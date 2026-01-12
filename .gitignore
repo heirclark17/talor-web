@@ -1,0 +1,28 @@
+# Frontend-only repository for talor-web
+# Backend is separate at: https://github.com/heirclark17/resume-ai-backend
+
+# Backend directory (separate repo)
+backend/
+
+# Root-level files (not part of web frontend)
+.env
+.env.example
+*.md
+database/
+dist/
+electron/
+node_modules/
+package-lock.json
+package.json
+playwright.config.ts
+postcss.config.cjs.backup
+resumes/
+run-app.bat
+tailwind.config.js.backup
+test-debug-initial.png
+test-results/
+tests/
+tsconfig.json
+tsconfig.node.json
+uploads/
+vite.config.ts
