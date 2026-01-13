@@ -327,6 +327,92 @@ function Dashboard() {
         </div>
         </div>
 
+        {/* How It Works Section */}
+        <div className="max-w-6xl mx-auto mt-32 mb-24">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">How It Works</h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              Create a job-winning resume in 4 simple steps
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Step 1 */}
+            <div className="text-center group">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center glass border border-purple-500/30 group-hover:scale-110 transition-transform duration-300">
+                  <Upload className="w-10 h-10 text-purple-400" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  1
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Upload Resume</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Upload your existing resume or start from scratch. We support PDF, DOCX, and TXT formats.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="text-center group">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center glass border border-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                  <Target className="w-10 h-10 text-blue-400" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  2
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Paste Job URL</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Copy any job posting URL from LinkedIn, Indeed, or company career pages. Our AI does the rest.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="text-center group">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center glass border border-green-500/30 group-hover:scale-110 transition-transform duration-300">
+                  <Sparkles className="w-10 h-10 text-green-400" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  3
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">AI Tailors It</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Our AI analyzes the job requirements and customizes your resume to match in under 30 seconds.
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="text-center group">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center glass border border-orange-500/30 group-hover:scale-110 transition-transform duration-300">
+                  <FileText className="w-10 h-10 text-orange-400" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  4
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Download & Apply</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Download your tailored resume as a professional DOCX file and start applying immediately.
+              </p>
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <div className="text-center mt-12">
+            <button
+              onClick={() => navigate('/upload')}
+              className="btn-primary inline-flex items-center gap-2 text-base px-8 py-4"
+            >
+              Try It Now - It's Free →
+            </button>
+          </div>
+        </div>
+
         {/* Stats Section */}
         <div className="max-w-6xl mx-auto mt-24">
           <h2 className="text-5xl font-bold text-center text-white mb-16">
