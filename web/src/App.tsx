@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown, Zap, Users, BarChart3, Clock } from 'lucide-react'
+import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown, Zap, Users, BarChart3, Clock, Check, X } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
@@ -410,6 +410,175 @@ function Dashboard() {
             >
               Try It Now - It's Free →
             </button>
+          </div>
+        </div>
+
+        {/* Pricing Section */}
+        <div id="pricing" className="max-w-7xl mx-auto mt-32 mb-24 scroll-mt-20">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              Start for free, upgrade when you need more. No hidden fees, cancel anytime.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 px-6">
+            {/* Free Plan */}
+            <div className="glass rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">Free</h3>
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span className="text-5xl font-bold text-white">$0</span>
+                  <span className="text-gray-400">/forever</span>
+                </div>
+                <p className="text-gray-400 text-sm">Perfect for getting started</p>
+              </div>
+
+              <button
+                onClick={() => navigate('/upload')}
+                className="w-full btn-secondary mb-8"
+              >
+                Get Started Free
+              </button>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">3 tailored resumes per month</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">AI-powered resume writing</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">ATS optimization</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">DOCX download</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <X className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-500 text-sm">Interview prep generation</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <X className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-500 text-sm">Priority support</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Pro Plan - Featured */}
+            <div className="glass rounded-3xl p-8 border-2 border-purple-500/50 relative hover:border-purple-500/70 transition-all duration-300 transform md:scale-105">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                Most Popular
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span className="text-5xl font-bold text-white">$19</span>
+                  <span className="text-gray-400">/month</span>
+                </div>
+                <p className="text-gray-400 text-sm">For active job seekers</p>
+              </div>
+
+              <button
+                onClick={() => navigate('/upload')}
+                className="w-full btn-primary mb-8"
+              >
+                Start 7-Day Free Trial
+              </button>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm"><strong className="text-white">Unlimited</strong> tailored resumes</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">AI-powered resume writing</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">ATS optimization</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">DOCX & PDF download</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm"><strong className="text-white">Interview prep</strong> generation</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">Company research & insights</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">Priority email support</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Enterprise Plan */}
+            <div className="glass rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span className="text-5xl font-bold text-white">$49</span>
+                  <span className="text-gray-400">/month</span>
+                </div>
+                <p className="text-gray-400 text-sm">For teams & recruiters</p>
+              </div>
+
+              <button
+                onClick={() => navigate('/upload')}
+                className="w-full btn-secondary mb-8"
+              >
+                Contact Sales
+              </button>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm"><strong className="text-white">Everything in Pro</strong></span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">Team collaboration (5 seats)</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">Custom branding & templates</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">API access</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">Dedicated account manager</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">24/7 priority support</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-300 text-sm">SSO & advanced security</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Trust Banner */}
+          <div className="text-center mt-12">
+            <p className="text-gray-400 text-sm">
+              All plans include 30-day money-back guarantee • No credit card required for Free plan
+            </p>
           </div>
         </div>
 
