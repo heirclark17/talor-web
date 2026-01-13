@@ -199,7 +199,7 @@ export default function TailorResume() {
     }
 
     if (!jobUrl && !company) {
-      setError('Please provide either a job URL or company name')
+      setError('Please provide a job URL (or company name if no URL available)')
       return
     }
 
@@ -658,12 +658,12 @@ export default function TailorResume() {
                 type="url"
                 value={jobUrl}
                 onChange={(e) => setJobUrl(e.target.value)}
-                placeholder="https://www.linkedin.com/jobs/view/..."
+                placeholder="https://www.linkedin.com/jobs/view/... or https://jobs.microsoft.com/..."
                 className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
               />
               <p className="text-sm text-gray-400 mt-3 flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                We'll automatically extract job details and company information
+                Just paste the URL - we'll automatically extract company name, job title, and full description
               </p>
             </div>
 
