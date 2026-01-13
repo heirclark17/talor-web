@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown, Zap, Users, BarChart3, Clock, Check, X, Star, Quote, Plus, Minus } from 'lucide-react'
+import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown, Zap, Users, BarChart3, Clock, Check, X, Star, Quote, Plus, Minus, Twitter, Linkedin, Github, Mail } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
@@ -1019,6 +1019,192 @@ function App() {
             <Route path="/resumes" element={<div className="p-8"><h1 className="text-3xl font-bold text-white">My Resumes</h1></div>} />
           </Routes>
         </main>
+
+        {/* Footer */}
+        <footer className="border-t border-white/10 mt-32">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+            {/* Footer Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-12">
+              {/* Company Column */}
+              <div>
+                <div className="flex items-center gap-2 mb-6">
+                  <FileText className="w-6 h-6 text-white" />
+                  <span className="text-xl font-bold text-white">Talor</span>
+                </div>
+                <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                  AI-powered resume builder that helps you land your dream job faster with perfectly tailored resumes.
+                </p>
+                <div className="flex items-center gap-4">
+                  <a
+                    href="https://twitter.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-colors"
+                    aria-label="Twitter"
+                  >
+                    <Twitter className="w-5 h-5 text-gray-400" />
+                  </a>
+                  <a
+                    href="https://linkedin.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-colors"
+                    aria-label="LinkedIn"
+                  >
+                    <Linkedin className="w-5 h-5 text-gray-400" />
+                  </a>
+                  <a
+                    href="https://github.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-colors"
+                    aria-label="GitHub"
+                  >
+                    <Github className="w-5 h-5 text-gray-400" />
+                  </a>
+                  <a
+                    href="mailto:support@talor.ai"
+                    className="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-colors"
+                    aria-label="Email"
+                  >
+                    <Mail className="w-5 h-5 text-gray-400" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Product Column */}
+              <div>
+                <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Product</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="#features" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Features
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#pricing" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Pricing
+                    </a>
+                  </li>
+                  <li>
+                    <Link to="/upload" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Upload Resume
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/tailor" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Tailor Resume
+                    </Link>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      ATS Checker
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Cover Letter Generator
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Resources Column */}
+              <div>
+                <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Resources</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Help Center
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Blog
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Resume Templates
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Resume Examples
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Career Guides
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      API Documentation
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Legal Column */}
+              <div>
+                <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Legal</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Privacy Policy
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Terms of Service
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Cookie Policy
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      GDPR Compliance
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Security
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                      Accessibility
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Bar */}
+            <div className="pt-8 border-t border-white/10">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-gray-400 text-sm text-center sm:text-left">
+                  © 2026 Talor. All rights reserved. Built with care for job seekers worldwide.
+                </p>
+                <div className="flex items-center gap-6 text-sm">
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Status
+                  </a>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Changelog
+                  </a>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Contact
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </BrowserRouter>
   )
