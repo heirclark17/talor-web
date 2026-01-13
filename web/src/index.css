@@ -64,12 +64,18 @@ body {
   transition: all 0.3s ease;
   border: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px; /* Touch-friendly size */
 }
 
 .btn-primary:hover {
   background: rgba(255, 255, 255, 0.9);
   transform: scale(1.05);
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
 }
 
 .btn-secondary {
@@ -81,9 +87,24 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px; /* Touch-friendly size */
 }
 
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
 }

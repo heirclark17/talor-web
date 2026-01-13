@@ -1,0 +1,4 @@
+Error: Project(s) "chromium" not found. Available projects: ""
+    at filterProjects (C:\Users\derri\projects\resume-ai-app\node_modules\playwright\lib\runner\projectUtils.js:80:11)
+    at runTests (C:\Users\derri\projects\resume-ai-app\node_modules\playwright\lib\program.js:208:42)
+    at r.<anonymous> (C:\Users\derri\projects\resume-ai-app\node_modules\playwright\lib\program.js:70:7)
