@@ -225,7 +225,7 @@ export default function TailorResume() {
         id: result.data.tailored_resume_id,
         tailored_summary: result.data.summary,
         tailored_skills: result.data.competencies || [],
-        tailored_experience: [],
+        tailored_experience: result.data.experience || [],
         alignment_statement: result.data.alignment_statement || '',
         quality_score: 95,
         docx_path: result.data.docx_path,
@@ -332,6 +332,38 @@ export default function TailorResume() {
                   </div>
                 )}
 
+                {/* Experience */}
+                {selectedResume.experience && selectedResume.experience.length > 0 && (
+                  <div className="mb-10">
+                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/10">
+                      Professional Experience
+                    </h3>
+                    <div className="space-y-6">
+                      {selectedResume.experience.map((exp: any, idx: number) => (
+                        <div key={idx} className="border-l-2 border-white/20 pl-4">
+                          <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
+                          {exp.location && (
+                            <p className="text-gray-400 text-sm mb-1">{exp.location}</p>
+                          )}
+                          {exp.dates && (
+                            <p className="text-gray-500 text-sm mb-3">{exp.dates}</p>
+                          )}
+                          {exp.bullets && exp.bullets.length > 0 && (
+                            <ul className="space-y-2 text-sm">
+                              {exp.bullets.map((bullet: string, bulletIdx: number) => (
+                                <li key={bulletIdx} className="text-gray-400 flex gap-2">
+                                  <span className="text-white/40 flex-shrink-0">•</span>
+                                  <span>{bullet}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Education */}
                 {selectedResume.education && (
                   <div className="mb-10">
@@ -396,6 +428,38 @@ export default function TailorResume() {
                         <span key={idx} className="px-3 py-1 bg-white/15 text-white rounded-full text-sm font-medium border border-white/20">
                           {skill}
                         </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tailored Experience */}
+                {tailoredResume.tailored_experience && tailoredResume.tailored_experience.length > 0 && (
+                  <div className="mb-10">
+                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/20">
+                      Professional Experience (Tailored)
+                    </h3>
+                    <div className="space-y-6">
+                      {tailoredResume.tailored_experience.map((exp: any, idx: number) => (
+                        <div key={idx} className="border-l-2 border-white/40 pl-4 bg-white/5 p-3 rounded-r-lg">
+                          <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
+                          {exp.location && (
+                            <p className="text-gray-300 text-sm mb-1">{exp.location}</p>
+                          )}
+                          {exp.dates && (
+                            <p className="text-gray-400 text-sm mb-3">{exp.dates}</p>
+                          )}
+                          {exp.bullets && exp.bullets.length > 0 && (
+                            <ul className="space-y-2 text-sm">
+                              {exp.bullets.map((bullet: string, bulletIdx: number) => (
+                                <li key={bulletIdx} className="text-gray-300 flex gap-2">
+                                  <span className="text-white/40 flex-shrink-0">•</span>
+                                  <span>{bullet}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
                       ))}
                     </div>
                   </div>
