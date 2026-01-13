@@ -98,8 +98,8 @@ export default function TailorResume() {
         throw new Error(result.error || 'Failed to delete resume')
       }
 
-      // Remove from local state
-      setResumes(resumes.filter(r => r.id !== resumeId))
+      // Remove from local state using functional update
+      setResumes(prevResumes => prevResumes.filter(r => r.id !== resumeId))
 
       // If deleted resume was selected, clear selection
       if (selectedResumeId === resumeId) {
@@ -107,9 +107,10 @@ export default function TailorResume() {
         setSelectedResume(null)
       }
 
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      // Show success message
+      console.log('Resume deleted successfully:', resumeId)
     } catch (err: any) {
+      console.error('Delete error:', err)
       setError(err.message)
     } finally {
       setDeletingResumeId(null)
