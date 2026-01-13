@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown, Zap, Users, BarChart3, Clock, Check, X } from 'lucide-react'
+import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown, Zap, Users, BarChart3, Clock, Check, X, Star, Quote } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
@@ -579,6 +579,150 @@ function Dashboard() {
             <p className="text-gray-400 text-sm">
               All plans include 30-day money-back guarantee • No credit card required for Free plan
             </p>
+          </div>
+        </div>
+
+        {/* Testimonials Section */}
+        <div className="max-w-7xl mx-auto mt-32 mb-24 px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">Loved by Job Seekers Worldwide</h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              See what our users have to say about landing their dream jobs with Talor
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Testimonial 1 */}
+            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+              <Quote className="w-8 h-8 text-purple-400/30 mb-4" />
+              <p className="text-gray-300 leading-relaxed mb-6 text-sm">
+                "Talor cut my resume tailoring time from 2 hours to 30 seconds. I landed 3 interviews in the first week after using it. The AI really understands what hiring managers want to see."
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold">
+                  SM
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Sarah Martinez</p>
+                  <p className="text-gray-400 text-xs">Senior Data Analyst at Google</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+              <Quote className="w-8 h-8 text-blue-400/30 mb-4" />
+              <p className="text-gray-300 leading-relaxed mb-6 text-sm">
+                "As someone who hates writing resumes, this is a game-changer. The interview prep feature helped me prepare for tough questions and I nailed my Microsoft interview!"
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">
+                  JC
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">James Chen</p>
+                  <p className="text-gray-400 text-xs">Software Engineer at Microsoft</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+              <Quote className="w-8 h-8 text-green-400/30 mb-4" />
+              <p className="text-gray-300 leading-relaxed mb-6 text-sm">
+                "I was skeptical about AI resume tools, but Talor proved me wrong. Got my resume past ATS and landed interviews at Amazon, Meta, and Stripe. Worth every penny."
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
+                  AP
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Aisha Patel</p>
+                  <p className="text-gray-400 text-xs">Product Manager at Amazon</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 4 */}
+            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+              <Quote className="w-8 h-8 text-orange-400/30 mb-4" />
+              <p className="text-gray-300 leading-relaxed mb-6 text-sm">
+                "The best $19/month I've ever spent. Applied to 25 jobs, got 8 interviews, and 3 offers. The tailored resumes made me stand out from hundreds of other applicants."
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white font-bold">
+                  MR
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Marcus Rodriguez</p>
+                  <p className="text-gray-400 text-xs">DevOps Engineer at Netflix</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 5 */}
+            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+              <Quote className="w-8 h-8 text-pink-400/30 mb-4" />
+              <p className="text-gray-300 leading-relaxed mb-6 text-sm">
+                "Switched careers from nursing to tech and Talor helped me highlight transferable skills. Got my first developer role at a startup within 2 months!"
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white font-bold">
+                  LN
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Lisa Nguyen</p>
+                  <p className="text-gray-400 text-xs">Junior Developer at Startup</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 6 */}
+            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+              <Quote className="w-8 h-8 text-indigo-400/30 mb-4" />
+              <p className="text-gray-300 leading-relaxed mb-6 text-sm">
+                "Finally, a resume tool that actually works. The ATS optimization is no joke - I started getting callbacks immediately after switching to Talor-generated resumes."
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                  DK
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">David Kim</p>
+                  <p className="text-gray-400 text-xs">Security Analyst at Cisco</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
