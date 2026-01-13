@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
-import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase } from 'lucide-react'
 import { api } from '../api/client'
 
 interface BaseResume {
@@ -31,6 +31,7 @@ interface TailoredResume {
 
 export default function TailorResume() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [resumes, setResumes] = useState<BaseResume[]>([])
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
   const [selectedResume, setSelectedResume] = useState<BaseResume | null>(null)
@@ -535,6 +536,13 @@ export default function TailorResume() {
 
           {/* Action Buttons */}
           <div className="mt-8 flex gap-4 justify-center">
+            <button
+              onClick={() => navigate(`/interview-prep/${tailoredResume.id}`)}
+              className="btn-primary flex items-center gap-3 text-lg bg-purple-600 hover:bg-purple-700"
+            >
+              <Briefcase className="w-5 h-5" />
+              View Interview Prep
+            </button>
             <button
               onClick={() => window.open(`https://resume-ai-backend-production-3134.up.railway.app/api/tailor/download/${tailoredResume.id}`, '_blank')}
               className="btn-primary flex items-center gap-3 text-lg"

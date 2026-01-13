@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-do
 import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
+import InterviewPrep from './pages/InterviewPrep'
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -171,6 +172,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/upload" element={<UploadResume />} />
             <Route path="/tailor" element={<TailorResume />} />
+            <Route path="/interview-prep/:tailoredResumeId" element={<InterviewPrep />} />
             <Route path="/resumes" element={<div className="p-8"><h1 className="text-3xl font-bold text-white">My Resumes</h1></div>} />
           </Routes>
         </main>
