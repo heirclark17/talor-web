@@ -20,6 +20,8 @@ interface TailoredResume {
   tailored_summary: string
   tailored_skills: string[]
   tailored_experience: any[]
+  tailored_education: string
+  tailored_certifications: string
   alignment_statement: string
   quality_score: number
   docx_path: string
@@ -239,6 +241,8 @@ export default function TailorResume() {
         tailored_summary: result.data.summary,
         tailored_skills: result.data.competencies || [],
         tailored_experience: result.data.experience || [],
+        tailored_education: result.data.education || '',
+        tailored_certifications: result.data.certifications || '',
         alignment_statement: result.data.alignment_statement || '',
         quality_score: 95,
         docx_path: result.data.docx_path,
@@ -475,6 +479,26 @@ export default function TailorResume() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* Education */}
+                {tailoredResume.tailored_education && (
+                  <div className="mb-10">
+                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/20">
+                      Education
+                    </h3>
+                    <p className="text-gray-300">{tailoredResume.tailored_education}</p>
+                  </div>
+                )}
+
+                {/* Certifications */}
+                {tailoredResume.tailored_certifications && (
+                  <div className="mb-10">
+                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/20">
+                      Certifications & Training
+                    </h3>
+                    <p className="text-gray-300 whitespace-pre-line">{tailoredResume.tailored_certifications}</p>
                   </div>
                 )}
 
