@@ -227,9 +227,9 @@ export default function TailorResume() {
     try {
       const result = await api.tailorResume({
         baseResumeId: selectedResumeId,
-        jobUrl: jobUrl || undefined,
-        company: company || undefined,
-        jobTitle: jobTitle || undefined,
+        jobUrl: jobUrl.trim() || undefined,
+        company: company.trim() || undefined,
+        jobTitle: jobTitle.trim() || undefined,
       })
 
       if (!result.success) {
