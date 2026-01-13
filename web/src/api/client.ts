@@ -125,8 +125,8 @@ class ApiClient {
    */
   async deleteResume(resumeId: number): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/resumes/${resumeId}`, {
-        method: 'DELETE',
+      const response = await fetch(`${this.baseUrl}/api/resumes/${resumeId}/delete`, {
+        method: 'POST',
       });
 
       const data = await response.json();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download } from 'lucide-react'
+import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2 } from 'lucide-react'
 import { api } from '../api/client'
 
 interface BaseResume {
@@ -41,6 +41,7 @@ export default function TailorResume() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [showComparison, setShowComparison] = useState(false)
+  const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
 
   // Check if a resume was passed via navigation state
   useEffect(() => {
@@ -79,6 +80,39 @@ export default function TailorResume() {
       setError(err.message)
     } finally {
       setLoadingResumes(false)
+    }
+  }
+
+  const handleDeleteResume = async (resumeId: number, e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent selecting the resume when clicking delete
+
+    if (!confirm('Are you sure you want to delete this resume? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      setDeletingResumeId(resumeId)
+      const result = await api.deleteResume(resumeId)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete resume')
+      }
+
+      // Remove from local state
+      setResumes(resumes.filter(r => r.id !== resumeId))
+
+      // If deleted resume was selected, clear selection
+      if (selectedResumeId === resumeId) {
+        setSelectedResumeId(null)
+        setSelectedResume(null)
+      }
+
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setDeletingResumeId(null)
     }
   }
 
@@ -435,11 +469,25 @@ export default function TailorResume() {
                         <span>Uploaded {new Date(resume.uploaded_at).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    {selectedResumeId === resume.id && (
-                      <div className="p-2 bg-white/10 rounded-full">
-                        <CheckCircle2 className="w-6 h-6 text-white" />
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {selectedResumeId === resume.id && (
+                        <div className="p-2 bg-white/10 rounded-full">
+                          <CheckCircle2 className="w-6 h-6 text-white" />
+                        </div>
+                      )}
+                      <button
+                        onClick={(e) => handleDeleteResume(resume.id, e)}
+                        disabled={deletingResumeId === resume.id}
+                        className="p-2 hover:bg-red-500/20 rounded-full transition-colors disabled:opacity-50"
+                        title="Delete resume"
+                      >
+                        {deletingResumeId === resume.id ? (
+                          <Loader2 className="w-5 h-5 text-red-400 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-5 h-5 text-red-400 hover:text-red-300" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </label>
               ))}
