@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown, Zap, Users, BarChart3, Clock, Check, X, Star, Quote } from 'lucide-react'
+import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown, Zap, Users, BarChart3, Clock, Check, X, Star, Quote, Plus, Minus } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
@@ -8,9 +8,14 @@ import InterviewPrep from './pages/InterviewPrep'
 function Dashboard() {
   const navigate = useNavigate()
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
+  const [expandedFaq, setExpandedFaq] = useState<string | null>(null)
 
   const toggleCard = (cardId: string) => {
     setExpandedCard(expandedCard === cardId ? null : cardId)
+  }
+
+  const toggleFaq = (faqId: string) => {
+    setExpandedFaq(expandedFaq === faqId ? null : faqId)
   }
 
   return (
@@ -744,6 +749,221 @@ function Dashboard() {
               <div className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3">95%</div>
               <div className="text-gray-400 text-sm">Interview rate improvement</div>
             </div>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="max-w-4xl mx-auto mt-20 sm:mt-32 mb-16 sm:mb-24 px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Frequently Asked Questions</h2>
+            <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
+              Everything you need to know about Talor and how it works
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {/* FAQ 1 */}
+            <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+              <button
+                onClick={() => toggleFaq('faq-1')}
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="text-lg font-semibold text-white pr-4">
+                  How does Talor tailor my resume to a job posting?
+                </span>
+                {expandedFaq === 'faq-1' ? (
+                  <Minus className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                ) : (
+                  <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
+              {expandedFaq === 'faq-1' && (
+                <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-white/10 pt-5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <p>
+                    Our AI analyzes the job description to identify key requirements, skills, and keywords. It then rewrites your resume bullets to highlight relevant experience, matches your skills to the job requirements, and optimizes formatting for ATS systems. The entire process takes under 30 seconds and creates a perfectly tailored resume for that specific role.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* FAQ 2 */}
+            <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+              <button
+                onClick={() => toggleFaq('faq-2')}
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="text-lg font-semibold text-white pr-4">
+                  Is my resume data secure and private?
+                </span>
+                {expandedFaq === 'faq-2' ? (
+                  <Minus className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                ) : (
+                  <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
+              {expandedFaq === 'faq-2' && (
+                <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-white/10 pt-5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <p>
+                    Absolutely. We use enterprise-grade encryption for all data transmission and storage. Your resume data is never shared with third parties, never used to train AI models, and you can delete your data at any time. We're committed to protecting your privacy and comply with GDPR, CCPA, and other data protection regulations.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* FAQ 3 */}
+            <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+              <button
+                onClick={() => toggleFaq('faq-3')}
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="text-lg font-semibold text-white pr-4">
+                  What file formats do you support?
+                </span>
+                {expandedFaq === 'faq-3' ? (
+                  <Minus className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                ) : (
+                  <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
+              {expandedFaq === 'faq-3' && (
+                <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-white/10 pt-5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <p>
+                    For uploads, we support PDF, DOCX (Microsoft Word), and TXT formats. Your tailored resume is always delivered as a professionally formatted DOCX file that you can edit in Microsoft Word or Google Docs. Pro users also get PDF export with the same formatting.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* FAQ 4 */}
+            <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+              <button
+                onClick={() => toggleFaq('faq-4')}
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="text-lg font-semibold text-white pr-4">
+                  Can I edit the AI-generated resume?
+                </span>
+                {expandedFaq === 'faq-4' ? (
+                  <Minus className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                ) : (
+                  <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
+              {expandedFaq === 'faq-4' && (
+                <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-white/10 pt-5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <p>
+                    Yes! The generated resume is a fully editable DOCX file. You can open it in Microsoft Word, Google Docs, or any word processor and make any changes you want. The AI provides a strong foundation, but you have complete control over the final version.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* FAQ 5 */}
+            <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+              <button
+                onClick={() => toggleFaq('faq-5')}
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="text-lg font-semibold text-white pr-4">
+                  What is ATS optimization and why does it matter?
+                </span>
+                {expandedFaq === 'faq-5' ? (
+                  <Minus className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                ) : (
+                  <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
+              {expandedFaq === 'faq-5' && (
+                <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-white/10 pt-5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <p>
+                    ATS (Applicant Tracking Systems) are software that 99% of large companies use to filter resumes before humans see them. Our resumes are optimized with proper formatting, keyword placement, and structure to ensure they pass ATS screening. This dramatically increases your chances of getting your resume in front of a real person.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* FAQ 6 */}
+            <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+              <button
+                onClick={() => toggleFaq('faq-6')}
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="text-lg font-semibold text-white pr-4">
+                  How is this different from other resume builders?
+                </span>
+                {expandedFaq === 'faq-6' ? (
+                  <Minus className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                ) : (
+                  <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
+              {expandedFaq === 'faq-6' && (
+                <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-white/10 pt-5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <p>
+                    Unlike generic resume builders, Talor specializes in job-specific tailoring. You maintain one master resume, then automatically generate customized versions for each job you apply to. This saves hours of manual work and ensures each application is perfectly matched to the role. Plus, our interview prep feature helps you prepare for the next step.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* FAQ 7 */}
+            <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+              <button
+                onClick={() => toggleFaq('faq-7')}
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="text-lg font-semibold text-white pr-4">
+                  Can I cancel my subscription anytime?
+                </span>
+                {expandedFaq === 'faq-7' ? (
+                  <Minus className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                ) : (
+                  <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
+              {expandedFaq === 'faq-7' && (
+                <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-white/10 pt-5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <p>
+                    Yes, you can cancel your Pro or Enterprise subscription at any time with no penalties or fees. You'll retain access until the end of your billing period. We also offer a 30-day money-back guarantee if you're not satisfied with the service. The Free plan never expires and requires no payment information.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* FAQ 8 */}
+            <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+              <button
+                onClick={() => toggleFaq('faq-8')}
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="text-lg font-semibold text-white pr-4">
+                  Do you offer refunds?
+                </span>
+                {expandedFaq === 'faq-8' ? (
+                  <Minus className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                ) : (
+                  <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                )}
+              </button>
+              {expandedFaq === 'faq-8' && (
+                <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-white/10 pt-5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <p>
+                    We offer a 30-day money-back guarantee on all paid plans. If you're not completely satisfied with Talor within the first 30 days, contact our support team and we'll issue a full refund, no questions asked. We want you to feel confident trying our service risk-free.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* CTA after FAQ */}
+          <div className="text-center mt-12">
+            <p className="text-gray-400 mb-6">Still have questions?</p>
+            <button
+              onClick={() => navigate('/upload')}
+              className="btn-primary inline-flex items-center gap-2"
+            >
+              Try It Free - No Credit Card Required
+            </button>
           </div>
         </div>
       </div>
