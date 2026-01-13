@@ -17,7 +17,7 @@ function Dashboard() {
             Build a Job-Winning Resume in Minutes with AI
           </h1>
           <p className="text-xl text-gray-400 mb-10 leading-relaxed">
-            Leverage your cybersecurity expertise and career goals to create a highly
+            Leverage your professional experience and career goals to create a highly
             effective resume. Our AI-powered resumes instantly impress hiring managers.
           </p>
           <button
@@ -41,7 +41,7 @@ function Dashboard() {
                   AI Writes it for You
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Click to expand • Based on net calories
+                  AI writes optimized content tailored to job descriptions
                 </p>
               </div>
               <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0 mt-1" />
@@ -59,7 +59,7 @@ function Dashboard() {
                   Guided Resume Flow
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Click to expand • Step by step guidance
+                  Step-by-step guidance through resume creation process
                 </p>
               </div>
               <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0 mt-1" />
@@ -77,7 +77,7 @@ function Dashboard() {
                   Resume Quality Score
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Click to expand • Track your resume quality
+                  Real-time ATS scoring to track and improve resume quality
                 </p>
               </div>
               <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0 mt-1" />
@@ -95,7 +95,7 @@ function Dashboard() {
                   Match Any Job Instantly
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Click to expand • Get restaurant recommendations
+                  Side-by-side job matching with keyword highlighting
                 </p>
               </div>
               <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0 mt-1" />
