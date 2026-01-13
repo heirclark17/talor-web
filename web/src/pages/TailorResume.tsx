@@ -58,10 +58,23 @@ export default function TailorResume() {
 
   useEffect(() => {
     if (selectedResumeId) {
-      const resume = resumes.find(r => r.id === selectedResumeId)
+      loadFullResume(selectedResumeId)
+    }
+  }, [selectedResumeId])
+
+  const loadFullResume = async (resumeId: number) => {
+    try {
+      const result = await api.getResume(resumeId)
+      if (result.success) {
+        setSelectedResume(result.data)
+      }
+    } catch (err: any) {
+      console.error('Failed to load full resume:', err)
+      // Fallback to partial data from list
+      const resume = resumes.find(r => r.id === resumeId)
       setSelectedResume(resume || null)
     }
-  }, [selectedResumeId, resumes])
+  }
 
   const loadResumes = async () => {
     try {
@@ -499,7 +512,7 @@ export default function TailorResume() {
           {/* Action Buttons */}
           <div className="mt-8 flex gap-4 justify-center">
             <button
-              onClick={() => window.open(tailoredResume.docx_path)}
+              onClick={() => window.open(`https://resume-ai-backend-production-3134.up.railway.app/api/tailor/download/${tailoredResume.id}`, '_blank')}
               className="btn-primary flex items-center gap-3 text-lg"
             >
               <Download className="w-5 h-5" />
