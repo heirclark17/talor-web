@@ -1,12 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown } from 'lucide-react'
+import { FileText, Upload, Target, CheckCircle, Sparkles, TrendingUp, Award, ChevronDown, Zap, Users, BarChart3, Clock } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
 
 function Dashboard() {
   const navigate = useNavigate()
+  const [expandedCard, setExpandedCard] = useState<string | null>(null)
+
+  const toggleCard = (cardId: string) => {
+    setExpandedCard(expandedCard === cardId ? null : cardId)
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -116,10 +121,13 @@ function Dashboard() {
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto mb-16">
           {/* AI Writes for You Card */}
-          <div className="glass glass-hover rounded-3xl p-8">
+          <div
+            className="glass glass-hover rounded-3xl p-8 cursor-pointer transition-all duration-300"
+            onClick={() => toggleCard('ai-writing')}
+          >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-6 h-6 text-purple-400" />
               </div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-white mb-3 uppercase tracking-wide">
@@ -129,15 +137,49 @@ function Dashboard() {
                   AI writes optimized content tailored to job descriptions
                 </p>
               </div>
-              <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0 mt-1" />
+              <ChevronDown
+                className={`w-5 h-5 text-gray-500 flex-shrink-0 mt-1 transition-transform duration-300 ${
+                  expandedCard === 'ai-writing' ? 'rotate-180' : ''
+                }`}
+              />
             </div>
+            {expandedCard === 'ai-writing' && (
+              <div className="mt-6 pt-6 border-t border-white/10 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="space-y-4">
+                  <p className="text-gray-300 leading-relaxed">
+                    Our AI analyzes the job posting and your experience to craft compelling bullet points
+                    that highlight your most relevant achievements. Save hours of writing time with intelligent
+                    suggestions that pass ATS screening.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="flex items-start gap-3">
+                      <Zap className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="text-white font-semibold text-sm">Lightning Fast</p>
+                        <p className="text-gray-400 text-xs">Save 3+ hours per application</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Target className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="text-white font-semibold text-sm">Targeted Content</p>
+                        <p className="text-gray-400 text-xs">Matches job requirements</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Guided Resume Flow Card */}
-          <div className="glass glass-hover rounded-3xl p-8">
+          <div
+            className="glass glass-hover rounded-3xl p-8 cursor-pointer transition-all duration-300"
+            onClick={() => toggleCard('guided-flow')}
+          >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <Target className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                <Target className="w-6 h-6 text-blue-400" />
               </div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-white mb-3 uppercase tracking-wide">
@@ -147,15 +189,48 @@ function Dashboard() {
                   Step-by-step guidance through resume creation process
                 </p>
               </div>
-              <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0 mt-1" />
+              <ChevronDown
+                className={`w-5 h-5 text-gray-500 flex-shrink-0 mt-1 transition-transform duration-300 ${
+                  expandedCard === 'guided-flow' ? 'rotate-180' : ''
+                }`}
+              />
             </div>
+            {expandedCard === 'guided-flow' && (
+              <div className="mt-6 pt-6 border-t border-white/10 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="space-y-4">
+                  <p className="text-gray-300 leading-relaxed">
+                    Follow our intuitive wizard that guides you through each section. We'll prompt you
+                    with smart questions and best practices to ensure nothing is missed.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="flex items-start gap-3">
+                      <Users className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="text-white font-semibold text-sm">Beginner Friendly</p>
+                        <p className="text-gray-400 text-xs">No experience needed</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="text-white font-semibold text-sm">Quick Process</p>
+                        <p className="text-gray-400 text-xs">Complete in under 5 min</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Resume Quality Score Card */}
-          <div className="glass glass-hover rounded-3xl p-8">
+          <div
+            className="glass glass-hover rounded-3xl p-8 cursor-pointer transition-all duration-300"
+            onClick={() => toggleCard('quality-score')}
+          >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-6 h-6 text-green-400" />
               </div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-white mb-3 uppercase tracking-wide">
@@ -165,15 +240,48 @@ function Dashboard() {
                   Real-time ATS scoring to track and improve resume quality
                 </p>
               </div>
-              <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0 mt-1" />
+              <ChevronDown
+                className={`w-5 h-5 text-gray-500 flex-shrink-0 mt-1 transition-transform duration-300 ${
+                  expandedCard === 'quality-score' ? 'rotate-180' : ''
+                }`}
+              />
             </div>
+            {expandedCard === 'quality-score' && (
+              <div className="mt-6 pt-6 border-t border-white/10 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="space-y-4">
+                  <p className="text-gray-300 leading-relaxed">
+                    See your resume score improve in real-time as you add content. Get specific suggestions
+                    on formatting, keywords, impact statements, and ATS compatibility.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="flex items-start gap-3">
+                      <BarChart3 className="w-5 h-5 text-green-400 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="text-white font-semibold text-sm">98% ATS Pass Rate</p>
+                        <p className="text-gray-400 text-xs">Tested on major ATS systems</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="text-white font-semibold text-sm">Instant Feedback</p>
+                        <p className="text-gray-400 text-xs">Know your chances before applying</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Match Any Job Card */}
-          <div className="glass glass-hover rounded-3xl p-8">
+          <div
+            className="glass glass-hover rounded-3xl p-8 cursor-pointer transition-all duration-300"
+            onClick={() => toggleCard('job-matching')}
+          >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <Award className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center flex-shrink-0">
+                <Award className="w-6 h-6 text-orange-400" />
               </div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-white mb-3 uppercase tracking-wide">
@@ -183,8 +291,38 @@ function Dashboard() {
                   Side-by-side job matching with keyword highlighting
                 </p>
               </div>
-              <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0 mt-1" />
+              <ChevronDown
+                className={`w-5 h-5 text-gray-500 flex-shrink-0 mt-1 transition-transform duration-300 ${
+                  expandedCard === 'job-matching' ? 'rotate-180' : ''
+                }`}
+              />
             </div>
+            {expandedCard === 'job-matching' && (
+              <div className="mt-6 pt-6 border-t border-white/10 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="space-y-4">
+                  <p className="text-gray-300 leading-relaxed">
+                    Paste any job URL and our AI instantly analyzes requirements. See your resume and
+                    job description side-by-side with keyword highlighting. One base resume, unlimited tailored versions.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="flex items-start gap-3">
+                      <Zap className="w-5 h-5 text-orange-400 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="text-white font-semibold text-sm">30 Second Match</p>
+                        <p className="text-gray-400 text-xs">Instant job analysis</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Target className="w-5 h-5 text-orange-400 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="text-white font-semibold text-sm">Keyword Highlighting</p>
+                        <p className="text-gray-400 text-xs">See what matters most</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         </div>
