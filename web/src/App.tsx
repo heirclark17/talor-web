@@ -21,11 +21,11 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-black">
       {/* Hero Section - Split Layout */}
-      <div className="container mx-auto px-4 sm:px-6 py-16 sm:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto mb-16 sm:mb-24">
+      <div className="container mx-auto px-4 sm:px-6 py-24 sm:py-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto mb-24 sm:mb-32">
           {/* Left: Content */}
           <div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold text-white mb-6 sm:mb-8 leading-tight tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-white mb-6 sm:mb-8 leading-tight tracking-tight">
               Build a Job-Winning Resume in Minutes with AI
             </h1>
             <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8 leading-relaxed">
@@ -119,7 +119,7 @@ function Dashboard() {
         {/* Feature Cards Grid - Glassmorphism Style */}
         <div id="features" className="scroll-mt-20 px-4 sm:px-6">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4">Powerful Features to Land Your Dream Job</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-white mb-3 sm:mb-4">Powerful Features to Land Your Dream Job</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               Everything you need to create ATS-friendly, recruiter-approved resumes in minutes
             </p>
@@ -135,7 +135,7 @@ function Dashboard() {
                 <Sparkles className="w-6 h-6 text-purple-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-white mb-3 uppercase tracking-wide">
+                <h3 className="text-lg font-semibold text-white mb-3 uppercase tracking-wide">
                   AI Writes it for You
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
@@ -187,7 +187,7 @@ function Dashboard() {
                 <Target className="w-6 h-6 text-blue-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-white mb-3 uppercase tracking-wide">
+                <h3 className="text-lg font-semibold text-white mb-3 uppercase tracking-wide">
                   Guided Resume Flow
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
@@ -238,7 +238,7 @@ function Dashboard() {
                 <TrendingUp className="w-6 h-6 text-green-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-white mb-3 uppercase tracking-wide">
+                <h3 className="text-lg font-semibold text-white mb-3 uppercase tracking-wide">
                   Resume Quality Score
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
@@ -289,7 +289,7 @@ function Dashboard() {
                 <Award className="w-6 h-6 text-orange-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-white mb-3 uppercase tracking-wide">
+                <h3 className="text-lg font-semibold text-white mb-3 uppercase tracking-wide">
                   Match Any Job Instantly
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
@@ -333,9 +333,9 @@ function Dashboard() {
         </div>
 
         {/* How It Works Section */}
-        <div className="max-w-6xl mx-auto mt-24 sm:mt-40 mb-16 sm:mb-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto mt-40 sm:mt-56 mb-24 sm:mb-32 px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4">How It Works</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-white mb-3 sm:mb-4">How It Works</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               Create a job-winning resume in 4 simple steps
             </p>
@@ -352,7 +352,7 @@ function Dashboard() {
                   1
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Upload Resume</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">Upload Resume</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Upload your existing resume or start from scratch. We support PDF, DOCX, and TXT formats.
               </p>
@@ -368,7 +368,7 @@ function Dashboard() {
                   2
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Paste Job URL</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">Paste Job URL</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Copy any job posting URL from LinkedIn, Indeed, or company career pages. Our AI does the rest.
               </p>
@@ -384,7 +384,7 @@ function Dashboard() {
                   3
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">AI Tailors It</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">AI Tailors It</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Our AI analyzes the job requirements and customizes your resume to match in under 30 seconds.
               </p>
@@ -400,7 +400,7 @@ function Dashboard() {
                   4
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Download & Apply</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">Download & Apply</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Download your tailored resume as a professional DOCX file and start applying immediately.
               </p>
@@ -419,9 +419,9 @@ function Dashboard() {
         </div>
 
         {/* Pricing Section */}
-        <div id="pricing" className="max-w-7xl mx-auto mt-24 sm:mt-40 mb-16 sm:mb-24 scroll-mt-20">
+        <div id="pricing" className="max-w-7xl mx-auto mt-40 sm:mt-56 mb-24 sm:mb-32 scroll-mt-20">
           <div className="text-center mb-12 sm:mb-16 px-4 sm:px-6">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-white mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               Start for free, upgrade when you need more. No hidden fees, cancel anytime.
             </p>
@@ -431,9 +431,9 @@ function Dashboard() {
             {/* Free Plan */}
             <div className="glass rounded-3xl p-10 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="mb-6">
-                <h3 className="text-2xl font-semibold text-white mb-2">Free</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">Free</h3>
                 <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-5xl font-bold text-white">$0</span>
+                  <span className="text-4xl font-bold text-white">$0</span>
                   <span className="text-gray-400">/forever</span>
                 </div>
                 <p className="text-gray-400 text-sm">Perfect for getting started</p>
@@ -481,9 +481,9 @@ function Dashboard() {
               </div>
 
               <div className="mb-6">
-                <h3 className="text-2xl font-semibold text-white mb-2">Pro</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">Pro</h3>
                 <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-5xl font-bold text-white">$19</span>
+                  <span className="text-4xl font-bold text-white">$19</span>
                   <span className="text-gray-400">/month</span>
                 </div>
                 <p className="text-gray-400 text-sm">For active job seekers</p>
@@ -531,9 +531,9 @@ function Dashboard() {
             {/* Enterprise Plan */}
             <div className="glass rounded-3xl p-10 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="mb-6">
-                <h3 className="text-2xl font-semibold text-white mb-2">Enterprise</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">Enterprise</h3>
                 <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-5xl font-bold text-white">$49</span>
+                  <span className="text-4xl font-bold text-white">$49</span>
                   <span className="text-gray-400">/month</span>
                 </div>
                 <p className="text-gray-400 text-sm">For teams & recruiters</p>
@@ -588,9 +588,9 @@ function Dashboard() {
         </div>
 
         {/* Testimonials Section */}
-        <div className="max-w-7xl mx-auto mt-24 sm:mt-40 mb-16 sm:mb-24 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto mt-40 sm:mt-56 mb-24 sm:mb-32 px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4 px-4">Loved by Job Seekers Worldwide</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-white mb-3 sm:mb-4 px-4">Loved by Job Seekers Worldwide</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               See what our users have to say about landing their dream jobs with Talor
             </p>
@@ -733,7 +733,7 @@ function Dashboard() {
 
         {/* Stats Section */}
         <div className="max-w-6xl mx-auto mt-16 sm:mt-24 px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-white mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-white mb-12 sm:mb-16">
             Why Choose Talor?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 text-center">
@@ -753,9 +753,9 @@ function Dashboard() {
         </div>
 
         {/* FAQ Section */}
-        <div className="max-w-4xl mx-auto mt-24 sm:mt-40 mb-16 sm:mb-24 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto mt-40 sm:mt-56 mb-24 sm:mb-32 px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4">Frequently Asked Questions</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-white mb-3 sm:mb-4">Frequently Asked Questions</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               Everything you need to know about Talor and how it works
             </p>
@@ -1022,7 +1022,7 @@ function App() {
 
         {/* Footer */}
         <footer className="border-t border-white/10 mt-32">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-24 sm:py-32">
             {/* Footer Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-12">
               {/* Company Column */}
