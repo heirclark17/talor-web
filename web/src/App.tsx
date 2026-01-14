@@ -28,7 +28,7 @@ function Dashboard() {
               onClick={() => navigate('/upload')}
               className="btn-primary inline-flex items-center justify-center gap-2 text-lg px-10 py-5 text-white font-semibold"
             >
-              Create My Resume Free →
+              Create My Resume →
             </button>
           </div>
         </div>
@@ -163,7 +163,7 @@ function Dashboard() {
             onClick={() => navigate('/upload')}
             className="btn-primary inline-flex items-center justify-center gap-2 text-lg px-10 py-5 text-white font-semibold"
           >
-            Start For Free →
+            Get Started →
           </button>
           <p className="text-sm text-gray-500 mt-4">Takes less than 2 minutes to get started</p>
         </div>
