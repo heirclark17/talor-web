@@ -4,15 +4,26 @@ import { FileText, Upload, Target, Zap, CheckCircle, Clock } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
+import { useScrollAnimation } from './hooks/useScrollAnimation'
 
 function Dashboard() {
   const navigate = useNavigate()
+  const heroAnimation = useScrollAnimation(0.1)
+  const socialProofAnimation = useScrollAnimation(0.1)
+  const featuresAnimation = useScrollAnimation(0.1)
+  const howItWorksAnimation = useScrollAnimation(0.1)
+  const finalCtaAnimation = useScrollAnimation(0.1)
 
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-6">
         {/* Hero Section */}
-        <div className="max-w-4xl mx-auto text-center pt-32 pb-24">
+        <div
+          ref={heroAnimation.ref}
+          className={`max-w-4xl mx-auto text-center pt-32 pb-24 animate-on-scroll ${
+            heroAnimation.isVisible ? 'animate-fade-in-up' : ''
+          }`}
+        >
           <h1 className="text-6xl font-semibold text-white mb-12 leading-tight tracking-tight">
             Build a Job-Winning Resume in Minutes with AI
           </h1>
@@ -34,17 +45,20 @@ function Dashboard() {
         </div>
 
         {/* Social Proof */}
-        <div className="max-w-5xl mx-auto py-20">
+        <div
+          ref={socialProofAnimation.ref}
+          className="max-w-5xl mx-auto py-20"
+        >
           <div className="grid grid-cols-3 gap-12 text-center">
-            <div>
+            <div className={`animate-on-scroll ${socialProofAnimation.isVisible ? 'animate-scale-in delay-100' : ''}`}>
               <div className="text-5xl font-bold text-white mb-3">10x</div>
               <div className="text-base text-gray-400">Faster Applications</div>
             </div>
-            <div>
+            <div className={`animate-on-scroll ${socialProofAnimation.isVisible ? 'animate-scale-in delay-300' : ''}`}>
               <div className="text-5xl font-bold text-white mb-3">ATS</div>
               <div className="text-base text-gray-400">Optimized Format</div>
             </div>
-            <div>
+            <div className={`animate-on-scroll ${socialProofAnimation.isVisible ? 'animate-scale-in delay-500' : ''}`}>
               <div className="text-5xl font-bold text-white mb-3">AI</div>
               <div className="text-base text-gray-400">Powered Tailoring</div>
             </div>
@@ -52,13 +66,20 @@ function Dashboard() {
         </div>
 
         {/* Features Section */}
-        <div className="max-w-5xl mx-auto py-24">
-          <h2 className="text-4xl font-bold text-white text-center mb-20">
+        <div
+          ref={featuresAnimation.ref}
+          className="max-w-5xl mx-auto py-24"
+        >
+          <h2 className={`text-4xl font-bold text-white text-center mb-20 animate-on-scroll ${
+            featuresAnimation.isVisible ? 'animate-fade-in-up' : ''
+          }`}>
             Why Talor Works Better
           </h2>
           <div className="grid grid-cols-3 gap-12">
             {/* Feature 1 */}
-            <div className="text-center">
+            <div className={`text-center animate-on-scroll ${
+              featuresAnimation.isVisible ? 'animate-fade-in-up delay-100' : ''
+            }`}>
               <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Zap className="w-10 h-10 text-white" />
               </div>
@@ -71,7 +92,9 @@ function Dashboard() {
             </div>
 
             {/* Feature 2 */}
-            <div className="text-center">
+            <div className={`text-center animate-on-scroll ${
+              featuresAnimation.isVisible ? 'animate-fade-in-up delay-300' : ''
+            }`}>
               <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="w-10 h-10 text-white" />
               </div>
@@ -84,7 +107,9 @@ function Dashboard() {
             </div>
 
             {/* Feature 3 */}
-            <div className="text-center">
+            <div className={`text-center animate-on-scroll ${
+              featuresAnimation.isVisible ? 'animate-fade-in-up delay-500' : ''
+            }`}>
               <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Clock className="w-10 h-10 text-white" />
               </div>
@@ -99,13 +124,20 @@ function Dashboard() {
         </div>
 
         {/* How It Works */}
-        <div className="max-w-4xl mx-auto py-24 border-t border-white/10">
-          <h2 className="text-4xl font-bold text-white text-center mb-20">
+        <div
+          ref={howItWorksAnimation.ref}
+          className="max-w-4xl mx-auto py-24 border-t border-white/10"
+        >
+          <h2 className={`text-4xl font-bold text-white text-center mb-20 animate-on-scroll ${
+            howItWorksAnimation.isVisible ? 'animate-fade-in-up' : ''
+          }`}>
             How It Works
           </h2>
           <div className="space-y-16">
             {/* Step 1 */}
-            <div className="flex items-start gap-8">
+            <div className={`flex items-start gap-8 animate-on-scroll ${
+              howItWorksAnimation.isVisible ? 'animate-slide-in-left delay-100' : ''
+            }`}>
               <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl font-bold">1</span>
               </div>
@@ -120,7 +152,9 @@ function Dashboard() {
             </div>
 
             {/* Step 2 */}
-            <div className="flex items-start gap-8">
+            <div className={`flex items-start gap-8 animate-on-scroll ${
+              howItWorksAnimation.isVisible ? 'animate-slide-in-left delay-300' : ''
+            }`}>
               <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl font-bold">2</span>
               </div>
@@ -135,7 +169,9 @@ function Dashboard() {
             </div>
 
             {/* Step 3 */}
-            <div className="flex items-start gap-8">
+            <div className={`flex items-start gap-8 animate-on-scroll ${
+              howItWorksAnimation.isVisible ? 'animate-slide-in-left delay-500' : ''
+            }`}>
               <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl font-bold">3</span>
               </div>
@@ -152,7 +188,12 @@ function Dashboard() {
         </div>
 
         {/* Final CTA */}
-        <div className="max-w-3xl mx-auto py-24 text-center">
+        <div
+          ref={finalCtaAnimation.ref}
+          className={`max-w-3xl mx-auto py-24 text-center animate-on-scroll ${
+            finalCtaAnimation.isVisible ? 'animate-fade-in-up' : ''
+          }`}
+        >
           <h2 className="text-4xl font-bold text-white mb-8">
             Ready to Land Your Next Interview?
           </h2>
