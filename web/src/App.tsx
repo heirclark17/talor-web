@@ -15,8 +15,21 @@ function Dashboard() {
   const finalCtaAnimation = useScrollAnimation(0.1)
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-6">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Animated gradient background */}
+      <div className="animate-gradient absolute inset-0 z-0"></div>
+
+      {/* Floating particles */}
+      <div className="particles-background">
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+      </div>
+
+      <div className="container mx-auto px-6 relative z-10">
         {/* Hero Section */}
         <div
           ref={heroAnimation.ref}
@@ -24,7 +37,7 @@ function Dashboard() {
             heroAnimation.isVisible ? 'animate-fade-in-up' : ''
           }`}
         >
-          <h1 className="text-6xl font-semibold text-white mb-12 leading-tight tracking-tight">
+          <h1 className="text-6xl font-semibold text-white mb-12 leading-tight tracking-tight animate-float">
             Build a Job-Winning Resume in Minutes with AI
           </h1>
           <p className="text-lg text-gray-300 mb-14 leading-relaxed">
@@ -37,7 +50,7 @@ function Dashboard() {
           <div className="flex flex-col items-center gap-4">
             <button
               onClick={() => navigate('/upload')}
-              className="btn-primary inline-flex items-center justify-center gap-2 text-lg px-10 py-5 text-white font-semibold"
+              className="btn-primary inline-flex items-center justify-center gap-2 text-lg px-10 py-5 text-white font-semibold animate-pulse-slow"
             >
               Create My Resume →
             </button>
@@ -80,7 +93,7 @@ function Dashboard() {
             <div className={`text-center animate-on-scroll ${
               featuresAnimation.isVisible ? 'animate-fade-in-up delay-100' : ''
             }`}>
-              <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-float">
                 <Zap className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-4">
@@ -95,7 +108,7 @@ function Dashboard() {
             <div className={`text-center animate-on-scroll ${
               featuresAnimation.isVisible ? 'animate-fade-in-up delay-300' : ''
             }`}>
-              <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-float" style={{ animationDelay: '1s' }}>
                 <CheckCircle className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-4">
@@ -110,7 +123,7 @@ function Dashboard() {
             <div className={`text-center animate-on-scroll ${
               featuresAnimation.isVisible ? 'animate-fade-in-up delay-500' : ''
             }`}>
-              <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-float" style={{ animationDelay: '2s' }}>
                 <Clock className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-4">
@@ -138,7 +151,7 @@ function Dashboard() {
             <div className={`flex items-start gap-8 animate-on-scroll ${
               howItWorksAnimation.isVisible ? 'animate-slide-in-left delay-100' : ''
             }`}>
-              <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center flex-shrink-0">
+              <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center flex-shrink-0 animate-pulse-slow">
                 <span className="text-2xl font-bold">1</span>
               </div>
               <div>
@@ -155,7 +168,7 @@ function Dashboard() {
             <div className={`flex items-start gap-8 animate-on-scroll ${
               howItWorksAnimation.isVisible ? 'animate-slide-in-left delay-300' : ''
             }`}>
-              <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center flex-shrink-0">
+              <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center flex-shrink-0 animate-pulse-slow" style={{ animationDelay: '1s' }}>
                 <span className="text-2xl font-bold">2</span>
               </div>
               <div>
@@ -172,7 +185,7 @@ function Dashboard() {
             <div className={`flex items-start gap-8 animate-on-scroll ${
               howItWorksAnimation.isVisible ? 'animate-slide-in-left delay-500' : ''
             }`}>
-              <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center flex-shrink-0">
+              <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center flex-shrink-0 animate-pulse-slow" style={{ animationDelay: '2s' }}>
                 <span className="text-2xl font-bold">3</span>
               </div>
               <div>
