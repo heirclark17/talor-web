@@ -21,11 +21,11 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-black">
       {/* Hero Section - Split Layout */}
-      <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      <div className="container mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto mb-16 sm:mb-24">
           {/* Left: Content */}
           <div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold text-white mb-6 sm:mb-8 leading-tight tracking-tight">
               Build a Job-Winning Resume in Minutes with AI
             </h1>
             <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8 leading-relaxed">
@@ -119,7 +119,7 @@ function Dashboard() {
         {/* Feature Cards Grid - Glassmorphism Style */}
         <div id="features" className="scroll-mt-20 px-4 sm:px-6">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Powerful Features to Land Your Dream Job</h2>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4">Powerful Features to Land Your Dream Job</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               Everything you need to create ATS-friendly, recruiter-approved resumes in minutes
             </p>
@@ -127,7 +127,7 @@ function Dashboard() {
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6 max-w-6xl mx-auto mb-12 sm:mb-16">
           {/* AI Writes for You Card */}
           <div
-            className="glass glass-hover rounded-3xl p-8 cursor-pointer transition-all duration-300"
+            className="glass glass-hover rounded-3xl p-10 cursor-pointer transition-all duration-300"
             onClick={() => toggleCard('ai-writing')}
           >
             <div className="flex items-start gap-4">
@@ -135,7 +135,7 @@ function Dashboard() {
                 <Sparkles className="w-6 h-6 text-purple-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-white mb-3 uppercase tracking-wide">
+                <h3 className="text-2xl font-semibold text-white mb-3 uppercase tracking-wide">
                   AI Writes it for You
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
@@ -179,7 +179,7 @@ function Dashboard() {
 
           {/* Guided Resume Flow Card */}
           <div
-            className="glass glass-hover rounded-3xl p-8 cursor-pointer transition-all duration-300"
+            className="glass glass-hover rounded-3xl p-10 cursor-pointer transition-all duration-300"
             onClick={() => toggleCard('guided-flow')}
           >
             <div className="flex items-start gap-4">
@@ -187,7 +187,7 @@ function Dashboard() {
                 <Target className="w-6 h-6 text-blue-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-white mb-3 uppercase tracking-wide">
+                <h3 className="text-2xl font-semibold text-white mb-3 uppercase tracking-wide">
                   Guided Resume Flow
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
@@ -230,7 +230,7 @@ function Dashboard() {
 
           {/* Resume Quality Score Card */}
           <div
-            className="glass glass-hover rounded-3xl p-8 cursor-pointer transition-all duration-300"
+            className="glass glass-hover rounded-3xl p-10 cursor-pointer transition-all duration-300"
             onClick={() => toggleCard('quality-score')}
           >
             <div className="flex items-start gap-4">
@@ -238,7 +238,7 @@ function Dashboard() {
                 <TrendingUp className="w-6 h-6 text-green-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-white mb-3 uppercase tracking-wide">
+                <h3 className="text-2xl font-semibold text-white mb-3 uppercase tracking-wide">
                   Resume Quality Score
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
@@ -281,7 +281,7 @@ function Dashboard() {
 
           {/* Match Any Job Card */}
           <div
-            className="glass glass-hover rounded-3xl p-8 cursor-pointer transition-all duration-300"
+            className="glass glass-hover rounded-3xl p-10 cursor-pointer transition-all duration-300"
             onClick={() => toggleCard('job-matching')}
           >
             <div className="flex items-start gap-4">
@@ -289,7 +289,7 @@ function Dashboard() {
                 <Award className="w-6 h-6 text-orange-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-white mb-3 uppercase tracking-wide">
+                <h3 className="text-2xl font-semibold text-white mb-3 uppercase tracking-wide">
                   Match Any Job Instantly
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
@@ -333,9 +333,9 @@ function Dashboard() {
         </div>
 
         {/* How It Works Section */}
-        <div className="max-w-6xl mx-auto mt-20 sm:mt-32 mb-16 sm:mb-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto mt-24 sm:mt-40 mb-16 sm:mb-24 px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">How It Works</h2>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4">How It Works</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               Create a job-winning resume in 4 simple steps
             </p>
@@ -352,7 +352,7 @@ function Dashboard() {
                   1
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Upload Resume</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Upload Resume</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Upload your existing resume or start from scratch. We support PDF, DOCX, and TXT formats.
               </p>
@@ -368,7 +368,7 @@ function Dashboard() {
                   2
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Paste Job URL</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Paste Job URL</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Copy any job posting URL from LinkedIn, Indeed, or company career pages. Our AI does the rest.
               </p>
@@ -384,7 +384,7 @@ function Dashboard() {
                   3
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">AI Tailors It</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">AI Tailors It</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Our AI analyzes the job requirements and customizes your resume to match in under 30 seconds.
               </p>
@@ -400,7 +400,7 @@ function Dashboard() {
                   4
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Download & Apply</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Download & Apply</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Download your tailored resume as a professional DOCX file and start applying immediately.
               </p>
@@ -419,9 +419,9 @@ function Dashboard() {
         </div>
 
         {/* Pricing Section */}
-        <div id="pricing" className="max-w-7xl mx-auto mt-20 sm:mt-32 mb-16 sm:mb-24 scroll-mt-20">
+        <div id="pricing" className="max-w-7xl mx-auto mt-24 sm:mt-40 mb-16 sm:mb-24 scroll-mt-20">
           <div className="text-center mb-12 sm:mb-16 px-4 sm:px-6">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               Start for free, upgrade when you need more. No hidden fees, cancel anytime.
             </p>
@@ -429,9 +429,9 @@ function Dashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 px-4 sm:px-6">
             {/* Free Plan */}
-            <div className="glass rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="glass rounded-3xl p-10 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">Free</h3>
+                <h3 className="text-2xl font-semibold text-white mb-2">Free</h3>
                 <div className="flex items-baseline gap-2 mb-4">
                   <span className="text-5xl font-bold text-white">$0</span>
                   <span className="text-gray-400">/forever</span>
@@ -475,13 +475,13 @@ function Dashboard() {
             </div>
 
             {/* Pro Plan - Featured */}
-            <div className="glass rounded-3xl p-8 border-2 border-purple-500/50 relative hover:border-purple-500/70 transition-all duration-300 md:transform md:scale-105">
+            <div className="glass rounded-3xl p-10 border-2 border-purple-500/50 relative hover:border-purple-500/70 transition-all duration-300 md:transform md:scale-105">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
                 Most Popular
               </div>
 
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
+                <h3 className="text-2xl font-semibold text-white mb-2">Pro</h3>
                 <div className="flex items-baseline gap-2 mb-4">
                   <span className="text-5xl font-bold text-white">$19</span>
                   <span className="text-gray-400">/month</span>
@@ -529,9 +529,9 @@ function Dashboard() {
             </div>
 
             {/* Enterprise Plan */}
-            <div className="glass rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="glass rounded-3xl p-10 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
+                <h3 className="text-2xl font-semibold text-white mb-2">Enterprise</h3>
                 <div className="flex items-baseline gap-2 mb-4">
                   <span className="text-5xl font-bold text-white">$49</span>
                   <span className="text-gray-400">/month</span>
@@ -588,9 +588,9 @@ function Dashboard() {
         </div>
 
         {/* Testimonials Section */}
-        <div className="max-w-7xl mx-auto mt-20 sm:mt-32 mb-16 sm:mb-24 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto mt-24 sm:mt-40 mb-16 sm:mb-24 px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 px-4">Loved by Job Seekers Worldwide</h2>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4 px-4">Loved by Job Seekers Worldwide</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               See what our users have to say about landing their dream jobs with Talor
             </p>
@@ -598,7 +598,7 @@ function Dashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Testimonial 1 */}
-            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="glass rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
@@ -620,7 +620,7 @@ function Dashboard() {
             </div>
 
             {/* Testimonial 2 */}
-            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="glass rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
@@ -642,7 +642,7 @@ function Dashboard() {
             </div>
 
             {/* Testimonial 3 */}
-            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="glass rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
@@ -664,7 +664,7 @@ function Dashboard() {
             </div>
 
             {/* Testimonial 4 */}
-            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="glass rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
@@ -686,7 +686,7 @@ function Dashboard() {
             </div>
 
             {/* Testimonial 5 */}
-            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="glass rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
@@ -708,7 +708,7 @@ function Dashboard() {
             </div>
 
             {/* Testimonial 6 */}
-            <div className="glass rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="glass rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
@@ -737,15 +737,15 @@ function Dashboard() {
             Why Choose Talor?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 text-center">
-            <div className="glass rounded-3xl p-8 sm:p-10">
+            <div className="glass rounded-3xl p-10 sm:p-10">
               <div className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3">Since 2025</div>
               <div className="text-gray-400 text-sm">Built with cutting-edge AI technology</div>
             </div>
-            <div className="glass rounded-3xl p-8 sm:p-10">
+            <div className="glass rounded-3xl p-10 sm:p-10">
               <div className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3">100+</div>
               <div className="text-gray-400 text-sm">Cybersecurity professionals trust Talor</div>
             </div>
-            <div className="glass rounded-3xl p-8 sm:p-10">
+            <div className="glass rounded-3xl p-10 sm:p-10">
               <div className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3">95%</div>
               <div className="text-gray-400 text-sm">Interview rate improvement</div>
             </div>
@@ -753,9 +753,9 @@ function Dashboard() {
         </div>
 
         {/* FAQ Section */}
-        <div className="max-w-4xl mx-auto mt-20 sm:mt-32 mb-16 sm:mb-24 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto mt-24 sm:mt-40 mb-16 sm:mb-24 px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Frequently Asked Questions</h2>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4">Frequently Asked Questions</h2>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto px-4">
               Everything you need to know about Talor and how it works
             </p>
@@ -1022,7 +1022,7 @@ function App() {
 
         {/* Footer */}
         <footer className="border-t border-white/10 mt-32">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
             {/* Footer Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-12">
               {/* Company Column */}
