@@ -832,13 +832,6 @@ export default function TailorResume() {
             </span>
           )}
         </button>
-
-        <div className="text-center mt-8 p-4 glass rounded-xl">
-          <p className="text-gray-400 flex items-center justify-center gap-2">
-            <Sparkles className="w-5 h-5 text-white" />
-            <span>Powered by <strong className="text-white">OpenAI GPT-4.1-mini</strong> & <strong className="text-white">Perplexity AI</strong></span>
-          </p>
-        </div>
         </div>
       </div>
     </div>
