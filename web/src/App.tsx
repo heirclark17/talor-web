@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import { FileText, Upload, Target, Zap, CheckCircle, Clock } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
@@ -38,7 +38,7 @@ function Dashboard() {
           }`}
         >
           <h1 className="text-6xl font-semibold text-white mb-12 leading-tight tracking-tight animate-float">
-            Build a Job-Winning Resume in Minutes with AI
+            Build a Job-Winning Resume in Minutes with Talor
           </h1>
           <p className="text-lg text-gray-300 mb-14 leading-relaxed">
             Leverage your professional experience and career goals to create highly
@@ -226,11 +226,14 @@ function Dashboard() {
   )
 }
 
-function App() {
+function AppContent() {
+  const location = useLocation()
+  const isLandingPage = location.pathname === '/'
+
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-black">
-        {/* Top Navigation - Glassmorphism */}
+    <div className="min-h-screen bg-black">
+      {/* Top Navigation - Hidden on landing page */}
+      {!isLandingPage && (
         <nav className="glass sticky top-0 z-50 border-b border-white/10">
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
@@ -257,19 +260,27 @@ function App() {
             </div>
           </div>
         </nav>
+      )}
 
-        {/* Main Content */}
-        <main>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/upload" element={<UploadResume />} />
-            <Route path="/tailor" element={<TailorResume />} />
-            <Route path="/interview-prep/:tailoredResumeId" element={<InterviewPrep />} />
-            <Route path="/resumes" element={<div className="p-8"><h1 className="text-3xl font-bold text-white">My Resumes</h1></div>} />
-          </Routes>
-        </main>
+      {/* Main Content */}
+      <main>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/upload" element={<UploadResume />} />
+          <Route path="/tailor" element={<TailorResume />} />
+          <Route path="/interview-prep/:tailoredResumeId" element={<InterviewPrep />} />
+          <Route path="/resumes" element={<div className="p-8"><h1 className="text-3xl font-bold text-white">My Resumes</h1></div>} />
+        </Routes>
+      </main>
 
-      </div>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   )
 }
