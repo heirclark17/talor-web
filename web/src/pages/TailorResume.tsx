@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase } from 'lucide-react'
+import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save } from 'lucide-react'
 import { api } from '../api/client'
+import ChangeExplanation from '../components/ChangeExplanation'
 
 interface BaseResume {
   id: number
@@ -48,6 +49,29 @@ export default function TailorResume() {
   const [selectedResumeIds, setSelectedResumeIds] = useState<Set<number>>(new Set())
   const [deletingBulk, setDeletingBulk] = useState(false)
 
+  // Enhancement states
+  const [showChanges, setShowChanges] = useState(true)
+  const [syncScroll, setSyncScroll] = useState(true)
+  const [activeSection, setActiveSection] = useState<string>('summary')
+  const [expandedSections, setExpandedSections] = useState({
+    summary: true,
+    skills: true,
+    experience: true,
+    education: true,
+    certifications: true,
+    alignment: true
+  })
+  const [copiedSection, setCopiedSection] = useState<string | null>(null)
+  const [editMode, setEditMode] = useState<Record<string, boolean>>({})
+  const [editedContent, setEditedContent] = useState<Record<string, string>>({})
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [mobileTab, setMobileTab] = useState<'original' | 'tailored'>('tailored')
+
+  // Refs for synchronized scrolling
+  const leftScrollRef = useRef<HTMLDivElement>(null)
+  const rightScrollRef = useRef<HTMLDivElement>(null)
+
   // Check if a resume was passed via navigation state
   useEffect(() => {
     if (location.state?.selectedResumeId) {
@@ -64,6 +88,106 @@ export default function TailorResume() {
       loadFullResume(selectedResumeId)
     }
   }, [selectedResumeId])
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 's':
+            e.preventDefault()
+            setSyncScroll(prev => !prev)
+            break
+          case 'c':
+            e.preventDefault()
+            setShowChanges(prev => !prev)
+            break
+          case 'd':
+            e.preventDefault()
+            if (tailoredResume) {
+              window.open(`https://resume-ai-backend-production-3134.up.railway.app/api/tailor/download/${tailoredResume.id}`, '_blank')
+            }
+            break
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [tailoredResume])
+
+  // Utility functions
+  const handleScroll = (source: 'left' | 'right') => (e: React.UIEvent<HTMLDivElement>) => {
+    if (!syncScroll) return
+
+    const scrollRatio = e.currentTarget.scrollTop / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight)
+    const target = source === 'left' ? rightScrollRef : leftScrollRef
+
+    if (target.current) {
+      target.current.scrollTop = scrollRatio * (target.current.scrollHeight - target.current.clientHeight)
+    }
+  }
+
+  const scrollToSection = (section: string) => {
+    const element = document.getElementById(`section-${section}`)
+    if (element && leftScrollRef.current) {
+      // Calculate the position relative to the scrollable container
+      const container = leftScrollRef.current
+      const elementTop = element.offsetTop
+      const containerTop = container.offsetTop
+
+      // Scroll both containers to the section
+      container.scrollTo({ top: elementTop - containerTop - 20, behavior: 'smooth' })
+
+      // If sync scroll is enabled, scroll the right container too
+      if (syncScroll && rightScrollRef.current) {
+        rightScrollRef.current.scrollTo({ top: elementTop - containerTop - 20, behavior: 'smooth' })
+      }
+
+      setActiveSection(section)
+    }
+  }
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
+  }
+
+  const handleCopy = async (content: string, section: string) => {
+    await navigator.clipboard.writeText(content)
+    setCopiedSection(section)
+    setTimeout(() => setCopiedSection(null), 2000)
+  }
+
+  const toggleEditMode = (section: string) => {
+    setEditMode(prev => ({ ...prev, [section]: !prev[section] }))
+  }
+
+  const saveEdit = (section: string) => {
+    toggleEditMode(section)
+  }
+
+  const exportToPDF = () => {
+    window.print()
+  }
+
+  const sendEmail = () => {
+    const subject = encodeURIComponent(`Tailored Resume for ${tailoredResume?.company}`)
+    const body = encodeURIComponent(`Your tailored resume is ready to download.`)
+    window.location.href = `mailto:?subject=${subject}&body=${body}`
+  }
+
+  const hasChanged = (original: string, tailored: string): boolean => {
+    return original !== tailored
+  }
 
   const loadFullResume = async (resumeId: number) => {
     try {
@@ -295,6 +419,116 @@ export default function TailorResume() {
             </button>
           </div>
 
+          {/* Control Bar */}
+          <div className="mb-6 flex items-center justify-between glass rounded-xl p-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSyncScroll(!syncScroll)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                  syncScroll ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                }`}
+                title="Ctrl/Cmd + S"
+              >
+                {syncScroll ? <Link2 size={18} /> : <Unlink2 size={18} />}
+                <span className="text-sm font-medium">Sync Scroll</span>
+              </button>
+
+              <button
+                onClick={() => setShowChanges(!showChanges)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                  showChanges ? 'bg-green-500/20 text-green-400' : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                }`}
+                title="Ctrl/Cmd + C"
+              >
+                <Sparkles size={18} />
+                <span className="text-sm font-medium">Show Changes</span>
+              </button>
+
+              <div className="h-6 w-px bg-white/10"></div>
+
+              <button
+                onClick={() => {
+                  const allExpanded = Object.values(expandedSections).every(v => v)
+                  const newState = Object.keys(expandedSections).reduce((acc, key) => ({ ...acc, [key]: !allExpanded }), {})
+                  setExpandedSections(newState)
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+              >
+                {Object.values(expandedSections).every(v => v) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                <span className="text-sm font-medium">
+                  {Object.values(expandedSections).every(v => v) ? 'Collapse All' : 'Expand All'}
+                </span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button
+                onClick={exportToPDF}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+              >
+                <Printer size={18} />
+                <span className="text-sm font-medium">Print</span>
+              </button>
+
+              <div className="relative">
+                <button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+                  title="Ctrl/Cmd + D"
+                >
+                  <FileDown size={18} />
+                  <span className="text-sm font-medium">Export</span>
+                  <ChevronDown size={16} />
+                </button>
+
+                {showExportMenu && (
+                  <div className="absolute right-0 top-full mt-2 bg-gray-900 rounded-xl shadow-2xl border border-white/10 py-2 min-w-[200px] z-10">
+                    <button
+                      onClick={() => {
+                        window.open(`https://resume-ai-backend-production-3134.up.railway.app/api/tailor/download/${tailoredResume.id}`, '_blank')
+                        setShowExportMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                    >
+                      <Download size={16} />
+                      Word Document (.docx)
+                    </button>
+                    <button
+                      onClick={() => {
+                        exportToPDF()
+                        setShowExportMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                    >
+                      <FileDown size={16} />
+                      PDF Document (.pdf)
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleCopy(JSON.stringify(tailoredResume, null, 2), 'all')
+                        setShowExportMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                    >
+                      <Copy size={16} />
+                      Copy to Clipboard
+                    </button>
+                    <button
+                      onClick={() => {
+                        sendEmail()
+                        setShowExportMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                    >
+                      <Mail size={16} />
+                      Email to Self
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Success Banner */}
           <div className="mb-8 p-6 glass border-2 border-green-500/30 rounded-2xl">
             <div className="flex items-start gap-4">
@@ -313,10 +547,85 @@ export default function TailorResume() {
             </div>
           </div>
 
-          {/* Side-by-Side Comparison */}
-          <div className="grid grid-cols-2 gap-6">
-            {/* Original Resume */}
-            <div className="glass rounded-2xl overflow-hidden border border-white/20">
+          {/* Comparison Summary Card */}
+          <div className="mb-6 glass rounded-xl p-6 border border-white/10">
+            <h3 className="text-xl font-bold text-white mb-4">What Changed?</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-white/5 rounded-lg">
+                <div className="text-3xl font-bold text-green-500 mb-1">
+                  +{tailoredResume.tailored_skills.length - selectedResume.skills.length}
+                </div>
+                <div className="text-sm text-gray-400">Keywords Added</div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-lg">
+                <div className="text-3xl font-bold text-blue-500 mb-1">
+                  {Math.round((tailoredResume.tailored_summary.length / selectedResume.summary.length) * 100 - 100)}%
+                </div>
+                <div className="text-sm text-gray-400">More Detailed</div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-lg">
+                <div className="text-3xl font-bold text-purple-500 mb-1">
+                  {tailoredResume.quality_score}/10
+                </div>
+                <div className="text-sm text-gray-400">Match Score</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Tab Switcher */}
+          {isMobile && (
+            <div className="flex border-b border-white/10 mb-6">
+              <button
+                className={`flex-1 py-3 text-center font-medium transition-all ${
+                  mobileTab === 'original'
+                    ? 'border-b-2 border-white text-white'
+                    : 'text-gray-400 hover:text-gray-300'
+                }`}
+                onClick={() => setMobileTab('original')}
+              >
+                Original
+              </button>
+              <button
+                className={`flex-1 py-3 text-center font-medium transition-all ${
+                  mobileTab === 'tailored'
+                    ? 'border-b-2 border-white text-white'
+                    : 'text-gray-400 hover:text-gray-300'
+                }`}
+                onClick={() => setMobileTab('tailored')}
+              >
+                Tailored ✨
+              </button>
+            </div>
+          )}
+
+          {/* Section Navigation Sidebar (Desktop Only) */}
+          <div className="flex gap-6">
+            {!isMobile && (
+              <div className="w-48 flex-shrink-0">
+                <div className="sticky top-4 space-y-2">
+                  <h3 className="text-sm font-bold text-gray-400 mb-3 px-3">SECTIONS</h3>
+                  {['summary', 'skills', 'experience', 'education', 'certifications'].map(section => (
+                    <button
+                      key={section}
+                      onClick={() => scrollToSection(section)}
+                      className={`w-full text-left text-sm px-3 py-2 rounded-lg transition-all ${
+                        activeSection === section
+                          ? 'bg-white/20 text-white font-medium'
+                          : 'text-gray-400 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      {section.charAt(0).toUpperCase() + section.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Side-by-Side Comparison */}
+            <div className={`flex-1 ${isMobile ? '' : 'grid grid-cols-2 gap-6'}`}>
+              {/* Show only selected tab on mobile */}
+              {(!isMobile || mobileTab === 'original') && (
+                <div className={`glass rounded-2xl overflow-hidden border border-white/20 ${isMobile ? 'mb-6' : ''}`}>
               <div className="glass p-6 border-b border-white/10">
                 <div className="flex items-center gap-3 mb-2">
                   <FileText className="w-6 h-6 text-white" />
@@ -325,87 +634,188 @@ export default function TailorResume() {
                 <p className="text-gray-400 text-sm">{selectedResume.filename}</p>
               </div>
 
-              <div className="p-6 max-h-[70vh] overflow-y-auto">
+              <div
+                ref={leftScrollRef}
+                onScroll={handleScroll('left')}
+                className="p-6 max-h-[70vh] overflow-y-auto"
+              >
                 {/* Summary */}
-                <div className="mb-10">
-                  <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/10">
-                    Professional Summary
-                  </h3>
-                  <p className="text-gray-400 leading-relaxed">{selectedResume.summary}</p>
+                <div id="section-summary" className="mb-10">
+                  <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/10">
+                    <button
+                      onClick={() => toggleSection('summary')}
+                      className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                    >
+                      {expandedSections.summary ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                      Professional Summary
+                    </button>
+                    <button
+                      onClick={() => handleCopy(selectedResume.summary, 'orig-summary')}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                      title="Copy to clipboard"
+                    >
+                      {copiedSection === 'orig-summary' ? (
+                        <Check size={18} className="text-green-500" />
+                      ) : (
+                        <Copy size={18} className="text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                  {expandedSections.summary && (
+                    <p className="text-gray-400 leading-relaxed">{selectedResume.summary}</p>
+                  )}
                 </div>
 
                 {/* Skills */}
                 {selectedResume.skills && selectedResume.skills.length > 0 && (
-                  <div className="mb-10">
-                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/10">
-                      Skills ({selectedResume.skills.length})
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedResume.skills.slice(0, 12).map((skill, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
-                          {skill}
-                        </span>
-                      ))}
+                  <div id="section-skills" className="mb-10">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/10">
+                      <button
+                        onClick={() => toggleSection('skills')}
+                        className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                      >
+                        {expandedSections.skills ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        Skills ({selectedResume.skills.length})
+                      </button>
+                      <button
+                        onClick={() => handleCopy(selectedResume.skills.join(', '), 'orig-skills')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'orig-skills' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
                     </div>
+                    {expandedSections.skills && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedResume.skills.slice(0, 12).map((skill, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Experience */}
                 {selectedResume.experience && selectedResume.experience.length > 0 && (
-                  <div className="mb-10">
-                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/10">
-                      Professional Experience
-                    </h3>
-                    <div className="space-y-6">
-                      {selectedResume.experience.map((exp: any, idx: number) => (
-                        <div key={idx} className="border-l-2 border-white/20 pl-4">
-                          <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
-                          {exp.location && (
-                            <p className="text-gray-400 text-sm mb-1">{exp.location}</p>
-                          )}
-                          {exp.dates && (
-                            <p className="text-gray-500 text-sm mb-3">{exp.dates}</p>
-                          )}
-                          {exp.bullets && exp.bullets.length > 0 && (
-                            <ul className="space-y-2 text-sm">
-                              {exp.bullets.map((bullet: string, bulletIdx: number) => (
-                                <li key={bulletIdx} className="text-gray-400 flex gap-2">
-                                  <span className="text-white/40 flex-shrink-0">•</span>
-                                  <span>{bullet}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      ))}
+                  <div id="section-experience" className="mb-10">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/10">
+                      <button
+                        onClick={() => toggleSection('experience')}
+                        className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                      >
+                        {expandedSections.experience ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        Professional Experience
+                      </button>
+                      <button
+                        onClick={() => handleCopy(JSON.stringify(selectedResume.experience, null, 2), 'orig-experience')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'orig-experience' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
                     </div>
+                    {expandedSections.experience && (
+                      <div className="space-y-6">
+                        {selectedResume.experience.map((exp: any, idx: number) => (
+                          <div key={idx} className="border-l-2 border-white/20 pl-4">
+                            <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
+                            {exp.location && (
+                              <p className="text-gray-400 text-sm mb-1">{exp.location}</p>
+                            )}
+                            {exp.dates && (
+                              <p className="text-gray-500 text-sm mb-3">{exp.dates}</p>
+                            )}
+                            {exp.bullets && exp.bullets.length > 0 && (
+                              <ul className="space-y-2 text-sm">
+                                {exp.bullets.map((bullet: string, bulletIdx: number) => (
+                                  <li key={bulletIdx} className="text-gray-400 flex gap-2">
+                                    <span className="text-white/40 flex-shrink-0">•</span>
+                                    <span>{bullet}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Education */}
                 {selectedResume.education && (
-                  <div className="mb-10">
-                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/10">
-                      Education
-                    </h3>
-                    <p className="text-gray-400">{selectedResume.education}</p>
+                  <div id="section-education" className="mb-10">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/10">
+                      <button
+                        onClick={() => toggleSection('education')}
+                        className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                      >
+                        {expandedSections.education ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        Education
+                      </button>
+                      <button
+                        onClick={() => handleCopy(selectedResume.education, 'orig-education')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'orig-education' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                    {expandedSections.education && (
+                      <p className="text-gray-400">{selectedResume.education}</p>
+                    )}
                   </div>
                 )}
 
                 {/* Certifications */}
                 {selectedResume.certifications && (
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/10">
-                      Certifications
-                    </h3>
-                    <p className="text-gray-400 whitespace-pre-line">{selectedResume.certifications}</p>
+                  <div id="section-certifications">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/10">
+                      <button
+                        onClick={() => toggleSection('certifications')}
+                        className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                      >
+                        {expandedSections.certifications ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        Certifications
+                      </button>
+                      <button
+                        onClick={() => handleCopy(selectedResume.certifications, 'orig-certifications')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'orig-certifications' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                    {expandedSections.certifications && (
+                      <p className="text-gray-400 whitespace-pre-line">{selectedResume.certifications}</p>
+                    )}
                   </div>
                 )}
               </div>
             </div>
+              )}
 
             {/* Tailored Resume */}
-            <div className="glass rounded-2xl overflow-hidden border border-white/40">
+            {(!isMobile || mobileTab === 'tailored') && (
+              <div className={`glass rounded-2xl overflow-hidden border border-white/40 ${isMobile ? '' : ''}`}>
               <div className="glass p-6 border-b border-white/20">
                 <div className="flex items-center gap-3 mb-2">
                   <Sparkles className="w-6 h-6 text-white" />
@@ -414,104 +824,239 @@ export default function TailorResume() {
                 <p className="text-gray-300 text-sm">Customized for {tailoredResume.company}</p>
               </div>
 
-              <div className="p-6 max-h-[70vh] overflow-y-auto">
-                {/* AI Badge */}
-                <div className="mb-6 p-3 bg-white/5 rounded-xl border border-white/10">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-white" />
-                    <span className="text-sm font-semibold text-white">
-                      AI-Enhanced with GPT-4.1-mini & Perplexity
-                    </span>
-                  </div>
-                </div>
-
+              <div
+                ref={rightScrollRef}
+                onScroll={handleScroll('right')}
+                className="p-6 max-h-[70vh] overflow-y-auto"
+              >
                 {/* Tailored Summary */}
                 <div className="mb-10">
-                  <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/20">
-                    Professional Summary
-                  </h3>
-                  <p className="text-gray-400 leading-relaxed bg-white/5 p-4 rounded-lg border border-white/10">
-                    {tailoredResume.tailored_summary}
-                  </p>
+                  <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/20">
+                    <button
+                      onClick={() => toggleSection('summary')}
+                      className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                    >
+                      {expandedSections.summary ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                      Professional Summary
+                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => toggleEditMode('summary')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Edit section"
+                      >
+                        {editMode.summary ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                      </button>
+                      <button
+                        onClick={() => handleCopy(tailoredResume.tailored_summary, 'tail-summary')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'tail-summary' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  {expandedSections.summary && (
+                    <div className={`relative ${
+                      showChanges && hasChanged(selectedResume.summary, tailoredResume.tailored_summary)
+                        ? 'bg-green-500/10 border-l-2 border-green-500/50 pl-4'
+                        : ''
+                    }`}>
+                      {showChanges && hasChanged(selectedResume.summary, tailoredResume.tailored_summary) && (
+                        <div className="absolute -left-1 top-0 bottom-0 w-1 bg-green-500 rounded"></div>
+                      )}
+                      {editMode.summary ? (
+                        <textarea
+                          value={editedContent.summary || tailoredResume.tailored_summary}
+                          onChange={(e) => setEditedContent(prev => ({ ...prev, summary: e.target.value }))}
+                          className="w-full bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[120px]"
+                          rows={6}
+                        />
+                      ) : (
+                        <p className="text-gray-400 leading-relaxed bg-white/5 p-4 rounded-lg border border-white/10">
+                          {editedContent.summary || tailoredResume.tailored_summary}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Tailored Competencies */}
                 {tailoredResume.tailored_skills && tailoredResume.tailored_skills.length > 0 && (
                   <div className="mb-10">
-                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/20">
-                      Core Competencies ({tailoredResume.tailored_skills.length})
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {tailoredResume.tailored_skills.map((skill, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-white/15 text-white rounded-full text-sm font-medium border border-white/20">
-                          {skill}
-                        </span>
-                      ))}
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/20">
+                      <button
+                        onClick={() => toggleSection('skills')}
+                        className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                      >
+                        {expandedSections.skills ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        Core Competencies ({tailoredResume.tailored_skills.length})
+                      </button>
+                      <button
+                        onClick={() => handleCopy(tailoredResume.tailored_skills.join(', '), 'tail-skills')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'tail-skills' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
                     </div>
+                    {expandedSections.skills && (
+                      <div className="flex flex-wrap gap-2">
+                        {tailoredResume.tailored_skills.map((skill, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-white/15 text-white rounded-full text-sm font-medium border border-white/20">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Tailored Experience */}
                 {tailoredResume.tailored_experience && tailoredResume.tailored_experience.length > 0 && (
                   <div className="mb-10">
-                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/20">
-                      Professional Experience (Tailored)
-                    </h3>
-                    <div className="space-y-6">
-                      {tailoredResume.tailored_experience.map((exp: any, idx: number) => (
-                        <div key={idx} className="border-l-2 border-white/40 pl-4 bg-white/5 p-3 rounded-r-lg">
-                          <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
-                          {exp.location && (
-                            <p className="text-gray-300 text-sm mb-1">{exp.location}</p>
-                          )}
-                          {exp.dates && (
-                            <p className="text-gray-400 text-sm mb-3">{exp.dates}</p>
-                          )}
-                          {exp.bullets && exp.bullets.length > 0 && (
-                            <ul className="space-y-2 text-sm">
-                              {exp.bullets.map((bullet: string, bulletIdx: number) => (
-                                <li key={bulletIdx} className="text-gray-300 flex gap-2">
-                                  <span className="text-white/40 flex-shrink-0">•</span>
-                                  <span>{bullet}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      ))}
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/20">
+                      <button
+                        onClick={() => toggleSection('experience')}
+                        className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                      >
+                        {expandedSections.experience ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        Professional Experience
+                      </button>
+                      <button
+                        onClick={() => handleCopy(JSON.stringify(tailoredResume.tailored_experience, null, 2), 'tail-experience')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'tail-experience' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
                     </div>
+                    {expandedSections.experience && (
+                      <div className="space-y-6">
+                        {tailoredResume.tailored_experience.map((exp: any, idx: number) => (
+                          <div key={idx} className="border-l-2 border-white/40 pl-4 bg-white/5 p-3 rounded-r-lg">
+                            <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
+                            {exp.location && (
+                              <p className="text-gray-300 text-sm mb-1">{exp.location}</p>
+                            )}
+                            {exp.dates && (
+                              <p className="text-gray-400 text-sm mb-3">{exp.dates}</p>
+                            )}
+                            {exp.bullets && exp.bullets.length > 0 && (
+                              <ul className="space-y-2 text-sm">
+                                {exp.bullets.map((bullet: string, bulletIdx: number) => (
+                                  <li key={bulletIdx} className="text-gray-300 flex gap-2">
+                                    <span className="text-white/40 flex-shrink-0">•</span>
+                                    <span>{bullet}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Education */}
                 {tailoredResume.tailored_education && (
                   <div className="mb-10">
-                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/20">
-                      Education
-                    </h3>
-                    <p className="text-gray-300">{tailoredResume.tailored_education}</p>
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/20">
+                      <button
+                        onClick={() => toggleSection('education')}
+                        className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                      >
+                        {expandedSections.education ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        Education
+                      </button>
+                      <button
+                        onClick={() => handleCopy(tailoredResume.tailored_education, 'tail-education')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'tail-education' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                    {expandedSections.education && (
+                      <p className="text-gray-300">{tailoredResume.tailored_education}</p>
+                    )}
                   </div>
                 )}
 
                 {/* Certifications */}
                 {tailoredResume.tailored_certifications && (
                   <div className="mb-10">
-                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/20">
-                      Certifications & Training
-                    </h3>
-                    <p className="text-gray-300 whitespace-pre-line">{tailoredResume.tailored_certifications}</p>
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/20">
+                      <button
+                        onClick={() => toggleSection('certifications')}
+                        className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                      >
+                        {expandedSections.certifications ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        Certifications & Training
+                      </button>
+                      <button
+                        onClick={() => handleCopy(tailoredResume.tailored_certifications, 'tail-certifications')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'tail-certifications' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                    {expandedSections.certifications && (
+                      <p className="text-gray-300 whitespace-pre-line">{tailoredResume.tailored_certifications}</p>
+                    )}
                   </div>
                 )}
 
                 {/* Alignment Statement */}
                 {tailoredResume.alignment_statement && (
                   <div className="mb-10">
-                    <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b-2 border-white/20">
-                      Company Alignment
-                    </h3>
-                    <p className="text-gray-400 bg-white/5 p-4 rounded-lg border border-white/10">
-                      {tailoredResume.alignment_statement}
-                    </p>
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-white/20">
+                      <button
+                        onClick={() => toggleSection('alignment')}
+                        className="flex items-center gap-2 text-lg font-bold text-white hover:text-gray-300 transition-colors"
+                      >
+                        {expandedSections.alignment ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        Company Alignment
+                      </button>
+                      <button
+                        onClick={() => handleCopy(tailoredResume.alignment_statement, 'tail-alignment')}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'tail-alignment' ? (
+                          <Check size={18} className="text-green-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                    {expandedSections.alignment && (
+                      <p className="text-gray-400 bg-white/5 p-4 rounded-lg border border-white/10">
+                        {tailoredResume.alignment_statement}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -532,6 +1077,8 @@ export default function TailorResume() {
                 </div>
               </div>
             </div>
+            )}
+          </div>
           </div>
 
           {/* Action Buttons */}
