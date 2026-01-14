@@ -9,10 +9,10 @@ function Dashboard() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Hero Section - Split Layout */}
-      <div className="container mx-auto px-4 sm:px-6 py-24 sm:py-32">
-        <div className="max-w-4xl mx-auto mb-24 sm:mb-32 text-center">
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      {/* Hero Section - Centered Layout */}
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-3xl sm:text-4xl font-semibold text-white mb-6 sm:mb-8 leading-tight tracking-tight">
               Build a Job-Winning Resume in Minutes with AI
             </h1>
@@ -22,19 +22,13 @@ function Dashboard() {
               to any job posting with ATS optimization.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {/* CTA Button */}
+            <div className="flex justify-center">
               <button
                 onClick={() => navigate('/upload')}
                 className="btn-primary inline-flex items-center justify-center gap-2 text-base px-8 py-4"
               >
                 Create My Resume Free →
-              </button>
-              <button
-                onClick={() => navigate('/tailor')}
-                className="btn-secondary inline-flex items-center justify-center gap-2 text-base px-8 py-4"
-              >
-                Learn More
               </button>
             </div>
         </div>
@@ -69,12 +63,6 @@ function App() {
                 >
                   <Target className="w-5 h-5" />
                   <span className="font-medium">Tailor</span>
-                </Link>
-                <Link
-                  to="/upload"
-                  className="btn-primary inline-flex items-center gap-2"
-                >
-                  Get Started
                 </Link>
               </div>
             </div>

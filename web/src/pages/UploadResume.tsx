@@ -85,13 +85,13 @@ export default function UploadResume() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-8">
       <div className="w-full max-w-3xl">
-        <div className="text-center mb-20">
+        <div className="text-center mb-32">
           <h1 className="text-6xl font-bold text-white mb-8">Upload Resume</h1>
           <p className="text-2xl text-gray-400">Upload your base resume to start tailoring for specific jobs</p>
         </div>
 
       {/* Upload Area */}
-      <div className="glass rounded-3xl p-16 mb-16">
+      <div className="glass rounded-3xl p-16 mb-24">
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${
@@ -152,8 +152,8 @@ export default function UploadResume() {
 
       {/* Parsed Resume Display */}
       {parsedResume && (
-        <div className="glass rounded-3xl p-10 mt-8">
-          <div className="flex items-center gap-3 mb-8 pb-6 border-b border-white/10">
+        <div className="glass rounded-3xl p-10 mt-16">
+          <div className="flex items-center gap-3 mb-12 pb-8 border-b border-white/10">
             <FileText className="w-8 h-8 text-white" />
             <div>
               <h2 className="text-2xl font-bold text-white">Parsed Resume</h2>
@@ -163,7 +163,7 @@ export default function UploadResume() {
 
           {/* Summary */}
           {parsedResume.parsed_data.summary && (
-            <div className="mb-10">
+            <div className="mb-14">
               <h3 className="text-xl font-bold text-white mb-4">Professional Summary</h3>
               <p className="text-gray-400 leading-relaxed">{parsedResume.parsed_data.summary}</p>
             </div>
@@ -171,7 +171,7 @@ export default function UploadResume() {
 
           {/* Skills */}
           {parsedResume.parsed_data.skills && parsedResume.parsed_data.skills.length > 0 && (
-            <div className="mb-10">
+            <div className="mb-14">
               <h3 className="text-xl font-bold text-white mb-4">Skills</h3>
               <div className="flex flex-wrap gap-2">
                 {parsedResume.parsed_data.skills.map((skill, idx) => (
@@ -188,7 +188,7 @@ export default function UploadResume() {
 
           {/* Experience */}
           {parsedResume.parsed_data.experience && parsedResume.parsed_data.experience.length > 0 && (
-            <div className="mb-10">
+            <div className="mb-14">
               <h3 className="text-xl font-bold text-white mb-4">Professional Experience</h3>
               <div className="space-y-4">
                 {parsedResume.parsed_data.experience.map((job, idx) => (
@@ -222,7 +222,7 @@ export default function UploadResume() {
 
           {/* Education */}
           {parsedResume.parsed_data.education && (
-            <div className="mb-10">
+            <div className="mb-14">
               <h3 className="text-xl font-bold text-white mb-4">Education</h3>
               <p className="text-gray-400">{parsedResume.parsed_data.education}</p>
             </div>
@@ -230,7 +230,7 @@ export default function UploadResume() {
 
           {/* Certifications */}
           {parsedResume.parsed_data.certifications && (
-            <div className="mb-10">
+            <div className="mb-14">
               <h3 className="text-xl font-bold text-white mb-4">Certifications</h3>
               <p className="text-gray-400">{parsedResume.parsed_data.certifications}</p>
             </div>

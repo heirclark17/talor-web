@@ -566,7 +566,7 @@ export default function TailorResume() {
     <div className="min-h-screen bg-black p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-24">
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="p-4 bg-white/10 rounded-2xl">
               <Target className="w-10 h-10 text-white" />
@@ -581,7 +581,7 @@ export default function TailorResume() {
         </div>
 
         {error && (
-          <div className="mb-12 p-5 glass border-2 border-red-500/30 rounded-2xl">
+          <div className="mb-16 p-5 glass border-2 border-red-500/30 rounded-2xl">
             <div className="flex items-start gap-4">
               <div className="p-2 bg-red-500/20 rounded-lg">
                 <AlertCircle className="w-6 h-6 text-red-500" />
@@ -595,8 +595,8 @@ export default function TailorResume() {
         )}
 
         {/* Resume Selection */}
-        <div className="glass rounded-2xl p-10 mb-12">
-          <div className="text-center mb-8">
+        <div className="glass rounded-2xl p-10 mb-20">
+          <div className="text-center mb-10">
             <div className="inline-flex items-center gap-3 mb-4">
               <div className="p-2 bg-white/10 rounded-lg">
                 <FileText className="w-6 h-6 text-white" />
@@ -748,8 +748,8 @@ export default function TailorResume() {
         </div>
 
         {/* Job Details */}
-        <div className="glass rounded-2xl p-10 mb-12">
-          <div className="text-center mb-8">
+        <div className="glass rounded-2xl p-10 mb-20">
+          <div className="text-center mb-10">
             <div className="inline-flex items-center gap-3 mb-4">
               <div className="p-2 bg-white/10 rounded-lg">
                 <Target className="w-6 h-6 text-white" />
@@ -758,7 +758,7 @@ export default function TailorResume() {
             <h2 className="text-2xl font-bold text-white">Job Details</h2>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
               <label className="block text-sm font-bold text-white mb-3">
                 Job URL (LinkedIn, Indeed, Company Site)
