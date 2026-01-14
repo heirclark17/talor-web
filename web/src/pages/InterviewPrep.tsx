@@ -38,6 +38,9 @@ import { api } from '../api/client'
 import STARStoryBuilder from '../components/STARStoryBuilder'
 import VideoRecorder from '../components/VideoRecorder'
 
+// API base URL - same logic as API client
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+
 interface InterviewPrepData {
   company_profile: {
     name: string
@@ -332,7 +335,7 @@ export default function InterviewPrep() {
       // Fetch all three data sources in parallel
       const [researchResult, newsResult, questionsResult] = await Promise.allSettled([
         // Company research
-        fetch('/api/interview-prep/company-research', {
+        fetch(`${API_BASE_URL}/api/interview-prep/company-research`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -346,7 +349,7 @@ export default function InterviewPrep() {
         }).then(res => res.json()),
 
         // Company news
-        fetch('/api/interview-prep/company-news', {
+        fetch(`${API_BASE_URL}/api/interview-prep/company-news`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -361,7 +364,7 @@ export default function InterviewPrep() {
         }).then(res => res.json()),
 
         // Interview questions
-        fetch('/api/interview-prep/interview-questions', {
+        fetch(`${API_BASE_URL}/api/interview-prep/interview-questions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
