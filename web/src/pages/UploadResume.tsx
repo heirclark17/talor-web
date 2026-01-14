@@ -164,7 +164,7 @@ export default function UploadResume() {
           {/* Summary */}
           {parsedResume.parsed_data.summary && (
             <div className="mb-14">
-              <h3 className="text-xl font-bold text-white mb-4">Professional Summary</h3>
+              <h3 className="text-xl font-bold text-white mb-6">Professional Summary</h3>
               <p className="text-gray-400 leading-relaxed">{parsedResume.parsed_data.summary}</p>
             </div>
           )}
@@ -172,7 +172,7 @@ export default function UploadResume() {
           {/* Skills */}
           {parsedResume.parsed_data.skills && parsedResume.parsed_data.skills.length > 0 && (
             <div className="mb-14">
-              <h3 className="text-xl font-bold text-white mb-4">Skills</h3>
+              <h3 className="text-xl font-bold text-white mb-6">Skills</h3>
               <div className="flex flex-wrap gap-2">
                 {parsedResume.parsed_data.skills.map((skill, idx) => (
                   <span
@@ -189,7 +189,7 @@ export default function UploadResume() {
           {/* Experience */}
           {parsedResume.parsed_data.experience && parsedResume.parsed_data.experience.length > 0 && (
             <div className="mb-14">
-              <h3 className="text-xl font-bold text-white mb-4">Professional Experience</h3>
+              <h3 className="text-xl font-bold text-white mb-6">Professional Experience</h3>
               <div className="space-y-4">
                 {parsedResume.parsed_data.experience.map((job, idx) => (
                   <div key={idx} className="border-l-4 border-white/20 pl-4">
@@ -223,7 +223,7 @@ export default function UploadResume() {
           {/* Education */}
           {parsedResume.parsed_data.education && (
             <div className="mb-14">
-              <h3 className="text-xl font-bold text-white mb-4">Education</h3>
+              <h3 className="text-xl font-bold text-white mb-6">Education</h3>
               <p className="text-gray-400">{parsedResume.parsed_data.education}</p>
             </div>
           )}
@@ -231,7 +231,7 @@ export default function UploadResume() {
           {/* Certifications */}
           {parsedResume.parsed_data.certifications && (
             <div className="mb-14">
-              <h3 className="text-xl font-bold text-white mb-4">Certifications</h3>
+              <h3 className="text-xl font-bold text-white mb-6">Certifications</h3>
               <p className="text-gray-400">{parsedResume.parsed_data.certifications}</p>
             </div>
           )}

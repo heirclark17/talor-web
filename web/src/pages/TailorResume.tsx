@@ -567,12 +567,12 @@ export default function TailorResume() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-24">
-          <div className="inline-flex items-center gap-3 mb-6">
+          <div className="inline-flex items-center gap-3 mb-8">
             <div className="p-4 bg-white/10 rounded-2xl">
               <Target className="w-10 h-10 text-white" />
             </div>
           </div>
-          <h1 className="text-5xl font-bold text-white mb-4">
+          <h1 className="text-5xl font-bold text-white mb-6">
             Talor
           </h1>
           <p className="text-xl text-gray-400">
@@ -596,8 +596,8 @@ export default function TailorResume() {
 
         {/* Resume Selection */}
         <div className="mb-20">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-3 mb-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-3 mb-6">
               <div className="p-2 bg-white/10 rounded-lg">
                 <FileText className="w-6 h-6 text-white" />
               </div>
@@ -751,8 +751,8 @@ export default function TailorResume() {
 
         {/* Job Details */}
         <div className="mb-20">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-3 mb-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-3 mb-6">
               <div className="p-2 bg-white/10 rounded-lg">
                 <Target className="w-6 h-6 text-white" />
               </div>
@@ -760,9 +760,9 @@ export default function TailorResume() {
             <h2 className="text-2xl text-white">Job Details</h2>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-8">
+          <div className="max-w-3xl mx-auto space-y-10">
             <div>
-              <label className="block text-sm font-bold text-white mb-3">
+              <label className="block text-sm font-bold text-white mb-4">
                 Job URL (LinkedIn, Indeed, Company Site)
               </label>
               <input
@@ -772,15 +772,15 @@ export default function TailorResume() {
                 placeholder="https://www.linkedin.com/jobs/view/... or https://jobs.microsoft.com/..."
                 className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
               />
-              <p className="text-sm text-gray-400 mt-3 flex items-center gap-2">
+              <p className="text-sm text-gray-400 mt-4 flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
                 Just paste the URL - we'll automatically extract company name, job title, and full description
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-sm font-bold text-white mb-3">
+                <label className="block text-sm font-bold text-white mb-4">
                   Company Name (Optional)
                 </label>
                 <input
@@ -793,7 +793,7 @@ export default function TailorResume() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-white mb-3">
+                <label className="block text-sm font-bold text-white mb-4">
                   Job Title (Optional)
                 </label>
                 <input

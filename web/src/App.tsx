@@ -13,10 +13,10 @@ function Dashboard() {
       {/* Hero Section - Centered Layout */}
       <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl font-semibold text-white mb-6 sm:mb-8 leading-tight tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-white mb-8 sm:mb-12 leading-tight tracking-tight">
               Build a Job-Winning Resume in Minutes with AI
             </h1>
-            <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8 leading-relaxed">
+            <p className="text-base sm:text-lg text-gray-300 mb-10 sm:mb-14 leading-relaxed">
               Leverage your professional experience and career goals to create highly
               effective resumes. Our AI-powered platform instantly tailors your resume
               to any job posting with ATS optimization.
