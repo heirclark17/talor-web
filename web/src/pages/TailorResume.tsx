@@ -595,17 +595,18 @@ export default function TailorResume() {
         )}
 
         {/* Resume Selection */}
-        <div className="glass rounded-2xl p-10 mb-20">
+        <div className="mb-20">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-3 mb-4">
               <div className="p-2 bg-white/10 rounded-lg">
                 <FileText className="w-6 h-6 text-white" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-white">Select Base Resume</h2>
+            <h2 className="text-2xl text-white">Select Base Resume</h2>
           </div>
 
           {/* Bulk Actions */}
+          <div className="max-w-3xl mx-auto">
           {resumes.length > 0 && (
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
               <div className="flex items-center gap-4">
@@ -745,20 +746,21 @@ export default function TailorResume() {
               ))}
             </div>
           )}
+          </div>
         </div>
 
         {/* Job Details */}
-        <div className="glass rounded-2xl p-10 mb-20">
+        <div className="mb-20">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-3 mb-4">
               <div className="p-2 bg-white/10 rounded-lg">
                 <Target className="w-6 h-6 text-white" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-white">Job Details</h2>
+            <h2 className="text-2xl text-white">Job Details</h2>
           </div>
 
-          <div className="space-y-8">
+          <div className="max-w-3xl mx-auto space-y-8">
             <div>
               <label className="block text-sm font-bold text-white mb-3">
                 Job URL (LinkedIn, Indeed, Company Site)
@@ -807,6 +809,7 @@ export default function TailorResume() {
         </div>
 
         {/* Tailor Button */}
+        <div className="max-w-3xl mx-auto">
         <button
           onClick={handleTailor}
           disabled={loading || !selectedResumeId}
@@ -835,6 +838,7 @@ export default function TailorResume() {
             <Sparkles className="w-5 h-5 text-white" />
             <span>Powered by <strong className="text-white">OpenAI GPT-4.1-mini</strong> & <strong className="text-white">Perplexity AI</strong></span>
           </p>
+        </div>
         </div>
       </div>
     </div>
