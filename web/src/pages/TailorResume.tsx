@@ -563,19 +563,19 @@ export default function TailorResume() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-8">
+    <div className="min-h-screen bg-black p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-24">
-          <div className="inline-flex items-center gap-3 mb-8">
-            <div className="p-4 bg-white/10 rounded-2xl">
-              <Target className="w-10 h-10 text-white" />
+        <div className="text-center mb-12 sm:mb-16 md:mb-20 lg:mb-24">
+          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6 md:mb-8">
+            <div className="p-3 sm:p-4 bg-white/10 rounded-xl sm:rounded-2xl">
+              <Target className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 text-white" />
             </div>
           </div>
-          <h1 className="text-5xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-5 md:mb-6">
             Talor
           </h1>
-          <p className="text-xl text-gray-400">
+          <p className="text-base sm:text-lg md:text-xl text-gray-400 px-2">
             AI-powered resume customization for every job application
           </p>
         </div>
@@ -595,14 +595,14 @@ export default function TailorResume() {
         )}
 
         {/* Resume Selection */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-3 mb-6">
+        <div className="mb-12 sm:mb-16 md:mb-20">
+          <div className="text-center mb-8 sm:mb-10 md:mb-12">
+            <div className="inline-flex items-center gap-3 mb-4 sm:mb-5 md:mb-6">
               <div className="p-2 bg-white/10 rounded-lg">
-                <FileText className="w-6 h-6 text-white" />
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
             </div>
-            <h2 className="text-2xl text-white">Select Base Resume</h2>
+            <h2 className="text-xl sm:text-2xl text-white">Select Base Resume</h2>
           </div>
 
           {/* Bulk Actions */}
@@ -750,37 +750,37 @@ export default function TailorResume() {
         </div>
 
         {/* Job Details */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-3 mb-6">
+        <div className="mb-12 sm:mb-16 md:mb-20">
+          <div className="text-center mb-8 sm:mb-10 md:mb-12">
+            <div className="inline-flex items-center gap-3 mb-4 sm:mb-5 md:mb-6">
               <div className="p-2 bg-white/10 rounded-lg">
-                <Target className="w-6 h-6 text-white" />
+                <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
             </div>
-            <h2 className="text-2xl text-white">Job Details</h2>
+            <h2 className="text-xl sm:text-2xl text-white">Job Details</h2>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-10">
+          <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 md:space-y-10">
             <div>
-              <label className="block text-sm font-bold text-white mb-4">
+              <label className="block text-xs sm:text-sm font-bold text-white mb-3 sm:mb-4">
                 Job URL (LinkedIn, Indeed, Company Site)
               </label>
               <input
                 type="url"
                 value={jobUrl}
                 onChange={(e) => setJobUrl(e.target.value)}
-                placeholder="https://www.linkedin.com/jobs/view/... or https://jobs.microsoft.com/..."
-                className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
+                placeholder="https://www.linkedin.com/jobs/view/..."
+                className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-sm sm:text-base md:text-lg text-white placeholder-gray-500"
               />
-              <p className="text-sm text-gray-400 mt-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                Just paste the URL - we'll automatically extract company name, job title, and full description
+              <p className="text-xs sm:text-sm text-gray-400 mt-3 sm:mt-4 flex items-center gap-2">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Just paste the URL - we'll automatically extract company name, job title, and full description</span>
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
               <div>
-                <label className="block text-sm font-bold text-white mb-4">
+                <label className="block text-xs sm:text-sm font-bold text-white mb-3 sm:mb-4">
                   Company Name (Optional)
                 </label>
                 <input
@@ -788,12 +788,12 @@ export default function TailorResume() {
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   placeholder="JPMorgan Chase"
-                  className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-sm sm:text-base md:text-lg text-white placeholder-gray-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-white mb-4">
+                <label className="block text-xs sm:text-sm font-bold text-white mb-3 sm:mb-4">
                   Job Title (Optional)
                 </label>
                 <input
@@ -801,7 +801,7 @@ export default function TailorResume() {
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Lead Technical Program Manager"
-                  className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-sm sm:text-base md:text-lg text-white placeholder-gray-500"
                 />
               </div>
             </div>
