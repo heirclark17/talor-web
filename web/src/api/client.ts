@@ -5,7 +5,8 @@
 
 import { getUserId } from '../utils/userSession';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://resume-ai-backend-production-3134.up.railway.app';
+// Use relative path in development (will be proxied by Vite), full URL in production
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app');
 
 export interface ApiResponse<T = any> {
   success: boolean;
