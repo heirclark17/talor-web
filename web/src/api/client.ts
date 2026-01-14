@@ -3,6 +3,8 @@
  * Replaces Electron IPC calls for web deployment
  */
 
+import { getUserId } from '../utils/userSession';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://resume-ai-backend-production-3134.up.railway.app';
 
 export interface ApiResponse<T = any> {
@@ -16,6 +18,16 @@ class ApiClient {
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl;
+  }
+
+  /**
+   * Get common headers with user ID
+   */
+  private getHeaders(additionalHeaders?: Record<string, string>): HeadersInit {
+    return {
+      'X-User-ID': getUserId(),
+      ...additionalHeaders,
+    };
   }
 
   /**
@@ -42,6 +54,7 @@ class ApiClient {
 
       const response = await fetch(`${this.baseUrl}/api/resumes/upload`, {
         method: 'POST',
+        headers: this.getHeaders(),
         body: formData,
       });
 
@@ -71,7 +84,9 @@ class ApiClient {
    */
   async listResumes(): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/resumes/list`);
+      const response = await fetch(`${this.baseUrl}/api/resumes/list`, {
+        headers: this.getHeaders(),
+      });
       const data = await response.json();
 
       if (!response.ok) {
@@ -98,7 +113,9 @@ class ApiClient {
    */
   async getResume(resumeId: number): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/resumes/${resumeId}`);
+      const response = await fetch(`${this.baseUrl}/api/resumes/${resumeId}`, {
+        headers: this.getHeaders(),
+      });
       const data = await response.json();
 
       if (!response.ok) {
@@ -127,6 +144,7 @@ class ApiClient {
     try {
       const response = await fetch(`${this.baseUrl}/api/resumes/${resumeId}/delete`, {
         method: 'POST',
+        headers: this.getHeaders(),
       });
 
       const data = await response.json();
@@ -172,9 +190,7 @@ class ApiClient {
 
       const response = await fetch(`${this.baseUrl}/api/tailor/tailor`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(backendData),
       });
 
@@ -223,9 +239,7 @@ class ApiClient {
 
       const response = await fetch(`${this.baseUrl}/api/tailor/tailor/batch`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(backendData),
       });
 
@@ -257,9 +271,7 @@ class ApiClient {
     try {
       const response = await fetch(`${this.baseUrl}/api/interview-prep/generate/${tailoredResumeId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       });
 
       const data = await response.json();
@@ -288,7 +300,9 @@ class ApiClient {
    */
   async getInterviewPrep(tailoredResumeId: number): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/interview-prep/${tailoredResumeId}`);
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${tailoredResumeId}`, {
+        headers: this.getHeaders(),
+      });
       const data = await response.json();
 
       if (!response.ok) {
