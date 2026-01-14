@@ -83,18 +83,18 @@ export default function UploadResume() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 sm:p-8">
+    <div className="min-h-screen bg-black flex items-center justify-center p-8">
       <div className="w-full max-w-3xl">
-        <div className="text-center mb-16 sm:mb-24 md:mb-32">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 md:mb-8">Upload Resume</h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-400 px-2">Upload your base resume to start tailoring for specific jobs</p>
+        <div className="text-center mb-32">
+          <h1 className="text-6xl font-bold text-white mb-8">Upload Resume</h1>
+          <p className="text-2xl text-gray-400">Upload your base resume to start tailoring for specific jobs</p>
         </div>
 
       {/* Upload Area */}
-      <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-16 mb-12 sm:mb-16 md:mb-24">
+      <div className="glass rounded-3xl p-16 mb-24">
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl sm:rounded-2xl p-8 sm:p-10 md:p-12 text-center transition-all cursor-pointer ${
+          className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${
             uploading
               ? 'border-white/40 bg-white/5 cursor-wait'
               : uploadSuccess
@@ -152,27 +152,27 @@ export default function UploadResume() {
 
       {/* Parsed Resume Display */}
       {parsedResume && (
-        <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 mt-8 sm:mt-12 md:mt-16">
-          <div className="flex items-center gap-3 mb-8 sm:mb-10 md:mb-12 pb-6 sm:pb-8 border-b border-white/10">
-            <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+        <div className="glass rounded-3xl p-10 mt-16">
+          <div className="flex items-center gap-3 mb-12 pb-8 border-b border-white/10">
+            <FileText className="w-8 h-8 text-white" />
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white">Parsed Resume</h2>
-              <p className="text-xs sm:text-sm text-gray-400">Resume ID: {parsedResume.resume_id}</p>
+              <h2 className="text-2xl font-bold text-white">Parsed Resume</h2>
+              <p className="text-sm text-gray-400">Resume ID: {parsedResume.resume_id}</p>
             </div>
           </div>
 
           {/* Summary */}
           {parsedResume.parsed_data.summary && (
-            <div className="mb-10 sm:mb-12 md:mb-14">
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-5 md:mb-6">Professional Summary</h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">{parsedResume.parsed_data.summary}</p>
+            <div className="mb-14">
+              <h3 className="text-xl font-bold text-white mb-6">Professional Summary</h3>
+              <p className="text-gray-400 leading-relaxed">{parsedResume.parsed_data.summary}</p>
             </div>
           )}
 
           {/* Skills */}
           {parsedResume.parsed_data.skills && parsedResume.parsed_data.skills.length > 0 && (
-            <div className="mb-10 sm:mb-12 md:mb-14">
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-5 md:mb-6">Skills</h3>
+            <div className="mb-14">
+              <h3 className="text-xl font-bold text-white mb-6">Skills</h3>
               <div className="flex flex-wrap gap-2">
                 {parsedResume.parsed_data.skills.map((skill, idx) => (
                   <span
@@ -188,8 +188,8 @@ export default function UploadResume() {
 
           {/* Experience */}
           {parsedResume.parsed_data.experience && parsedResume.parsed_data.experience.length > 0 && (
-            <div className="mb-10 sm:mb-12 md:mb-14">
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-5 md:mb-6">Professional Experience</h3>
+            <div className="mb-14">
+              <h3 className="text-xl font-bold text-white mb-6">Professional Experience</h3>
               <div className="space-y-4">
                 {parsedResume.parsed_data.experience.map((job, idx) => (
                   <div key={idx} className="border-l-4 border-white/20 pl-4">
