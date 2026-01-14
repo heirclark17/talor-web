@@ -567,12 +567,7 @@ export default function TailorResume() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-24">
-          <div className="inline-flex items-center gap-3 mb-8">
-            <div className="p-4 bg-white/10 rounded-2xl">
-              <Target className="w-10 h-10 text-white" />
-            </div>
-          </div>
-          <h1 className="text-5xl font-bold text-white mb-6">
+          <h1 className="text-6xl font-bold text-white mb-6">
             Talor
           </h1>
           <p className="text-xl text-gray-400">
@@ -597,11 +592,6 @@ export default function TailorResume() {
         {/* Resume Selection */}
         <div className="mb-20">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-3 mb-6">
-              <div className="p-2 bg-white/10 rounded-lg">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-            </div>
             <h2 className="text-2xl text-white">Select Base Resume</h2>
           </div>
 
@@ -659,8 +649,8 @@ export default function TailorResume() {
           ) : resumes.length === 0 ? (
             <div className="text-center py-12 bg-white/5 rounded-xl">
               <FileText className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-400 mb-4 text-lg">No resumes uploaded yet</p>
-              <a href="/upload" className="text-white hover:text-gray-300 font-semibold text-lg">
+              <p className="text-gray-400 mb-6 text-lg">No resumes uploaded yet</p>
+              <a href="/upload" className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/30 rounded-xl text-white font-semibold text-lg transition-all">
                 Upload a resume to get started →
               </a>
             </div>
@@ -752,17 +742,12 @@ export default function TailorResume() {
         {/* Job Details */}
         <div className="mb-20">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-3 mb-6">
-              <div className="p-2 bg-white/10 rounded-lg">
-                <Target className="w-6 h-6 text-white" />
-              </div>
-            </div>
             <h2 className="text-2xl text-white">Job Details</h2>
           </div>
 
           <div className="max-w-3xl mx-auto space-y-10">
             <div>
-              <label className="block text-sm font-bold text-white mb-4">
+              <label className="block text-base font-bold text-white mb-4">
                 Job URL (LinkedIn, Indeed, Company Site)
               </label>
               <input
@@ -772,7 +757,7 @@ export default function TailorResume() {
                 placeholder="https://www.linkedin.com/jobs/view/... or https://jobs.microsoft.com/..."
                 className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
               />
-              <p className="text-sm text-gray-400 mt-4 flex items-center gap-2">
+              <p className="text-sm text-gray-400 mt-6 flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
                 Just paste the URL - we'll automatically extract company name, job title, and full description
               </p>
@@ -780,7 +765,7 @@ export default function TailorResume() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-sm font-bold text-white mb-4">
+                <label className="block text-base font-bold text-white mb-4">
                   Company Name (Optional)
                 </label>
                 <input
@@ -793,7 +778,7 @@ export default function TailorResume() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-white mb-4">
+                <label className="block text-base font-bold text-white mb-4">
                   Job Title (Optional)
                 </label>
                 <input

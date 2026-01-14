@@ -11,12 +11,12 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       {/* Hero Section - Centered Layout */}
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="container mx-auto px-6">
         <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl font-semibold text-white mb-8 sm:mb-12 leading-tight tracking-tight">
+            <h1 className="text-6xl font-semibold text-white mb-12 leading-tight tracking-tight">
               Build a Job-Winning Resume in Minutes with AI
             </h1>
-            <p className="text-base sm:text-lg text-gray-300 mb-10 sm:mb-14 leading-relaxed">
+            <p className="text-lg text-gray-300 mb-14 leading-relaxed">
               Leverage your professional experience and career goals to create highly
               effective resumes. Our AI-powered platform instantly tailors your resume
               to any job posting with ATS optimization.
@@ -43,26 +43,26 @@ function App() {
       <div className="min-h-screen bg-black">
         {/* Top Navigation - Glassmorphism */}
         <nav className="glass sticky top-0 z-50 border-b border-white/10">
-          <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <Link to="/" className="flex items-center gap-2">
-                <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                <span className="text-xl sm:text-2xl font-bold text-white tracking-tight">Talor</span>
+                <FileText className="w-8 h-8 text-white" />
+                <span className="text-2xl font-bold text-white tracking-tight">Talor</span>
               </Link>
-              <div className="flex items-center gap-4 sm:gap-8">
+              <div className="flex items-center gap-8">
                 <Link
                   to="/upload"
-                  className="flex items-center gap-1.5 sm:gap-2 text-gray-400 hover:text-white transition-colors"
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
                 >
-                  <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-sm sm:text-base font-medium">Upload</span>
+                  <Upload className="w-5 h-5" />
+                  <span className="text-base font-medium">Upload</span>
                 </Link>
                 <Link
                   to="/tailor"
-                  className="flex items-center gap-1.5 sm:gap-2 text-gray-400 hover:text-white transition-colors"
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
                 >
-                  <Target className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-sm sm:text-base font-medium">Tailor</span>
+                  <Target className="w-5 h-5" />
+                  <span className="text-base font-medium">Tailor</span>
                 </Link>
               </div>
             </div>
