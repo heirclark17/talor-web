@@ -132,38 +132,49 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       <div className="glass rounded-xl p-6 border border-white/10">
         <h4 className="text-lg font-semibold text-white mb-4">1. Select Your Experiences</h4>
         <div className="space-y-3">
-          {experiences.map((exp, index) => (
-            <label
-              key={index}
-              className={`flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-all ${
-                selectedExperiences.has(index)
-                  ? 'bg-white/10 border-2 border-white/40'
-                  : 'bg-white/5 border-2 border-white/10 hover:border-white/20'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={selectedExperiences.has(index)}
-                onChange={() => toggleExperience(index)}
-                className="mt-1 w-5 h-5 rounded border-white/20 bg-white/10 text-white focus:ring-2 focus:ring-white/50"
-              />
-              <div className="flex-1">
-                <div className="font-semibold text-white mb-1">
-                  {exp.header || exp.title || exp.position || 'Position'}
-                </div>
-                {exp.bullets && exp.bullets.length > 0 && (
-                  <div className="text-sm text-gray-400 space-y-1">
-                    {exp.bullets.slice(0, 2).map((bullet, i) => (
-                      <div key={i}>• {bullet.substring(0, 100)}{bullet.length > 100 ? '...' : ''}</div>
-                    ))}
-                    {exp.bullets.length > 2 && (
-                      <div className="text-gray-500 italic">+{exp.bullets.length - 2} more achievements</div>
-                    )}
+          {experiences.length === 0 ? (
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+              <p className="text-yellow-400 text-sm">
+                <strong>Loading resume experiences...</strong>
+                <br />
+                Your resume experiences will appear here once the interview prep data is loaded.
+                If this message persists, please refresh the page or check that your resume was uploaded correctly.
+              </p>
+            </div>
+          ) : (
+            experiences.map((exp, index) => (
+              <label
+                key={index}
+                className={`flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-all ${
+                  selectedExperiences.has(index)
+                    ? 'bg-white/10 border-2 border-white/40'
+                    : 'bg-white/5 border-2 border-white/10 hover:border-white/20'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedExperiences.has(index)}
+                  onChange={() => toggleExperience(index)}
+                  className="mt-1 w-5 h-5 rounded border-white/20 bg-white/10 text-white focus:ring-2 focus:ring-white/50"
+                />
+                <div className="flex-1">
+                  <div className="font-semibold text-white mb-1">
+                    {exp.header || exp.title || exp.position || 'Position'}
                   </div>
-                )}
-              </div>
-            </label>
-          ))}
+                  {exp.bullets && exp.bullets.length > 0 && (
+                    <div className="text-sm text-gray-400 space-y-1">
+                      {exp.bullets.slice(0, 2).map((bullet, i) => (
+                        <div key={i}>• {bullet.substring(0, 100)}{bullet.length > 100 ? '...' : ''}</div>
+                      ))}
+                      {exp.bullets.length > 2 && (
+                        <div className="text-gray-500 italic">+{exp.bullets.length - 2} more achievements</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </label>
+            ))
+          )}
         </div>
       </div>
 

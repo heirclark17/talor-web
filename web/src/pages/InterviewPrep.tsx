@@ -1627,27 +1627,18 @@ export default function InterviewPrep() {
                   </div>
                 )}
 
-                {/* AI-Generated STAR Stories Builder */}
+                {/* AI-Generated STAR Stories Builder - Always visible */}
                 <div>
-                  {baseResumeExperiences.length > 0 ? (
-                    <STARStoryBuilder
-                      tailoredResumeId={Number(tailoredResumeId)}
-                      experiences={baseResumeExperiences}
-                      companyContext={`${prepData.company_profile.name} - ${prepData.role_analysis.job_title}`}
-                      storyThemes={
-                        prepData.candidate_positioning.story_prompts && prepData.candidate_positioning.story_prompts.length > 0
-                          ? prepData.candidate_positioning.story_prompts.map(s => s.title)
-                          : ['Leadership Challenge', 'Problem Solving', 'Team Collaboration', 'Handling Ambiguity', 'Delivering Under Pressure']
-                      }
-                    />
-                  ) : (
-                    <div className="bg-white/5 p-6 rounded-lg border border-white/10">
-                      <h4 className="text-white font-semibold mb-2">STAR Story Builder</h4>
-                      <p className="text-gray-400 text-sm">
-                        Loading your resume experiences... If this persists, please refresh the page.
-                      </p>
-                    </div>
-                  )}
+                  <STARStoryBuilder
+                    tailoredResumeId={Number(tailoredResumeId)}
+                    experiences={baseResumeExperiences}
+                    companyContext={`${prepData.company_profile.name} - ${prepData.role_analysis.job_title}`}
+                    storyThemes={
+                      prepData.candidate_positioning.story_prompts && prepData.candidate_positioning.story_prompts.length > 0
+                        ? prepData.candidate_positioning.story_prompts.map(s => s.title)
+                        : ['Leadership Challenge', 'Problem Solving', 'Team Collaboration', 'Handling Ambiguity', 'Delivering Under Pressure']
+                    }
+                  />
                 </div>
 
                 {prepData.candidate_positioning.keyword_map.length > 0 && (
