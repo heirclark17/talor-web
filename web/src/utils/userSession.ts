@@ -26,6 +26,12 @@ export function getUserId(): string {
     userId = generateUserId();
     localStorage.setItem(USER_ID_KEY, userId);
     console.log('Generated new user ID:', userId);
+  } else if (!userId.startsWith('user_')) {
+    // Fix old format user IDs (migration)
+    console.log('Migrating old user ID format to new format');
+    userId = 'user_' + userId;
+    localStorage.setItem(USER_ID_KEY, userId);
+    console.log('Migrated user ID:', userId);
   }
 
   return userId;
