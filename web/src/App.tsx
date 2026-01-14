@@ -30,12 +30,11 @@ function Dashboard() {
             >
               Create My Resume Free →
             </button>
-            <p className="text-sm text-gray-500">No credit card required • Free forever</p>
           </div>
         </div>
 
         {/* Social Proof */}
-        <div className="max-w-5xl mx-auto py-20 border-t border-white/10">
+        <div className="max-w-5xl mx-auto py-20">
           <div className="grid grid-cols-3 gap-12 text-center">
             <div>
               <div className="text-5xl font-bold text-white mb-3">10x</div>
