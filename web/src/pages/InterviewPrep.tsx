@@ -261,7 +261,7 @@ export default function InterviewPrep() {
 
       if (result.success) {
         setPrepData(result.data.prep_data)
-        setInterviewPrepId(result.data.id)
+        setInterviewPrepId(result.data.interview_prep_id)
 
         // Also fetch the tailored resume to get base resume ID
         const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
@@ -373,7 +373,7 @@ export default function InterviewPrep() {
 
       if (result.success) {
         setPrepData(result.data.prep_data)
-        setInterviewPrepId(result.data.id)
+        setInterviewPrepId(result.data.interview_prep_id)
         // After setting prep data, fetch related resume data and real data
         await fetchRelatedData(result.data.prep_data)
         return result.data.prep_data
