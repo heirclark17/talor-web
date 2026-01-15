@@ -381,17 +381,6 @@ export default function TailorResume() {
     }
   }
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      element.classList.add('bg-yellow-500/20')
-      setTimeout(() => {
-        element.classList.remove('bg-yellow-500/20')
-      }, 2000)
-    }
-  }
-
   const toggleResumeSelection = (resumeId: number) => {
     setSelectedResumeIds(prev => {
       const newSet = new Set(prev)
