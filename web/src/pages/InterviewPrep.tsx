@@ -1239,7 +1239,10 @@ export default function InterviewPrep() {
                 )}
 
                 {/* Fallback to AI-generated data if no real data */}
-                {!loadingRealData && (!companyResearch || !companyNews) && (
+                {!loadingRealData && (
+                  !companyResearch?.strategic_initiatives?.length &&
+                  !companyNews?.news_articles?.length
+                ) && (
                   <>
                     {prepData.strategy_and_news.recent_events.length > 0 && (
                       <div className="mb-6">
