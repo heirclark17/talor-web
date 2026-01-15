@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 
@@ -37,6 +37,7 @@ export default function UploadResume() {
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null)
   const [existingResumes, setExistingResumes] = useState<ExistingResume[]>([])
   const [loadingResumes, setLoadingResumes] = useState(true)
+  const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Clear old tailored resume data when user navigates to upload page
@@ -63,7 +64,28 @@ export default function UploadResume() {
       const result = await api.listResumes()
 
       if (result.success && result.data.resumes) {
-        setExistingResumes(result.data.resumes)
+        // Remove duplicates based on filename (keep newest)
+        const uniqueResumes = result.data.resumes.reduce((acc: ExistingResume[], current: ExistingResume) => {
+          const duplicate = acc.find(r => r.filename === current.filename)
+          if (!duplicate) {
+            acc.push(current)
+          } else {
+            // Keep the newer one (higher ID = newer upload)
+            if (current.id > duplicate.id) {
+              const index = acc.indexOf(duplicate)
+              acc[index] = current
+            }
+          }
+          return acc
+        }, [])
+
+        // Sort by upload date (newest first)
+        uniqueResumes.sort((a, b) =>
+          new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
+        )
+
+        setExistingResumes(uniqueResumes)
+        console.log(`Loaded ${uniqueResumes.length} unique resumes (removed ${result.data.resumes.length - uniqueResumes.length} duplicates)`)
       }
     } catch (err) {
       console.error('Error loading existing resumes:', err)
@@ -74,6 +96,32 @@ export default function UploadResume() {
 
   const handleUseExistingResume = (resumeId: number) => {
     navigate('/tailor', { state: { selectedResumeId: resumeId } })
+  }
+
+  const handleDeleteResume = async (resumeId: number, e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent navigating to tailor page
+
+    if (!confirm('Are you sure you want to delete this resume? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      setDeletingResumeId(resumeId)
+      const result = await api.deleteResume(resumeId)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete resume')
+      }
+
+      // Remove from local state
+      setExistingResumes(prev => prev.filter(r => r.id !== resumeId))
+      console.log('Resume deleted successfully:', resumeId)
+    } catch (err: any) {
+      console.error('Delete error:', err)
+      setError(err.message || 'Failed to delete resume')
+    } finally {
+      setDeletingResumeId(null)
+    }
   }
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,16 +159,22 @@ export default function UploadResume() {
       }
 
       console.log('Mapped data:', mappedData)
-      console.log('Experience entries:', mappedData.parsed_data.experience.map((exp: any, idx: number) => ({
-        index: idx,
-        availableFields: Object.keys(exp),
-        header: exp.header,
-        title: exp.title,
-        position: exp.position,
-        role: exp.role,
-        job_title: exp.job_title,
-        company: exp.company
-      })))
+
+      // Log each experience entry individually for better debugging
+      console.log('=== EXPERIENCE ENTRIES DEBUG ===')
+      mappedData.parsed_data.experience.forEach((exp: any, idx: number) => {
+        console.log(`Experience ${idx + 1}:`)
+        console.log(`  Available fields: ${Object.keys(exp).join(', ')}`)
+        console.log(`  header: "${exp.header}"`)
+        console.log(`  title: "${exp.title}"`)
+        console.log(`  position: "${exp.position}"`)
+        console.log(`  role: "${exp.role}"`)
+        console.log(`  job_title: "${exp.job_title}"`)
+        console.log(`  company: "${exp.company}"`)
+        console.log(`  location: "${exp.location}"`)
+        console.log(`  dates: "${exp.dates}"`)
+      })
+      console.log('=================================')
       setParsedResume(mappedData)
       setUploadSuccess(true)
       setUploading(false)
@@ -166,12 +220,26 @@ export default function UploadResume() {
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleUseExistingResume(resume.id)}
-                  className="btn-primary"
-                >
-                  Use This Resume →
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={(e) => handleDeleteResume(resume.id, e)}
+                    disabled={deletingResumeId === resume.id}
+                    className="p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Delete resume"
+                  >
+                    {deletingResumeId === resume.id ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-5 h-5" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleUseExistingResume(resume.id)}
+                    className="btn-primary"
+                  >
+                    Use This Resume →
+                  </button>
+                </div>
               </div>
             ))}
           </div>
