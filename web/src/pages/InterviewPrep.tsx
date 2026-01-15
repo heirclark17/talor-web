@@ -555,8 +555,12 @@ export default function InterviewPrep() {
 
   // Load certifications
   const loadCertifications = async () => {
-    if (!interviewPrepId) return
+    if (!interviewPrepId) {
+      console.log('No interview prep ID, cannot load certifications')
+      return
+    }
 
+    console.log('Loading certifications for interview prep ID:', interviewPrepId)
     setLoadingCertifications(true)
     const userId = localStorage.getItem('talor_user_id')
 
@@ -570,9 +574,16 @@ export default function InterviewPrep() {
         body: JSON.stringify({ interview_prep_id: interviewPrepId })
       })
 
+      console.log('Certifications API response status:', response.status)
+
       if (response.ok) {
         const data = await response.json()
+        console.log('Certifications data received:', data)
+        console.log('Setting certifications to:', data.certifications)
         setCertifications(data.certifications)
+      } else {
+        const errorText = await response.text()
+        console.error('Certifications API error:', response.status, errorText)
       }
     } catch (error) {
       console.error('Error loading certifications:', error)

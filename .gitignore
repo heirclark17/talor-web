@@ -26,3 +26,5 @@ tsconfig.json
 tsconfig.node.json
 uploads/
 vite.config.ts
+.vercel
+.env*.local
