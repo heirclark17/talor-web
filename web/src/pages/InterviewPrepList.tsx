@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { BookOpen, Calendar, MapPin, Trash2, Eye, Loader, AlertCircle } from 'lucide-react'
 import { getUserId } from '../utils/userSession'
 
+// API base URL - same logic as API client
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+
 interface InterviewPrepItem {
   id: number
   tailored_resume_id: number
@@ -30,7 +33,7 @@ export default function InterviewPrepList() {
       setError(null)
 
       const userId = getUserId()
-      const response = await fetch('/api/interview-prep/list', {
+      const response = await fetch(`${API_BASE_URL}/api/interview-prep/list`, {
         method: 'GET',
         headers: {
           'X-User-ID': userId
@@ -64,7 +67,7 @@ export default function InterviewPrepList() {
     try {
       setDeletingId(prepId)
 
-      const response = await fetch(`/api/interview-prep/${prepId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/interview-prep/${prepId}`, {
         method: 'DELETE'
       })
 
