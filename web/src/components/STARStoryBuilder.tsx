@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Loader2, Sparkles, Save, Trash2, Edit, Check, X, Plus, ChevronDown, ChevronUp } from 'lucide-react'
+import { Loader2, Sparkles, Save, Trash2, Edit, Check, X, Plus, ChevronDown, ChevronUp, Play } from 'lucide-react'
 import { api } from '../api/client'
+import PracticeSession from './PracticeSession'
 
 // API base URL - same logic as API client
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
@@ -49,6 +50,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
   const [editingStory, setEditingStory] = useState<string | null>(null)
   const [editedStory, setEditedStory] = useState<STARStory | null>(null)
   const [collapsedStories, setCollapsedStories] = useState<Set<string>>(new Set())
+  const [practicingStory, setPracticingStory] = useState<STARStory | null>(null)
 
   const toggleExperience = (index: number) => {
     const newSet = new Set(selectedExperiences)
@@ -452,6 +454,13 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                         )}
                       </button>
                       <button
+                        onClick={() => setPracticingStory(story)}
+                        className="p-2 hover:bg-green-500/20 rounded-lg transition-colors"
+                        title="Practice this story"
+                      >
+                        <Play className="w-5 h-5 text-green-400" />
+                      </button>
+                      <button
                         onClick={() => startEditing(story)}
                         className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                         title="Edit story"
@@ -531,6 +540,14 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
             </div>
           ))}
         </div>
+      )}
+
+      {/* Practice Session Modal */}
+      {practicingStory && (
+        <PracticeSession
+          story={practicingStory}
+          onClose={() => setPracticingStory(null)}
+        />
       )}
     </div>
   )
