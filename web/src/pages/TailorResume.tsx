@@ -1584,7 +1584,6 @@ export default function TailorResume() {
               </div>
             </div>
             )}
-              </div>
             </div>
             </>
           )}
