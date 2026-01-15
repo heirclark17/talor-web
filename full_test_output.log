@@ -1,0 +1,38 @@
+================================================================================
+FULL END-TO-END TEST WITH FILE UPLOAD
+================================================================================
+
+[STEP 1] Uploading resume...
+✓ File selected, waiting for upload...
+⚠️  Upload may have failed or timed out
+
+[STEP 2] Navigating to /tailor page...
+User ID: user_cf384379-7693-4187-8c8c-4e0fd1a185c8
+Found 1 base resume(s)
+
+[STEP 3] Selecting resume and filling job details...
+✓ Resume selected
+
+[STEP 4] Generating tailored resume (THIS WILL TAKE 60-90 SECONDS)...
+✓ Clicked generate button
+⏳ Waiting for AI to analyze and tailor resume...
+❌ Generation timeout or error: Page.wait_for_selector: Timeout 120000ms exceeded.
+Call log:
+  - waiting for locator("text=Success, text=Error") to be visible
+
+
+================================================================================
+API ERROR ANALYSIS
+================================================================================
+
+✅ No API errors detected!
+
+================================================================================
+CONSOLE ERROR ANALYSIS
+================================================================================
+
+✅ No critical console errors!
+
+================================================================================
+TEST COMPLETE
+================================================================================

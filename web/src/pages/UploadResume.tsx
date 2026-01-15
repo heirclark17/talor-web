@@ -1,7 +1,10 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Upload, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
+
+// LocalStorage key for clearing old tailored resumes
+const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
 
 interface ParsedResume {
   resume_id: number
@@ -25,6 +28,16 @@ export default function UploadResume() {
   const [error, setError] = useState<string | null>(null)
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Clear old tailored resume data when user navigates to upload page
+  // This ensures they start fresh with a new resume
+  useEffect(() => {
+    const savedResumeId = localStorage.getItem(LAST_TAILORED_RESUME_KEY)
+    if (savedResumeId) {
+      console.log('Clearing old tailored resume from localStorage:', savedResumeId)
+      localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
+    }
+  }, [])
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -83,7 +96,7 @@ export default function UploadResume() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-8">
+    <div className="min-h-screen flex items-center justify-center p-8">
       <div className="w-full max-w-3xl">
         <div className="text-center mb-32">
           <h1 className="text-6xl font-bold text-white mb-8">Upload Resume</h1>

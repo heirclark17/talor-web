@@ -669,7 +669,7 @@ export default function TailorResume() {
 
   if (showComparison && selectedResume && tailoredResume) {
     return (
-      <div className="min-h-screen bg-black p-8">
+      <div className="min-h-screen p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
@@ -1448,7 +1448,7 @@ export default function TailorResume() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-8">
+    <div className="min-h-screen p-8">
       <ThemeToggle />
       <div className="max-w-4xl mx-auto">
         {/* Header */}

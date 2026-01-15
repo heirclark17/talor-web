@@ -1,0 +1,47 @@
+{
+  "recent_events": [
+    {
+      "date": "2024",
+      "title": "Expansion of AWS Professional Services Delivery Teams",
+      "impact_summary": "AWS has been growing its Professional Services teams to better support complex customer transformations, enabling faster adoption of cloud solutions."
+    },
+    {
+      "date": "2024 Q1",
+      "title": "Launch of New Security and Compliance Cloud Offerings",
+      "impact_summary": "AWS introduced enhanced security services to address rising cybersecurity concerns, strengthening trust with enterprise customers."
+    },
+    {
+      "date": "Recent",
+      "title": "Increased Investment in Cloud Migration and Modernization",
+      "impact_summary": "AWS is focusing on accelerating customers\u2019 cloud migration journeys with tailored consulting and delivery practices."
+    },
+    {
+      "date": "Last 12 months",
+      "title": "Partnerships with Global Consulting Firms",
+      "impact_summary": "AWS expanded strategic alliances with top consulting firms to deliver integrated cloud transformation solutions."
+    },
+    {
+      "date": "2024",
+      "title": "Focus on Customer-Centric Delivery Models",
+      "impact_summary": "AWS Professional Services is emphasizing outcome-driven engagements that align closely with client business goals."
+    }
+  ],
+  "strategic_themes": [
+    {
+      "theme": "Customer-Centric Transformation",
+      "rationale": "Delivering cloud projects that directly support client business outcomes and measurable value."
+    },
+    {
+      "theme": "Security and Compliance Leadership",
+      "rationale": "Building trust through enhanced security offerings and adherence to regulatory standards."
+    },
+    {
+      "theme": "Scalable Delivery Excellence",
+      "rationale": "Optimizing team performance and utilization to meet growing demand for cloud consulting services."
+    },
+    {
+      "theme": "Collaborative Ecosystem Expansion",
+      "rationale": "Leveraging partnerships and internal collaboration to provide comprehensive cloud solutions."
+    }
+  ]
+}

@@ -17,7 +17,7 @@ function Dashboard() {
   const finalCtaAnimation = useScrollAnimation(0.1)
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       {/* Animated gradient background */}
       <div className="animate-gradient absolute inset-0 z-0"></div>
 
@@ -233,7 +233,7 @@ function AppContent() {
   const isLandingPage = location.pathname === '/'
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen">
       {/* Top Navigation - Hidden on landing page */}
       {!isLandingPage && (
         <nav className="glass sticky top-0 z-50 border-b border-white/10">
