@@ -1507,22 +1507,6 @@ export default function TailorResume() {
                     )}
                   </div>
                 )}
-
-                {/* Quality Score */}
-                <div className="p-4 bg-white/5 rounded-xl border border-green-500/30">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-white">Quality Score</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-32 h-2 bg-white/20 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-green-500 rounded-full"
-                          style={{ width: `${tailoredResume.quality_score}%` }}
-                        />
-                      </div>
-                      <span className="text-2xl font-bold text-green-500">{tailoredResume.quality_score}%</span>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
             )}
