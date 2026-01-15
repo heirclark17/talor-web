@@ -1,10 +1,11 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
 import InterviewPrepList from './pages/InterviewPrepList'
+import StarStoriesList from './pages/StarStoriesList'
 import { useScrollAnimation } from './hooks/useScrollAnimation'
 
 function Dashboard() {
@@ -264,6 +265,13 @@ function AppContent() {
                   <BookOpen className="w-5 h-5" />
                   <span className="text-base font-medium">Interview Prep</span>
                 </Link>
+                <Link
+                  to="/star-stories"
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  <span className="text-base font-medium">STAR Stories</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -278,6 +286,7 @@ function AppContent() {
           <Route path="/tailor" element={<TailorResume />} />
           <Route path="/interview-preps" element={<InterviewPrepList />} />
           <Route path="/interview-prep/:tailoredResumeId" element={<InterviewPrep />} />
+          <Route path="/star-stories" element={<StarStoriesList />} />
           <Route path="/resumes" element={<div className="p-8"><h1 className="text-3xl font-bold text-white">My Resumes</h1></div>} />
         </Routes>
       </main>

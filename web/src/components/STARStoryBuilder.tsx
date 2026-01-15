@@ -84,14 +84,48 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       const data = await response.json()
 
       if (data.success) {
-        const newStory: STARStory = {
-          id: Date.now().toString(),
-          ...data.story,
-        }
-        setStories([...stories, newStory])
+        // Save the generated story to database
+        const saveResponse = await fetch(`${API_BASE_URL}/api/star-stories/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          },
+          body: JSON.stringify({
+            tailored_resume_id: tailoredResumeId,
+            title: data.story.title,
+            story_theme: selectedTheme,
+            company_context: companyContext,
+            situation: data.story.situation,
+            task: data.story.task,
+            action: data.story.action,
+            result: data.story.result,
+            key_themes: data.story.key_themes || [],
+            talking_points: data.story.talking_points || [],
+            experience_indices: Array.from(selectedExperiences),
+          }),
+        })
 
-        // Reset selections
-        setSelectedExperiences(new Set())
+        if (!saveResponse.ok) {
+          throw new Error('Failed to save story to database')
+        }
+
+        const saveData = await saveResponse.json()
+
+        if (saveData.success) {
+          const newStory: STARStory = {
+            id: saveData.story.id.toString(),
+            ...data.story,
+          }
+          setStories([...stories, newStory])
+
+          // Reset selections
+          setSelectedExperiences(new Set())
+
+          alert('✓ STAR story generated and saved successfully!')
+        } else {
+          throw new Error('Failed to save story: ' + (saveData.error || 'Unknown error'))
+        }
       } else {
         alert('Failed to generate story: ' + (data.error || 'Unknown error'))
       }
@@ -103,8 +137,36 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
     }
   }
 
-  const deleteStory = (storyId: string) => {
-    setStories(stories.filter(s => s.id !== storyId))
+  const deleteStory = async (storyId: string) => {
+    if (!window.confirm('Are you sure you want to delete this STAR story? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/star-stories/${storyId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete story from database')
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Remove from local state
+        setStories(stories.filter(s => s.id !== storyId))
+        alert('✓ STAR story deleted successfully!')
+      } else {
+        throw new Error('Failed to delete story')
+      }
+    } catch (error: any) {
+      console.error('Error deleting story:', error)
+      alert('Failed to delete story: ' + error.message)
+    }
   }
 
   const startEditing = (story: STARStory) => {
@@ -112,11 +174,44 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
     setEditedStory({ ...story })
   }
 
-  const saveEdit = () => {
-    if (editedStory && editingStory) {
-      setStories(stories.map(s => s.id === editingStory ? editedStory : s))
-      setEditingStory(null)
-      setEditedStory(null)
+  const saveEdit = async () => {
+    if (!editedStory || !editingStory) return
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/star-stories/${editingStory}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+        },
+        body: JSON.stringify({
+          title: editedStory.title,
+          situation: editedStory.situation,
+          task: editedStory.task,
+          action: editedStory.action,
+          result: editedStory.result,
+          key_themes: editedStory.key_themes,
+          talking_points: editedStory.talking_points,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update story in database')
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        setStories(stories.map(s => s.id === editingStory ? editedStory : s))
+        setEditingStory(null)
+        setEditedStory(null)
+        alert('✓ STAR story updated successfully!')
+      } else {
+        throw new Error('Failed to update story')
+      }
+    } catch (error: any) {
+      console.error('Error updating story:', error)
+      alert('Failed to update story: ' + error.message)
     }
   }
 
@@ -238,42 +333,46 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                   />
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-400 mb-2">Situation</label>
+                    <label className="block text-sm font-semibold text-gray-400 mb-2">Situation (150-250 words)</label>
                     <textarea
                       value={editedStory?.situation || ''}
                       onChange={(e) => setEditedStory({ ...editedStory!, situation: e.target.value })}
-                      rows={3}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-none"
+                      rows={8}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-y"
+                      placeholder="Detailed context and background..."
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-400 mb-2">Task</label>
+                    <label className="block text-sm font-semibold text-gray-400 mb-2">Task (100-150 words)</label>
                     <textarea
                       value={editedStory?.task || ''}
                       onChange={(e) => setEditedStory({ ...editedStory!, task: e.target.value })}
-                      rows={2}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-none"
+                      rows={6}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-y"
+                      placeholder="What needed to be accomplished and why..."
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-400 mb-2">Action</label>
+                    <label className="block text-sm font-semibold text-gray-400 mb-2">Action (300-500 words) - Most Important!</label>
                     <textarea
                       value={editedStory?.action || ''}
                       onChange={(e) => setEditedStory({ ...editedStory!, action: e.target.value })}
-                      rows={4}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-none"
+                      rows={15}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-y"
+                      placeholder="Step-by-step breakdown of what YOU did..."
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-400 mb-2">Result</label>
+                    <label className="block text-sm font-semibold text-gray-400 mb-2">Result (150-250 words)</label>
                     <textarea
                       value={editedStory?.result || ''}
                       onChange={(e) => setEditedStory({ ...editedStory!, result: e.target.value })}
-                      rows={3}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-none"
+                      rows={8}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-y"
+                      placeholder="Specific, quantifiable outcomes..."
                     />
                   </div>
 
