@@ -190,17 +190,21 @@ export default function TailorResume() {
   const scrollToSection = (section: string) => {
     const element = document.getElementById(`section-${section}`)
     if (element && leftScrollRef.current) {
-      // Calculate the position relative to the scrollable container
       const container = leftScrollRef.current
-      const elementTop = element.offsetTop
-      const containerTop = container.offsetTop
+
+      // Get the element's position relative to the container using getBoundingClientRect
+      const containerRect = container.getBoundingClientRect()
+      const elementRect = element.getBoundingClientRect()
+
+      // Calculate the scroll position (current scroll + difference between positions)
+      const scrollTop = container.scrollTop + (elementRect.top - containerRect.top) - 20
 
       // Scroll both containers to the section
-      container.scrollTo({ top: elementTop - containerTop - 20, behavior: 'smooth' })
+      container.scrollTo({ top: scrollTop, behavior: 'smooth' })
 
       // If sync scroll is enabled, scroll the right container too
       if (syncScroll && rightScrollRef.current) {
-        rightScrollRef.current.scrollTo({ top: elementTop - containerTop - 20, behavior: 'smooth' })
+        rightScrollRef.current.scrollTo({ top: scrollTop, behavior: 'smooth' })
       }
 
       setActiveSection(section)
