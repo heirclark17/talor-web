@@ -755,8 +755,14 @@ export default function TailorResume() {
       return
     }
 
-    if (!jobUrl && !company) {
-      setError('Please provide a job URL (or company name if no URL available)')
+    // Trim all inputs
+    const trimmedJobUrl = jobUrl.trim()
+    const trimmedCompany = company.trim()
+    const trimmedJobTitle = jobTitle.trim()
+
+    // Validate that at least job URL or company name is provided
+    if (!trimmedJobUrl && !trimmedCompany) {
+      setError('Please provide either a job URL or company name to generate a tailored resume')
       return
     }
 
@@ -768,9 +774,9 @@ export default function TailorResume() {
     try {
       const result = await api.tailorResume({
         baseResumeId: selectedResumeId,
-        jobUrl: jobUrl.trim() || undefined,
-        company: company.trim() || undefined,
-        jobTitle: jobTitle.trim() || undefined,
+        jobUrl: trimmedJobUrl || undefined,
+        company: trimmedCompany || undefined,
+        jobTitle: trimmedJobTitle || undefined,
       })
 
       if (!result.success) {

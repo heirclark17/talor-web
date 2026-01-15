@@ -111,6 +111,16 @@ export default function UploadResume() {
       }
 
       console.log('Mapped data:', mappedData)
+      console.log('Experience entries:', mappedData.parsed_data.experience.map((exp: any, idx: number) => ({
+        index: idx,
+        availableFields: Object.keys(exp),
+        header: exp.header,
+        title: exp.title,
+        position: exp.position,
+        role: exp.role,
+        job_title: exp.job_title,
+        company: exp.company
+      })))
       setParsedResume(mappedData)
       setUploadSuccess(true)
       setUploading(false)
@@ -280,11 +290,13 @@ export default function UploadResume() {
               {parsedResume.parsed_data.experience.map((job, idx) => (
                 <div key={idx} className="glass rounded-xl p-6">
                   <h4 className="font-semibold text-white mb-1">
-                    {job.header || job.title || job.position || 'Position'}
+                    {job.header || job.title || job.position || job.role || job.job_title || job.company || 'Position'}
                   </h4>
-                  {(job.location || job.dates) && (
+                  {(job.location || job.dates || job.date_range || job.duration) && (
                     <p className="text-sm text-gray-400 italic mb-3">
-                      {job.location && job.dates ? `${job.location} | ${job.dates}` : job.location || job.dates}
+                      {(job.location || '') && (job.dates || job.date_range || job.duration)
+                        ? `${job.location} | ${job.dates || job.date_range || job.duration}`
+                        : (job.location || job.dates || job.date_range || job.duration)}
                     </p>
                   )}
                   {job.bullets && Array.isArray(job.bullets) && job.bullets.length > 0 ? (
