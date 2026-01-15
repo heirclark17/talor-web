@@ -3,15 +3,37 @@
 
 /* Tailwind v4 includes preflight (CSS reset) - no need for additional universal reset */
 
+/* Theme Variables */
+:root.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f3f4f6;
+  --bg-tertiary: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #d1d5db;
+  --accent-color: #3b82f6;
+}
+
+:root.dark {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #2a2a2a;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --border-color: #374151;
+  --accent-color: #60a5fa;
+}
+
 body {
   font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #000000;
-  color: #f8fafc;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.6;
   font-size: 16px;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Glassmorphism utility classes - Subtle & Professional */

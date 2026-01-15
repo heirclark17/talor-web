@@ -3,6 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save } from 'lucide-react'
 import { api } from '../api/client'
 import ChangeExplanation from '../components/ChangeExplanation'
+import ResumeAnalysis from '../components/ResumeAnalysis'
+import KeywordPanel from '../components/KeywordPanel'
+import MatchScore from '../components/MatchScore'
+import ThemeToggle from '../components/ThemeToggle'
 
 interface BaseResume {
   id: number
@@ -68,9 +72,18 @@ export default function TailorResume() {
   const [isMobile, setIsMobile] = useState(false)
   const [mobileTab, setMobileTab] = useState<'original' | 'tailored'>('tailored')
 
+  // New analysis states
+  const [analysis, setAnalysis] = useState<any>(null)
+  const [keywords, setKeywords] = useState<any>(null)
+  const [matchScore, setMatchScore] = useState<any>(null)
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false)
+  const [detailMode, setDetailMode] = useState(false)
+
   // Refs for synchronized scrolling
   const leftScrollRef = useRef<HTMLDivElement>(null)
   const rightScrollRef = useRef<HTMLDivElement>(null)
+  const leftPanelRef = useRef<HTMLDivElement>(null)
+  const rightPanelRef = useRef<HTMLDivElement>(null)
 
   // Check if a resume was passed via navigation state
   useEffect(() => {
@@ -124,6 +137,43 @@ export default function TailorResume() {
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [tailoredResume])
+
+  // Load analysis when tailored resume is ready
+  useEffect(() => {
+    if (tailoredResume?.id) {
+      loadAllAnalysis(tailoredResume.id)
+    }
+  }, [tailoredResume?.id])
+
+  // Scroll sync effect
+  useEffect(() => {
+    if (!syncScroll || !leftPanelRef.current || !rightPanelRef.current) return
+
+    const leftPanel = leftPanelRef.current
+    const rightPanel = rightPanelRef.current
+
+    const handleLeftScroll = () => {
+      if (leftPanel && rightPanel) {
+        const scrollPercentage = leftPanel.scrollTop / (leftPanel.scrollHeight - leftPanel.clientHeight)
+        rightPanel.scrollTop = scrollPercentage * (rightPanel.scrollHeight - rightPanel.clientHeight)
+      }
+    }
+
+    const handleRightScroll = () => {
+      if (leftPanel && rightPanel) {
+        const scrollPercentage = rightPanel.scrollTop / (rightPanel.scrollHeight - rightPanel.clientHeight)
+        leftPanel.scrollTop = scrollPercentage * (leftPanel.scrollHeight - leftPanel.clientHeight)
+      }
+    }
+
+    leftPanel.addEventListener('scroll', handleLeftScroll)
+    rightPanel.addEventListener('scroll', handleRightScroll)
+
+    return () => {
+      leftPanel.removeEventListener('scroll', handleLeftScroll)
+      rightPanel.removeEventListener('scroll', handleRightScroll)
+    }
+  }, [syncScroll])
 
   // Utility functions
   const handleScroll = (source: 'left' | 'right') => (e: React.UIEvent<HTMLDivElement>) => {
@@ -222,6 +272,123 @@ export default function TailorResume() {
       setError(err.message)
     } finally {
       setLoadingResumes(false)
+    }
+  }
+
+  // New AI analysis functions
+  const loadAllAnalysis = async (tailoredResumeId: number) => {
+    if (!tailoredResumeId) return
+
+    setLoadingAnalysis(true)
+    const userId = localStorage.getItem('talor_user_id')
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+    try {
+      // Load analysis
+      const analysisRes = await fetch(`${API_BASE_URL}/api/resume-analysis/analyze-changes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userId || ''
+        },
+        body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
+      })
+      if (analysisRes.ok) {
+        const data = await analysisRes.json()
+        setAnalysis(data.analysis)
+      }
+
+      // Load keywords
+      const keywordsRes = await fetch(`${API_BASE_URL}/api/resume-analysis/analyze-keywords`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userId || ''
+        },
+        body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
+      })
+      if (keywordsRes.ok) {
+        const data = await keywordsRes.json()
+        setKeywords(data.keywords)
+      }
+
+      // Load match score
+      const scoreRes = await fetch(`${API_BASE_URL}/api/resume-analysis/match-score`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userId || ''
+        },
+        body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
+      })
+      if (scoreRes.ok) {
+        const data = await scoreRes.json()
+        setMatchScore(data.match_score)
+      }
+    } catch (error) {
+      console.error('Error loading analysis:', error)
+    } finally {
+      setLoadingAnalysis(false)
+    }
+  }
+
+  const handleDownloadResume = async (format: 'pdf' | 'docx') => {
+    if (!tailoredResume?.id) return
+
+    try {
+      const userId = localStorage.getItem('talor_user_id')
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+      const response = await fetch(`${API_BASE_URL}/api/resume-analysis/export`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userId || ''
+        },
+        body: JSON.stringify({
+          tailored_resume_id: tailoredResume.id,
+          format: format
+        })
+      })
+
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+
+        // Get filename from Content-Disposition header
+        const contentDisposition = response.headers.get('Content-Disposition')
+        let filename = `TailoredResume.${format}`
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
+          if (filenameMatch) {
+            filename = filenameMatch[1]
+          }
+        }
+
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      } else {
+        alert('Error downloading resume')
+      }
+    } catch (error) {
+      console.error('Error downloading resume:', error)
+      alert('Error downloading resume')
+    }
+  }
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      element.classList.add('bg-yellow-500/20')
+      setTimeout(() => {
+        element.classList.remove('bg-yellow-500/20')
+      }, 2000)
     }
   }
 
@@ -1111,6 +1278,7 @@ export default function TailorResume() {
 
   return (
     <div className="min-h-screen bg-black p-8">
+      <ThemeToggle />
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-24">

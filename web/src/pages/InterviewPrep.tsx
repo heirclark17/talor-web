@@ -38,6 +38,8 @@ import { api } from '../api/client'
 import STARStoryBuilder from '../components/STARStoryBuilder'
 import VideoRecorder from '../components/VideoRecorder'
 import CommonInterviewQuestions from '../components/CommonInterviewQuestions'
+import CertificationRecommendations from '../components/CertificationRecommendations'
+import ThemeToggle from '../components/ThemeToggle'
 
 // API base URL - same logic as API client
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
@@ -188,7 +190,9 @@ export default function InterviewPrep() {
   const [companyResearch, setCompanyResearch] = useState<CompanyResearchData | null>(null)
   const [companyNews, setCompanyNews] = useState<NewsData | null>(null)
   const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestionsData | null>(null)
+  const [certifications, setCertifications] = useState<any>(null)
   const [loadingRealData, setLoadingRealData] = useState(false)
+  const [loadingCertifications, setLoadingCertifications] = useState(false)
 
   // Enhancement states
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>(() => {
@@ -207,7 +211,8 @@ export default function InterviewPrep() {
       questions: true,
       practice: true,
       commonQuestions: true,
-      positioning: true
+      positioning: true,
+      certifications: true
     }
   })
 
@@ -250,6 +255,12 @@ export default function InterviewPrep() {
   useEffect(() => {
     loadInterviewPrep()
   }, [tailoredResumeId])
+
+  useEffect(() => {
+    if (interviewPrepId) {
+      loadCertifications()
+    }
+  }, [interviewPrepId])
 
   const loadInterviewPrep = async () => {
     try {
@@ -542,6 +553,34 @@ export default function InterviewPrep() {
     localStorage.setItem(`interview-prep-star-stories-${tailoredResumeId}`, JSON.stringify(updated))
   }
 
+  // Load certifications
+  const loadCertifications = async () => {
+    if (!interviewPrepId) return
+
+    setLoadingCertifications(true)
+    const userId = localStorage.getItem('talor_user_id')
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/certifications/recommend`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userId || ''
+        },
+        body: JSON.stringify({ interview_prep_id: interviewPrepId })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setCertifications(data.certifications)
+      }
+    } catch (error) {
+      console.error('Error loading certifications:', error)
+    } finally {
+      setLoadingCertifications(false)
+    }
+  }
+
   const startPracticeMode = () => {
     setPracticeMode(true)
     setCurrentQuestionIndex(0)
@@ -706,6 +745,7 @@ export default function InterviewPrep() {
 
   return (
     <div className="min-h-screen bg-black">
+      <ThemeToggle />
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -1723,6 +1763,31 @@ export default function InterviewPrep() {
                   interviewPrepId={interviewPrepId}
                   companyName={prepData?.company_profile.name || ''}
                   jobTitle={prepData?.role_analysis.job_title || ''}
+                />
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Recommended Certifications */}
+        {prepData && (
+          <section className="glass rounded-3xl mt-6 overflow-hidden">
+            <button
+              onClick={() => toggleSection('certifications')}
+              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Award className="w-6 h-6 text-blue-500" />
+                <h2 className="text-2xl font-bold text-white">Recommended Certifications for This Career Path</h2>
+              </div>
+              {expandedSections.certifications ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
+            </button>
+
+            {expandedSections.certifications && (
+              <div className="px-8 pb-8">
+                <CertificationRecommendations
+                  certifications={certifications}
+                  loading={loadingCertifications}
                 />
               </div>
             )}
