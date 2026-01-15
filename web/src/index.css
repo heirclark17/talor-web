@@ -591,3 +591,75 @@ body {
 .particle:nth-child(4) { top: 80%; left: 70%; animation-delay: 3s; }
 .particle:nth-child(5) { top: 30%; left: 80%; animation-delay: 4s; }
 .particle:nth-child(6) { top: 70%; left: 20%; animation-delay: 5s; }
+
+/* Print styles for resume export */
+@media print {
+  /* Hide everything except print-only content */
+  body * {
+    visibility: hidden;
+  }
+
+  #print-resume,
+  #print-resume * {
+    visibility: visible;
+  }
+
+  #print-resume {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0.5in;
+  }
+
+  /* Remove backgrounds and use black text for print */
+  .glass,
+  .btn-primary,
+  .btn-secondary {
+    background: white !important;
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Black text for all print content */
+  h1, h2, h3, h4, h5, h6, p, span, li {
+    color: #000 !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-after: always;
+  }
+
+  /* Hide print buttons and UI elements */
+  button, nav, .no-print {
+    display: none !important;
+  }
+
+  /* Ensure proper sizing */
+  @page {
+    margin: 0.5in;
+    size: letter;
+  }
+}
+
+/* Screen-only: hide print content */
+@media screen {
+  #print-resume {
+    display: none;
+  }
+}
+
+/* Highlighting styles for click correspondence */
+.highlight-original {
+  border: 2px solid #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  transition: all 0.3s ease;
+}
+
+.highlight-tailored {
+  border: 2px solid #10b981 !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  transition: all 0.3s ease;
+}

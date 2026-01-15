@@ -138,6 +138,9 @@ export default function TailorResume() {
   const [activeTab, setActiveTab] = useState<'comparison' | 'analysis' | 'insights'>('comparison')
   const [analysisLoaded, setAnalysisLoaded] = useState(false)
 
+  // Highlighting state for click correspondence
+  const [highlightedSection, setHighlightedSection] = useState<{ type: string; index?: number } | null>(null)
+
   // Refs for synchronized scrolling
   const leftScrollRef = useRef<HTMLDivElement>(null)
   const rightScrollRef = useRef<HTMLDivElement>(null)
@@ -413,6 +416,15 @@ export default function TailorResume() {
 
   const saveEdit = (section: string) => {
     toggleEditMode(section)
+  }
+
+  const handleSectionClick = (type: string, index?: number) => {
+    // Toggle highlighting: if same section clicked, clear highlight, otherwise set new highlight
+    if (highlightedSection?.type === type && highlightedSection?.index === index) {
+      setHighlightedSection(null)
+    } else {
+      setHighlightedSection({ type, index })
+    }
   }
 
   const exportToPDF = () => {
@@ -1176,7 +1188,12 @@ export default function TailorResume() {
                     </button>
                   </div>
                   {expandedSections.summary && (
-                    <div className="glass rounded-xl p-4 border border-white/10">
+                    <div
+                      className={`glass rounded-xl p-4 border border-white/10 cursor-pointer ${
+                        highlightedSection?.type === 'summary' ? 'highlight-original' : ''
+                      }`}
+                      onClick={() => handleSectionClick('summary')}
+                    >
                       <p className="text-gray-400 leading-relaxed">{selectedResume.summary}</p>
                     </div>
                   )}
@@ -1206,7 +1223,12 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.skills && (
-                      <div className="glass rounded-xl p-4 border border-white/10">
+                      <div
+                        className={`glass rounded-xl p-4 border border-white/10 cursor-pointer ${
+                          highlightedSection?.type === 'skills' ? 'highlight-original' : ''
+                        }`}
+                        onClick={() => handleSectionClick('skills')}
+                      >
                         <div className="flex flex-wrap gap-2">
                           {selectedResume.skills.slice(0, 12).map((skill, idx) => (
                             <span key={idx} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
@@ -1245,7 +1267,15 @@ export default function TailorResume() {
                     {expandedSections.experience && (
                       <div className="space-y-4">
                         {selectedResume.experience.map((exp: any, idx: number) => (
-                          <div key={idx} className="glass rounded-xl p-4 border border-white/10">
+                          <div
+                            key={idx}
+                            className={`glass rounded-xl p-4 border border-white/10 cursor-pointer ${
+                              highlightedSection?.type === 'experience' && highlightedSection?.index === idx
+                                ? 'highlight-original'
+                                : ''
+                            }`}
+                            onClick={() => handleSectionClick('experience', idx)}
+                          >
                             <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
                             {exp.location && (
                               <p className="text-gray-400 text-sm mb-1">{exp.location}</p>
@@ -1294,7 +1324,12 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.education && (
-                      <div className="glass rounded-xl p-4 border border-white/10">
+                      <div
+                        className={`glass rounded-xl p-4 border border-white/10 cursor-pointer ${
+                          highlightedSection?.type === 'education' ? 'highlight-original' : ''
+                        }`}
+                        onClick={() => handleSectionClick('education')}
+                      >
                         <p className="text-gray-400">{selectedResume.education}</p>
                       </div>
                     )}
@@ -1325,7 +1360,12 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.certifications && (
-                      <div className="glass rounded-xl p-4 border border-white/10">
+                      <div
+                        className={`glass rounded-xl p-4 border border-white/10 cursor-pointer ${
+                          highlightedSection?.type === 'certifications' ? 'highlight-original' : ''
+                        }`}
+                        onClick={() => handleSectionClick('certifications')}
+                      >
                         <p className="text-gray-400 whitespace-pre-line">{selectedResume.certifications}</p>
                       </div>
                     )}
@@ -1383,11 +1423,14 @@ export default function TailorResume() {
                     </div>
                   </div>
                   {expandedSections.summary && (
-                    <div className={`relative ${
-                      showChanges && hasChanged(selectedResume.summary, tailoredResume.tailored_summary)
-                        ? 'bg-green-500/10 border-l-2 border-green-500/50 pl-4'
-                        : ''
-                    }`}>
+                    <div
+                      className={`relative cursor-pointer ${
+                        showChanges && hasChanged(selectedResume.summary, tailoredResume.tailored_summary)
+                          ? 'bg-green-500/10 border-l-2 border-green-500/50 pl-4'
+                          : ''
+                      } ${highlightedSection?.type === 'summary' ? 'highlight-tailored' : ''}`}
+                      onClick={() => handleSectionClick('summary')}
+                    >
                       {showChanges && hasChanged(selectedResume.summary, tailoredResume.tailored_summary) && (
                         <div className="absolute -left-1 top-0 bottom-0 w-1 bg-green-500 rounded"></div>
                       )}
@@ -1418,27 +1461,51 @@ export default function TailorResume() {
                         {expandedSections.skills ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                         Core Competencies ({tailoredResume.tailored_skills.length})
                       </button>
-                      <button
-                        onClick={() => handleCopy(tailoredResume.tailored_skills.join(', '), 'tail-skills')}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        title="Copy to clipboard"
-                      >
-                        {copiedSection === 'tail-skills' ? (
-                          <Check size={18} className="text-green-500" />
-                        ) : (
-                          <Copy size={18} className="text-gray-400" />
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleEditMode('skills')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Edit section"
+                        >
+                          {editMode.skills ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                        </button>
+                        <button
+                          onClick={() => handleCopy(tailoredResume.tailored_skills.join(', '), 'tail-skills')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Copy to clipboard"
+                        >
+                          {copiedSection === 'tail-skills' ? (
+                            <Check size={18} className="text-green-500" />
+                          ) : (
+                            <Copy size={18} className="text-gray-400" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     {expandedSections.skills && (
-                      <div className="glass rounded-xl p-4 border border-white/20">
-                        <div className="flex flex-wrap gap-2">
-                          {tailoredResume.tailored_skills.map((skill, idx) => (
-                            <span key={idx} className="px-3 py-1 bg-white/15 text-white rounded-full text-sm font-medium border border-white/20">
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
+                      <div
+                        className={`glass rounded-xl p-4 border border-white/20 cursor-pointer ${
+                          highlightedSection?.type === 'skills' ? 'highlight-tailored' : ''
+                        }`}
+                        onClick={() => handleSectionClick('skills')}
+                      >
+                        {editMode.skills ? (
+                          <textarea
+                            value={editedContent.skills || tailoredResume.tailored_skills.join(', ')}
+                            onChange={(e) => setEditedContent(prev => ({ ...prev, skills: e.target.value }))}
+                            className="w-full bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
+                            placeholder="Enter skills separated by commas"
+                            rows={4}
+                          />
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {(editedContent.skills ? editedContent.skills.split(',').map(s => s.trim()) : tailoredResume.tailored_skills).map((skill, idx) => (
+                              <span key={idx} className="px-3 py-1 bg-white/15 text-white rounded-full text-sm font-medium border border-white/20">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1470,7 +1537,15 @@ export default function TailorResume() {
                     {expandedSections.experience && (
                       <div className="space-y-4">
                         {tailoredResume.tailored_experience.map((exp: any, idx: number) => (
-                          <div key={idx} className="glass rounded-xl p-4 border border-white/20">
+                          <div
+                            key={idx}
+                            className={`glass rounded-xl p-4 border border-white/20 cursor-pointer ${
+                              highlightedSection?.type === 'experience' && highlightedSection?.index === idx
+                                ? 'highlight-tailored'
+                                : ''
+                            }`}
+                            onClick={() => handleSectionClick('experience', idx)}
+                          >
                             <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
                             {exp.location && (
                               <p className="text-gray-300 text-sm mb-1">{exp.location}</p>
@@ -1506,21 +1581,44 @@ export default function TailorResume() {
                         {expandedSections.education ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                         Education
                       </button>
-                      <button
-                        onClick={() => handleCopy(tailoredResume.tailored_education, 'tail-education')}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        title="Copy to clipboard"
-                      >
-                        {copiedSection === 'tail-education' ? (
-                          <Check size={18} className="text-green-500" />
-                        ) : (
-                          <Copy size={18} className="text-gray-400" />
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleEditMode('education')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Edit section"
+                        >
+                          {editMode.education ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                        </button>
+                        <button
+                          onClick={() => handleCopy(tailoredResume.tailored_education, 'tail-education')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Copy to clipboard"
+                        >
+                          {copiedSection === 'tail-education' ? (
+                            <Check size={18} className="text-green-500" />
+                          ) : (
+                            <Copy size={18} className="text-gray-400" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     {expandedSections.education && (
-                      <div className="glass rounded-xl p-4 border border-white/20">
-                        <p className="text-gray-300">{tailoredResume.tailored_education}</p>
+                      <div
+                        className={`glass rounded-xl p-4 border border-white/20 cursor-pointer ${
+                          highlightedSection?.type === 'education' ? 'highlight-tailored' : ''
+                        }`}
+                        onClick={() => handleSectionClick('education')}
+                      >
+                        {editMode.education ? (
+                          <textarea
+                            value={editedContent.education || tailoredResume.tailored_education}
+                            onChange={(e) => setEditedContent(prev => ({ ...prev, education: e.target.value }))}
+                            className="w-full bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[80px]"
+                            rows={3}
+                          />
+                        ) : (
+                          <p className="text-gray-300">{editedContent.education || tailoredResume.tailored_education}</p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1537,21 +1635,44 @@ export default function TailorResume() {
                         {expandedSections.certifications ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                         Certifications & Training
                       </button>
-                      <button
-                        onClick={() => handleCopy(tailoredResume.tailored_certifications, 'tail-certifications')}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        title="Copy to clipboard"
-                      >
-                        {copiedSection === 'tail-certifications' ? (
-                          <Check size={18} className="text-green-500" />
-                        ) : (
-                          <Copy size={18} className="text-gray-400" />
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleEditMode('certifications')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Edit section"
+                        >
+                          {editMode.certifications ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                        </button>
+                        <button
+                          onClick={() => handleCopy(tailoredResume.tailored_certifications, 'tail-certifications')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Copy to clipboard"
+                        >
+                          {copiedSection === 'tail-certifications' ? (
+                            <Check size={18} className="text-green-500" />
+                          ) : (
+                            <Copy size={18} className="text-gray-400" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     {expandedSections.certifications && (
-                      <div className="glass rounded-xl p-4 border border-white/20">
-                        <p className="text-gray-300 whitespace-pre-line">{tailoredResume.tailored_certifications}</p>
+                      <div
+                        className={`glass rounded-xl p-4 border border-white/20 cursor-pointer ${
+                          highlightedSection?.type === 'certifications' ? 'highlight-tailored' : ''
+                        }`}
+                        onClick={() => handleSectionClick('certifications')}
+                      >
+                        {editMode.certifications ? (
+                          <textarea
+                            value={editedContent.certifications || tailoredResume.tailored_certifications}
+                            onChange={(e) => setEditedContent(prev => ({ ...prev, certifications: e.target.value }))}
+                            className="w-full bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[80px]"
+                            rows={3}
+                          />
+                        ) : (
+                          <p className="text-gray-300 whitespace-pre-line">{editedContent.certifications || tailoredResume.tailored_certifications}</p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1568,21 +1689,44 @@ export default function TailorResume() {
                         {expandedSections.alignment ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                         Company Alignment
                       </button>
-                      <button
-                        onClick={() => handleCopy(tailoredResume.alignment_statement, 'tail-alignment')}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        title="Copy to clipboard"
-                      >
-                        {copiedSection === 'tail-alignment' ? (
-                          <Check size={18} className="text-green-500" />
-                        ) : (
-                          <Copy size={18} className="text-gray-400" />
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleEditMode('alignment')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Edit section"
+                        >
+                          {editMode.alignment ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                        </button>
+                        <button
+                          onClick={() => handleCopy(tailoredResume.alignment_statement, 'tail-alignment')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Copy to clipboard"
+                        >
+                          {copiedSection === 'tail-alignment' ? (
+                            <Check size={18} className="text-green-500" />
+                          ) : (
+                            <Copy size={18} className="text-gray-400" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     {expandedSections.alignment && (
-                      <div className="glass rounded-xl p-4 border border-white/20">
-                        <p className="text-gray-400">{tailoredResume.alignment_statement}</p>
+                      <div
+                        className={`glass rounded-xl p-4 border border-white/20 cursor-pointer ${
+                          highlightedSection?.type === 'alignment' ? 'highlight-tailored' : ''
+                        }`}
+                        onClick={() => handleSectionClick('alignment')}
+                      >
+                        {editMode.alignment ? (
+                          <textarea
+                            value={editedContent.alignment || tailoredResume.alignment_statement}
+                            onChange={(e) => setEditedContent(prev => ({ ...prev, alignment: e.target.value }))}
+                            className="w-full bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[80px]"
+                            rows={3}
+                          />
+                        ) : (
+                          <p className="text-gray-400">{editedContent.alignment || tailoredResume.alignment_statement}</p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1608,6 +1752,116 @@ export default function TailorResume() {
               <KeywordPanel keywords={keywords} loading={loadingAnalysis} />
             </div>
           )}
+
+          {/* Print-Only Resume View */}
+          <div id="print-resume" className="hidden">
+            <div className="max-w-4xl mx-auto bg-white p-8">
+              {/* Header */}
+              <div className="text-center mb-8 border-b-2 border-gray-800 pb-6">
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                  {tailoredResume.company ? `Resume for ${tailoredResume.company}` : 'Tailored Resume'}
+                </h1>
+                {tailoredResume.title && (
+                  <h2 className="text-2xl text-gray-700">{tailoredResume.title}</h2>
+                )}
+              </div>
+
+              {/* Professional Summary */}
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                  PROFESSIONAL SUMMARY
+                </h3>
+                <p className="text-gray-800 leading-relaxed">
+                  {editedContent.summary || tailoredResume.tailored_summary}
+                </p>
+              </div>
+
+              {/* Core Competencies */}
+              {tailoredResume.tailored_skills && tailoredResume.tailored_skills.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                    CORE COMPETENCIES
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(editedContent.skills ? editedContent.skills.split(',').map(s => s.trim()) : tailoredResume.tailored_skills).map((skill, idx) => (
+                      <div key={idx} className="text-gray-800 text-sm">
+                        • {skill}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Professional Experience */}
+              {tailoredResume.tailored_experience && tailoredResume.tailored_experience.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                    PROFESSIONAL EXPERIENCE
+                  </h3>
+                  <div className="space-y-4">
+                    {tailoredResume.tailored_experience.map((exp: any, idx: number) => (
+                      <div key={idx} className="mb-4">
+                        <h4 className="font-bold text-gray-900 text-lg mb-1">
+                          {exp.header || exp.title || exp.position || 'Position'}
+                        </h4>
+                        {exp.location && (
+                          <p className="text-gray-700 text-sm mb-1">{exp.location}</p>
+                        )}
+                        {exp.dates && (
+                          <p className="text-gray-600 text-sm mb-2">{exp.dates}</p>
+                        )}
+                        {exp.bullets && exp.bullets.length > 0 && (
+                          <ul className="space-y-1">
+                            {exp.bullets.map((bullet: string, bulletIdx: number) => (
+                              <li key={bulletIdx} className="text-gray-800 text-sm ml-4">
+                                • {bullet}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Education */}
+              {tailoredResume.tailored_education && (
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                    EDUCATION
+                  </h3>
+                  <p className="text-gray-800">
+                    {editedContent.education || tailoredResume.tailored_education}
+                  </p>
+                </div>
+              )}
+
+              {/* Certifications */}
+              {tailoredResume.tailored_certifications && (
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                    CERTIFICATIONS & TRAINING
+                  </h3>
+                  <p className="text-gray-800 whitespace-pre-line">
+                    {editedContent.certifications || tailoredResume.tailored_certifications}
+                  </p>
+                </div>
+              )}
+
+              {/* Alignment Statement */}
+              {tailoredResume.alignment_statement && (
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                    COMPANY ALIGNMENT
+                  </h3>
+                  <p className="text-gray-800">
+                    {editedContent.alignment || tailoredResume.alignment_statement}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Action Buttons */}
           <div className="mt-8 flex gap-4 justify-center">
