@@ -719,7 +719,7 @@ export default function TailorResume() {
               <ThemeToggle />
               <button
                 onClick={saveComparison}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-medium transition-all "
                 title="Save this comparison for later"
               >
                 <Bookmark className="w-5 h-5" />
@@ -727,7 +727,7 @@ export default function TailorResume() {
               </button>
               <button
                 onClick={resetForm}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-medium transition-all "
               >
                 <RotateCcw className="w-5 h-5" />
                 Start New Resume
@@ -897,7 +897,7 @@ export default function TailorResume() {
                 onClick={() => handleTabChange('comparison')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                   activeTab === 'comparison'
-                    ? 'bg-white/20 text-white shadow-lg'
+                    ? 'bg-white/20 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -908,7 +908,7 @@ export default function TailorResume() {
                 onClick={() => handleTabChange('analysis')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                   activeTab === 'analysis'
-                    ? 'bg-white/20 text-white shadow-lg'
+                    ? 'bg-white/20 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -919,7 +919,7 @@ export default function TailorResume() {
                 onClick={() => handleTabChange('insights')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                   activeTab === 'insights'
-                    ? 'bg-white/20 text-white shadow-lg'
+                    ? 'bg-white/20 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
