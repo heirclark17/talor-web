@@ -1260,6 +1260,13 @@ export default function TailorResume() {
               Create Another
             </button>
           </div>
+
+          {/* Analysis Components */}
+          <div className="mt-12 space-y-8">
+            <MatchScore matchScore={matchScore} loading={loadingAnalysis} />
+            <ResumeAnalysis analysis={analysis} loading={loadingAnalysis} />
+            <KeywordPanel keywords={keywords} loading={loadingAnalysis} />
+          </div>
         </div>
       </div>
     )
