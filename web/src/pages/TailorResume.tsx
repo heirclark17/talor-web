@@ -82,6 +82,9 @@ export default function TailorResume() {
   const [loadingAnalysis, setLoadingAnalysis] = useState(false)
   const [detailMode, setDetailMode] = useState(false)
 
+  // Tab state for main content organization
+  const [activeTab, setActiveTab] = useState<'comparison' | 'analysis' | 'insights'>('comparison')
+
   // Refs for synchronized scrolling
   const leftScrollRef = useRef<HTMLDivElement>(null)
   const rightScrollRef = useRef<HTMLDivElement>(null)
@@ -797,39 +800,76 @@ export default function TailorResume() {
             </div>
           </div>
 
-          {/* AI-Powered Change Analysis - Moved here from bottom */}
-          <div className="mb-6">
-            <ResumeAnalysis analysis={analysis} loading={loadingAnalysis} />
-          </div>
-
-          {/* Mobile Tab Switcher */}
-          {isMobile && (
-            <div className="flex border-b border-white/10 mb-6">
+          {/* Tab Navigation */}
+          <div className="mb-6 glass rounded-xl border border-white/20 p-2">
+            <div className="flex gap-2">
               <button
-                className={`flex-1 py-3 text-center font-medium transition-all ${
-                  mobileTab === 'original'
-                    ? 'border-b-2 border-white text-white'
-                    : 'text-gray-400 hover:text-gray-300'
+                onClick={() => setActiveTab('comparison')}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  activeTab === 'comparison'
+                    ? 'bg-white/20 text-white shadow-lg'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
-                onClick={() => setMobileTab('original')}
               >
-                Original
+                <FileText className="w-5 h-5" />
+                Side-by-Side Comparison
               </button>
               <button
-                className={`flex-1 py-3 text-center font-medium transition-all ${
-                  mobileTab === 'tailored'
-                    ? 'border-b-2 border-white text-white'
-                    : 'text-gray-400 hover:text-gray-300'
+                onClick={() => setActiveTab('analysis')}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  activeTab === 'analysis'
+                    ? 'bg-white/20 text-white shadow-lg'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
-                onClick={() => setMobileTab('tailored')}
               >
-                Tailored ✨
+                <Sparkles className="w-5 h-5" />
+                AI Analysis & Insights
+              </button>
+              <button
+                onClick={() => setActiveTab('insights')}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  activeTab === 'insights'
+                    ? 'bg-white/20 text-white shadow-lg'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Target className="w-5 h-5" />
+                Match & Keywords
               </button>
             </div>
-          )}
+          </div>
 
-          {/* Section Navigation Sidebar (Desktop Only) */}
-          <div className="flex gap-6">
+          {/* Tab Content: Side-by-Side Comparison */}
+          {activeTab === 'comparison' && (
+            <>
+              {/* Mobile Tab Switcher */}
+              {isMobile && (
+                <div className="flex border-b border-white/10 mb-6">
+                  <button
+                    className={`flex-1 py-3 text-center font-medium transition-all ${
+                      mobileTab === 'original'
+                        ? 'border-b-2 border-white text-white'
+                        : 'text-gray-400 hover:text-gray-300'
+                    }`}
+                    onClick={() => setMobileTab('original')}
+                  >
+                    Original
+                  </button>
+                  <button
+                    className={`flex-1 py-3 text-center font-medium transition-all ${
+                      mobileTab === 'tailored'
+                        ? 'border-b-2 border-white text-white'
+                        : 'text-gray-400 hover:text-gray-300'
+                    }`}
+                    onClick={() => setMobileTab('tailored')}
+                  >
+                    Tailored ✨
+                  </button>
+                </div>
+              )}
+
+              {/* Section Navigation Sidebar (Desktop Only) */}
+              <div className="flex gap-6">
             {!isMobile && (
               <div className="w-48 flex-shrink-0">
                 <div className="sticky top-4 space-y-2">
@@ -1308,8 +1348,25 @@ export default function TailorResume() {
               </div>
             </div>
             )}
-          </div>
-          </div>
+              </div>
+            </div>
+            </>
+          )}
+
+          {/* Tab Content: AI Analysis & Insights */}
+          {activeTab === 'analysis' && (
+            <div className="mb-6">
+              <ResumeAnalysis analysis={analysis} loading={loadingAnalysis} />
+            </div>
+          )}
+
+          {/* Tab Content: Match & Keywords */}
+          {activeTab === 'insights' && (
+            <div className="space-y-8">
+              <MatchScore matchScore={matchScore} loading={loadingAnalysis} />
+              <KeywordPanel keywords={keywords} loading={loadingAnalysis} />
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="mt-8 flex gap-4 justify-center">
@@ -1333,12 +1390,6 @@ export default function TailorResume() {
             >
               Create Another
             </button>
-          </div>
-
-          {/* Additional Analysis Components */}
-          <div className="mt-12 space-y-8">
-            <MatchScore matchScore={matchScore} loading={loadingAnalysis} />
-            <KeywordPanel keywords={keywords} loading={loadingAnalysis} />
           </div>
         </div>
       </div>
