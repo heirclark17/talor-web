@@ -811,7 +811,7 @@ export default function InterviewPrep() {
           {/* Interview Date Countdown */}
           <div className="glass rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-6 h-6 text-white" />
+              <Calendar className="w-6 h-6 text-white" strokeWidth={2} />
               <h3 className="text-xl font-bold text-white">Interview Date</h3>
             </div>
             <div className="flex items-center gap-4">
