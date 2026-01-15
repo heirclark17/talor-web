@@ -128,7 +128,7 @@ export default function TailorResume() {
           case 'd':
             e.preventDefault()
             if (tailoredResume) {
-              window.open(`https://resume-ai-backend-production-3134.up.railway.app/api/tailor/download/${tailoredResume.id}`, '_blank')
+              handleDownloadResume('docx')
             }
             break
         }
@@ -641,7 +641,7 @@ export default function TailorResume() {
                   <div className="absolute right-0 top-full mt-2 bg-gray-900 rounded-xl shadow-2xl border border-white/10 py-2 min-w-[200px] z-10">
                     <button
                       onClick={() => {
-                        window.open(`https://resume-ai-backend-production-3134.up.railway.app/api/tailor/download/${tailoredResume.id}`, '_blank')
+                        handleDownloadResume('docx')
                         setShowExportMenu(false)
                       }}
                       className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
@@ -651,7 +651,7 @@ export default function TailorResume() {
                     </button>
                     <button
                       onClick={() => {
-                        exportToPDF()
+                        handleDownloadResume('pdf')
                         setShowExportMenu(false)
                       }}
                       className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
@@ -703,29 +703,36 @@ export default function TailorResume() {
             </div>
           </div>
 
-          {/* Comparison Summary Card */}
+          {/* AI-Powered Analysis Summary Card */}
           <div className="mb-6 glass rounded-xl p-6 border border-white/10">
-            <h3 className="text-xl font-bold text-white mb-4">What Changed?</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-white/5 rounded-lg">
-                <div className="text-3xl font-bold text-green-500 mb-1">
-                  +{tailoredResume.tailored_skills.length - selectedResume.skills.length}
-                </div>
-                <div className="text-sm text-gray-400">Keywords Added</div>
+            <h3 className="text-xl font-bold text-white mb-4">What Changed? (AI Analysis)</h3>
+            {loadingAnalysis ? (
+              <div className="text-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2" />
+                <p className="text-gray-400">Analyzing changes with GPT-4.1-mini...</p>
               </div>
-              <div className="text-center p-4 bg-white/5 rounded-lg">
-                <div className="text-3xl font-bold text-blue-500 mb-1">
-                  {Math.round((tailoredResume.tailored_summary.length / selectedResume.summary.length) * 100 - 100)}%
+            ) : (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-white/5 rounded-lg">
+                  <div className="text-3xl font-bold text-green-500 mb-1">
+                    +{keywords?.total_keywords || 0}
+                  </div>
+                  <div className="text-sm text-gray-400">Keywords Added</div>
                 </div>
-                <div className="text-sm text-gray-400">More Detailed</div>
-              </div>
-              <div className="text-center p-4 bg-white/5 rounded-lg">
-                <div className="text-3xl font-bold text-purple-500 mb-1">
-                  {tailoredResume.quality_score}/10
+                <div className="text-center p-4 bg-white/5 rounded-lg">
+                  <div className="text-3xl font-bold text-blue-500 mb-1">
+                    {analysis?.sections?.length || 0}
+                  </div>
+                  <div className="text-sm text-gray-400">Sections Changed</div>
                 </div>
-                <div className="text-sm text-gray-400">Match Score</div>
+                <div className="text-center p-4 bg-white/5 rounded-lg">
+                  <div className="text-3xl font-bold text-purple-500 mb-1">
+                    {matchScore?.overall_score || 0}/100
+                  </div>
+                  <div className="text-sm text-gray-400">Match Score</div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Mobile Tab Switcher */}
@@ -1247,7 +1254,7 @@ export default function TailorResume() {
               View Interview Prep
             </button>
             <button
-              onClick={() => window.open(`https://resume-ai-backend-production-3134.up.railway.app/api/tailor/download/${tailoredResume.id}`, '_blank')}
+              onClick={() => handleDownloadResume('docx')}
               className="btn-primary flex items-center gap-3 text-lg"
             >
               <Download className="w-5 h-5" />
