@@ -1129,31 +1129,8 @@ export default function TailorResume() {
                 </div>
               )}
 
-              {/* Section Navigation Sidebar (Desktop Only) */}
-              <div className="flex gap-6">
-            {!isMobile && (
-              <div className="w-48 flex-shrink-0">
-                <div className="sticky top-4 space-y-2">
-                  <h3 className="text-sm font-bold text-gray-400 mb-3 px-3">SECTIONS</h3>
-                  {['summary', 'skills', 'experience', 'education', 'certifications'].map(section => (
-                    <button
-                      key={section}
-                      onClick={() => scrollToSection(section)}
-                      className={`w-full text-left text-sm px-3 py-2 rounded-lg transition-all ${
-                        activeSection === section
-                          ? 'bg-white/20 text-white font-medium'
-                          : 'text-gray-400 hover:bg-white/10 hover:text-white'
-                      }`}
-                    >
-                      {section.charAt(0).toUpperCase() + section.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Side-by-Side Comparison */}
-            <div className={`flex-1 ${isMobile ? '' : 'grid grid-cols-2 gap-6'}`}>
+              {/* Side-by-Side Comparison */}
+              <div className={`${isMobile ? '' : 'grid grid-cols-2 gap-6'}`}>
               {/* Show only selected tab on mobile */}
               {(!isMobile || mobileTab === 'original') && (
                 <div className={`glass rounded-2xl overflow-hidden border border-white/20 ${isMobile ? 'mb-6' : ''}`}>
@@ -1193,7 +1170,9 @@ export default function TailorResume() {
                     </button>
                   </div>
                   {expandedSections.summary && (
-                    <p className="text-gray-400 leading-relaxed">{selectedResume.summary}</p>
+                    <div className="glass rounded-xl p-4 border border-white/10">
+                      <p className="text-gray-400 leading-relaxed">{selectedResume.summary}</p>
+                    </div>
                   )}
                 </div>
 
@@ -1221,12 +1200,14 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.skills && (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedResume.skills.slice(0, 12).map((skill, idx) => (
-                          <span key={idx} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
-                            {skill}
-                          </span>
-                        ))}
+                      <div className="glass rounded-xl p-4 border border-white/10">
+                        <div className="flex flex-wrap gap-2">
+                          {selectedResume.skills.slice(0, 12).map((skill, idx) => (
+                            <span key={idx} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1256,9 +1237,9 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.experience && (
-                      <div className="space-y-6">
+                      <div className="space-y-4">
                         {selectedResume.experience.map((exp: any, idx: number) => (
-                          <div key={idx} className="border-l-2 border-white/20 pl-4">
+                          <div key={idx} className="glass rounded-xl p-4 border border-white/10">
                             <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
                             {exp.location && (
                               <p className="text-gray-400 text-sm mb-1">{exp.location}</p>
@@ -1307,7 +1288,9 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.education && (
-                      <p className="text-gray-400">{selectedResume.education}</p>
+                      <div className="glass rounded-xl p-4 border border-white/10">
+                        <p className="text-gray-400">{selectedResume.education}</p>
+                      </div>
                     )}
                   </div>
                 )}
@@ -1336,7 +1319,9 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.certifications && (
-                      <p className="text-gray-400 whitespace-pre-line">{selectedResume.certifications}</p>
+                      <div className="glass rounded-xl p-4 border border-white/10">
+                        <p className="text-gray-400 whitespace-pre-line">{selectedResume.certifications}</p>
+                      </div>
                     )}
                   </div>
                 )}
@@ -1440,12 +1425,14 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.skills && (
-                      <div className="flex flex-wrap gap-2">
-                        {tailoredResume.tailored_skills.map((skill, idx) => (
-                          <span key={idx} className="px-3 py-1 bg-white/15 text-white rounded-full text-sm font-medium border border-white/20">
-                            {skill}
-                          </span>
-                        ))}
+                      <div className="glass rounded-xl p-4 border border-white/20">
+                        <div className="flex flex-wrap gap-2">
+                          {tailoredResume.tailored_skills.map((skill, idx) => (
+                            <span key={idx} className="px-3 py-1 bg-white/15 text-white rounded-full text-sm font-medium border border-white/20">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1475,9 +1462,9 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.experience && (
-                      <div className="space-y-6">
+                      <div className="space-y-4">
                         {tailoredResume.tailored_experience.map((exp: any, idx: number) => (
-                          <div key={idx} className="border-l-2 border-white/40 pl-4 bg-white/5 p-3 rounded-r-lg">
+                          <div key={idx} className="glass rounded-xl p-4 border border-white/20">
                             <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
                             {exp.location && (
                               <p className="text-gray-300 text-sm mb-1">{exp.location}</p>
@@ -1526,7 +1513,9 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.education && (
-                      <p className="text-gray-300">{tailoredResume.tailored_education}</p>
+                      <div className="glass rounded-xl p-4 border border-white/20">
+                        <p className="text-gray-300">{tailoredResume.tailored_education}</p>
+                      </div>
                     )}
                   </div>
                 )}
@@ -1555,7 +1544,9 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.certifications && (
-                      <p className="text-gray-300 whitespace-pre-line">{tailoredResume.tailored_certifications}</p>
+                      <div className="glass rounded-xl p-4 border border-white/20">
+                        <p className="text-gray-300 whitespace-pre-line">{tailoredResume.tailored_certifications}</p>
+                      </div>
                     )}
                   </div>
                 )}
@@ -1584,9 +1575,9 @@ export default function TailorResume() {
                       </button>
                     </div>
                     {expandedSections.alignment && (
-                      <p className="text-gray-400 bg-white/5 p-4 rounded-lg border border-white/10">
-                        {tailoredResume.alignment_statement}
-                      </p>
+                      <div className="glass rounded-xl p-4 border border-white/20">
+                        <p className="text-gray-400">{tailoredResume.alignment_statement}</p>
+                      </div>
                     )}
                   </div>
                 )}
