@@ -86,6 +86,7 @@ export default function TailorResume() {
 
   // Tab state for main content organization
   const [activeTab, setActiveTab] = useState<'comparison' | 'analysis' | 'insights'>('comparison')
+  const [analysisLoaded, setAnalysisLoaded] = useState(false)
 
   // Refs for synchronized scrolling
   const leftScrollRef = useRef<HTMLDivElement>(null)
@@ -146,12 +147,9 @@ export default function TailorResume() {
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [tailoredResume])
 
-  // Load analysis when tailored resume is ready
-  useEffect(() => {
-    if (tailoredResume?.id) {
-      loadAllAnalysis(tailoredResume.id)
-    }
-  }, [tailoredResume?.id])
+  // Don't auto-load analysis - wait for user to click tabs (lazy loading)
+  // This makes the page load instantly instead of waiting 3-5 minutes
+  // Analysis will load when user clicks the Analysis or Insights tabs
 
   // Restore last viewed tailored resume on mount
   useEffect(() => {
@@ -361,58 +359,57 @@ export default function TailorResume() {
     }
   }
 
-  // New AI analysis functions
+  // New AI analysis functions - OPTIMIZED with parallel calls
   const loadAllAnalysis = async (tailoredResumeId: number) => {
     if (!tailoredResumeId) return
 
     setLoadingAnalysis(true)
+    setAnalysisProgress('Loading AI analysis in parallel...')
+    setAnalysisEstimate(90)
+
     const userId = localStorage.getItem('talor_user_id')
     const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
     try {
-      // Load analysis (60-90s estimated)
-      setAnalysisProgress('Analyzing resume changes with AI...')
-      setAnalysisEstimate(75)
-      const analysisRes = await fetch(`${API_BASE_URL}/api/resume-analysis/analyze-changes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        },
-        body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
-      })
+      // Call all 3 APIs in parallel (3x faster!)
+      const [analysisRes, keywordsRes, scoreRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/resume-analysis/analyze-changes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-ID': userId || ''
+          },
+          body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
+        }),
+        fetch(`${API_BASE_URL}/api/resume-analysis/analyze-keywords`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-ID': userId || ''
+          },
+          body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
+        }),
+        fetch(`${API_BASE_URL}/api/resume-analysis/match-score`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-ID': userId || ''
+          },
+          body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
+        })
+      ])
+
+      // Parse results
       if (analysisRes.ok) {
         const data = await analysisRes.json()
         setAnalysis(data.analysis)
       }
 
-      // Load keywords (60-90s estimated)
-      setAnalysisProgress('Extracting keywords and ATS optimization...')
-      setAnalysisEstimate(75)
-      const keywordsRes = await fetch(`${API_BASE_URL}/api/resume-analysis/analyze-keywords`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        },
-        body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
-      })
       if (keywordsRes.ok) {
         const data = await keywordsRes.json()
         setKeywords(data.keywords)
       }
 
-      // Load match score (60-90s estimated)
-      setAnalysisProgress('Calculating match score and breakdown...')
-      setAnalysisEstimate(75)
-      const scoreRes = await fetch(`${API_BASE_URL}/api/resume-analysis/match-score`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        },
-        body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
-      })
       if (scoreRes.ok) {
         const data = await scoreRes.json()
         setMatchScore(data.match_score)
@@ -649,10 +646,25 @@ export default function TailorResume() {
     setShowComparison(false)
     setSuccess(false)
     setError(null)
+    setAnalysisLoaded(false)
+    setAnalysis(null)
+    setKeywords(null)
+    setMatchScore(null)
 
     // Clear persisted tailored resume
     localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
     console.log('Cleared saved tailored resume from localStorage')
+  }
+
+  // Handle tab change with lazy loading
+  const handleTabChange = (tab: 'comparison' | 'analysis' | 'insights') => {
+    setActiveTab(tab)
+
+    // Lazy load analysis when user clicks Analysis or Insights tabs
+    if ((tab === 'analysis' || tab === 'insights') && !analysisLoaded && !loadingAnalysis && tailoredResume?.id) {
+      setAnalysisLoaded(true)
+      loadAllAnalysis(tailoredResume.id)
+    }
   }
 
   if (showComparison && selectedResume && tailoredResume) {
@@ -843,7 +855,7 @@ export default function TailorResume() {
           <div className="mb-6 glass rounded-xl border border-white/20 p-2">
             <div className="flex gap-2">
               <button
-                onClick={() => setActiveTab('comparison')}
+                onClick={() => handleTabChange('comparison')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                   activeTab === 'comparison'
                     ? 'bg-white/20 text-white shadow-lg'
@@ -854,7 +866,7 @@ export default function TailorResume() {
                 Side-by-Side Comparison
               </button>
               <button
-                onClick={() => setActiveTab('analysis')}
+                onClick={() => handleTabChange('analysis')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                   activeTab === 'analysis'
                     ? 'bg-white/20 text-white shadow-lg'
@@ -865,7 +877,7 @@ export default function TailorResume() {
                 AI Analysis & Insights
               </button>
               <button
-                onClick={() => setActiveTab('insights')}
+                onClick={() => handleTabChange('insights')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                   activeTab === 'insights'
                     ? 'bg-white/20 text-white shadow-lg'
