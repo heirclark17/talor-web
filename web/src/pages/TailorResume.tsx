@@ -285,7 +285,7 @@ export default function TailorResume() {
 
     setLoadingAnalysis(true)
     const userId = localStorage.getItem('talor_user_id')
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
     try {
       // Load analysis
@@ -341,7 +341,7 @@ export default function TailorResume() {
 
     try {
       const userId = localStorage.getItem('talor_user_id')
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
       const response = await fetch(`${API_BASE_URL}/api/resume-analysis/export`, {
         method: 'POST',
