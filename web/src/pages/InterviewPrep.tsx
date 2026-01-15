@@ -289,14 +289,62 @@ export default function InterviewPrep() {
         }
       }
     } catch (err: any) {
-      // If not found, generate new one
+      console.error('Error loading interview prep:', err)
+      // If not found, try to generate automatically
       if (err.message?.includes('not found') || err.message?.includes('404')) {
-        await generateInterviewPrep()
+        console.log('Interview prep not found, generating new one...')
+        setLoading(false)
+        try {
+          await generateInterviewPrep()
+          // Generation success - related data is already fetched in generateInterviewPrep
+        } catch (genErr: any) {
+          console.error('Auto-generation failed:', genErr)
+          setError(`Failed to generate interview prep. ${genErr.message}`)
+        }
       } else {
         setError(err.message || 'Failed to load interview prep')
+        setLoading(false)
       }
     } finally {
-      setLoading(false)
+      if (!error && !generating) {
+        setLoading(false)
+      }
+    }
+  }
+
+  const fetchRelatedData = async (interviewPrepData: InterviewPrepData) => {
+    try {
+      // Fetch the tailored resume to get base resume ID
+      const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
+        headers: {
+          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+        },
+      })
+
+      if (tailoredResponse.ok) {
+        const tailoredData = await tailoredResponse.json()
+        setTailoredResumeData(tailoredData)
+
+        // Fetch base resume to get experiences
+        const baseResponse = await fetch(`${API_BASE_URL}/api/resumes/${tailoredData.base_resume_id}`, {
+          headers: {
+            'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          },
+        })
+
+        if (baseResponse.ok) {
+          const baseData = await baseResponse.json()
+          const experiences = typeof baseData.experience === 'string'
+            ? JSON.parse(baseData.experience)
+            : baseData.experience
+          setBaseResumeExperiences(experiences || [])
+        }
+
+        // Fetch real data from backend services
+        await fetchRealData(interviewPrepData)
+      }
+    } catch (err) {
+      console.error('Error fetching related data:', err)
     }
   }
 
@@ -309,11 +357,15 @@ export default function InterviewPrep() {
 
       if (result.success) {
         setPrepData(result.data.prep_data)
+        // After setting prep data, fetch related resume data and real data
+        await fetchRelatedData(result.data.prep_data)
+        return result.data.prep_data
       } else {
         throw new Error(result.error || 'Failed to generate interview prep')
       }
     } catch (err: any) {
       setError(err.message || 'Failed to generate interview prep')
+      throw err
     } finally {
       setGenerating(false)
     }
@@ -597,9 +649,21 @@ export default function InterviewPrep() {
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Error Loading Interview Prep</h2>
           <p className="text-gray-400 mb-6">{error}</p>
-          <button onClick={() => navigate('/tailor')} className="btn-secondary">
-            Back to Resumes
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={async () => {
+                setError(null)
+                await generateInterviewPrep()
+              }}
+              className="btn-primary"
+              disabled={generating}
+            >
+              {generating ? 'Generating...' : 'Try Generating Again'}
+            </button>
+            <button onClick={() => navigate('/tailor')} className="btn-secondary">
+              Back to Resumes
+            </button>
+          </div>
         </div>
       </div>
     )
