@@ -1,9 +1,18 @@
 import React, { useState } from 'react'
-import { Loader2, Sparkles, Save, Trash2, Edit, Check, X, Plus } from 'lucide-react'
+import { Loader2, Sparkles, Save, Trash2, Edit, Check, X, Plus, ChevronDown, ChevronUp } from 'lucide-react'
 import { api } from '../api/client'
 
 // API base URL - same logic as API client
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+
+// Tone options for story generation
+const TONE_OPTIONS = [
+  { value: 'professional', label: 'Professional & Formal', description: 'Corporate, structured, polished language' },
+  { value: 'conversational', label: 'Conversational & Authentic', description: 'Natural, approachable, genuine tone' },
+  { value: 'confident', label: 'Confident & Assertive', description: 'Strong, decisive, leadership-focused' },
+  { value: 'technical', label: 'Technical & Detailed', description: 'Precise, methodical, technical depth' },
+  { value: 'strategic', label: 'Strategic & Visionary', description: 'Big-picture, forward-thinking, executive-level' },
+]
 
 interface Experience {
   header?: string
@@ -34,10 +43,12 @@ interface Props {
 export default function STARStoryBuilder({ tailoredResumeId, experiences, companyContext, storyThemes }: Props) {
   const [selectedExperiences, setSelectedExperiences] = useState<Set<number>>(new Set())
   const [selectedTheme, setSelectedTheme] = useState<string>(storyThemes[0] || '')
+  const [selectedTone, setSelectedTone] = useState<string>('professional')
   const [generating, setGenerating] = useState(false)
   const [stories, setStories] = useState<STARStory[]>([])
   const [editingStory, setEditingStory] = useState<string | null>(null)
   const [editedStory, setEditedStory] = useState<STARStory | null>(null)
+  const [collapsedStories, setCollapsedStories] = useState<Set<string>>(new Set())
 
   const toggleExperience = (index: number) => {
     const newSet = new Set(selectedExperiences)
@@ -47,6 +58,16 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       newSet.add(index)
     }
     setSelectedExperiences(newSet)
+  }
+
+  const toggleCollapse = (storyId: string) => {
+    const newSet = new Set(collapsedStories)
+    if (newSet.has(storyId)) {
+      newSet.delete(storyId)
+    } else {
+      newSet.add(storyId)
+    }
+    setCollapsedStories(newSet)
   }
 
   const generateStory = async () => {
@@ -73,6 +94,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
           tailored_resume_id: tailoredResumeId,
           experience_indices: Array.from(selectedExperiences),
           story_theme: selectedTheme,
+          tone: selectedTone,
           company_context: companyContext,
         }),
       })
@@ -296,6 +318,25 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         </select>
       </div>
 
+      {/* Tone Selection */}
+      <div className="glass rounded-xl p-6 border border-white/10">
+        <h4 className="text-lg font-semibold text-white mb-4">3. Choose Tone</h4>
+        <select
+          value={selectedTone}
+          onChange={(e) => setSelectedTone(e.target.value)}
+          className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none"
+        >
+          {TONE_OPTIONS.map((tone) => (
+            <option key={tone.value} value={tone.value} className="bg-gray-900">
+              {tone.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-sm text-gray-400 mt-2">
+          {TONE_OPTIONS.find(t => t.value === selectedTone)?.description}
+        </p>
+      </div>
+
       {/* Generate Button */}
       <button
         onClick={generateStory}
@@ -397,8 +438,19 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                 // View Mode
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
-                    <h5 className="text-xl font-semibold text-white">{story.title}</h5>
+                    <h5 className="text-xl font-semibold text-white flex-1">{story.title}</h5>
                     <div className="flex gap-2">
+                      <button
+                        onClick={() => toggleCollapse(story.id!)}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title={collapsedStories.has(story.id!) ? "Expand story" : "Collapse story"}
+                      >
+                        {collapsedStories.has(story.id!) ? (
+                          <ChevronDown className="w-5 h-5 text-gray-400" />
+                        ) : (
+                          <ChevronUp className="w-5 h-5 text-gray-400" />
+                        )}
+                      </button>
                       <button
                         onClick={() => startEditing(story)}
                         className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -416,52 +468,62 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div>
-                      <div className="text-sm font-semibold text-green-400 mb-1">Situation</div>
-                      <p className="text-gray-300">{story.situation}</p>
-                    </div>
+                  {!collapsedStories.has(story.id!) && (
+                    <>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-sm font-semibold text-green-400 mb-1">Situation</div>
+                          <p className="text-gray-300 whitespace-pre-wrap">{story.situation}</p>
+                        </div>
 
-                    <div>
-                      <div className="text-sm font-semibold text-blue-400 mb-1">Task</div>
-                      <p className="text-gray-300">{story.task}</p>
-                    </div>
+                        <div>
+                          <div className="text-sm font-semibold text-blue-400 mb-1">Task</div>
+                          <p className="text-gray-300 whitespace-pre-wrap">{story.task}</p>
+                        </div>
 
-                    <div>
-                      <div className="text-sm font-semibold text-purple-400 mb-1">Action</div>
-                      <p className="text-gray-300">{story.action}</p>
-                    </div>
+                        <div>
+                          <div className="text-sm font-semibold text-purple-400 mb-1">Action</div>
+                          <p className="text-gray-300 whitespace-pre-wrap">{story.action}</p>
+                        </div>
 
-                    <div>
-                      <div className="text-sm font-semibold text-yellow-400 mb-1">Result</div>
-                      <p className="text-gray-300">{story.result}</p>
-                    </div>
-                  </div>
-
-                  {story.key_themes && story.key_themes.length > 0 && (
-                    <div>
-                      <div className="text-sm font-semibold text-gray-400 mb-2">Key Themes</div>
-                      <div className="flex flex-wrap gap-2">
-                        {story.key_themes.map((theme, i) => (
-                          <span key={i} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
-                            {theme}
-                          </span>
-                        ))}
+                        <div>
+                          <div className="text-sm font-semibold text-yellow-400 mb-1">Result</div>
+                          <p className="text-gray-300 whitespace-pre-wrap">{story.result}</p>
+                        </div>
                       </div>
-                    </div>
+
+                      {story.key_themes && story.key_themes.length > 0 && (
+                        <div>
+                          <div className="text-sm font-semibold text-gray-400 mb-2">Key Themes</div>
+                          <div className="flex flex-wrap gap-2">
+                            {story.key_themes.map((theme, i) => (
+                              <span key={i} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
+                                {theme}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {story.talking_points && story.talking_points.length > 0 && (
+                        <div>
+                          <div className="text-sm font-semibold text-gray-400 mb-2">Talking Points</div>
+                          <ul className="space-y-1">
+                            {story.talking_points.map((point, i) => (
+                              <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
+                                <span className="text-white mt-1">•</span>
+                                <span>{point}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </>
                   )}
 
-                  {story.talking_points && story.talking_points.length > 0 && (
-                    <div>
-                      <div className="text-sm font-semibold text-gray-400 mb-2">Talking Points</div>
-                      <ul className="space-y-1">
-                        {story.talking_points.map((point, i) => (
-                          <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
-                            <span className="text-white mt-1">•</span>
-                            <span>{point}</span>
-                          </li>
-                        ))}
-                      </ul>
+                  {collapsedStories.has(story.id!) && (
+                    <div className="text-sm text-gray-400 italic">
+                      Story collapsed - click to expand
                     </div>
                   )}
                 </div>
