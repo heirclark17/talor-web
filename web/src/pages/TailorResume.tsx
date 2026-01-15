@@ -797,36 +797,9 @@ export default function TailorResume() {
             </div>
           </div>
 
-          {/* AI-Powered Analysis Summary Card */}
-          <div className="mb-6 glass rounded-xl p-6 border border-white/10">
-            <h3 className="text-xl font-bold text-white mb-4">What Changed? (AI Analysis)</h3>
-            {loadingAnalysis ? (
-              <div className="text-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2" />
-                <p className="text-gray-400">Analyzing changes with GPT-4.1-mini...</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-white/5 rounded-lg">
-                  <div className="text-3xl font-bold text-green-500 mb-1">
-                    +{keywords?.total_keywords || 0}
-                  </div>
-                  <div className="text-sm text-gray-400">Keywords Added</div>
-                </div>
-                <div className="text-center p-4 bg-white/5 rounded-lg">
-                  <div className="text-3xl font-bold text-blue-500 mb-1">
-                    {analysis?.sections?.length || 0}
-                  </div>
-                  <div className="text-sm text-gray-400">Sections Changed</div>
-                </div>
-                <div className="text-center p-4 bg-white/5 rounded-lg">
-                  <div className="text-3xl font-bold text-purple-500 mb-1">
-                    {matchScore?.overall_score || 0}/100
-                  </div>
-                  <div className="text-sm text-gray-400">Match Score</div>
-                </div>
-              </div>
-            )}
+          {/* AI-Powered Change Analysis - Moved here from bottom */}
+          <div className="mb-6">
+            <ResumeAnalysis analysis={analysis} loading={loadingAnalysis} />
           </div>
 
           {/* Mobile Tab Switcher */}
@@ -1362,10 +1335,9 @@ export default function TailorResume() {
             </button>
           </div>
 
-          {/* Analysis Components */}
+          {/* Additional Analysis Components */}
           <div className="mt-12 space-y-8">
             <MatchScore matchScore={matchScore} loading={loadingAnalysis} />
-            <ResumeAnalysis analysis={analysis} loading={loadingAnalysis} />
             <KeywordPanel keywords={keywords} loading={loadingAnalysis} />
           </div>
         </div>
