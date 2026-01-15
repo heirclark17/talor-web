@@ -259,7 +259,7 @@ export default function InterviewPrep() {
         setPrepData(result.data.prep_data)
 
         // Also fetch the tailored resume to get base resume ID
-        const tailoredResponse = await fetch(`/api/tailor/tailored/${tailoredResumeId}`, {
+        const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
           headers: {
             'X-User-ID': localStorage.getItem('talor_user_id') || '',
           },
@@ -270,7 +270,7 @@ export default function InterviewPrep() {
           setTailoredResumeData(tailoredData)
 
           // Fetch base resume to get experiences
-          const baseResponse = await fetch(`/api/resumes/${tailoredData.base_resume_id}`, {
+          const baseResponse = await fetch(`${API_BASE_URL}/api/resumes/${tailoredData.base_resume_id}`, {
             headers: {
               'X-User-ID': localStorage.getItem('talor_user_id') || '',
             },
