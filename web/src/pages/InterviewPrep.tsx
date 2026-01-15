@@ -177,6 +177,7 @@ export default function InterviewPrep() {
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [warning, setWarning] = useState<string | null>(null)
   const [prepData, setPrepData] = useState<InterviewPrepData | null>(null)
   const [baseResumeExperiences, setBaseResumeExperiences] = useState<any[]>([])
   const [tailoredResumeData, setTailoredResumeData] = useState<any>(null)
@@ -265,7 +266,18 @@ export default function InterviewPrep() {
           },
         })
 
-        if (tailoredResponse.ok) {
+        if (!tailoredResponse.ok) {
+          if (tailoredResponse.status === 404) {
+            const errorData = await tailoredResponse.json()
+            console.warn('Tailored resume not found:', errorData)
+            // Interview prep exists but tailored resume is deleted - show warning
+            setWarning(`The original resume for this interview prep has been deleted. Some features like STAR Story Builder may not work.`)
+            // Still show the interview prep data we have
+            await fetchRealData(result.data.prep_data)
+          } else {
+            throw new Error(`Failed to fetch tailored resume: ${tailoredResponse.status}`)
+          }
+        } else {
           const tailoredData = await tailoredResponse.json()
           setTailoredResumeData(tailoredData)
 
@@ -699,6 +711,24 @@ export default function InterviewPrep() {
             <ArrowLeft className="w-5 h-5" />
             Back to Resume
           </button>
+
+          {/* Warning Banner */}
+          {warning && (
+            <div className="mb-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-yellow-400 text-sm font-medium mb-1">Warning</p>
+                <p className="text-gray-300 text-sm">{warning}</p>
+              </div>
+              <button
+                onClick={() => setWarning(null)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">Interview Preparation</h1>

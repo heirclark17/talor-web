@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import { Loader2, Sparkles, Save, Trash2, Edit, Check, X, Plus } from 'lucide-react'
 import { api } from '../api/client'
 
+// API base URL - same logic as API client
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+
 interface Experience {
   header?: string
   title?: string
@@ -60,7 +63,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
     try {
       setGenerating(true)
 
-      const response = await fetch('/api/interview-prep/generate-star-story', {
+      const response = await fetch(`${API_BASE_URL}/api/interview-prep/generate-star-story`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,6 +76,10 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
           company_context: companyContext,
         }),
       })
+
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}: ${response.statusText}`)
+      }
 
       const data = await response.json()
 
