@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save, RotateCcw } from 'lucide-react'
+import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save, RotateCcw, Bookmark } from 'lucide-react'
 import { api } from '../api/client'
 import ChangeExplanation from '../components/ChangeExplanation'
 import ResumeAnalysis from '../components/ResumeAnalysis'
@@ -638,6 +638,37 @@ export default function TailorResume() {
     }
   }
 
+  // Save comparison for later viewing
+  const saveComparison = async () => {
+    if (!tailoredResume?.id) return
+
+    try {
+      const userId = localStorage.getItem('talor_user_id')
+      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+
+      const response = await fetch(`${API_BASE_URL}/api/saved-comparisons/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userId || ''
+        },
+        body: JSON.stringify({
+          tailored_resume_id: tailoredResume.id,
+          title: `${tailoredResume.company} - ${tailoredResume.title}`
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save comparison')
+      }
+
+      alert('Comparison saved successfully! View it in the Saved menu.')
+    } catch (err: any) {
+      console.error('Error saving comparison:', err)
+      alert('Failed to save comparison')
+    }
+  }
+
   const resetForm = () => {
     setJobUrl('')
     setCompany('')
@@ -686,6 +717,14 @@ export default function TailorResume() {
             </div>
             <div className="flex items-center gap-3">
               <ThemeToggle />
+              <button
+                onClick={saveComparison}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl"
+                title="Save this comparison for later"
+              >
+                <Bookmark className="w-5 h-5" />
+                Save Comparison
+              </button>
               <button
                 onClick={resetForm}
                 className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl"
