@@ -1306,14 +1306,15 @@ export default function TailorResume() {
               />
               <p className="text-sm text-gray-400 mt-6 flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                Just paste the URL - we'll automatically extract company name, job title, and full description
+                Just paste the URL - we'll automatically extract company name, job title, and full description.
+                If extraction fails, provide company or job title below.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <label className="block text-base font-bold text-white mb-4">
-                  Company Name (Optional)
+                  Company Name (Optional - Fallback)
                 </label>
                 <input
                   type="text"
@@ -1322,11 +1323,14 @@ export default function TailorResume() {
                   placeholder="JPMorgan Chase"
                   className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
                 />
+                <p className="text-xs text-gray-500 mt-2">
+                  Provide if URL extraction fails or no URL available
+                </p>
               </div>
 
               <div>
                 <label className="block text-base font-bold text-white mb-4">
-                  Job Title (Optional)
+                  Job Title (Optional - Fallback)
                 </label>
                 <input
                   type="text"
@@ -1335,6 +1339,9 @@ export default function TailorResume() {
                   placeholder="Lead Technical Program Manager"
                   className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
                 />
+                <p className="text-xs text-gray-500 mt-2">
+                  Provide if URL extraction fails or no URL available
+                </p>
               </div>
             </div>
           </div>
