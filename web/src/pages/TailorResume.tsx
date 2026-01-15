@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save, RotateCcw, Bookmark } from 'lucide-react'
 import { api } from '../api/client'
 import ChangeExplanation from '../components/ChangeExplanation'
@@ -40,6 +40,7 @@ interface TailoredResume {
 export default function TailorResume() {
   const location = useLocation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [resumes, setResumes] = useState<BaseResume[]>([])
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
   const [selectedResume, setSelectedResume] = useState<BaseResume | null>(null)
@@ -150,6 +151,89 @@ export default function TailorResume() {
   // Don't auto-load analysis - wait for user to click tabs (lazy loading)
   // This makes the page load instantly instead of waiting 3-5 minutes
   // Analysis will load when user clicks the Analysis or Insights tabs
+
+  // Load saved comparison from URL parameter
+  useEffect(() => {
+    const loadSavedComparison = async () => {
+      const comparisonId = searchParams.get('comparison')
+      if (comparisonId && !tailoredResume && !loading) {
+        console.log('Loading saved comparison:', comparisonId)
+        try {
+          const userId = localStorage.getItem('talor_user_id')
+          const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+
+          const response = await fetch(`${API_BASE_URL}/api/saved-comparisons/${comparisonId}`, {
+            headers: {
+              'Content-Type': 'application/json',
+              'X-User-ID': userId || ''
+            }
+          })
+
+          if (!response.ok) {
+            throw new Error('Failed to load saved comparison')
+          }
+
+          const data = await response.json()
+          console.log('Loaded saved comparison data:', data)
+
+          // Set base resume data
+          setSelectedResume({
+            id: 0, // Placeholder - not used when viewing saved comparison
+            filename: 'Base Resume',
+            summary: data.base_resume.summary,
+            skills: data.base_resume.skills,
+            experience: data.base_resume.experience,
+            education: data.base_resume.education,
+            certifications: data.base_resume.certifications,
+            skills_count: data.base_resume.skills.length,
+            uploaded_at: ''
+          })
+
+          // Set tailored resume data
+          setTailoredResume({
+            id: data.tailored_resume.id || 0,
+            tailored_summary: data.tailored_resume.summary,
+            tailored_skills: data.tailored_resume.skills,
+            tailored_experience: data.tailored_resume.experience,
+            tailored_education: data.tailored_resume.education,
+            tailored_certifications: data.tailored_resume.certifications,
+            alignment_statement: data.tailored_resume.alignment_statement,
+            quality_score: 0,
+            docx_path: '',
+            company: data.job.company,
+            title: data.job.title
+          })
+
+          // Set job data
+          setCompany(data.job.company)
+          setJobTitle(data.job.title)
+          setJobUrl(data.job.url || '')
+
+          // Restore persisted AI analysis data
+          if (data.analysis) {
+            console.log('Restoring persisted AI analysis')
+            setAnalysis(data.analysis)
+            setAnalysisLoaded(true)
+          }
+          if (data.keywords) {
+            console.log('Restoring persisted keyword analysis')
+            setKeywords(data.keywords)
+          }
+          if (data.match_score) {
+            console.log('Restoring persisted match score')
+            setMatchScore(data.match_score)
+          }
+
+          setShowComparison(true)
+          setSuccess(true)
+        } catch (err: any) {
+          console.error('Error loading saved comparison:', err)
+          setError('Failed to load saved comparison')
+        }
+      }
+    }
+    loadSavedComparison()
+  }, [searchParams])
 
   // Restore last viewed tailored resume on mount
   useEffect(() => {
@@ -638,7 +722,7 @@ export default function TailorResume() {
     }
   }
 
-  // Save comparison for later viewing
+  // Save comparison for later viewing with AI analysis data
   const saveComparison = async () => {
     if (!tailoredResume?.id) return
 
@@ -654,7 +738,11 @@ export default function TailorResume() {
         },
         body: JSON.stringify({
           tailored_resume_id: tailoredResume.id,
-          title: `${tailoredResume.company} - ${tailoredResume.title}`
+          title: `${tailoredResume.company} - ${tailoredResume.title}`,
+          // Persist AI analysis data so user sees exact same data when reopening
+          analysis_data: analysis,
+          keywords_data: keywords,
+          match_score_data: matchScore
         })
       })
 
