@@ -3,8 +3,9 @@ import { Upload, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-reac
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 
-// LocalStorage key for clearing old tailored resumes
+// LocalStorage keys for clearing old tailored resumes
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
+const TAILOR_SESSION_KEY = 'tailor_session_data'
 
 interface ParsedResume {
   resume_id: number
@@ -21,23 +22,59 @@ interface ParsedResume {
   }
 }
 
+interface ExistingResume {
+  id: number
+  filename: string
+  uploaded_at: string
+  skills_count: number
+}
+
 export default function UploadResume() {
   const navigate = useNavigate()
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null)
+  const [existingResumes, setExistingResumes] = useState<ExistingResume[]>([])
+  const [loadingResumes, setLoadingResumes] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Clear old tailored resume data when user navigates to upload page
   // This ensures they start fresh with a new resume
   useEffect(() => {
     const savedResumeId = localStorage.getItem(LAST_TAILORED_RESUME_KEY)
-    if (savedResumeId) {
-      console.log('Clearing old tailored resume from localStorage:', savedResumeId)
+    const sessionData = localStorage.getItem(TAILOR_SESSION_KEY)
+
+    if (savedResumeId || sessionData) {
+      console.log('Clearing old session data from localStorage')
       localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
+      localStorage.removeItem(TAILOR_SESSION_KEY)
     }
   }, [])
+
+  // Load existing resumes on mount
+  useEffect(() => {
+    loadExistingResumes()
+  }, [])
+
+  const loadExistingResumes = async () => {
+    try {
+      setLoadingResumes(true)
+      const result = await api.listResumes()
+
+      if (result.success && result.data.resumes) {
+        setExistingResumes(result.data.resumes)
+      }
+    } catch (err) {
+      console.error('Error loading existing resumes:', err)
+    } finally {
+      setLoadingResumes(false)
+    }
+  }
+
+  const handleUseExistingResume = (resumeId: number) => {
+    navigate('/tailor', { state: { selectedResumeId: resumeId } })
+  }
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -96,12 +133,48 @@ export default function UploadResume() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
-      <div className="w-full max-w-3xl">
-        <div className="text-center mb-32">
+    <div className="min-h-screen p-8">
+      <div className="w-full max-w-4xl mx-auto">
+        <div className="text-center mb-16">
           <h1 className="text-6xl font-bold text-white mb-8">Upload Resume</h1>
-          <p className="text-2xl text-gray-400">Upload your base resume to start tailoring for specific jobs</p>
+          <p className="text-2xl text-gray-400">Upload a new resume or use an existing one to start tailoring</p>
         </div>
+
+      {/* Existing Resumes Section */}
+      {!loadingResumes && existingResumes.length > 0 && (
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-6">Or Use an Existing Resume</h2>
+          <div className="grid gap-4">
+            {existingResumes.map((resume) => (
+              <div key={resume.id} className="glass rounded-xl p-6 flex items-center justify-between hover:bg-white/10 transition-all">
+                <div className="flex items-center gap-4">
+                  <FileText className="w-8 h-8 text-white" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{resume.filename}</h3>
+                    <p className="text-sm text-gray-400">
+                      {resume.skills_count} skills • Uploaded {new Date(resume.uploaded_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleUseExistingResume(resume.id)}
+                  className="btn-primary"
+                >
+                  Use This Resume →
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="relative my-12">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/20"></div>
+            </div>
+            <div className="relative flex justify-center">
+              <span className="px-4 bg-[var(--bg-primary)] text-gray-400">or upload a new one</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Upload Area */}
       <div className="glass rounded-3xl p-16 mb-24">

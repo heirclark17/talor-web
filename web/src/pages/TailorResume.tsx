@@ -8,8 +8,9 @@ import KeywordPanel from '../components/KeywordPanel'
 import MatchScore from '../components/MatchScore'
 import ThemeToggle from '../components/ThemeToggle'
 
-// LocalStorage key for persisting last viewed tailored resume
+// LocalStorage keys for persisting tailor session
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
+const TAILOR_SESSION_KEY = 'tailor_session_data'
 
 interface BaseResume {
   id: number
@@ -35,6 +36,54 @@ interface TailoredResume {
   docx_path: string
   company: string
   title: string
+}
+
+// Helper functions for session persistence
+const saveSessionToLocalStorage = (
+  selectedResume: BaseResume | null,
+  tailoredResume: TailoredResume | null,
+  jobUrl: string,
+  company: string,
+  jobTitle: string
+) => {
+  try {
+    const sessionData = {
+      selectedResume,
+      tailoredResume,
+      jobUrl,
+      company,
+      jobTitle,
+      timestamp: Date.now()
+    }
+    localStorage.setItem(TAILOR_SESSION_KEY, JSON.stringify(sessionData))
+    console.log('Saved session to localStorage')
+  } catch (err) {
+    console.error('Error saving session:', err)
+  }
+}
+
+const loadSessionFromLocalStorage = () => {
+  try {
+    const sessionData = localStorage.getItem(TAILOR_SESSION_KEY)
+    if (!sessionData) return null
+
+    const parsed = JSON.parse(sessionData)
+    console.log('Loaded session from localStorage')
+    return parsed
+  } catch (err) {
+    console.error('Error loading session:', err)
+    return null
+  }
+}
+
+const clearSession = () => {
+  try {
+    localStorage.removeItem(TAILOR_SESSION_KEY)
+    localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
+    console.log('Cleared session from localStorage')
+  } catch (err) {
+    console.error('Error clearing session:', err)
+  }
 }
 
 export default function TailorResume() {
@@ -235,17 +284,52 @@ export default function TailorResume() {
     loadSavedComparison()
   }, [searchParams])
 
-  // Restore last viewed tailored resume on mount
+  // Restore session from localStorage on mount (takes priority over API calls)
+  useEffect(() => {
+    const restoreSession = () => {
+      // Don't restore if loading from URL comparison parameter
+      const comparisonId = searchParams.get('comparison')
+      if (comparisonId) {
+        console.log('Skipping session restore - loading from URL comparison')
+        return
+      }
+
+      const session = loadSessionFromLocalStorage()
+      if (session && session.tailoredResume && session.selectedResume) {
+        console.log('Restoring session from localStorage')
+        setSelectedResume(session.selectedResume)
+        setTailoredResume(session.tailoredResume)
+        setJobUrl(session.jobUrl || '')
+        setCompany(session.company || '')
+        setJobTitle(session.jobTitle || '')
+        setShowComparison(true)
+        setSuccess(true)
+      }
+    }
+    restoreSession()
+  }, []) // Only run on mount
+
+  // Restore last viewed tailored resume on mount (fallback if no session data)
   useEffect(() => {
     const restoreLastViewed = async () => {
       const savedId = localStorage.getItem(LAST_TAILORED_RESUME_KEY)
-      if (savedId && !tailoredResume && !loading) {
+      const session = loadSessionFromLocalStorage()
+
+      // Only load from API if no session data exists
+      if (savedId && !tailoredResume && !loading && !session) {
         console.log('Restoring last viewed tailored resume:', savedId)
         await loadTailoredResumeById(parseInt(savedId))
       }
     }
     restoreLastViewed()
   }, []) // Only run on mount
+
+  // Save session whenever relevant data changes
+  useEffect(() => {
+    if (tailoredResume && selectedResume) {
+      saveSessionToLocalStorage(selectedResume, tailoredResume, jobUrl, company, jobTitle)
+    }
+  }, [tailoredResume, selectedResume, jobUrl, company, jobTitle])
 
   // Scroll sync effect
   useEffect(() => {
@@ -770,9 +854,8 @@ export default function TailorResume() {
     setKeywords(null)
     setMatchScore(null)
 
-    // Clear persisted tailored resume
-    localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
-    console.log('Cleared saved tailored resume from localStorage')
+    // Clear persisted session data
+    clearSession()
   }
 
   // Handle tab change with lazy loading
