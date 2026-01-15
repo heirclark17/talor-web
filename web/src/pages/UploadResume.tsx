@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Trash2 } from 'lucide-react'
+import { Upload, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 
@@ -22,22 +22,12 @@ interface ParsedResume {
   }
 }
 
-interface ExistingResume {
-  id: number
-  filename: string
-  uploaded_at: string
-  skills_count: number
-}
-
 export default function UploadResume() {
   const navigate = useNavigate()
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null)
-  const [existingResumes, setExistingResumes] = useState<ExistingResume[]>([])
-  const [loadingResumes, setLoadingResumes] = useState(true)
-  const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Clear old tailored resume data when user navigates to upload page
@@ -52,77 +42,6 @@ export default function UploadResume() {
       localStorage.removeItem(TAILOR_SESSION_KEY)
     }
   }, [])
-
-  // Load existing resumes on mount
-  useEffect(() => {
-    loadExistingResumes()
-  }, [])
-
-  const loadExistingResumes = async () => {
-    try {
-      setLoadingResumes(true)
-      const result = await api.listResumes()
-
-      if (result.success && result.data.resumes) {
-        // Remove duplicates based on filename (keep newest)
-        const uniqueResumes = result.data.resumes.reduce((acc: ExistingResume[], current: ExistingResume) => {
-          const duplicate = acc.find(r => r.filename === current.filename)
-          if (!duplicate) {
-            acc.push(current)
-          } else {
-            // Keep the newer one (higher ID = newer upload)
-            if (current.id > duplicate.id) {
-              const index = acc.indexOf(duplicate)
-              acc[index] = current
-            }
-          }
-          return acc
-        }, [])
-
-        // Sort by upload date (newest first)
-        uniqueResumes.sort((a, b) =>
-          new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
-        )
-
-        setExistingResumes(uniqueResumes)
-        console.log(`Loaded ${uniqueResumes.length} unique resumes (removed ${result.data.resumes.length - uniqueResumes.length} duplicates)`)
-      }
-    } catch (err) {
-      console.error('Error loading existing resumes:', err)
-    } finally {
-      setLoadingResumes(false)
-    }
-  }
-
-  const handleUseExistingResume = (resumeId: number) => {
-    navigate('/tailor', { state: { selectedResumeId: resumeId } })
-  }
-
-  const handleDeleteResume = async (resumeId: number, e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent navigating to tailor page
-
-    if (!confirm('Are you sure you want to delete this resume? This action cannot be undone.')) {
-      return
-    }
-
-    try {
-      setDeletingResumeId(resumeId)
-      const result = await api.deleteResume(resumeId)
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to delete resume')
-      }
-
-      // Remove from local state
-      setExistingResumes(prev => prev.filter(r => r.id !== resumeId))
-      console.log('Resume deleted successfully:', resumeId)
-    } catch (err: any) {
-      console.error('Delete error:', err)
-      setError(err.message || 'Failed to delete resume')
-    } finally {
-      setDeletingResumeId(null)
-    }
-  }
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -199,60 +118,19 @@ export default function UploadResume() {
   return (
     <div className="min-h-screen p-8">
       <div className="w-full max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <h1 className="text-6xl font-bold text-white mb-8">Upload Resume</h1>
-          <p className="text-2xl text-gray-400">Upload a new resume or use an existing one to start tailoring</p>
-        </div>
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-bold text-white mb-6">Upload Resume</h1>
+          <p className="text-xl text-gray-400 mb-8">Upload a new resume to start tailoring for your next job</p>
 
-      {/* Existing Resumes Section */}
-      {!loadingResumes && existingResumes.length > 0 && (
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold text-white mb-6">Or Use an Existing Resume</h2>
-          <div className="grid gap-4">
-            {existingResumes.map((resume) => (
-              <div key={resume.id} className="glass rounded-xl p-6 flex items-center justify-between hover:bg-white/10 transition-all">
-                <div className="flex items-center gap-4">
-                  <FileText className="w-8 h-8 text-white" />
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">{resume.filename}</h3>
-                    <p className="text-sm text-gray-400">
-                      {resume.skills_count} skills • Uploaded {new Date(resume.uploaded_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={(e) => handleDeleteResume(resume.id, e)}
-                    disabled={deletingResumeId === resume.id}
-                    className="p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Delete resume"
-                  >
-                    {deletingResumeId === resume.id ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Trash2 className="w-5 h-5" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => handleUseExistingResume(resume.id)}
-                    className="btn-primary"
-                  >
-                    Use This Resume →
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="relative my-12">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/20"></div>
-            </div>
-            <div className="relative flex justify-center">
-              <span className="px-4 bg-[var(--bg-primary)] text-gray-400">or upload a new one</span>
-            </div>
-          </div>
+          {/* Button to use existing resume */}
+          <button
+            onClick={() => navigate('/tailor')}
+            className="btn-secondary inline-flex items-center gap-2"
+          >
+            <FileText className="w-5 h-5" />
+            Use Existing Resume Instead
+          </button>
         </div>
-      )}
 
       {/* Upload Area */}
       <div className="glass rounded-3xl p-16 mb-24">
