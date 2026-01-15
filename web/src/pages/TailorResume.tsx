@@ -81,6 +81,8 @@ export default function TailorResume() {
   const [matchScore, setMatchScore] = useState<any>(null)
   const [loadingAnalysis, setLoadingAnalysis] = useState(false)
   const [detailMode, setDetailMode] = useState(false)
+  const [analysisProgress, setAnalysisProgress] = useState<string>('')
+  const [analysisEstimate, setAnalysisEstimate] = useState<number>(0)
 
   // Tab state for main content organization
   const [activeTab, setActiveTab] = useState<'comparison' | 'analysis' | 'insights'>('comparison')
@@ -368,7 +370,9 @@ export default function TailorResume() {
     const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
     try {
-      // Load analysis
+      // Load analysis (60-90s estimated)
+      setAnalysisProgress('Analyzing resume changes with AI...')
+      setAnalysisEstimate(75)
       const analysisRes = await fetch(`${API_BASE_URL}/api/resume-analysis/analyze-changes`, {
         method: 'POST',
         headers: {
@@ -382,7 +386,9 @@ export default function TailorResume() {
         setAnalysis(data.analysis)
       }
 
-      // Load keywords
+      // Load keywords (60-90s estimated)
+      setAnalysisProgress('Extracting keywords and ATS optimization...')
+      setAnalysisEstimate(75)
       const keywordsRes = await fetch(`${API_BASE_URL}/api/resume-analysis/analyze-keywords`, {
         method: 'POST',
         headers: {
@@ -396,7 +402,9 @@ export default function TailorResume() {
         setKeywords(data.keywords)
       }
 
-      // Load match score
+      // Load match score (60-90s estimated)
+      setAnalysisProgress('Calculating match score and breakdown...')
+      setAnalysisEstimate(75)
       const scoreRes = await fetch(`${API_BASE_URL}/api/resume-analysis/match-score`, {
         method: 'POST',
         headers: {
@@ -409,8 +417,12 @@ export default function TailorResume() {
         const data = await scoreRes.json()
         setMatchScore(data.match_score)
       }
+
+      setAnalysisProgress('Analysis complete!')
+      setAnalysisEstimate(0)
     } catch (error) {
       console.error('Error loading analysis:', error)
+      setAnalysisProgress('Error loading analysis')
     } finally {
       setLoadingAnalysis(false)
     }
@@ -799,6 +811,33 @@ export default function TailorResume() {
               </div>
             </div>
           </div>
+
+          {/* Loading Progress Indicator */}
+          {loadingAnalysis && (
+            <div className="mb-6 p-6 glass rounded-xl border border-blue-500/30">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-500/20 rounded-lg">
+                  <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold text-white">{analysisProgress}</h3>
+                    {analysisEstimate > 0 && (
+                      <span className="text-sm text-gray-400">
+                        ~{analysisEstimate} seconds
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 rounded-full animate-pulse" style={{ width: '70%' }} />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">
+                    Powered by GPT-4.1-mini • This may take 3-5 minutes total
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Tab Navigation */}
           <div className="mb-6 glass rounded-xl border border-white/20 p-2">
