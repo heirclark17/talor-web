@@ -200,37 +200,35 @@ export default function UploadResume() {
             </div>
           )}
 
-          {/* Experience Card */}
+          {/* Experience Section - Each job in separate card */}
           {parsedResume.parsed_data.experience && parsedResume.parsed_data.experience.length > 0 && (
-            <div className="glass rounded-xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Professional Experience</h3>
-              <div className="space-y-6">
-                {parsedResume.parsed_data.experience.map((job, idx) => (
-                  <div key={idx} className="border-l-4 border-white/20 pl-4">
-                    <h4 className="font-semibold text-white mb-1">
-                      {job.header || job.title || job.position || 'Position'}
-                    </h4>
-                    {(job.location || job.dates) && (
-                      <p className="text-sm text-gray-400 italic mb-2">
-                        {job.location && job.dates ? `${job.location} | ${job.dates}` : job.location || job.dates}
-                      </p>
-                    )}
-                    {job.bullets && Array.isArray(job.bullets) && job.bullets.length > 0 ? (
-                      <ul className="list-disc list-inside space-y-1">
-                        {job.bullets.map((bullet, bulletIdx) => (
-                          <li key={bulletIdx} className="text-gray-400 text-sm">
-                            {bullet}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : job.description ? (
-                      <p className="text-gray-400 text-sm">{job.description}</p>
-                    ) : (
-                      <p className="text-gray-500 text-sm italic">No details available</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-white">Professional Experience</h3>
+              {parsedResume.parsed_data.experience.map((job, idx) => (
+                <div key={idx} className="glass rounded-xl p-6">
+                  <h4 className="font-semibold text-white mb-1">
+                    {job.header || job.title || job.position || 'Position'}
+                  </h4>
+                  {(job.location || job.dates) && (
+                    <p className="text-sm text-gray-400 italic mb-3">
+                      {job.location && job.dates ? `${job.location} | ${job.dates}` : job.location || job.dates}
+                    </p>
+                  )}
+                  {job.bullets && Array.isArray(job.bullets) && job.bullets.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-1">
+                      {job.bullets.map((bullet, bulletIdx) => (
+                        <li key={bulletIdx} className="text-gray-400 text-sm">
+                          {bullet}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : job.description ? (
+                    <p className="text-gray-400 text-sm">{job.description}</p>
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">No details available</p>
+                  )}
+                </div>
+              ))}
             </div>
           )}
 
