@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save } from 'lucide-react'
+import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save, RotateCcw } from 'lucide-react'
 import { api } from '../api/client'
 import ChangeExplanation from '../components/ChangeExplanation'
 import ResumeAnalysis from '../components/ResumeAnalysis'
 import KeywordPanel from '../components/KeywordPanel'
 import MatchScore from '../components/MatchScore'
 import ThemeToggle from '../components/ThemeToggle'
+
+// LocalStorage key for persisting last viewed tailored resume
+const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
 
 interface BaseResume {
   id: number
@@ -145,6 +148,18 @@ export default function TailorResume() {
     }
   }, [tailoredResume?.id])
 
+  // Restore last viewed tailored resume on mount
+  useEffect(() => {
+    const restoreLastViewed = async () => {
+      const savedId = localStorage.getItem(LAST_TAILORED_RESUME_KEY)
+      if (savedId && !tailoredResume && !loading) {
+        console.log('Restoring last viewed tailored resume:', savedId)
+        await loadTailoredResumeById(parseInt(savedId))
+      }
+    }
+    restoreLastViewed()
+  }, []) // Only run on mount
+
   // Scroll sync effect
   useEffect(() => {
     if (!syncScroll || !leftPanelRef.current || !rightPanelRef.current) return
@@ -276,6 +291,68 @@ export default function TailorResume() {
       setError(err.message)
     } finally {
       setLoadingResumes(false)
+    }
+  }
+
+  // Load a tailored resume by ID (for restoring from localStorage)
+  const loadTailoredResumeById = async (tailoredId: number) => {
+    try {
+      setLoading(true)
+      const userId = localStorage.getItem('talor_user_id')
+      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+
+      // Fetch the tailored resume
+      const response = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredId}`, {
+        headers: {
+          'X-User-ID': userId || ''
+        }
+      })
+
+      if (!response.ok) {
+        // If tailored resume not found, clear localStorage
+        if (response.status === 404) {
+          localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
+          throw new Error('Saved resume no longer exists')
+        }
+        throw new Error('Failed to load saved resume')
+      }
+
+      const data = await response.json()
+
+      // Load the base resume
+      await loadFullResume(data.base_resume_id)
+      setSelectedResumeId(data.base_resume_id)
+
+      // Set the tailored resume
+      setTailoredResume({
+        id: data.id,
+        tailored_summary: data.tailored_summary,
+        tailored_skills: data.tailored_skills || [],
+        tailored_experience: data.tailored_experience || [],
+        tailored_education: data.tailored_education || '',
+        tailored_certifications: data.tailored_certifications || '',
+        alignment_statement: data.alignment_statement || '',
+        quality_score: data.quality_score || 95,
+        docx_path: data.docx_path,
+        company: data.job?.company || 'Unknown Company',
+        title: data.job?.title || 'Unknown Position'
+      })
+
+      // Set job details for the form
+      setCompany(data.job?.company || '')
+      setJobTitle(data.job?.title || '')
+      setJobUrl(data.job?.url || '')
+
+      setShowComparison(true)
+      setSuccess(true)
+
+      console.log('Successfully restored tailored resume:', tailoredId)
+    } catch (err: any) {
+      console.error('Error loading tailored resume:', err)
+      setError(err.message)
+      localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -521,8 +598,9 @@ export default function TailorResume() {
       }
 
       // Set tailored resume data
+      const tailoredId = result.data.tailored_resume_id
       setTailoredResume({
-        id: result.data.tailored_resume_id,
+        id: tailoredId,
         tailored_summary: result.data.summary,
         tailored_skills: result.data.competencies || [],
         tailored_experience: result.data.experience || [],
@@ -534,6 +612,10 @@ export default function TailorResume() {
         company: result.data.company || company,
         title: result.data.title || jobTitle
       })
+
+      // Save to localStorage for persistence
+      localStorage.setItem(LAST_TAILORED_RESUME_KEY, tailoredId.toString())
+      console.log('Saved tailored resume to localStorage:', tailoredId)
 
       setSuccess(true)
       setShowComparison(true)
@@ -552,6 +634,10 @@ export default function TailorResume() {
     setShowComparison(false)
     setSuccess(false)
     setError(null)
+
+    // Clear persisted tailored resume
+    localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
+    console.log('Cleared saved tailored resume from localStorage')
   }
 
   if (showComparison && selectedResume && tailoredResume) {
@@ -571,12 +657,16 @@ export default function TailorResume() {
                 <p className="text-gray-400 mt-1">Original vs. Tailored for {tailoredResume.company}</p>
               </div>
             </div>
-            <button
-              onClick={resetForm}
-              className="btn-secondary"
-            >
-              ← Back to Tailoring
-            </button>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <button
+                onClick={resetForm}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Start New Resume
+              </button>
+            </div>
           </div>
 
           {/* Control Bar */}
