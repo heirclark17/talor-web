@@ -37,6 +37,7 @@ import {
 import { api } from '../api/client'
 import STARStoryBuilder from '../components/STARStoryBuilder'
 import VideoRecorder from '../components/VideoRecorder'
+import CommonInterviewQuestions from '../components/CommonInterviewQuestions'
 
 // API base URL - same logic as API client
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
@@ -179,6 +180,7 @@ export default function InterviewPrep() {
   const [error, setError] = useState<string | null>(null)
   const [warning, setWarning] = useState<string | null>(null)
   const [prepData, setPrepData] = useState<InterviewPrepData | null>(null)
+  const [interviewPrepId, setInterviewPrepId] = useState<number | null>(null)
   const [baseResumeExperiences, setBaseResumeExperiences] = useState<any[]>([])
   const [tailoredResumeData, setTailoredResumeData] = useState<any>(null)
 
@@ -204,6 +206,7 @@ export default function InterviewPrep() {
       preparation: true,
       questions: true,
       practice: true,
+      commonQuestions: true,
       positioning: true
     }
   })
@@ -258,6 +261,7 @@ export default function InterviewPrep() {
 
       if (result.success) {
         setPrepData(result.data.prep_data)
+        setInterviewPrepId(result.data.id)
 
         // Also fetch the tailored resume to get base resume ID
         const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
@@ -369,6 +373,7 @@ export default function InterviewPrep() {
 
       if (result.success) {
         setPrepData(result.data.prep_data)
+        setInterviewPrepId(result.data.id)
         // After setting prep data, fetch related resume data and real data
         await fetchRelatedData(result.data.prep_data)
         return result.data.prep_data
@@ -1693,6 +1698,32 @@ export default function InterviewPrep() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Common Interview Questions People Struggle With */}
+        {interviewPrepId && (
+          <section className="glass rounded-3xl mt-6 overflow-hidden">
+            <button
+              onClick={() => toggleSection('commonQuestions')}
+              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <MessageSquare className="w-6 h-6 text-white" />
+                <h2 className="text-2xl font-bold text-white">Common Interview Questions People Struggle With</h2>
+              </div>
+              {expandedSections.commonQuestions ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
+            </button>
+
+            {expandedSections.commonQuestions && (
+              <div className="px-8 pb-8">
+                <CommonInterviewQuestions
+                  interviewPrepId={interviewPrepId}
+                  companyName={prepData?.company_profile.name || ''}
+                  jobTitle={prepData?.role_analysis.job_title || ''}
+                />
               </div>
             )}
           </section>
