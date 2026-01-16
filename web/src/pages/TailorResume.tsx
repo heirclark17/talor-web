@@ -15,6 +15,15 @@ const TAILOR_SESSION_KEY = 'tailor_session_data'
 interface BaseResume {
   id: number
   filename: string
+
+  // Contact Information (ATS Required)
+  name?: string
+  email?: string
+  phone?: string
+  linkedin?: string
+  location?: string
+
+  // Resume Sections
   summary: string
   skills: string[]
   experience: any[]
@@ -880,16 +889,22 @@ export default function TailorResume() {
       return
     }
 
-    // If extraction was attempted, validate that missing fields are filled
-    if (extractionAttempted) {
-      if (!companyExtracted && !trimmedCompany) {
-        setError('Company name is required. Please enter it manually.')
-        return
-      }
-      if (!titleExtracted && !trimmedJobTitle) {
-        setError('Job title is required. Please enter it manually.')
-        return
-      }
+    // Require extraction to be attempted first
+    if (!extractionAttempted) {
+      setError('Please click "Extract Details" to extract company name and job title from the URL first')
+      // Auto-trigger extraction for user convenience
+      await handleExtractJobDetails()
+      return
+    }
+
+    // Validate that missing fields are filled after extraction
+    if (!companyExtracted && !trimmedCompany) {
+      setError('Company name is required. Please enter it manually.')
+      return
+    }
+    if (!titleExtracted && !trimmedJobTitle) {
+      setError('Job title is required. Please enter it manually.')
+      return
     }
 
     setLoading(true)

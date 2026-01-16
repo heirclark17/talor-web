@@ -102,6 +102,15 @@ export default function UploadResume() {
       console.log('Upload successful:', uploadResult.data)
       console.log('Full response structure:', JSON.stringify(uploadResult.data, null, 2))
 
+      // Log the raw parsed_data to see what backend is sending
+      console.log('=== RAW BACKEND PARSED_DATA ===')
+      console.log('parsed_data object:', uploadResult.data.parsed_data)
+      console.log('Available top-level fields:', Object.keys(uploadResult.data).join(', '))
+      if (uploadResult.data.parsed_data) {
+        console.log('Available parsed_data fields:', Object.keys(uploadResult.data.parsed_data).join(', '))
+      }
+      console.log('===============================')
+
       // Success - map backend response to our interface
       const backendData = uploadResult.data.parsed_data || uploadResult.data
 
