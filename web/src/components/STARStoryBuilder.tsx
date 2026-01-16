@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Loader2, Sparkles, Save, Trash2, Edit, Check, X, Plus, ChevronDown, ChevronUp, Play } from 'lucide-react'
 import { api } from '../api/client'
 import PracticeSession from './PracticeSession'
@@ -47,10 +47,50 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
   const [selectedTone, setSelectedTone] = useState<string>('professional')
   const [generating, setGenerating] = useState(false)
   const [stories, setStories] = useState<STARStory[]>([])
+  const [loadingStories, setLoadingStories] = useState(true)
   const [editingStory, setEditingStory] = useState<string | null>(null)
   const [editedStory, setEditedStory] = useState<STARStory | null>(null)
   const [collapsedStories, setCollapsedStories] = useState<Set<string>>(new Set())
   const [practicingStory, setPracticingStory] = useState<STARStory | null>(null)
+
+  // Load existing stories for this interview prep
+  useEffect(() => {
+    const loadExistingStories = async () => {
+      try {
+        setLoadingStories(true)
+        const response = await fetch(`${API_BASE_URL}/api/star-stories/list?tailored_resume_id=${tailoredResumeId}`, {
+          headers: {
+            'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.stories) {
+            const loadedStories = data.stories.map((s: any) => ({
+              id: s.id.toString(),
+              title: s.title,
+              situation: s.situation,
+              task: s.task,
+              action: s.action,
+              result: s.result,
+              key_themes: s.key_themes || [],
+              talking_points: s.talking_points || [],
+            }))
+            setStories(loadedStories)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading existing stories:', error)
+      } finally {
+        setLoadingStories(false)
+      }
+    }
+
+    if (tailoredResumeId) {
+      loadExistingStories()
+    }
+  }, [tailoredResumeId])
 
   const toggleExperience = (index: number) => {
     const newSet = new Set(selectedExperiences)
@@ -143,10 +183,21 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
           }
           setStories([...stories, newStory])
 
-          // Reset selections
+          // Reset selections to allow creating more stories
           setSelectedExperiences(new Set())
+          setSelectedTheme(storyThemes[0] || '')
+          setSelectedTone('professional')
 
-          alert('✓ STAR story generated and saved successfully!')
+          // Scroll to the new story
+          setTimeout(() => {
+            const storyElements = document.querySelectorAll('[data-story-id]')
+            const lastStory = storyElements[storyElements.length - 1]
+            if (lastStory) {
+              lastStory.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+          }, 100)
+
+          alert('✓ STAR story generated and saved successfully!\n\nYou can now create another story by selecting different experiences and themes.')
         } else {
           throw new Error('Failed to save story: ' + (saveData.error || 'Unknown error'))
         }
@@ -340,6 +391,14 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       </div>
 
       {/* Generate Button */}
+      {stories.length > 0 && (
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+          <p className="text-blue-300 text-sm">
+            <strong>Ready to create another story?</strong> Select different experiences and a new theme below, then click Generate STAR Story again.
+          </p>
+        </div>
+      )}
+
       <button
         onClick={generateStory}
         disabled={generating || selectedExperiences.size === 0}
@@ -353,7 +412,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         ) : (
           <>
             <Sparkles className="w-6 h-6" />
-            Generate STAR Story
+            {stories.length > 0 ? 'Generate Another STAR Story' : 'Generate STAR Story'}
           </>
         )}
       </button>
@@ -361,9 +420,17 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       {/* Generated Stories */}
       {stories.length > 0 && (
         <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-white">Your STAR Stories</h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-lg font-semibold text-white">Your STAR Stories ({stories.length})</h4>
+            <p className="text-sm text-gray-400">
+              All stories are automatically saved and available on the STAR Stories page
+            </p>
+          </div>
           {stories.map((story) => (
-            <div key={story.id} className="glass rounded-xl p-6 border border-white/10">
+            <div
+              key={story.id}
+              data-story-id={story.id}
+              className="glass rounded-xl p-6 border border-white/10">
               {editingStory === story.id ? (
                 // Edit Mode
                 <div className="space-y-4">
