@@ -44,7 +44,10 @@ const saveSessionToLocalStorage = (
   tailoredResume: TailoredResume | null,
   jobUrl: string,
   company: string,
-  jobTitle: string
+  jobTitle: string,
+  analysis?: any,
+  keywords?: any,
+  matchScore?: any
 ) => {
   try {
     const sessionData = {
@@ -53,10 +56,13 @@ const saveSessionToLocalStorage = (
       jobUrl,
       company,
       jobTitle,
+      analysis,
+      keywords,
+      matchScore,
       timestamp: Date.now()
     }
     localStorage.setItem(TAILOR_SESSION_KEY, JSON.stringify(sessionData))
-    console.log('Saved session to localStorage')
+    console.log('Saved session to localStorage with AI analysis data')
   } catch (err) {
     console.error('Error saving session:', err)
   }
@@ -305,6 +311,22 @@ export default function TailorResume() {
         setJobUrl(session.jobUrl || '')
         setCompany(session.company || '')
         setJobTitle(session.jobTitle || '')
+
+        // Restore AI analysis data if available
+        if (session.analysis) {
+          console.log('Restoring AI analysis from localStorage')
+          setAnalysis(session.analysis)
+          setAnalysisLoaded(true)
+        }
+        if (session.keywords) {
+          console.log('Restoring keywords from localStorage')
+          setKeywords(session.keywords)
+        }
+        if (session.matchScore) {
+          console.log('Restoring match score from localStorage')
+          setMatchScore(session.matchScore)
+        }
+
         setShowComparison(true)
         setSuccess(true)
       }
@@ -327,12 +349,12 @@ export default function TailorResume() {
     restoreLastViewed()
   }, []) // Only run on mount
 
-  // Save session whenever relevant data changes
+  // Save session whenever relevant data changes (including AI analysis)
   useEffect(() => {
     if (tailoredResume && selectedResume) {
-      saveSessionToLocalStorage(selectedResume, tailoredResume, jobUrl, company, jobTitle)
+      saveSessionToLocalStorage(selectedResume, tailoredResume, jobUrl, company, jobTitle, analysis, keywords, matchScore)
     }
-  }, [tailoredResume, selectedResume, jobUrl, company, jobTitle])
+  }, [tailoredResume, selectedResume, jobUrl, company, jobTitle, analysis, keywords, matchScore])
 
   // Scroll sync effect
   useEffect(() => {
