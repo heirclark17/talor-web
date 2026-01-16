@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Trash2, Eye } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 
@@ -22,12 +22,22 @@ interface ParsedResume {
   }
 }
 
+interface ExistingResume {
+  id: number
+  filename: string
+  uploaded_at: string
+  skills_count?: number
+}
+
 export default function UploadResume() {
   const navigate = useNavigate()
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null)
+  const [existingResumes, setExistingResumes] = useState<ExistingResume[]>([])
+  const [loadingResumes, setLoadingResumes] = useState(true)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Clear old tailored resume data when user navigates to upload page
@@ -42,6 +52,55 @@ export default function UploadResume() {
       localStorage.removeItem(TAILOR_SESSION_KEY)
     }
   }, [])
+
+  // Load existing resumes on mount
+  useEffect(() => {
+    loadExistingResumes()
+  }, [])
+
+  const loadExistingResumes = async () => {
+    try {
+      setLoadingResumes(true)
+      const result = await api.listResumes()
+
+      if (result.success && result.data?.resumes) {
+        setExistingResumes(result.data.resumes)
+      }
+    } catch (err) {
+      console.error('Error loading resumes:', err)
+    } finally {
+      setLoadingResumes(false)
+    }
+  }
+
+  const handleDeleteResume = async (resumeId: number, filename: string) => {
+    if (!confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      setDeletingId(resumeId)
+      const result = await api.deleteResume(resumeId)
+
+      if (result.success) {
+        // Remove from list
+        setExistingResumes(prev => prev.filter(r => r.id !== resumeId))
+
+        // If this was the currently displayed parsed resume, clear it
+        if (parsedResume?.resume_id === resumeId) {
+          setParsedResume(null)
+          setUploadSuccess(false)
+        }
+      } else {
+        alert(`Failed to delete resume: ${result.error}`)
+      }
+    } catch (err: any) {
+      console.error('Error deleting resume:', err)
+      alert(`Error deleting resume: ${err.message}`)
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -97,6 +156,9 @@ export default function UploadResume() {
       setParsedResume(mappedData)
       setUploadSuccess(true)
       setUploading(false)
+
+      // Reload existing resumes list
+      await loadExistingResumes()
 
       // Reset file input so same file can be uploaded again
       if (fileInputRef.current) {
@@ -191,6 +253,60 @@ export default function UploadResume() {
           </button>
         </div>
       </div>
+
+      {/* Existing Resumes Section */}
+      {existingResumes.length > 0 && (
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-6">Your Uploaded Resumes</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {existingResumes.map((resume) => (
+              <div
+                key={resume.id}
+                className="glass rounded-xl p-6 flex items-center justify-between hover:bg-white/5 transition-all"
+              >
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <FileText className="w-10 h-10 text-white flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-white font-semibold truncate">{resume.filename}</h3>
+                    <p className="text-sm text-gray-400">
+                      Uploaded: {new Date(resume.uploaded_at).toLocaleDateString()}
+                    </p>
+                    {resume.skills_count !== undefined && (
+                      <p className="text-xs text-gray-500">
+                        {resume.skills_count} skills
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => navigate('/tailor', { state: { selectedResumeId: resume.id } })}
+                    className="btn-secondary flex items-center gap-2 px-4 py-2"
+                    title="View and tailor this resume"
+                  >
+                    <Eye className="w-4 h-4" />
+                    View
+                  </button>
+                  <button
+                    onClick={() => handleDeleteResume(resume.id, resume.filename)}
+                    disabled={deletingId === resume.id}
+                    className="btn-secondary flex items-center gap-2 px-4 py-2 hover:bg-red-500/20 hover:border-red-500/50 transition-colors"
+                    title="Delete this resume"
+                  >
+                    {deletingId === resume.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                    {deletingId === resume.id ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Parsed Resume Display */}
       {parsedResume && (
