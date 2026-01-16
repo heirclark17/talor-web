@@ -11,6 +11,14 @@ interface ParsedResume {
   resume_id: number
   filename: string
   parsed_data: {
+    // Contact Information (ATS Required)
+    name?: string
+    email?: string
+    phone?: string
+    linkedin?: string
+    location?: string
+
+    // Resume Sections
     summary: string
     skills: string[]
     experience: Array<{
@@ -95,17 +103,35 @@ export default function UploadResume() {
       console.log('Full response structure:', JSON.stringify(uploadResult.data, null, 2))
 
       // Success - map backend response to our interface
+      const backendData = uploadResult.data.parsed_data || uploadResult.data
+
       const mappedData = {
         resume_id: uploadResult.data.resume_id || uploadResult.data.id,
         filename: uploadResult.data.filename || file.name,
         parsed_data: {
-          summary: uploadResult.data.parsed_data?.summary || uploadResult.data.summary || '',
-          skills: uploadResult.data.parsed_data?.skills || uploadResult.data.skills || [],
-          experience: uploadResult.data.parsed_data?.experience || uploadResult.data.experience || [],
-          education: uploadResult.data.parsed_data?.education || uploadResult.data.education || '',
-          certifications: uploadResult.data.parsed_data?.certifications || uploadResult.data.certifications || ''
+          // Contact Information (ATS Required)
+          name: backendData.name || backendData.Name || backendData.full_name || '',
+          email: backendData.email || backendData.Email || '',
+          phone: backendData.phone || backendData.Phone || backendData.phone_number || '',
+          linkedin: backendData.linkedin || backendData.LinkedIn || backendData.linkedin_url || '',
+          location: backendData.location || backendData.Location || backendData.address || '',
+
+          // Resume Sections
+          summary: backendData.summary || '',
+          skills: backendData.skills || [],
+          experience: backendData.experience || [],
+          education: backendData.education || '',
+          certifications: backendData.certifications || ''
         }
       }
+
+      console.log('=== CONTACT INFORMATION DEBUG ===')
+      console.log('Name:', mappedData.parsed_data.name)
+      console.log('Email:', mappedData.parsed_data.email)
+      console.log('Phone:', mappedData.parsed_data.phone)
+      console.log('LinkedIn:', mappedData.parsed_data.linkedin)
+      console.log('Location:', mappedData.parsed_data.location)
+      console.log('==================================')
 
       console.log('Mapped data:', mappedData)
 
@@ -231,6 +257,71 @@ export default function UploadResume() {
             <div>
               <h2 className="text-2xl font-bold text-white">Parsed Resume</h2>
               <p className="text-sm text-gray-400">Resume ID: {parsedResume.resume_id}</p>
+            </div>
+          </div>
+
+          {/* Contact Information Card - ATS CRITICAL */}
+          <div className="glass rounded-xl p-6 border-2 border-blue-500/30">
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-blue-400" />
+              Contact Information (ATS Required)
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {parsedResume.parsed_data.name ? (
+                <div>
+                  <p className="text-sm text-gray-400">Name</p>
+                  <p className="text-white font-semibold">{parsedResume.parsed_data.name}</p>
+                </div>
+              ) : (
+                <div className="col-span-2 bg-red-500/10 border border-red-500/30 rounded p-3">
+                  <p className="text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    ❌ Name not found - Backend must extract candidate name
+                  </p>
+                </div>
+              )}
+
+              {parsedResume.parsed_data.email ? (
+                <div>
+                  <p className="text-sm text-gray-400">Email</p>
+                  <p className="text-white">{parsedResume.parsed_data.email}</p>
+                </div>
+              ) : (
+                <div className="bg-red-500/10 border border-red-500/30 rounded p-3">
+                  <p className="text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    ❌ Email missing
+                  </p>
+                </div>
+              )}
+
+              {parsedResume.parsed_data.phone ? (
+                <div>
+                  <p className="text-sm text-gray-400">Phone</p>
+                  <p className="text-white">{parsedResume.parsed_data.phone}</p>
+                </div>
+              ) : (
+                <div className="bg-red-500/10 border border-red-500/30 rounded p-3">
+                  <p className="text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    ❌ Phone missing
+                  </p>
+                </div>
+              )}
+
+              {parsedResume.parsed_data.linkedin && (
+                <div>
+                  <p className="text-sm text-gray-400">LinkedIn</p>
+                  <p className="text-white text-sm truncate">{parsedResume.parsed_data.linkedin}</p>
+                </div>
+              )}
+
+              {parsedResume.parsed_data.location && (
+                <div>
+                  <p className="text-sm text-gray-400">Location</p>
+                  <p className="text-white">{parsedResume.parsed_data.location}</p>
+                </div>
+              )}
             </div>
           </div>
 

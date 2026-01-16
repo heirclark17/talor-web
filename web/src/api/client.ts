@@ -170,6 +170,38 @@ class ApiClient {
   }
 
   /**
+   * Extract job details from URL (company name, job title, description)
+   */
+  async extractJobDetails(jobUrl: string): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/jobs/extract`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ job_url: jobUrl }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data, // Expected: { company, job_title, description }
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
    * Tailor resume for specific job
    */
   async tailorResume(tailorData: {

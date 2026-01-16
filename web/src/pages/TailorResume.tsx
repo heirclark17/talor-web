@@ -103,6 +103,14 @@ export default function TailorResume() {
   const [jobUrl, setJobUrl] = useState('')
   const [company, setCompany] = useState('')
   const [jobTitle, setJobTitle] = useState('')
+
+  // URL extraction states
+  const [extractionAttempted, setExtractionAttempted] = useState(false)
+  const [companyExtracted, setCompanyExtracted] = useState(false)
+  const [titleExtracted, setTitleExtracted] = useState(false)
+  const [extracting, setExtracting] = useState(false)
+  const [extractionError, setExtractionError] = useState<{company?: string; title?: string}>({})
+
   const [loading, setLoading] = useState(false)
   const [loadingResumes, setLoadingResumes] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -783,6 +791,78 @@ export default function TailorResume() {
     }
   }
 
+  // Extract job details from URL
+  const handleExtractJobDetails = async () => {
+    const trimmedUrl = jobUrl.trim()
+
+    if (!trimmedUrl) {
+      setExtractionError({ company: 'Please enter a job URL first', title: 'Please enter a job URL first' })
+      return
+    }
+
+    setExtracting(true)
+    setExtractionAttempted(false)
+    setExtractionError({})
+
+    try {
+      const result = await api.extractJobDetails(trimmedUrl)
+
+      if (!result.success) {
+        // Extraction failed completely
+        setExtractionAttempted(true)
+        setCompanyExtracted(false)
+        setTitleExtracted(false)
+        setExtractionError({
+          company: 'Could not extract company name. Please enter it manually.',
+          title: 'Could not extract job title. Please enter it manually.'
+        })
+        return
+      }
+
+      // Check what was extracted
+      const extractedCompany = result.data.company || result.data.Company || ''
+      const extractedTitle = result.data.job_title || result.data.title || result.data.Title || ''
+
+      setExtractionAttempted(true)
+
+      // Update states based on what was extracted
+      if (extractedCompany) {
+        setCompany(extractedCompany)
+        setCompanyExtracted(true)
+      } else {
+        setCompanyExtracted(false)
+        setExtractionError(prev => ({
+          ...prev,
+          company: 'Could not extract company name. Please enter it manually.'
+        }))
+      }
+
+      if (extractedTitle) {
+        setJobTitle(extractedTitle)
+        setTitleExtracted(true)
+      } else {
+        setTitleExtracted(false)
+        setExtractionError(prev => ({
+          ...prev,
+          title: 'Could not extract job title. Please enter it manually.'
+        }))
+      }
+
+      console.log('Extraction result:', { company: extractedCompany, title: extractedTitle })
+    } catch (err: any) {
+      console.error('Extraction error:', err)
+      setExtractionAttempted(true)
+      setCompanyExtracted(false)
+      setTitleExtracted(false)
+      setExtractionError({
+        company: 'Extraction failed. Please enter company name manually.',
+        title: 'Extraction failed. Please enter job title manually.'
+      })
+    } finally {
+      setExtracting(false)
+    }
+  }
+
   const handleTailor = async () => {
     if (!selectedResumeId) {
       setError('Please select a resume')
@@ -794,10 +874,22 @@ export default function TailorResume() {
     const trimmedCompany = company.trim()
     const trimmedJobTitle = jobTitle.trim()
 
-    // Validate that at least job URL or company name is provided
-    if (!trimmedJobUrl && !trimmedCompany) {
-      setError('Please provide either a job URL or company name to generate a tailored resume')
+    // Validate required fields
+    if (!trimmedJobUrl) {
+      setError('Please enter a job URL')
       return
+    }
+
+    // If extraction was attempted, validate that missing fields are filled
+    if (extractionAttempted) {
+      if (!companyExtracted && !trimmedCompany) {
+        setError('Company name is required. Please enter it manually.')
+        return
+      }
+      if (!titleExtracted && !trimmedJobTitle) {
+        setError('Job title is required. Please enter it manually.')
+        return
+      }
     }
 
     setLoading(true)
@@ -2098,57 +2190,125 @@ export default function TailorResume() {
           </div>
 
           <div className="max-w-3xl mx-auto space-y-10">
+            {/* Job URL Field - Always Visible */}
             <div>
               <label className="block text-base font-bold text-white mb-4">
-                Job URL (LinkedIn, Indeed, Company Site)
+                Job URL <span className="text-red-400">*</span>
               </label>
-              <input
-                type="url"
-                value={jobUrl}
-                onChange={(e) => setJobUrl(e.target.value)}
-                placeholder="https://www.linkedin.com/jobs/view/... or https://jobs.microsoft.com/..."
-                className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
-              />
-              <p className="text-sm text-gray-400 mt-6 flex items-center gap-2">
+              <div className="flex gap-4">
+                <input
+                  type="url"
+                  value={jobUrl}
+                  onChange={(e) => {
+                    setJobUrl(e.target.value)
+                    // Reset extraction state when URL changes
+                    if (extractionAttempted) {
+                      setExtractionAttempted(false)
+                      setCompanyExtracted(false)
+                      setTitleExtracted(false)
+                      setExtractionError({})
+                      setCompany('')
+                      setJobTitle('')
+                    }
+                  }}
+                  onBlur={handleExtractJobDetails}
+                  placeholder="https://www.linkedin.com/jobs/view/... or https://jobs.microsoft.com/..."
+                  className="flex-1 px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
+                  disabled={extracting}
+                />
+                <button
+                  onClick={handleExtractJobDetails}
+                  disabled={extracting || !jobUrl.trim()}
+                  className={`px-6 py-4 rounded-xl font-semibold whitespace-nowrap transition-all ${
+                    extracting || !jobUrl.trim()
+                      ? 'bg-white/10 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  }`}
+                >
+                  {extracting ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Extracting...
+                    </span>
+                  ) : (
+                    'Extract Details'
+                  )}
+                </button>
+              </div>
+              <p className="text-sm text-gray-400 mt-4 flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                Just paste the URL - we'll automatically extract company name, job title, and full description.
-                If extraction fails, provide company or job title below.
+                Paste the job URL and click "Extract Details" to automatically extract company name and job title.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <label className="block text-base font-bold text-white mb-4">
-                  Company Name (Optional - Fallback)
-                </label>
-                <input
-                  type="text"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                  placeholder="JPMorgan Chase"
-                  className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  Provide if URL extraction fails or no URL available
-                </p>
-              </div>
+            {/* Conditionally Show Company & Title Fields if Extraction Failed */}
+            {extractionAttempted && (!companyExtracted || !titleExtracted) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Company Name - Show only if not extracted */}
+                {!companyExtracted && (
+                  <div>
+                    <label className="block text-base font-bold text-white mb-4">
+                      Company Name <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      placeholder="JPMorgan Chase"
+                      className={`w-full px-5 py-4 bg-white/5 border-2 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500 ${
+                        extractionError.company ? 'border-red-500' : 'border-white/20'
+                      }`}
+                    />
+                    {extractionError.company && (
+                      <p className="text-sm text-red-400 mt-2 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        {extractionError.company}
+                      </p>
+                    )}
+                  </div>
+                )}
 
-              <div>
-                <label className="block text-base font-bold text-white mb-4">
-                  Job Title (Optional - Fallback)
-                </label>
-                <input
-                  type="text"
-                  value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
-                  placeholder="Lead Technical Program Manager"
-                  className="w-full px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  Provide if URL extraction fails or no URL available
-                </p>
+                {/* Job Title - Show only if not extracted */}
+                {!titleExtracted && (
+                  <div>
+                    <label className="block text-base font-bold text-white mb-4">
+                      Job Title <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={jobTitle}
+                      onChange={(e) => setJobTitle(e.target.value)}
+                      placeholder="Lead Technical Program Manager"
+                      className={`w-full px-5 py-4 bg-white/5 border-2 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500 ${
+                        extractionError.title ? 'border-red-500' : 'border-white/20'
+                      }`}
+                    />
+                    {extractionError.title && (
+                      <p className="text-sm text-red-400 mt-2 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        {extractionError.title}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
+
+            {/* Success Messages if Extracted */}
+            {extractionAttempted && (companyExtracted || titleExtracted) && (
+              <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm text-green-300 font-semibold mb-1">Extraction Successful!</p>
+                    <div className="text-sm text-gray-300 space-y-1">
+                      {companyExtracted && <p>✓ Company: {company}</p>}
+                      {titleExtracted && <p>✓ Job Title: {jobTitle}</p>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
