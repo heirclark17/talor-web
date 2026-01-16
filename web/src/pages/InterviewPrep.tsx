@@ -1841,8 +1841,8 @@ export default function InterviewPrep() {
                     experiences={baseResumeExperiences}
                     companyContext={`${prepData.company_profile.name} - ${prepData.role_analysis.job_title}`}
                     storyThemes={
-                      prepData.candidate_positioning.story_prompts && prepData.candidate_positioning.story_prompts.length > 0
-                        ? prepData.candidate_positioning.story_prompts.map(s => s.title)
+                      prepData.role_analysis.core_responsibilities && prepData.role_analysis.core_responsibilities.length > 0
+                        ? prepData.role_analysis.core_responsibilities
                         : ['Leadership Challenge', 'Problem Solving', 'Team Collaboration', 'Handling Ambiguity', 'Delivering Under Pressure']
                     }
                   />

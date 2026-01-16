@@ -22,6 +22,10 @@ export default function PracticeSession({ story, onClose }: Props) {
   const [seconds, setSeconds] = useState(0)
   const [currentSection, setCurrentSection] = useState<'situation' | 'task' | 'action' | 'result' | 'complete'>('situation')
   const [isRecording, setIsRecording] = useState(false)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
+  const [showInstructions, setShowInstructions] = useState(true)
 
   // Estimated time per section (in seconds)
   const sectionTime = {
@@ -98,6 +102,52 @@ export default function PracticeSession({ story, onClose }: Props) {
     }
   }
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream)
+      const audioChunks: BlobPart[] = []
+
+      recorder.ondataavailable = (event) => {
+        audioChunks.push(event.data)
+      }
+
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' })
+        setAudioBlob(blob)
+        setAudioUrl(URL.createObjectURL(blob))
+        stream.getTracks().forEach(track => track.stop())
+      }
+
+      recorder.start()
+      setMediaRecorder(recorder)
+      setIsRecording(true)
+    } catch (err) {
+      console.error('Error accessing microphone:', err)
+      alert('Could not access microphone. Please check your permissions.')
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop()
+      setIsRecording(false)
+    }
+  }
+
+  const downloadRecording = () => {
+    if (audioBlob) {
+      const url = URL.createObjectURL(audioBlob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `star-story-${story.title.replace(/\s+/g, '-')}-${Date.now()}.webm`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }
+  }
+
   const getSectionColor = (section: string) => {
     switch (section) {
       case 'situation':
@@ -142,6 +192,88 @@ export default function PracticeSession({ story, onClose }: Props) {
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Instructions Panel */}
+          {showInstructions && (
+            <div className="bg-blue-500/10 border-2 border-blue-500/30 rounded-xl p-6">
+              <div className="flex items-start justify-between mb-4">
+                <h3 className="text-lg font-bold text-blue-400">How to Use This Practice Session</h3>
+                <button
+                  onClick={() => setShowInstructions(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="space-y-3 text-sm text-gray-300">
+                <p className="flex items-start gap-2">
+                  <span className="text-blue-400 font-bold">1.</span>
+                  <span>Click <strong className="text-white">"Start Practice"</strong> to begin the timer and recording (optional)</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-blue-400 font-bold">2.</span>
+                  <span>Speak out loud through each STAR section. The timer will auto-advance through sections.</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-blue-400 font-bold">3.</span>
+                  <span>Focus on the <strong className="text-purple-400">ACTION</strong> section (2.5 minutes) - this is the most important part</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-blue-400 font-bold">4.</span>
+                  <span>Try to complete your story within <strong className="text-white">3-5 minutes</strong> total</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-blue-400 font-bold">5.</span>
+                  <span>Use the <strong className="text-white">Record</strong> button to capture your practice and <strong className="text-white">Play</strong> to review</span>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Audio Recording Controls */}
+          <div className="flex items-center justify-center gap-4">
+            {!isRecording && !audioUrl && (
+              <button
+                onClick={startRecording}
+                className="btn-secondary flex items-center gap-2 px-6 py-3"
+                disabled={isRunning}
+              >
+                <Mic className="w-5 h-5" />
+                Start Recording
+              </button>
+            )}
+            {isRecording && (
+              <button
+                onClick={stopRecording}
+                className="btn-danger flex items-center gap-2 px-6 py-3 animate-pulse"
+              >
+                <MicOff className="w-5 h-5" />
+                Stop Recording
+              </button>
+            )}
+            {audioUrl && !isRecording && (
+              <div className="glass rounded-xl p-4 border border-white/10 flex items-center gap-4 w-full max-w-2xl">
+                <div className="flex-1">
+                  <audio src={audioUrl} controls className="w-full" />
+                </div>
+                <button
+                  onClick={downloadRecording}
+                  className="btn-secondary px-4 py-2 text-sm"
+                >
+                  <FileDown className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    setAudioUrl(null)
+                    setAudioBlob(null)
+                  }}
+                  className="btn-secondary px-4 py-2 text-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Timer Display */}
           <div className="text-center">
             <div className="inline-flex items-center gap-3 glass rounded-2xl px-8 py-4 border border-white/10">
