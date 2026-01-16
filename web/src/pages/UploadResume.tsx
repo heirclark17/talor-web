@@ -108,6 +108,9 @@ export default function UploadResume() {
       console.log('Available top-level fields:', Object.keys(uploadResult.data).join(', '))
       if (uploadResult.data.parsed_data) {
         console.log('Available parsed_data fields:', Object.keys(uploadResult.data.parsed_data).join(', '))
+        console.log('candidate_name:', uploadResult.data.parsed_data.candidate_name)
+        console.log('candidate_email:', uploadResult.data.parsed_data.candidate_email)
+        console.log('candidate_phone:', uploadResult.data.parsed_data.candidate_phone)
       }
       console.log('===============================')
 
@@ -119,11 +122,12 @@ export default function UploadResume() {
         filename: uploadResult.data.filename || file.name,
         parsed_data: {
           // Contact Information (ATS Required)
-          name: backendData.name || backendData.Name || backendData.full_name || '',
-          email: backendData.email || backendData.Email || '',
-          phone: backendData.phone || backendData.Phone || backendData.phone_number || '',
-          linkedin: backendData.linkedin || backendData.LinkedIn || backendData.linkedin_url || '',
-          location: backendData.location || backendData.Location || backendData.address || '',
+          // Backend parser returns candidate_name, candidate_email, etc.
+          name: backendData.candidate_name || backendData.name || backendData.Name || backendData.full_name || '',
+          email: backendData.candidate_email || backendData.email || backendData.Email || '',
+          phone: backendData.candidate_phone || backendData.phone || backendData.Phone || backendData.phone_number || '',
+          linkedin: backendData.candidate_linkedin || backendData.linkedin || backendData.LinkedIn || backendData.linkedin_url || '',
+          location: backendData.candidate_location || backendData.location || backendData.Location || backendData.address || '',
 
           // Resume Sections
           summary: backendData.summary || '',
