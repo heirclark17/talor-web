@@ -363,6 +363,193 @@ class ApiClient {
   async getAppVersion(): Promise<string> {
     return '1.0.0-web';
   }
+
+  // =========================================================================
+  // INTERVIEW INTELLIGENCE METHODS (Sales Navigator Features)
+  // =========================================================================
+
+  /**
+   * Score content relevance to specific job
+   */
+  async scoreContentRelevance(data: {
+    content_items: any[];
+    job_description: string;
+    job_title: string;
+    content_type?: 'strategy' | 'news';
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/score-relevance`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Generate talking points for interview
+   */
+  async generateTalkingPoints(data: {
+    content: any;
+    job_description: string;
+    job_title: string;
+    company_name: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/generate-talking-points`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Analyze job alignment
+   */
+  async analyzeJobAlignment(data: {
+    company_research: any;
+    job_description: string;
+    job_title: string;
+    company_name: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/analyze-job-alignment`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Calculate interview readiness score
+   */
+  async calculateInterviewReadiness(data: {
+    prep_data: any;
+    sections_completed: string[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/calculate-readiness`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Generate values alignment scorecard
+   */
+  async generateValuesAlignment(data: {
+    stated_values: any[];
+    candidate_background: string;
+    job_description: string;
+    company_name: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/values-alignment`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
 }
 
 // Export singleton instance

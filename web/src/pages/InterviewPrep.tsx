@@ -174,6 +174,27 @@ interface InterviewQuestionsData {
   job_title: string
 }
 
+interface CompanyValue {
+  name: string
+  description: string
+  source_snippet: string
+  url: string
+  source: string
+}
+
+interface CompanyValuesData {
+  stated_values: CompanyValue[]
+  cultural_priorities: string[]
+  work_environment: string
+  sources_consulted: Array<{
+    title: string
+    url: string
+    type: string
+  }>
+  last_updated: string
+  company_name: string
+}
+
 export default function InterviewPrep() {
   const { tailoredResumeId } = useParams<{ tailoredResumeId: string }>()
   const navigate = useNavigate()
@@ -189,6 +210,7 @@ export default function InterviewPrep() {
   // Real data from backend services
   const [companyResearch, setCompanyResearch] = useState<CompanyResearchData | null>(null)
   const [companyNews, setCompanyNews] = useState<NewsData | null>(null)
+  const [companyValues, setCompanyValues] = useState<CompanyValuesData | null>(null)
   const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestionsData | null>(null)
   const [certifications, setCertifications] = useState<any>(null)
   const [loadingRealData, setLoadingRealData] = useState(false)
@@ -251,6 +273,19 @@ export default function InterviewPrep() {
   })
 
   const [showExportMenu, setShowExportMenu] = useState(false)
+
+  // Interview Intelligence state (Sales Navigator features)
+  const [relevanceScores, setRelevanceScores] = useState<any[]>([])
+  const [talkingPoints, setTalkingPoints] = useState<any>(null)
+  const [jobAlignment, setJobAlignment] = useState<any>(null)
+  const [readinessData, setReadinessData] = useState<any>(null)
+  const [valuesAlignment, setValuesAlignment] = useState<any>(null)
+  const [sectionsCompleted, setSectionsCompleted] = useState<string[]>(() => {
+    const saved = localStorage.getItem(`sections-completed-${tailoredResumeId}`)
+    return saved ? JSON.parse(saved) : []
+  })
+  const [loadingIntelligence, setLoadingIntelligence] = useState(false)
+  const [expandedInitiative, setExpandedInitiative] = useState<number | null>(null)
 
   useEffect(() => {
     loadInterviewPrep()
@@ -412,8 +447,8 @@ export default function InterviewPrep() {
         return
       }
 
-      // Fetch all three data sources in parallel
-      const [researchResult, newsResult, questionsResult] = await Promise.allSettled([
+      // Fetch all four data sources in parallel
+      const [researchResult, newsResult, valuesResult, questionsResult] = await Promise.allSettled([
         // Company research
         fetch(`${API_BASE_URL}/api/interview-prep/company-research`, {
           method: 'POST',
@@ -440,6 +475,20 @@ export default function InterviewPrep() {
             industry: industry || null,
             job_title: jobTitle || null,
             days_back: 90,
+          }),
+        }).then(res => res.json()),
+
+        // Company values & culture
+        fetch(`${API_BASE_URL}/api/interview-prep/company-values`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          },
+          body: JSON.stringify({
+            company_name: companyName,
+            industry: industry || null,
+            job_title: jobTitle || null,
           }),
         }).then(res => res.json()),
 
@@ -475,6 +524,14 @@ export default function InterviewPrep() {
         console.error('Failed to load company news:', newsResult)
       }
 
+      // Handle company values result
+      if (valuesResult.status === 'fulfilled' && valuesResult.value?.success) {
+        setCompanyValues(valuesResult.value.data)
+        console.log('✓ Company values loaded:', valuesResult.value.data.stated_values?.length, 'values')
+      } else {
+        console.error('Failed to load company values:', valuesResult)
+      }
+
       // Handle interview questions result
       if (questionsResult.status === 'fulfilled' && questionsResult.value?.success) {
         setInterviewQuestions(questionsResult.value.data)
@@ -488,6 +545,107 @@ export default function InterviewPrep() {
       setLoadingRealData(false)
     }
   }
+
+  // Fetch interview intelligence (Sales Navigator features)
+  const fetchInterviewIntelligence = async () => {
+    if (!prepData || !tailoredResumeData) {
+      console.log('Missing prep data or tailored resume, skipping intelligence fetch')
+      return
+    }
+
+    try {
+      setLoadingIntelligence(true)
+
+      const jobDescription = tailoredResumeData.job?.description || ''
+      const jobTitle = prepData.role_analysis?.job_title || ''
+      const companyName = prepData.company_profile?.name || ''
+
+      // 1. Score relevance for strategic initiatives (if available)
+      if (companyResearch?.strategic_initiatives && companyResearch.strategic_initiatives.length > 0) {
+        const scoredResult = await api.scoreContentRelevance({
+          content_items: companyResearch.strategic_initiatives,
+          job_description: jobDescription,
+          job_title: jobTitle,
+          content_type: 'strategy'
+        })
+
+        if (scoredResult.success) {
+          setRelevanceScores(scoredResult.data.scored_items || [])
+        }
+      }
+
+      // 2. Generate talking points
+      if (companyResearch) {
+        const pointsResult = await api.generateTalkingPoints({
+          content: companyResearch,
+          job_description: jobDescription,
+          job_title: jobTitle,
+          company_name: companyName
+        })
+
+        if (pointsResult.success) {
+          setTalkingPoints(pointsResult.data)
+        }
+      }
+
+      // 3. Analyze job alignment
+      if (companyResearch) {
+        const alignmentResult = await api.analyzeJobAlignment({
+          company_research: companyResearch,
+          job_description: jobDescription,
+          job_title: jobTitle,
+          company_name: companyName
+        })
+
+        if (alignmentResult.success) {
+          setJobAlignment(alignmentResult.data)
+        }
+      }
+
+      // 4. Calculate readiness
+      const readinessResult = await api.calculateInterviewReadiness({
+        prep_data: prepData,
+        sections_completed: sectionsCompleted
+      })
+
+      if (readinessResult.success) {
+        setReadinessData(readinessResult.data)
+      }
+
+      // 5. Generate values alignment
+      if (companyValues?.stated_values && companyValues.stated_values.length > 0) {
+        const candidateBackground = tailoredResumeData.summary || ''
+
+        const valuesResult = await api.generateValuesAlignment({
+          stated_values: companyValues.stated_values,
+          candidate_background: candidateBackground,
+          job_description: jobDescription,
+          company_name: companyName
+        })
+
+        if (valuesResult.success) {
+          setValuesAlignment(valuesResult.data)
+        }
+      }
+
+    } catch (err: any) {
+      console.error('Failed to fetch interview intelligence:', err)
+    } finally {
+      setLoadingIntelligence(false)
+    }
+  }
+
+  // Call intelligence fetching when data is ready
+  useEffect(() => {
+    if (prepData && tailoredResumeData && (companyResearch || companyValues)) {
+      fetchInterviewIntelligence()
+    }
+  }, [prepData, tailoredResumeData, companyResearch, companyValues])
+
+  // Save sections completed to localStorage
+  useEffect(() => {
+    localStorage.setItem(`sections-completed-${tailoredResumeId}`, JSON.stringify(sectionsCompleted))
+  }, [sectionsCompleted, tailoredResumeId])
 
   // Utility functions for enhancements
   const toggleCheck = (itemId: string) => {
@@ -1102,36 +1260,136 @@ export default function InterviewPrep() {
 
             {expandedSections.valuesAndCulture && (
               <div className="px-8 pb-8">
-                <div className="space-y-4 mb-6">
-                  {prepData.values_and_culture.stated_values.map((value, idx) => (
-                    <div key={idx} className="bg-white/5 p-4 rounded-lg">
-                      <h4 className="text-white font-semibold mb-2">{value.name}</h4>
-                      <p className="text-gray-300 text-sm mb-2">{value.source_snippet}</p>
-                      {value.url && (
-                        <a
-                          href={value.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 text-xs hover:underline"
-                        >
-                          Source
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                {/* Loading State */}
+                {loadingRealData && (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-white" />
+                    <span className="ml-3 text-gray-300">Loading company values from research...</span>
+                  </div>
+                )}
 
-                {prepData.values_and_culture.practical_implications.length > 0 && (
-                  <div>
-                    <h4 className="text-white font-semibold mb-3">Practical Implications</h4>
-                    <ul className="space-y-2">
-                      {prepData.values_and_culture.practical_implications.map((impl, idx) => (
-                        <li key={idx} className="text-gray-300 flex gap-2 text-sm">
-                          <span className="text-white/40">→</span>
-                          <span>{impl}</span>
-                        </li>
+                {/* Real Values from Perplexity (Priority Display) */}
+                {companyValues && companyValues.stated_values.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <CheckCircle2 className="w-5 h-5 text-green-400" />
+                      <h3 className="text-white font-semibold">Company Values (from research)</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {companyValues.stated_values.map((value, idx) => (
+                        <div key={idx} className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 p-4 rounded-lg">
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <h4 className="text-white font-semibold">{value.name}</h4>
+                            {value.url && (
+                              <a
+                                href={value.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 text-xs hover:underline flex items-center gap-1 shrink-0"
+                              >
+                                <span>🔗 Source</span>
+                              </a>
+                            )}
+                          </div>
+                          {value.description && (
+                            <p className="text-gray-300 text-sm mb-2">{value.description}</p>
+                          )}
+                          {value.source_snippet && (
+                            <p className="text-gray-400 text-xs italic">{value.source_snippet}</p>
+                          )}
+                        </div>
                       ))}
-                    </ul>
+                    </div>
+
+                    {/* Cultural Priorities */}
+                    {companyValues.cultural_priorities && companyValues.cultural_priorities.length > 0 && (
+                      <div className="mt-6">
+                        <h4 className="text-white font-semibold mb-3">Cultural Priorities</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {companyValues.cultural_priorities.map((priority, idx) => (
+                            <span key={idx} className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm">
+                              {priority}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Work Environment */}
+                    {companyValues.work_environment && (
+                      <div className="mt-6 bg-white/5 p-4 rounded-lg">
+                        <h4 className="text-white font-semibold mb-2">Work Environment</h4>
+                        <p className="text-gray-300 text-sm">{companyValues.work_environment}</p>
+                      </div>
+                    )}
+
+                    {/* Sources Consulted */}
+                    {companyValues.sources_consulted && companyValues.sources_consulted.length > 0 && (
+                      <div className="mt-4 text-xs text-gray-400">
+                        <span>Sources consulted: {companyValues.sources_consulted.length} (</span>
+                        {companyValues.sources_consulted.slice(0, 3).map((source, idx) => (
+                          <span key={idx}>
+                            {source.url ? (
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:underline"
+                              >
+                                {source.title || source.type}
+                              </a>
+                            ) : (
+                              source.title || source.type
+                            )}
+                            {idx < Math.min(2, companyValues.sources_consulted.length - 1) && ', '}
+                          </span>
+                        ))}
+                        {companyValues.sources_consulted.length > 3 && ` and ${companyValues.sources_consulted.length - 3} more`})
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* AI-Generated Fallback Values (if no real data) */}
+                {!loadingRealData && (!companyValues || companyValues.stated_values.length === 0) && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <AlertCircle className="w-5 h-5 text-yellow-400" />
+                      <h3 className="text-white font-semibold">Company Values (AI-generated)</h3>
+                      <span className="text-xs text-gray-400">Using fallback data - real research unavailable</span>
+                    </div>
+                    <div className="space-y-4 mb-6">
+                      {prepData.values_and_culture.stated_values.map((value, idx) => (
+                        <div key={idx} className="bg-white/5 p-4 rounded-lg">
+                          <h4 className="text-white font-semibold mb-2">{value.name}</h4>
+                          <p className="text-gray-300 text-sm mb-2">{value.source_snippet}</p>
+                          {value.url && (
+                            <a
+                              href={value.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 text-xs hover:underline"
+                            >
+                              Source
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {prepData.values_and_culture.practical_implications.length > 0 && (
+                      <div>
+                        <h4 className="text-white font-semibold mb-3">Practical Implications</h4>
+                        <ul className="space-y-2">
+                          {prepData.values_and_culture.practical_implications.map((impl, idx) => (
+                            <li key={idx} className="text-gray-300 flex gap-2 text-sm">
+                              <span className="text-white/40">→</span>
+                              <span>{impl}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
 
