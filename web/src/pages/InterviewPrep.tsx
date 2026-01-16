@@ -276,6 +276,7 @@ export default function InterviewPrep() {
 
   // Interview Intelligence state (Sales Navigator features)
   const [relevanceScores, setRelevanceScores] = useState<any[]>([])
+  const [newsRelevanceScores, setNewsRelevanceScores] = useState<any[]>([])
   const [talkingPoints, setTalkingPoints] = useState<any>(null)
   const [jobAlignment, setJobAlignment] = useState<any>(null)
   const [readinessData, setReadinessData] = useState<any>(null)
@@ -286,6 +287,7 @@ export default function InterviewPrep() {
   })
   const [loadingIntelligence, setLoadingIntelligence] = useState(false)
   const [expandedInitiative, setExpandedInitiative] = useState<number | null>(null)
+  const [expandedNewsArticle, setExpandedNewsArticle] = useState<number | null>(null)
 
   useEffect(() => {
     loadInterviewPrep()
@@ -571,6 +573,20 @@ export default function InterviewPrep() {
 
         if (scoredResult.success) {
           setRelevanceScores(scoredResult.data.scored_items || [])
+        }
+      }
+
+      // 1b. Score relevance for news articles (if available)
+      if (companyNews?.news_articles && companyNews.news_articles.length > 0) {
+        const newsScored = await api.scoreContentRelevance({
+          content_items: companyNews.news_articles,
+          job_description: jobDescription,
+          job_title: jobTitle,
+          content_type: 'news'
+        })
+
+        if (newsScored.success) {
+          setNewsRelevanceScores(newsScored.data.scored_items || [])
         }
       }
 
@@ -1375,25 +1391,27 @@ export default function InterviewPrep() {
                     </div>
                     <div className="space-y-4">
                       {companyValues.stated_values.map((value, idx) => (
-                        <div key={idx} className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 p-4 rounded-lg">
-                          <div className="flex items-start justify-between gap-3 mb-2">
-                            <h4 className="text-white font-semibold">{value.name}</h4>
+                        <div key={idx} className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 p-5 rounded-lg">
+                          <div className="flex items-start justify-between gap-4 mb-3">
+                            <h4 className="text-white font-semibold text-base leading-tight flex-1 break-words">{value.name}</h4>
                             {value.url && (
                               <a
                                 href={value.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-400 text-xs hover:underline flex items-center gap-1 shrink-0"
+                                className="text-blue-400 text-xs hover:underline flex items-center gap-1 shrink-0 mt-0.5"
                               >
                                 <span>🔗 Source</span>
                               </a>
                             )}
                           </div>
                           {value.description && (
-                            <p className="text-gray-300 text-sm mb-2">{value.description}</p>
+                            <p className="text-gray-300 text-sm leading-relaxed mb-3 break-words">{value.description}</p>
                           )}
                           {value.source_snippet && (
-                            <p className="text-gray-400 text-xs italic">{value.source_snippet}</p>
+                            <div className="pt-3 border-t border-white/10">
+                              <p className="text-gray-400 text-xs italic leading-relaxed break-words">"{value.source_snippet}"</p>
+                            </div>
                           )}
                         </div>
                       ))}
@@ -1578,14 +1596,17 @@ export default function InterviewPrep() {
                                       }`}>
                                         {intelligence.relevance_score}/10
                                       </span>
-                                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                        intelligence.priority === 'Critical' ? 'bg-red-500/20 text-red-300' :
-                                        intelligence.priority === 'High' ? 'bg-orange-500/20 text-orange-300' :
-                                        intelligence.priority === 'Medium' ? 'bg-blue-500/20 text-blue-300' :
-                                        'bg-gray-500/20 text-gray-300'
-                                      }`}>
-                                        {intelligence.priority}
-                                      </span>
+                                      {/* Only show priority badge if not "Context" */}
+                                      {intelligence.priority && intelligence.priority !== 'Context' && (
+                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                          intelligence.priority === 'Critical' ? 'bg-red-500/20 text-red-300' :
+                                          intelligence.priority === 'High' ? 'bg-orange-500/20 text-orange-300' :
+                                          intelligence.priority === 'Medium' ? 'bg-blue-500/20 text-blue-300' :
+                                          'bg-gray-500/20 text-gray-300'
+                                        }`}>
+                                          {intelligence.priority}
+                                        </span>
+                                      )}
                                     </>
                                   )}
                                 </div>
@@ -1635,12 +1656,12 @@ export default function InterviewPrep() {
                                       <p className="text-white/90 italic text-sm">"{intelligence.talking_point}"</p>
                                     </div>
 
-                                    {/* Example statements from section talking points */}
-                                    {talkingPoints?.example_statements && (
+                                    {/* Example statements - initiative-specific */}
+                                    {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
                                       <div>
                                         <div className="text-xs font-semibold text-yellow-300 mb-2">EXAMPLE STATEMENTS</div>
                                         <ul className="space-y-2">
-                                          {talkingPoints.example_statements.slice(0, 2).map((statement: string, sIdx: number) => (
+                                          {intelligence.example_statements.map((statement: string, sIdx: number) => (
                                             <li key={sIdx} className="text-white/80 flex items-start gap-2 text-sm">
                                               <span className="text-yellow-400 mt-1">→</span>
                                               <span>{statement}</span>
@@ -1650,12 +1671,12 @@ export default function InterviewPrep() {
                                       </div>
                                     )}
 
-                                    {/* Questions to ask */}
-                                    {talkingPoints?.questions_to_ask && (
+                                    {/* Questions to ask - initiative-specific */}
+                                    {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
                                       <div>
                                         <div className="text-xs font-semibold text-orange-300 mb-2">QUESTIONS TO ASK</div>
                                         <ul className="space-y-2">
-                                          {talkingPoints.questions_to_ask.slice(0, 2).map((question: string, qIdx: number) => (
+                                          {intelligence.questions_to_ask.map((question: string, qIdx: number) => (
                                             <li key={qIdx} className="text-white/80 flex items-start gap-2 text-sm">
                                               <span className="text-orange-400 mt-1">?</span>
                                               <span>{question}</span>
@@ -1719,42 +1740,154 @@ export default function InterviewPrep() {
                   </div>
                 )}
 
-                {/* Real Company News */}
+                {/* Real Company News with Intelligence */}
                 {companyNews && companyNews.news_articles && companyNews.news_articles.length > 0 && (
                   <div className="mb-6">
                     <div className="flex items-center gap-2 mb-3">
                       <h4 className="text-white font-semibold">Recent News ({companyNews.date_range})</h4>
                       <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
                     </div>
-                    <div className="space-y-3">
-                      {companyNews.news_articles.slice(0, 10).map((article, idx) => (
-                        <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                          <div className="flex justify-between items-start mb-2">
-                            <h5 className="text-white font-medium">{article.title}</h5>
-                            <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{article.published_date}</span>
-                          </div>
-                          <p className="text-gray-300 text-sm mb-2">{article.summary}</p>
-                          {article.impact_summary && (
-                            <p className="text-blue-300 text-sm italic mb-2">→ {article.impact_summary}</p>
-                          )}
-                          <div className="flex items-center gap-4 mt-2">
-                            <span className="text-gray-500 text-xs">Source: {article.source}</span>
-                            {article.category && (
-                              <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded">{article.category}</span>
+                    <div className="space-y-4">
+                      {(newsRelevanceScores.length > 0 ? newsRelevanceScores : companyNews.news_articles).slice(0, 10).map((item: any, idx: number) => {
+                        const article = newsRelevanceScores.length > 0 ? item.original_item : item
+                        const intelligence = newsRelevanceScores.length > 0 ? item : null
+                        const isExpanded = expandedNewsArticle === idx
+
+                        return (
+                          <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                            {/* Header with relevance score */}
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  {intelligence && (
+                                    <>
+                                      <span className={`text-2xl font-bold ${
+                                        intelligence.relevance_score >= 9 ? 'text-green-400' :
+                                        intelligence.relevance_score >= 7 ? 'text-blue-400' :
+                                        intelligence.relevance_score >= 5 ? 'text-yellow-400' :
+                                        'text-gray-400'
+                                      }`}>
+                                        {intelligence.relevance_score}/10
+                                      </span>
+                                      {/* Only show priority badge if not "Context" */}
+                                      {intelligence.priority && intelligence.priority !== 'Context' && (
+                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                          intelligence.priority === 'Critical' ? 'bg-red-500/20 text-red-300' :
+                                          intelligence.priority === 'High' ? 'bg-orange-500/20 text-orange-300' :
+                                          intelligence.priority === 'Medium' ? 'bg-blue-500/20 text-blue-300' :
+                                          'bg-gray-500/20 text-gray-300'
+                                        }`}>
+                                          {intelligence.priority}
+                                        </span>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                                <div className="flex justify-between items-start mb-2">
+                                  <h5 className="text-white font-medium flex-1">{article.title}</h5>
+                                  <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{article.published_date}</span>
+                                </div>
+                                <p className="text-gray-300 text-sm mb-2">{article.summary}</p>
+                                {article.impact_summary && (
+                                  <p className="text-blue-300 text-sm italic mb-2">→ {article.impact_summary}</p>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Why it matters */}
+                            {intelligence && (
+                              <div className="bg-blue-500/10 border-l-4 border-blue-500 p-3 mb-3">
+                                <div className="text-xs font-semibold text-blue-300 mb-1">WHY THIS MATTERS</div>
+                                <p className="text-white/90 text-sm">{intelligence.why_it_matters}</p>
+                              </div>
                             )}
-                            {article.url && (
-                              <a
-                                href={article.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 text-xs hover:underline ml-auto"
-                              >
-                                Read Article →
-                              </a>
+
+                            {/* Job alignment */}
+                            {intelligence && intelligence.job_alignment && intelligence.job_alignment.length > 0 && (
+                              <div className="mb-3">
+                                <div className="text-xs font-semibold text-purple-300 mb-2">ALIGNS WITH JOB REQUIREMENTS</div>
+                                <div className="flex flex-wrap gap-2">
+                                  {intelligence.job_alignment.map((req: string, reqIdx: number) => (
+                                    <span key={reqIdx} className="px-3 py-1 bg-purple-500/20 text-purple-200 rounded-full text-sm">
+                                      {req}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
                             )}
+
+                            {/* Expandable: How to use in interview */}
+                            {intelligence && (
+                              <>
+                                <button
+                                  onClick={() => setExpandedNewsArticle(isExpanded ? null : idx)}
+                                  className="w-full text-left px-3 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded-lg text-sm text-green-300 font-medium transition-colors"
+                                >
+                                  {isExpanded ? '▼' : '▶'} How to Use in Interview
+                                </button>
+
+                                {isExpanded && (
+                                  <div className="mt-3 space-y-3 bg-white/5 rounded-lg p-4">
+                                    {/* Talking point */}
+                                    <div>
+                                      <div className="text-xs font-semibold text-green-300 mb-2">TALKING POINT</div>
+                                      <p className="text-white/90 italic text-sm">"{intelligence.talking_point}"</p>
+                                    </div>
+
+                                    {/* Example statements - article-specific */}
+                                    {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
+                                      <div>
+                                        <div className="text-xs font-semibold text-yellow-300 mb-2">EXAMPLE STATEMENTS</div>
+                                        <ul className="space-y-2">
+                                          {intelligence.example_statements.map((statement: string, sIdx: number) => (
+                                            <li key={sIdx} className="text-white/80 flex items-start gap-2 text-sm">
+                                              <span className="text-yellow-400 mt-1">→</span>
+                                              <span>{statement}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+
+                                    {/* Questions to ask - article-specific */}
+                                    {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
+                                      <div>
+                                        <div className="text-xs font-semibold text-orange-300 mb-2">QUESTIONS TO ASK</div>
+                                        <ul className="space-y-2">
+                                          {intelligence.questions_to_ask.map((question: string, qIdx: number) => (
+                                            <li key={qIdx} className="text-white/80 flex items-start gap-2 text-sm">
+                                              <span className="text-orange-400 mt-1">?</span>
+                                              <span>{question}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            )}
+
+                            {/* Source and category */}
+                            <div className="mt-3 pt-3 border-t border-white/10 flex items-center gap-4">
+                              <span className="text-gray-500 text-xs">Source: {article.source}</span>
+                              {article.category && (
+                                <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded">{article.category}</span>
+                              )}
+                              {article.url && (
+                                <a
+                                  href={article.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-400 text-xs hover:underline ml-auto"
+                                >
+                                  Read Article →
+                                </a>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 )}
