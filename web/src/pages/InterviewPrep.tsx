@@ -1085,6 +1085,104 @@ export default function InterviewPrep() {
           </div>
         </div>
 
+        {/* Interview Readiness Dashboard (Sales Navigator-style) */}
+        {loadingIntelligence && (
+          <div className="glass rounded-3xl p-8 mb-6">
+            <div className="flex items-center justify-center gap-3">
+              <Loader2 className="w-6 h-6 text-white animate-spin" />
+              <span className="text-gray-300">Analyzing interview intelligence...</span>
+            </div>
+          </div>
+        )}
+
+        {readinessData && !loadingIntelligence && (
+          <div className="glass rounded-3xl p-8 mb-6">
+            <h2 className="text-2xl font-bold text-white mb-6">
+              Interview Readiness Dashboard
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Readiness Score */}
+              <div className="bg-white/5 rounded-xl p-6 text-center">
+                <div className="text-sm text-gray-400 mb-2">Interview Ready Score</div>
+                <div className={`text-5xl font-bold ${
+                  readinessData.readiness_score >= 8.5 ? 'text-green-500' :
+                  readinessData.readiness_score >= 7.0 ? 'text-blue-500' :
+                  readinessData.readiness_score >= 5.0 ? 'text-yellow-500' :
+                  'text-gray-500'
+                }`}>
+                  {readinessData.readiness_score}
+                  <span className="text-2xl text-gray-400">/10</span>
+                </div>
+                <div className="text-sm text-white/80 mt-2">{readinessData.status}</div>
+              </div>
+
+              {/* Progress */}
+              <div className="bg-white/5 rounded-xl p-6 text-center">
+                <div className="text-sm text-gray-400 mb-2">Prep Progress</div>
+                <div className="text-5xl font-bold text-blue-400">
+                  {readinessData.progress_percentage}
+                  <span className="text-2xl text-gray-400">%</span>
+                </div>
+                <div className="text-sm text-white/80 mt-2">Sections Complete</div>
+              </div>
+
+              {/* Time Invested */}
+              <div className="bg-white/5 rounded-xl p-6 text-center">
+                <div className="text-sm text-gray-400 mb-2">Time Invested</div>
+                <div className="text-5xl font-bold text-purple-400">
+                  {Math.floor(readinessData.time_invested_minutes / 60)}
+                  <span className="text-2xl">h</span>
+                  <span className="text-3xl text-gray-400"> {readinessData.time_invested_minutes % 60}m</span>
+                </div>
+                <div className="text-sm text-white/80 mt-2">Preparation Time</div>
+              </div>
+            </div>
+
+            {/* Recommendation */}
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+              <p className="text-blue-300">{readinessData.recommendation}</p>
+            </div>
+
+            {/* Critical Next Actions */}
+            {readinessData.next_actions && readinessData.next_actions.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4">Critical Next Actions</h3>
+                <div className="space-y-3">
+                  {readinessData.next_actions.map((action: any, idx: number) => (
+                    <div key={idx} className="bg-white/5 rounded-lg p-4 flex items-start">
+                      <input
+                        type="checkbox"
+                        className="mt-1 mr-4"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            const newSections = [...sectionsCompleted, action.action]
+                            setSectionsCompleted(newSections)
+                          }
+                        }}
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            action.priority === 'Critical' ? 'bg-red-500/20 text-red-300' :
+                            action.priority === 'High' ? 'bg-orange-500/20 text-orange-300' :
+                            'bg-blue-500/20 text-blue-300'
+                          }`}>
+                            {action.priority}
+                          </span>
+                          <span className="text-xs text-gray-400">⏱️ {action.time_estimate_minutes} min</span>
+                        </div>
+                        <div className="text-white font-medium">{action.action}</div>
+                        <div className="text-sm text-gray-400 mt-1">{action.why}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Company Profile */}
         <section className="glass rounded-3xl mb-6 overflow-hidden">
           <button
@@ -1446,39 +1544,148 @@ export default function InterviewPrep() {
                   </div>
                 )}
 
-                {/* Real Company Strategies */}
+                {/* Real Company Strategies with Intelligence */}
                 {companyResearch && companyResearch.strategic_initiatives && companyResearch.strategic_initiatives.length > 0 && (
                   <div className="mb-6">
                     <div className="flex items-center gap-2 mb-3">
                       <h4 className="text-white font-semibold">Strategic Initiatives</h4>
                       <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
+                      {jobAlignment && (
+                        <span className="text-xs text-blue-400 bg-blue-500/20 px-2 py-0.5 rounded">
+                          Alignment: {jobAlignment.overall_alignment_score}/10
+                        </span>
+                      )}
                     </div>
                     <div className="space-y-4">
-                      {companyResearch.strategic_initiatives.map((initiative, idx) => (
-                        <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                          <div className="flex justify-between items-start mb-2">
-                            <h5 className="text-white font-medium">{initiative.title}</h5>
-                            {initiative.date && <span className="text-gray-500 text-sm">{initiative.date}</span>}
-                          </div>
-                          <p className="text-gray-300 text-sm mb-2">{initiative.description}</p>
-                          {initiative.relevance_to_role && (
-                            <p className="text-blue-300 text-sm italic mb-2">→ {initiative.relevance_to_role}</p>
-                          )}
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-gray-500 text-xs">Source: {initiative.source}</span>
-                            {initiative.url && (
-                              <a
-                                href={initiative.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 text-xs hover:underline"
-                              >
-                                View Source →
-                              </a>
+                      {(relevanceScores.length > 0 ? relevanceScores : companyResearch.strategic_initiatives).map((item: any, idx: number) => {
+                        const initiative = relevanceScores.length > 0 ? item.original_item : item
+                        const intelligence = relevanceScores.length > 0 ? item : null
+                        const isExpanded = expandedInitiative === idx
+
+                        return (
+                          <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                            {/* Header with relevance score */}
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  {intelligence && (
+                                    <>
+                                      <span className={`text-2xl font-bold ${
+                                        intelligence.relevance_score >= 9 ? 'text-green-400' :
+                                        intelligence.relevance_score >= 7 ? 'text-blue-400' :
+                                        intelligence.relevance_score >= 5 ? 'text-yellow-400' :
+                                        'text-gray-400'
+                                      }`}>
+                                        {intelligence.relevance_score}/10
+                                      </span>
+                                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                        intelligence.priority === 'Critical' ? 'bg-red-500/20 text-red-300' :
+                                        intelligence.priority === 'High' ? 'bg-orange-500/20 text-orange-300' :
+                                        intelligence.priority === 'Medium' ? 'bg-blue-500/20 text-blue-300' :
+                                        'bg-gray-500/20 text-gray-300'
+                                      }`}>
+                                        {intelligence.priority}
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                                <h5 className="text-white font-medium mb-2">{initiative.title}</h5>
+                                <p className="text-gray-300 text-sm mb-2">{initiative.description}</p>
+                              </div>
+                              {initiative.date && <span className="text-gray-500 text-sm ml-2">{initiative.date}</span>}
+                            </div>
+
+                            {/* Why it matters */}
+                            {intelligence && (
+                              <div className="bg-blue-500/10 border-l-4 border-blue-500 p-3 mb-3">
+                                <div className="text-xs font-semibold text-blue-300 mb-1">WHY THIS MATTERS</div>
+                                <p className="text-white/90 text-sm">{intelligence.why_it_matters}</p>
+                              </div>
                             )}
+
+                            {/* Job alignment */}
+                            {intelligence && intelligence.job_alignment && intelligence.job_alignment.length > 0 && (
+                              <div className="mb-3">
+                                <div className="text-xs font-semibold text-purple-300 mb-2">ALIGNS WITH JOB REQUIREMENTS</div>
+                                <div className="flex flex-wrap gap-2">
+                                  {intelligence.job_alignment.map((req: string, reqIdx: number) => (
+                                    <span key={reqIdx} className="px-3 py-1 bg-purple-500/20 text-purple-200 rounded-full text-sm">
+                                      {req}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Expandable section */}
+                            {intelligence && (
+                              <>
+                                <button
+                                  onClick={() => setExpandedInitiative(isExpanded ? null : idx)}
+                                  className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-2 mb-2"
+                                >
+                                  {isExpanded ? '▼' : '▶'} How to Use in Interview
+                                </button>
+
+                                {isExpanded && (
+                                  <div className="mt-3 space-y-3 bg-white/5 rounded-lg p-4">
+                                    {/* Talking point */}
+                                    <div>
+                                      <div className="text-xs font-semibold text-green-300 mb-2">TALKING POINT</div>
+                                      <p className="text-white/90 italic text-sm">"{intelligence.talking_point}"</p>
+                                    </div>
+
+                                    {/* Example statements from section talking points */}
+                                    {talkingPoints?.example_statements && (
+                                      <div>
+                                        <div className="text-xs font-semibold text-yellow-300 mb-2">EXAMPLE STATEMENTS</div>
+                                        <ul className="space-y-2">
+                                          {talkingPoints.example_statements.slice(0, 2).map((statement: string, sIdx: number) => (
+                                            <li key={sIdx} className="text-white/80 flex items-start gap-2 text-sm">
+                                              <span className="text-yellow-400 mt-1">→</span>
+                                              <span>{statement}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+
+                                    {/* Questions to ask */}
+                                    {talkingPoints?.questions_to_ask && (
+                                      <div>
+                                        <div className="text-xs font-semibold text-orange-300 mb-2">QUESTIONS TO ASK</div>
+                                        <ul className="space-y-2">
+                                          {talkingPoints.questions_to_ask.slice(0, 2).map((question: string, qIdx: number) => (
+                                            <li key={qIdx} className="text-white/80 flex items-start gap-2 text-sm">
+                                              <span className="text-orange-400 mt-1">?</span>
+                                              <span>{question}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            )}
+
+                            {/* Source and date */}
+                            <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-sm">
+                              <span className="text-gray-500 text-xs">Source: {initiative.source}</span>
+                              {initiative.url && (
+                                <a
+                                  href={initiative.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-400 hover:underline text-xs"
+                                >
+                                  View Source →
+                                </a>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 )}
