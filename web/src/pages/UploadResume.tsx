@@ -409,6 +409,24 @@ export default function UploadResume() {
             >
               View All Resumes
             </button>
+            <button
+              onClick={() => handleDeleteResume(parsedResume.resume_id, parsedResume.filename)}
+              disabled={deletingId === parsedResume.resume_id}
+              className="btn-secondary flex items-center gap-2 hover:bg-red-500/20 hover:border-red-500/50 transition-colors"
+              title="Delete this uploaded resume"
+            >
+              {deletingId === parsedResume.resume_id ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-5 h-5" />
+                  Delete This Resume
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
