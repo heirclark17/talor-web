@@ -164,7 +164,7 @@ export default function CareerPathDesigner() {
         educationLevel = 'associates'
       }
 
-      const result = await api.generateCareerPlan({
+      const intake = {
         current_role_title: currentRole,
         current_industry: currentIndustry,
         years_experience: yearsExp,
@@ -180,14 +180,37 @@ export default function CareerPathDesigner() {
         education_level: educationLevel,
         location: location || 'Remote',
         in_person_vs_remote: 'hybrid'
-      })
+      }
+
+      console.log('Generating career plan with intake:', intake)
+
+      const result = await api.generateCareerPlan(intake)
+
+      console.log('Career plan result:', result)
 
       if (result.success && result.data) {
-        setPlan(result.data.plan)
-        setPlanId(result.data.plan_id)
-        setStep('results')
+        // Check if the nested data is successful
+        if (result.data.success && result.data.plan) {
+          setPlan(result.data.plan)
+          setPlanId(result.data.plan_id)
+          setStep('results')
+        } else {
+          // Backend returned success=true but inner data has success=false
+          const errorMsg = result.data.error || 'Failed to generate career plan. Please try again.'
+          console.error('Career plan generation failed:', errorMsg)
+
+          // Log detailed validation errors if available
+          if (result.data.validation_errors) {
+            console.error('Validation errors:', result.data.validation_errors)
+          }
+
+          setError(errorMsg)
+          setStep('questions')
+        }
       } else {
-        setError(result.error || 'Failed to generate career plan')
+        const errorMsg = result.error || 'Failed to generate career plan. Please try again.'
+        console.error('Career plan generation failed:', errorMsg)
+        setError(errorMsg)
         setStep('questions')
       }
     } catch (err: any) {
