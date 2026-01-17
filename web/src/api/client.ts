@@ -5,6 +5,34 @@
 
 import { getUserId } from '../utils/userSession';
 
+/**
+ * Convert snake_case keys to camelCase recursively
+ * Handles nested objects and arrays
+ */
+function snakeToCamel(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => snakeToCamel(item));
+  }
+
+  if (typeof obj === 'object') {
+    const converted: any = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        // Convert snake_case to camelCase
+        const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+        converted[camelKey] = snakeToCamel(obj[key]);
+      }
+    }
+    return converted;
+  }
+
+  return obj;
+}
+
 // Use relative path in development (will be proxied by Vite), full URL in production
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app');
 
@@ -736,9 +764,16 @@ class ApiClient {
         };
       }
 
+      // Convert snake_case keys from backend to camelCase for frontend
+      const convertedResult = {
+        ...result,
+        plan: result.plan ? snakeToCamel(result.plan) : null,
+        planId: result.plan_id || result.planId,
+      };
+
       return {
         success: true,
-        data: result,
+        data: convertedResult,
       };
     } catch (error: any) {
       return {
