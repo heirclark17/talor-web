@@ -661,7 +661,31 @@ export default function CareerPathDesigner() {
   }
 
   // Results Screen
-  if (step === 'results' && plan) {
+  if (step === 'results') {
+    // If we're in results step but no plan, show error
+    if (!plan) {
+      return (
+        <div className="min-h-screen p-8 flex items-center justify-center">
+          <div className="glass rounded-lg p-8 max-w-md text-center">
+            <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">Failed to Generate Plan</h2>
+            <p className="text-gray-400 mb-6">
+              We couldn't generate your career plan. Please try again.
+            </p>
+            <button
+              onClick={() => {
+                setStep('questions')
+                setError(undefined)
+              }}
+              className="btn-primary"
+            >
+              Back to Questions
+            </button>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="min-h-screen p-8">
         <div className="max-w-5xl mx-auto">
@@ -695,10 +719,14 @@ export default function CareerPathDesigner() {
                 </div>
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-white mb-2">Your Career Transition Plan</h1>
-                  <p className="text-gray-400 mb-4">{plan.profileSummary}</p>
+                  <p className="text-gray-400 mb-4">{plan.profileSummary || 'Your personalized career transition roadmap'}</p>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="text-gray-500">Generated {new Date(plan.generatedAt).toLocaleDateString()}</span>
-                    <span className="text-gray-500">•</span>
+                    {plan.generatedAt && (
+                      <>
+                        <span className="text-gray-500">Generated {new Date(plan.generatedAt).toLocaleDateString()}</span>
+                        <span className="text-gray-500">•</span>
+                      </>
+                    )}
                     <span className="text-gray-500">Timeline: {timeline}</span>
                     <span className="text-gray-500">•</span>
                     <span className="text-gray-500">Budget: {budget}</span>
@@ -711,21 +739,22 @@ export default function CareerPathDesigner() {
           {/* Results Sections */}
           <div className="space-y-4" data-testid="results-container">
             {/* Target Roles */}
-            <div className="glass rounded-lg border border-white/10 overflow-hidden">
-              <button
-                onClick={() => setExpandedSection(expandedSection === 'roles' ? null : 'roles')}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Target className="w-6 h-6 text-white" />
-                  <h2 className="text-xl font-semibold text-white">Target Roles</h2>
-                  <span className="text-sm text-gray-400">({plan.targetRoles.length} recommendations)</span>
-                </div>
-                <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'roles' ? 'rotate-90' : ''}`} />
-              </button>
-              {expandedSection === 'roles' && (
-                <div className="px-6 pb-6 space-y-4">
-                  {plan.targetRoles.map((role, idx) => (
+            {plan.targetRoles && plan.targetRoles.length > 0 && (
+              <div className="glass rounded-lg border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'roles' ? null : 'roles')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Target className="w-6 h-6 text-white" />
+                    <h2 className="text-xl font-semibold text-white">Target Roles</h2>
+                    <span className="text-sm text-gray-400">({plan.targetRoles.length} recommendations)</span>
+                  </div>
+                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'roles' ? 'rotate-90' : ''}`} />
+                </button>
+                {expandedSection === 'roles' && (
+                  <div className="px-6 pb-6 space-y-4">
+                    {plan.targetRoles.map((role, idx) => (
                     <div key={idx} className="bg-white/5 rounded-lg p-6 border border-white/10">
                       <h3 className="text-lg font-semibold text-white mb-2">{role.title}</h3>
                       <p className="text-gray-400 mb-4">{role.whyAligned}</p>
@@ -744,181 +773,200 @@ export default function CareerPathDesigner() {
                 </div>
               )}
             </div>
+            )}
 
             {/* Skills Analysis */}
-            <div className="glass rounded-lg border border-white/10 overflow-hidden">
-              <button
-                onClick={() => setExpandedSection(expandedSection === 'skills' ? null : 'skills')}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Award className="w-6 h-6 text-white" />
-                  <h2 className="text-xl font-semibold text-white">Skills Analysis</h2>
-                </div>
-                <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'skills' ? 'rotate-90' : ''}`} />
-              </button>
-              {expandedSection === 'skills' && (
-                <div className="px-6 pb-6 space-y-6">
-                  <div>
-                    <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                      <Check className="w-5 h-5" />
-                      Skills You Already Have
-                    </h3>
-                    <div className="space-y-3">
-                      {plan.skillsAnalysis.alreadyHave.map((skill, idx) => (
-                        <div key={idx} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                          <div className="font-semibold text-white">{skill.skillName}</div>
-                          <div className="text-sm text-gray-400 mt-1">{skill.targetRoleMapping}</div>
-                        </div>
-                      ))}
-                    </div>
+            {plan.skillsAnalysis && (
+              <div className="glass rounded-lg border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'skills' ? null : 'skills')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Award className="w-6 h-6 text-white" />
+                    <h2 className="text-xl font-semibold text-white">Skills Analysis</h2>
                   </div>
+                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'skills' ? 'rotate-90' : ''}`} />
+                </button>
+                {expandedSection === 'skills' && (
+                  <div className="px-6 pb-6 space-y-6">
+                    {plan.skillsAnalysis.alreadyHave && plan.skillsAnalysis.alreadyHave.length > 0 && (
+                      <div>
+                        <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                          <Check className="w-5 h-5" />
+                          Skills You Already Have
+                        </h3>
+                        <div className="space-y-3">
+                          {plan.skillsAnalysis.alreadyHave.map((skill, idx) => (
+                            <div key={idx} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                              <div className="font-semibold text-white">{skill.skillName}</div>
+                              <div className="text-sm text-gray-400 mt-1">{skill.targetRoleMapping}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                  {plan.skillsAnalysis.needToBuild.length > 0 && (
-                    <div>
-                      <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5" />
-                        Skills to Build
-                      </h3>
+                    {plan.skillsAnalysis.needToBuild && plan.skillsAnalysis.needToBuild.length > 0 && (
+                      <div>
+                        <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5" />
+                          Skills to Build
+                        </h3>
+                        <div className="space-y-3">
+                          {plan.skillsAnalysis.needToBuild.map((skill, idx) => (
+                            <div key={idx} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                              <div className="font-semibold text-white">{skill.skillName}</div>
+                              <div className="text-sm text-gray-400 mt-1">{skill.whyNeeded}</div>
+                              <div className="text-sm text-gray-300 mt-2">{skill.howToBuild}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Certification Path */}
+            {plan.certificationPath && plan.certificationPath.length > 0 && (
+              <div className="glass rounded-lg border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'certs' ? null : 'certs')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Award className="w-6 h-6 text-white" />
+                    <h2 className="text-xl font-semibold text-white">Certification Path</h2>
+                    <span className="text-sm text-gray-400">({plan.certificationPath.length} certifications)</span>
+                  </div>
+                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'certs' ? 'rotate-90' : ''}`} />
+                </button>
+                {expandedSection === 'certs' && (
+                  <div className="px-6 pb-6 space-y-4">
+                    {plan.certificationPath.map((cert, idx) => (
+                      <div key={idx} className="bg-white/5 rounded-lg p-6 border border-white/10">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold text-white mb-1">{cert.name}</h3>
+                            <span className="text-sm text-gray-400 uppercase">{cert.level}</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-white font-semibold">{cert.estCostRange}</div>
+                            <div className="text-sm text-gray-400">{cert.estStudyWeeks} weeks</div>
+                          </div>
+                        </div>
+                        <p className="text-gray-400 text-sm mb-4">{cert.whatItUnlocks}</p>
+                        {cert.officialLinks && cert.officialLinks.map((link, linkIdx) => (
+                          <a
+                            key={linkIdx}
+                            href={link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-white/60 hover:text-white text-sm underline block"
+                          >
+                            {link}
+                          </a>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Timeline */}
+            {plan.timeline && plan.timeline.twelveWeekPlan && plan.timeline.twelveWeekPlan.length > 0 && (
+              <div className="glass rounded-lg border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'timeline' ? null : 'timeline')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-6 h-6 text-white" />
+                    <h2 className="text-xl font-semibold text-white">Your Timeline</h2>
+                  </div>
+                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'timeline' ? 'rotate-90' : ''}`} />
+                </button>
+                {expandedSection === 'timeline' && (
+                  <div className="px-6 pb-6">
+                    <div className="mb-6">
+                      <h3 className="text-white font-semibold mb-4">12-Week Plan</h3>
                       <div className="space-y-3">
-                        {plan.skillsAnalysis.needToBuild.map((skill, idx) => (
+                        {plan.timeline.twelveWeekPlan.map((week, idx) => (
                           <div key={idx} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                            <div className="font-semibold text-white">{skill.skillName}</div>
-                            <div className="text-sm text-gray-400 mt-1">{skill.whyNeeded}</div>
-                            <div className="text-sm text-gray-300 mt-2">{skill.howToBuild}</div>
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                                {week.weekNumber}
+                              </div>
+                              <div className="text-white font-semibold">{week.milestone || `Week ${week.weekNumber}`}</div>
+                            </div>
+                            {week.tasks && week.tasks.length > 0 && (
+                              <ul className="space-y-1 ml-11">
+                                {week.tasks.map((task, taskIdx) => (
+                                  <li key={taskIdx} className="text-gray-400 text-sm">• {task}</li>
+                                ))}
+                              </ul>
+                            )}
                           </div>
                         ))}
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Certification Path */}
-            <div className="glass rounded-lg border border-white/10 overflow-hidden">
-              <button
-                onClick={() => setExpandedSection(expandedSection === 'certs' ? null : 'certs')}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Award className="w-6 h-6 text-white" />
-                  <h2 className="text-xl font-semibold text-white">Certification Path</h2>
-                  <span className="text-sm text-gray-400">({plan.certificationPath.length} certifications)</span>
-                </div>
-                <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'certs' ? 'rotate-90' : ''}`} />
-              </button>
-              {expandedSection === 'certs' && (
-                <div className="px-6 pb-6 space-y-4">
-                  {plan.certificationPath.map((cert, idx) => (
-                    <div key={idx} className="bg-white/5 rounded-lg p-6 border border-white/10">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold text-white mb-1">{cert.name}</h3>
-                          <span className="text-sm text-gray-400 uppercase">{cert.level}</span>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-white font-semibold">{cert.estCostRange}</div>
-                          <div className="text-sm text-gray-400">{cert.estStudyWeeks} weeks</div>
-                        </div>
-                      </div>
-                      <p className="text-gray-400 text-sm mb-4">{cert.whatItUnlocks}</p>
-                      {cert.officialLinks.map((link, linkIdx) => (
-                        <a
-                          key={linkIdx}
-                          href={link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-white/60 hover:text-white text-sm underline block"
-                        >
-                          {link}
-                        </a>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Timeline */}
-            <div className="glass rounded-lg border border-white/10 overflow-hidden">
-              <button
-                onClick={() => setExpandedSection(expandedSection === 'timeline' ? null : 'timeline')}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-6 h-6 text-white" />
-                  <h2 className="text-xl font-semibold text-white">Your Timeline</h2>
-                </div>
-                <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'timeline' ? 'rotate-90' : ''}`} />
-              </button>
-              {expandedSection === 'timeline' && (
-                <div className="px-6 pb-6">
-                  <div className="mb-6">
-                    <h3 className="text-white font-semibold mb-4">12-Week Plan</h3>
-                    <div className="space-y-3">
-                      {plan.timeline.twelveWeekPlan.map((week, idx) => (
-                        <div key={idx} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                              {week.weekNumber}
-                            </div>
-                            <div className="text-white font-semibold">{week.milestone || `Week ${week.weekNumber}`}</div>
-                          </div>
-                          <ul className="space-y-1 ml-11">
-                            {week.tasks.map((task, taskIdx) => (
-                              <li key={taskIdx} className="text-gray-400 text-sm">• {task}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Resume Assets */}
-            <div className="glass rounded-lg border border-white/10 overflow-hidden">
-              <button
-                onClick={() => setExpandedSection(expandedSection === 'resume' ? null : 'resume')}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <FileText className="w-6 h-6 text-white" />
-                  <h2 className="text-xl font-semibold text-white">Resume Assets</h2>
-                </div>
-                <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'resume' ? 'rotate-90' : ''}`} />
-              </button>
-              {expandedSection === 'resume' && (
-                <div className="px-6 pb-6 space-y-6">
-                  <div>
-                    <h3 className="text-white font-semibold mb-2">Headline</h3>
-                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                      <p className="text-gray-300">{plan.resumeAssets.headline}</p>
-                    </div>
+            {plan.resumeAssets && (
+              <div className="glass rounded-lg border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'resume' ? null : 'resume')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-6 h-6 text-white" />
+                    <h2 className="text-xl font-semibold text-white">Resume Assets</h2>
                   </div>
-
-                  <div>
-                    <h3 className="text-white font-semibold mb-2">Professional Summary</h3>
-                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                      <p className="text-gray-300">{plan.resumeAssets.summary}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-white font-semibold mb-2">Achievement Bullets</h3>
-                    <div className="space-y-2">
-                      {plan.resumeAssets.targetRoleBullets.map((bullet, idx) => (
-                        <div key={idx} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                          <p className="text-gray-300 text-sm">• {bullet}</p>
+                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'resume' ? 'rotate-90' : ''}`} />
+                </button>
+                {expandedSection === 'resume' && (
+                  <div className="px-6 pb-6 space-y-6">
+                    {plan.resumeAssets.headline && (
+                      <div>
+                        <h3 className="text-white font-semibold mb-2">Headline</h3>
+                        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                          <p className="text-gray-300">{plan.resumeAssets.headline}</p>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    )}
+
+                    {plan.resumeAssets.summary && (
+                      <div>
+                        <h3 className="text-white font-semibold mb-2">Professional Summary</h3>
+                        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                          <p className="text-gray-300">{plan.resumeAssets.summary}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {plan.resumeAssets.targetRoleBullets && plan.resumeAssets.targetRoleBullets.length > 0 && (
+                      <div>
+                        <h3 className="text-white font-semibold mb-2">Achievement Bullets</h3>
+                        <div className="space-y-2">
+                          {plan.resumeAssets.targetRoleBullets.map((bullet, idx) => (
+                            <div key={idx} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                              <p className="text-gray-300 text-sm">• {bullet}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
