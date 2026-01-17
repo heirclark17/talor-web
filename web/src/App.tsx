@@ -1,12 +1,13 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
 import InterviewPrepList from './pages/InterviewPrepList'
 import StarStoriesList from './pages/StarStoriesList'
 import SavedComparisons from './pages/SavedComparisons'
+import CareerPathDesigner from './pages/CareerPathDesigner'
 import { useScrollAnimation } from './hooks/useScrollAnimation'
 
 function Dashboard() {
@@ -280,6 +281,13 @@ function AppContent() {
                   <Bookmark className="w-5 h-5" />
                   <span className="text-base font-medium">Saved</span>
                 </Link>
+                <Link
+                  to="/career-path"
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="text-base font-medium">Career Path</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -296,6 +304,7 @@ function AppContent() {
           <Route path="/interview-prep/:tailoredResumeId" element={<InterviewPrep />} />
           <Route path="/star-stories" element={<StarStoriesList />} />
           <Route path="/saved-comparisons" element={<SavedComparisons />} />
+          <Route path="/career-path" element={<CareerPathDesigner />} />
           <Route path="/resumes" element={<div className="p-8"><h1 className="text-3xl font-bold text-white">My Resumes</h1></div>} />
         </Routes>
       </main>

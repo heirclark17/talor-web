@@ -712,6 +712,167 @@ class ApiClient {
       };
     }
   }
+
+  /**
+   * Generate career path plan
+   */
+  async generateCareerPlan(intake: any): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/generate`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ intake }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get career plan by ID
+   */
+  async getCareerPlan(planId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/${planId}`, {
+        headers: this.getHeaders(),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * List all career plans
+   */
+  async listCareerPlans(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/`, {
+        headers: this.getHeaders(),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Refresh events for a career plan
+   */
+  async refreshCareerPlanEvents(planId: number, location: string): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/refresh-events`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ plan_id: planId, location }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Delete career plan
+   */
+  async deleteCareerPlan(planId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/${planId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
 }
 
 // Export singleton instance
