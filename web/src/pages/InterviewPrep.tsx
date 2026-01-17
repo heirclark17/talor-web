@@ -813,6 +813,53 @@ export default function InterviewPrep() {
     return diff
   }
 
+  // Helper functions for UX improvements
+  const getPriorityEmoji = (priority: string): string => {
+    const emojiMap: Record<string, string> = {
+      'Critical': '🔴',
+      'High': '🟠',
+      'Medium': '🔵',
+      'Context': '⚪'
+    }
+    return emojiMap[priority] || '⚪'
+  }
+
+  const getPriorityColor = (priority: string): string => {
+    const colorMap: Record<string, string> = {
+      'Critical': 'text-red-400',
+      'High': 'text-orange-400',
+      'Medium': 'text-blue-400',
+      'Context': 'text-gray-400'
+    }
+    return colorMap[priority] || 'text-gray-400'
+  }
+
+  const getValueIcon = (valueName: string): string => {
+    const iconMap: Record<string, string> = {
+      'innovation': '💡',
+      'integrity': '🤝',
+      'excellence': '🎯',
+      'collaboration': '👥',
+      'diversity': '🌈',
+      'customer': '🎧',
+      'quality': '⭐',
+      'accountability': '✓',
+      'respect': '🙏',
+      'trust': '🔒',
+      'teamwork': '🤝',
+      'growth': '📈',
+      'passion': '❤️',
+      'transparency': '🔍',
+      'ownership': '👤'
+    }
+
+    const key = valueName.toLowerCase()
+    for (const [keyword, icon] of Object.entries(iconMap)) {
+      if (key.includes(keyword)) return icon
+    }
+    return '⚡' // Default icon
+  }
+
   const exportToPDF = () => {
     window.print()
   }
@@ -1385,34 +1432,39 @@ export default function InterviewPrep() {
                 {/* Real Values from Perplexity (Priority Display) */}
                 {companyValues && companyValues.stated_values.length > 0 && (
                   <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <CheckCircle2 className="w-5 h-5 text-green-400" />
-                      <h3 className="text-white font-semibold">Company Values (from research)</h3>
+                    <h3 className="text-white font-semibold mb-3">Company Values</h3>
+
+                    {/* Section Guidance */}
+                    <div className="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Star className="w-5 h-5 text-blue-400" />
+                        <span className="text-blue-300 font-semibold text-sm">How to Use These Values</span>
+                      </div>
+                      <p className="text-white/80 text-sm">
+                        Reference 1-2 values that align with your background when discussing your experience.
+                        Use the example statements and questions provided below.
+                      </p>
                     </div>
+
                     <div className="space-y-4">
                       {companyValues.stated_values.map((value, idx) => (
-                        <div key={idx} className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 p-5 rounded-lg">
-                          <div className="flex items-start justify-between gap-4 mb-3">
-                            <h4 className="text-white font-semibold text-base leading-tight flex-1 break-words">{value.name}</h4>
-                            {value.url && (
-                              <a
-                                href={value.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 text-xs hover:underline flex items-center gap-1 shrink-0 mt-0.5"
-                              >
-                                <span>🔗 Source</span>
-                              </a>
-                            )}
+                        <div key={idx} className="bg-white/5 border border-white/10 p-5 rounded-lg">
+                          <div className="flex items-center gap-3 mb-3">
+                            <span className="text-2xl">{getValueIcon(value.name)}</span>
+                            <h4 className="text-white font-semibold text-base">{value.name}</h4>
                           </div>
+
                           {value.description && (
-                            <p className="text-gray-300 text-sm leading-relaxed mb-3 break-words">{value.description}</p>
+                            <p className="text-gray-300 text-sm mb-4 leading-relaxed">{value.description}</p>
                           )}
-                          {value.source_snippet && (
-                            <div className="pt-3 border-t border-white/10">
-                              <p className="text-gray-400 text-xs italic leading-relaxed break-words">"{value.source_snippet}"</p>
+
+                          <div className="bg-blue-500/10 border-l-4 border-blue-500 p-3 rounded">
+                            <div className="text-xs font-semibold text-blue-300 mb-2">💬 HOW TO DEMONSTRATE</div>
+                            <div className="space-y-2 text-sm">
+                              <p className="text-white/90">→ Mention your experience that demonstrates {value.name.toLowerCase()}</p>
+                              <p className="text-white/90">→ Ask: "How does the team embody {value.name.toLowerCase()} in day-to-day work?"</p>
                             </div>
-                          )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1565,14 +1617,18 @@ export default function InterviewPrep() {
                 {/* Real Company Strategies with Intelligence */}
                 {companyResearch && companyResearch.strategic_initiatives && companyResearch.strategic_initiatives.length > 0 && (
                   <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <h4 className="text-white font-semibold">Strategic Initiatives</h4>
-                      <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
-                      {jobAlignment && (
-                        <span className="text-xs text-blue-400 bg-blue-500/20 px-2 py-0.5 rounded">
-                          Alignment: {jobAlignment.overall_alignment_score}/10
-                        </span>
-                      )}
+                    <h4 className="text-white font-semibold mb-3">Strategic Initiatives</h4>
+
+                    {/* Section Guidance */}
+                    <div className="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Target className="w-5 h-5 text-blue-400" />
+                        <span className="text-blue-300 font-semibold text-sm">How to Use These Initiatives</span>
+                      </div>
+                      <p className="text-white/80 text-sm">
+                        Mention 1-2 high-priority initiatives in your interview to demonstrate you understand
+                        the company's direction. Use the talking points provided below.
+                      </p>
                     </div>
                     <div className="space-y-4">
                       {(relevanceScores.length > 0 ? relevanceScores : companyResearch.strategic_initiatives).map((item: any, idx: number) => {
@@ -1581,108 +1637,77 @@ export default function InterviewPrep() {
                         const isExpanded = expandedInitiative === idx
 
                         return (
-                          <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                            {/* Header with relevance score */}
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  {intelligence && (
-                                    <>
-                                      <span className={`text-2xl font-bold ${
-                                        intelligence.relevance_score >= 9 ? 'text-green-400' :
-                                        intelligence.relevance_score >= 7 ? 'text-blue-400' :
-                                        intelligence.relevance_score >= 5 ? 'text-yellow-400' :
-                                        'text-gray-400'
-                                      }`}>
-                                        {intelligence.relevance_score}/10
-                                      </span>
-                                      {/* Only show priority badge if not "Context" */}
-                                      {intelligence.priority && intelligence.priority !== 'Context' && (
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                          intelligence.priority === 'Critical' ? 'bg-red-500/20 text-red-300' :
-                                          intelligence.priority === 'High' ? 'bg-orange-500/20 text-orange-300' :
-                                          intelligence.priority === 'Medium' ? 'bg-blue-500/20 text-blue-300' :
-                                          'bg-gray-500/20 text-gray-300'
-                                        }`}>
-                                          {intelligence.priority}
-                                        </span>
-                                      )}
-                                    </>
-                                  )}
+                          <div key={idx} className="bg-white/5 p-5 rounded-lg border border-white/10">
+                            {/* Header: Priority + Score */}
+                            <div className="flex items-center justify-between mb-3">
+                              {intelligence && intelligence.priority && intelligence.priority !== 'Context' ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">{getPriorityEmoji(intelligence.priority)}</span>
+                                  <span className={`font-semibold ${getPriorityColor(intelligence.priority)}`}>
+                                    {intelligence.priority} Priority
+                                  </span>
                                 </div>
-                                <h5 className="text-white font-medium mb-2">{initiative.title}</h5>
-                                <p className="text-gray-300 text-sm mb-2">{initiative.description}</p>
-                              </div>
-                              {initiative.date && <span className="text-gray-500 text-sm ml-2">{initiative.date}</span>}
+                              ) : null}
+                              {intelligence && (
+                                <span className="text-gray-400 text-sm">{intelligence.relevance_score}/10</span>
+                              )}
                             </div>
 
-                            {/* Why it matters */}
-                            {intelligence && (
-                              <div className="bg-blue-500/10 border-l-4 border-blue-500 p-3 mb-3">
-                                <div className="text-xs font-semibold text-blue-300 mb-1">WHY THIS MATTERS</div>
-                                <p className="text-white/90 text-sm">{intelligence.why_it_matters}</p>
+                            {/* Title + Description */}
+                            <h5 className="text-white font-medium mb-2">{initiative.title}</h5>
+                            <p className="text-gray-300 text-sm mb-4 leading-relaxed">{initiative.description}</p>
+                            {initiative.date && <p className="text-gray-500 text-xs mb-3">{initiative.date}</p>}
+
+                            {/* Talking Points - ALWAYS VISIBLE for Critical/High */}
+                            {intelligence && (intelligence.priority === 'Critical' || intelligence.priority === 'High') && (
+                              <div className="space-y-3 mb-4">
+                                {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
+                                  <div className="bg-green-500/10 border-l-4 border-green-500 p-3 rounded">
+                                    <div className="text-xs font-semibold text-green-300 mb-2">💬 SAY THIS</div>
+                                    <p className="text-white/90 text-sm italic">
+                                      "{intelligence.example_statements[0]}"
+                                    </p>
+                                  </div>
+                                )}
+
+                                {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
+                                  <div className="bg-orange-500/10 border-l-4 border-orange-500 p-3 rounded">
+                                    <div className="text-xs font-semibold text-orange-300 mb-2">❓ ASK THIS</div>
+                                    <p className="text-white/90 text-sm">
+                                      {intelligence.questions_to_ask[0]}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
                             )}
 
-                            {/* Job alignment */}
-                            {intelligence && intelligence.job_alignment && intelligence.job_alignment.length > 0 && (
-                              <div className="mb-3">
-                                <div className="text-xs font-semibold text-purple-300 mb-2">ALIGNS WITH JOB REQUIREMENTS</div>
-                                <div className="flex flex-wrap gap-2">
-                                  {intelligence.job_alignment.map((req: string, reqIdx: number) => (
-                                    <span key={reqIdx} className="px-3 py-1 bg-purple-500/20 text-purple-200 rounded-full text-sm">
-                                      {req}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Expandable section */}
-                            {intelligence && (
+                            {/* Expandable section for Medium priority or to show additional talking points */}
+                            {intelligence && intelligence.priority === 'Medium' && (
                               <>
                                 <button
                                   onClick={() => setExpandedInitiative(isExpanded ? null : idx)}
                                   className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-2 mb-2"
                                 >
-                                  {isExpanded ? '▼' : '▶'} How to Use in Interview
+                                  {isExpanded ? '▼' : '▶'} Show Talking Points
                                 </button>
 
                                 {isExpanded && (
-                                  <div className="mt-3 space-y-3 bg-white/5 rounded-lg p-4">
-                                    {/* Talking point */}
-                                    <div>
-                                      <div className="text-xs font-semibold text-green-300 mb-2">TALKING POINT</div>
-                                      <p className="text-white/90 italic text-sm">"{intelligence.talking_point}"</p>
-                                    </div>
-
-                                    {/* Example statements - initiative-specific */}
+                                  <div className="mt-3 space-y-3">
                                     {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
-                                      <div>
-                                        <div className="text-xs font-semibold text-yellow-300 mb-2">EXAMPLE STATEMENTS</div>
-                                        <ul className="space-y-2">
-                                          {intelligence.example_statements.map((statement: string, sIdx: number) => (
-                                            <li key={sIdx} className="text-white/80 flex items-start gap-2 text-sm">
-                                              <span className="text-yellow-400 mt-1">→</span>
-                                              <span>{statement}</span>
-                                            </li>
-                                          ))}
-                                        </ul>
+                                      <div className="bg-green-500/10 border-l-4 border-green-500 p-3 rounded">
+                                        <div className="text-xs font-semibold text-green-300 mb-2">💬 SAY THIS</div>
+                                        <p className="text-white/90 text-sm italic">
+                                          "{intelligence.example_statements[0]}"
+                                        </p>
                                       </div>
                                     )}
 
-                                    {/* Questions to ask - initiative-specific */}
                                     {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
-                                      <div>
-                                        <div className="text-xs font-semibold text-orange-300 mb-2">QUESTIONS TO ASK</div>
-                                        <ul className="space-y-2">
-                                          {intelligence.questions_to_ask.map((question: string, qIdx: number) => (
-                                            <li key={qIdx} className="text-white/80 flex items-start gap-2 text-sm">
-                                              <span className="text-orange-400 mt-1">?</span>
-                                              <span>{question}</span>
-                                            </li>
-                                          ))}
-                                        </ul>
+                                      <div className="bg-orange-500/10 border-l-4 border-orange-500 p-3 rounded">
+                                        <div className="text-xs font-semibold text-orange-300 mb-2">❓ ASK THIS</div>
+                                        <p className="text-white/90 text-sm">
+                                          {intelligence.questions_to_ask[0]}
+                                        </p>
                                       </div>
                                     )}
                                   </div>
@@ -1743,10 +1768,7 @@ export default function InterviewPrep() {
                 {/* Real Company News with Intelligence */}
                 {companyNews && companyNews.news_articles && companyNews.news_articles.length > 0 && (
                   <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <h4 className="text-white font-semibold">Recent News ({companyNews.date_range})</h4>
-                      <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
-                    </div>
+                    <h4 className="text-white font-semibold mb-3">Recent News ({companyNews.date_range})</h4>
                     <div className="space-y-4">
                       {(newsRelevanceScores.length > 0 ? newsRelevanceScores : companyNews.news_articles).slice(0, 10).map((item: any, idx: number) => {
                         const article = newsRelevanceScores.length > 0 ? item.original_item : item
@@ -1754,113 +1776,79 @@ export default function InterviewPrep() {
                         const isExpanded = expandedNewsArticle === idx
 
                         return (
-                          <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                            {/* Header with relevance score */}
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  {intelligence && (
-                                    <>
-                                      <span className={`text-2xl font-bold ${
-                                        intelligence.relevance_score >= 9 ? 'text-green-400' :
-                                        intelligence.relevance_score >= 7 ? 'text-blue-400' :
-                                        intelligence.relevance_score >= 5 ? 'text-yellow-400' :
-                                        'text-gray-400'
-                                      }`}>
-                                        {intelligence.relevance_score}/10
-                                      </span>
-                                      {/* Only show priority badge if not "Context" */}
-                                      {intelligence.priority && intelligence.priority !== 'Context' && (
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                          intelligence.priority === 'Critical' ? 'bg-red-500/20 text-red-300' :
-                                          intelligence.priority === 'High' ? 'bg-orange-500/20 text-orange-300' :
-                                          intelligence.priority === 'Medium' ? 'bg-blue-500/20 text-blue-300' :
-                                          'bg-gray-500/20 text-gray-300'
-                                        }`}>
-                                          {intelligence.priority}
-                                        </span>
-                                      )}
-                                    </>
-                                  )}
+                          <div key={idx} className="bg-white/5 p-5 rounded-lg border border-white/10">
+                            {/* Header: Priority + Score */}
+                            <div className="flex items-center justify-between mb-3">
+                              {intelligence && intelligence.priority && intelligence.priority !== 'Context' ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">{getPriorityEmoji(intelligence.priority)}</span>
+                                  <span className={`font-semibold ${getPriorityColor(intelligence.priority)}`}>
+                                    {intelligence.priority} Priority
+                                  </span>
                                 </div>
-                                <div className="flex justify-between items-start mb-2">
-                                  <h5 className="text-white font-medium flex-1">{article.title}</h5>
-                                  <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{article.published_date}</span>
-                                </div>
-                                <p className="text-gray-300 text-sm mb-2">{article.summary}</p>
-                                {article.impact_summary && (
-                                  <p className="text-blue-300 text-sm italic mb-2">→ {article.impact_summary}</p>
-                                )}
-                              </div>
+                              ) : null}
+                              {intelligence && (
+                                <span className="text-gray-400 text-sm">{intelligence.relevance_score}/10</span>
+                              )}
                             </div>
 
-                            {/* Why it matters */}
-                            {intelligence && (
-                              <div className="bg-blue-500/10 border-l-4 border-blue-500 p-3 mb-3">
-                                <div className="text-xs font-semibold text-blue-300 mb-1">WHY THIS MATTERS</div>
-                                <p className="text-white/90 text-sm">{intelligence.why_it_matters}</p>
+                            {/* Title + Date + Summary */}
+                            <div className="flex justify-between items-start mb-2">
+                              <h5 className="text-white font-medium flex-1">{article.title}</h5>
+                              <span className="text-gray-500 text-xs whitespace-nowrap ml-3">{article.published_date}</span>
+                            </div>
+                            <p className="text-gray-300 text-sm mb-3 leading-relaxed">{article.summary}</p>
+
+                            {/* Talking Points - ALWAYS VISIBLE for Critical/High */}
+                            {intelligence && (intelligence.priority === 'Critical' || intelligence.priority === 'High') && (
+                              <div className="space-y-3 mb-4">
+                                {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
+                                  <div className="bg-green-500/10 border-l-4 border-green-500 p-3 rounded">
+                                    <div className="text-xs font-semibold text-green-300 mb-2">💬 SAY THIS</div>
+                                    <p className="text-white/90 text-sm italic">
+                                      "{intelligence.example_statements[0]}"
+                                    </p>
+                                  </div>
+                                )}
+
+                                {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
+                                  <div className="bg-orange-500/10 border-l-4 border-orange-500 p-3 rounded">
+                                    <div className="text-xs font-semibold text-orange-300 mb-2">❓ ASK THIS</div>
+                                    <p className="text-white/90 text-sm">
+                                      {intelligence.questions_to_ask[0]}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
                             )}
 
-                            {/* Job alignment */}
-                            {intelligence && intelligence.job_alignment && intelligence.job_alignment.length > 0 && (
-                              <div className="mb-3">
-                                <div className="text-xs font-semibold text-purple-300 mb-2">ALIGNS WITH JOB REQUIREMENTS</div>
-                                <div className="flex flex-wrap gap-2">
-                                  {intelligence.job_alignment.map((req: string, reqIdx: number) => (
-                                    <span key={reqIdx} className="px-3 py-1 bg-purple-500/20 text-purple-200 rounded-full text-sm">
-                                      {req}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Expandable: How to use in interview */}
-                            {intelligence && (
+                            {/* Expandable section for Medium priority */}
+                            {intelligence && intelligence.priority === 'Medium' && (
                               <>
                                 <button
                                   onClick={() => setExpandedNewsArticle(isExpanded ? null : idx)}
-                                  className="w-full text-left px-3 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded-lg text-sm text-green-300 font-medium transition-colors"
+                                  className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-2 mb-2"
                                 >
-                                  {isExpanded ? '▼' : '▶'} How to Use in Interview
+                                  {isExpanded ? '▼' : '▶'} Show Talking Points
                                 </button>
 
                                 {isExpanded && (
-                                  <div className="mt-3 space-y-3 bg-white/5 rounded-lg p-4">
-                                    {/* Talking point */}
-                                    <div>
-                                      <div className="text-xs font-semibold text-green-300 mb-2">TALKING POINT</div>
-                                      <p className="text-white/90 italic text-sm">"{intelligence.talking_point}"</p>
-                                    </div>
-
-                                    {/* Example statements - article-specific */}
+                                  <div className="mt-3 space-y-3">
                                     {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
-                                      <div>
-                                        <div className="text-xs font-semibold text-yellow-300 mb-2">EXAMPLE STATEMENTS</div>
-                                        <ul className="space-y-2">
-                                          {intelligence.example_statements.map((statement: string, sIdx: number) => (
-                                            <li key={sIdx} className="text-white/80 flex items-start gap-2 text-sm">
-                                              <span className="text-yellow-400 mt-1">→</span>
-                                              <span>{statement}</span>
-                                            </li>
-                                          ))}
-                                        </ul>
+                                      <div className="bg-green-500/10 border-l-4 border-green-500 p-3 rounded">
+                                        <div className="text-xs font-semibold text-green-300 mb-2">💬 SAY THIS</div>
+                                        <p className="text-white/90 text-sm italic">
+                                          "{intelligence.example_statements[0]}"
+                                        </p>
                                       </div>
                                     )}
 
-                                    {/* Questions to ask - article-specific */}
                                     {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
-                                      <div>
-                                        <div className="text-xs font-semibold text-orange-300 mb-2">QUESTIONS TO ASK</div>
-                                        <ul className="space-y-2">
-                                          {intelligence.questions_to_ask.map((question: string, qIdx: number) => (
-                                            <li key={qIdx} className="text-white/80 flex items-start gap-2 text-sm">
-                                              <span className="text-orange-400 mt-1">?</span>
-                                              <span>{question}</span>
-                                            </li>
-                                          ))}
-                                        </ul>
+                                      <div className="bg-orange-500/10 border-l-4 border-orange-500 p-3 rounded">
+                                        <div className="text-xs font-semibold text-orange-300 mb-2">❓ ASK THIS</div>
+                                        <p className="text-white/90 text-sm">
+                                          {intelligence.questions_to_ask[0]}
+                                        </p>
                                       </div>
                                     )}
                                   </div>
