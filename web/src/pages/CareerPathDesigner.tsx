@@ -899,6 +899,171 @@ export default function CareerPathDesigner() {
               </div>
             )}
 
+            {/* Education Options */}
+            {plan.educationOptions && plan.educationOptions.length > 0 && (
+              <div className="glass rounded-lg border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'education' ? null : 'education')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-6 h-6 text-white" />
+                    <h2 className="text-xl font-semibold text-white">Education Options</h2>
+                    <span className="text-sm text-gray-400">({plan.educationOptions.length} options)</span>
+                  </div>
+                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'education' ? 'rotate-90' : ''}`} />
+                </button>
+                {expandedSection === 'education' && (
+                  <div className="px-6 pb-6 space-y-4">
+                    {plan.educationOptions.map((option, idx) => (
+                      <div key={idx} className="bg-white/5 rounded-lg p-6 border border-white/10">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold text-white mb-1">{option.name}</h3>
+                            <span className="text-sm text-gray-400 uppercase">{option.type}</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-white font-semibold">{option.costRange}</div>
+                            <div className="text-sm text-gray-400">{option.duration}</div>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-400 mb-2">{option.format}</div>
+                        <div className="mb-4">
+                          <div className="text-white font-semibold mb-2">Pros:</div>
+                          <ul className="space-y-1">
+                            {option.pros && option.pros.map((pro, proIdx) => (
+                              <li key={proIdx} className="text-gray-400 text-sm">• {pro}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <div className="text-white font-semibold mb-2">Cons:</div>
+                          <ul className="space-y-1">
+                            {option.cons && option.cons.map((con, conIdx) => (
+                              <li key={conIdx} className="text-gray-400 text-sm">• {con}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        {option.officialLink && (
+                          <a
+                            href={option.officialLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-white/60 hover:text-white text-sm underline block mt-4"
+                          >
+                            {option.officialLink}
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Experience Plan */}
+            {plan.experiencePlan && plan.experiencePlan.length > 0 && (
+              <div className="glass rounded-lg border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'experience' ? null : 'experience')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Briefcase className="w-6 h-6 text-white" />
+                    <h2 className="text-xl font-semibold text-white">Experience Plan</h2>
+                    <span className="text-sm text-gray-400">({plan.experiencePlan.length} projects)</span>
+                  </div>
+                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'experience' ? 'rotate-90' : ''}`} />
+                </button>
+                {expandedSection === 'experience' && (
+                  <div className="px-6 pb-6 space-y-4">
+                    {plan.experiencePlan.map((project, idx) => (
+                      <div key={idx} className="bg-white/5 rounded-lg p-6 border border-white/10">
+                        <div className="mb-2">
+                          <h3 className="text-lg font-semibold text-white mb-1">{project.title}</h3>
+                          <span className="text-sm text-gray-400 uppercase">{project.type}</span>
+                        </div>
+                        <p className="text-gray-400 mb-4">{project.description}</p>
+                        <div className="mb-4">
+                          <div className="text-white font-semibold mb-2">Skills Demonstrated:</div>
+                          <div className="flex flex-wrap gap-2">
+                            {project.skillsDemonstrated && project.skillsDemonstrated.map((skill, skillIdx) => (
+                              <span key={skillIdx} className="bg-white/10 px-3 py-1 rounded-full text-sm text-white">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="text-sm">
+                          <span className="text-gray-500">Time Commitment:</span>
+                          <span className="text-white ml-2">{project.timeCommitment}</span>
+                        </div>
+                        <div className="mt-4 p-4 bg-white/5 rounded-lg">
+                          <div className="text-white font-semibold mb-2">How to Showcase:</div>
+                          <p className="text-gray-400 text-sm">{project.howToShowcase}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Networking Events */}
+            {plan.events && plan.events.length > 0 && (
+              <div className="glass rounded-lg border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'events' ? null : 'events')}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-6 h-6 text-white" />
+                    <h2 className="text-xl font-semibold text-white">Networking Events</h2>
+                    <span className="text-sm text-gray-400">({plan.events.length} events)</span>
+                  </div>
+                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'events' ? 'rotate-90' : ''}`} />
+                </button>
+                {expandedSection === 'events' && (
+                  <div className="px-6 pb-6 space-y-4">
+                    {plan.events.map((event, idx) => (
+                      <div key={idx} className="bg-white/5 rounded-lg p-6 border border-white/10">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold text-white mb-1">{event.name}</h3>
+                            <span className="text-sm text-gray-400 uppercase">{event.type}</span>
+                            {event.beginnerFriendly && (
+                              <span className="ml-2 text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">
+                                Beginner Friendly
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <div className="text-white font-semibold">{event.priceRange}</div>
+                            <div className="text-sm text-gray-400">{event.dateOrSeason}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
+                          <MapPin className="w-4 h-4" />
+                          <span>{event.location}</span>
+                        </div>
+                        <p className="text-gray-400 mb-4">{event.whyAttend}</p>
+                        {event.registrationLink && (
+                          <a
+                            href={event.registrationLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                          >
+                            Register Now →
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Timeline */}
             {plan.timeline && plan.timeline.twelveWeekPlan && plan.timeline.twelveWeekPlan.length > 0 && (
               <div className="glass rounded-lg border border-white/10 overflow-hidden">
