@@ -87,9 +87,38 @@ export default function CareerPathDesigner() {
 
     try {
       // Extract data from parsed resume (if available)
-      const experience = resumeData?.experience || []
-      const skills = resumeData?.skills || []
-      const education = resumeData?.education || []
+      // Ensure all data is in array format (handle string/object/array cases)
+      let experience = resumeData?.experience || []
+      let skills = resumeData?.skills || []
+      let education = resumeData?.education || []
+
+      // Parse JSON strings if needed (backend may return stringified JSON)
+      if (typeof experience === 'string') {
+        try {
+          experience = JSON.parse(experience)
+        } catch {
+          experience = []
+        }
+      }
+      if (typeof skills === 'string') {
+        try {
+          skills = JSON.parse(skills)
+        } catch {
+          skills = []
+        }
+      }
+      if (typeof education === 'string') {
+        try {
+          education = JSON.parse(education)
+        } catch {
+          education = []
+        }
+      }
+
+      // Ensure arrays (not objects or other types)
+      if (!Array.isArray(experience)) experience = []
+      if (!Array.isArray(skills)) skills = []
+      if (!Array.isArray(education)) education = []
 
       // Determine current role from resume or use defaults
       const currentRole = experience[0]?.title || dreamRole || 'Professional'
