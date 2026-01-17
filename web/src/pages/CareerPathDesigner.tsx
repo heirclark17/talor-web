@@ -31,6 +31,9 @@ export default function CareerPathDesigner() {
   const [location, setLocation] = useState('')
   const [timePerWeek, setTimePerWeek] = useState(10)
 
+  // Results screen
+  const [expandedSection, setExpandedSection] = useState<string | null>(null)
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -659,8 +662,6 @@ export default function CareerPathDesigner() {
 
   // Results Screen
   if (step === 'results' && plan) {
-    const [expandedSection, setExpandedSection] = useState<string | null>(null)
-
     return (
       <div className="min-h-screen p-8">
         <div className="max-w-5xl mx-auto">
