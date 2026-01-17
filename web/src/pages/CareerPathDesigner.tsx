@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import type { CareerPlan as CareerPlanType } from '../types/career-plan'
+import CareerPlanResults from '../components/CareerPlanResults'
 import {
   Sparkles, TrendingUp, BookOpen, Award, Briefcase, Calendar,
   FileText, Download, RefreshCw, ArrowLeft, Loader2, Upload,
@@ -1336,64 +1337,8 @@ export default function CareerPathDesigner() {
             </div>
           </div>
 
-          {/* Vertical Timeline Results - TO BE REDESIGNED WITH DETAILED COMPONENTS */}
-          <div className="space-y-4" data-testid="results-container">
-            {/* NOTE: The results sections below will be completely redesigned
-                 with vertical timeline, detailed certification displays (interview-prep style),
-                 tech stack details, comprehensive event info, and detailed resume guidance.
-                 For now, keeping simplified versions to maintain functionality. */}
-
-            {/* Target Roles */}
-            {plan.targetRoles && plan.targetRoles.length > 0 && (
-              <div className="glass rounded-lg border border-white/10 overflow-hidden">
-                <button
-                  onClick={() => setExpandedSection(expandedSection === 'roles' ? null : 'roles')}
-                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Target className="w-6 h-6 text-white" />
-                    <h2 className="text-xl font-semibold text-white">Target Roles</h2>
-                    <span className="text-sm text-gray-400">({plan.targetRoles.length} recommendations)</span>
-                  </div>
-                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'roles' ? 'rotate-90' : ''}`} />
-                </button>
-                {expandedSection === 'roles' && (
-                  <div className="px-6 pb-6 space-y-4">
-                    {plan.targetRoles.map((role, idx) => (
-                      <div key={idx} className="bg-white/5 rounded-lg p-6 border border-white/10">
-                        <h3 className="text-lg font-semibold text-white mb-2">{role.title}</h3>
-                        <p className="text-gray-400 mb-4">{role.whyAligned}</p>
-                        <div className="grid md:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-gray-500">Growth Outlook:</span>
-                            <p className="text-white">{role.growthOutlook}</p>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">Salary Range:</span>
-                            <p className="text-white">{role.salaryRange}</p>
-                          </div>
-                        </div>
-                        {role.typicalRequirements && role.typicalRequirements.length > 0 && (
-                          <div className="mt-4">
-                            <span className="text-gray-500 text-sm">Typical Requirements:</span>
-                            <ul className="mt-2 space-y-1">
-                              {role.typicalRequirements.map((req, reqIdx) => (
-                                <li key={reqIdx} className="text-white text-sm">• {req}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* More sections to be implemented... will continue in next update */}
-            {/* This is placeholder - full implementation coming */}
-
-          </div>
+          {/* Detailed Career Plan Results */}
+          <CareerPlanResults plan={plan} timeline={timeline} />
         </div>
       </div>
     )
