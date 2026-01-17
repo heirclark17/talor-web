@@ -550,6 +550,168 @@ class ApiClient {
       };
     }
   }
+
+  /**
+   * Generate job-specific practice questions
+   */
+  async generatePracticeQuestions(data: {
+    interview_prep_id: number;
+    num_questions?: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/interview-prep/generate-practice-questions`,
+        {
+          method: 'POST',
+          headers: {
+            ...this.getHeaders(),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Generate STAR story for a practice question
+   */
+  async generateStarStory(data: {
+    interview_prep_id: number;
+    question: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/interview-prep/generate-star-story`,
+        {
+          method: 'POST',
+          headers: {
+            ...this.getHeaders(),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Save practice question response
+   */
+  async savePracticeResponse(data: {
+    interview_prep_id: number;
+    question_text: string;
+    question_category?: string;
+    star_story?: any;
+    audio_recording_url?: string;
+    video_recording_url?: string;
+    written_answer?: string;
+    practice_duration_seconds?: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/interview-prep/save-practice-response`,
+        {
+          method: 'POST',
+          headers: {
+            ...this.getHeaders(),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get practice responses for interview prep
+   */
+  async getPracticeResponses(interviewPrepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/interview-prep/practice-responses/${interviewPrepId}`,
+        {
+          headers: this.getHeaders(),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
 }
 
 // Export singleton instance

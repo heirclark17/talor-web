@@ -32,13 +32,15 @@ import {
   Edit,
   Check,
   Square,
-  CheckSquare
+  CheckSquare,
+  Sparkles
 } from 'lucide-react'
 import { api } from '../api/client'
 import STARStoryBuilder from '../components/STARStoryBuilder'
 import VideoRecorder from '../components/VideoRecorder'
 import CommonInterviewQuestions from '../components/CommonInterviewQuestions'
 import CertificationRecommendations from '../components/CertificationRecommendations'
+import PracticeQuestions from '../components/PracticeQuestions'
 import ThemeToggle from '../components/ThemeToggle'
 
 // API base URL - same logic as API client
@@ -212,7 +214,8 @@ export default function InterviewPrep() {
       practice: true,
       commonQuestions: true,
       positioning: true,
-      certifications: true
+      certifications: true,
+      aiPracticeQuestions: true
     }
   })
 
@@ -1864,6 +1867,29 @@ export default function InterviewPrep() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+        </section>
+
+        {/* AI Practice Questions with Recording */}
+        <section className="glass rounded-3xl mt-6 overflow-hidden">
+          <button
+            onClick={() => toggleSection('aiPracticeQuestions')}
+            className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-white" />
+              <h2 className="text-2xl font-bold text-white">AI Practice Questions</h2>
+              <span className="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded">
+                NEW
+              </span>
+            </div>
+            {expandedSections.aiPracticeQuestions ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
+          </button>
+
+          {expandedSections.aiPracticeQuestions && (
+            <div className="px-8 pb-8">
+              <PracticeQuestions interviewPrepId={interviewPrepId} />
             </div>
           )}
         </section>
