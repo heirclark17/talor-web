@@ -174,27 +174,6 @@ interface InterviewQuestionsData {
   job_title: string
 }
 
-interface CompanyValue {
-  name: string
-  description: string
-  source_snippet: string
-  url: string
-  source: string
-}
-
-interface CompanyValuesData {
-  stated_values: CompanyValue[]
-  cultural_priorities: string[]
-  work_environment: string
-  sources_consulted: Array<{
-    title: string
-    url: string
-    type: string
-  }>
-  last_updated: string
-  company_name: string
-}
-
 export default function InterviewPrep() {
   const { tailoredResumeId } = useParams<{ tailoredResumeId: string }>()
   const navigate = useNavigate()
@@ -210,7 +189,6 @@ export default function InterviewPrep() {
   // Real data from backend services
   const [companyResearch, setCompanyResearch] = useState<CompanyResearchData | null>(null)
   const [companyNews, setCompanyNews] = useState<NewsData | null>(null)
-  const [companyValues, setCompanyValues] = useState<CompanyValuesData | null>(null)
   const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestionsData | null>(null)
   const [certifications, setCertifications] = useState<any>(null)
   const [loadingRealData, setLoadingRealData] = useState(false)
@@ -273,21 +251,6 @@ export default function InterviewPrep() {
   })
 
   const [showExportMenu, setShowExportMenu] = useState(false)
-
-  // Interview Intelligence state (Sales Navigator features)
-  const [relevanceScores, setRelevanceScores] = useState<any[]>([])
-  const [newsRelevanceScores, setNewsRelevanceScores] = useState<any[]>([])
-  const [talkingPoints, setTalkingPoints] = useState<any>(null)
-  const [jobAlignment, setJobAlignment] = useState<any>(null)
-  const [readinessData, setReadinessData] = useState<any>(null)
-  const [valuesAlignment, setValuesAlignment] = useState<any>(null)
-  const [sectionsCompleted, setSectionsCompleted] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`sections-completed-${tailoredResumeId}`)
-    return saved ? JSON.parse(saved) : []
-  })
-  const [loadingIntelligence, setLoadingIntelligence] = useState(false)
-  const [expandedInitiative, setExpandedInitiative] = useState<number | null>(null)
-  const [expandedNewsArticle, setExpandedNewsArticle] = useState<number | null>(null)
 
   useEffect(() => {
     loadInterviewPrep()
@@ -449,8 +412,8 @@ export default function InterviewPrep() {
         return
       }
 
-      // Fetch all four data sources in parallel
-      const [researchResult, newsResult, valuesResult, questionsResult] = await Promise.allSettled([
+      // Fetch all three data sources in parallel
+      const [researchResult, newsResult, questionsResult] = await Promise.allSettled([
         // Company research
         fetch(`${API_BASE_URL}/api/interview-prep/company-research`, {
           method: 'POST',
@@ -477,20 +440,6 @@ export default function InterviewPrep() {
             industry: industry || null,
             job_title: jobTitle || null,
             days_back: 90,
-          }),
-        }).then(res => res.json()),
-
-        // Company values & culture
-        fetch(`${API_BASE_URL}/api/interview-prep/company-values`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-ID': localStorage.getItem('talor_user_id') || '',
-          },
-          body: JSON.stringify({
-            company_name: companyName,
-            industry: industry || null,
-            job_title: jobTitle || null,
           }),
         }).then(res => res.json()),
 
@@ -526,14 +475,6 @@ export default function InterviewPrep() {
         console.error('Failed to load company news:', newsResult)
       }
 
-      // Handle company values result
-      if (valuesResult.status === 'fulfilled' && valuesResult.value?.success) {
-        setCompanyValues(valuesResult.value.data)
-        console.log('✓ Company values loaded:', valuesResult.value.data.stated_values?.length, 'values')
-      } else {
-        console.error('Failed to load company values:', valuesResult)
-      }
-
       // Handle interview questions result
       if (questionsResult.status === 'fulfilled' && questionsResult.value?.success) {
         setInterviewQuestions(questionsResult.value.data)
@@ -547,121 +488,6 @@ export default function InterviewPrep() {
       setLoadingRealData(false)
     }
   }
-
-  // Fetch interview intelligence (Sales Navigator features)
-  const fetchInterviewIntelligence = async () => {
-    if (!prepData || !tailoredResumeData) {
-      console.log('Missing prep data or tailored resume, skipping intelligence fetch')
-      return
-    }
-
-    try {
-      setLoadingIntelligence(true)
-
-      const jobDescription = tailoredResumeData.job?.description || ''
-      const jobTitle = prepData.role_analysis?.job_title || ''
-      const companyName = prepData.company_profile?.name || ''
-
-      // 1. Score relevance for strategic initiatives (if available)
-      if (companyResearch?.strategic_initiatives && companyResearch.strategic_initiatives.length > 0) {
-        const scoredResult = await api.scoreContentRelevance({
-          content_items: companyResearch.strategic_initiatives,
-          job_description: jobDescription,
-          job_title: jobTitle,
-          content_type: 'strategy'
-        })
-
-        if (scoredResult.success) {
-          setRelevanceScores(scoredResult.data.scored_items || [])
-        }
-      }
-
-      // 1b. Score relevance for news articles (if available)
-      if (companyNews?.news_articles && companyNews.news_articles.length > 0) {
-        const newsScored = await api.scoreContentRelevance({
-          content_items: companyNews.news_articles,
-          job_description: jobDescription,
-          job_title: jobTitle,
-          content_type: 'news'
-        })
-
-        if (newsScored.success) {
-          setNewsRelevanceScores(newsScored.data.scored_items || [])
-        }
-      }
-
-      // 2. Generate talking points
-      if (companyResearch) {
-        const pointsResult = await api.generateTalkingPoints({
-          content: companyResearch,
-          job_description: jobDescription,
-          job_title: jobTitle,
-          company_name: companyName
-        })
-
-        if (pointsResult.success) {
-          setTalkingPoints(pointsResult.data)
-        }
-      }
-
-      // 3. Analyze job alignment
-      if (companyResearch) {
-        const alignmentResult = await api.analyzeJobAlignment({
-          company_research: companyResearch,
-          job_description: jobDescription,
-          job_title: jobTitle,
-          company_name: companyName
-        })
-
-        if (alignmentResult.success) {
-          setJobAlignment(alignmentResult.data)
-        }
-      }
-
-      // 4. Calculate readiness
-      const readinessResult = await api.calculateInterviewReadiness({
-        prep_data: prepData,
-        sections_completed: sectionsCompleted
-      })
-
-      if (readinessResult.success) {
-        setReadinessData(readinessResult.data)
-      }
-
-      // 5. Generate values alignment
-      if (companyValues?.stated_values && companyValues.stated_values.length > 0) {
-        const candidateBackground = tailoredResumeData.summary || ''
-
-        const valuesResult = await api.generateValuesAlignment({
-          stated_values: companyValues.stated_values,
-          candidate_background: candidateBackground,
-          job_description: jobDescription,
-          company_name: companyName
-        })
-
-        if (valuesResult.success) {
-          setValuesAlignment(valuesResult.data)
-        }
-      }
-
-    } catch (err: any) {
-      console.error('Failed to fetch interview intelligence:', err)
-    } finally {
-      setLoadingIntelligence(false)
-    }
-  }
-
-  // Call intelligence fetching when data is ready
-  useEffect(() => {
-    if (prepData && tailoredResumeData && (companyResearch || companyValues)) {
-      fetchInterviewIntelligence()
-    }
-  }, [prepData, tailoredResumeData, companyResearch, companyValues])
-
-  // Save sections completed to localStorage
-  useEffect(() => {
-    localStorage.setItem(`sections-completed-${tailoredResumeId}`, JSON.stringify(sectionsCompleted))
-  }, [sectionsCompleted, tailoredResumeId])
 
   // Utility functions for enhancements
   const toggleCheck = (itemId: string) => {
@@ -811,53 +637,6 @@ export default function InterviewPrep() {
     const interview = new Date(interviewDate)
     const diff = Math.ceil((interview.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
     return diff
-  }
-
-  // Helper functions for UX improvements
-  const getPriorityEmoji = (priority: string): string => {
-    const emojiMap: Record<string, string> = {
-      'Critical': '🔴',
-      'High': '🟠',
-      'Medium': '🔵',
-      'Context': '⚪'
-    }
-    return emojiMap[priority] || '⚪'
-  }
-
-  const getPriorityColor = (priority: string): string => {
-    const colorMap: Record<string, string> = {
-      'Critical': 'text-red-400',
-      'High': 'text-orange-400',
-      'Medium': 'text-blue-400',
-      'Context': 'text-gray-400'
-    }
-    return colorMap[priority] || 'text-gray-400'
-  }
-
-  const getValueIcon = (valueName: string): string => {
-    const iconMap: Record<string, string> = {
-      'innovation': '💡',
-      'integrity': '🤝',
-      'excellence': '🎯',
-      'collaboration': '👥',
-      'diversity': '🌈',
-      'customer': '🎧',
-      'quality': '⭐',
-      'accountability': '✓',
-      'respect': '🙏',
-      'trust': '🔒',
-      'teamwork': '🤝',
-      'growth': '📈',
-      'passion': '❤️',
-      'transparency': '🔍',
-      'ownership': '👤'
-    }
-
-    const key = valueName.toLowerCase()
-    for (const [keyword, icon] of Object.entries(iconMap)) {
-      if (key.includes(keyword)) return icon
-    }
-    return '⚡' // Default icon
   }
 
   const exportToPDF = () => {
@@ -1148,104 +927,6 @@ export default function InterviewPrep() {
           </div>
         </div>
 
-        {/* Interview Readiness Dashboard (Sales Navigator-style) */}
-        {loadingIntelligence && (
-          <div className="glass rounded-3xl p-8 mb-6">
-            <div className="flex items-center justify-center gap-3">
-              <Loader2 className="w-6 h-6 text-white animate-spin" />
-              <span className="text-gray-300">Analyzing interview intelligence...</span>
-            </div>
-          </div>
-        )}
-
-        {readinessData && !loadingIntelligence && (
-          <div className="glass rounded-3xl p-8 mb-6">
-            <h2 className="text-2xl font-bold text-white mb-6">
-              Interview Readiness Dashboard
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {/* Readiness Score */}
-              <div className="bg-white/5 rounded-xl p-6 text-center">
-                <div className="text-sm text-gray-400 mb-2">Interview Ready Score</div>
-                <div className={`text-5xl font-bold ${
-                  readinessData.readiness_score >= 8.5 ? 'text-green-500' :
-                  readinessData.readiness_score >= 7.0 ? 'text-blue-500' :
-                  readinessData.readiness_score >= 5.0 ? 'text-yellow-500' :
-                  'text-gray-500'
-                }`}>
-                  {readinessData.readiness_score}
-                  <span className="text-2xl text-gray-400">/10</span>
-                </div>
-                <div className="text-sm text-white/80 mt-2">{readinessData.status}</div>
-              </div>
-
-              {/* Progress */}
-              <div className="bg-white/5 rounded-xl p-6 text-center">
-                <div className="text-sm text-gray-400 mb-2">Prep Progress</div>
-                <div className="text-5xl font-bold text-blue-400">
-                  {readinessData.progress_percentage}
-                  <span className="text-2xl text-gray-400">%</span>
-                </div>
-                <div className="text-sm text-white/80 mt-2">Sections Complete</div>
-              </div>
-
-              {/* Time Invested */}
-              <div className="bg-white/5 rounded-xl p-6 text-center">
-                <div className="text-sm text-gray-400 mb-2">Time Invested</div>
-                <div className="text-5xl font-bold text-purple-400">
-                  {Math.floor(readinessData.time_invested_minutes / 60)}
-                  <span className="text-2xl">h</span>
-                  <span className="text-3xl text-gray-400"> {readinessData.time_invested_minutes % 60}m</span>
-                </div>
-                <div className="text-sm text-white/80 mt-2">Preparation Time</div>
-              </div>
-            </div>
-
-            {/* Recommendation */}
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
-              <p className="text-blue-300">{readinessData.recommendation}</p>
-            </div>
-
-            {/* Critical Next Actions */}
-            {readinessData.next_actions && readinessData.next_actions.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Critical Next Actions</h3>
-                <div className="space-y-3">
-                  {readinessData.next_actions.map((action: any, idx: number) => (
-                    <div key={idx} className="bg-white/5 rounded-lg p-4 flex items-start">
-                      <input
-                        type="checkbox"
-                        className="mt-1 mr-4"
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            const newSections = [...sectionsCompleted, action.action]
-                            setSectionsCompleted(newSections)
-                          }
-                        }}
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs px-2 py-1 rounded ${
-                            action.priority === 'Critical' ? 'bg-red-500/20 text-red-300' :
-                            action.priority === 'High' ? 'bg-orange-500/20 text-orange-300' :
-                            'bg-blue-500/20 text-blue-300'
-                          }`}>
-                            {action.priority}
-                          </span>
-                          <span className="text-xs text-gray-400">⏱️ {action.time_estimate_minutes} min</span>
-                        </div>
-                        <div className="text-white font-medium">{action.action}</div>
-                        <div className="text-sm text-gray-400 mt-1">{action.why}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Company Profile */}
         <section className="glass rounded-3xl mb-6 overflow-hidden">
           <button
@@ -1421,143 +1102,36 @@ export default function InterviewPrep() {
 
             {expandedSections.valuesAndCulture && (
               <div className="px-8 pb-8">
-                {/* Loading State */}
-                {loadingRealData && (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-white" />
-                    <span className="ml-3 text-gray-300">Loading company values from research...</span>
-                  </div>
-                )}
-
-                {/* Real Values from Perplexity (Priority Display) */}
-                {companyValues && companyValues.stated_values.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-white font-semibold mb-3">Company Values</h3>
-
-                    {/* Section Guidance */}
-                    <div className="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Star className="w-5 h-5 text-blue-400" />
-                        <span className="text-blue-300 font-semibold text-sm">How to Use These Values</span>
-                      </div>
-                      <p className="text-white/80 text-sm">
-                        Reference 1-2 values that align with your background when discussing your experience.
-                        Use the example statements and questions provided below.
-                      </p>
+                <div className="space-y-4 mb-6">
+                  {prepData.values_and_culture.stated_values.map((value, idx) => (
+                    <div key={idx} className="bg-white/5 p-4 rounded-lg">
+                      <h4 className="text-white font-semibold mb-2">{value.name}</h4>
+                      <p className="text-gray-300 text-sm mb-2">{value.source_snippet}</p>
+                      {value.url && (
+                        <a
+                          href={value.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 text-xs hover:underline"
+                        >
+                          Source
+                        </a>
+                      )}
                     </div>
+                  ))}
+                </div>
 
-                    <div className="space-y-4">
-                      {companyValues.stated_values.map((value, idx) => (
-                        <div key={idx} className="bg-white/5 border border-white/10 p-5 rounded-lg">
-                          <div className="flex items-center gap-3 mb-3">
-                            <span className="text-2xl">{getValueIcon(value.name)}</span>
-                            <h4 className="text-white font-semibold text-base">{value.name}</h4>
-                          </div>
-
-                          {value.description && (
-                            <p className="text-gray-300 text-sm mb-4 leading-relaxed">{value.description}</p>
-                          )}
-
-                          <div className="bg-blue-500/10 border-l-4 border-blue-500 p-3 rounded">
-                            <div className="text-xs font-semibold text-blue-300 mb-2">💬 HOW TO DEMONSTRATE</div>
-                            <div className="space-y-2 text-sm">
-                              <p className="text-white/90">→ Mention your experience that demonstrates {value.name.toLowerCase()}</p>
-                              <p className="text-white/90">→ Ask: "How does the team embody {value.name.toLowerCase()} in day-to-day work?"</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Cultural Priorities */}
-                    {companyValues.cultural_priorities && companyValues.cultural_priorities.length > 0 && (
-                      <div className="mt-6">
-                        <h4 className="text-white font-semibold mb-3">Cultural Priorities</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {companyValues.cultural_priorities.map((priority, idx) => (
-                            <span key={idx} className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm">
-                              {priority}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Work Environment */}
-                    {companyValues.work_environment && (
-                      <div className="mt-6 bg-white/5 p-4 rounded-lg">
-                        <h4 className="text-white font-semibold mb-2">Work Environment</h4>
-                        <p className="text-gray-300 text-sm">{companyValues.work_environment}</p>
-                      </div>
-                    )}
-
-                    {/* Sources Consulted */}
-                    {companyValues.sources_consulted && companyValues.sources_consulted.length > 0 && (
-                      <div className="mt-4 text-xs text-gray-400">
-                        <span>Sources consulted: {companyValues.sources_consulted.length} (</span>
-                        {companyValues.sources_consulted.slice(0, 3).map((source, idx) => (
-                          <span key={idx}>
-                            {source.url ? (
-                              <a
-                                href={source.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 hover:underline"
-                              >
-                                {source.title || source.type}
-                              </a>
-                            ) : (
-                              source.title || source.type
-                            )}
-                            {idx < Math.min(2, companyValues.sources_consulted.length - 1) && ', '}
-                          </span>
-                        ))}
-                        {companyValues.sources_consulted.length > 3 && ` and ${companyValues.sources_consulted.length - 3} more`})
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* AI-Generated Fallback Values (if no real data) */}
-                {!loadingRealData && (!companyValues || companyValues.stated_values.length === 0) && (
+                {prepData.values_and_culture.practical_implications.length > 0 && (
                   <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <AlertCircle className="w-5 h-5 text-yellow-400" />
-                      <h3 className="text-white font-semibold">Company Values (AI-generated)</h3>
-                      <span className="text-xs text-gray-400">Using fallback data - real research unavailable</span>
-                    </div>
-                    <div className="space-y-4 mb-6">
-                      {prepData.values_and_culture.stated_values.map((value, idx) => (
-                        <div key={idx} className="bg-white/5 p-4 rounded-lg">
-                          <h4 className="text-white font-semibold mb-2">{value.name}</h4>
-                          <p className="text-gray-300 text-sm mb-2">{value.source_snippet}</p>
-                          {value.url && (
-                            <a
-                              href={value.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-400 text-xs hover:underline"
-                            >
-                              Source
-                            </a>
-                          )}
-                        </div>
+                    <h4 className="text-white font-semibold mb-3">Practical Implications</h4>
+                    <ul className="space-y-2">
+                      {prepData.values_and_culture.practical_implications.map((impl, idx) => (
+                        <li key={idx} className="text-gray-300 flex gap-2 text-sm">
+                          <span className="text-white/40">→</span>
+                          <span>{impl}</span>
+                        </li>
                       ))}
-                    </div>
-
-                    {prepData.values_and_culture.practical_implications.length > 0 && (
-                      <div>
-                        <h4 className="text-white font-semibold mb-3">Practical Implications</h4>
-                        <ul className="space-y-2">
-                          {prepData.values_and_culture.practical_implications.map((impl, idx) => (
-                            <li key={idx} className="text-gray-300 flex gap-2 text-sm">
-                              <span className="text-white/40">→</span>
-                              <span>{impl}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    </ul>
                   </div>
                 )}
 
@@ -1614,124 +1188,39 @@ export default function InterviewPrep() {
                   </div>
                 )}
 
-                {/* Real Company Strategies with Intelligence */}
+                {/* Real Company Strategies */}
                 {companyResearch && companyResearch.strategic_initiatives && companyResearch.strategic_initiatives.length > 0 && (
                   <div className="mb-6">
-                    <h4 className="text-white font-semibold mb-3">Strategic Initiatives</h4>
-
-                    {/* Section Guidance */}
-                    <div className="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Target className="w-5 h-5 text-blue-400" />
-                        <span className="text-blue-300 font-semibold text-sm">How to Use These Initiatives</span>
-                      </div>
-                      <p className="text-white/80 text-sm">
-                        Mention 1-2 high-priority initiatives in your interview to demonstrate you understand
-                        the company's direction. Use the talking points provided below.
-                      </p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <h4 className="text-white font-semibold">Strategic Initiatives</h4>
+                      <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
                     </div>
                     <div className="space-y-4">
-                      {(relevanceScores.length > 0 ? relevanceScores : companyResearch.strategic_initiatives).map((item: any, idx: number) => {
-                        const initiative = relevanceScores.length > 0 ? item.original_item : item
-                        const intelligence = relevanceScores.length > 0 ? item : null
-                        const isExpanded = expandedInitiative === idx
-
-                        return (
-                          <div key={idx} className="bg-white/5 p-5 rounded-lg border border-white/10">
-                            {/* Header: Priority + Score */}
-                            <div className="flex items-center justify-between mb-3">
-                              {intelligence && intelligence.priority && intelligence.priority !== 'Context' ? (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg">{getPriorityEmoji(intelligence.priority)}</span>
-                                  <span className={`font-semibold ${getPriorityColor(intelligence.priority)}`}>
-                                    {intelligence.priority} Priority
-                                  </span>
-                                </div>
-                              ) : null}
-                              {intelligence && (
-                                <span className="text-gray-400 text-sm">{intelligence.relevance_score}/10</span>
-                              )}
-                            </div>
-
-                            {/* Title + Description */}
-                            <h5 className="text-white font-medium mb-2">{initiative.title}</h5>
-                            <p className="text-gray-300 text-sm mb-4 leading-relaxed">{initiative.description}</p>
-                            {initiative.date && <p className="text-gray-500 text-xs mb-3">{initiative.date}</p>}
-
-                            {/* Talking Points - ALWAYS VISIBLE for Critical/High */}
-                            {intelligence && (intelligence.priority === 'Critical' || intelligence.priority === 'High') && (
-                              <div className="space-y-3 mb-4">
-                                {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
-                                  <div className="bg-green-500/10 border-l-4 border-green-500 p-3 rounded">
-                                    <div className="text-xs font-semibold text-green-300 mb-2">💬 SAY THIS</div>
-                                    <p className="text-white/90 text-sm italic">
-                                      "{intelligence.example_statements[0]}"
-                                    </p>
-                                  </div>
-                                )}
-
-                                {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
-                                  <div className="bg-orange-500/10 border-l-4 border-orange-500 p-3 rounded">
-                                    <div className="text-xs font-semibold text-orange-300 mb-2">❓ ASK THIS</div>
-                                    <p className="text-white/90 text-sm">
-                                      {intelligence.questions_to_ask[0]}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Expandable section for Medium priority or to show additional talking points */}
-                            {intelligence && intelligence.priority === 'Medium' && (
-                              <>
-                                <button
-                                  onClick={() => setExpandedInitiative(isExpanded ? null : idx)}
-                                  className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-2 mb-2"
-                                >
-                                  {isExpanded ? '▼' : '▶'} Show Talking Points
-                                </button>
-
-                                {isExpanded && (
-                                  <div className="mt-3 space-y-3">
-                                    {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
-                                      <div className="bg-green-500/10 border-l-4 border-green-500 p-3 rounded">
-                                        <div className="text-xs font-semibold text-green-300 mb-2">💬 SAY THIS</div>
-                                        <p className="text-white/90 text-sm italic">
-                                          "{intelligence.example_statements[0]}"
-                                        </p>
-                                      </div>
-                                    )}
-
-                                    {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
-                                      <div className="bg-orange-500/10 border-l-4 border-orange-500 p-3 rounded">
-                                        <div className="text-xs font-semibold text-orange-300 mb-2">❓ ASK THIS</div>
-                                        <p className="text-white/90 text-sm">
-                                          {intelligence.questions_to_ask[0]}
-                                        </p>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </>
-                            )}
-
-                            {/* Source and date */}
-                            <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-sm">
-                              <span className="text-gray-500 text-xs">Source: {initiative.source}</span>
-                              {initiative.url && (
-                                <a
-                                  href={initiative.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-400 hover:underline text-xs"
-                                >
-                                  View Source →
-                                </a>
-                              )}
-                            </div>
+                      {companyResearch.strategic_initiatives.map((initiative, idx) => (
+                        <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                          <div className="flex justify-between items-start mb-2">
+                            <h5 className="text-white font-medium">{initiative.title}</h5>
+                            {initiative.date && <span className="text-gray-500 text-sm">{initiative.date}</span>}
                           </div>
-                        )
-                      })}
+                          <p className="text-gray-300 text-sm mb-2">{initiative.description}</p>
+                          {initiative.relevance_to_role && (
+                            <p className="text-blue-300 text-sm italic mb-2">→ {initiative.relevance_to_role}</p>
+                          )}
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-gray-500 text-xs">Source: {initiative.source}</span>
+                            {initiative.url && (
+                              <a
+                                href={initiative.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 text-xs hover:underline"
+                              >
+                                View Source →
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -1765,117 +1254,42 @@ export default function InterviewPrep() {
                   </div>
                 )}
 
-                {/* Real Company News with Intelligence */}
+                {/* Real Company News */}
                 {companyNews && companyNews.news_articles && companyNews.news_articles.length > 0 && (
                   <div className="mb-6">
-                    <h4 className="text-white font-semibold mb-3">Recent News ({companyNews.date_range})</h4>
-                    <div className="space-y-4">
-                      {(newsRelevanceScores.length > 0 ? newsRelevanceScores : companyNews.news_articles).slice(0, 10).map((item: any, idx: number) => {
-                        const article = newsRelevanceScores.length > 0 ? item.original_item : item
-                        const intelligence = newsRelevanceScores.length > 0 ? item : null
-                        const isExpanded = expandedNewsArticle === idx
-
-                        return (
-                          <div key={idx} className="bg-white/5 p-5 rounded-lg border border-white/10">
-                            {/* Header: Priority + Score */}
-                            <div className="flex items-center justify-between mb-3">
-                              {intelligence && intelligence.priority && intelligence.priority !== 'Context' ? (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg">{getPriorityEmoji(intelligence.priority)}</span>
-                                  <span className={`font-semibold ${getPriorityColor(intelligence.priority)}`}>
-                                    {intelligence.priority} Priority
-                                  </span>
-                                </div>
-                              ) : null}
-                              {intelligence && (
-                                <span className="text-gray-400 text-sm">{intelligence.relevance_score}/10</span>
-                              )}
-                            </div>
-
-                            {/* Title + Date + Summary */}
-                            <div className="flex justify-between items-start mb-2">
-                              <h5 className="text-white font-medium flex-1">{article.title}</h5>
-                              <span className="text-gray-500 text-xs whitespace-nowrap ml-3">{article.published_date}</span>
-                            </div>
-                            <p className="text-gray-300 text-sm mb-3 leading-relaxed">{article.summary}</p>
-
-                            {/* Talking Points - ALWAYS VISIBLE for Critical/High */}
-                            {intelligence && (intelligence.priority === 'Critical' || intelligence.priority === 'High') && (
-                              <div className="space-y-3 mb-4">
-                                {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
-                                  <div className="bg-green-500/10 border-l-4 border-green-500 p-3 rounded">
-                                    <div className="text-xs font-semibold text-green-300 mb-2">💬 SAY THIS</div>
-                                    <p className="text-white/90 text-sm italic">
-                                      "{intelligence.example_statements[0]}"
-                                    </p>
-                                  </div>
-                                )}
-
-                                {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
-                                  <div className="bg-orange-500/10 border-l-4 border-orange-500 p-3 rounded">
-                                    <div className="text-xs font-semibold text-orange-300 mb-2">❓ ASK THIS</div>
-                                    <p className="text-white/90 text-sm">
-                                      {intelligence.questions_to_ask[0]}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Expandable section for Medium priority */}
-                            {intelligence && intelligence.priority === 'Medium' && (
-                              <>
-                                <button
-                                  onClick={() => setExpandedNewsArticle(isExpanded ? null : idx)}
-                                  className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-2 mb-2"
-                                >
-                                  {isExpanded ? '▼' : '▶'} Show Talking Points
-                                </button>
-
-                                {isExpanded && (
-                                  <div className="mt-3 space-y-3">
-                                    {intelligence?.example_statements && intelligence.example_statements.length > 0 && (
-                                      <div className="bg-green-500/10 border-l-4 border-green-500 p-3 rounded">
-                                        <div className="text-xs font-semibold text-green-300 mb-2">💬 SAY THIS</div>
-                                        <p className="text-white/90 text-sm italic">
-                                          "{intelligence.example_statements[0]}"
-                                        </p>
-                                      </div>
-                                    )}
-
-                                    {intelligence?.questions_to_ask && intelligence.questions_to_ask.length > 0 && (
-                                      <div className="bg-orange-500/10 border-l-4 border-orange-500 p-3 rounded">
-                                        <div className="text-xs font-semibold text-orange-300 mb-2">❓ ASK THIS</div>
-                                        <p className="text-white/90 text-sm">
-                                          {intelligence.questions_to_ask[0]}
-                                        </p>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </>
-                            )}
-
-                            {/* Source and category */}
-                            <div className="mt-3 pt-3 border-t border-white/10 flex items-center gap-4">
-                              <span className="text-gray-500 text-xs">Source: {article.source}</span>
-                              {article.category && (
-                                <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded">{article.category}</span>
-                              )}
-                              {article.url && (
-                                <a
-                                  href={article.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-400 text-xs hover:underline ml-auto"
-                                >
-                                  Read Article →
-                                </a>
-                              )}
-                            </div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <h4 className="text-white font-semibold">Recent News ({companyNews.date_range})</h4>
+                      <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
+                    </div>
+                    <div className="space-y-3">
+                      {companyNews.news_articles.slice(0, 10).map((article, idx) => (
+                        <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                          <div className="flex justify-between items-start mb-2">
+                            <h5 className="text-white font-medium">{article.title}</h5>
+                            <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{article.published_date}</span>
                           </div>
-                        )
-                      })}
+                          <p className="text-gray-300 text-sm mb-2">{article.summary}</p>
+                          {article.impact_summary && (
+                            <p className="text-blue-300 text-sm italic mb-2">→ {article.impact_summary}</p>
+                          )}
+                          <div className="flex items-center gap-4 mt-2">
+                            <span className="text-gray-500 text-xs">Source: {article.source}</span>
+                            {article.category && (
+                              <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded">{article.category}</span>
+                            )}
+                            {article.url && (
+                              <a
+                                href={article.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 text-xs hover:underline ml-auto"
+                              >
+                                Read Article →
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
