@@ -11,6 +11,18 @@ test.describe('Career Path Designer E2E Tests (New Wizard Flow)', () => {
   test('Complete workflow: Welcome → Upload Resume → Answer Questions → View Results', async ({ page }) => {
     test.setTimeout(240000); // 4 minutes for upload + AI processing
 
+    // Capture browser console logs for debugging
+    page.on('console', msg => {
+      if (msg.type() === 'error' || msg.text().includes('Career plan')) {
+        console.log(`  [BROWSER ${msg.type().toUpperCase()}] ${msg.text()}`);
+      }
+    });
+
+    // Capture network errors
+    page.on('requestfailed', request => {
+      console.log(`  [NETWORK FAILED] ${request.url()} - ${request.failure()?.errorText}`);
+    });
+
     // Step 1: Navigate to Career Path Designer
     console.log('Step 1: Navigating to Career Path Designer...');
     await page.goto(`${BASE_URL}/career-path`);
@@ -123,9 +135,11 @@ test.describe('Career Path Designer E2E Tests (New Wizard Flow)', () => {
     await expect(generatingIndicator).toBeVisible({ timeout: 10000 });
     console.log('  - AI processing started...');
 
-    // Wait for completion (could take 60-90 seconds)
-    const resultsHeading = page.locator('text=/Your Career|Career Path|Results|Target Roles/i');
-    await expect(resultsHeading).toBeVisible({ timeout: 150000 }); // 2.5 minutes
+    // Wait for completion (API can take 3+ minutes)
+    // Wait for the specific results heading that only appears on the results page
+    // Note: "Career Path" appears in nav, so we need more specific text
+    const resultsHeading = page.locator('text="Your Career Transition Plan"');
+    await expect(resultsHeading).toBeVisible({ timeout: 210000 }); // 3.5 minutes
     console.log('✓ Plan generation completed!');
 
     // Step 7: Verify all result sections are present

@@ -152,6 +152,65 @@ export default function CareerPathDesigner() {
       // Extract tools/technologies or use defaults
       const tools = skills.length > 0 ? skills.slice(0, 10) : ['General professional tools']
 
+      // Extract strengths from resume summary or infer from skills/experience
+      const strengths: string[] = []
+
+      // 1. Extract from resume summary if available
+      if (resumeData?.summary && typeof resumeData.summary === 'string') {
+        const summaryLower = resumeData.summary.toLowerCase()
+
+        // Common strength keywords to look for
+        const strengthIndicators = [
+          { keywords: ['leadership', 'lead', 'led', 'manage', 'managed', 'director'], strength: 'Leadership & Team Management' },
+          { keywords: ['communication', 'stakeholder', 'present', 'collaborate'], strength: 'Communication & Stakeholder Management' },
+          { keywords: ['problem-solving', 'troubleshoot', 'resolve', 'solution'], strength: 'Problem Solving' },
+          { keywords: ['strategic', 'planning', 'roadmap', 'vision'], strength: 'Strategic Planning' },
+          { keywords: ['technical', 'engineering', 'development', 'architecture'], strength: 'Technical Expertise' },
+          { keywords: ['project management', 'program management', 'agile', 'scrum'], strength: 'Project Management' },
+          { keywords: ['analytical', 'analysis', 'data-driven', 'metrics'], strength: 'Analytical Thinking' },
+          { keywords: ['cross-functional', 'collaboration', 'teamwork'], strength: 'Cross-Functional Collaboration' },
+          { keywords: ['innovation', 'creative', 'improve', 'optimization'], strength: 'Innovation & Process Improvement' }
+        ]
+
+        strengthIndicators.forEach(({ keywords, strength }) => {
+          if (keywords.some(kw => summaryLower.includes(kw))) {
+            strengths.push(strength)
+          }
+        })
+      }
+
+      // 2. Infer from top skills
+      if (skills.length > 0) {
+        skills.slice(0, 5).forEach(skill => {
+          if (!strengths.includes(skill)) {
+            strengths.push(skill)
+          }
+        })
+      }
+
+      // 3. Ensure minimum strengths with relevant defaults
+      if (strengths.length === 0) {
+        strengths.push('Career transition planning', 'Adaptability', 'Professional growth mindset')
+      }
+
+      // Keep top 5 most relevant strengths
+      const finalStrengths = strengths.slice(0, 5)
+
+      // Extract likes/preferences from career goals and interests
+      const likes: string[] = []
+      if (dreamRole) {
+        likes.push(`Pursuing career growth in ${dreamRole}`)
+      }
+      if (resumeData?.summary && typeof resumeData.summary === 'string') {
+        const summaryLower = resumeData.summary.toLowerCase()
+        if (summaryLower.includes('passion') || summaryLower.includes('enjoy')) {
+          likes.push('Passionate about meaningful impact')
+        }
+        if (summaryLower.includes('continuous learning') || summaryLower.includes('professional development')) {
+          likes.push('Continuous learning and development')
+        }
+      }
+
       // Determine education level from resume or use default
       let educationLevel = 'bachelors'
       if (education.some((e: any) => e.degree?.toLowerCase().includes('phd'))) {
@@ -170,9 +229,9 @@ export default function CareerPathDesigner() {
         years_experience: yearsExp,
         top_tasks: topTasks,
         tools: tools,
-        strengths: ['Career transition planning', 'Adaptability'],
-        likes: [],
-        dislikes: [],
+        strengths: finalStrengths,
+        likes: likes,
+        dislikes: [],  // Leave empty - focus on positive attributes
         target_role_interest: dreamRole,
         time_per_week: timePerWeek,
         budget: budget,
