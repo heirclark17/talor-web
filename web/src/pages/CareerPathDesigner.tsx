@@ -51,20 +51,19 @@ export default function CareerPathDesigner() {
         return
       }
 
-      setResumeId(uploadResult.data.id)
+      setResumeId(uploadResult.data.resume_id)
 
-      // Parse resume
-      const parseResult = await api.parseResume(uploadResult.data.id)
+      // Upload response already includes parsed data
       setUploadProgress(100)
 
-      if (!parseResult.success || !parseResult.data) {
+      if (!uploadResult.data.parsed_data) {
         setError('Failed to parse resume. Please try again.')
         setResumeFile(null)
         setUploadProgress(0)
         return
       }
 
-      setResumeData(parseResult.data)
+      setResumeData(uploadResult.data.parsed_data)
 
       // Auto-advance to questions after successful upload
       setTimeout(() => setStep('questions'), 500)
