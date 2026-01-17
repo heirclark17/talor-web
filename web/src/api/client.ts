@@ -601,7 +601,7 @@ class ApiClient {
   }): Promise<ApiResponse> {
     try {
       const response = await fetch(
-        `${this.baseUrl}/api/interview-prep/generate-star-story`,
+        `${this.baseUrl}/api/interview-prep/generate-practice-star-story`,
         {
           method: 'POST',
           headers: {
