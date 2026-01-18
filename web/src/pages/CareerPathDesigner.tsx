@@ -148,6 +148,36 @@ export default function CareerPathDesigner() {
     localStorage.setItem('careerPathIntake', JSON.stringify(data))
   }, [currentRole, currentIndustry, yearsExperience, education, topTasks, tools, strengths, likes, dislikes, dreamRole, targetLevel, targetIndustries, specificCompanies, timePerWeek, timeline, employmentStatus, location, willingToRelocate, inPersonVsRemote, learningStyle, preferredPlatforms, technicalBackground, transitionMotivation, specificTechnologiesInterest, certificationAreasInterest])
 
+  // Auto-generate tasks when currentRole changes
+  const [isGeneratingTasks, setIsGeneratingTasks] = useState(false)
+  useEffect(() => {
+    // Only auto-generate if user has entered a role and tasks are empty
+    const hasRole = currentRole.trim().length > 2
+    const hasEmptyTasks = topTasks.filter(t => t.trim()).length === 0
+
+    if (hasRole && hasEmptyTasks && !isGeneratingTasks) {
+      setIsGeneratingTasks(true)
+
+      api.generateTasksForRole(currentRole, currentIndustry || undefined)
+        .then(response => {
+          if (response.success && response.data?.tasks) {
+            console.log('✓ Auto-generated tasks:', response.data.tasks)
+            setTopTasks(response.data.tasks)
+          } else {
+            console.warn('✗ Task generation failed:', response.error)
+            // Keep default empty tasks
+          }
+        })
+        .catch(err => {
+          console.error('✗ Task generation error:', err)
+          // Keep default empty tasks
+        })
+        .finally(() => {
+          setIsGeneratingTasks(false)
+        })
+    }
+  }, [currentRole, currentIndustry]) // Only trigger when role or industry changes
+
   const resetIntakeData = () => {
     localStorage.removeItem('careerPathIntake')
     setCurrentRole('')
@@ -876,7 +906,14 @@ export default function CareerPathDesigner() {
 
                   {/* Top Tasks */}
                   <div>
-                    <label className="text-white font-semibold mb-2 block">Top 3-5 Tasks in Current Role *</label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-white font-semibold">Top 3-5 Tasks in Current Role *</label>
+                      {isGeneratingTasks && (
+                        <span className="text-xs text-blue-400 animate-pulse">
+                          ✨ AI is generating tasks...
+                        </span>
+                      )}
+                    </div>
                     {topTasks.map((task, idx) => (
                       <input
                         key={idx}

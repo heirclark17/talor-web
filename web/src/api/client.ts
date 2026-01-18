@@ -995,6 +995,44 @@ class ApiClient {
       };
     }
   }
+
+  /**
+   * Auto-generate typical tasks for a job role using Perplexity AI
+   */
+  async generateTasksForRole(roleTitle: string, industry?: string): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/generate-tasks`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          role_title: roleTitle,
+          industry: industry || ''
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result, // Contains: { success: true, role_title: str, industry: str, tasks: List[str] }
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
 }
 
 // Export singleton instance

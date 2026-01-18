@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Async Career Plan Generation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+        }
+        .progress {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.5s;
+        }
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+        }
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Async Career Plan Generator Test</h1>
+
+        <div style="text-align: center;">
+            <button id="startBtn" onclick="startGeneration()">Start Generation</button>
+            <button id="stopBtn" onclick="stopPolling()" disabled>Stop Polling</button>
+        </div>
+
+        <div class="progress">
+            <div class="status" id="status">Ready to start</div>
+            <div id="message" style="color: #ccc; margin: 10px 0;">Click "Start Generation" to begin</div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div style="text-align: center; margin-top: 5px;">
+                <span id="progressText">0%</span>
+            </div>
+        </div>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://resume-ai-backend-production-3134.up.railway.app';
+        let pollingInterval = null;
+        let jobId = null;
+
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function updateProgress(progress, status, message) {
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${progress}%`;
+            document.getElementById('status').textContent = status;
+            document.getElementById('message').textContent = message;
+        }
+
+        async function startGeneration() {
+            log('🚀 Starting async career plan generation...');
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            updateProgress(0, 'Starting...', 'Creating job...');
+
+            try {
+                // Create async job
+                const response = await fetch(`${API_URL}/api/career-path/generate-async`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': 'test-user-123'
+                    },
+                    body: JSON.stringify({
+                        intake: {
+                            current_role_title: "Software Engineer",
+                            current_industry: "Technology",
+                            years_experience: 5,
+                            education_level: "bachelors",
+                            top_tasks: ["Coding", "Code reviews", "System design"],
+                            strengths: ["Problem solving", "Communication"],
+                            target_role_interest: "Senior Security Engineer",
+                            target_role_level: "senior",
+                            time_per_week: 10,
+                            timeline: "6months",
+                            current_employment_status: "employed-full-time",
+                            location: "Houston, TX",
+                            in_person_vs_remote: "remote",
+                            learning_style: ["hands-on-projects"],
+                            technical_background: "technical",
+                            transition_motivation: ["career-growth"]
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success || !data.job_id) {
+                    throw new Error('Failed to create job: ' + JSON.stringify(data));
+                }
+
+                jobId = data.job_id;
+                log(`✅ Job created: ${jobId}`);
+                updateProgress(5, 'Job Created', `Job ID: ${jobId}`);
+
+                // Start polling
+                pollJobStatus();
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+                updateProgress(0, 'Error', error.message);
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+
+        async function pollJobStatus() {
+            if (!jobId) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/career-path/job/${jobId}`, {
+                    headers: {
+                        'X-User-ID': 'test-user-123'
+                    }
+                });
+
+                const data = await response.json();
+
+                log(`📊 Status: ${data.status} | Progress: ${data.progress}% | ${data.message || 'Processing...'}`);
+                updateProgress(
+                    data.progress || 0,
+                    data.status.toUpperCase(),
+                    data.message || 'Processing...'
+                );
+
+                if (data.status === 'completed') {
+                    log('✅ Career plan generation COMPLETED!');
+                    log(`✅ Plan ID: ${data.plan_id || data.planId}`);
+                    log(`✅ Target Roles: ${data.plan?.targetRoles?.map(r => r.title).join(', ') || 'N/A'}`);
+                    log(`✅ Certifications: ${data.plan?.certificationPath?.length || 0}`);
+                    log(`✅ Events: ${data.plan?.events?.length || 0}`);
+                    stopPolling();
+                    updateProgress(100, 'COMPLETED', 'Career plan ready!');
+                } else if (data.status === 'failed') {
+                    log(`❌ Job FAILED: ${data.error || 'Unknown error'}`);
+                    stopPolling();
+                    updateProgress(data.progress || 0, 'FAILED', data.error || 'Unknown error');
+                } else {
+                    // Continue polling
+                    pollingInterval = setTimeout(pollJobStatus, 5000);
+                }
+
+            } catch (error) {
+                log(`❌ Polling error: ${error.message}`);
+                // Continue polling on error
+                pollingInterval = setTimeout(pollJobStatus, 5000);
+            }
+        }
+
+        function stopPolling() {
+            if (pollingInterval) {
+                clearTimeout(pollingInterval);
+                pollingInterval = null;
+            }
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            log('⏹️ Polling stopped');
+        }
+    </script>
+</body>
+</html>
