@@ -11,9 +11,10 @@ import {
 interface CareerPlanResultsProps {
   plan: CareerPlan
   timeline: string
+  onExportPDF?: () => void
 }
 
-export default function CareerPlanResults({ plan, timeline }: CareerPlanResultsProps) {
+export default function CareerPlanResults({ plan, timeline, onExportPDF }: CareerPlanResultsProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [expandedCert, setExpandedCert] = useState<number | null>(null)
   const [expandedProject, setExpandedProject] = useState<number | null>(null)
@@ -1237,7 +1238,10 @@ export default function CareerPlanResults({ plan, timeline }: CareerPlanResultsP
             <h3 className="text-white font-semibold mb-1">Export Your Plan</h3>
             <p className="text-sm text-gray-400">Download this career plan for offline access</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors">
+          <button
+            onClick={onExportPDF || (() => window.print())}
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors"
+          >
             <Download className="w-4 h-4" />
             Download PDF
           </button>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import type { CareerPlan as CareerPlanType } from '../types/career-plan'
@@ -28,6 +28,9 @@ export default function CareerPathDesigner() {
   const [jobStatus, setJobStatus] = useState<string>('pending')
   const [jobProgress, setJobProgress] = useState<number>(0)
   const [jobMessage, setJobMessage] = useState<string>('')
+
+  // Export menu
+  const [showExportMenu, setShowExportMenu] = useState(false)
 
   // Resume upload
   const [resumeFile, setResumeFile] = useState<File | null>(null)
@@ -75,6 +78,104 @@ export default function CareerPathDesigner() {
   const [expandedCert, setExpandedCert] = useState<number | null>(null)
   const [expandedProject, setExpandedProject] = useState<number | null>(null)
   const [expandedBullet, setExpandedBullet] = useState<number | null>(null)
+
+  // Load saved intake data on mount
+  useEffect(() => {
+    const savedData = localStorage.getItem('careerPathIntake')
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData)
+        setCurrentRole(data.currentRole || '')
+        setCurrentIndustry(data.currentIndustry || '')
+        setYearsExperience(data.yearsExperience || '')
+        setEducation(data.education || 'bachelors')
+        setTopTasks(data.topTasks || ['', '', ''])
+        setTools(data.tools || ['', '', '', '', ''])
+        setStrengths(data.strengths || ['', ''])
+        setLikes(data.likes || [])
+        setDislikes(data.dislikes || [])
+        setDreamRole(data.dreamRole || '')
+        setTargetLevel(data.targetLevel || 'senior')
+        setTargetIndustries(data.targetIndustries || [])
+        setSpecificCompanies(data.specificCompanies || [])
+        setTimePerWeek(data.timePerWeek || 10)
+        setTimeline(data.timeline || '6months')
+        setEmploymentStatus(data.employmentStatus || 'employed-full-time')
+        setLocation(data.location || '')
+        setWillingToRelocate(data.willingToRelocate || false)
+        setInPersonVsRemote(data.inPersonVsRemote || 'remote')
+        setLearningStyle(data.learningStyle || [])
+        setPreferredPlatforms(data.preferredPlatforms || [])
+        setTechnicalBackground(data.technicalBackground || 'some-technical')
+        setTransitionMotivation(data.transitionMotivation || [])
+        setSpecificTechnologiesInterest(data.specificTechnologiesInterest || [])
+        setCertificationAreasInterest(data.certificationAreasInterest || [])
+      } catch (err) {
+        console.error('Failed to load saved data:', err)
+      }
+    }
+  }, [])
+
+  // Save intake data whenever it changes
+  useEffect(() => {
+    const data = {
+      currentRole,
+      currentIndustry,
+      yearsExperience,
+      education,
+      topTasks,
+      tools,
+      strengths,
+      likes,
+      dislikes,
+      dreamRole,
+      targetLevel,
+      targetIndustries,
+      specificCompanies,
+      timePerWeek,
+      timeline,
+      employmentStatus,
+      location,
+      willingToRelocate,
+      inPersonVsRemote,
+      learningStyle,
+      preferredPlatforms,
+      technicalBackground,
+      transitionMotivation,
+      specificTechnologiesInterest,
+      certificationAreasInterest
+    }
+    localStorage.setItem('careerPathIntake', JSON.stringify(data))
+  }, [currentRole, currentIndustry, yearsExperience, education, topTasks, tools, strengths, likes, dislikes, dreamRole, targetLevel, targetIndustries, specificCompanies, timePerWeek, timeline, employmentStatus, location, willingToRelocate, inPersonVsRemote, learningStyle, preferredPlatforms, technicalBackground, transitionMotivation, specificTechnologiesInterest, certificationAreasInterest])
+
+  const resetIntakeData = () => {
+    localStorage.removeItem('careerPathIntake')
+    setCurrentRole('')
+    setCurrentIndustry('')
+    setYearsExperience('')
+    setEducation('bachelors')
+    setTopTasks(['', '', ''])
+    setTools(['', '', '', '', ''])
+    setStrengths(['', ''])
+    setLikes([])
+    setDislikes([])
+    setDreamRole('')
+    setTargetLevel('senior')
+    setTargetIndustries([])
+    setSpecificCompanies([])
+    setTimePerWeek(10)
+    setTimeline('6months')
+    setEmploymentStatus('employed-full-time')
+    setLocation('')
+    setWillingToRelocate(false)
+    setInPersonVsRemote('remote')
+    setLearningStyle([])
+    setPreferredPlatforms([])
+    setTechnicalBackground('some-technical')
+    setTransitionMotivation([])
+    setSpecificTechnologiesInterest([])
+    setCertificationAreasInterest([])
+  }
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -181,6 +282,24 @@ export default function CareerPathDesigner() {
       setResumeFile(null)
       setUploadProgress(0)
     }
+  }
+
+  const exportToPDF = () => {
+    window.print()
+  }
+
+  const exportToJSON = () => {
+    if (!plan) return
+
+    const dataStr = JSON.stringify(plan, null, 2)
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
+
+    const exportFileDefaultName = `career-plan-${new Date().toISOString().split('T')[0]}.json`
+
+    const linkElement = document.createElement('a')
+    linkElement.setAttribute('href', dataUri)
+    linkElement.setAttribute('download', exportFileDefaultName)
+    linkElement.click()
   }
 
   const handleGenerate = async () => {
@@ -448,13 +567,21 @@ export default function CareerPathDesigner() {
               </div>
             </div>
 
-            <button
-              onClick={() => setStep('upload')}
-              className="btn-primary inline-flex items-center gap-2 text-lg"
-            >
-              Get Started
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            <div className="flex flex-col items-center gap-4">
+              <button
+                onClick={() => setStep('upload')}
+                className="btn-primary inline-flex items-center gap-2 text-lg"
+              >
+                Get Started
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <button
+                onClick={resetIntakeData}
+                className="text-gray-400 hover:text-white transition-colors text-sm"
+              >
+                Reset Saved Data
+              </button>
+            </div>
             <p className="text-sm text-gray-500 mt-4">Takes 10-15 minutes for comprehensive assessment</p>
           </div>
         </div>
@@ -1397,10 +1524,41 @@ export default function CareerPathDesigner() {
                 <ArrowLeft className="w-5 h-5" />
                 New Plan
               </button>
-              <button className="btn-secondary inline-flex items-center gap-2">
-                <Download className="w-5 h-5" />
-                Export Plan
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="btn-secondary inline-flex items-center gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  Export Plan
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+
+                {showExportMenu && (
+                  <div className="absolute right-0 top-full mt-2 bg-gray-900 rounded-xl shadow-2xl border border-white/10 py-2 min-w-[200px] z-10">
+                    <button
+                      onClick={() => {
+                        exportToPDF()
+                        setShowExportMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                    >
+                      <FileText size={16} />
+                      <span>Export as PDF</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        exportToJSON()
+                        setShowExportMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                    >
+                      <Download size={16} />
+                      <span>Export as JSON</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="glass rounded-lg p-8 border border-white/10">
@@ -1426,7 +1584,7 @@ export default function CareerPathDesigner() {
           </div>
 
           {/* Detailed Career Plan Results */}
-          <CareerPlanResults plan={plan} timeline={timeline} />
+          <CareerPlanResults plan={plan} timeline={timeline} onExportPDF={exportToPDF} />
         </div>
       </div>
     )
