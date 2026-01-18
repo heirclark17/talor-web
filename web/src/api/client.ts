@@ -742,7 +742,82 @@ class ApiClient {
   }
 
   /**
-   * Generate career path plan
+   * Generate career path plan (ASYNC - uses Perplexity + OpenAI)
+   * Returns job_id immediately, poll getCareerPlanJobStatus for results
+   */
+  async generateCareerPlanAsync(intake: any): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/generate-async`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ intake }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result, // Contains: { success: true, job_id: "...", message: "..." }
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get status of async career plan generation job
+   * Poll this endpoint until status === 'completed' or 'failed'
+   */
+  async getCareerPlanJobStatus(jobId: string): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/job/${jobId}`, {
+        headers: this.getHeaders(),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      // Convert snake_case keys from backend to camelCase for frontend
+      const convertedResult = {
+        ...result,
+        plan: result.plan ? snakeToCamel(result.plan) : null,
+        planId: result.plan_id || result.planId,
+      };
+
+      return {
+        success: true,
+        data: convertedResult,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Generate career path plan (SYNCHRONOUS - legacy, skips Perplexity research)
+   * Use generateCareerPlanAsync for better results with web research
    */
   async generateCareerPlan(intake: any): Promise<ApiResponse> {
     try {

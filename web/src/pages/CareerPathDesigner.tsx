@@ -23,6 +23,12 @@ export default function CareerPathDesigner() {
   const [plan, setPlan] = useState<CareerPlanType>()
   const [planId, setPlanId] = useState<number>()
 
+  // Async job status
+  const [jobId, setJobId] = useState<string>()
+  const [jobStatus, setJobStatus] = useState<string>('pending')
+  const [jobProgress, setJobProgress] = useState<number>(0)
+  const [jobMessage, setJobMessage] = useState<string>('')
+
   // Resume upload
   const [resumeFile, setResumeFile] = useState<File | null>(null)
   const [resumeId, setResumeId] = useState<number | null>(null)
@@ -200,6 +206,9 @@ export default function CareerPathDesigner() {
     setLoading(true)
     setError(undefined)
     setStep('generating')
+    setJobStatus('pending')
+    setJobProgress(0)
+    setJobMessage('Creating your personalized career plan...')
 
     try {
       const intake = {
@@ -241,38 +250,81 @@ export default function CareerPathDesigner() {
         certification_areas_interest: certificationAreasInterest
       }
 
-      console.log('Generating career plan with intake:', intake)
+      console.log('🚀 Starting async career plan generation with intake:', intake)
 
-      const result = await api.generateCareerPlan(intake)
+      // Step 1: Create async job
+      const createJobResult = await api.generateCareerPlanAsync(intake)
 
-      console.log('Career plan result:', result)
-
-      if (result.success && result.data) {
-        if (result.data.success && result.data.plan) {
-          setPlan(result.data.plan)
-          setPlanId(result.data.plan_id)
-          setStep('results')
-        } else {
-          const errorMsg = result.data.error || 'Failed to generate career plan. Please try again.'
-          console.error('Career plan generation failed:', errorMsg)
-
-          if (result.data.validation_errors) {
-            console.error('Validation errors:', result.data.validation_errors)
-          }
-
-          setError(errorMsg)
-          setStep('questions')
-        }
-      } else {
-        const errorMsg = result.error || 'Failed to generate career plan. Please try again.'
-        console.error('Career plan generation failed:', errorMsg)
+      if (!createJobResult.success || !createJobResult.data?.job_id) {
+        const errorMsg = createJobResult.error || 'Failed to start career plan generation'
+        console.error('❌ Job creation failed:', errorMsg)
         setError(errorMsg)
         setStep('questions')
+        setLoading(false)
+        return
       }
+
+      const currentJobId = createJobResult.data.job_id
+      setJobId(currentJobId)
+      console.log('✅ Job created:', currentJobId)
+
+      // Step 2: Poll for job status
+      let attempts = 0
+      const maxAttempts = 120 // 10 minutes with 5-second polling
+      const pollInterval = 5000 // 5 seconds
+
+      const poll = async () => {
+        attempts++
+
+        if (attempts > maxAttempts) {
+          setError('Career plan generation timed out. Please try again.')
+          setStep('questions')
+          setLoading(false)
+          return
+        }
+
+        const statusResult = await api.getCareerPlanJobStatus(currentJobId)
+
+        if (!statusResult.success) {
+          console.error('❌ Failed to get job status:', statusResult.error)
+          // Continue polling on status check errors
+          setTimeout(poll, pollInterval)
+          return
+        }
+
+        const jobData = statusResult.data
+        console.log(`📊 Job status [${attempts}]:`, jobData.status, `${jobData.progress}%`, jobData.message)
+
+        // Update UI
+        setJobStatus(jobData.status)
+        setJobProgress(jobData.progress || 0)
+        setJobMessage(jobData.message || 'Processing...')
+
+        if (jobData.status === 'completed' && jobData.plan) {
+          console.log('✅ Career plan generation completed!')
+          setPlan(jobData.plan)
+          setPlanId(jobData.planId || jobData.plan_id)
+          setStep('results')
+          setLoading(false)
+        } else if (jobData.status === 'failed') {
+          const errorMsg = jobData.error || 'Career plan generation failed'
+          console.error('❌ Job failed:', errorMsg)
+          setError(errorMsg)
+          setStep('questions')
+          setLoading(false)
+        } else {
+          // Still processing, continue polling
+          setTimeout(poll, pollInterval)
+        }
+      }
+
+      // Start polling
+      poll()
+
     } catch (err: any) {
-      setError(err.message)
+      console.error('❌ Unexpected error:', err)
+      setError(err.message || 'An unexpected error occurred')
       setStep('questions')
-    } finally {
       setLoading(false)
     }
   }
@@ -1206,6 +1258,11 @@ export default function CareerPathDesigner() {
 
   // Generating Screen
   if (step === 'generating') {
+    // Determine which steps are completed based on job progress
+    const isResearching = jobStatus === 'researching' || jobProgress >= 10
+    const isSynthesizing = jobStatus === 'synthesizing' || jobProgress >= 60
+    const isCompleting = jobProgress >= 90
+
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
         <div className="max-w-2xl w-full glass rounded-3xl p-12">
@@ -1216,45 +1273,73 @@ export default function CareerPathDesigner() {
             <h2 className="text-3xl font-bold text-white mb-4">
               Crafting Your Personalized Career Roadmap
             </h2>
-            <p className="text-lg text-gray-400 mb-8">
-              Our AI is researching {dreamRole} opportunities with real-world data from certifications, events, and job markets...
+            <p className="text-lg text-gray-400 mb-2">
+              {jobMessage || `Our AI is researching ${dreamRole} opportunities with real-world data...`}
+            </p>
+            <p className="text-sm text-gray-500 mb-8">
+              This may take 2-3 minutes for comprehensive research
             </p>
 
             <div className="space-y-4 mb-8">
               <div className="flex items-center gap-3 text-left">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <Check className="w-5 h-5 text-white" />
+                  {jobProgress >= 10 ? (
+                    <Check className="w-5 h-5 text-green-400" />
+                  ) : (
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  )}
                 </div>
-                <div className="text-white">Analyzing your transferable skills</div>
+                <div className={jobProgress >= 10 ? "text-white" : "text-gray-400"}>
+                  {isResearching ? "Researching certifications, events, and job market data with Perplexity" : "Preparing research..."}
+                </div>
               </div>
               <div className="flex items-center gap-3 text-left">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  {jobProgress >= 60 ? (
+                    isSynthesizing ? (
+                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    ) : (
+                      <Check className="w-5 h-5 text-green-400" />
+                    )
+                  ) : (
+                    <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                  )}
                 </div>
-                <div className="text-white">Researching actual certifications with study materials</div>
+                <div className={jobProgress >= 60 ? "text-white" : "text-gray-400"}>
+                  {isSynthesizing ? "Generating personalized plan with OpenAI GPT-4.1-mini" : "Analyzing your transferable skills"}
+                </div>
               </div>
               <div className="flex items-center gap-3 text-left">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                  {jobProgress >= 80 ? (
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  ) : (
+                    <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                  )}
                 </div>
-                <div className="text-gray-400">Finding real networking events in your location</div>
+                <div className={jobProgress >= 80 ? "text-white" : "text-gray-400"}>
+                  {jobProgress >= 80 ? "Creating detailed project roadmaps with tech stacks" : "Finding real networking events in your location"}
+                </div>
               </div>
               <div className="flex items-center gap-3 text-left">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                  {jobProgress >= 90 ? (
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  ) : (
+                    <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                  )}
                 </div>
-                <div className="text-gray-400">Creating detailed project roadmaps with tech stacks</div>
-              </div>
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                <div className={jobProgress >= 90 ? "text-white" : "text-gray-400"}>
+                  {jobProgress >= 90 ? "Finalizing your resume transformation guide" : "Building your resume transformation guide"}
                 </div>
-                <div className="text-gray-400">Building your resume transformation guide</div>
               </div>
             </div>
 
             <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-white animate-pulse" style={{ width: '65%' }}></div>
+              <div
+                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+                style={{ width: `${jobProgress}%` }}
+              ></div>
             </div>
             <p className="text-sm text-gray-500 mt-4">This typically takes 30-90 seconds (web research takes time)</p>
           </div>
