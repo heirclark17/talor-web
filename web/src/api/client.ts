@@ -759,9 +759,21 @@ class ApiClient {
       const result = await response.json();
 
       if (!response.ok) {
+        // For 422 validation errors, include detailed error info
+        let errorMsg = result.detail || result.error || `HTTP ${response.status}: ${response.statusText}`;
+
+        // If there's a detail array (FastAPI validation errors), format it
+        if (Array.isArray(result.detail)) {
+          const validationErrors = result.detail.map((err: any) =>
+            `${err.loc?.join('.') || 'field'}: ${err.msg}`
+          ).join('; ');
+          errorMsg = `Validation errors: ${validationErrors}`;
+        }
+
         return {
           success: false,
-          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+          error: errorMsg,
+          data: result, // Include full result for debugging
         };
       }
 

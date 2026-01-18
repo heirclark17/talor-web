@@ -255,10 +255,13 @@ export default function CareerPathDesigner() {
       // Step 1: Create async job
       const createJobResult = await api.generateCareerPlanAsync(intake)
 
+      console.log('Create job result:', createJobResult)
+
       if (!createJobResult.success || !createJobResult.data?.job_id) {
         const errorMsg = createJobResult.error || 'Failed to start career plan generation'
         console.error('❌ Job creation failed:', errorMsg)
-        setError(errorMsg)
+        console.error('Full result:', JSON.stringify(createJobResult, null, 2))
+        setError(`Generation failed: ${errorMsg}`)
         setStep('questions')
         setLoading(false)
         return
