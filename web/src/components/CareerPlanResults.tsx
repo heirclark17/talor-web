@@ -32,8 +32,12 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           >
             <div className="flex items-center gap-3">
               <Target className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-semibold text-white">Target Roles</h2>
-              <span className="text-sm text-gray-400">({plan.targetRoles.length} recommendations)</span>
+              <div className="text-left">
+                <h2 className="text-xl font-semibold text-white">Target Roles</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Specific job titles that match your goals with salary ranges, requirements, and bridge roles • {plan.targetRoles.length} recommendations
+                </p>
+              </div>
             </div>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'roles' ? 'rotate-90' : ''}`} />
           </button>
@@ -88,18 +92,18 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
                   {role.sourceCitations && role.sourceCitations.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-white/10">
-                      <span className="text-xs text-gray-500">Sources:</span>
-                      <div className="flex flex-wrap gap-2 mt-2">
+                      <span className="text-xs text-gray-500 font-semibold mb-2 block">Research Sources:</span>
+                      <div className="space-y-1">
                         {role.sourceCitations.map((url, urlIdx) => (
                           <a
                             key={urlIdx}
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-white/60 hover:text-white underline flex items-center gap-1"
+                            className="text-xs text-blue-400 hover:text-blue-300 underline flex items-start gap-1 break-all"
                           >
-                            <ExternalLink className="w-3 h-3" />
-                            Source {urlIdx + 1}
+                            <ExternalLink className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                            <span>{url}</span>
                           </a>
                         ))}
                       </div>
@@ -121,7 +125,12 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           >
             <div className="flex items-center gap-3">
               <Award className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-semibold text-white">Skills Analysis</h2>
+              <div className="text-left">
+                <h2 className="text-xl font-semibold text-white">Skills Analysis</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  What you already have, what you can reframe, and what you need to build with specific action plans
+                </p>
+              </div>
             </div>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'skills' ? 'rotate-90' : ''}`} />
           </button>
@@ -247,8 +256,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Certification Roadmap</h2>
                 <p className="text-sm text-gray-400 mt-1">
-                  Your step-by-step certification journey • {plan.certificationPath.length} certifications •
-                  {plan.certificationPath.reduce((sum, cert) => sum + (cert.estStudyWeeks || 0), 0)} weeks total
+                  Your detailed end-to-end certification path with study plans, resources, and exact timelines • {plan.certificationPath.length} certifications • {plan.certificationPath.reduce((sum, cert) => sum + (cert.estStudyWeeks || 0), 0)} weeks total
                 </p>
               </div>
             </div>
@@ -470,30 +478,23 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                       {/* Official Links */}
                       {cert.officialLinks && cert.officialLinks.length > 0 && (
                         <div>
-                          <h5 className="text-white font-semibold text-sm mb-3">📋 Official Resources & Sources</h5>
+                          <h5 className="text-white font-semibold text-sm mb-3">📋 Official Resources & Source Links</h5>
+                          <p className="text-xs text-gray-400 mb-3">Click any link below to access official certification information, study guides, and registration pages</p>
                           <div className="space-y-2">
                             {cert.officialLinks.map((link, lIdx) => {
-                              // Extract domain name from URL for better labeling
-                              let displayLabel = 'Official Link'
-                              try {
-                                const url = new URL(link)
-                                displayLabel = url.hostname.replace('www.', '')
-                              } catch (e) {
-                                // If URL parsing fails, use the full link
-                              }
-
                               return (
                                 <a
                                   key={lIdx}
                                   href={link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-start gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-sm text-white transition-colors group"
+                                  className="flex items-start gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors group block"
                                 >
-                                  <ExternalLink className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-400" />
-                                  <div className="flex-1 min-w-0">
-                                    <div className="text-white font-medium">{displayLabel}</div>
-                                    <div className="text-xs text-gray-400 truncate group-hover:text-gray-300">{link}</div>
+                                  <div className="flex items-start gap-2 w-full">
+                                    <ExternalLink className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-400" />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-white font-medium break-all">{link}</div>
+                                    </div>
                                   </div>
                                 </a>
                               )
@@ -505,28 +506,24 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                       {/* Source Citations */}
                       {cert.sourceCitations && cert.sourceCitations.length > 0 && (
                         <div className="bg-gray-500/10 border border-gray-500/30 rounded-lg p-4">
-                          <h5 className="text-gray-300 font-semibold text-sm mb-2">📚 Research Sources</h5>
-                          <div className="space-y-1">
+                          <h5 className="text-gray-300 font-semibold text-sm mb-2">📚 Research Sources & Citations</h5>
+                          <p className="text-xs text-gray-400 mb-3">All sources used to research this certification path</p>
+                          <div className="space-y-2">
                             {cert.sourceCitations.map((source, sIdx) => {
                               // Check if source is a URL or plain text
                               const isUrl = source.startsWith('http://') || source.startsWith('https://')
 
                               if (isUrl) {
-                                let domainName = source
-                                try {
-                                  const url = new URL(source)
-                                  domainName = url.hostname.replace('www.', '')
-                                } catch (e) {}
-
                                 return (
                                   <a
                                     key={sIdx}
                                     href={source}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs text-blue-400 hover:text-blue-300 underline block"
+                                    className="flex items-start gap-2 text-xs text-blue-400 hover:text-blue-300 underline break-all"
                                   >
-                                    {domainName}
+                                    <ExternalLink className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                                    <span>{source}</span>
                                   </a>
                                 )
                               } else {
@@ -556,8 +553,12 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           >
             <div className="flex items-center gap-3">
               <Briefcase className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-semibold text-white">Experience Building Plan</h2>
-              <span className="text-sm text-gray-400">({plan.experiencePlan.length} projects)</span>
+              <div className="text-left">
+                <h2 className="text-xl font-semibold text-white">Experience Building Plan</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Hands-on projects with detailed tech stacks, step-by-step guides, and portfolio showcase strategies • {plan.experiencePlan.length} projects
+                </p>
+              </div>
             </div>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'experience' ? 'rotate-90' : ''}`} />
           </button>
@@ -724,8 +725,12 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           >
             <div className="flex items-center gap-3">
               <Calendar className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-semibold text-white">Networking Events</h2>
-              <span className="text-sm text-gray-400">({plan.events.length} events)</span>
+              <div className="text-left">
+                <h2 className="text-xl font-semibold text-white">Networking Events</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Industry conferences, meetups, and networking opportunities with dates, locations, and registration links • {plan.events.length} events
+                </p>
+              </div>
             </div>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'events' ? 'rotate-90' : ''}`} />
           </button>
@@ -860,7 +865,12 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           >
             <div className="flex items-center gap-3">
               <Calendar className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-semibold text-white">Your Action Timeline</h2>
+              <div className="text-left">
+                <h2 className="text-xl font-semibold text-white">Your Action Timeline</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Week-by-week tactical plan with milestones, tasks, and checkpoints to keep you on track
+                </p>
+              </div>
             </div>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'timeline' ? 'rotate-90' : ''}`} />
           </button>
@@ -971,7 +981,12 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           >
             <div className="flex items-center gap-3">
               <FileText className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-semibold text-white">Resume & LinkedIn Assets</h2>
+              <div className="text-left">
+                <h2 className="text-xl font-semibold text-white">Resume & LinkedIn Assets</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Ready-to-use headlines, summaries, achievement bullets, and optimization strategies with ATS keywords
+                </p>
+              </div>
             </div>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'resume' ? 'rotate-90' : ''}`} />
           </button>
@@ -1239,8 +1254,12 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           >
             <div className="flex items-center gap-3">
               <BookOpen className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-semibold text-white">Education & Training Options</h2>
-              <span className="text-sm text-gray-400">({plan.educationOptions.length} options)</span>
+              <div className="text-left">
+                <h2 className="text-xl font-semibold text-white">Education & Training Options</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Formal degree programs, bootcamps, and online courses with costs, duration, and pros/cons • {plan.educationOptions.length} options
+                </p>
+              </div>
             </div>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'education' ? 'rotate-90' : ''}`} />
           </button>
