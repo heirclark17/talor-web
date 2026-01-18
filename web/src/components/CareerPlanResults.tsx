@@ -244,13 +244,68 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           >
             <div className="flex items-center gap-3">
               <Award className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-semibold text-white">Certification Path</h2>
-              <span className="text-sm text-gray-400">({plan.certificationPath.length} certifications)</span>
+              <div className="text-left">
+                <h2 className="text-xl font-semibold text-white">Certification Roadmap</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Your step-by-step certification journey • {plan.certificationPath.length} certifications •
+                  {plan.certificationPath.reduce((sum, cert) => sum + (cert.estStudyWeeks || 0), 0)} weeks total
+                </p>
+              </div>
             </div>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'certs' ? 'rotate-90' : ''}`} />
           </button>
           {expandedSection === 'certs' && (
-            <div className="px-6 pb-6 space-y-4">
+            <div className="px-6 pb-6 space-y-6">
+              {/* Visual Timeline */}
+              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-white/10 rounded-lg p-6">
+                <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Your Certification Timeline
+                </h3>
+                <div className="relative">
+                  {plan.certificationPath.map((cert, idx) => (
+                    <div key={idx} className="relative flex items-start gap-4 pb-8 last:pb-0">
+                      {/* Timeline Line */}
+                      {idx < plan.certificationPath.length - 1 && (
+                        <div className="absolute left-5 top-11 w-0.5 h-full bg-gradient-to-b from-blue-400 to-purple-400"></div>
+                      )}
+
+                      {/* Step Number */}
+                      <div className="relative z-10 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <span className="text-white font-bold text-sm">{idx + 1}</span>
+                      </div>
+
+                      {/* Cert Summary Card */}
+                      <div className="flex-1 bg-white/5 rounded-lg border border-white/10 p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h4 className="text-white font-semibold">{cert.name}</h4>
+                            <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
+                              <span>{cert.certifyingBody}</span>
+                              <span>•</span>
+                              <span className="uppercase">{cert.level}</span>
+                            </div>
+                          </div>
+                          <div className="text-right ml-4 flex-shrink-0">
+                            <div className="text-white font-semibold text-sm">{cert.estCostRange}</div>
+                            <div className="text-xs text-gray-400">{cert.estStudyWeeks} weeks</div>
+                          </div>
+                        </div>
+                        <p className="text-gray-300 text-sm">{cert.whatItUnlocks}</p>
+                        <button
+                          onClick={() => setExpandedCert(expandedCert === idx ? null : idx)}
+                          className="mt-3 text-xs text-blue-400 hover:text-blue-300 underline"
+                        >
+                          {expandedCert === idx ? 'Hide details' : 'View full details →'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Detailed Certification Cards */}
+              <div className="space-y-4">
               {plan.certificationPath.map((cert, idx) => (
                 <div key={idx} className="bg-white/5 rounded-lg border border-white/10 overflow-hidden">
                   {/* Cert Header - Always Visible */}
@@ -414,19 +469,73 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
                       {/* Official Links */}
                       {cert.officialLinks && cert.officialLinks.length > 0 && (
-                        <div className="flex flex-wrap gap-3">
-                          {cert.officialLinks.map((link, lIdx) => (
-                            <a
-                              key={lIdx}
-                              href={link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm text-white transition-colors"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              Official Link {lIdx + 1}
-                            </a>
-                          ))}
+                        <div>
+                          <h5 className="text-white font-semibold text-sm mb-3">📋 Official Resources & Sources</h5>
+                          <div className="space-y-2">
+                            {cert.officialLinks.map((link, lIdx) => {
+                              // Extract domain name from URL for better labeling
+                              let displayLabel = 'Official Link'
+                              try {
+                                const url = new URL(link)
+                                displayLabel = url.hostname.replace('www.', '')
+                              } catch (e) {
+                                // If URL parsing fails, use the full link
+                              }
+
+                              return (
+                                <a
+                                  key={lIdx}
+                                  href={link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-start gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-sm text-white transition-colors group"
+                                >
+                                  <ExternalLink className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-400" />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-white font-medium">{displayLabel}</div>
+                                    <div className="text-xs text-gray-400 truncate group-hover:text-gray-300">{link}</div>
+                                  </div>
+                                </a>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Source Citations */}
+                      {cert.sourceCitations && cert.sourceCitations.length > 0 && (
+                        <div className="bg-gray-500/10 border border-gray-500/30 rounded-lg p-4">
+                          <h5 className="text-gray-300 font-semibold text-sm mb-2">📚 Research Sources</h5>
+                          <div className="space-y-1">
+                            {cert.sourceCitations.map((source, sIdx) => {
+                              // Check if source is a URL or plain text
+                              const isUrl = source.startsWith('http://') || source.startsWith('https://')
+
+                              if (isUrl) {
+                                let domainName = source
+                                try {
+                                  const url = new URL(source)
+                                  domainName = url.hostname.replace('www.', '')
+                                } catch (e) {}
+
+                                return (
+                                  <a
+                                    key={sIdx}
+                                    href={source}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-blue-400 hover:text-blue-300 underline block"
+                                  >
+                                    {domainName}
+                                  </a>
+                                )
+                              } else {
+                                return (
+                                  <div key={sIdx} className="text-xs text-gray-400">• {source}</div>
+                                )
+                              }
+                            })}
+                          </div>
                         </div>
                       )}
                     </div>
