@@ -100,12 +100,12 @@ export default function CareerPathDesigner() {
         setLikes(data.likes || [])
         setDislikes(data.dislikes || [])
         setDreamRole(data.dreamRole || '')
-        setTargetLevel(data.targetLevel || 'senior')
+        setTargetRoleLevel(data.targetLevel || 'senior')
         setTargetIndustries(data.targetIndustries || [])
         setSpecificCompanies(data.specificCompanies || [])
         setTimePerWeek(data.timePerWeek || 10)
         setTimeline(data.timeline || '6months')
-        setEmploymentStatus(data.employmentStatus || 'employed-full-time')
+        setCurrentEmploymentStatus(data.employmentStatus || 'employed-full-time')
         setLocation(data.location || '')
         setWillingToRelocate(data.willingToRelocate || false)
         setInPersonVsRemote(data.inPersonVsRemote || 'remote')
@@ -134,12 +134,12 @@ export default function CareerPathDesigner() {
       likes,
       dislikes,
       dreamRole,
-      targetLevel,
+      targetRoleLevel,
       targetIndustries,
       specificCompanies,
       timePerWeek,
       timeline,
-      employmentStatus,
+      currentEmploymentStatus,
       location,
       willingToRelocate,
       inPersonVsRemote,
@@ -151,7 +151,7 @@ export default function CareerPathDesigner() {
       certificationAreasInterest
     }
     localStorage.setItem('careerPathIntake', JSON.stringify(data))
-  }, [currentRole, currentIndustry, yearsExperience, educationLevel, topTasks, tools, strengths, likes, dislikes, dreamRole, targetLevel, targetIndustries, specificCompanies, timePerWeek, timeline, employmentStatus, location, willingToRelocate, inPersonVsRemote, learningStyle, preferredPlatforms, technicalBackground, transitionMotivation, specificTechnologiesInterest, certificationAreasInterest])
+  }, [currentRole, currentIndustry, yearsExperience, educationLevel, topTasks, tools, strengths, likes, dislikes, dreamRole, targetRoleLevel, targetIndustries, specificCompanies, timePerWeek, timeline, currentEmploymentStatus, location, willingToRelocate, inPersonVsRemote, learningStyle, preferredPlatforms, technicalBackground, transitionMotivation, specificTechnologiesInterest, certificationAreasInterest])
 
   // Auto-generate tasks when currentRole changes
   const [isGeneratingTasks, setIsGeneratingTasks] = useState(false)
@@ -195,12 +195,12 @@ export default function CareerPathDesigner() {
     setLikes([])
     setDislikes([])
     setDreamRole('')
-    setTargetLevel('senior')
+    setTargetRoleLevel('senior')
     setTargetIndustries([])
     setSpecificCompanies([])
     setTimePerWeek(10)
     setTimeline('6months')
-    setEmploymentStatus('employed-full-time')
+    setCurrentEmploymentStatus('employed-full-time')
     setLocation('')
     setWillingToRelocate(false)
     setInPersonVsRemote('remote')
