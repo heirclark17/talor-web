@@ -717,6 +717,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                 </div>
               ))}
             </div>
+          </div>
           )}
         </div>
       )}
