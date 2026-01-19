@@ -38,6 +38,11 @@ export default function CareerPathDesigner() {
   const [resumeData, setResumeData] = useState<any>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
 
+  // Existing resumes
+  const [existingResumes, setExistingResumes] = useState<any[]>([])
+  const [selectedExistingResumeId, setSelectedExistingResumeId] = useState<number | null>(null)
+  const [loadingResumes, setLoadingResumes] = useState(false)
+
   // Basic Profile (Step 1)
   const [dreamRole, setDreamRole] = useState('')
   const [currentRole, setCurrentRole] = useState('')
@@ -205,6 +210,120 @@ export default function CareerPathDesigner() {
     setTransitionMotivation([])
     setSpecificTechnologiesInterest([])
     setCertificationAreasInterest([])
+  }
+
+  // Fetch existing resumes when on upload step
+  useEffect(() => {
+    if (step === 'upload' && existingResumes.length === 0) {
+      setLoadingResumes(true)
+      api.listResumes()
+        .then(response => {
+          if (response.success && response.data?.resumes) {
+            setExistingResumes(response.data.resumes)
+          }
+        })
+        .catch(err => {
+          console.error('Failed to load resumes:', err)
+        })
+        .finally(() => {
+          setLoadingResumes(false)
+        })
+    }
+  }, [step])
+
+  // Handle selecting an existing resume
+  const handleSelectExistingResume = async (resumeId: number) => {
+    setSelectedExistingResumeId(resumeId)
+    setError(undefined)
+    setUploadProgress(10)
+
+    try {
+      const resumeResult = await api.getResume(resumeId)
+      setUploadProgress(50)
+
+      if (!resumeResult.success || !resumeResult.data) {
+        setError('Failed to load resume. Please try again.')
+        setSelectedExistingResumeId(null)
+        setUploadProgress(0)
+        return
+      }
+
+      setResumeId(resumeId)
+      setUploadProgress(100)
+
+      if (!resumeResult.data.parsed_data) {
+        setError('Failed to parse resume. Please try again.')
+        setSelectedExistingResumeId(null)
+        setUploadProgress(0)
+        return
+      }
+
+      setResumeData(resumeResult.data.parsed_data)
+
+      // Auto-fill fields from resume
+      if (resumeResult.data.parsed_data) {
+        const data = resumeResult.data.parsed_data
+
+        // Parse arrays if they're stringified JSON
+        let experience = data.experience || []
+        let skills = data.skills || []
+        let education = data.education || []
+
+        if (typeof experience === 'string') {
+          try { experience = JSON.parse(experience) } catch { experience = [] }
+        }
+        if (typeof skills === 'string') {
+          try { skills = JSON.parse(skills) } catch { skills = [] }
+        }
+        if (typeof education === 'string') {
+          try { education = JSON.parse(education) } catch { education = [] }
+        }
+
+        if (!Array.isArray(experience)) experience = []
+        if (!Array.isArray(skills)) skills = []
+        if (!Array.isArray(education)) education = []
+
+        // Set current role and industry
+        if (experience[0]?.title) setCurrentRole(experience[0].title)
+        if (experience[0]?.company) setCurrentIndustry(experience[0].company)
+
+        // Calculate years of experience
+        const years = experience.reduce((total: number, exp: any) => {
+          if (exp.start_date && exp.end_date) {
+            const start = new Date(exp.start_date)
+            const end = exp.end_date.toLowerCase().includes('present') ? new Date() : new Date(exp.end_date)
+            const diffYears = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365)
+            return total + Math.max(0, diffYears)
+          }
+          return total
+        }, 0)
+
+        if (years > 0) setYearsExperience(Math.round(years))
+
+        // Set skills/tools
+        if (Array.isArray(skills) && skills.length > 0) {
+          setTools(skills.slice(0, 20))
+        }
+
+        // Set education level
+        if (Array.isArray(education) && education.length > 0) {
+          const highestDegree = education[0]?.degree?.toLowerCase() || ''
+          if (highestDegree.includes('phd') || highestDegree.includes('doctor')) {
+            setEducationLevel('phd')
+          } else if (highestDegree.includes('master')) {
+            setEducationLevel('masters')
+          } else if (highestDegree.includes('bachelor')) {
+            setEducationLevel('bachelors')
+          } else if (highestDegree.includes('associate')) {
+            setEducationLevel('associates')
+          }
+        }
+      }
+    } catch (error: any) {
+      setError(error.message || 'Failed to load resume')
+      setSelectedExistingResumeId(null)
+      setUploadProgress(0)
+    }
   }
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -651,6 +770,53 @@ export default function CareerPathDesigner() {
                 We'll automatically extract your skills, experience, and background
               </p>
             </div>
+
+            {/* Select from existing resumes */}
+            {existingResumes.length > 0 && !resumeFile && !selectedExistingResumeId && (
+              <div className="glass rounded-3xl p-8 mb-6">
+                <h3 className="text-lg font-semibold text-white mb-4 text-center">
+                  Select from Your Previous Resumes
+                </h3>
+                {loadingResumes ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-8 h-8 text-white animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {existingResumes.map((resume: any) => (
+                      <button
+                        key={resume.id}
+                        onClick={() => handleSelectExistingResume(resume.id)}
+                        className="w-full glass rounded-lg p-4 border border-white/10 hover:border-white/30 transition-all text-left flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-5 h-5 text-white/60" />
+                          <div>
+                            <div className="text-white font-medium">{resume.filename || `Resume ${resume.id}`}</div>
+                            <div className="text-sm text-gray-400">
+                              Uploaded {new Date(resume.created_at).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* OR divider */}
+            {existingResumes.length > 0 && !resumeFile && !selectedExistingResumeId && (
+              <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/20"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 glass rounded-full text-gray-400">OR</span>
+                </div>
+              </div>
+            )}
 
             {/* Upload zone */}
             <div className="glass rounded-3xl p-16 mb-8">
