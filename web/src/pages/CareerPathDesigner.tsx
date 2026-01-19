@@ -93,7 +93,7 @@ export default function CareerPathDesigner() {
         setCurrentRole(data.currentRole || '')
         setCurrentIndustry(data.currentIndustry || '')
         setYearsExperience(data.yearsExperience || '')
-        setEducation(data.education || 'bachelors')
+        setEducationLevel(data.education || 'bachelors')
         setTopTasks(data.topTasks || ['', '', ''])
         setTools(data.tools || ['', '', '', '', ''])
         setStrengths(data.strengths || ['', ''])
@@ -127,7 +127,7 @@ export default function CareerPathDesigner() {
       currentRole,
       currentIndustry,
       yearsExperience,
-      education,
+      educationLevel,
       topTasks,
       tools,
       strengths,
@@ -151,7 +151,7 @@ export default function CareerPathDesigner() {
       certificationAreasInterest
     }
     localStorage.setItem('careerPathIntake', JSON.stringify(data))
-  }, [currentRole, currentIndustry, yearsExperience, education, topTasks, tools, strengths, likes, dislikes, dreamRole, targetLevel, targetIndustries, specificCompanies, timePerWeek, timeline, employmentStatus, location, willingToRelocate, inPersonVsRemote, learningStyle, preferredPlatforms, technicalBackground, transitionMotivation, specificTechnologiesInterest, certificationAreasInterest])
+  }, [currentRole, currentIndustry, yearsExperience, educationLevel, topTasks, tools, strengths, likes, dislikes, dreamRole, targetLevel, targetIndustries, specificCompanies, timePerWeek, timeline, employmentStatus, location, willingToRelocate, inPersonVsRemote, learningStyle, preferredPlatforms, technicalBackground, transitionMotivation, specificTechnologiesInterest, certificationAreasInterest])
 
   // Auto-generate tasks when currentRole changes
   const [isGeneratingTasks, setIsGeneratingTasks] = useState(false)
@@ -188,7 +188,7 @@ export default function CareerPathDesigner() {
     setCurrentRole('')
     setCurrentIndustry('')
     setYearsExperience('')
-    setEducation('bachelors')
+    setEducationLevel('bachelors')
     setTopTasks(['', '', ''])
     setTools(['', '', '', '', ''])
     setStrengths(['', ''])
