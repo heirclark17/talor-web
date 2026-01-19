@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import type { CareerPlan } from '../types/career-plan'
+import CareerPathCertifications from './CareerPathCertifications'
 import {
   Target, Award, BookOpen, Briefcase, Calendar, FileText,
   ChevronRight, ChevronDown, ExternalLink, Check, Clock,
@@ -421,7 +422,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
         </div>
       )}
 
-      {/* Certifications (Interview-Prep Style with EXTREME Detail) */}
+      {/* Certifications (Interview-Prep Style) */}
       {plan.certificationPath && plan.certificationPath.length > 0 && (
         <div className="glass rounded-lg border border-white/10 overflow-hidden">
           <button
@@ -431,293 +432,18 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
             <div className="flex items-center gap-3">
               <Award className="w-6 h-6 text-white" />
               <div className="text-left">
-                <h2 className="text-xl font-semibold text-white">Certification Roadmap</h2>
+                <h2 className="text-xl font-semibold text-white">Recommended Certifications for This Career Path</h2>
                 <p className="text-sm text-gray-400 mt-1">
-                  Your detailed end-to-end certification path with study plans, resources, and exact timelines • {plan.certificationPath.length} certifications • {plan.certificationPath.reduce((sum, cert) => sum + (cert.estStudyWeeks || 0), 0)} weeks total
+                  Personalized certification recommendations with study materials, exam details, and timelines
                 </p>
               </div>
             </div>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'certs' ? 'rotate-90' : ''}`} />
           </button>
           {expandedSection === 'certs' && (
-            <div className="px-6 pb-6 space-y-6">
-              {/* Visual Timeline */}
-              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-white/10 rounded-lg p-6">
-                <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  Your Certification Timeline
-                </h3>
-                <div className="relative">
-                  {plan.certificationPath.map((cert, idx) => (
-                    <div key={idx} className="relative flex items-start gap-4 pb-8 last:pb-0">
-                      {/* Timeline Line */}
-                      {idx < plan.certificationPath.length - 1 && (
-                        <div className="absolute left-5 top-11 w-0.5 h-full bg-gradient-to-b from-blue-400 to-purple-400"></div>
-                      )}
-
-                      {/* Step Number */}
-                      <div className="relative z-10 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <span className="text-white font-bold text-sm">{idx + 1}</span>
-                      </div>
-
-                      {/* Cert Summary Card */}
-                      <div className="flex-1 bg-white/5 rounded-lg border border-white/10 p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h4 className="text-white font-semibold">{cert.name}</h4>
-                            <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
-                              <span>{cert.certifyingBody}</span>
-                              <span>•</span>
-                              <span className="uppercase">{cert.level}</span>
-                            </div>
-                          </div>
-                          <div className="text-right ml-4 flex-shrink-0">
-                            <div className="text-white font-semibold text-sm">{cert.estCostRange}</div>
-                            <div className="text-xs text-gray-400">{cert.estStudyWeeks} weeks</div>
-                          </div>
-                        </div>
-                        <p className="text-gray-300 text-sm">{cert.whatItUnlocks}</p>
-                        <button
-                          onClick={() => setExpandedCert(expandedCert === idx ? null : idx)}
-                          className="mt-3 text-xs text-blue-400 hover:text-blue-300 underline"
-                        >
-                          {expandedCert === idx ? 'Hide details' : 'View full details →'}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Detailed Certification Cards */}
-              <div className="space-y-4">
-              {plan.certificationPath.map((cert, idx) => (
-                <div key={idx} className="bg-white/5 rounded-lg border border-white/10 overflow-hidden">
-                  {/* Cert Header - Always Visible */}
-                  <button
-                    onClick={() => setExpandedCert(expandedCert === idx ? null : idx)}
-                    className="w-full p-6 flex items-start justify-between hover:bg-white/5 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold text-white mb-1">{cert.name}</h3>
-                          <div className="flex items-center gap-3 text-sm">
-                            <span className="text-gray-400">{cert.certifyingBody}</span>
-                            <span className="text-gray-500">•</span>
-                            <span className="text-gray-400 uppercase">{cert.level}</span>
-                          </div>
-                        </div>
-                        <div className="text-right ml-4">
-                          <div className="text-white font-semibold">{cert.estCostRange}</div>
-                          <div className="text-sm text-gray-400">{cert.estStudyWeeks} weeks</div>
-                        </div>
-                      </div>
-                      <p className="text-gray-400 text-sm mt-3">{cert.whatItUnlocks}</p>
-                    </div>
-                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ml-4 flex-shrink-0 mt-1 ${expandedCert === idx ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {/* Cert Details - Expanded */}
-                  {expandedCert === idx && (
-                    <div className="px-6 pb-6 space-y-6 border-t border-white/10">
-                      {/* Exam Details */}
-                      {cert.examDetails && Object.keys(cert.examDetails).length > 0 && (
-                        <div className="bg-white/5 rounded-lg p-4">
-                          <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                            <FileQuestion className="w-4 h-4" />
-                            Exam Details
-                          </h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            {cert.examDetails.examCode && (
-                              <div>
-                                <div className="text-gray-500">Exam Code</div>
-                                <div className="text-white font-mono">{cert.examDetails.examCode}</div>
-                              </div>
-                            )}
-                            {cert.examDetails.passingScore && (
-                              <div>
-                                <div className="text-gray-500">Passing Score</div>
-                                <div className="text-white">{cert.examDetails.passingScore}</div>
-                              </div>
-                            )}
-                            {cert.examDetails.durationMinutes && (
-                              <div>
-                                <div className="text-gray-500">Duration</div>
-                                <div className="text-white">{cert.examDetails.durationMinutes} min</div>
-                              </div>
-                            )}
-                            {cert.examDetails.numQuestions && (
-                              <div>
-                                <div className="text-gray-500">Questions</div>
-                                <div className="text-white">{cert.examDetails.numQuestions}</div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Study Materials - Interview-Prep Style */}
-                      {cert.studyMaterials && cert.studyMaterials.length > 0 && (
-                        <div>
-                          <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                            <Book className="w-4 h-4" />
-                            Study Materials ({cert.studyMaterials.length} resources)
-                          </h4>
-                          <div className="space-y-3">
-                            {cert.studyMaterials
-                              .sort((a, b) => a.recommendedOrder - b.recommendedOrder)
-                              .map((material, mIdx) => (
-                                <div key={mIdx} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                                  <div className="flex items-start justify-between mb-2">
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-xs bg-white/10 px-2 py-1 rounded text-white">
-                                          #{material.recommendedOrder}
-                                        </span>
-                                        <span className="text-xs text-gray-400 uppercase">{material.type}</span>
-                                      </div>
-                                      <h5 className="text-white font-semibold">{material.title}</h5>
-                                      <div className="text-sm text-gray-400">{material.provider}</div>
-                                    </div>
-                                    <div className="text-right ml-4 flex-shrink-0">
-                                      <div className="text-white font-semibold text-sm">{material.cost}</div>
-                                      <div className="text-xs text-gray-400">{material.duration}</div>
-                                    </div>
-                                  </div>
-                                  <p className="text-sm text-gray-300 mb-3">{material.description}</p>
-                                  <a
-                                    href={material.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-sm text-white/80 hover:text-white underline"
-                                  >
-                                    <ExternalLink className="w-3 h-3" />
-                                    View Resource
-                                  </a>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Week-by-Week Study Plan */}
-                      {cert.studyPlanWeeks && cert.studyPlanWeeks.length > 0 && (
-                        <div>
-                          <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            Week-by-Week Study Plan
-                          </h4>
-                          <div className="space-y-2">
-                            {cert.studyPlanWeeks.map((week, wIdx) => (
-                              <div key={wIdx} className="bg-white/5 rounded-lg p-3 border border-white/10">
-                                <div className="flex items-start gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                                    <span className="text-white text-sm font-semibold">{week.week || wIdx + 1}</span>
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="text-white font-semibold text-sm mb-1">{week.focus}</div>
-                                    {week.resources && <div className="text-xs text-gray-400 mb-1">📚 {week.resources}</div>}
-                                    {week.practice && <div className="text-xs text-gray-400">✏️ {week.practice}</div>}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Prerequisites & Alternatives */}
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {cert.prerequisites && cert.prerequisites.length > 0 && (
-                          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                            <h5 className="text-yellow-300 font-semibold text-sm mb-2">Prerequisites</h5>
-                            <ul className="space-y-1">
-                              {cert.prerequisites.map((prereq, pIdx) => (
-                                <li key={pIdx} className="text-sm text-gray-300">• {prereq}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {cert.alternatives && cert.alternatives.length > 0 && (
-                          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                            <h5 className="text-blue-300 font-semibold text-sm mb-2">Alternatives</h5>
-                            <ul className="space-y-1">
-                              {cert.alternatives.map((alt, aIdx) => (
-                                <li key={aIdx} className="text-sm text-gray-300">• {alt}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Official Links */}
-                      {cert.officialLinks && cert.officialLinks.length > 0 && (
-                        <div>
-                          <h5 className="text-white font-semibold text-sm mb-3">📋 Official Resources & Source Links</h5>
-                          <p className="text-xs text-gray-400 mb-3">Click any link below to access official certification information, study guides, and registration pages</p>
-                          <div className="space-y-2">
-                            {cert.officialLinks.map((link, lIdx) => {
-                              return (
-                                <a
-                                  key={lIdx}
-                                  href={link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-start gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors group block"
-                                >
-                                  <div className="flex items-start gap-2 w-full">
-                                    <ExternalLink className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-400" />
-                                    <div className="flex-1 min-w-0">
-                                      <div className="text-white font-medium break-all">{link}</div>
-                                    </div>
-                                  </div>
-                                </a>
-                              )
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Source Citations */}
-                      {cert.sourceCitations && cert.sourceCitations.length > 0 && (
-                        <div className="bg-gray-500/10 border border-gray-500/30 rounded-lg p-4">
-                          <h5 className="text-gray-300 font-semibold text-sm mb-2">📚 Research Sources & Citations</h5>
-                          <p className="text-xs text-gray-400 mb-3">All sources used to research this certification path</p>
-                          <div className="space-y-2">
-                            {cert.sourceCitations.map((source, sIdx) => {
-                              // Check if source is a URL or plain text
-                              const isUrl = source.startsWith('http://') || source.startsWith('https://')
-
-                              if (isUrl) {
-                                return (
-                                  <a
-                                    key={sIdx}
-                                    href={source}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-start gap-2 text-xs text-blue-400 hover:text-blue-300 underline break-all"
-                                  >
-                                    <ExternalLink className="w-3 h-3 flex-shrink-0 mt-0.5" />
-                                    <span>{source}</span>
-                                  </a>
-                                )
-                              } else {
-                                return (
-                                  <div key={sIdx} className="text-xs text-gray-400">• {source}</div>
-                                )
-                              }
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="px-6 pb-6">
+              <CareerPathCertifications certifications={plan.certificationPath} />
             </div>
-          </div>
           )}
         </div>
       )}
