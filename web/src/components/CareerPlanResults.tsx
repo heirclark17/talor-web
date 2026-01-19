@@ -244,6 +244,183 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
         </div>
       )}
 
+      {/* Skills Guidance */}
+      {plan.skillsGuidance && (
+        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+          <button
+            onClick={() => setExpandedSection(expandedSection === 'skillsGuidance' ? null : 'skillsGuidance')}
+            className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Lightbulb className="w-6 h-6 text-white" />
+              <div className="text-left">
+                <h2 className="text-xl font-semibold text-white">Skills Development Guidance</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Essential soft and hard skills with detailed why they matter, how to improve, and real-world application
+                </p>
+              </div>
+            </div>
+            <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === 'skillsGuidance' ? 'rotate-90' : ''}`} />
+          </button>
+          {expandedSection === 'skillsGuidance' && (
+            <div className="px-6 pb-6 space-y-6">
+              {/* Overall Strategy */}
+              {plan.skillsGuidance.skillDevelopmentStrategy && (
+                <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-white/10 rounded-lg p-6">
+                  <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                    <Zap className="w-5 h-5" />
+                    Your Skills Development Strategy
+                  </h3>
+                  <p className="text-gray-300 leading-relaxed">{plan.skillsGuidance.skillDevelopmentStrategy}</p>
+                </div>
+              )}
+
+              {/* Soft Skills */}
+              {plan.skillsGuidance.softSkills && plan.skillsGuidance.softSkills.length > 0 && (
+                <div>
+                  <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-pink-400" />
+                    Essential Soft Skills ({plan.skillsGuidance.softSkills.length} skills)
+                  </h3>
+                  <div className="space-y-4">
+                    {plan.skillsGuidance.softSkills.map((skill, idx) => (
+                      <div key={idx} className="bg-white/5 rounded-lg p-5 border border-white/10">
+                        <div className="flex items-start justify-between mb-3">
+                          <h4 className="text-lg font-semibold text-white">{skill.skillName}</h4>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-3 py-1 rounded-full ${
+                              skill.importance === 'critical' ? 'bg-red-500/20 text-red-300' :
+                              skill.importance === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                              'bg-blue-500/20 text-blue-300'
+                            }`}>
+                              {skill.importance.toUpperCase()}
+                            </span>
+                            <span className="text-xs text-gray-400 bg-white/10 px-3 py-1 rounded-full">
+                              <Clock className="w-3 h-3 inline mr-1" />
+                              {skill.estimatedTime}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Why Needed */}
+                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-4">
+                          <h5 className="text-blue-300 font-semibold text-sm mb-2">Why This Skill Matters</h5>
+                          <p className="text-sm text-gray-300">{skill.whyNeeded}</p>
+                        </div>
+
+                        {/* How to Improve */}
+                        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-4">
+                          <h5 className="text-green-300 font-semibold text-sm mb-2">How to Develop This Skill</h5>
+                          <p className="text-sm text-gray-300">{skill.howToImprove}</p>
+                        </div>
+
+                        {/* Real World Application */}
+                        <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 mb-4">
+                          <h5 className="text-purple-300 font-semibold text-sm mb-2">Real-World Application</h5>
+                          <p className="text-sm text-gray-300">{skill.realWorldApplication}</p>
+                        </div>
+
+                        {/* Learning Resources */}
+                        {skill.resources && skill.resources.length > 0 && (
+                          <div>
+                            <h5 className="text-white font-semibold text-sm mb-2">Learning Resources</h5>
+                            <div className="space-y-1">
+                              {skill.resources.map((resource, rIdx) => (
+                                <a
+                                  key={rIdx}
+                                  href={resource}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-start gap-2 text-xs text-blue-400 hover:text-blue-300 underline break-all"
+                                >
+                                  <ExternalLink className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                                  <span>{resource}</span>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Hard Skills */}
+              {plan.skillsGuidance.hardSkills && plan.skillsGuidance.hardSkills.length > 0 && (
+                <div>
+                  <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                    <Code className="w-5 h-5 text-green-400" />
+                    Essential Hard Skills ({plan.skillsGuidance.hardSkills.length} skills)
+                  </h3>
+                  <div className="space-y-4">
+                    {plan.skillsGuidance.hardSkills.map((skill, idx) => (
+                      <div key={idx} className="bg-white/5 rounded-lg p-5 border border-white/10">
+                        <div className="flex items-start justify-between mb-3">
+                          <h4 className="text-lg font-semibold text-white">{skill.skillName}</h4>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-3 py-1 rounded-full ${
+                              skill.importance === 'critical' ? 'bg-red-500/20 text-red-300' :
+                              skill.importance === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                              'bg-blue-500/20 text-blue-300'
+                            }`}>
+                              {skill.importance.toUpperCase()}
+                            </span>
+                            <span className="text-xs text-gray-400 bg-white/10 px-3 py-1 rounded-full">
+                              <Clock className="w-3 h-3 inline mr-1" />
+                              {skill.estimatedTime}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Why Needed */}
+                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-4">
+                          <h5 className="text-blue-300 font-semibold text-sm mb-2">Why This Skill Matters</h5>
+                          <p className="text-sm text-gray-300">{skill.whyNeeded}</p>
+                        </div>
+
+                        {/* How to Improve */}
+                        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-4">
+                          <h5 className="text-green-300 font-semibold text-sm mb-2">How to Develop This Skill</h5>
+                          <p className="text-sm text-gray-300">{skill.howToImprove}</p>
+                        </div>
+
+                        {/* Real World Application */}
+                        <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 mb-4">
+                          <h5 className="text-purple-300 font-semibold text-sm mb-2">Real-World Application</h5>
+                          <p className="text-sm text-gray-300">{skill.realWorldApplication}</p>
+                        </div>
+
+                        {/* Learning Resources */}
+                        {skill.resources && skill.resources.length > 0 && (
+                          <div>
+                            <h5 className="text-white font-semibold text-sm mb-2">Learning Resources</h5>
+                            <div className="space-y-1">
+                              {skill.resources.map((resource, rIdx) => (
+                                <a
+                                  key={rIdx}
+                                  href={resource}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-start gap-2 text-xs text-blue-400 hover:text-blue-300 underline break-all"
+                                >
+                                  <ExternalLink className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                                  <span>{resource}</span>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Certifications (Interview-Prep Style with EXTREME Detail) */}
       {plan.certificationPath && plan.certificationPath.length > 0 && (
         <div className="glass rounded-lg border border-white/10 overflow-hidden">

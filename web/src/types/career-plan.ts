@@ -91,6 +91,23 @@ export interface SkillsAnalysis {
   needToBuild: GapSkill[]
 }
 
+// ========== Skills Guidance Types ==========
+export interface SkillGuidanceItem {
+  skillName: string
+  whyNeeded: string  // Min 100 chars - detailed explanation
+  howToImprove: string  // Min 150 chars - specific actionable steps
+  importance: 'critical' | 'high' | 'medium'
+  estimatedTime: string  // e.g., "3-6 months", "1-2 years"
+  resources: string[]  // Learning resources URLs (max 5)
+  realWorldApplication: string  // Min 100 chars - how used in day-to-day work
+}
+
+export interface SkillsGuidance {
+  softSkills: SkillGuidanceItem[]  // 3-8 essential soft skills
+  hardSkills: SkillGuidanceItem[]  // 3-10 essential technical skills
+  skillDevelopmentStrategy: string  // Min 200 chars - overall parallel development strategy
+}
+
 // ========== Certification Types (ENHANCED) ==========
 export interface StudyMaterial {
   type: string  // official-course, book, video-series, practice-exams, hands-on-labs
@@ -267,6 +284,7 @@ export interface CareerPlan {
   profileSummary: string
   targetRoles: TargetRole[]
   skillsAnalysis: SkillsAnalysis
+  skillsGuidance: SkillsGuidance
   certificationPath: Certification[]
   educationOptions: EducationOption[]
   experiencePlan: ExperienceProject[]
