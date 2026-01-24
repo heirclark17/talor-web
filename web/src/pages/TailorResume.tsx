@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save, RotateCcw, Bookmark } from 'lucide-react'
+import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save, RotateCcw, Bookmark, X, Plus } from 'lucide-react'
 import { api } from '../api/client'
 import ChangeExplanation from '../components/ChangeExplanation'
 import ResumeAnalysis from '../components/ResumeAnalysis'
@@ -144,6 +144,10 @@ export default function TailorResume() {
   const [copiedSection, setCopiedSection] = useState<string | null>(null)
   const [editMode, setEditMode] = useState<Record<string, boolean>>({})
   const [editedContent, setEditedContent] = useState<Record<string, string>>({})
+  const [editedSkills, setEditedSkills] = useState<string[] | null>(null)
+  const [editedExperience, setEditedExperience] = useState<any[] | null>(null)
+  const [newSkill, setNewSkill] = useState('')
+  const [savingSection, setSavingSection] = useState<string | null>(null)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [mobileTab, setMobileTab] = useState<'original' | 'tailored'>('tailored')
@@ -450,11 +454,150 @@ export default function TailorResume() {
   }
 
   const toggleEditMode = (section: string) => {
+    const isEnteringEditMode = !editMode[section]
+
+    if (isEnteringEditMode) {
+      // Initialize edited arrays when entering edit mode
+      if (section === 'skills' && tailoredResume) {
+        setEditedSkills([...tailoredResume.tailored_skills])
+      }
+      if (section === 'experience' && tailoredResume) {
+        setEditedExperience(JSON.parse(JSON.stringify(tailoredResume.tailored_experience)))
+      }
+    } else {
+      // Clear edited arrays when exiting edit mode (without saving)
+      if (section === 'skills') {
+        setEditedSkills(null)
+        setNewSkill('')
+      }
+      if (section === 'experience') {
+        setEditedExperience(null)
+      }
+    }
+
     setEditMode(prev => ({ ...prev, [section]: !prev[section] }))
   }
 
-  const saveEdit = (section: string) => {
-    toggleEditMode(section)
+  // Skills editing helper functions
+  const deleteSkill = (index: number) => {
+    if (editedSkills) {
+      setEditedSkills(editedSkills.filter((_, i) => i !== index))
+    }
+  }
+
+  const addSkill = () => {
+    if (newSkill.trim() && editedSkills) {
+      setEditedSkills([...editedSkills, newSkill.trim()])
+      setNewSkill('')
+    }
+  }
+
+  // Experience editing helper functions
+  const updateExperience = (index: number, field: string, value: any) => {
+    if (editedExperience) {
+      const updated = [...editedExperience]
+      updated[index] = { ...updated[index], [field]: value }
+      setEditedExperience(updated)
+    }
+  }
+
+  const updateExperienceBullet = (expIndex: number, bulletIndex: number, value: string) => {
+    if (editedExperience) {
+      const updated = [...editedExperience]
+      const bullets = [...(updated[expIndex].bullets || [])]
+      bullets[bulletIndex] = value
+      updated[expIndex] = { ...updated[expIndex], bullets }
+      setEditedExperience(updated)
+    }
+  }
+
+  const deleteExperienceBullet = (expIndex: number, bulletIndex: number) => {
+    if (editedExperience) {
+      const updated = [...editedExperience]
+      const bullets = [...(updated[expIndex].bullets || [])]
+      bullets.splice(bulletIndex, 1)
+      updated[expIndex] = { ...updated[expIndex], bullets }
+      setEditedExperience(updated)
+    }
+  }
+
+  const addExperienceBullet = (expIndex: number) => {
+    if (editedExperience) {
+      const updated = [...editedExperience]
+      const bullets = [...(updated[expIndex].bullets || []), '']
+      updated[expIndex] = { ...updated[expIndex], bullets }
+      setEditedExperience(updated)
+    }
+  }
+
+  const saveEdit = async (section: string) => {
+    if (!tailoredResume) return
+
+    // Check if there are actual edits to save
+    const hasStringEdits = editedContent[section] !== undefined
+    const hasSkillsEdits = section === 'skills' && editedSkills !== null
+    const hasExperienceEdits = section === 'experience' && editedExperience !== null
+
+    if (!hasStringEdits && !hasSkillsEdits && !hasExperienceEdits) {
+      toggleEditMode(section)
+      return
+    }
+
+    setSavingSection(section)
+
+    try {
+      // Build the update payload based on which section was edited
+      const updatePayload: Record<string, any> = {}
+
+      if (section === 'summary' && editedContent.summary !== undefined) {
+        updatePayload.summary = editedContent.summary
+      }
+      if (section === 'skills' && editedSkills !== null) {
+        updatePayload.competencies = editedSkills.filter(s => s.trim())
+      }
+      if (section === 'experience' && editedExperience !== null) {
+        updatePayload.experience = editedExperience
+      }
+      if (section === 'alignment' && editedContent.alignment !== undefined) {
+        updatePayload.alignment_statement = editedContent.alignment
+      }
+
+      // Only call API if there's something to update
+      if (Object.keys(updatePayload).length > 0) {
+        const response = await api.put(`/tailoring/tailored/${tailoredResume.id}`, updatePayload)
+
+        if (response.data.success) {
+          // Update local state with saved values
+          setTailoredResume(prev => {
+            if (!prev) return prev
+            return {
+              ...prev,
+              tailored_summary: response.data.summary || prev.tailored_summary,
+              tailored_skills: response.data.competencies || prev.tailored_skills,
+              tailored_experience: response.data.experience || prev.tailored_experience,
+              alignment_statement: response.data.alignment_statement || prev.alignment_statement
+            }
+          })
+        }
+      }
+
+      // Clear edited state
+      if (section === 'skills') {
+        setEditedSkills(null)
+        setNewSkill('')
+      }
+      if (section === 'experience') {
+        setEditedExperience(null)
+      }
+
+      setEditMode(prev => ({ ...prev, [section]: false }))
+    } catch (error) {
+      console.error('Failed to save edit:', error)
+      // Still toggle edit mode on error so user isn't stuck
+      setEditMode(prev => ({ ...prev, [section]: false }))
+    } finally {
+      setSavingSection(null)
+    }
   }
 
   const handleSectionClick = (type: string, index?: number) => {
@@ -1532,11 +1675,18 @@ export default function TailorResume() {
                     </button>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => toggleEditMode('summary')}
+                        onClick={() => editMode.summary ? saveEdit('summary') : toggleEditMode('summary')}
                         className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        title="Edit section"
+                        title={editMode.summary ? "Save changes" : "Edit section"}
+                        disabled={savingSection === 'summary'}
                       >
-                        {editMode.summary ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                        {savingSection === 'summary' ? (
+                          <Loader2 size={18} className="text-blue-400 animate-spin" />
+                        ) : editMode.summary ? (
+                          <Save size={18} className="text-blue-400" />
+                        ) : (
+                          <Edit size={18} className="text-gray-400" />
+                        )}
                       </button>
                       <button
                         onClick={() => handleCopy(tailoredResume.tailored_summary, 'tail-summary')}
@@ -1592,11 +1742,18 @@ export default function TailorResume() {
                       </button>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => toggleEditMode('skills')}
+                          onClick={() => editMode.skills ? saveEdit('skills') : toggleEditMode('skills')}
                           className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                          title="Edit section"
+                          title={editMode.skills ? "Save changes" : "Edit section"}
+                          disabled={savingSection === 'skills'}
                         >
-                          {editMode.skills ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                          {savingSection === 'skills' ? (
+                            <Loader2 size={18} className="text-blue-400 animate-spin" />
+                          ) : editMode.skills ? (
+                            <Save size={18} className="text-blue-400" />
+                          ) : (
+                            <Edit size={18} className="text-gray-400" />
+                          )}
                         </button>
                         <button
                           onClick={() => handleCopy(tailoredResume.tailored_skills.join(', '), 'tail-skills')}
@@ -1613,22 +1770,62 @@ export default function TailorResume() {
                     </div>
                     {expandedSections.skills && (
                       <div
-                        className={`glass rounded-xl p-4 border border-white/20 cursor-pointer ${
+                        className={`glass rounded-xl p-4 border border-white/20 ${
                           highlightedSection?.type === 'skills' ? 'highlight-tailored' : ''
-                        }`}
-                        onClick={() => handleSectionClick('skills')}
+                        } ${!editMode.skills ? 'cursor-pointer' : ''}`}
+                        onClick={() => !editMode.skills && handleSectionClick('skills')}
                       >
                         {editMode.skills ? (
-                          <textarea
-                            value={editedContent.skills || tailoredResume.tailored_skills.join(', ')}
-                            onChange={(e) => setEditedContent(prev => ({ ...prev, skills: e.target.value }))}
-                            className="w-full bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
-                            placeholder="Enter skills separated by commas"
-                            rows={4}
-                          />
+                          <div className="space-y-4">
+                            {/* Skills with delete icons */}
+                            <div className="flex flex-wrap gap-2">
+                              {(editedSkills || tailoredResume.tailored_skills).map((skill, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-3 py-1 bg-white/15 text-white rounded-full text-sm font-medium border border-white/20 flex items-center gap-2 group"
+                                >
+                                  {skill}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      deleteSkill(idx)
+                                    }}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-full p-0.5 transition-colors"
+                                    title="Remove skill"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                            {/* Add new skill input */}
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={newSkill}
+                                onChange={(e) => setNewSkill(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault()
+                                    addSkill()
+                                  }
+                                }}
+                                placeholder="Add new competency..."
+                                className="flex-1 bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                              />
+                              <button
+                                onClick={addSkill}
+                                disabled={!newSkill.trim()}
+                                className="px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg text-sm flex items-center gap-1 transition-colors"
+                              >
+                                <Plus size={16} />
+                                Add
+                              </button>
+                            </div>
+                          </div>
                         ) : (
                           <div className="flex flex-wrap gap-2">
-                            {(editedContent.skills ? editedContent.skills.split(',').map(s => s.trim()) : tailoredResume.tailored_skills).map((skill, idx) => (
+                            {tailoredResume.tailored_skills.map((skill, idx) => (
                               <span key={idx} className="px-3 py-1 bg-white/15 text-white rounded-full text-sm font-medium border border-white/20">
                                 {skill}
                               </span>
@@ -1651,46 +1848,124 @@ export default function TailorResume() {
                         {expandedSections.experience ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                         Professional Experience
                       </button>
-                      <button
-                        onClick={() => handleCopy(JSON.stringify(tailoredResume.tailored_experience, null, 2), 'tail-experience')}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        title="Copy to clipboard"
-                      >
-                        {copiedSection === 'tail-experience' ? (
-                          <Check size={18} className="text-green-500" />
-                        ) : (
-                          <Copy size={18} className="text-gray-400" />
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => editMode.experience ? saveEdit('experience') : toggleEditMode('experience')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title={editMode.experience ? "Save changes" : "Edit section"}
+                          disabled={savingSection === 'experience'}
+                        >
+                          {savingSection === 'experience' ? (
+                            <Loader2 size={18} className="text-blue-400 animate-spin" />
+                          ) : editMode.experience ? (
+                            <Save size={18} className="text-blue-400" />
+                          ) : (
+                            <Edit size={18} className="text-gray-400" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleCopy(JSON.stringify(tailoredResume.tailored_experience, null, 2), 'tail-experience')}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Copy to clipboard"
+                        >
+                          {copiedSection === 'tail-experience' ? (
+                            <Check size={18} className="text-green-500" />
+                          ) : (
+                            <Copy size={18} className="text-gray-400" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     {expandedSections.experience && (
                       <div className="space-y-4">
-                        {tailoredResume.tailored_experience.map((exp: any, idx: number) => (
+                        {(editMode.experience ? editedExperience : tailoredResume.tailored_experience)?.map((exp: any, idx: number) => (
                           <div
                             key={idx}
-                            className={`glass rounded-xl p-4 border border-white/20 cursor-pointer ${
+                            className={`glass rounded-xl p-4 border border-white/20 ${
                               highlightedSection?.type === 'experience' && highlightedSection?.index === idx
                                 ? 'highlight-tailored'
                                 : ''
-                            }`}
-                            onClick={() => handleSectionClick('experience', idx)}
+                            } ${!editMode.experience ? 'cursor-pointer' : ''}`}
+                            onClick={() => !editMode.experience && handleSectionClick('experience', idx)}
                           >
-                            <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
-                            {exp.location && (
-                              <p className="text-gray-300 text-sm mb-1">{exp.location}</p>
-                            )}
-                            {exp.dates && (
-                              <p className="text-gray-400 text-sm mb-3">{exp.dates}</p>
-                            )}
-                            {exp.bullets && exp.bullets.length > 0 && (
-                              <ul className="space-y-2 text-sm">
-                                {exp.bullets.map((bullet: string, bulletIdx: number) => (
-                                  <li key={bulletIdx} className="text-gray-300 flex gap-2">
-                                    <span className="text-white/40 flex-shrink-0">•</span>
-                                    <span>{bullet}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                            {editMode.experience ? (
+                              /* Edit Mode */
+                              <div className="space-y-3">
+                                {/* Title/Header */}
+                                <input
+                                  type="text"
+                                  value={exp.header || exp.title || ''}
+                                  onChange={(e) => updateExperience(idx, 'header', e.target.value)}
+                                  className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white font-bold focus:outline-none focus:border-blue-500"
+                                  placeholder="Job Title"
+                                />
+                                {/* Location */}
+                                <input
+                                  type="text"
+                                  value={exp.location || ''}
+                                  onChange={(e) => updateExperience(idx, 'location', e.target.value)}
+                                  className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-gray-300 text-sm focus:outline-none focus:border-blue-500"
+                                  placeholder="Company | Location"
+                                />
+                                {/* Dates */}
+                                <input
+                                  type="text"
+                                  value={exp.dates || ''}
+                                  onChange={(e) => updateExperience(idx, 'dates', e.target.value)}
+                                  className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-gray-400 text-sm focus:outline-none focus:border-blue-500"
+                                  placeholder="Date Range (e.g., Jan 2020 - Present)"
+                                />
+                                {/* Bullets */}
+                                <div className="space-y-2 mt-3">
+                                  <p className="text-xs text-gray-500 uppercase tracking-wide">Bullet Points</p>
+                                  {(exp.bullets || []).map((bullet: string, bulletIdx: number) => (
+                                    <div key={bulletIdx} className="flex gap-2 items-start">
+                                      <span className="text-white/40 mt-2.5 flex-shrink-0">•</span>
+                                      <textarea
+                                        value={bullet}
+                                        onChange={(e) => updateExperienceBullet(idx, bulletIdx, e.target.value)}
+                                        className="flex-1 bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-gray-300 text-sm focus:outline-none focus:border-blue-500 min-h-[60px] resize-y"
+                                        placeholder="Describe your achievement..."
+                                      />
+                                      <button
+                                        onClick={() => deleteExperienceBullet(idx, bulletIdx)}
+                                        className="mt-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-full p-1 transition-colors flex-shrink-0"
+                                        title="Remove bullet"
+                                      >
+                                        <X size={16} />
+                                      </button>
+                                    </div>
+                                  ))}
+                                  <button
+                                    onClick={() => addExperienceBullet(idx)}
+                                    className="w-full py-2 border border-dashed border-white/20 rounded-lg text-gray-400 hover:text-white hover:border-white/40 text-sm flex items-center justify-center gap-1 transition-colors"
+                                  >
+                                    <Plus size={14} />
+                                    Add Bullet Point
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              /* View Mode */
+                              <>
+                                <h4 className="font-bold text-white text-base mb-1">{exp.header || exp.title}</h4>
+                                {exp.location && (
+                                  <p className="text-gray-300 text-sm mb-1">{exp.location}</p>
+                                )}
+                                {exp.dates && (
+                                  <p className="text-gray-400 text-sm mb-3">{exp.dates}</p>
+                                )}
+                                {exp.bullets && exp.bullets.length > 0 && (
+                                  <ul className="space-y-2 text-sm">
+                                    {exp.bullets.map((bullet: string, bulletIdx: number) => (
+                                      <li key={bulletIdx} className="text-gray-300 flex gap-2">
+                                        <span className="text-white/40 flex-shrink-0">•</span>
+                                        <span>{bullet}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </>
                             )}
                           </div>
                         ))}
@@ -1712,11 +1987,15 @@ export default function TailorResume() {
                       </button>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => toggleEditMode('education')}
+                          onClick={() => editMode.education ? toggleEditMode('education') : toggleEditMode('education')}
                           className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                          title="Edit section"
+                          title={editMode.education ? "Done editing" : "Edit section"}
                         >
-                          {editMode.education ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                          {editMode.education ? (
+                            <Save size={18} className="text-blue-400" />
+                          ) : (
+                            <Edit size={18} className="text-gray-400" />
+                          )}
                         </button>
                         <button
                           onClick={() => handleCopy(tailoredResume.tailored_education, 'tail-education')}
@@ -1768,9 +2047,13 @@ export default function TailorResume() {
                         <button
                           onClick={() => toggleEditMode('certifications')}
                           className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                          title="Edit section"
+                          title={editMode.certifications ? "Done editing" : "Edit section"}
                         >
-                          {editMode.certifications ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                          {editMode.certifications ? (
+                            <Save size={18} className="text-blue-400" />
+                          ) : (
+                            <Edit size={18} className="text-gray-400" />
+                          )}
                         </button>
                         <button
                           onClick={() => handleCopy(tailoredResume.tailored_certifications, 'tail-certifications')}
@@ -1820,11 +2103,18 @@ export default function TailorResume() {
                       </button>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => toggleEditMode('alignment')}
+                          onClick={() => editMode.alignment ? saveEdit('alignment') : toggleEditMode('alignment')}
                           className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                          title="Edit section"
+                          title={editMode.alignment ? "Save changes" : "Edit section"}
+                          disabled={savingSection === 'alignment'}
                         >
-                          {editMode.alignment ? <Save size={18} className="text-blue-400" /> : <Edit size={18} className="text-gray-400" />}
+                          {savingSection === 'alignment' ? (
+                            <Loader2 size={18} className="text-blue-400 animate-spin" />
+                          ) : editMode.alignment ? (
+                            <Save size={18} className="text-blue-400" />
+                          ) : (
+                            <Edit size={18} className="text-gray-400" />
+                          )}
                         </button>
                         <button
                           onClick={() => handleCopy(tailoredResume.alignment_statement, 'tail-alignment')}

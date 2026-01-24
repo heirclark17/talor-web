@@ -42,6 +42,11 @@ interface Props {
 }
 
 export default function STARStoryBuilder({ tailoredResumeId, experiences, companyContext, storyThemes }: Props) {
+  // Debug: Log experiences to see what's being passed
+  console.log('[STARStoryBuilder] Received experiences:', experiences)
+  console.log('[STARStoryBuilder] Experiences length:', Array.isArray(experiences) ? experiences.length : 'NOT AN ARRAY')
+  console.log('[STARStoryBuilder] tailoredResumeId:', tailoredResumeId)
+
   const [selectedExperiences, setSelectedExperiences] = useState<Set<number>>(new Set())
   const [selectedTheme, setSelectedTheme] = useState<string>(storyThemes[0] || '')
   const [selectedTone, setSelectedTone] = useState<string>('professional')
@@ -113,17 +118,25 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
   }
 
   const generateStory = async () => {
+    console.log('[STARStoryBuilder] generateStory called')
+    console.log('[STARStoryBuilder] selectedExperiences:', selectedExperiences)
+    console.log('[STARStoryBuilder] selectedExperiences.size:', selectedExperiences.size)
+    console.log('[STARStoryBuilder] selectedTheme:', selectedTheme)
+
     if (selectedExperiences.size === 0) {
+      console.log('[STARStoryBuilder] No experiences selected, showing alert')
       alert('Please select at least one experience')
       return
     }
 
     if (!selectedTheme) {
+      console.log('[STARStoryBuilder] No theme selected, showing alert')
       alert('Please select a story theme')
       return
     }
 
     try {
+      console.log('[STARStoryBuilder] Starting story generation...')
       setGenerating(true)
 
       const response = await fetch(`${API_BASE_URL}/api/interview-prep/generate-star-story`, {

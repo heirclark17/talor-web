@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import type { CareerPlan } from '../types/career-plan'
 import CareerPathCertifications from './CareerPathCertifications'
 import {
@@ -6,13 +6,62 @@ import {
   ChevronRight, ChevronDown, ExternalLink, Check, Clock,
   DollarSign, MapPin, Users, TrendingUp, Code, Lightbulb,
   Download, Shield, Zap, Book, Video, FileQuestion, Globe,
-  Building, Heart, Sparkles
+  Building, Heart, Sparkles, Play, Star, ArrowRight, Info,
+  CheckCircle2, Circle, BarChart3
 } from 'lucide-react'
+
+// Tooltip component for jargon terms
+const Tooltip = ({ term, definition, children }: { term: string; definition: string; children: React.ReactNode }) => {
+  const [show, setShow] = useState(false)
+  return (
+    <span className="relative inline-block">
+      <span
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        className="border-b border-dotted border-blue-400 cursor-help"
+      >
+        {children}
+      </span>
+      {show && (
+        <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap max-w-xs">
+          <span className="font-semibold text-blue-300">{term}:</span> {definition}
+          <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></span>
+        </span>
+      )}
+    </span>
+  )
+}
+
+// Jargon definitions for tooltips
+const jargonDefinitions: Record<string, string> = {
+  'ATS': 'Applicant Tracking System - software that screens resumes before human review',
+  'CAR': 'Challenge-Action-Result - a framework for writing achievement bullets',
+  'STAR': 'Situation-Task-Action-Result - interview response framework',
+  'Bridge Role': 'An intermediate position that helps you transition to your target role',
+  'Soft Skills': 'Interpersonal abilities like communication and leadership',
+  'Hard Skills': 'Technical abilities specific to a job or industry',
+  'CVSS': 'Common Vulnerability Scoring System - rates security vulnerabilities',
+  'NIST': 'National Institute of Standards and Technology - sets security frameworks',
+  'DevSecOps': 'Development-Security-Operations - integrating security into development',
+}
 
 interface CareerPlanResultsProps {
   plan: CareerPlan
   timeline: string
   onExportPDF?: () => void
+}
+
+// Section color mapping for visual differentiation
+const sectionColors = {
+  roles: { border: 'border-l-4 border-l-blue-500', icon: 'text-blue-400', bg: 'bg-blue-500/5' },
+  skills: { border: 'border-l-4 border-l-green-500', icon: 'text-green-400', bg: 'bg-green-500/5' },
+  skillsGuidance: { border: 'border-l-4 border-l-emerald-500', icon: 'text-emerald-400', bg: 'bg-emerald-500/5' },
+  certs: { border: 'border-l-4 border-l-yellow-500', icon: 'text-yellow-400', bg: 'bg-yellow-500/5' },
+  experience: { border: 'border-l-4 border-l-purple-500', icon: 'text-purple-400', bg: 'bg-purple-500/5' },
+  events: { border: 'border-l-4 border-l-pink-500', icon: 'text-pink-400', bg: 'bg-pink-500/5' },
+  timeline: { border: 'border-l-4 border-l-orange-500', icon: 'text-orange-400', bg: 'bg-orange-500/5' },
+  resume: { border: 'border-l-4 border-l-cyan-500', icon: 'text-cyan-400', bg: 'bg-cyan-500/5' },
+  education: { border: 'border-l-4 border-l-indigo-500', icon: 'text-indigo-400', bg: 'bg-indigo-500/5' },
 }
 
 export default function CareerPlanResults({ plan, timeline, onExportPDF }: CareerPlanResultsProps) {
@@ -22,17 +71,236 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
   const [expandedEvent, setExpandedEvent] = useState<number | null>(null)
   const [expandedBullet, setExpandedBullet] = useState<number | null>(null)
 
+  // Calculate plan completion stats
+  const stats = useMemo(() => {
+    const targetRolesCount = plan.targetRoles?.length || 0
+    const certsCount = plan.certificationPath?.length || 0
+    const projectsCount = plan.experiencePlan?.length || 0
+    const eventsCount = plan.events?.length || 0
+    const weeksInPlan = plan.timeline?.twelveWeekPlan?.length || 0
+    const skillsToLearn = plan.skillsAnalysis?.needToBuild?.length || 0
+    const skillsHave = plan.skillsAnalysis?.alreadyHave?.length || 0
+
+    // Calculate estimated salary range from first target role
+    const salaryRange = plan.targetRoles?.[0]?.salaryRange || 'Competitive'
+
+    return {
+      targetRolesCount,
+      certsCount,
+      projectsCount,
+      eventsCount,
+      weeksInPlan,
+      skillsToLearn,
+      skillsHave,
+      salaryRange,
+      totalItems: targetRolesCount + certsCount + projectsCount + eventsCount
+    }
+  }, [plan])
+
+  // Get quick start data
+  const quickStart = useMemo(() => {
+    const primaryRole = plan.targetRoles?.[0]
+    const firstWeekTask = plan.timeline?.twelveWeekPlan?.[0]
+    const topCert = plan.certificationPath?.[0]
+    const topSkill = plan.skillsAnalysis?.needToBuild?.[0]
+
+    return { primaryRole, firstWeekTask, topCert, topSkill }
+  }, [plan])
+
   return (
     <div className="space-y-4">
+      {/* ===== QUICK START SECTION ===== */}
+      <div className="glass rounded-xl border-2 border-blue-500/30 overflow-hidden bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+            <Play className="w-5 h-5 text-blue-400" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white">Quick Start</h2>
+            <p className="text-sm text-gray-400">Your 3 most important next steps</p>
+          </div>
+          <div className="ml-auto px-3 py-1 bg-green-500/20 text-green-300 text-xs font-semibold rounded-full">
+            START HERE
+          </div>
+        </div>
+
+        <div className="p-6 grid md:grid-cols-3 gap-4">
+          {/* Card 1: Target Role */}
+          {quickStart.primaryRole && (
+            <button
+              onClick={() => setExpandedSection('roles')}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-4 text-left transition-all hover:border-blue-500/50 group"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <Target className="w-4 h-4 text-blue-400" />
+                </div>
+                <span className="text-xs font-semibold text-blue-400 uppercase">Step 1</span>
+              </div>
+              <h3 className="text-white font-semibold mb-1 group-hover:text-blue-300 transition-colors">
+                {quickStart.primaryRole.title}
+              </h3>
+              <p className="text-xs text-gray-400 mb-2 line-clamp-2">
+                {quickStart.primaryRole.whyAligned}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-green-400">{quickStart.primaryRole.salaryRange}</span>
+                <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-blue-400 transition-colors" />
+              </div>
+            </button>
+          )}
+
+          {/* Card 2: First Week Task */}
+          {quickStart.firstWeekTask && (
+            <button
+              onClick={() => setExpandedSection('timeline')}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-4 text-left transition-all hover:border-orange-500/50 group"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
+                  <Calendar className="w-4 h-4 text-orange-400" />
+                </div>
+                <span className="text-xs font-semibold text-orange-400 uppercase">Week 1</span>
+              </div>
+              <h3 className="text-white font-semibold mb-1 group-hover:text-orange-300 transition-colors">
+                {quickStart.firstWeekTask.milestone || 'First Week Goals'}
+              </h3>
+              <p className="text-xs text-gray-400 mb-2 line-clamp-2">
+                {quickStart.firstWeekTask.tasks?.[0] || 'Start your career transition'}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-orange-400">{quickStart.firstWeekTask.tasks?.length || 0} tasks</span>
+                <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-orange-400 transition-colors" />
+              </div>
+            </button>
+          )}
+
+          {/* Card 3: Top Certification */}
+          {quickStart.topCert && (
+            <button
+              onClick={() => setExpandedSection('certs')}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-4 text-left transition-all hover:border-yellow-500/50 group"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                  <Award className="w-4 h-4 text-yellow-400" />
+                </div>
+                <span className="text-xs font-semibold text-yellow-400 uppercase">Priority Cert</span>
+              </div>
+              <h3 className="text-white font-semibold mb-1 group-hover:text-yellow-300 transition-colors line-clamp-1">
+                {quickStart.topCert.name}
+              </h3>
+              <p className="text-xs text-gray-400 mb-2 line-clamp-2">
+                {quickStart.topCert.whyRecommended || 'Recommended for your target role'}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className={`text-xs px-2 py-0.5 rounded ${
+                  quickStart.topCert.level === 'foundation' ? 'bg-green-500/20 text-green-300' :
+                  quickStart.topCert.level === 'intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
+                  'bg-red-500/20 text-red-300'
+                }`}>
+                  {quickStart.topCert.level}
+                </span>
+                <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-yellow-400 transition-colors" />
+              </div>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ===== STATS SUMMARY BAR ===== */}
+      <div className="glass rounded-lg border border-white/10 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <BarChart3 className="w-5 h-5 text-white" />
+          <h3 className="text-white font-semibold">Your Plan at a Glance</h3>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-blue-400">{stats.targetRolesCount}</div>
+            <div className="text-xs text-gray-400">Target Roles</div>
+          </div>
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-yellow-400">{stats.certsCount}</div>
+            <div className="text-xs text-gray-400">Certifications</div>
+          </div>
+          <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-purple-400">{stats.projectsCount}</div>
+            <div className="text-xs text-gray-400">Projects</div>
+          </div>
+          <div className="bg-pink-500/10 border border-pink-500/30 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-pink-400">{stats.eventsCount}</div>
+            <div className="text-xs text-gray-400">Events</div>
+          </div>
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-green-400">{stats.skillsHave}</div>
+            <div className="text-xs text-gray-400">Skills You Have</div>
+          </div>
+          <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-orange-400">{stats.weeksInPlan}</div>
+            <div className="text-xs text-gray-400">Week Plan</div>
+          </div>
+        </div>
+        {/* Salary indicator */}
+        <div className="mt-3 flex items-center justify-center gap-2 py-2 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 rounded-lg border border-green-500/20">
+          <DollarSign className="w-4 h-4 text-green-400" />
+          <span className="text-sm text-gray-300">Target Salary Range:</span>
+          <span className="text-sm font-semibold text-green-400">{stats.salaryRange}</span>
+        </div>
+      </div>
+
+      {/* ===== VISUAL TIMELINE PROGRESS ===== */}
+      {plan.timeline?.twelveWeekPlan && plan.timeline.twelveWeekPlan.length > 0 && (
+        <div className="glass rounded-lg border border-white/10 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-orange-400" />
+              <h3 className="text-white font-semibold">12-Week Journey</h3>
+            </div>
+            <button
+              onClick={() => setExpandedSection('timeline')}
+              className="text-xs text-orange-400 hover:text-orange-300 flex items-center gap-1"
+            >
+              View Full Timeline <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
+          <div className="relative">
+            {/* Progress bar background */}
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-orange-500 via-yellow-500 to-green-500 rounded-full w-0 transition-all duration-1000" style={{ width: '0%' }} />
+            </div>
+            {/* Week markers */}
+            <div className="flex justify-between mt-2">
+              {plan.timeline.twelveWeekPlan.slice(0, 6).map((week, idx) => (
+                <div key={idx} className="flex flex-col items-center">
+                  <div className={`w-3 h-3 rounded-full ${idx === 0 ? 'bg-orange-500 ring-2 ring-orange-500/30' : 'bg-white/20'} mb-1`} />
+                  <span className="text-xs text-gray-500">W{week.weekNumber}</span>
+                </div>
+              ))}
+              <div className="flex flex-col items-center">
+                <div className="w-3 h-3 rounded-full bg-green-500/30 mb-1" />
+                <span className="text-xs text-green-400">Goal</span>
+              </div>
+            </div>
+          </div>
+          {/* Current milestone */}
+          <div className="mt-3 flex items-center gap-2 p-2 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+            <Star className="w-4 h-4 text-orange-400" />
+            <span className="text-xs text-gray-300">
+              <span className="text-orange-400 font-semibold">This week:</span> {plan.timeline.twelveWeekPlan[0]?.milestone || plan.timeline.twelveWeekPlan[0]?.tasks?.[0] || 'Start your journey'}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Target Roles */}
       {plan.targetRoles && plan.targetRoles.length > 0 && (
-        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+        <div className={`glass rounded-lg border border-white/10 overflow-hidden ${sectionColors.roles.border}`}>
           <button
             onClick={() => setExpandedSection(expandedSection === 'roles' ? null : 'roles')}
             className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <Target className="w-6 h-6 text-white" />
+              <Target className={`w-6 h-6 ${sectionColors.roles.icon}`} />
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Target Roles</h2>
                 <p className="text-sm text-gray-400 mt-1">
@@ -77,7 +345,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                     <div className="bg-white/5 rounded-lg p-4 border border-white/10">
                       <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
                         <TrendingUp className="w-4 h-4" />
-                        Bridge Roles (Stepping Stones)
+                        <Tooltip term="Bridge Role" definition={jargonDefinitions['Bridge Role']}>Bridge Roles</Tooltip> (Stepping Stones)
                       </h4>
                       <div className="space-y-3">
                         {role.bridgeRoles.map((bridge, bridgeIdx) => (
@@ -119,13 +387,13 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
       {/* Skills Analysis */}
       {plan.skillsAnalysis && (
-        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+        <div className={`glass rounded-lg border border-white/10 overflow-hidden ${sectionColors.skills.border}`}>
           <button
             onClick={() => setExpandedSection(expandedSection === 'skills' ? null : 'skills')}
             className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <Award className="w-6 h-6 text-white" />
+              <Award className={`w-6 h-6 ${sectionColors.skills.icon}`} />
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Skills Analysis</h2>
                 <p className="text-sm text-gray-400 mt-1">
@@ -247,13 +515,13 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
       {/* Skills Guidance */}
       {plan.skillsGuidance && (
-        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+        <div className={`glass rounded-lg border border-white/10 overflow-hidden ${sectionColors.skillsGuidance.border}`}>
           <button
             onClick={() => setExpandedSection(expandedSection === 'skillsGuidance' ? null : 'skillsGuidance')}
             className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <Lightbulb className="w-6 h-6 text-white" />
+              <Lightbulb className={`w-6 h-6 ${sectionColors.skillsGuidance.icon}`} />
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Skills Development Guidance</h2>
                 <p className="text-sm text-gray-400 mt-1">
@@ -281,7 +549,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                 <div>
                   <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                     <Heart className="w-5 h-5 text-pink-400" />
-                    Essential Soft Skills ({plan.skillsGuidance.softSkills.length} skills)
+                    Essential <Tooltip term="Soft Skills" definition={jargonDefinitions['Soft Skills']}>Soft Skills</Tooltip> ({plan.skillsGuidance.softSkills.length} skills)
                   </h3>
                   <div className="space-y-4">
                     {plan.skillsGuidance.softSkills.map((skill, idx) => (
@@ -352,7 +620,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                 <div>
                   <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                     <Code className="w-5 h-5 text-green-400" />
-                    Essential Hard Skills ({plan.skillsGuidance.hardSkills.length} skills)
+                    Essential <Tooltip term="Hard Skills" definition={jargonDefinitions['Hard Skills']}>Hard Skills</Tooltip> ({plan.skillsGuidance.hardSkills.length} skills)
                   </h3>
                   <div className="space-y-4">
                     {plan.skillsGuidance.hardSkills.map((skill, idx) => (
@@ -424,13 +692,13 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
       {/* Certifications (Interview-Prep Style) */}
       {plan.certificationPath && plan.certificationPath.length > 0 && (
-        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+        <div className={`glass rounded-lg border border-white/10 overflow-hidden ${sectionColors.certs.border}`}>
           <button
             onClick={() => setExpandedSection(expandedSection === 'certs' ? null : 'certs')}
             className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <Award className="w-6 h-6 text-white" />
+              <Award className={`w-6 h-6 ${sectionColors.certs.icon}`} />
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Recommended Certifications for This Career Path</h2>
                 <p className="text-sm text-gray-400 mt-1">
@@ -450,13 +718,13 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
       {/* Experience Plan (with Detailed Tech Stacks) */}
       {plan.experiencePlan && plan.experiencePlan.length > 0 && (
-        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+        <div className={`glass rounded-lg border border-white/10 overflow-hidden ${sectionColors.experience.border}`}>
           <button
             onClick={() => setExpandedSection(expandedSection === 'experience' ? null : 'experience')}
             className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <Briefcase className="w-6 h-6 text-white" />
+              <Briefcase className={`w-6 h-6 ${sectionColors.experience.icon}`} />
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Experience Building Plan</h2>
                 <p className="text-sm text-gray-400 mt-1">
@@ -622,13 +890,13 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
       {/* Networking Events (Comprehensive Details) */}
       {plan.events && plan.events.length > 0 && (
-        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+        <div className={`glass rounded-lg border border-white/10 overflow-hidden ${sectionColors.events.border}`}>
           <button
             onClick={() => setExpandedSection(expandedSection === 'events' ? null : 'events')}
             className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <Calendar className="w-6 h-6 text-white" />
+              <Calendar className={`w-6 h-6 ${sectionColors.events.icon}`} />
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Networking Events</h2>
                 <p className="text-sm text-gray-400 mt-1">
@@ -762,13 +1030,13 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
       {/* Timeline */}
       {plan.timeline && (
-        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+        <div className={`glass rounded-lg border border-white/10 overflow-hidden ${sectionColors.timeline.border}`}>
           <button
             onClick={() => setExpandedSection(expandedSection === 'timeline' ? null : 'timeline')}
             className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <Calendar className="w-6 h-6 text-white" />
+              <Calendar className={`w-6 h-6 ${sectionColors.timeline.icon}`} />
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Your Action Timeline</h2>
                 <p className="text-sm text-gray-400 mt-1">
@@ -878,13 +1146,13 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
       {/* Resume Assets (Extreme Detail with Guidance) */}
       {plan.resumeAssets && (
-        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+        <div className={`glass rounded-lg border border-white/10 overflow-hidden ${sectionColors.resume.border}`}>
           <button
             onClick={() => setExpandedSection(expandedSection === 'resume' ? null : 'resume')}
             className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <FileText className="w-6 h-6 text-white" />
+              <FileText className={`w-6 h-6 ${sectionColors.resume.icon}`} />
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Resume & LinkedIn Assets</h2>
                 <p className="text-sm text-gray-400 mt-1">
@@ -1030,7 +1298,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                             {/* Structure Explanation */}
                             {bullet.structureExplanation && (
                               <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                                <h5 className="text-blue-300 font-semibold text-sm mb-1">CAR/STAR Structure</h5>
+                                <h5 className="text-blue-300 font-semibold text-sm mb-1"><Tooltip term="CAR" definition={jargonDefinitions['CAR']}>CAR</Tooltip>/<Tooltip term="STAR" definition={jargonDefinitions['STAR']}>STAR</Tooltip> Structure</h5>
                                 <p className="text-xs text-gray-300">{bullet.structureExplanation}</p>
                               </div>
                             )}
@@ -1077,7 +1345,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
               {/* Keywords & ATS */}
               {plan.resumeAssets.keywordsForAts && plan.resumeAssets.keywordsForAts.length > 0 && (
                 <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-                  <h3 className="text-white font-semibold mb-3">Keywords for ATS (Applicant Tracking Systems)</h3>
+                  <h3 className="text-white font-semibold mb-3">Keywords for <Tooltip term="ATS" definition={jargonDefinitions['ATS']}>ATS</Tooltip> (Applicant Tracking Systems)</h3>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {plan.resumeAssets.keywordsForAts.map((keyword, idx) => (
                       <span key={idx} className="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-sm font-mono">
@@ -1151,13 +1419,13 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
       {/* Education Options */}
       {plan.educationOptions && plan.educationOptions.length > 0 && (
-        <div className="glass rounded-lg border border-white/10 overflow-hidden">
+        <div className={`glass rounded-lg border border-white/10 overflow-hidden ${sectionColors.education.border}`}>
           <button
             onClick={() => setExpandedSection(expandedSection === 'education' ? null : 'education')}
             className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <BookOpen className="w-6 h-6 text-white" />
+              <BookOpen className={`w-6 h-6 ${sectionColors.education.icon}`} />
               <div className="text-left">
                 <h2 className="text-xl font-semibold text-white">Education & Training Options</h2>
                 <p className="text-sm text-gray-400 mt-1">

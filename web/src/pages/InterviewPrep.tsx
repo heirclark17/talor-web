@@ -37,10 +37,8 @@ import {
 } from 'lucide-react'
 import { api } from '../api/client'
 import STARStoryBuilder from '../components/STARStoryBuilder'
-import VideoRecorder from '../components/VideoRecorder'
 import CommonInterviewQuestions from '../components/CommonInterviewQuestions'
 import CertificationRecommendations from '../components/CertificationRecommendations'
-import PracticeQuestions from '../components/PracticeQuestions'
 import BehavioralTechnicalQuestions from '../components/BehavioralTechnicalQuestions'
 import ThemeToggle from '../components/ThemeToggle'
 
@@ -220,12 +218,10 @@ export default function InterviewPrep() {
       strategy: true,
       preparation: true,
       questions: true,
-      practice: true,
       commonQuestions: true,
       behavioralTechnical: true,
       positioning: true,
-      certifications: true,
-      aiPracticeQuestions: true
+      certifications: true
     }
   })
 
@@ -252,18 +248,36 @@ export default function InterviewPrep() {
 
   const [editingStory, setEditingStory] = useState<string | null>(null)
 
-  const [practiceMode, setPracticeMode] = useState(false)
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [timeRemaining, setTimeRemaining] = useState(120)
-  const [isPaused, setIsPaused] = useState(false)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
-
   const [interviewDate, setInterviewDate] = useState<string>(() => {
     const saved = localStorage.getItem(`interview-date-${tailoredResumeId}`)
     return saved || ''
   })
 
   const [showExportMenu, setShowExportMenu] = useState(false)
+
+  // Modal state for grid card view
+  const [activeModal, setActiveModal] = useState<string | null>(null)
+
+  const openModal = (sectionId: string) => {
+    setActiveModal(sectionId)
+    document.body.style.overflow = 'hidden'
+  }
+
+  const closeModal = () => {
+    setActiveModal(null)
+    document.body.style.overflow = 'auto'
+  }
+
+  // Close modal on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeModal()
+      }
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [])
 
   useEffect(() => {
     loadInterviewPrep()
@@ -605,40 +619,6 @@ export default function InterviewPrep() {
     }
   }
 
-  const startPracticeMode = () => {
-    setPracticeMode(true)
-    setCurrentQuestionIndex(0)
-    setTimeRemaining(120)
-    setIsPaused(false)
-  }
-
-  const nextQuestion = () => {
-    if (!prepData) return
-    const totalQuestions = interviewQuestions && interviewQuestions.questions.length > 0
-      ? interviewQuestions.questions.length
-      : prepData.interview_preparation.practice_questions_for_candidate.length
-    if (currentQuestionIndex < totalQuestions - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1)
-      setTimeRemaining(120)
-    } else {
-      exitPractice()
-    }
-  }
-
-  const togglePause = () => {
-    setIsPaused(!isPaused)
-  }
-
-  const exitPractice = () => {
-    setPracticeMode(false)
-    setCurrentQuestionIndex(0)
-    setTimeRemaining(120)
-    setIsPaused(false)
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-    }
-  }
-
   const saveInterviewDate = (date: string) => {
     setInterviewDate(date)
     localStorage.setItem(`interview-date-${tailoredResumeId}`, date)
@@ -663,7 +643,7 @@ export default function InterviewPrep() {
   }
 
   const getProgressStats = () => {
-    if (!prepData) return { researchCompleted: 0, researchTotal: 0, checklistCompleted: 0, checklistTotal: 0, practiceCompleted: 0, practiceTotal: 0 }
+    if (!prepData) return { researchCompleted: 0, researchTotal: 0, checklistCompleted: 0, checklistTotal: 0 }
 
     const researchTasks = prepData.interview_preparation.research_tasks
     const researchCompleted = researchTasks.filter((_, idx) => checkedItems[`research-${idx}`]).length
@@ -671,42 +651,13 @@ export default function InterviewPrep() {
     const checklistItems = prepData.interview_preparation.day_of_checklist
     const checklistCompleted = checklistItems.filter((_, idx) => checkedItems[`checklist-${idx}`]).length
 
-    // Use real interview questions if available
-    const practiceQuestions = interviewQuestions && interviewQuestions.questions.length > 0
-      ? interviewQuestions.questions
-      : prepData.interview_preparation.practice_questions_for_candidate
-    const practiceCompleted = practiceQuestions.filter((_, idx) =>
-      checkedItems[interviewQuestions && interviewQuestions.questions.length > 0 ? `real-practice-${idx}` : `practice-${idx}`]
-    ).length
-
     return {
       researchCompleted,
       researchTotal: researchTasks.length,
       checklistCompleted,
-      checklistTotal: checklistItems.length,
-      practiceCompleted,
-      practiceTotal: practiceQuestions.length
+      checklistTotal: checklistItems.length
     }
   }
-
-  // Practice timer effect
-  useEffect(() => {
-    if (practiceMode && !isPaused && timeRemaining > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current!)
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
-
-      return () => {
-        if (timerRef.current) clearInterval(timerRef.current)
-      }
-    }
-  }, [practiceMode, isPaused, timeRemaining])
 
   if (loading || generating) {
     return (
@@ -884,6 +835,7 @@ export default function InterviewPrep() {
                 value={interviewDate}
                 onChange={(e) => saveInterviewDate(e.target.value)}
                 className="bg-white/5 border border-white/20 rounded-lg p-3 text-white flex-1"
+                style={{ colorScheme: 'dark' }}
               />
               {daysUntilInterview !== null && (
                 <div className="text-center">
@@ -924,419 +876,531 @@ export default function InterviewPrep() {
                   />
                 </div>
               </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">Practice Questions</span>
-                  <span className="text-white font-medium">{progressStats.practiceCompleted}/{progressStats.practiceTotal}</span>
-                </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-purple-500 rounded-full transition-all"
-                    style={{ width: `${(progressStats.practiceCompleted / progressStats.practiceTotal) * 100}%` }}
-                  />
-                </div>
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Company Profile */}
-        <section className="glass rounded-3xl mb-6 overflow-hidden">
+        {/* Grid Layout - Section Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {/* Company Profile Card */}
           <button
-            onClick={() => toggleSection('companyProfile')}
-            className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
+            onClick={() => openModal('companyProfile')}
+            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
           >
-            <div className="flex items-center gap-3">
-              <Building2 className="w-6 h-6 text-white" />
-              <h2 className="text-2xl font-bold text-white">Company Profile</h2>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-lg bg-blue-500/20">
+                <Building2 className="w-6 h-6 text-blue-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Company Profile</h3>
             </div>
-            {expandedSections.companyProfile ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
+            <p className="text-gray-400 text-sm line-clamp-2">{prepData.company_profile.name} - {prepData.company_profile.industry}</p>
+            <div className="mt-3 text-blue-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              View Details <ChevronRight className="w-4 h-4" />
+            </div>
           </button>
 
-          {expandedSections.companyProfile && (
-            <div className="px-8 pb-8">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">{prepData.company_profile.name}</h3>
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-4">
-                    <span className="flex items-center gap-2">
-                      <Briefcase className="w-4 h-4" />
-                      {prepData.company_profile.industry}
-                    </span>
-                    {prepData.company_profile.locations.length > 0 && (
-                      <span className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {prepData.company_profile.locations.join(', ')}
-                      </span>
-                    )}
-                    {prepData.company_profile.size_estimate && (
-                      <span className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        {prepData.company_profile.size_estimate}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-gray-300 leading-relaxed">{prepData.company_profile.overview_paragraph}</p>
-                </div>
-              </div>
-
-              {/* Notes Section */}
-              <div className="mt-6">
-                <button
-                  onClick={() => setShowNotesFor(showNotesFor === 'companyProfile' ? null : 'companyProfile')}
-                  className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-                >
-                  <FileText size={16} />
-                  {notes.companyProfile ? 'Edit Notes' : 'Add Notes'}
-                </button>
-                {showNotesFor === 'companyProfile' && (
-                  <textarea
-                    value={notes.companyProfile || ''}
-                    onChange={(e) => updateNote('companyProfile', e.target.value)}
-                    placeholder="Add your notes about the company here..."
-                    className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
-                  />
-                )}
-                {notes.companyProfile && showNotesFor !== 'companyProfile' && (
-                  <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
-                    <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.companyProfile}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* Role Analysis */}
-        <section className="glass rounded-3xl mb-6 overflow-hidden">
+          {/* Role Analysis Card */}
           <button
-            onClick={() => toggleSection('roleAnalysis')}
-            className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
+            onClick={() => openModal('roleAnalysis')}
+            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
           >
-            <div className="flex items-center gap-3">
-              <Target className="w-6 h-6 text-white" />
-              <h2 className="text-2xl font-bold text-white">Role Analysis</h2>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-lg bg-green-500/20">
+                <Target className="w-6 h-6 text-green-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Role Analysis</h3>
             </div>
-            {expandedSections.roleAnalysis ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
+            <p className="text-gray-400 text-sm line-clamp-2">{prepData.role_analysis.job_title} - {prepData.role_analysis.seniority_level}</p>
+            <div className="mt-3 text-green-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              View Details <ChevronRight className="w-4 h-4" />
+            </div>
           </button>
 
-          {expandedSections.roleAnalysis && (
-            <div className="px-8 pb-8">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">{prepData.role_analysis.job_title}</h3>
-                  <p className="text-gray-400 text-sm mb-4">{prepData.role_analysis.seniority_level}</p>
-                </div>
-
-                <div>
-                  <h4 className="text-white font-semibold mb-3">Core Responsibilities</h4>
-                  <ul className="space-y-2">
-                    {prepData.role_analysis.core_responsibilities.map((resp, idx) => (
-                      <li key={idx} className="text-gray-300 flex gap-2">
-                        <span className="text-white/40">•</span>
-                        <span>{resp}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="text-white font-semibold mb-3">Must-Have Skills</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {prepData.role_analysis.must_have_skills.map((skill, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-white font-semibold mb-3">Nice-to-Have Skills</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {prepData.role_analysis.nice_to_have_skills.map((skill, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {prepData.role_analysis.success_signals_6_12_months && (
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <h4 className="text-white font-semibold mb-2">Success in 6-12 Months</h4>
-                    <p className="text-gray-300 text-sm">{prepData.role_analysis.success_signals_6_12_months}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Notes Section */}
-              <div className="mt-6">
-                <button
-                  onClick={() => setShowNotesFor(showNotesFor === 'roleAnalysis' ? null : 'roleAnalysis')}
-                  className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-                >
-                  <FileText size={16} />
-                  {notes.roleAnalysis ? 'Edit Notes' : 'Add Notes'}
-                </button>
-                {showNotesFor === 'roleAnalysis' && (
-                  <textarea
-                    value={notes.roleAnalysis || ''}
-                    onChange={(e) => updateNote('roleAnalysis', e.target.value)}
-                    placeholder="Add your notes about the role requirements..."
-                    className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
-                  />
-                )}
-                {notes.roleAnalysis && showNotesFor !== 'roleAnalysis' && (
-                  <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
-                    <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.roleAnalysis}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* Values & Culture */}
-        {prepData.values_and_culture.stated_values.length > 0 && (
-          <section className="glass rounded-3xl mb-6 overflow-hidden">
+          {/* Values & Culture Card */}
+          {prepData.values_and_culture.stated_values.length > 0 && (
             <button
-              onClick={() => toggleSection('valuesAndCulture')}
-              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
+              onClick={() => openModal('valuesAndCulture')}
+              className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
             >
-              <div className="flex items-center gap-3">
-                <Star className="w-6 h-6 text-white" />
-                <h2 className="text-2xl font-bold text-white">Values & Culture</h2>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-yellow-500/20">
+                  <Star className="w-6 h-6 text-yellow-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Values & Culture</h3>
               </div>
-              {expandedSections.valuesAndCulture ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
+              <p className="text-gray-400 text-sm line-clamp-2">{prepData.values_and_culture.stated_values.length} core values identified</p>
+              <div className="mt-3 text-yellow-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                View Details <ChevronRight className="w-4 h-4" />
+              </div>
             </button>
+          )}
 
-            {expandedSections.valuesAndCulture && (
-              <div className="px-8 pb-8">
-                <div className="space-y-4 mb-6">
-                  {prepData.values_and_culture.stated_values.map((value, idx) => (
-                    <div key={idx} className="bg-white/5 p-4 rounded-lg">
-                      <h4 className="text-white font-semibold mb-2">{value.name}</h4>
-                      <p className="text-gray-300 text-sm mb-2">{value.source_snippet}</p>
-                      {value.url && (
-                        <a
-                          href={value.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 text-xs hover:underline"
-                        >
-                          Source
-                        </a>
+          {/* Strategy & News Card */}
+          {(prepData.strategy_and_news.recent_events.length > 0 || prepData.strategy_and_news.strategic_themes.length > 0) && (
+            <button
+              onClick={() => openModal('strategy')}
+              className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-purple-500/20">
+                  <TrendingUp className="w-6 h-6 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Strategy & News</h3>
+              </div>
+              <p className="text-gray-400 text-sm line-clamp-2">
+                {companyNews?.news_articles?.length || prepData.strategy_and_news.recent_events.length} recent updates
+              </p>
+              <div className="mt-3 text-purple-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                View Details <ChevronRight className="w-4 h-4" />
+              </div>
+            </button>
+          )}
+
+          {/* Interview Preparation Card */}
+          <button
+            onClick={() => openModal('preparation')}
+            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-lg bg-cyan-500/20">
+                <CheckCircle2 className="w-6 h-6 text-cyan-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Preparation Checklist</h3>
+            </div>
+            <p className="text-gray-400 text-sm line-clamp-2">
+              {progressStats.researchCompleted}/{progressStats.researchTotal} tasks completed
+            </p>
+            <div className="mt-3 text-cyan-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              View Details <ChevronRight className="w-4 h-4" />
+            </div>
+          </button>
+
+          {/* Questions to Ask Card */}
+          <button
+            onClick={() => openModal('questions')}
+            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-lg bg-orange-500/20">
+                <MessageSquare className="w-6 h-6 text-orange-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Questions to Ask</h3>
+            </div>
+            <p className="text-gray-400 text-sm line-clamp-2">
+              {Object.values(prepData.questions_to_ask_interviewer).flat().length + customQuestions.length} questions prepared
+            </p>
+            <div className="mt-3 text-orange-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              View Details <ChevronRight className="w-4 h-4" />
+            </div>
+          </button>
+
+          {/* Behavioral & Technical Card */}
+          {interviewPrepId && (
+            <button
+              onClick={() => openModal('behavioralTechnical')}
+              className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20">
+                  <Target className="w-6 h-6 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Behavioral & Technical</h3>
+                <span className="text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white px-2 py-0.5 rounded">AI</span>
+              </div>
+              <p className="text-gray-400 text-sm line-clamp-2">Practice questions with STAR story builder</p>
+              <div className="mt-3 text-purple-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                View Details <ChevronRight className="w-4 h-4" />
+              </div>
+            </button>
+          )}
+
+          {/* Common Questions Card */}
+          {interviewPrepId && (
+            <button
+              onClick={() => openModal('commonQuestions')}
+              className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-pink-500/20">
+                  <MessageSquare className="w-6 h-6 text-pink-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Common Questions</h3>
+              </div>
+              <p className="text-gray-400 text-sm line-clamp-2">Questions people commonly struggle with</p>
+              <div className="mt-3 text-pink-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                View Details <ChevronRight className="w-4 h-4" />
+              </div>
+            </button>
+          )}
+
+          {/* Certifications Card */}
+          <button
+            onClick={() => openModal('certifications')}
+            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-lg bg-blue-500/20">
+                <Award className="w-6 h-6 text-blue-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Certifications</h3>
+            </div>
+            <p className="text-gray-400 text-sm line-clamp-2">Recommended certifications for this role</p>
+            <div className="mt-3 text-blue-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              View Details <ChevronRight className="w-4 h-4" />
+            </div>
+          </button>
+
+          {/* Candidate Positioning Card */}
+          <button
+            onClick={() => openModal('positioning')}
+            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-lg bg-emerald-500/20">
+                <Award className="w-6 h-6 text-emerald-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Candidate Positioning</h3>
+              <span className="text-xs bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded">STAR Builder</span>
+            </div>
+            <p className="text-gray-400 text-sm line-clamp-2">Resume focus areas & keyword mapping</p>
+            <div className="mt-3 text-emerald-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              View Details <ChevronRight className="w-4 h-4" />
+            </div>
+          </button>
+        </div>
+
+        {/* Modal Backdrop & Content */}
+        {activeModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={closeModal}
+          >
+            {/* Blurred Backdrop */}
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+
+            {/* Modal Content */}
+            <div
+              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900/95 rounded-3xl border border-white/10 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm p-6 border-b border-white/10 flex items-center justify-between z-10">
+                <h2 className="text-2xl font-bold text-white">
+                  {activeModal === 'companyProfile' && 'Company Profile'}
+                  {activeModal === 'roleAnalysis' && 'Role Analysis'}
+                  {activeModal === 'valuesAndCulture' && 'Values & Culture'}
+                  {activeModal === 'strategy' && 'Strategy & Recent News'}
+                  {activeModal === 'preparation' && 'Interview Preparation'}
+                  {activeModal === 'questions' && 'Questions to Ask'}
+                  {activeModal === 'behavioralTechnical' && 'Behavioral & Technical Questions'}
+                  {activeModal === 'commonQuestions' && 'Common Interview Questions'}
+                  {activeModal === 'certifications' && 'Recommended Certifications'}
+                  {activeModal === 'positioning' && 'Candidate Positioning'}
+                </h2>
+                <button
+                  onClick={closeModal}
+                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <X className="w-6 h-6 text-gray-400" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6">
+                {/* Company Profile Modal Content */}
+                {activeModal === 'companyProfile' && (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">{prepData.company_profile.name}</h3>
+                      <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-4">
+                        <span className="flex items-center gap-2">
+                          <Briefcase className="w-4 h-4" />
+                          {prepData.company_profile.industry}
+                        </span>
+                        {prepData.company_profile.locations.length > 0 && (
+                          <span className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            {prepData.company_profile.locations.join(', ')}
+                          </span>
+                        )}
+                        {prepData.company_profile.size_estimate && (
+                          <span className="flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            {prepData.company_profile.size_estimate}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-300 leading-relaxed">{prepData.company_profile.overview_paragraph}</p>
+                    </div>
+
+                    {/* Notes Section */}
+                    <div className="mt-6 pt-6 border-t border-white/10">
+                      <button
+                        onClick={() => setShowNotesFor(showNotesFor === 'companyProfile' ? null : 'companyProfile')}
+                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                      >
+                        <FileText size={16} />
+                        {notes.companyProfile ? 'Edit Notes' : 'Add Notes'}
+                      </button>
+                      {showNotesFor === 'companyProfile' && (
+                        <textarea
+                          value={notes.companyProfile || ''}
+                          onChange={(e) => updateNote('companyProfile', e.target.value)}
+                          placeholder="Add your notes about the company here..."
+                          className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
+                        />
+                      )}
+                      {notes.companyProfile && showNotesFor !== 'companyProfile' && (
+                        <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.companyProfile}</p>
+                        </div>
                       )}
                     </div>
-                  ))}
-                </div>
-
-                {prepData.values_and_culture.practical_implications.length > 0 && (
-                  <div>
-                    <h4 className="text-white font-semibold mb-3">Practical Implications</h4>
-                    <ul className="space-y-2">
-                      {prepData.values_and_culture.practical_implications.map((impl, idx) => (
-                        <li key={idx} className="text-gray-300 flex gap-2 text-sm">
-                          <span className="text-white/40">→</span>
-                          <span>{impl}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 )}
 
-                {/* Notes Section */}
-                <div className="mt-6">
-                  <button
-                    onClick={() => setShowNotesFor(showNotesFor === 'valuesAndCulture' ? null : 'valuesAndCulture')}
-                    className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-                  >
-                    <FileText size={16} />
-                    {notes.valuesAndCulture ? 'Edit Notes' : 'Add Notes'}
-                  </button>
-                  {showNotesFor === 'valuesAndCulture' && (
-                    <textarea
-                      value={notes.valuesAndCulture || ''}
-                      onChange={(e) => updateNote('valuesAndCulture', e.target.value)}
-                      placeholder="Add your notes about company values and culture..."
-                      className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
-                    />
-                  )}
-                  {notes.valuesAndCulture && showNotesFor !== 'valuesAndCulture' && (
-                    <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
-                      <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.valuesAndCulture}</p>
+                {/* Role Analysis Modal Content */}
+                {activeModal === 'roleAnalysis' && (
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-2">{prepData.role_analysis.job_title}</h3>
+                      <p className="text-gray-400 text-sm mb-4">{prepData.role_analysis.seniority_level}</p>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </section>
-        )}
 
-        {/* Strategy & News */}
-        {(prepData.strategy_and_news.recent_events.length > 0 ||
-          prepData.strategy_and_news.strategic_themes.length > 0) && (
-          <section className="glass rounded-3xl mb-6 overflow-hidden">
-            <button
-              onClick={() => toggleSection('strategy')}
-              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <TrendingUp className="w-6 h-6 text-white" />
-                <h2 className="text-2xl font-bold text-white">Strategy & Recent News</h2>
-              </div>
-              {expandedSections.strategy ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
-            </button>
+                    <div>
+                      <h4 className="text-white font-semibold mb-3">Core Responsibilities</h4>
+                      <ul className="space-y-2">
+                        {prepData.role_analysis.core_responsibilities.map((resp, idx) => (
+                          <li key={idx} className="text-gray-300 flex gap-2">
+                            <span className="text-white/40">•</span>
+                            <span>{resp}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-            {expandedSections.strategy && (
-              <div className="px-8 pb-8">
-                {/* Loading State */}
-                {loadingRealData && (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 text-white animate-spin mr-2" />
-                    <span className="text-gray-300">Fetching latest company data...</span>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="text-white font-semibold mb-3">Must-Have Skills</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {prepData.role_analysis.must_have_skills.map((skill, idx) => (
+                            <span key={idx} className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-white font-semibold mb-3">Nice-to-Have Skills</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {prepData.role_analysis.nice_to_have_skills.map((skill, idx) => (
+                            <span key={idx} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {prepData.role_analysis.success_signals_6_12_months && (
+                      <div className="bg-white/5 p-4 rounded-lg">
+                        <h4 className="text-white font-semibold mb-2">Success in 6-12 Months</h4>
+                        <p className="text-gray-300 text-sm">{prepData.role_analysis.success_signals_6_12_months}</p>
+                      </div>
+                    )}
+
+                    {/* Notes Section */}
+                    <div className="mt-6 pt-6 border-t border-white/10">
+                      <button
+                        onClick={() => setShowNotesFor(showNotesFor === 'roleAnalysis' ? null : 'roleAnalysis')}
+                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                      >
+                        <FileText size={16} />
+                        {notes.roleAnalysis ? 'Edit Notes' : 'Add Notes'}
+                      </button>
+                      {showNotesFor === 'roleAnalysis' && (
+                        <textarea
+                          value={notes.roleAnalysis || ''}
+                          onChange={(e) => updateNote('roleAnalysis', e.target.value)}
+                          placeholder="Add your notes about the role requirements..."
+                          className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
+                        />
+                      )}
+                      {notes.roleAnalysis && showNotesFor !== 'roleAnalysis' && (
+                        <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.roleAnalysis}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {/* Real Company Strategies */}
-                {companyResearch && companyResearch.strategic_initiatives && companyResearch.strategic_initiatives.length > 0 && (
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <h4 className="text-white font-semibold">Strategic Initiatives</h4>
-                      <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
-                    </div>
+                {/* Values & Culture Modal Content */}
+                {activeModal === 'valuesAndCulture' && (
+                  <div className="space-y-6">
                     <div className="space-y-4">
-                      {companyResearch.strategic_initiatives.map((initiative, idx) => (
-                        <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                          <div className="flex justify-between items-start mb-2">
-                            <h5 className="text-white font-medium">{initiative.title}</h5>
-                            {initiative.date && <span className="text-gray-500 text-sm">{initiative.date}</span>}
-                          </div>
-                          <p className="text-gray-300 text-sm mb-2">{initiative.description}</p>
-                          {initiative.relevance_to_role && (
-                            <p className="text-blue-300 text-sm italic mb-2">→ {initiative.relevance_to_role}</p>
+                      {prepData.values_and_culture.stated_values.map((value, idx) => (
+                        <div key={idx} className="bg-white/5 p-4 rounded-lg">
+                          <h4 className="text-white font-semibold mb-2">{value.name}</h4>
+                          <p className="text-gray-300 text-sm mb-2">{value.source_snippet}</p>
+                          {value.url && (
+                            <a
+                              href={value.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 text-xs hover:underline"
+                            >
+                              Source
+                            </a>
                           )}
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-gray-500 text-xs">Source: {initiative.source}</span>
-                            {initiative.url && (
-                              <a
-                                href={initiative.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 text-xs hover:underline"
-                              >
-                                View Source →
-                              </a>
-                            )}
-                          </div>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
 
-                {/* Recent Developments */}
-                {companyResearch && companyResearch.recent_developments && companyResearch.recent_developments.length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="text-white font-semibold mb-3">Recent Developments</h4>
-                    <ul className="space-y-2">
-                      {companyResearch.recent_developments.map((dev, idx) => (
-                        <li key={idx} className="text-gray-300 flex gap-2 text-sm">
-                          <span className="text-white/40">→</span>
-                          <span>{dev}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                    {prepData.values_and_culture.practical_implications.length > 0 && (
+                      <div>
+                        <h4 className="text-white font-semibold mb-3">Practical Implications</h4>
+                        <ul className="space-y-2">
+                          {prepData.values_and_culture.practical_implications.map((impl, idx) => (
+                            <li key={idx} className="text-gray-300 flex gap-2 text-sm">
+                              <span className="text-white/40">→</span>
+                              <span>{impl}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                {/* Technology Focus */}
-                {companyResearch && companyResearch.technology_focus && companyResearch.technology_focus.length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="text-white font-semibold mb-3">Technology Focus Areas</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {companyResearch.technology_focus.map((tech, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Real Company News */}
-                {companyNews && companyNews.news_articles && companyNews.news_articles.length > 0 && (
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <h4 className="text-white font-semibold">Recent News ({companyNews.date_range})</h4>
-                      <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
-                    </div>
-                    <div className="space-y-3">
-                      {companyNews.news_articles.slice(0, 10).map((article, idx) => (
-                        <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                          <div className="flex justify-between items-start mb-2">
-                            <h5 className="text-white font-medium">{article.title}</h5>
-                            <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{article.published_date}</span>
-                          </div>
-                          <p className="text-gray-300 text-sm mb-2">{article.summary}</p>
-                          {article.impact_summary && (
-                            <p className="text-blue-300 text-sm italic mb-2">→ {article.impact_summary}</p>
-                          )}
-                          <div className="flex items-center gap-4 mt-2">
-                            <span className="text-gray-500 text-xs">Source: {article.source}</span>
-                            {article.category && (
-                              <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded">{article.category}</span>
-                            )}
-                            {article.url && (
-                              <a
-                                href={article.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 text-xs hover:underline ml-auto"
-                              >
-                                Read Article →
-                              </a>
-                            )}
-                          </div>
+                    {/* Notes Section */}
+                    <div className="mt-6 pt-6 border-t border-white/10">
+                      <button
+                        onClick={() => setShowNotesFor(showNotesFor === 'valuesAndCulture' ? null : 'valuesAndCulture')}
+                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                      >
+                        <FileText size={16} />
+                        {notes.valuesAndCulture ? 'Edit Notes' : 'Add Notes'}
+                      </button>
+                      {showNotesFor === 'valuesAndCulture' && (
+                        <textarea
+                          value={notes.valuesAndCulture || ''}
+                          onChange={(e) => updateNote('valuesAndCulture', e.target.value)}
+                          placeholder="Add your notes about company values and culture..."
+                          className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
+                        />
+                      )}
+                      {notes.valuesAndCulture && showNotesFor !== 'valuesAndCulture' && (
+                        <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.valuesAndCulture}</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 )}
 
-                {/* Fallback to AI-generated data if no real data */}
-                {!loadingRealData && (
-                  !companyResearch?.strategic_initiatives?.length &&
-                  !companyNews?.news_articles?.length
-                ) && (
-                  <>
-                    {prepData.strategy_and_news.recent_events.length > 0 && (
+                {/* Strategy & News Modal Content */}
+                {activeModal === 'strategy' && (
+                  <div className="space-y-6">
+                    {/* Loading State */}
+                    {loadingRealData && (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 text-white animate-spin mr-2" />
+                        <span className="text-gray-300">Fetching latest company data...</span>
+                      </div>
+                    )}
+
+                    {/* Real Company Strategies */}
+                    {companyResearch && companyResearch.strategic_initiatives && companyResearch.strategic_initiatives.length > 0 && (
                       <div className="mb-6">
                         <div className="flex items-center gap-2 mb-3">
-                          <h4 className="text-white font-semibold">Recent Events</h4>
-                          <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
+                          <h4 className="text-white font-semibold">Strategic Initiatives</h4>
+                          <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
                         </div>
-                        <div className="space-y-3">
-                          {prepData.strategy_and_news.recent_events.map((event, idx) => (
+                        <div className="space-y-4">
+                          {companyResearch.strategic_initiatives.map((initiative, idx) => (
                             <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
                               <div className="flex justify-between items-start mb-2">
-                                <h5 className="text-white font-medium">{event.title}</h5>
-                                {event.date && <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{event.date}</span>}
+                                <h5 className="text-white font-medium">{initiative.title}</h5>
+                                {initiative.date && <span className="text-gray-500 text-sm">{initiative.date}</span>}
                               </div>
-                              {event.summary && (
-                                <p className="text-gray-300 text-sm mb-2">{event.summary}</p>
+                              <p className="text-gray-300 text-sm mb-2">{initiative.description}</p>
+                              {initiative.relevance_to_role && (
+                                <p className="text-blue-300 text-sm italic mb-2">→ {initiative.relevance_to_role}</p>
                               )}
-                              <p className="text-blue-300 text-sm italic mb-2">→ {event.impact_summary}</p>
-                              <div className="flex items-center gap-4 mt-2">
-                                {event.source && (
-                                  <span className="text-gray-500 text-xs">Source: {event.source}</span>
-                                )}
-                                {event.url && (
+                              <div className="flex items-center gap-2 mt-2">
+                                <span className="text-gray-500 text-xs">Source: {initiative.source}</span>
+                                {initiative.url && (
                                   <a
-                                    href={event.url}
+                                    href={initiative.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-400 text-xs hover:underline"
+                                  >
+                                    View Source →
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recent Developments */}
+                    {companyResearch && companyResearch.recent_developments && companyResearch.recent_developments.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-white font-semibold mb-3">Recent Developments</h4>
+                        <ul className="space-y-2">
+                          {companyResearch.recent_developments.map((dev, idx) => (
+                            <li key={idx} className="text-gray-300 flex gap-2 text-sm">
+                              <span className="text-white/40">→</span>
+                              <span>{dev}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Technology Focus */}
+                    {companyResearch && companyResearch.technology_focus && companyResearch.technology_focus.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-white font-semibold mb-3">Technology Focus Areas</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {companyResearch.technology_focus.map((tech, idx) => (
+                            <span key={idx} className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Real Company News */}
+                    {companyNews && companyNews.news_articles && companyNews.news_articles.length > 0 && (
+                      <div className="mb-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <h4 className="text-white font-semibold">Recent News ({companyNews.date_range})</h4>
+                          <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
+                        </div>
+                        <div className="space-y-3">
+                          {companyNews.news_articles.slice(0, 10).map((article, idx) => (
+                            <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                              <div className="flex justify-between items-start mb-2">
+                                <h5 className="text-white font-medium">{article.title}</h5>
+                                <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{article.published_date}</span>
+                              </div>
+                              <p className="text-gray-300 text-sm mb-2">{article.summary}</p>
+                              {article.impact_summary && (
+                                <p className="text-blue-300 text-sm italic mb-2">→ {article.impact_summary}</p>
+                              )}
+                              <div className="flex items-center gap-4 mt-2">
+                                <span className="text-gray-500 text-xs">Source: {article.source}</span>
+                                {article.category && (
+                                  <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded">{article.category}</span>
+                                )}
+                                {article.url && (
+                                  <a
+                                    href={article.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-400 text-xs hover:underline ml-auto"
@@ -1351,652 +1415,392 @@ export default function InterviewPrep() {
                       </div>
                     )}
 
-                    {prepData.strategy_and_news.strategic_themes.length > 0 && (
+                    {/* Fallback to AI-generated data if no real data */}
+                    {!loadingRealData && (
+                      !companyResearch?.strategic_initiatives?.length &&
+                      !companyNews?.news_articles?.length
+                    ) && (
+                      <>
+                        {prepData.strategy_and_news.recent_events.length > 0 && (
+                          <div className="mb-6">
+                            <div className="flex items-center gap-2 mb-3">
+                              <h4 className="text-white font-semibold">Recent Events</h4>
+                              <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
+                            </div>
+                            <div className="space-y-3">
+                              {prepData.strategy_and_news.recent_events.map((event, idx) => (
+                                <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                                  <div className="flex justify-between items-start mb-2">
+                                    <h5 className="text-white font-medium">{event.title}</h5>
+                                    {event.date && <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{event.date}</span>}
+                                  </div>
+                                  {event.summary && (
+                                    <p className="text-gray-300 text-sm mb-2">{event.summary}</p>
+                                  )}
+                                  <p className="text-blue-300 text-sm italic mb-2">→ {event.impact_summary}</p>
+                                  <div className="flex items-center gap-4 mt-2">
+                                    {event.source && (
+                                      <span className="text-gray-500 text-xs">Source: {event.source}</span>
+                                    )}
+                                    {event.url && (
+                                      <a
+                                        href={event.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-400 text-xs hover:underline ml-auto"
+                                      >
+                                        Read Article →
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {prepData.strategy_and_news.strategic_themes.length > 0 && (
+                          <div className="mb-6">
+                            <div className="flex items-center gap-2 mb-3">
+                              <h4 className="text-white font-semibold">Strategic Themes</h4>
+                              <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
+                            </div>
+                            <div className="space-y-3">
+                              {prepData.strategy_and_news.strategic_themes.map((theme, idx) => (
+                                <div key={idx} className="bg-white/5 p-4 rounded-lg">
+                                  <h5 className="text-white font-medium mb-2">{theme.theme}</h5>
+                                  <p className="text-gray-300 text-sm">{theme.rationale}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Technology Focus from AI */}
+                        {prepData.strategy_and_news.technology_focus && prepData.strategy_and_news.technology_focus.length > 0 && (
+                          <div className="mb-6">
+                            <div className="flex items-center gap-2 mb-3">
+                              <h4 className="text-white font-semibold">Technology Focus Areas</h4>
+                              <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
+                            </div>
+                            <div className="space-y-3">
+                              {prepData.strategy_and_news.technology_focus.map((tech, idx) => (
+                                <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                                  <h5 className="text-purple-300 font-medium mb-2">{tech.technology}</h5>
+                                  <p className="text-gray-300 text-sm mb-2">{tech.description}</p>
+                                  <p className="text-blue-300 text-sm italic">
+                                    <span className="text-gray-500">Relevance to your role:</span> {tech.relevance_to_role}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Sources Consulted */}
+                    {companyResearch && companyResearch.sources_consulted && companyResearch.sources_consulted.length > 0 && (
                       <div className="mb-6">
-                        <div className="flex items-center gap-2 mb-3">
-                          <h4 className="text-white font-semibold">Strategic Themes</h4>
-                          <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
-                        </div>
-                        <div className="space-y-3">
-                          {prepData.strategy_and_news.strategic_themes.map((theme, idx) => (
-                            <div key={idx} className="bg-white/5 p-4 rounded-lg">
-                              <h5 className="text-white font-medium mb-2">{theme.theme}</h5>
-                              <p className="text-gray-300 text-sm">{theme.rationale}</p>
+                        <h4 className="text-white font-semibold mb-3">Sources Consulted</h4>
+                        <div className="space-y-2">
+                          {companyResearch.sources_consulted.map((source, idx) => (
+                            <div key={idx} className="flex items-center gap-2 text-sm">
+                              <FileText className="w-4 h-4 text-gray-400" />
+                              <span className="text-gray-400">{source.type.replace('_', ' ').toUpperCase()}:</span>
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:underline"
+                              >
+                                {source.title || source.url}
+                              </a>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {/* Technology Focus from AI - with rich descriptions */}
-                    {prepData.strategy_and_news.technology_focus && prepData.strategy_and_news.technology_focus.length > 0 && (
-                      <div className="mb-6">
-                        <div className="flex items-center gap-2 mb-3">
-                          <h4 className="text-white font-semibold">Technology Focus Areas</h4>
-                          <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
+                    {/* Notes Section */}
+                    <div className="mt-6 pt-6 border-t border-white/10">
+                      <button
+                        onClick={() => setShowNotesFor(showNotesFor === 'strategy' ? null : 'strategy')}
+                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                      >
+                        <FileText size={16} />
+                        {notes.strategy ? 'Edit Notes' : 'Add Notes'}
+                      </button>
+                      {showNotesFor === 'strategy' && (
+                        <textarea
+                          value={notes.strategy || ''}
+                          onChange={(e) => updateNote('strategy', e.target.value)}
+                          placeholder="Add your notes about company strategy and news..."
+                          className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
+                        />
+                      )}
+                      {notes.strategy && showNotesFor !== 'strategy' && (
+                        <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.strategy}</p>
                         </div>
-                        <div className="space-y-3">
-                          {prepData.strategy_and_news.technology_focus.map((tech, idx) => (
-                            <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                              <h5 className="text-purple-300 font-medium mb-2">{tech.technology}</h5>
-                              <p className="text-gray-300 text-sm mb-2">{tech.description}</p>
-                              <p className="text-blue-300 text-sm italic">
-                                <span className="text-gray-500">Relevance to your role:</span> {tech.relevance_to_role}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* Sources Consulted */}
-                {companyResearch && companyResearch.sources_consulted && companyResearch.sources_consulted.length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="text-white font-semibold mb-3">Sources Consulted</h4>
-                    <div className="space-y-2">
-                      {companyResearch.sources_consulted.map((source, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-sm">
-                          <FileText className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-400">{source.type.replace('_', ' ').toUpperCase()}:</span>
-                          <a
-                            href={source.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:underline"
-                          >
-                            {source.title || source.url}
-                          </a>
-                        </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 )}
 
-                {/* Notes Section */}
-                <div className="mt-6">
-                  <button
-                    onClick={() => setShowNotesFor(showNotesFor === 'strategy' ? null : 'strategy')}
-                    className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-                  >
-                    <FileText size={16} />
-                    {notes.strategy ? 'Edit Notes' : 'Add Notes'}
-                  </button>
-                  {showNotesFor === 'strategy' && (
-                    <textarea
-                      value={notes.strategy || ''}
-                      onChange={(e) => updateNote('strategy', e.target.value)}
-                      placeholder="Add your notes about company strategy and news..."
-                      className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
-                    />
-                  )}
-                  {notes.strategy && showNotesFor !== 'strategy' && (
-                    <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
-                      <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.strategy}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </section>
-        )}
-
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Interview Preparation */}
-          <section className="glass rounded-3xl overflow-hidden">
-            <button
-              onClick={() => toggleSection('preparation')}
-              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-6 h-6 text-white" />
-                <h2 className="text-2xl font-bold text-white">Interview Preparation</h2>
-              </div>
-              {expandedSections.preparation ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
-            </button>
-
-            {expandedSections.preparation && (
-              <div className="px-8 pb-8">
-                <div className="space-y-6">
-                  {prepData.interview_preparation.research_tasks.length > 0 && (
-                    <div>
-                      <h4 className="text-white font-semibold mb-3">Research Tasks</h4>
-                      <ul className="space-y-2">
-                        {prepData.interview_preparation.research_tasks.map((task, idx) => {
-                          const itemId = `research-${idx}`
-                          const isChecked = checkedItems[itemId] || false
-                          return (
-                            <li key={idx} className="flex items-start gap-3 group">
-                              <button
-                                onClick={() => toggleCheck(itemId)}
-                                className="mt-0.5 flex-shrink-0"
-                              >
-                                {isChecked ? (
-                                  <CheckSquare className="w-5 h-5 text-green-500" />
-                                ) : (
-                                  <Square className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
-                                )}
-                              </button>
-                              <span className={`text-sm ${isChecked ? 'text-gray-500 line-through' : 'text-gray-300'}`}>
-                                {task}
-                              </span>
-                            </li>
-                          )
-                        })}
-                      </ul>
-                    </div>
-                  )}
-
-                  {prepData.interview_preparation.day_of_checklist.length > 0 && (
-                    <div>
-                      <h4 className="text-white font-semibold mb-3">Day-Of Checklist</h4>
-                      <ul className="space-y-2">
-                        {prepData.interview_preparation.day_of_checklist.map((item, idx) => {
-                          const itemId = `checklist-${idx}`
-                          const isChecked = checkedItems[itemId] || false
-                          return (
-                            <li key={idx} className="flex items-start gap-3 group">
-                              <button
-                                onClick={() => toggleCheck(itemId)}
-                                className="mt-0.5 flex-shrink-0"
-                              >
-                                {isChecked ? (
-                                  <CheckSquare className="w-5 h-5 text-green-500" />
-                                ) : (
-                                  <Square className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
-                                )}
-                              </button>
-                              <span className={`text-sm ${isChecked ? 'text-gray-500 line-through' : 'text-gray-300'}`}>
-                                {item}
-                              </span>
-                            </li>
-                          )
-                        })}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </section>
-
-          {/* Questions to Ask */}
-          <section className="glass rounded-3xl overflow-hidden">
-            <button
-              onClick={() => toggleSection('questions')}
-              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <MessageSquare className="w-6 h-6 text-white" />
-                <h2 className="text-2xl font-bold text-white">Questions to Ask</h2>
-              </div>
-              {expandedSections.questions ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
-            </button>
-
-            {expandedSections.questions && (
-              <div className="px-8 pb-8">
-                <div className="space-y-4 mb-6">
-                  {Object.entries(prepData.questions_to_ask_interviewer).map(([category, questions]) => (
-                    questions.length > 0 && (
-                      <div key={category}>
-                        <h4 className="text-white font-semibold mb-2 capitalize">{category}</h4>
-                        <ul className="space-y-1">
-                          {questions.map((q, idx) => (
-                            <li key={idx} className="text-gray-300 text-sm flex gap-2">
-                              <span className="text-white/40">?</span>
-                              <span>{q}</span>
-                            </li>
-                          ))}
+                {/* Preparation Checklist Modal Content */}
+                {activeModal === 'preparation' && (
+                  <div className="space-y-6">
+                    {prepData.interview_preparation.research_tasks.length > 0 && (
+                      <div>
+                        <h4 className="text-white font-semibold mb-3">Research Tasks</h4>
+                        <ul className="space-y-2">
+                          {prepData.interview_preparation.research_tasks.map((task, idx) => {
+                            const itemId = `research-${idx}`
+                            const isChecked = checkedItems[itemId] || false
+                            return (
+                              <li key={idx} className="flex items-start gap-3 group">
+                                <button
+                                  onClick={() => toggleCheck(itemId)}
+                                  className="mt-0.5 flex-shrink-0"
+                                >
+                                  {isChecked ? (
+                                    <CheckSquare className="w-5 h-5 text-green-500" />
+                                  ) : (
+                                    <Square className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                                  )}
+                                </button>
+                                <span className={`text-sm ${isChecked ? 'text-gray-500 line-through' : 'text-gray-300'}`}>
+                                  {task}
+                                </span>
+                              </li>
+                            )
+                          })}
                         </ul>
                       </div>
-                    )
-                  ))}
+                    )}
 
-                  {/* Custom Questions */}
-                  {customQuestions.length > 0 && (
-                    <div>
-                      <h4 className="text-white font-semibold mb-2">Your Questions</h4>
-                      <ul className="space-y-2">
-                        {customQuestions.map((q) => (
-                          <li key={q.id} className="flex items-start justify-between gap-2 bg-white/5 p-3 rounded-lg">
-                            <div className="flex gap-2 flex-1">
-                              <span className="text-white/40">?</span>
-                              <span className="text-gray-300 text-sm">{q.question}</span>
-                            </div>
-                            <button
-                              onClick={() => deleteCustomQuestion(q.id)}
-                              className="text-red-400 hover:text-red-300 transition-colors"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                {/* Add Custom Question */}
-                {!showAddQuestion ? (
-                  <button
-                    onClick={() => setShowAddQuestion(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-white text-sm"
-                  >
-                    <Plus size={16} />
-                    Add Your Question
-                  </button>
-                ) : (
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                    <input
-                      type="text"
-                      value={newQuestion}
-                      onChange={(e) => setNewQuestion(e.target.value)}
-                      placeholder="What's your question?"
-                      className="w-full bg-white/5 border border-white/20 rounded-lg p-3 mb-3 text-white"
-                    />
-                    <select
-                      value={newQuestionCategory}
-                      onChange={(e) => setNewQuestionCategory(e.target.value)}
-                      className="w-full bg-white/5 border border-white/20 rounded-lg p-3 mb-3 text-white"
-                    >
-                      <option value="product">Product</option>
-                      <option value="team">Team</option>
-                      <option value="culture">Culture</option>
-                      <option value="performance">Performance</option>
-                      <option value="strategy">Strategy</option>
-                    </select>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={addCustomQuestion}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors text-sm"
-                      >
-                        <Save size={16} />
-                        Save
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowAddQuestion(false)
-                          setNewQuestion('')
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-400 rounded-lg transition-colors text-sm"
-                      >
-                        <X size={16} />
-                        Cancel
-                      </button>
-                    </div>
+                    {prepData.interview_preparation.day_of_checklist.length > 0 && (
+                      <div>
+                        <h4 className="text-white font-semibold mb-3">Day-Of Checklist</h4>
+                        <ul className="space-y-2">
+                          {prepData.interview_preparation.day_of_checklist.map((item, idx) => {
+                            const itemId = `checklist-${idx}`
+                            const isChecked = checkedItems[itemId] || false
+                            return (
+                              <li key={idx} className="flex items-start gap-3 group">
+                                <button
+                                  onClick={() => toggleCheck(itemId)}
+                                  className="mt-0.5 flex-shrink-0"
+                                >
+                                  {isChecked ? (
+                                    <CheckSquare className="w-5 h-5 text-green-500" />
+                                  ) : (
+                                    <Square className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                                  )}
+                                </button>
+                                <span className={`text-sm ${isChecked ? 'text-gray-500 line-through' : 'text-gray-300'}`}>
+                                  {item}
+                                </span>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
-          </section>
-        </div>
 
-        {/* Practice Questions */}
-        {(prepData.interview_preparation.practice_questions_for_candidate.length > 0 || (interviewQuestions && interviewQuestions.questions.length > 0)) && (
-          <section className="glass rounded-3xl mt-6 overflow-hidden">
-            <button
-              onClick={() => toggleSection('practice')}
-              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <Lightbulb className="w-6 h-6 text-white" />
-                <h2 className="text-2xl font-bold text-white">Practice Questions</h2>
-                {interviewQuestions && interviewQuestions.total_questions > 0 && (
-                  <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">
-                    {interviewQuestions.total_questions} Real Questions
-                  </span>
-                )}
-              </div>
-              {expandedSections.practice ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
-            </button>
+                {/* Questions to Ask Modal Content */}
+                {activeModal === 'questions' && (
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      {Object.entries(prepData.questions_to_ask_interviewer).map(([category, questions]) => (
+                        questions.length > 0 && (
+                          <div key={category}>
+                            <h4 className="text-white font-semibold mb-2 capitalize">{category}</h4>
+                            <ul className="space-y-1">
+                              {questions.map((q, idx) => (
+                                <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                                  <span className="text-white/40">?</span>
+                                  <span>{q}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )
+                      ))}
 
-            {expandedSections.practice && (
-              <div className="px-8 pb-8">
-                <div className="mb-6 flex justify-end">
-                  <button
-                    onClick={startPracticeMode}
-                    className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg transition-colors"
-                  >
-                    <PlayCircle size={18} />
-                    Start Practice Session
-                  </button>
-                </div>
-
-                {/* Real Interview Questions */}
-                {interviewQuestions && interviewQuestions.questions && interviewQuestions.questions.length > 0 && (
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <h4 className="text-white font-semibold">Real Interview Questions from {interviewQuestions.company_name}</h4>
-                      <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">From {interviewQuestions.sources.join(', ')}</span>
+                      {/* Custom Questions */}
+                      {customQuestions.length > 0 && (
+                        <div>
+                          <h4 className="text-white font-semibold mb-2">Your Questions</h4>
+                          <ul className="space-y-2">
+                            {customQuestions.map((q) => (
+                              <li key={q.id} className="flex items-start justify-between gap-2 bg-white/5 p-3 rounded-lg">
+                                <div className="flex gap-2 flex-1">
+                                  <span className="text-white/40">?</span>
+                                  <span className="text-gray-300 text-sm">{q.question}</span>
+                                </div>
+                                <button
+                                  onClick={() => deleteCustomQuestion(q.id)}
+                                  className="text-red-400 hover:text-red-300 transition-colors"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Question Type Breakdown */}
-                    {interviewQuestions.question_types && Object.keys(interviewQuestions.question_types).length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {Object.entries(interviewQuestions.question_types).map(([type, count]) => (
-                          <span key={type} className="text-xs text-gray-300 bg-white/10 px-2 py-1 rounded">
-                            {type}: {count}
-                          </span>
-                        ))}
+                    {/* Add Custom Question */}
+                    {!showAddQuestion ? (
+                      <button
+                        onClick={() => setShowAddQuestion(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-white text-sm"
+                      >
+                        <Plus size={16} />
+                        Add Your Question
+                      </button>
+                    ) : (
+                      <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                        <input
+                          type="text"
+                          value={newQuestion}
+                          onChange={(e) => setNewQuestion(e.target.value)}
+                          placeholder="What's your question?"
+                          className="w-full bg-white/5 border border-white/20 rounded-lg p-3 mb-3 text-white"
+                        />
+                        <select
+                          value={newQuestionCategory}
+                          onChange={(e) => setNewQuestionCategory(e.target.value)}
+                          className="w-full bg-white/5 border border-white/20 rounded-lg p-3 mb-3 text-white"
+                        >
+                          <option value="product">Product</option>
+                          <option value="team">Team</option>
+                          <option value="culture">Culture</option>
+                          <option value="performance">Performance</option>
+                          <option value="strategy">Strategy</option>
+                        </select>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={addCustomQuestion}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors text-sm"
+                          >
+                            <Save size={16} />
+                            Save
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowAddQuestion(false)
+                              setNewQuestion('')
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-400 rounded-lg transition-colors text-sm"
+                          >
+                            <X size={16} />
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Behavioral & Technical Modal Content */}
+                {activeModal === 'behavioralTechnical' && interviewPrepId && prepData && (
+                  <div>
+                    <BehavioralTechnicalQuestions
+                      interviewPrepId={interviewPrepId}
+                      companyName={prepData.company_profile.name}
+                      jobTitle={prepData.role_analysis.job_title}
+                    />
+                  </div>
+                )}
+
+                {/* Common Questions Modal Content */}
+                {activeModal === 'commonQuestions' && interviewPrepId && (
+                  <div>
+                    <CommonInterviewQuestions
+                      interviewPrepId={interviewPrepId}
+                      companyName={prepData?.company_profile.name || ''}
+                      jobTitle={prepData?.role_analysis.job_title || ''}
+                    />
+                  </div>
+                )}
+
+                {/* Certifications Modal Content */}
+                {activeModal === 'certifications' && (
+                  <div>
+                    <CertificationRecommendations
+                      certifications={certifications}
+                      loading={loadingCertifications}
+                    />
+                  </div>
+                )}
+
+                {/* Candidate Positioning Modal Content */}
+                {activeModal === 'positioning' && (
+                  <div className="space-y-6">
+                    {prepData.candidate_positioning.resume_focus_areas.length > 0 && (
+                      <div>
+                        <h4 className="text-white font-semibold mb-3">Resume Focus Areas</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {prepData.candidate_positioning.resume_focus_areas.map((area, idx) => (
+                            <span key={idx} className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm">
+                              {area}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
 
-                    <div className="space-y-4">
-                      {interviewQuestions.questions.map((q, idx) => {
-                        const itemId = `real-practice-${idx}`
-                        const isChecked = checkedItems[itemId] || false
-
-                        // Difficulty color coding
-                        const difficultyColors = {
-                          easy: 'text-green-400 bg-green-500/20',
-                          medium: 'text-yellow-400 bg-yellow-500/20',
-                          hard: 'text-red-400 bg-red-500/20'
+                    {/* STAR Story Builder */}
+                    <div>
+                      <STARStoryBuilder
+                        tailoredResumeId={Number(tailoredResumeId)}
+                        experiences={(() => {
+                          // Parse tailored resume experience if it's a string
+                          if (tailoredResumeData?.experience) {
+                            const exp = tailoredResumeData.experience
+                            if (typeof exp === 'string') {
+                              try {
+                                return JSON.parse(exp)
+                              } catch {
+                                return baseResumeExperiences
+                              }
+                            }
+                            return exp
+                          }
+                          return baseResumeExperiences
+                        })()}
+                        companyContext={`${prepData.company_profile.name} - ${prepData.role_analysis.job_title}`}
+                        storyThemes={
+                          prepData.role_analysis.core_responsibilities && prepData.role_analysis.core_responsibilities.length > 0
+                            ? prepData.role_analysis.core_responsibilities
+                            : ['Leadership Challenge', 'Problem Solving', 'Team Collaboration', 'Handling Ambiguity', 'Delivering Under Pressure']
                         }
+                      />
+                    </div>
 
-                        // Type color coding
-                        const typeColors = {
-                          behavioral: 'text-purple-400 bg-purple-500/20',
-                          technical: 'text-blue-400 bg-blue-500/20',
-                          situational: 'text-cyan-400 bg-cyan-500/20',
-                          case_study: 'text-pink-400 bg-pink-500/20',
-                          general: 'text-gray-400 bg-gray-500/20'
-                        }
-
-                        return (
-                          <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                            <div className="flex items-start gap-3 mb-3">
-                              <button
-                                onClick={() => toggleCheck(itemId)}
-                                className="mt-0.5 flex-shrink-0"
-                              >
-                                {isChecked ? (
-                                  <CheckSquare className="w-5 h-5 text-green-500" />
-                                ) : (
-                                  <Square className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
-                                )}
-                              </button>
-                              <div className="flex-1">
-                                <p className={`font-medium mb-2 ${isChecked ? 'text-gray-500 line-through' : 'text-white'}`}>
-                                  {q.question}
-                                </p>
-
-                                {/* Metadata */}
-                                <div className="flex flex-wrap gap-2 mb-2">
-                                  <span className={`text-xs px-2 py-0.5 rounded ${typeColors[q.type as keyof typeof typeColors] || typeColors.general}`}>
-                                    {q.type}
-                                  </span>
-                                  <span className={`text-xs px-2 py-0.5 rounded ${difficultyColors[q.difficulty as keyof typeof difficultyColors] || difficultyColors.medium}`}>
-                                    {q.difficulty}
-                                  </span>
-                                  {q.frequency && (
-                                    <span className="text-xs text-orange-400 bg-orange-500/20 px-2 py-0.5 rounded">
-                                      {q.frequency} frequency
-                                    </span>
-                                  )}
-                                </div>
-
-                                {/* Context & Tips */}
-                                {q.context && (
-                                  <p className="text-gray-400 text-sm mb-1">
-                                    <span className="text-gray-500">Context:</span> {q.context}
-                                  </p>
-                                )}
-                                {q.tips && (
-                                  <p className="text-blue-300 text-sm italic mb-2">
-                                    💡 {q.tips}
-                                  </p>
-                                )}
-
-                                {/* Source */}
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                  <span>Source: {q.source}</span>
-                                  {q.source_url && (
-                                    <a
-                                      href={q.source_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-400 hover:underline"
-                                    >
-                                      View →
-                                    </a>
-                                  )}
-                                </div>
-                              </div>
+                    {prepData.candidate_positioning.keyword_map.length > 0 && (
+                      <div>
+                        <h4 className="text-white font-semibold mb-3">Keyword Mapping</h4>
+                        <div className="space-y-2">
+                          {prepData.candidate_positioning.keyword_map.map((mapping, idx) => (
+                            <div key={idx} className="flex items-start gap-3 text-sm">
+                              <span className="text-blue-400 font-medium">{mapping.company_term}</span>
+                              <span className="text-gray-500">→</span>
+                              <span className="text-green-400">{mapping.candidate_equivalent}</span>
+                              <span className="text-gray-500 flex-1">({mapping.context})</span>
                             </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* AI-Generated Questions (Fallback) */}
-                {(!interviewQuestions || interviewQuestions.questions.length === 0) && prepData.interview_preparation.practice_questions_for_candidate.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <h4 className="text-white font-semibold">AI-Generated Practice Questions</h4>
-                      <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
-                    </div>
-                    <div className="space-y-3">
-                      {prepData.interview_preparation.practice_questions_for_candidate.map((q, idx) => {
-                        const itemId = `practice-${idx}`
-                        const isChecked = checkedItems[itemId] || false
-                        return (
-                          <div key={idx} className="flex items-start gap-3 bg-white/5 p-4 rounded-lg group">
-                            <button
-                              onClick={() => toggleCheck(itemId)}
-                              className="mt-0.5 flex-shrink-0"
-                            >
-                              {isChecked ? (
-                                <CheckSquare className="w-5 h-5 text-green-500" />
-                              ) : (
-                                <Square className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
-                              )}
-                            </button>
-                            <p className={`font-medium flex-1 ${isChecked ? 'text-gray-500 line-through' : 'text-white'}`}>{q}</p>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Behavioral & Technical Interview Questions */}
-        {interviewPrepId && prepData && (
-          <section className="glass rounded-3xl mt-6 overflow-hidden">
-            <button
-              onClick={() => toggleSection('behavioralTechnical')}
-              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <Target className="w-6 h-6 text-purple-500" />
-                <h2 className="text-2xl font-bold text-white">Behavioral & Technical Questions</h2>
-                <span className="text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white px-2 py-1 rounded">
-                  AI + STAR
-                </span>
-              </div>
-              {expandedSections.behavioralTechnical ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
-            </button>
-
-            {expandedSections.behavioralTechnical && (
-              <div className="px-8 pb-8">
-                <BehavioralTechnicalQuestions
-                  interviewPrepId={interviewPrepId}
-                  companyName={prepData.company_profile.name}
-                  jobTitle={prepData.role_analysis.job_title}
-                />
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Common Interview Questions People Struggle With */}
-        {interviewPrepId && (
-          <section className="glass rounded-3xl mt-6 overflow-hidden">
-            <button
-              onClick={() => toggleSection('commonQuestions')}
-              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <MessageSquare className="w-6 h-6 text-white" />
-                <h2 className="text-2xl font-bold text-white">Common Interview Questions People Struggle With</h2>
-              </div>
-              {expandedSections.commonQuestions ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
-            </button>
-
-            {expandedSections.commonQuestions && (
-              <div className="px-8 pb-8">
-                <CommonInterviewQuestions
-                  interviewPrepId={interviewPrepId}
-                  companyName={prepData?.company_profile.name || ''}
-                  jobTitle={prepData?.role_analysis.job_title || ''}
-                />
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Recommended Certifications */}
-        {prepData && (
-          <section className="glass rounded-3xl mt-6 overflow-hidden">
-            <button
-              onClick={() => toggleSection('certifications')}
-              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <Award className="w-6 h-6 text-blue-500" />
-                <h2 className="text-2xl font-bold text-white">Recommended Certifications for This Career Path</h2>
-              </div>
-              {expandedSections.certifications ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
-            </button>
-
-            {expandedSections.certifications && (
-              <div className="px-8 pb-8">
-                <CertificationRecommendations
-                  certifications={certifications}
-                  loading={loadingCertifications}
-                />
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Candidate Positioning */}
-        <section className="glass rounded-3xl mt-6 overflow-hidden">
-          <button
-            onClick={() => toggleSection('positioning')}
-            className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <Award className="w-6 h-6 text-white" />
-              <h2 className="text-2xl font-bold text-white">Candidate Positioning</h2>
-            </div>
-            {expandedSections.positioning ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
-          </button>
-
-          {expandedSections.positioning && (
-            <div className="px-8 pb-8">
-              <div className="space-y-6">
-                {prepData.candidate_positioning.resume_focus_areas.length > 0 && (
-                  <div>
-                    <h4 className="text-white font-semibold mb-3">Resume Focus Areas</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {prepData.candidate_positioning.resume_focus_areas.map((area, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm">
-                          {area}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* AI-Generated STAR Stories Builder - Always visible */}
-                <div>
-                  <STARStoryBuilder
-                    tailoredResumeId={Number(tailoredResumeId)}
-                    experiences={baseResumeExperiences}
-                    companyContext={`${prepData.company_profile.name} - ${prepData.role_analysis.job_title}`}
-                    storyThemes={
-                      prepData.role_analysis.core_responsibilities && prepData.role_analysis.core_responsibilities.length > 0
-                        ? prepData.role_analysis.core_responsibilities
-                        : ['Leadership Challenge', 'Problem Solving', 'Team Collaboration', 'Handling Ambiguity', 'Delivering Under Pressure']
-                    }
-                  />
-                </div>
-
-                {prepData.candidate_positioning.keyword_map.length > 0 && (
-                  <div>
-                    <h4 className="text-white font-semibold mb-3">Keyword Mapping</h4>
-                    <div className="space-y-2">
-                      {prepData.candidate_positioning.keyword_map.map((mapping, idx) => (
-                        <div key={idx} className="flex items-start gap-3 text-sm">
-                          <span className="text-blue-400 font-medium">{mapping.company_term}</span>
-                          <span className="text-gray-500">→</span>
-                          <span className="text-green-400">{mapping.candidate_equivalent}</span>
-                          <span className="text-gray-500 flex-1">({mapping.context})</span>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* AI Practice Questions with Recording */}
-        <section className="glass rounded-3xl mt-6 overflow-hidden">
-          <button
-            onClick={() => toggleSection('aiPracticeQuestions')}
-            className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <Sparkles className="w-6 h-6 text-white" />
-              <h2 className="text-2xl font-bold text-white">AI Practice Questions</h2>
-              <span className="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded">
-                NEW
-              </span>
-            </div>
-            {expandedSections.aiPracticeQuestions ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
-          </button>
-
-          {expandedSections.aiPracticeQuestions && (
-            <div className="px-8 pb-8">
-              <PracticeQuestions interviewPrepId={interviewPrepId} />
-            </div>
-          )}
-        </section>
-
-        {/* Practice Mode Modal with Video Recording */}
-        {practiceMode && (
-          <div className="fixed inset-0 bg-black/95 z-50 overflow-y-auto">
-            <div className="container mx-auto px-6 py-8">
-              <div className="max-w-5xl mx-auto">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-3xl font-bold text-white">Practice Session</h2>
-                  <button
-                    onClick={exitPractice}
-                    className="px-6 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors font-medium"
-                  >
-                    Exit Practice
-                  </button>
-                </div>
-
-                <VideoRecorder
-                  questions={
-                    interviewQuestions && interviewQuestions.questions.length > 0
-                      ? interviewQuestions.questions.map(q => q.question)
-                      : prepData.interview_preparation.practice_questions_for_candidate
-                  }
-                  onRecordingComplete={(recording) => {
-                    console.log('Recording saved:', recording)
-                  }}
-                />
               </div>
             </div>
           </div>

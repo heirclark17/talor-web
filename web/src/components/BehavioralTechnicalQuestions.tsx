@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Loader2,
   AlertCircle,
@@ -18,7 +18,9 @@ import {
   TrendingUp,
   Award,
   HelpCircle,
-  ExternalLink
+  ExternalLink,
+  Sparkles,
+  RefreshCw
 } from 'lucide-react'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
@@ -134,6 +136,10 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
   const [starStories, setStarStories] = useState<Record<string, StarStory>>({})
   const [savingStory, setSavingStory] = useState(false)
 
+  // AI-generated STAR stories state
+  const [aiGeneratingStory, setAiGeneratingStory] = useState<Record<string, boolean>>({})
+  const [aiGeneratedStories, setAiGeneratedStories] = useState<Record<string, StarStory>>({})
+
   // Expanded questions state
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set())
 
@@ -177,12 +183,60 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
     }
   }
 
-  const toggleQuestion = (questionKey: string) => {
+  // Generate AI STAR story for a behavioral question
+  const generateAiStarStory = useCallback(async (questionKey: string, questionText: string) => {
+    // Don't regenerate if already exists or is being generated
+    if (aiGeneratedStories[questionKey] || aiGeneratingStory[questionKey] || starStories[questionKey]) {
+      return
+    }
+
+    setAiGeneratingStory(prev => ({ ...prev, [questionKey]: true }))
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/interview-prep/generate-practice-star-story`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+        },
+        body: JSON.stringify({
+          interview_prep_id: interviewPrepId,
+          question: questionText,
+        }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success && result.data?.star_story) {
+          const story = result.data.star_story
+          setAiGeneratedStories(prev => ({
+            ...prev,
+            [questionKey]: {
+              situation: story.situation || '',
+              task: story.task || '',
+              action: story.action || '',
+              result: story.result || '',
+            }
+          }))
+        }
+      }
+    } catch (err) {
+      console.error('Failed to generate AI STAR story:', err)
+    } finally {
+      setAiGeneratingStory(prev => ({ ...prev, [questionKey]: false }))
+    }
+  }, [interviewPrepId, aiGeneratedStories, aiGeneratingStory, starStories])
+
+  const toggleQuestion = (questionKey: string, questionText?: string) => {
     const newExpanded = new Set(expandedQuestions)
     if (newExpanded.has(questionKey)) {
       newExpanded.delete(questionKey)
     } else {
       newExpanded.add(questionKey)
+      // Auto-generate AI STAR story when expanding a behavioral question
+      if (questionKey.startsWith('behavioral_') && questionText) {
+        generateAiStarStory(questionKey, questionText)
+      }
     }
     setExpandedQuestions(newExpanded)
   }
@@ -398,12 +452,15 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
               const isExpanded = expandedQuestions.has(questionKey)
               const isEditing = editingQuestionId === questionKey
               const story = starStories[questionKey]
+              const aiStory = aiGeneratedStories[questionKey]
+              const isGeneratingAi = aiGeneratingStory[questionKey]
+              const hasAnyStory = story || aiStory
 
               return (
                 <div key={question.id} className="bg-white/5 rounded-xl overflow-hidden border border-white/10">
                   {/* Question Header */}
                   <button
-                    onClick={() => toggleQuestion(questionKey)}
+                    onClick={() => toggleQuestion(questionKey, question.question)}
                     className="w-full p-4 flex items-start gap-4 hover:bg-white/5 transition-colors text-left"
                   >
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold">
@@ -418,10 +475,10 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                         <span className={`text-xs px-2 py-0.5 rounded ${getDifficultyColor(question.difficulty)}`}>
                           {question.difficulty}
                         </span>
-                        {story && (
+                        {hasAnyStory && (
                           <span className="text-xs px-2 py-0.5 rounded text-green-400 bg-green-500/20 flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" />
-                            Story Prepared
+                            {story ? 'Story Ready' : 'AI Story Generated'}
                           </span>
                         )}
                       </div>
@@ -491,19 +548,62 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                           <h5 className="text-white font-semibold flex items-center gap-2">
                             <BookOpen className="w-5 h-5 text-purple-400" />
                             Your STAR Story
+                            {aiStory && !story && (
+                              <span className="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300 flex items-center gap-1">
+                                <Sparkles className="w-3 h-3" />
+                                AI Generated
+                              </span>
+                            )}
                           </h5>
-                          {!isEditing && (
-                            <button
-                              onClick={() => setEditingQuestionId(questionKey)}
-                              className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300"
-                            >
-                              <Edit className="w-4 h-4" />
-                              {story ? 'Edit' : 'Create'} Story
-                            </button>
+                          {!isEditing && !isGeneratingAi && (
+                            <div className="flex items-center gap-2">
+                              {aiStory && !story && (
+                                <button
+                                  onClick={() => {
+                                    // Clear AI story and regenerate
+                                    setAiGeneratedStories(prev => {
+                                      const updated = { ...prev }
+                                      delete updated[questionKey]
+                                      return updated
+                                    })
+                                    generateAiStarStory(questionKey, question.question)
+                                  }}
+                                  className="flex items-center gap-1 text-sm text-gray-400 hover:text-white"
+                                >
+                                  <RefreshCw className="w-4 h-4" />
+                                  Regenerate
+                                </button>
+                              )}
+                              <button
+                                onClick={() => {
+                                  // If AI story exists but no user story, copy AI story to user story for editing
+                                  if (aiStory && !story) {
+                                    setStarStories(prev => ({
+                                      ...prev,
+                                      [questionKey]: { ...aiStory }
+                                    }))
+                                  }
+                                  setEditingQuestionId(questionKey)
+                                }}
+                                className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300"
+                              >
+                                <Edit className="w-4 h-4" />
+                                {story ? 'Edit' : aiStory ? 'Edit AI Story' : 'Create'} Story
+                              </button>
+                            </div>
                           )}
                         </div>
 
-                        {isEditing ? (
+                        {/* Loading state for AI generation */}
+                        {isGeneratingAi && (
+                          <div className="text-center py-6">
+                            <Loader2 className="w-8 h-8 text-purple-400 animate-spin mx-auto mb-3" />
+                            <p className="text-gray-300 text-sm">Generating AI STAR story based on your resume...</p>
+                            <p className="text-gray-500 text-xs mt-1">This uses your experience to craft a compelling answer</p>
+                          </div>
+                        )}
+
+                        {!isGeneratingAi && isEditing ? (
                           <div className="space-y-4">
                             {/* STAR Prompts */}
                             <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -588,7 +688,8 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                               </button>
                             </div>
                           </div>
-                        ) : story ? (
+                        ) : !isGeneratingAi && story ? (
+                          /* User-edited story takes priority */
                           <div className="space-y-3">
                             <div>
                               <span className="text-green-400 text-xs font-medium">SITUATION</span>
@@ -607,18 +708,50 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                               <p className="text-gray-300 text-sm">{story.result}</p>
                             </div>
                           </div>
-                        ) : (
-                          <div className="text-center py-4">
-                            <p className="text-gray-400 text-sm mb-2">No story prepared yet</p>
-                            <button
-                              onClick={() => setEditingQuestionId(questionKey)}
-                              className="text-purple-400 hover:text-purple-300 text-sm flex items-center gap-1 mx-auto"
-                            >
-                              <Edit className="w-4 h-4" />
-                              Start Writing Your Story
-                            </button>
+                        ) : !isGeneratingAi && aiStory ? (
+                          /* AI-generated story display */
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-green-400 text-xs font-medium">SITUATION</span>
+                              <p className="text-gray-300 text-sm">{aiStory.situation}</p>
+                            </div>
+                            <div>
+                              <span className="text-blue-400 text-xs font-medium">TASK</span>
+                              <p className="text-gray-300 text-sm">{aiStory.task}</p>
+                            </div>
+                            <div>
+                              <span className="text-purple-400 text-xs font-medium">ACTION</span>
+                              <p className="text-gray-300 text-sm">{aiStory.action}</p>
+                            </div>
+                            <div>
+                              <span className="text-yellow-400 text-xs font-medium">RESULT</span>
+                              <p className="text-gray-300 text-sm">{aiStory.result}</p>
+                            </div>
+                            <div className="pt-2 text-center">
+                              <p className="text-gray-500 text-xs">Click "Edit AI Story" above to customize this response</p>
+                            </div>
                           </div>
-                        )}
+                        ) : !isGeneratingAi ? (
+                          <div className="text-center py-4">
+                            <p className="text-gray-400 text-sm mb-2">AI story generation failed</p>
+                            <div className="flex items-center justify-center gap-3">
+                              <button
+                                onClick={() => generateAiStarStory(questionKey, question.question)}
+                                className="text-purple-400 hover:text-purple-300 text-sm flex items-center gap-1"
+                              >
+                                <RefreshCw className="w-4 h-4" />
+                                Try Again
+                              </button>
+                              <button
+                                onClick={() => setEditingQuestionId(questionKey)}
+                                className="text-gray-400 hover:text-white text-sm flex items-center gap-1"
+                              >
+                                <Edit className="w-4 h-4" />
+                                Write Manually
+                              </button>
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   )}
