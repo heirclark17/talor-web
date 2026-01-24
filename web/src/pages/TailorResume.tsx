@@ -721,63 +721,50 @@ export default function TailorResume() {
     }
   }
 
-  // New AI analysis functions - OPTIMIZED with parallel calls
-  const loadAllAnalysis = async (tailoredResumeId: number) => {
+  // New AI analysis functions - OPTIMIZED with caching and parallel execution
+  const loadAllAnalysis = async (tailoredResumeId: number, forceRefresh: boolean = false) => {
     if (!tailoredResumeId) return
 
     setLoadingAnalysis(true)
-    setAnalysisProgress('Loading AI analysis in parallel...')
-    setAnalysisEstimate(90)
+    setAnalysisProgress(forceRefresh ? 'Refreshing AI analysis...' : 'Loading AI analysis...')
+    setAnalysisEstimate(forceRefresh ? 60 : 5) // Much faster if cached
 
     const userId = localStorage.getItem('talor_user_id')
     const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
     try {
-      // Call all 3 APIs in parallel (3x faster!)
-      const [analysisRes, keywordsRes, scoreRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/resume-analysis/analyze-changes`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-ID': userId || ''
-          },
-          body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
-        }),
-        fetch(`${API_BASE_URL}/api/resume-analysis/analyze-keywords`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-ID': userId || ''
-          },
-          body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
-        }),
-        fetch(`${API_BASE_URL}/api/resume-analysis/match-score`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-ID': userId || ''
-          },
-          body: JSON.stringify({ tailored_resume_id: tailoredResumeId })
+      // Use the new combined endpoint with caching and parallel execution
+      const response = await fetch(`${API_BASE_URL}/api/resume-analysis/analyze-all`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userId || ''
+        },
+        body: JSON.stringify({
+          tailored_resume_id: tailoredResumeId,
+          force_refresh: forceRefresh
         })
-      ])
+      })
 
-      // Parse results
-      if (analysisRes.ok) {
-        const data = await analysisRes.json()
-        setAnalysis(data.analysis)
+      if (response.ok) {
+        const data = await response.json()
+
+        // Set all results at once
+        if (data.analysis) setAnalysis(data.analysis)
+        if (data.keywords) setKeywords(data.keywords)
+        if (data.match_score) setMatchScore(data.match_score)
+
+        // Show cache status
+        if (data.cached) {
+          setAnalysisProgress(`Analysis loaded from cache (${data.elapsed_seconds?.toFixed(2)}s)`)
+        } else {
+          setAnalysisProgress(`Analysis complete (${data.elapsed_seconds?.toFixed(1)}s)`)
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || 'Failed to load analysis')
       }
 
-      if (keywordsRes.ok) {
-        const data = await keywordsRes.json()
-        setKeywords(data.keywords)
-      }
-
-      if (scoreRes.ok) {
-        const data = await scoreRes.json()
-        setMatchScore(data.match_score)
-      }
-
-      setAnalysisProgress('Analysis complete!')
       setAnalysisEstimate(0)
     } catch (error) {
       console.error('Error loading analysis:', error)
