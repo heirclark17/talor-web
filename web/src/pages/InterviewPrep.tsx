@@ -66,11 +66,19 @@ interface InterviewPrepData {
     recent_events: Array<{
       date: string
       title: string
+      summary?: string
+      source?: string
+      url?: string
       impact_summary: string
     }>
     strategic_themes: Array<{
       theme: string
       rationale: string
+    }>
+    technology_focus?: Array<{
+      technology: string
+      description: string
+      relevance_to_role: string
     }>
   }
   role_analysis: {
@@ -1311,12 +1319,30 @@ export default function InterviewPrep() {
                         </div>
                         <div className="space-y-3">
                           {prepData.strategy_and_news.recent_events.map((event, idx) => (
-                            <div key={idx} className="bg-white/5 p-4 rounded-lg">
+                            <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
                               <div className="flex justify-between items-start mb-2">
                                 <h5 className="text-white font-medium">{event.title}</h5>
-                                {event.date && <span className="text-gray-500 text-sm">{event.date}</span>}
+                                {event.date && <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{event.date}</span>}
                               </div>
-                              <p className="text-gray-300 text-sm">{event.impact_summary}</p>
+                              {event.summary && (
+                                <p className="text-gray-300 text-sm mb-2">{event.summary}</p>
+                              )}
+                              <p className="text-blue-300 text-sm italic mb-2">→ {event.impact_summary}</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                {event.source && (
+                                  <span className="text-gray-500 text-xs">Source: {event.source}</span>
+                                )}
+                                {event.url && (
+                                  <a
+                                    href={event.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-400 text-xs hover:underline ml-auto"
+                                  >
+                                    Read Article →
+                                  </a>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -1334,6 +1360,27 @@ export default function InterviewPrep() {
                             <div key={idx} className="bg-white/5 p-4 rounded-lg">
                               <h5 className="text-white font-medium mb-2">{theme.theme}</h5>
                               <p className="text-gray-300 text-sm">{theme.rationale}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Technology Focus from AI - with rich descriptions */}
+                    {prepData.strategy_and_news.technology_focus && prepData.strategy_and_news.technology_focus.length > 0 && (
+                      <div className="mb-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <h4 className="text-white font-semibold">Technology Focus Areas</h4>
+                          <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
+                        </div>
+                        <div className="space-y-3">
+                          {prepData.strategy_and_news.technology_focus.map((tech, idx) => (
+                            <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                              <h5 className="text-purple-300 font-medium mb-2">{tech.technology}</h5>
+                              <p className="text-gray-300 text-sm mb-2">{tech.description}</p>
+                              <p className="text-blue-300 text-sm italic">
+                                <span className="text-gray-500">Relevance to your role:</span> {tech.relevance_to_role}
+                              </p>
                             </div>
                           ))}
                         </div>
