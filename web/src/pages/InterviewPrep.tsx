@@ -41,6 +41,7 @@ import VideoRecorder from '../components/VideoRecorder'
 import CommonInterviewQuestions from '../components/CommonInterviewQuestions'
 import CertificationRecommendations from '../components/CertificationRecommendations'
 import PracticeQuestions from '../components/PracticeQuestions'
+import BehavioralTechnicalQuestions from '../components/BehavioralTechnicalQuestions'
 import ThemeToggle from '../components/ThemeToggle'
 
 // API base URL - same logic as API client
@@ -221,6 +222,7 @@ export default function InterviewPrep() {
       questions: true,
       practice: true,
       commonQuestions: true,
+      behavioralTechnical: true,
       positioning: true,
       certifications: true,
       aiPracticeQuestions: true
@@ -1799,6 +1801,35 @@ export default function InterviewPrep() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Behavioral & Technical Interview Questions */}
+        {interviewPrepId && prepData && (
+          <section className="glass rounded-3xl mt-6 overflow-hidden">
+            <button
+              onClick={() => toggleSection('behavioralTechnical')}
+              className="w-full p-8 flex items-center justify-between hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Target className="w-6 h-6 text-purple-500" />
+                <h2 className="text-2xl font-bold text-white">Behavioral & Technical Questions</h2>
+                <span className="text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white px-2 py-1 rounded">
+                  AI + STAR
+                </span>
+              </div>
+              {expandedSections.behavioralTechnical ? <ChevronDown className="w-6 h-6 text-white" /> : <ChevronRight className="w-6 h-6 text-white" />}
+            </button>
+
+            {expandedSections.behavioralTechnical && (
+              <div className="px-8 pb-8">
+                <BehavioralTechnicalQuestions
+                  interviewPrepId={interviewPrepId}
+                  companyName={prepData.company_profile.name}
+                  jobTitle={prepData.role_analysis.job_title}
+                />
               </div>
             )}
           </section>
