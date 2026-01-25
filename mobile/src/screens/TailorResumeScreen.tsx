@@ -197,7 +197,13 @@ export default function TailorResumeScreen() {
       >
         <View style={styles.header}>
           {initialResumeId && (
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+              accessibilityHint="Returns to the previous screen"
+            >
               <ArrowLeft color={COLORS.dark.text} size={24} />
             </TouchableOpacity>
           )}
@@ -215,6 +221,10 @@ export default function TailorResumeScreen() {
             <TouchableOpacity
               style={styles.selector}
               onPress={() => setShowResumeSelector(!showResumeSelector)}
+              accessibilityRole="button"
+              accessibilityLabel={`Resume selector: ${selectedResume?.filename || 'No resume selected'}`}
+              accessibilityHint={showResumeSelector ? 'Collapses resume list' : 'Expands resume list'}
+              accessibilityState={{ expanded: showResumeSelector }}
             >
               <View style={styles.selectorContent}>
                 <FileText color={COLORS.primary} size={20} />
@@ -242,6 +252,10 @@ export default function TailorResumeScreen() {
                       setSelectedResumeId(resume.id);
                       setShowResumeSelector(false);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Select ${resume.filename}`}
+                    accessibilityHint={`${resume.skills_count} skills`}
+                    accessibilityState={{ selected: selectedResumeId === resume.id }}
                   >
                     <Text
                       style={[
@@ -285,6 +299,10 @@ export default function TailorResumeScreen() {
                 ]}
                 onPress={handleExtractJob}
                 disabled={extracting || !jobUrl.trim()}
+                accessibilityRole="button"
+                accessibilityLabel={extracting ? 'Extracting job details' : 'Extract job details from URL'}
+                accessibilityHint="Uses AI to extract company name and job title from the job posting URL"
+                accessibilityState={{ disabled: extracting || !jobUrl.trim(), busy: extracting }}
               >
                 {extracting ? (
                   <ActivityIndicator size="small" color={COLORS.dark.text} />
@@ -339,6 +357,10 @@ export default function TailorResumeScreen() {
             style={[styles.tailorButton, tailoring && styles.tailorButtonDisabled]}
             onPress={handleTailor}
             disabled={tailoring}
+            accessibilityRole="button"
+            accessibilityLabel={tailoring ? 'Tailoring resume in progress' : 'Tailor resume for this job'}
+            accessibilityHint="Uses AI to customize your resume for the specific company and job posting"
+            accessibilityState={{ disabled: tailoring, busy: tailoring }}
           >
             {tailoring ? (
               <>

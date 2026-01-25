@@ -99,12 +99,16 @@ export default function SettingsScreen() {
     label: string,
     onPress?: () => void,
     rightElement?: React.ReactNode,
-    destructive?: boolean
+    destructive?: boolean,
+    accessibilityHint?: string
   ) => (
     <TouchableOpacity
       style={styles.item}
       onPress={onPress}
       disabled={!onPress && !rightElement}
+      accessibilityRole={onPress ? "button" : "none"}
+      accessibilityLabel={label}
+      accessibilityHint={accessibilityHint}
     >
       <View style={styles.itemLeft}>
         <View style={[styles.iconContainer, destructive && styles.iconContainerDestructive]}>
@@ -144,12 +148,18 @@ export default function SettingsScreen() {
           {renderItem(
             <BookOpen color={COLORS.dark.textSecondary} size={20} />,
             'STAR Stories',
-            () => navigation.navigate('StarStories')
+            () => navigation.navigate('StarStories'),
+            undefined,
+            false,
+            'Manage your behavioral interview stories'
           )}
           {renderItem(
             <TrendingUp color={COLORS.dark.textSecondary} size={20} />,
             'Career Path Designer',
-            () => navigation.navigate('CareerPathDesigner')
+            () => navigation.navigate('CareerPathDesigner'),
+            undefined,
+            false,
+            'Plan your career progression with AI guidance'
           )}
         </View>
 
@@ -186,12 +196,18 @@ export default function SettingsScreen() {
           {renderItem(
             <HelpCircle color={COLORS.dark.textSecondary} size={20} />,
             'Help Center',
-            () => Linking.openURL('https://talor.app/help')
+            () => Linking.openURL('https://talor.app/help'),
+            undefined,
+            false,
+            'Opens help documentation in browser'
           )}
           {renderItem(
             <Mail color={COLORS.dark.textSecondary} size={20} />,
             'Contact Support',
-            handleContact
+            handleContact,
+            undefined,
+            false,
+            'Send an email to support team'
           )}
         </View>
 
@@ -201,12 +217,18 @@ export default function SettingsScreen() {
           {renderItem(
             <Shield color={COLORS.dark.textSecondary} size={20} />,
             'Privacy Policy',
-            handlePrivacy
+            handlePrivacy,
+            undefined,
+            false,
+            'View privacy and data protection policy'
           )}
           {renderItem(
             <ExternalLink color={COLORS.dark.textSecondary} size={20} />,
             'Terms of Service',
-            handleTerms
+            handleTerms,
+            undefined,
+            false,
+            'View terms and conditions of use'
           )}
         </View>
 
@@ -218,7 +240,8 @@ export default function SettingsScreen() {
             'Clear Local Data',
             handleClearData,
             undefined,
-            true
+            true,
+            'Deletes all local session data and user ID'
           )}
         </View>
 
