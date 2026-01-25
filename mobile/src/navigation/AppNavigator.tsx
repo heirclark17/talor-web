@@ -3,7 +3,7 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FileText, Target, Briefcase, BookmarkCheck, Settings } from 'lucide-react-native';
-import { COLORS } from '../utils/constants';
+import { COLORS, FONTS } from '../utils/constants';
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';
@@ -11,6 +11,9 @@ import UploadResumeScreen from '../screens/UploadResumeScreen';
 import TailorResumeScreen from '../screens/TailorResumeScreen';
 import InterviewPrepListScreen from '../screens/InterviewPrepListScreen';
 import InterviewPrepScreen from '../screens/InterviewPrepScreen';
+import CommonQuestionsScreen from '../screens/CommonQuestionsScreen';
+import PracticeQuestionsScreen from '../screens/PracticeQuestionsScreen';
+import BehavioralTechnicalQuestionsScreen from '../screens/BehavioralTechnicalQuestionsScreen';
 import SavedComparisonsScreen from '../screens/SavedComparisonsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import StarStoriesScreen from '../screens/StarStoriesScreen';
@@ -22,6 +25,9 @@ export type RootStackParamList = {
   UploadResume: undefined;
   TailorResume: { resumeId?: number };
   InterviewPrep: { tailoredResumeId: number };
+  CommonQuestions: { interviewPrepId: number };
+  PracticeQuestions: { interviewPrepId: number; tailoredResumeId: number };
+  BehavioralTechnicalQuestions: { interviewPrepId: number };
   StarStories: undefined;
   CareerPathDesigner: undefined;
 };
@@ -70,7 +76,7 @@ function MainTabs() {
         tabBarInactiveTintColor: COLORS.dark.textTertiary,
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '600',
+          fontFamily: FONTS.semibold,
           marginTop: 4,
         },
       }}
@@ -148,6 +154,27 @@ export default function AppNavigator() {
         <Stack.Screen
           name="InterviewPrep"
           component={InterviewPrepScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="CommonQuestions"
+          component={CommonQuestionsScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="PracticeQuestions"
+          component={PracticeQuestionsScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="BehavioralTechnicalQuestions"
+          component={BehavioralTechnicalQuestionsScreen}
           options={{
             animation: 'slide_from_right',
           }}

@@ -14,9 +14,9 @@ const fetchWithAuth = async (
 ): Promise<Response> => {
   const userId = await getUserId();
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'X-User-ID': userId,
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
 
   // Don't set Content-Type for FormData (browser will set it with boundary)
@@ -229,9 +229,9 @@ export const api = {
   async listInterviewPreps(): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/interview-prep/list');
-      const data = await response.json();
-      // Backend returns array directly
-      const preps = Array.isArray(data) ? data : [];
+      const json = await response.json();
+      // Backend returns { success, count, interview_preps: [...] }
+      const preps = json.interview_preps || [];
       return { success: true, data: preps };
     } catch (error: any) {
       console.error('Error fetching interview preps:', error);
@@ -248,6 +248,206 @@ export const api = {
       return { success: response.ok, data };
     } catch (error: any) {
       console.error('Error deleting interview prep:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Generate common interview questions with personalized answers
+  async generateCommonQuestions(interviewPrepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/common-questions/generate', {
+        method: 'POST',
+        body: JSON.stringify({ interview_prep_id: interviewPrepId }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error generating common questions:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Regenerate a single common question with a new personalized answer
+  async regenerateSingleQuestion(params: {
+    interview_prep_id: number;
+    question_id: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/common-questions/regenerate', {
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error regenerating question:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Generate behavioral and technical interview questions
+  async generateBehavioralTechnicalQuestions(interviewPrepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/generate-behavioral-technical-questions', {
+        method: 'POST',
+        body: JSON.stringify({ interview_prep_id: interviewPrepId }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error generating behavioral/technical questions:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Generate STAR story for a specific experience
+  async generateStarStory(params: {
+    tailoredResumeId: number;
+    experienceIndices: number[];
+    storyTheme: string;
+    tone?: string;
+    companyContext?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/generate-star-story', {
+        method: 'POST',
+        body: JSON.stringify({
+          tailored_resume_id: params.tailoredResumeId,
+          experience_indices: params.experienceIndices,
+          story_theme: params.storyTheme,
+          tone: params.tone || 'professional',
+          company_context: params.companyContext,
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error generating STAR story:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get company research data
+  async getCompanyResearch(params: {
+    companyName: string;
+    industry?: string;
+    jobTitle?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/company-research', {
+        method: 'POST',
+        body: JSON.stringify({
+          company_name: params.companyName,
+          industry: params.industry,
+          job_title: params.jobTitle,
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching company research:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get company news
+  async getCompanyNews(params: {
+    companyName: string;
+    industry?: string;
+    jobTitle?: string;
+    daysBack?: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/company-news', {
+        method: 'POST',
+        body: JSON.stringify({
+          company_name: params.companyName,
+          industry: params.industry,
+          job_title: params.jobTitle,
+          days_back: params.daysBack || 90,
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching company news:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Generate practice questions for an interview prep
+  async generatePracticeQuestions(interviewPrepId: number, numQuestions?: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/generate-practice-questions', {
+        method: 'POST',
+        body: JSON.stringify({
+          interview_prep_id: interviewPrepId,
+          num_questions: numQuestions || 10,
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error generating practice questions:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Generate STAR story for a practice question
+  async generatePracticeStarStory(interviewPrepId: number, question: string): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/generate-practice-star-story', {
+        method: 'POST',
+        body: JSON.stringify({
+          interview_prep_id: interviewPrepId,
+          question: question,
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error generating practice STAR story:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Save practice response
+  async savePracticeResponse(params: {
+    interviewPrepId: number;
+    questionText: string;
+    questionCategory?: string;
+    starStory?: object;
+    writtenAnswer?: string;
+    practiceDurationSeconds?: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/save-practice-response', {
+        method: 'POST',
+        body: JSON.stringify({
+          interview_prep_id: params.interviewPrepId,
+          question_text: params.questionText,
+          question_category: params.questionCategory,
+          star_story: params.starStory,
+          written_answer: params.writtenAnswer,
+          practice_duration_seconds: params.practiceDurationSeconds,
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error saving practice response:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get practice responses for an interview prep
+  async getPracticeResponses(interviewPrepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/practice-responses/${interviewPrepId}`);
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching practice responses:', error);
       return { success: false, error: error.message };
     }
   },

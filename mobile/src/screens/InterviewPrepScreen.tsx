@@ -12,49 +12,201 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   ArrowLeft,
-  Briefcase,
   Building2,
   ChevronDown,
   ChevronUp,
-  Lightbulb,
-  MessageSquare,
   Sparkles,
   Target,
+  Users,
+  Newspaper,
+  Briefcase,
+  CheckCircle,
+  MessageCircle,
+  FileText,
+  Award,
+  Lightbulb,
+  MapPin,
+  TrendingUp,
+  Cpu,
+  Heart,
+  ClipboardList,
+  HelpCircle,
+  Star,
+  Brain,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-interface Question {
-  id: number;
-  question: string;
-  suggested_answer: string;
-  category: string;
-  difficulty?: string;
+// Type definitions matching backend prep_data structure
+interface CompanyProfile {
+  name: string;
+  industry: string;
+  locations: string[];
+  size_estimate: string;
+  overview_paragraph: string;
 }
 
-interface InterviewPrepData {
-  id: number;
-  company: string;
+interface StatedValue {
+  name: string;
+  description?: string;
+  source_snippet?: string;
+  url?: string;
+  source_url?: string;
+}
+
+interface ValuesAndCulture {
+  stated_values: StatedValue[];
+  practical_implications: string[];
+  cultural_priorities?: string[];
+}
+
+interface StrategyAndNews {
+  recent_events: Array<{
+    title?: string;
+    headline?: string;
+    date?: string;
+    summary: string;
+    source?: string;
+    url?: string;
+    source_url?: string;
+    impact_summary?: string;
+  }>;
+  strategic_themes: Array<{
+    theme: string;
+    rationale: string;
+  }>;
+  technology_focus: Array<{
+    technology: string;
+    description: string;
+    relevance_to_role: string;
+  }>;
+}
+
+interface RoleAnalysis {
   job_title: string;
-  questions: Question[];
-  tips?: string[];
+  seniority_level: string;
+  core_responsibilities: string[];
+  must_have_skills: string[];
+  nice_to_have_skills: string[];
+  success_signals_6_12_months: string[];
+}
+
+interface InterviewPreparation {
+  research_tasks: string[];
+  practice_questions_for_candidate: string[];
+  day_of_checklist: string[];
+}
+
+interface CandidatePositioning {
+  resume_focus_areas: string[];
+  story_prompts: Array<{
+    title: string;
+    description: string;
+    star_hint?: {
+      situation: string;
+      task: string;
+      action: string;
+      result: string;
+    };
+  }>;
+  keyword_map: Array<{
+    company_term: string;
+    candidate_equivalent: string;
+    context: string;
+  }>;
+}
+
+interface QuestionsToAsk {
+  product: string[];
+  team: string[];
+  culture: string[];
+  performance: string[];
+  strategy: string[];
+}
+
+interface PrepData {
+  company_profile: CompanyProfile;
+  values_and_culture: ValuesAndCulture;
+  strategy_and_news: StrategyAndNews;
+  role_analysis: RoleAnalysis;
+  interview_preparation: InterviewPreparation;
+  candidate_positioning: CandidatePositioning;
+  questions_to_ask_interviewer: QuestionsToAsk;
+}
+
+interface InterviewPrepResponse {
+  success: boolean;
+  interview_prep_id: number;
+  prep_data: PrepData;
   created_at: string;
 }
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type InterviewPrepRouteProp = RouteProp<RootStackParamList, 'InterviewPrep'>;
 
+// Expandable Section Component
+const ExpandableSection: React.FC<{
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  defaultExpanded?: boolean;
+  accentColor?: string;
+}> = ({ title, icon, children, defaultExpanded = false, accentColor = COLORS.primary }) => {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
+  return (
+    <View style={styles.sectionCard}>
+      <TouchableOpacity
+        style={styles.sectionHeader}
+        onPress={() => setExpanded(!expanded)}
+        accessibilityRole="button"
+        accessibilityLabel={`${title} section, ${expanded ? 'expanded' : 'collapsed'}`}
+      >
+        <View style={[styles.sectionIconContainer, { backgroundColor: `${accentColor}20` }]}>
+          {icon}
+        </View>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {expanded ? (
+          <ChevronUp color={COLORS.dark.textSecondary} size={20} />
+        ) : (
+          <ChevronDown color={COLORS.dark.textSecondary} size={20} />
+        )}
+      </TouchableOpacity>
+      {expanded && <View style={styles.sectionContent}>{children}</View>}
+    </View>
+  );
+};
+
+// Bullet List Component
+const BulletList: React.FC<{ items: string[]; icon?: React.ReactNode }> = ({ items, icon }) => (
+  <View style={styles.bulletList}>
+    {items.map((item, index) => (
+      <View key={index} style={styles.bulletItem}>
+        {icon || <View style={styles.bulletDot} />}
+        <Text style={styles.bulletText}>{item}</Text>
+      </View>
+    ))}
+  </View>
+);
+
+// Chip/Badge Component
+const Chip: React.FC<{ label: string; color?: string }> = ({ label, color = COLORS.primary }) => (
+  <View style={[styles.chip, { backgroundColor: `${color}20` }]}>
+    <Text style={[styles.chipText, { color }]}>{label}</Text>
+  </View>
+);
+
 export default function InterviewPrepScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<InterviewPrepRouteProp>();
   const { tailoredResumeId } = route.params;
 
-  const [prepData, setPrepData] = useState<InterviewPrepData | null>(null);
+  const [prepData, setPrepData] = useState<PrepData | null>(null);
+  const [interviewPrepId, setInterviewPrepId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadInterviewPrep();
@@ -65,7 +217,9 @@ export default function InterviewPrepScreen() {
     try {
       const result = await api.getInterviewPrep(tailoredResumeId);
       if (result.success && result.data) {
-        setPrepData(result.data);
+        const data = result.data as InterviewPrepResponse;
+        setPrepData(data.prep_data);
+        setInterviewPrepId(data.interview_prep_id);
       }
     } catch (error) {
       console.error('Error loading interview prep:', error);
@@ -79,7 +233,9 @@ export default function InterviewPrepScreen() {
     try {
       const result = await api.generateInterviewPrep(tailoredResumeId);
       if (result.success && result.data) {
-        setPrepData(result.data);
+        const data = result.data as InterviewPrepResponse;
+        setPrepData(data.prep_data);
+        setInterviewPrepId(data.interview_prep_id);
       } else {
         Alert.alert('Error', result.error || 'Failed to generate interview prep');
       }
@@ -88,29 +244,6 @@ export default function InterviewPrepScreen() {
       Alert.alert('Error', 'Failed to generate interview prep');
     } finally {
       setGenerating(false);
-    }
-  };
-
-  const toggleQuestion = (questionId: number) => {
-    const newExpanded = new Set(expandedQuestions);
-    if (newExpanded.has(questionId)) {
-      newExpanded.delete(questionId);
-    } else {
-      newExpanded.add(questionId);
-    }
-    setExpandedQuestions(newExpanded);
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
-      case 'behavioral':
-        return COLORS.primary;
-      case 'technical':
-        return COLORS.purple;
-      case 'situational':
-        return COLORS.success;
-      default:
-        return COLORS.dark.textSecondary;
     }
   };
 
@@ -129,7 +262,12 @@ export default function InterviewPrepScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
             <ArrowLeft color={COLORS.dark.text} size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Interview Prep</Text>
@@ -142,12 +280,14 @@ export default function InterviewPrepScreen() {
           </View>
           <Text style={styles.emptyTitle}>No Prep Available</Text>
           <Text style={styles.emptyText}>
-            Generate interview preparation materials for this job application.
+            Generate AI-powered interview preparation materials for this job application.
           </Text>
           <TouchableOpacity
             style={[styles.generateButton, generating && styles.generateButtonDisabled]}
             onPress={handleGeneratePrep}
             disabled={generating}
+            accessibilityRole="button"
+            accessibilityLabel={generating ? 'Generating interview prep' : 'Generate interview prep'}
           >
             {generating ? (
               <>
@@ -157,7 +297,7 @@ export default function InterviewPrepScreen() {
             ) : (
               <>
                 <Sparkles color={COLORS.dark.background} size={20} />
-                <Text style={styles.generateButtonText}>Generate Prep</Text>
+                <Text style={styles.generateButtonText}>Generate Interview Prep</Text>
               </>
             )}
           </TouchableOpacity>
@@ -166,10 +306,17 @@ export default function InterviewPrepScreen() {
     );
   }
 
+  const { company_profile, values_and_culture, strategy_and_news, role_analysis, interview_preparation, candidate_positioning, questions_to_ask_interviewer } = prepData;
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <ArrowLeft color={COLORS.dark.text} size={24} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Interview Prep</Text>
@@ -177,6 +324,55 @@ export default function InterviewPrepScreen() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        {/* Action Buttons */}
+        {interviewPrepId && (
+          <View style={styles.actionButtonsContainer}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => {
+                // Navigate to common questions screen
+                navigation.navigate('CommonQuestions' as any, { interviewPrepId });
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="View common interview questions"
+            >
+              <MessageCircle color={COLORS.dark.background} size={18} />
+              <Text style={styles.actionButtonText}>Common Questions</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: COLORS.purple }]}
+              onPress={() => {
+                // Navigate to practice questions screen
+                navigation.navigate('PracticeQuestions' as any, {
+                  interviewPrepId,
+                  tailoredResumeId
+                });
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Practice interview questions"
+            >
+              <ClipboardList color={COLORS.dark.background} size={18} />
+              <Text style={styles.actionButtonText}>Practice Questions</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: COLORS.info }]}
+              onPress={() => {
+                // Navigate to behavioral/technical questions screen
+                navigation.navigate('BehavioralTechnicalQuestions' as any, {
+                  interviewPrepId
+                });
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="View behavioral and technical questions"
+            >
+              <Brain color={COLORS.dark.background} size={18} />
+              <Text style={styles.actionButtonText}>Behavioral & Technical</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Job Info Card */}
         <View style={styles.jobCard}>
           <View style={styles.jobCardHeader}>
@@ -184,76 +380,287 @@ export default function InterviewPrepScreen() {
               <Building2 color={COLORS.primary} size={24} />
             </View>
             <View style={styles.jobInfo}>
-              <Text style={styles.jobCompany}>{prepData.company}</Text>
-              <Text style={styles.jobTitle}>{prepData.job_title}</Text>
+              <Text style={styles.jobCompany}>{company_profile?.name || 'Company'}</Text>
+              <Text style={styles.jobTitle}>{role_analysis?.job_title || 'Position'}</Text>
             </View>
           </View>
-          <View style={styles.statsRow}>
-            <View style={styles.stat}>
-              <MessageSquare color={COLORS.dark.textSecondary} size={16} />
-              <Text style={styles.statText}>{prepData.questions.length} questions</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Tips Section */}
-        {prepData.tips && prepData.tips.length > 0 && (
-          <View style={styles.tipsSection}>
-            <View style={styles.tipsSectionHeader}>
-              <Lightbulb color={COLORS.warning} size={20} />
-              <Text style={styles.tipsSectionTitle}>Key Tips</Text>
-            </View>
-            {prepData.tips.map((tip, index) => (
-              <View key={index} style={styles.tipItem}>
-                <Text style={styles.tipText}>{tip}</Text>
+          <View style={styles.jobMeta}>
+            {company_profile?.industry && (
+              <View style={styles.metaItem}>
+                <Briefcase color={COLORS.dark.textSecondary} size={14} />
+                <Text style={styles.metaText}>{company_profile.industry}</Text>
               </View>
-            ))}
+            )}
+            {company_profile?.locations && company_profile.locations.length > 0 && (
+              <View style={styles.metaItem}>
+                <MapPin color={COLORS.dark.textSecondary} size={14} />
+                <Text style={styles.metaText}>{company_profile.locations[0]}</Text>
+              </View>
+            )}
+            {role_analysis?.seniority_level && (
+              <View style={styles.metaItem}>
+                <TrendingUp color={COLORS.dark.textSecondary} size={14} />
+                <Text style={styles.metaText}>{role_analysis.seniority_level}</Text>
+              </View>
+            )}
           </View>
-        )}
-
-        {/* Questions Section */}
-        <View style={styles.questionsSection}>
-          <Text style={styles.sectionTitle}>Practice Questions</Text>
-          {prepData.questions.map((question) => (
-            <View key={question.id} style={styles.questionCard}>
-              <TouchableOpacity
-                style={styles.questionHeader}
-                onPress={() => toggleQuestion(question.id)}
-              >
-                <View style={styles.questionInfo}>
-                  <View
-                    style={[
-                      styles.categoryBadge,
-                      { backgroundColor: `${getCategoryColor(question.category)}20` },
-                    ]}
-                  >
-                    <Text
-                      style={[styles.categoryText, { color: getCategoryColor(question.category) }]}
-                    >
-                      {question.category}
-                    </Text>
-                  </View>
-                  <Text style={styles.questionText}>{question.question}</Text>
-                </View>
-                {expandedQuestions.has(question.id) ? (
-                  <ChevronUp color={COLORS.dark.textSecondary} size={20} />
-                ) : (
-                  <ChevronDown color={COLORS.dark.textSecondary} size={20} />
-                )}
-              </TouchableOpacity>
-
-              {expandedQuestions.has(question.id) && (
-                <View style={styles.answerSection}>
-                  <View style={styles.answerHeader}>
-                    <Target color={COLORS.success} size={16} />
-                    <Text style={styles.answerLabel}>Suggested Answer</Text>
-                  </View>
-                  <Text style={styles.answerText}>{question.suggested_answer}</Text>
-                </View>
-              )}
-            </View>
-          ))}
         </View>
+
+        {/* Company Profile Section */}
+        <ExpandableSection
+          title="Company Profile"
+          icon={<Building2 color={COLORS.primary} size={20} />}
+          defaultExpanded={true}
+          accentColor={COLORS.primary}
+        >
+          {company_profile?.overview_paragraph && (
+            <Text style={styles.overviewText}>{company_profile.overview_paragraph}</Text>
+          )}
+          {company_profile?.size_estimate && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Company Size:</Text>
+              <Text style={styles.infoValue}>{company_profile.size_estimate}</Text>
+            </View>
+          )}
+        </ExpandableSection>
+
+        {/* Role Analysis Section */}
+        <ExpandableSection
+          title="Role Analysis"
+          icon={<Target color={COLORS.purple} size={20} />}
+          accentColor={COLORS.purple}
+        >
+          {role_analysis?.core_responsibilities && role_analysis.core_responsibilities.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Core Responsibilities</Text>
+              <BulletList items={role_analysis.core_responsibilities} />
+            </View>
+          )}
+          {role_analysis?.must_have_skills && role_analysis.must_have_skills.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Must-Have Skills</Text>
+              <View style={styles.chipContainer}>
+                {role_analysis.must_have_skills.map((skill, index) => (
+                  <Chip key={index} label={skill} color={COLORS.success} />
+                ))}
+              </View>
+            </View>
+          )}
+          {role_analysis?.nice_to_have_skills && role_analysis.nice_to_have_skills.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Nice-to-Have Skills</Text>
+              <View style={styles.chipContainer}>
+                {role_analysis.nice_to_have_skills.map((skill, index) => (
+                  <Chip key={index} label={skill} color={COLORS.dark.textSecondary} />
+                ))}
+              </View>
+            </View>
+          )}
+          {role_analysis?.success_signals_6_12_months && role_analysis.success_signals_6_12_months.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Success Signals (6-12 Months)</Text>
+              <BulletList
+                items={role_analysis.success_signals_6_12_months}
+                icon={<Star color={COLORS.warning} size={12} />}
+              />
+            </View>
+          )}
+        </ExpandableSection>
+
+        {/* Values & Culture Section */}
+        <ExpandableSection
+          title="Values & Culture"
+          icon={<Heart color={COLORS.error} size={20} />}
+          accentColor={COLORS.error}
+        >
+          {values_and_culture?.stated_values && values_and_culture.stated_values.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Company Values</Text>
+              {values_and_culture.stated_values.map((value, index) => (
+                <View key={index} style={styles.valueCard}>
+                  <Text style={styles.valueName}>{value.name}</Text>
+                  <Text style={styles.valueDescription}>
+                    {value.description || value.source_snippet || 'No description available'}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+          {values_and_culture?.practical_implications && values_and_culture.practical_implications.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>What This Means for You</Text>
+              <BulletList items={values_and_culture.practical_implications} />
+            </View>
+          )}
+        </ExpandableSection>
+
+        {/* Strategy & News Section */}
+        <ExpandableSection
+          title="Strategy & Recent News"
+          icon={<Newspaper color={COLORS.info} size={20} />}
+          accentColor={COLORS.info}
+        >
+          {strategy_and_news?.strategic_themes && strategy_and_news.strategic_themes.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Strategic Themes</Text>
+              {strategy_and_news.strategic_themes.map((theme, index) => (
+                <View key={index} style={styles.themeCard}>
+                  <Text style={styles.themeName}>{theme.theme}</Text>
+                  <Text style={styles.themeRationale}>{theme.rationale}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          {strategy_and_news?.technology_focus && strategy_and_news.technology_focus.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Technology Focus</Text>
+              {strategy_and_news.technology_focus.map((tech, index) => (
+                <View key={index} style={styles.techCard}>
+                  <Text style={styles.techName}>{tech.technology}</Text>
+                  <Text style={styles.techDescription}>{tech.description}</Text>
+                  {tech.relevance_to_role && (
+                    <Text style={styles.techRelevance}>Relevance: {tech.relevance_to_role}</Text>
+                  )}
+                </View>
+              ))}
+            </View>
+          )}
+          {strategy_and_news?.recent_events && strategy_and_news.recent_events.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Recent News</Text>
+              {strategy_and_news.recent_events.slice(0, 5).map((event, index) => (
+                <View key={index} style={styles.newsItem}>
+                  <Text style={styles.newsHeadline}>{event.title || event.headline}</Text>
+                  {event.date && <Text style={styles.newsDate}>{event.date}</Text>}
+                  {event.source && <Text style={styles.newsSource}>Source: {event.source}</Text>}
+                  <Text style={styles.newsSummary}>{event.summary}</Text>
+                  {event.impact_summary && (
+                    <Text style={styles.newsImpact}>Impact: {event.impact_summary}</Text>
+                  )}
+                </View>
+              ))}
+            </View>
+          )}
+        </ExpandableSection>
+
+        {/* Interview Preparation Section */}
+        <ExpandableSection
+          title="Preparation Checklist"
+          icon={<ClipboardList color={COLORS.success} size={20} />}
+          accentColor={COLORS.success}
+        >
+          {interview_preparation?.research_tasks && interview_preparation.research_tasks.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Research Tasks</Text>
+              <BulletList
+                items={interview_preparation.research_tasks}
+                icon={<CheckCircle color={COLORS.success} size={14} />}
+              />
+            </View>
+          )}
+          {interview_preparation?.day_of_checklist && interview_preparation.day_of_checklist.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Day-of Checklist</Text>
+              <BulletList
+                items={interview_preparation.day_of_checklist}
+                icon={<CheckCircle color={COLORS.warning} size={14} />}
+              />
+            </View>
+          )}
+          {interview_preparation?.practice_questions_for_candidate && interview_preparation.practice_questions_for_candidate.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Practice Questions</Text>
+              {interview_preparation.practice_questions_for_candidate.map((question, index) => (
+                <View key={index} style={styles.practiceQuestion}>
+                  <HelpCircle color={COLORS.primary} size={16} />
+                  <Text style={styles.practiceQuestionText}>{question}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </ExpandableSection>
+
+        {/* Questions to Ask Section */}
+        <ExpandableSection
+          title="Questions to Ask"
+          icon={<MessageCircle color={COLORS.warning} size={20} />}
+          accentColor={COLORS.warning}
+        >
+          {questions_to_ask_interviewer?.product && questions_to_ask_interviewer.product.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>About the Product</Text>
+              <BulletList items={questions_to_ask_interviewer.product} />
+            </View>
+          )}
+          {questions_to_ask_interviewer?.team && questions_to_ask_interviewer.team.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>About the Team</Text>
+              <BulletList items={questions_to_ask_interviewer.team} />
+            </View>
+          )}
+          {questions_to_ask_interviewer?.culture && questions_to_ask_interviewer.culture.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>About Culture</Text>
+              <BulletList items={questions_to_ask_interviewer.culture} />
+            </View>
+          )}
+          {questions_to_ask_interviewer?.performance && questions_to_ask_interviewer.performance.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>About Performance</Text>
+              <BulletList items={questions_to_ask_interviewer.performance} />
+            </View>
+          )}
+          {questions_to_ask_interviewer?.strategy && questions_to_ask_interviewer.strategy.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>About Strategy</Text>
+              <BulletList items={questions_to_ask_interviewer.strategy} />
+            </View>
+          )}
+        </ExpandableSection>
+
+        {/* Candidate Positioning Section */}
+        <ExpandableSection
+          title="Your Positioning"
+          icon={<Award color={COLORS.purple} size={20} />}
+          accentColor={COLORS.purple}
+        >
+          {candidate_positioning?.resume_focus_areas && candidate_positioning.resume_focus_areas.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Resume Focus Areas</Text>
+              <BulletList items={candidate_positioning.resume_focus_areas} />
+            </View>
+          )}
+          {candidate_positioning?.story_prompts && candidate_positioning.story_prompts.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>STAR Story Prompts</Text>
+              {candidate_positioning.story_prompts.map((prompt, index) => (
+                <View key={index} style={styles.storyPromptCard}>
+                  <View style={styles.storyPromptHeader}>
+                    <Lightbulb color={COLORS.warning} size={16} />
+                    <Text style={styles.storyPromptTitle}>{prompt.title}</Text>
+                  </View>
+                  <Text style={styles.storyPromptDescription}>{prompt.description}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          {candidate_positioning?.keyword_map && candidate_positioning.keyword_map.length > 0 && (
+            <View style={styles.subsection}>
+              <Text style={styles.subsectionTitle}>Keywords to Use</Text>
+              {candidate_positioning.keyword_map.map((item, index) => (
+                <View key={index} style={styles.keywordItem}>
+                  <Text style={styles.keywordLabel}>
+                    {item.company_term} → {item.candidate_equivalent}
+                  </Text>
+                  <Text style={styles.keywordContext}>{item.context}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </ExpandableSection>
+
+        {/* Bottom padding */}
+        <View style={{ height: SPACING.xl }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -273,6 +680,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     color: COLORS.dark.textSecondary,
     fontSize: 16,
+    fontFamily: FONTS.regular,
   },
   header: {
     flexDirection: 'row',
@@ -291,7 +699,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
   },
   headerPlaceholder: {
@@ -302,6 +710,28 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: SPACING.lg,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.md,
+    minHeight: 48,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    color: COLORS.dark.background,
   },
   jobCard: {
     backgroundColor: COLORS.dark.glass,
@@ -330,67 +760,31 @@ const styles = StyleSheet.create({
   },
   jobCompany: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     marginBottom: 2,
   },
   jobTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
   },
-  statsRow: {
+  jobMeta: {
     flexDirection: 'row',
-    gap: SPACING.lg,
+    flexWrap: 'wrap',
+    gap: SPACING.md,
   },
-  stat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  statText: {
-    fontSize: 14,
-    color: COLORS.dark.textSecondary,
-  },
-  tipsSection: {
-    backgroundColor: COLORS.dark.glass,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
-  },
-  tipsSectionHeader: {
+  metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.md,
+    gap: 4,
   },
-  tipsSectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.dark.text,
-  },
-  tipItem: {
-    paddingLeft: SPACING.md,
-    borderLeftWidth: 2,
-    borderLeftColor: COLORS.warning,
-    marginBottom: SPACING.sm,
-  },
-  tipText: {
-    fontSize: 14,
+  metaText: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
-    lineHeight: 20,
   },
-  questionsSection: {
-    marginBottom: SPACING.lg,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.dark.text,
-    marginBottom: SPACING.md,
-  },
-  questionCard: {
+  sectionCard: {
     backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
@@ -398,54 +792,274 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
-  questionHeader: {
+  sectionHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     padding: SPACING.lg,
     minHeight: 60,
   },
-  questionInfo: {
-    flex: 1,
-  },
-  categoryBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
+  sectionIconContainer: {
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.sm,
-    marginBottom: SPACING.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
   },
-  categoryText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  questionText: {
+  sectionTitle: {
+    flex: 1,
     fontSize: 16,
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
-    lineHeight: 22,
   },
-  answerSection: {
-    padding: SPACING.lg,
-    paddingTop: 0,
+  sectionContent: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg,
     borderTopWidth: 1,
     borderTopColor: COLORS.dark.border,
-    marginTop: SPACING.sm,
-    paddingTop: SPACING.md,
   },
-  answerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
+  subsection: {
+    marginTop: SPACING.md,
+  },
+  subsectionTitle: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
-  answerLabel: {
+  overviewText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.success,
-  },
-  answerText: {
-    fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     lineHeight: 22,
+    marginTop: SPACING.md,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+  },
+  infoLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    color: COLORS.dark.text,
+    marginRight: SPACING.xs,
+  },
+  infoValue: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+  },
+  bulletList: {
+    marginTop: SPACING.xs,
+  },
+  bulletItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.sm,
+    paddingRight: SPACING.md,
+  },
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.primary,
+    marginTop: 6,
+    marginRight: SPACING.sm,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+    lineHeight: 20,
+  },
+  chipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    marginTop: SPACING.xs,
+  },
+  chip: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+  },
+  chipText: {
+    fontSize: 12,
+    fontFamily: FONTS.medium,
+  },
+  valueCard: {
+    backgroundColor: COLORS.dark.backgroundTertiary,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  valueName: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    color: COLORS.dark.text,
+    marginBottom: 4,
+  },
+  valueDescription: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+    lineHeight: 18,
+  },
+  themeCard: {
+    backgroundColor: COLORS.dark.backgroundTertiary,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  themeName: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    color: COLORS.dark.text,
+    marginBottom: 4,
+  },
+  themeRationale: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+    lineHeight: 18,
+  },
+  techCard: {
+    backgroundColor: COLORS.dark.backgroundTertiary,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  techName: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    color: COLORS.info,
+    marginBottom: 4,
+  },
+  techDescription: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+    lineHeight: 18,
+    marginBottom: 4,
+  },
+  techRelevance: {
+    fontSize: 12,
+    fontFamily: FONTS.italic,
+    color: COLORS.dark.textTertiary,
+    lineHeight: 16,
+  },
+  newsItem: {
+    backgroundColor: COLORS.dark.backgroundTertiary,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  newsHeadline: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    color: COLORS.dark.text,
+    marginBottom: 4,
+  },
+  newsDate: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textTertiary,
+    marginBottom: 4,
+  },
+  newsSource: {
+    fontSize: 11,
+    fontFamily: FONTS.medium,
+    color: COLORS.dark.textTertiary,
+    marginBottom: 6,
+  },
+  newsSummary: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+    lineHeight: 18,
+  },
+  newsImpact: {
+    fontSize: 12,
+    fontFamily: FONTS.medium,
+    color: COLORS.warning,
+    lineHeight: 16,
+    marginTop: 6,
+  },
+  practiceQuestion: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: COLORS.dark.backgroundTertiary,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  practiceQuestionText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+    lineHeight: 20,
+    marginLeft: SPACING.sm,
+  },
+  storyPromptCard: {
+    backgroundColor: COLORS.dark.backgroundTertiary,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  storyPromptHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  storyPromptTitle: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    color: COLORS.dark.text,
+    marginLeft: SPACING.sm,
+  },
+  storyPromptDescription: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+    lineHeight: 18,
+  },
+  storyPrompt: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: COLORS.dark.backgroundTertiary,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  storyPromptText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+    lineHeight: 20,
+    marginLeft: SPACING.sm,
+  },
+  keywordItem: {
+    backgroundColor: COLORS.dark.backgroundTertiary,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  keywordLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    color: COLORS.primary,
+    marginBottom: 4,
+  },
+  keywordContext: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    color: COLORS.dark.textSecondary,
+    lineHeight: 18,
   },
   emptyState: {
     flex: 1,
@@ -459,12 +1073,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
@@ -484,7 +1099,7 @@ const styles = StyleSheet.create({
   },
   generateButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
   },
 });

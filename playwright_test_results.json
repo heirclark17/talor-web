@@ -1,0 +1,296 @@
+{
+  "test_date": "2026-01-25T17:39:56.309023",
+  "url_tested": "https://talorme.com",
+  "features_found": [
+    {
+      "name": "Landing Page",
+      "status": "FOUND",
+      "details": "Main landing page loaded successfully",
+      "timestamp": "2026-01-25T17:40:03.333375"
+    },
+    {
+      "name": "Page: /",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:03.561960"
+    },
+    {
+      "name": "Page: /app",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:03.752318"
+    },
+    {
+      "name": "Page: /dashboard",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:03.915319"
+    },
+    {
+      "name": "Page: /upload",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:04.090103"
+    },
+    {
+      "name": "Page: /tailor",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:04.303077"
+    },
+    {
+      "name": "Page: /interview-preps",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:04.530408"
+    },
+    {
+      "name": "Page: /interview",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:04.697569"
+    },
+    {
+      "name": "Page: /star-stories",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:05.052408"
+    },
+    {
+      "name": "Page: /saved-comparisons",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:05.185405"
+    },
+    {
+      "name": "Page: /career-path",
+      "status": "ACCESSIBLE",
+      "details": "Title: Talor - AI Resume Tailoring",
+      "timestamp": "2026-01-25T17:40:05.466123"
+    },
+    {
+      "name": "Navigation to https://talorme.com/app",
+      "status": "FOUND",
+      "details": "Loaded: https://talorme.com/app",
+      "timestamp": "2026-01-25T17:40:06.079702"
+    },
+    {
+      "name": "Navigation to https://talorme.com/dashboard",
+      "status": "FOUND",
+      "details": "Loaded: https://talorme.com/dashboard",
+      "timestamp": "2026-01-25T17:40:06.897431"
+    },
+    {
+      "name": "Navigation to https://talorme.com/interview-preps",
+      "status": "FOUND",
+      "details": "Loaded: https://talorme.com/interview-preps",
+      "timestamp": "2026-01-25T17:40:07.691233"
+    },
+    {
+      "name": "Interview Prep",
+      "status": "FOUND",
+      "details": "UI element present",
+      "timestamp": "2026-01-25T17:40:08.716916"
+    },
+    {
+      "name": "Interview Preparation",
+      "status": "FOUND",
+      "details": "UI element present",
+      "timestamp": "2026-01-25T17:40:08.721007"
+    },
+    {
+      "name": "STAR Stories",
+      "status": "FOUND",
+      "details": "UI element present",
+      "timestamp": "2026-01-25T17:40:08.740168"
+    },
+    {
+      "name": "Forms",
+      "status": "FOUND",
+      "details": "0 form(s) detected",
+      "timestamp": "2026-01-25T17:40:16.592649"
+    },
+    {
+      "name": "Modals",
+      "status": "NONE",
+      "details": "0 modal(s) detected",
+      "timestamp": "2026-01-25T17:40:16.610641"
+    }
+  ],
+  "ui_elements": [
+    {
+      "type": "cta_button",
+      "text": "Create My Resume \u2192",
+      "selector": ""
+    },
+    {
+      "type": "cta_button",
+      "text": "Get Started \u2192",
+      "selector": ""
+    },
+    {
+      "type": "heading_H1",
+      "text": "Build a Job-Winning Resume in Minutes with Talor",
+      "selector": ""
+    },
+    {
+      "type": "heading_H2",
+      "text": "Why Talor Works Better",
+      "selector": ""
+    },
+    {
+      "type": "heading_H3",
+      "text": "Instant Tailoring",
+      "selector": ""
+    },
+    {
+      "type": "heading_H3",
+      "text": "ATS-Friendly Format",
+      "selector": ""
+    },
+    {
+      "type": "heading_H3",
+      "text": "Save Hours Per Application",
+      "selector": ""
+    },
+    {
+      "type": "heading_H2",
+      "text": "How It Works",
+      "selector": ""
+    },
+    {
+      "type": "heading_H3",
+      "text": "Upload Your Base Resume",
+      "selector": ""
+    },
+    {
+      "type": "heading_H3",
+      "text": "Paste Any Job URL",
+      "selector": ""
+    },
+    {
+      "type": "heading_H3",
+      "text": "Download & Apply",
+      "selector": ""
+    },
+    {
+      "type": "heading_H2",
+      "text": "Ready to Land Your Next Interview?",
+      "selector": ""
+    }
+  ],
+  "api_calls_detected": [
+    {
+      "endpoint": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "status": "detected",
+      "timestamp": "2026-01-25T17:40:15.500796"
+    },
+    {
+      "endpoint": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "status": "detected",
+      "timestamp": "2026-01-25T17:40:15.500831"
+    },
+    {
+      "endpoint": "https://talorme.com/interview-preps",
+      "method": "GET",
+      "status": "detected",
+      "timestamp": "2026-01-25T17:40:15.500841"
+    },
+    {
+      "endpoint": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "status": "detected",
+      "timestamp": "2026-01-25T17:40:15.500847"
+    },
+    {
+      "endpoint": "https://resume-ai-backend-production-3134.up.railway.app/api/interview-prep/list",
+      "method": "GET",
+      "status": "detected",
+      "timestamp": "2026-01-25T17:40:15.500852"
+    },
+    {
+      "endpoint": "https://talorme.com/interview",
+      "method": "GET",
+      "status": "detected",
+      "timestamp": "2026-01-25T17:40:15.500857"
+    },
+    {
+      "endpoint": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "status": "detected",
+      "timestamp": "2026-01-25T17:40:15.500862"
+    }
+  ],
+  "navigation_paths": [
+    {
+      "requested": "https://talorme.com/",
+      "actual": "https://talorme.com/",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    },
+    {
+      "requested": "https://talorme.com/app",
+      "actual": "https://talorme.com/app",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    },
+    {
+      "requested": "https://talorme.com/dashboard",
+      "actual": "https://talorme.com/dashboard",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    },
+    {
+      "requested": "https://talorme.com/upload",
+      "actual": "https://talorme.com/upload",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    },
+    {
+      "requested": "https://talorme.com/tailor",
+      "actual": "https://talorme.com/tailor",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    },
+    {
+      "requested": "https://talorme.com/interview-preps",
+      "actual": "https://talorme.com/interview-preps",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    },
+    {
+      "requested": "https://talorme.com/interview",
+      "actual": "https://talorme.com/interview",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    },
+    {
+      "requested": "https://talorme.com/star-stories",
+      "actual": "https://talorme.com/star-stories",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    },
+    {
+      "requested": "https://talorme.com/saved-comparisons",
+      "actual": "https://talorme.com/saved-comparisons",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    },
+    {
+      "requested": "https://talorme.com/career-path",
+      "actual": "https://talorme.com/career-path",
+      "title": "Talor - AI Resume Tailoring",
+      "requires_auth": false
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    "landing_page.png",
+    "app.png",
+    "dashboard.png",
+    "interview-preps.png",
+    "interview_preps_page.png"
+  ]
+}
