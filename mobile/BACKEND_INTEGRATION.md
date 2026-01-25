@@ -51,10 +51,12 @@ api.deleteResume(resumeId: number)
 ```typescript
 api.extractJobDetails(jobUrl: string)
 ```
-**Backend:** `POST /api/job/extract`
+**Backend:** `POST /api/jobs/extract`
 **Request:** `{job_url}`
 **Response:** `{success, company, job_title, description, location, salary}`
 **Uses:** Firecrawl for scraping job postings
+
+**Note:** LinkedIn and some other sites are blocked by Firecrawl due to Terms of Service restrictions. If extraction fails, users should manually enter company name and job title.
 
 ---
 
