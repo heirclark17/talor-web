@@ -185,16 +185,16 @@ export default function UploadResume() {
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-6xl font-bold text-white mb-6">Upload Resume</h1>
-          <p className="text-xl text-gray-400 mb-8">Upload a new resume to start tailoring for your next job</p>
+        <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">Upload Resume</h1>
+          <p className="text-base sm:text-lg lg:text-xl text-gray-400 mb-6 sm:mb-8 px-2">Upload a new resume to start tailoring for your next job</p>
 
           {/* Button to use existing resume */}
           <button
             onClick={() => navigate('/tailor')}
-            className="btn-secondary inline-flex items-center gap-2"
+            className="btn-secondary inline-flex items-center gap-2 w-full sm:w-auto"
           >
             <FileText className="w-5 h-5" />
             Use Existing Resume Instead
@@ -202,10 +202,10 @@ export default function UploadResume() {
         </div>
 
       {/* Upload Area */}
-      <div className="glass rounded-3xl p-16 mb-24">
+      <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-16 mb-12 sm:mb-16 lg:mb-24">
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${
+          className={`border-2 border-dashed rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 text-center transition-all cursor-pointer ${
             uploading
               ? 'border-white/40 bg-white/5 cursor-wait'
               : uploadSuccess
@@ -217,26 +217,26 @@ export default function UploadResume() {
         >
           {uploading ? (
             <>
-              <Loader2 className="w-16 h-16 mx-auto text-white mb-4 animate-spin" />
-              <p className="text-lg text-white mb-2 font-semibold">Uploading and parsing resume...</p>
+              <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-white mb-3 sm:mb-4 animate-spin" />
+              <p className="text-base sm:text-lg text-white mb-2 font-semibold">Uploading and parsing resume...</p>
             </>
           ) : uploadSuccess ? (
             <>
-              <CheckCircle className="w-16 h-16 mx-auto text-green-500 mb-4" />
-              <p className="text-lg text-white mb-2 font-semibold">Resume uploaded successfully!</p>
-              <p className="text-sm text-gray-400 mb-4">Parsed {parsedResume?.filename}</p>
+              <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-green-500 mb-3 sm:mb-4" />
+              <p className="text-base sm:text-lg text-white mb-2 font-semibold">Resume uploaded successfully!</p>
+              <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">Parsed {parsedResume?.filename}</p>
             </>
           ) : error ? (
             <>
-              <AlertCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
-              <p className="text-lg text-red-400 mb-2 font-semibold">Upload failed</p>
-              <p className="text-sm text-red-400 mb-4">{error}</p>
+              <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-red-500 mb-3 sm:mb-4" />
+              <p className="text-base sm:text-lg text-red-400 mb-2 font-semibold">Upload failed</p>
+              <p className="text-xs sm:text-sm text-red-400 mb-3 sm:mb-4">{error}</p>
             </>
           ) : (
             <>
-              <Upload className="w-16 h-16 mx-auto text-white mb-4" />
-              <p className="text-lg text-white mb-2 font-semibold">Click to select your resume</p>
-              <p className="text-sm text-gray-400 mb-4">Supports .docx and .pdf files (max 10MB)</p>
+              <Upload className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-white mb-3 sm:mb-4" />
+              <p className="text-base sm:text-lg text-white mb-2 font-semibold">Click to select your resume</p>
+              <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">Supports .docx and .pdf files (max 10MB)</p>
             </>
           )}
 

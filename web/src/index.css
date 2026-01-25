@@ -159,12 +159,6 @@ body {
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .btn-primary,
-  .btn-secondary {
-    width: 100%;
-    justify-content: center;
-  }
-
   /* Hide particles on mobile - not visible and cause performance issues */
   .particles-background {
     display: none;
@@ -179,161 +173,45 @@ body {
     animation: none;
   }
 
-  /* Smaller typography on mobile */
-  h1 {
-    font-size: 2.5rem !important; /* 40px instead of 60px */
-    line-height: 1.2 !important;
-  }
-
-  h2 {
-    font-size: 1.875rem !important; /* 30px instead of 36px */
-  }
-
-  h3 {
-    font-size: 1.25rem !important; /* 20px instead of 24px */
-  }
-
-  /* Better spacing on mobile */
-  .pt-32 {
-    padding-top: 4rem !important; /* 64px instead of 128px */
-  }
-
-  .pb-24 {
-    padding-bottom: 3rem !important; /* 48px instead of 96px */
-  }
-
-  .py-20 {
-    padding-top: 3rem !important;
-    padding-bottom: 3rem !important;
-  }
-
-  .py-24 {
-    padding-top: 3rem !important;
-    padding-bottom: 3rem !important;
-  }
-
-  .mb-12 {
-    margin-bottom: 2rem !important; /* 32px instead of 48px */
-  }
-
-  .mb-20 {
-    margin-bottom: 2rem !important;
-  }
-
-  .gap-12 {
-    gap: 2rem !important;
-  }
-
-  /* Stack grids vertically on mobile */
-  .grid-cols-3 {
-    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
-  }
-
-  /* Better mobile navigation */
-  nav .flex.items-center.gap-8 {
-    gap: 1rem !important;
-  }
-
-  nav span {
-    font-size: 1.125rem !important; /* 18px */
-  }
-
-  nav .text-base {
-    font-size: 0.875rem !important; /* 14px */
-  }
-
-  /* Mobile: Center-align "How It Works" steps */
-  .flex.items-start.gap-8 {
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center;
-    gap: 1.5rem !important;
-  }
-
-  /* Mobile: Reduce size of step badges */
-  .flex.items-start.gap-8 > div:first-child {
-    width: 3rem !important; /* 48px instead of 64px */
-    height: 3rem !important;
-  }
-
-  .flex.items-start.gap-8 > div:first-child span {
-    font-size: 1.5rem !important; /* 24px instead of 32px */
-  }
-
-  /* Mobile: Better spacing for feature icons */
-  .w-20.h-20 {
-    width: 4rem !important; /* 64px instead of 80px */
-    height: 4rem !important;
-  }
-
-  .w-20.h-20 svg {
-    width: 2rem !important; /* 32px instead of 40px */
-    height: 2rem !important;
-  }
-
-  /* Mobile: Reduce social proof numbers */
-  .text-5xl {
-    font-size: 2.5rem !important; /* 40px instead of 48px */
-  }
-
-  /* Mobile: Better container padding */
-  .container {
-    padding-left: 1.5rem !important;
-    padding-right: 1.5rem !important;
-  }
-
-  /* Mobile: Smaller max-width for content */
-  .max-w-4xl,
-  .max-w-5xl {
-    max-width: 100% !important;
-  }
-
-  /* Mobile: Better text sizing */
-  .text-lg {
-    font-size: 1rem !important; /* 16px instead of 18px */
-  }
-
-  .text-xl {
-    font-size: 1.125rem !important; /* 18px instead of 20px */
-  }
-
-  .text-2xl {
-    font-size: 1.5rem !important; /* 24px instead of 30px */
-  }
-
   /* Mobile: Hide or minimize gradient animation for performance */
   .animate-gradient {
     animation: none;
     background: rgba(255, 255, 255, 0.02);
   }
 
-  /* Mobile: Better form inputs */
+  /* Mobile: Better form inputs - prevent iOS zoom */
   input[type="text"],
   input[type="url"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
   input[type="file"],
+  select,
   textarea {
     font-size: 16px !important; /* Prevent zoom on iOS */
   }
 
-  /* Mobile: Better button sizing */
+  /* Mobile: Better button sizing for touch */
   button {
-    min-height: 44px !important; /* iOS touch target recommendation */
-    font-size: 1rem !important;
+    min-height: 44px; /* iOS touch target recommendation */
   }
 
-  /* Mobile: Tailor page specific */
-  .max-w-3xl {
+  /* Mobile: Better touch targets for interactive elements */
+  a, button, [role="button"], input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Mobile: Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Mobile: Better max-widths */
+  .max-w-3xl,
+  .max-w-4xl,
+  .max-w-5xl,
+  .max-w-6xl {
     max-width: 100% !important;
-  }
-
-  /* Mobile: Upload page specific */
-  .p-8 {
-    padding: 1.5rem !important;
-  }
-
-  /* Mobile: Better spacing for sections */
-  .space-y-16 > * + * {
-    margin-top: 2rem !important; /* 32px instead of 64px */
   }
 }
 

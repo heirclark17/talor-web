@@ -125,14 +125,14 @@ export default function InterviewPrepList() {
         <div className="particle"></div>
       </div>
 
-      <div className="container mx-auto px-6 py-12 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
         {/* Header */}
-        <div className="max-w-6xl mx-auto mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <BookOpen className="w-10 h-10 text-white" />
-            <h1 className="text-4xl font-bold text-white">My Interview Prep</h1>
+        <div className="max-w-6xl mx-auto mb-8 sm:mb-12">
+          <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">My Interview Prep</h1>
           </div>
-          <p className="text-lg text-gray-400">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-400">
             Access all your saved interview preparation materials. Click any item to view the full prep details.
           </p>
         </div>
@@ -190,20 +190,20 @@ export default function InterviewPrepList() {
               {preps.length} {preps.length === 1 ? 'interview prep' : 'interview preps'} found
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {preps.map((prep) => (
                 <div
                   key={prep.id}
-                  className="glass rounded-xl p-6 border border-white/10 hover:border-white/30 transition-all group"
+                  className="glass rounded-xl p-4 sm:p-6 border border-white/10 hover:border-white/30 transition-all group"
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     {/* Content */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <h3 className="text-xl font-semibold text-white group-hover:text-blue-400 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                        <h3 className="text-lg sm:text-xl font-semibold text-white group-hover:text-blue-400 transition-colors truncate">
                           {prep.company_name}
                         </h3>
-                        <span className="text-xs text-gray-500 bg-white/5 px-3 py-1 rounded-full">
+                        <span className="text-xs text-gray-500 bg-white/5 px-2 sm:px-3 py-1 rounded-full flex-shrink-0">
                           ID: {prep.id}
                         </span>
                       </div>

@@ -2298,15 +2298,15 @@ export default function TailorResume() {
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <ThemeToggle />
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-24">
-          <h1 className="text-6xl font-bold text-white mb-6">
+        <div className="text-center mb-12 sm:mb-16 lg:mb-24">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">
             Talor
           </h1>
-          <p className="text-xl text-gray-400">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-400 px-2">
             AI-powered resume customization for every job application
           </p>
         </div>
@@ -2326,9 +2326,9 @@ export default function TailorResume() {
         )}
 
         {/* Resume Selection */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl text-white">Select Base Resume</h2>
+        <div className="mb-12 sm:mb-16 lg:mb-20">
+          <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+            <h2 className="text-xl sm:text-2xl text-white">Select Base Resume</h2>
           </div>
 
           {/* Bulk Actions */}
@@ -2476,18 +2476,18 @@ export default function TailorResume() {
         </div>
 
         {/* Job Details */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl text-white">Job Details</h2>
+        <div className="mb-12 sm:mb-16 lg:mb-20">
+          <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+            <h2 className="text-xl sm:text-2xl text-white">Job Details</h2>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-10">
+          <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10">
             {/* Job URL Field - Always Visible */}
             <div>
-              <label className="block text-base font-bold text-white mb-4">
+              <label className="block text-sm sm:text-base font-bold text-white mb-3 sm:mb-4">
                 Job URL <span className="text-red-400">*</span>
               </label>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <input
                   type="url"
                   value={jobUrl}
@@ -2504,21 +2504,21 @@ export default function TailorResume() {
                     }
                   }}
                   onBlur={handleExtractJobDetails}
-                  placeholder="https://www.linkedin.com/jobs/view/... or https://jobs.microsoft.com/..."
-                  className="flex-1 px-5 py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500"
+                  placeholder="Paste job URL here..."
+                  className="flex-1 px-4 sm:px-5 py-3 sm:py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-base sm:text-lg text-white placeholder-gray-500"
                   disabled={extracting}
                 />
                 <button
                   onClick={handleExtractJobDetails}
                   disabled={extracting || !jobUrl.trim()}
-                  className={`px-6 py-4 rounded-xl font-semibold whitespace-nowrap transition-all ${
+                  className={`px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-semibold whitespace-nowrap transition-all w-full sm:w-auto ${
                     extracting || !jobUrl.trim()
                       ? 'bg-white/10 text-gray-500 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700 text-white'
                   }`}
                 >
                   {extracting ? (
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center justify-center gap-2">
                       <Loader2 className="w-5 h-5 animate-spin" />
                       Extracting...
                     </span>
@@ -2527,15 +2527,15 @@ export default function TailorResume() {
                   )}
                 </button>
               </div>
-              <p className="text-sm text-gray-400 mt-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                Paste the job URL and click "Extract Details" to automatically extract company name and job title.
+              <p className="text-xs sm:text-sm text-gray-400 mt-3 sm:mt-4 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 flex-shrink-0" />
+                <span>Paste the job URL and click "Extract Details" to automatically extract company name and job title.</span>
               </p>
             </div>
 
             {/* Conditionally Show Company & Title Fields if Extraction Failed */}
             {extractionAttempted && (!companyExtracted || !titleExtracted) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 md:gap-8">
                 {/* Company Name - Show only if not extracted */}
                 {!companyExtracted && (
                   <div>
