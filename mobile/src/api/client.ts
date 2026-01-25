@@ -87,7 +87,7 @@ export const api = {
   // Job extraction
   async extractJobDetails(jobUrl: string): Promise<ApiResponse> {
     try {
-      const response = await fetchWithAuth('/api/job/extract', {
+      const response = await fetchWithAuth('/api/jobs/extract', {
         method: 'POST',
         body: JSON.stringify({ job_url: jobUrl }),
       });
