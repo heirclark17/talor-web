@@ -71,7 +71,7 @@ api.tailorResume({
   jobTitle?: string
 })
 ```
-**Backend:** `POST /api/tailor`
+**Backend:** `POST /api/tailor/tailor`
 **Process:**
 1. Fetches base resume
 2. Extracts job details with Firecrawl (if URL provided)
@@ -86,7 +86,7 @@ api.tailorResume({
 ```typescript
 api.getTailoredResume(tailoredResumeId: number)
 ```
-**Backend:** `GET /api/tailored/{tailored_id}`
+**Backend:** `GET /api/tailor/tailored/{tailored_id}`
 **Response:** Full tailored resume details
 
 ### Update Tailored Resume
@@ -98,7 +98,7 @@ api.updateTailoredResume(tailoredResumeId, {
   alignment_statement?: string
 })
 ```
-**Backend:** `PUT /api/tailored/{tailored_id}`
+**Backend:** `PUT /api/tailor/tailored/{tailored_id}`
 **Purpose:** Edit tailored resume content
 
 ### List Tailored Resumes
