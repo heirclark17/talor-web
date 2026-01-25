@@ -22,13 +22,21 @@ import {
   LogOut,
   ChevronRight,
   Info,
+  BookOpen,
+  TrendingUp,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { clearUserSession, getUserId } from '../utils/userSession';
 import { COLORS, SPACING, RADIUS, STORAGE_KEYS } from '../utils/constants';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
+  const navigation = useNavigation<NavigationProp>();
   const [userId, setUserId] = useState<string>('');
   const [darkMode, setDarkMode] = useState(true);
   const [notifications, setNotifications] = useState(true);
@@ -127,6 +135,21 @@ export default function SettingsScreen() {
             <Text style={styles.itemValue} numberOfLines={1}>
               {userId.slice(0, 16)}...
             </Text>
+          )}
+        </View>
+
+        {/* Features Section */}
+        {renderSection('FEATURES')}
+        <View style={styles.card}>
+          {renderItem(
+            <BookOpen color={COLORS.dark.textSecondary} size={20} />,
+            'STAR Stories',
+            () => navigation.navigate('StarStories')
+          )}
+          {renderItem(
+            <TrendingUp color={COLORS.dark.textSecondary} size={20} />,
+            'Career Path Designer',
+            () => navigation.navigate('CareerPathDesigner')
           )}
         </View>
 

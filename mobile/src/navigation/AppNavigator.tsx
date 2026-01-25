@@ -13,6 +13,8 @@ import InterviewPrepListScreen from '../screens/InterviewPrepListScreen';
 import InterviewPrepScreen from '../screens/InterviewPrepScreen';
 import SavedComparisonsScreen from '../screens/SavedComparisonsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import StarStoriesScreen from '../screens/StarStoriesScreen';
+import CareerPathDesignerScreen from '../screens/CareerPathDesignerScreen';
 
 // Navigation types
 export type RootStackParamList = {
@@ -20,6 +22,8 @@ export type RootStackParamList = {
   UploadResume: undefined;
   TailorResume: { resumeId?: number };
   InterviewPrep: { tailoredResumeId: number };
+  StarStories: undefined;
+  CareerPathDesigner: undefined;
 };
 
 export type MainTabParamList = {
@@ -146,6 +150,21 @@ export default function AppNavigator() {
           component={InterviewPrepScreen}
           options={{
             animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="StarStories"
+          component={StarStoriesScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="CareerPathDesigner"
+          component={CareerPathDesignerScreen}
+          options={{
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
           }}
         />
       </Stack.Navigator>
