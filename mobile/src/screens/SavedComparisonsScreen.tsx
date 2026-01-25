@@ -161,6 +161,9 @@ export default function SavedComparisonsScreen() {
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => handleViewInterviewPrep(item.tailored_resume_id)}
+          accessibilityRole="button"
+          accessibilityLabel={`View interview prep for ${item.company} ${item.job_title}`}
+          accessibilityHint="Opens interview preparation materials for this tailored resume"
         >
           <Target color={COLORS.primary} size={18} />
           <Text style={styles.actionText}>Prep</Text>
@@ -170,6 +173,10 @@ export default function SavedComparisonsScreen() {
           style={[styles.actionButton, styles.deleteButton]}
           onPress={() => handleDelete(item.id)}
           disabled={deletingId === item.id}
+          accessibilityRole="button"
+          accessibilityLabel={`Delete ${item.title} comparison`}
+          accessibilityHint="Permanently removes this saved comparison"
+          accessibilityState={{ disabled: deletingId === item.id, busy: deletingId === item.id }}
         >
           {deletingId === item.id ? (
             <ActivityIndicator size="small" color={COLORS.danger} />

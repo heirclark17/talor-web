@@ -76,6 +76,9 @@ export default function InterviewPrepListScreen() {
     <TouchableOpacity
       style={styles.card}
       onPress={() => navigation.navigate('InterviewPrep', { tailoredResumeId: item.tailored_resume_id })}
+      accessibilityRole="button"
+      accessibilityLabel={`Interview prep for ${item.company} ${item.job_title}`}
+      accessibilityHint={`${item.questions_count || 'No'} questions prepared. Created on ${formatDate(item.created_at)}`}
     >
       <View style={styles.cardContent}>
         <View style={styles.iconContainer}>
@@ -113,6 +116,9 @@ export default function InterviewPrepListScreen() {
       <TouchableOpacity
         style={styles.tailorButton}
         onPress={() => navigation.navigate('Main' as any)}
+        accessibilityRole="button"
+        accessibilityLabel="Tailor a resume"
+        accessibilityHint="Navigate to resume tailoring to create interview prep materials"
       >
         <Target color={COLORS.dark.background} size={20} />
         <Text style={styles.tailorButtonText}>Tailor a Resume</Text>

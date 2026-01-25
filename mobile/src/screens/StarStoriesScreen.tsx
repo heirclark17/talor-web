@@ -119,6 +119,9 @@ export default function StarStoriesScreen() {
     <TouchableOpacity
       style={styles.card}
       onPress={() => setSelectedStory(item)}
+      accessibilityRole="button"
+      accessibilityLabel={`STAR story: ${item.title || 'Untitled'}`}
+      accessibilityHint={`Theme: ${item.story_theme || 'No theme'}. Created ${formatDate(item.created_at)}`}
     >
       <View style={styles.cardContent}>
         <View style={styles.iconContainer}>
@@ -143,6 +146,10 @@ export default function StarStoriesScreen() {
           handleDelete(item.id);
         }}
         disabled={deletingId === item.id}
+        accessibilityRole="button"
+        accessibilityLabel={`Delete ${item.title || 'story'}`}
+        accessibilityHint="Permanently removes this STAR story"
+        accessibilityState={{ disabled: deletingId === item.id, busy: deletingId === item.id }}
       >
         {deletingId === item.id ? (
           <ActivityIndicator size="small" color={COLORS.danger} />
