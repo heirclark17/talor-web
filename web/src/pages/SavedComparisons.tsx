@@ -151,30 +151,30 @@ export default function SavedComparisons() {
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Bookmark className="w-8 h-8 text-white" />
-            <h1 className="text-4xl font-bold text-white">Saved Comparisons</h1>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <Bookmark className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Saved Comparisons</h1>
           </div>
-          <p className="text-gray-400">
+          <p className="text-sm sm:text-base text-gray-400">
             View and manage your saved resume comparisons
           </p>
         </div>
 
         {/* Comparisons List */}
         {comparisons.length === 0 ? (
-          <div className="glass rounded-xl p-12 text-center">
-            <Bookmark className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">No Saved Comparisons</h2>
-            <p className="text-gray-400 mb-6">
+          <div className="glass rounded-xl p-8 sm:p-12 text-center">
+            <Bookmark className="w-12 h-12 sm:w-16 sm:h-16 text-gray-600 mx-auto mb-4" />
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">No Saved Comparisons</h2>
+            <p className="text-sm sm:text-base text-gray-400 mb-6">
               Save your resume comparisons to easily return to them later
             </p>
             <button
               onClick={() => navigate('/tailor')}
-              className="btn-primary"
+              className="btn-primary w-full sm:w-auto"
             >
               Create a Tailored Resume →
             </button>
@@ -192,12 +192,12 @@ export default function SavedComparisons() {
                       {comparison.is_pinned && (
                         <Pin className="w-5 h-5 text-yellow-400" />
                       )}
-                      <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
                         {comparison.title || `${comparison.company} - ${comparison.position}`}
                       </h3>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400">
                       <div className="flex items-center gap-2">
                         <Building2 className="w-4 h-4" />
                         {comparison.company}
@@ -231,13 +231,13 @@ export default function SavedComparisons() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-2 ml-2 sm:ml-4">
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         handleTogglePin(comparison.id, comparison.is_pinned)
                       }}
-                      className={`p-2 rounded-lg transition-colors ${
+                      className={`p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
                         comparison.is_pinned
                           ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
                           : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
@@ -251,7 +251,7 @@ export default function SavedComparisons() {
                         e.stopPropagation()
                         handleDelete(comparison.id)
                       }}
-                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                      className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />

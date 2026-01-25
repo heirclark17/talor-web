@@ -136,14 +136,14 @@ export default function StarStoriesList() {
         <div className="particle"></div>
       </div>
 
-      <div className="container mx-auto px-6 py-12 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
         {/* Header */}
-        <div className="max-w-7xl mx-auto mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <Sparkles className="w-10 h-10 text-white" />
-            <h1 className="text-4xl font-bold text-white">My STAR Stories</h1>
+        <div className="max-w-7xl mx-auto mb-8 sm:mb-12">
+          <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">My STAR Stories</h1>
           </div>
-          <p className="text-lg text-gray-400">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-400">
             Your saved interview stories using the STAR method (Situation, Task, Action, Result)
           </p>
         </div>
@@ -180,14 +180,14 @@ export default function StarStoriesList() {
           <div className="max-w-7xl mx-auto">
             <div className="glass rounded-2xl p-12 text-center border border-white/10">
               <Sparkles className="w-16 h-16 text-white/40 mx-auto mb-6" />
-              <h3 className="text-2xl font-semibold text-white mb-3">No STAR Stories Yet</h3>
-              <p className="text-gray-400 mb-8 text-lg">
-                Create interview prep from a tailored resume to generate STAR stories,<br/>
+              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3">No STAR Stories Yet</h3>
+              <p className="text-gray-400 mb-6 sm:mb-8 text-base sm:text-lg px-2 sm:px-0">
+                Create interview prep from a tailored resume to generate STAR stories,
                 or create a new tailored resume to get started.
               </p>
               <button
                 onClick={() => navigate('/tailor')}
-                className="btn-primary inline-flex items-center gap-2 px-8 py-4 text-lg"
+                className="btn-primary inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg w-full sm:w-auto justify-center"
               >
                 Create Tailored Resume →
               </button>
@@ -202,7 +202,7 @@ export default function StarStoriesList() {
               {stories.length} {stories.length === 1 ? 'story' : 'stories'} saved
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Stories Grid */}
               <div className="space-y-4">
                 {stories.map((story) => (
@@ -238,7 +238,7 @@ export default function StarStoriesList() {
                           handleDelete(story.id)
                         }}
                         disabled={deletingId === story.id}
-                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-500/20 rounded-lg transition-colors"
                         title="Delete story"
                       >
                         {deletingId === story.id ? (
@@ -279,7 +279,7 @@ export default function StarStoriesList() {
               {/* Story Detail View */}
               {selectedStory ? (
                 <div className="glass rounded-xl p-8 border border-white/10 lg:sticky lg:top-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                  <h2 className="text-2xl font-bold text-white mb-6">{selectedStory.title}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">{selectedStory.title}</h2>
 
                   <div className="space-y-6">
                     <div>

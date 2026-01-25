@@ -169,13 +169,13 @@ export default function InterviewPrepList() {
           <div className="max-w-6xl mx-auto">
             <div className="glass rounded-2xl p-12 text-center border border-white/10">
               <BookOpen className="w-16 h-16 text-white/40 mx-auto mb-6" />
-              <h3 className="text-2xl font-semibold text-white mb-3">No Interview Preps Yet</h3>
-              <p className="text-gray-400 mb-8 text-lg">
+              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3">No Interview Preps Yet</h3>
+              <p className="text-gray-400 mb-6 sm:mb-8 text-base sm:text-lg px-2 sm:px-0">
                 Create a tailored resume first, then generate interview prep materials from the tailor page.
               </p>
               <button
                 onClick={() => navigate('/tailor')}
-                className="btn-primary inline-flex items-center gap-2 px-8 py-4 text-lg"
+                className="btn-primary inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg w-full sm:w-auto"
               >
                 Create Tailored Resume →
               </button>
@@ -212,7 +212,7 @@ export default function InterviewPrepList() {
                         {prep.job_title}
                       </p>
 
-                      <div className="flex items-center gap-6 text-sm text-gray-400">
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400">
                         {prep.job_location && (
                           <div className="flex items-center gap-2">
                             <MapPin className="w-4 h-4" />
@@ -227,31 +227,31 @@ export default function InterviewPrepList() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-3 ml-6">
+                    <div className="flex items-center gap-2 sm:gap-3 ml-0 sm:ml-6">
                       <button
                         onClick={() => handleView(prep.tailored_resume_id)}
-                        className="btn-secondary flex items-center gap-2 px-4 py-2 text-sm"
+                        className="btn-secondary flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm min-h-[44px] min-w-[44px] flex-1 sm:flex-none"
                       >
                         <Eye className="w-4 h-4" />
-                        View
+                        <span className="hidden sm:inline">View</span>
                       </button>
 
                       <button
                         onClick={() => handleDelete(prep.id)}
                         disabled={deletingId === prep.id}
-                        className={`btn-danger flex items-center gap-2 px-4 py-2 text-sm ${
+                        className={`btn-danger flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm min-h-[44px] min-w-[44px] flex-1 sm:flex-none ${
                           deletingId === prep.id ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                       >
                         {deletingId === prep.id ? (
                           <>
                             <Loader className="w-4 h-4 animate-spin" />
-                            Deleting...
+                            <span className="hidden sm:inline">Deleting...</span>
                           </>
                         ) : (
                           <>
                             <Trash2 className="w-4 h-4" />
-                            Delete
+                            <span className="hidden sm:inline">Delete</span>
                           </>
                         )}
                       </button>

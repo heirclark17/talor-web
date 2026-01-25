@@ -658,10 +658,10 @@ export default function CareerPathDesigner() {
   // Welcome Screen
   if (step === 'welcome') {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
         <div className="max-w-5xl mx-auto">
           {/* Progress indicator */}
-          <div className="flex items-center justify-center gap-2 mb-12">
+          <div className="flex items-center justify-center gap-1 sm:gap-2 mb-8 sm:mb-12 flex-wrap">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-semibold text-sm">1</div>
               <span className="text-white font-medium">Welcome</span>
@@ -679,47 +679,47 @@ export default function CareerPathDesigner() {
           </div>
 
           {/* Hero */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-8">
+          <div className="text-center mb-10 sm:mb-16">
+            <div className="inline-flex items-center gap-2 glass px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium mb-6 sm:mb-8">
               <Sparkles className="w-4 h-4 text-white" />
-              <span className="text-white">AI-Powered Career Planning with Real-World Data</span>
+              <span className="text-white">AI-Powered Career Planning</span>
             </div>
-            <h1 className="text-6xl font-bold text-white mb-6 leading-tight">
-              Design Your Career <br />Transition Path
+            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2">
+              Design Your Career Transition Path
             </h1>
-            <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-400 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-4">
               Upload your resume and complete our comprehensive assessment. Get a personalized roadmap with ACTUAL certifications, study materials, tech stacks, and networking events.
             </p>
 
             {/* Feature highlights */}
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
-              <div className="glass rounded-lg p-8 text-center">
-                <div className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center mb-4 mx-auto">
-                  <Upload className="w-8 h-8 text-white" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto mb-10 sm:mb-16">
+              <div className="glass rounded-lg p-6 sm:p-8 text-center">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-white/10 flex items-center justify-center mb-3 sm:mb-4 mx-auto">
+                  <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-white mb-2 text-lg">Upload Resume</h3>
-                <p className="text-sm text-gray-400">We analyze your experience automatically</p>
+                <h3 className="font-semibold text-white mb-2 text-base sm:text-lg">Upload Resume</h3>
+                <p className="text-xs sm:text-sm text-gray-400">We analyze your experience automatically</p>
               </div>
-              <div className="glass rounded-lg p-8 text-center">
-                <div className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center mb-4 mx-auto">
-                  <Target className="w-8 h-8 text-white" />
+              <div className="glass rounded-lg p-6 sm:p-8 text-center">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-white/10 flex items-center justify-center mb-3 sm:mb-4 mx-auto">
+                  <Target className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-white mb-2 text-lg">Detailed Assessment</h3>
-                <p className="text-sm text-gray-400">Comprehensive questionnaire for best fit</p>
+                <h3 className="font-semibold text-white mb-2 text-base sm:text-lg">Detailed Assessment</h3>
+                <p className="text-xs sm:text-sm text-gray-400">Comprehensive questionnaire for best fit</p>
               </div>
-              <div className="glass rounded-lg p-8 text-center">
-                <div className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center mb-4 mx-auto">
-                  <TrendingUp className="w-8 h-8 text-white" />
+              <div className="glass rounded-lg p-6 sm:p-8 text-center sm:col-span-2 lg:col-span-1">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-white/10 flex items-center justify-center mb-3 sm:mb-4 mx-auto">
+                  <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-white mb-2 text-lg">Actionable Plan</h3>
-                <p className="text-sm text-gray-400">Real certifications, events, and resources</p>
+                <h3 className="font-semibold text-white mb-2 text-base sm:text-lg">Actionable Plan</h3>
+                <p className="text-xs sm:text-sm text-gray-400">Real certifications, events, and resources</p>
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-4 px-4">
               <button
                 onClick={() => setStep('upload')}
-                className="btn-primary inline-flex items-center gap-2 text-lg"
+                className="btn-primary inline-flex items-center gap-2 text-base sm:text-lg w-full sm:w-auto justify-center"
               >
                 Get Started
                 <ChevronRight className="w-5 h-5" />
@@ -731,7 +731,7 @@ export default function CareerPathDesigner() {
                 Reset Saved Data
               </button>
             </div>
-            <p className="text-sm text-gray-500 mt-4">Takes 10-15 minutes for comprehensive assessment</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-4">Takes 10-15 minutes for comprehensive assessment</p>
           </div>
         </div>
       </div>
@@ -741,10 +741,10 @@ export default function CareerPathDesigner() {
   // Upload Resume Screen
   if (step === 'upload') {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Progress indicator */}
-          <div className="flex items-center justify-center gap-2 mb-12">
+          <div className="flex items-center justify-center gap-1 sm:gap-2 mb-8 sm:mb-12 flex-wrap">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white/10 text-white/60 flex items-center justify-center">
                 <Check className="w-5 h-5" />
@@ -764,9 +764,9 @@ export default function CareerPathDesigner() {
           </div>
 
           <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-4xl font-bold text-white mb-4">Upload Your Resume</h2>
-              <p className="text-lg text-gray-400">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4">Upload Your Resume</h2>
+              <p className="text-base sm:text-lg text-gray-400 px-2">
                 We'll automatically extract your skills, experience, and background
               </p>
             </div>
@@ -819,8 +819,8 @@ export default function CareerPathDesigner() {
             )}
 
             {/* Upload zone */}
-            <div className="glass rounded-3xl p-16 mb-8">
-              <div className="border-2 border-dashed border-white/20 rounded-2xl p-12 text-center transition-all hover:border-white/40">
+            <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-16 mb-6 sm:mb-8">
+              <div className="border-2 border-dashed border-white/20 rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 text-center transition-all hover:border-white/40">
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx"
@@ -832,11 +832,11 @@ export default function CareerPathDesigner() {
 
                 {!resumeFile ? (
                   <label htmlFor="resume-upload" className="cursor-pointer">
-                    <Upload className="w-16 h-16 text-white mx-auto mb-6" />
-                    <h3 className="text-xl font-semibold text-white mb-2">
+                    <Upload className="w-12 h-12 sm:w-16 sm:h-16 text-white mx-auto mb-4 sm:mb-6" />
+                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
                       Click to select your resume
                     </h3>
-                    <p className="text-gray-400 mb-6">
+                    <p className="text-sm sm:text-base text-gray-400 mb-4 sm:mb-6">
                       Supports PDF, DOC, and DOCX files
                     </p>
                     <div className="inline-flex items-center gap-2 btn-primary">
@@ -898,10 +898,10 @@ export default function CareerPathDesigner() {
               </div>
             )}
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <button
                 onClick={() => setStep('welcome')}
-                className="inline-flex items-center gap-2 text-gray-400 hover:text-white font-medium transition-colors"
+                className="inline-flex items-center gap-2 text-gray-400 hover:text-white font-medium transition-colors order-2 sm:order-1"
               >
                 <ArrowLeft className="w-5 h-5" />
                 Back
@@ -910,7 +910,7 @@ export default function CareerPathDesigner() {
               {resumeData ? (
                 <button
                   onClick={() => setStep('questions')}
-                  className="btn-primary inline-flex items-center gap-2"
+                  className="btn-primary inline-flex items-center gap-2 w-full sm:w-auto justify-center order-1 sm:order-2"
                 >
                   Continue to Assessment
                   <ChevronRight className="w-5 h-5" />
@@ -918,7 +918,7 @@ export default function CareerPathDesigner() {
               ) : (
                 <button
                   onClick={() => setStep('questions')}
-                  className="btn-secondary inline-flex items-center gap-2"
+                  className="btn-secondary inline-flex items-center gap-2 w-full sm:w-auto justify-center order-1 sm:order-2"
                 >
                   Skip & Continue
                   <ChevronRight className="w-5 h-5" />
@@ -934,10 +934,10 @@ export default function CareerPathDesigner() {
   // Questions Screen (Multi-Step)
   if (step === 'questions') {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Progress indicator */}
-          <div className="flex items-center justify-center gap-2 mb-12">
+          <div className="flex items-center justify-center gap-1 sm:gap-2 mb-8 sm:mb-12 flex-wrap">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white/10 text-white/60 flex items-center justify-center">
                 <Check className="w-5 h-5" />
@@ -959,19 +959,19 @@ export default function CareerPathDesigner() {
           </div>
 
           {/* Question step indicator */}
-          <div className="flex items-center justify-center gap-2 mb-8">
+          <div className="flex items-center justify-center gap-1 sm:gap-2 mb-6 sm:mb-8 flex-wrap">
             {[1, 2, 3, 4, 5].map((num) => (
               <React.Fragment key={num}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm transition-all ${
                   questionStep === num
                     ? 'bg-white text-black scale-110'
                     : questionStep > num
                     ? 'bg-white/20 text-white/60'
                     : 'bg-white/10 text-white/40'
                 }`}>
-                  {questionStep > num ? <Check className="w-5 h-5" /> : num}
+                  {questionStep > num ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : num}
                 </div>
-                {num < 5 && <div className={`w-12 h-0.5 ${questionStep > num ? 'bg-white/40' : 'bg-white/20'}`}></div>}
+                {num < 5 && <div className={`w-6 sm:w-12 h-0.5 ${questionStep > num ? 'bg-white/40' : 'bg-white/20'}`}></div>}
               </React.Fragment>
             ))}
           </div>
@@ -980,49 +980,49 @@ export default function CareerPathDesigner() {
             {/* Step 1: Basic Profile */}
             {questionStep === 1 && (
               <div>
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
-                    <Target className="w-8 h-8 text-white" />
+                <div className="text-center mb-6 sm:mb-8">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <Target className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
-                  <h2 className="text-3xl font-bold text-white mb-2">Basic Profile</h2>
-                  <p className="text-gray-400">Tell us about your current role and dream career</p>
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2">Basic Profile</h2>
+                  <p className="text-sm sm:text-base text-gray-400">Tell us about your current role and dream career</p>
                 </div>
 
-                <div className="glass rounded-3xl p-8 space-y-6">
+                <div className="glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
                   {/* Dream Role */}
                   <div>
-                    <label className="text-white font-semibold mb-2 block">Dream Role or Career Goal *</label>
+                    <label className="text-white font-semibold mb-2 block text-sm sm:text-base">Dream Role or Career Goal *</label>
                     <input
                       type="text"
                       value={dreamRole}
                       onChange={(e) => setDreamRole(e.target.value)}
                       placeholder="e.g., Senior Cloud Security Architect, Product Manager"
-                      className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500"
+                      className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
                       data-testid="dream-role-input"
                     />
                   </div>
 
                   {/* Current Role */}
                   <div>
-                    <label className="text-white font-semibold mb-2 block">Current Role Title</label>
+                    <label className="text-white font-semibold mb-2 block text-sm sm:text-base">Current Role Title</label>
                     <input
                       type="text"
                       value={currentRole}
                       onChange={(e) => setCurrentRole(e.target.value)}
                       placeholder="e.g., IT Manager, Software Developer"
-                      className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500"
+                      className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
                     />
                   </div>
 
                   {/* Current Industry */}
                   <div>
-                    <label className="text-white font-semibold mb-2 block">Current Industry</label>
+                    <label className="text-white font-semibold mb-2 block text-sm sm:text-base">Current Industry</label>
                     <input
                       type="text"
                       value={currentIndustry}
                       onChange={(e) => setCurrentIndustry(e.target.value)}
                       placeholder="e.g., Healthcare, Finance, Technology"
-                      className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500"
+                      className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
                     />
                   </div>
 
@@ -1046,8 +1046,8 @@ export default function CareerPathDesigner() {
 
                   {/* Education Level */}
                   <div>
-                    <label className="text-white font-semibold mb-3 block">Education Level</label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <label className="text-white font-semibold mb-2 sm:mb-3 block text-sm sm:text-base">Education Level</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                       {[
                         { value: 'high school', label: 'High School' },
                         { value: 'associates', label: 'Associates' },
@@ -1058,13 +1058,13 @@ export default function CareerPathDesigner() {
                         <button
                           key={option.value}
                           onClick={() => setEducationLevel(option.value)}
-                          className={`p-3 rounded-lg border-2 text-center transition-all ${
+                          className={`p-3 min-h-[44px] rounded-lg border-2 text-center transition-all ${
                             educationLevel === option.value
                               ? 'border-white bg-white/10'
                               : 'border-white/20 hover:border-white/40'
                           }`}
                         >
-                          <div className="font-semibold text-white text-sm">{option.label}</div>
+                          <div className="font-semibold text-white text-xs sm:text-sm">{option.label}</div>
                         </button>
                       ))}
                     </div>

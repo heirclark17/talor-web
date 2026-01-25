@@ -1148,67 +1148,69 @@ export default function TailorResume() {
 
   if (showComparison && selectedResume && tailoredResume) {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 sm:mb-8">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-white/10 rounded-xl">
-                <Sparkles className="w-8 h-8 text-white" />
+              <div className="p-2 sm:p-3 bg-white/10 rounded-xl">
+                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
                   Resume Comparison
                 </h1>
-                <p className="text-gray-400 mt-1">Original vs. Tailored for {tailoredResume.company}</p>
+                <p className="text-sm sm:text-base text-gray-400 mt-1">Original vs. Tailored for {tailoredResume.company}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <ThemeToggle />
               <button
                 onClick={saveComparison}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-medium transition-all "
+                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-medium transition-all min-h-[44px] flex-1 sm:flex-none"
                 title="Save this comparison for later"
               >
                 <Bookmark className="w-5 h-5" />
-                Save Comparison
+                <span className="hidden sm:inline">Save Comparison</span>
+                <span className="sm:hidden">Save</span>
               </button>
               <button
                 onClick={resetForm}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-medium transition-all "
+                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-medium transition-all min-h-[44px] flex-1 sm:flex-none"
               >
                 <RotateCcw className="w-5 h-5" />
-                Start New Resume
+                <span className="hidden sm:inline">Start New Resume</span>
+                <span className="sm:hidden">New</span>
               </button>
             </div>
           </div>
 
           {/* Control Bar */}
-          <div className="mb-6 flex items-center justify-between glass rounded-xl p-4">
-            <div className="flex items-center gap-4">
+          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 glass rounded-xl p-3 sm:p-4">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               <button
                 onClick={() => setSyncScroll(!syncScroll)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all min-h-[44px] ${
                   syncScroll ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
                 }`}
                 title="Ctrl/Cmd + S"
               >
                 {syncScroll ? <Link2 size={18} /> : <Unlink2 size={18} />}
-                <span className="text-sm font-medium">Sync Scroll</span>
+                <span className="text-sm font-medium hidden sm:inline">Sync Scroll</span>
               </button>
 
               <button
                 onClick={() => setShowChanges(!showChanges)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all min-h-[44px] ${
                   showChanges ? 'bg-green-500/20 text-green-400' : 'bg-white/5 text-gray-400 hover:bg-white/10'
                 }`}
                 title="Ctrl/Cmd + C"
               >
                 <Sparkles size={18} />
-                <span className="text-sm font-medium">Show Changes</span>
+                <span className="text-sm font-medium hidden sm:inline">Show Changes</span>
               </button>
 
-              <div className="h-6 w-px bg-white/10"></div>
+              <div className="hidden sm:block h-6 w-px bg-white/10"></div>
 
               <button
                 onClick={() => {
@@ -1216,32 +1218,32 @@ export default function TailorResume() {
                   const newState = Object.keys(expandedSections).reduce((acc, key) => ({ ...acc, [key]: !allExpanded }), {})
                   setExpandedSections(newState)
                 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
               >
                 {Object.values(expandedSections).every(v => v) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium hidden sm:inline">
                   {Object.values(expandedSections).every(v => v) ? 'Collapse All' : 'Expand All'}
                 </span>
               </button>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <button
                 onClick={exportToPDF}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
               >
                 <Printer size={18} />
-                <span className="text-sm font-medium">Print</span>
+                <span className="text-sm font-medium hidden sm:inline">Print</span>
               </button>
 
               <div className="relative">
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+                  className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
                   title="Ctrl/Cmd + D"
                 >
                   <FileDown size={18} />
-                  <span className="text-sm font-medium">Export</span>
+                  <span className="text-sm font-medium hidden sm:inline">Export</span>
                   <ChevronDown size={16} />
                 </button>
 
@@ -1339,40 +1341,43 @@ export default function TailorResume() {
           )}
 
           {/* Tab Navigation */}
-          <div className="mb-6 glass rounded-xl border border-white/20 p-2">
-            <div className="flex gap-2">
+          <div className="mb-4 sm:mb-6 glass rounded-xl border border-white/20 p-1 sm:p-2">
+            <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
               <button
                 onClick={() => handleTabChange('comparison')}
-                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-6 py-3 rounded-lg font-medium transition-all min-h-[44px] ${
                   activeTab === 'comparison'
                     ? 'bg-white/20 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <FileText className="w-5 h-5" />
-                Side-by-Side Comparison
+                <span className="hidden sm:inline">Side-by-Side Comparison</span>
+                <span className="sm:hidden text-sm">Compare</span>
               </button>
               <button
                 onClick={() => handleTabChange('analysis')}
-                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-6 py-3 rounded-lg font-medium transition-all min-h-[44px] ${
                   activeTab === 'analysis'
                     ? 'bg-white/20 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <Sparkles className="w-5 h-5" />
-                AI Analysis & Insights
+                <span className="hidden sm:inline">AI Analysis & Insights</span>
+                <span className="sm:hidden text-sm">Analysis</span>
               </button>
               <button
                 onClick={() => handleTabChange('insights')}
-                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-6 py-3 rounded-lg font-medium transition-all min-h-[44px] ${
                   activeTab === 'insights'
                     ? 'bg-white/20 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <Target className="w-5 h-5" />
-                Match & Keywords
+                <span className="hidden sm:inline">Match & Keywords</span>
+                <span className="sm:hidden text-sm">Match</span>
               </button>
             </div>
           </div>
@@ -2270,24 +2275,26 @@ export default function TailorResume() {
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-8 flex gap-4 justify-center">
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <button
               onClick={() => navigate(`/interview-prep/${tailoredResume.id}`)}
-              className="btn-primary flex items-center gap-3 text-lg bg-purple-600 hover:bg-purple-700"
+              className="btn-primary flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg bg-purple-600 hover:bg-purple-700 min-h-[48px] w-full sm:w-auto"
             >
               <Briefcase className="w-5 h-5" />
-              View Interview Prep
+              <span className="hidden sm:inline">View Interview Prep</span>
+              <span className="sm:hidden">Interview Prep</span>
             </button>
             <button
               onClick={() => handleDownloadResume('docx')}
-              className="btn-primary flex items-center gap-3 text-lg"
+              className="btn-primary flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg min-h-[48px] w-full sm:w-auto"
             >
               <Download className="w-5 h-5" />
-              Download Tailored Resume
+              <span className="hidden sm:inline">Download Tailored Resume</span>
+              <span className="sm:hidden">Download</span>
             </button>
             <button
               onClick={resetForm}
-              className="btn-secondary text-lg"
+              className="btn-secondary text-base sm:text-lg min-h-[48px] w-full sm:w-auto"
             >
               Create Another
             </button>
@@ -2505,13 +2512,13 @@ export default function TailorResume() {
                   }}
                   onBlur={handleExtractJobDetails}
                   placeholder="Paste job URL here..."
-                  className="flex-1 px-4 sm:px-5 py-3 sm:py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-base sm:text-lg text-white placeholder-gray-500"
+                  className="flex-1 px-4 sm:px-5 py-3 sm:py-4 bg-white/5 border-2 border-white/20 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-[16px] sm:text-lg text-white placeholder-gray-500 min-h-[48px]"
                   disabled={extracting}
                 />
                 <button
                   onClick={handleExtractJobDetails}
                   disabled={extracting || !jobUrl.trim()}
-                  className={`px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-semibold whitespace-nowrap transition-all w-full sm:w-auto ${
+                  className={`px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-semibold whitespace-nowrap transition-all w-full sm:w-auto min-h-[48px] ${
                     extracting || !jobUrl.trim()
                       ? 'bg-white/10 text-gray-500 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -2547,7 +2554,7 @@ export default function TailorResume() {
                       value={company}
                       onChange={(e) => setCompany(e.target.value)}
                       placeholder="JPMorgan Chase"
-                      className={`w-full px-5 py-4 bg-white/5 border-2 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500 ${
+                      className={`w-full px-4 sm:px-5 py-3 sm:py-4 bg-white/5 border-2 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-[16px] sm:text-lg text-white placeholder-gray-500 min-h-[48px] ${
                         extractionError.company ? 'border-red-500' : 'border-white/20'
                       }`}
                     />
@@ -2571,7 +2578,7 @@ export default function TailorResume() {
                       value={jobTitle}
                       onChange={(e) => setJobTitle(e.target.value)}
                       placeholder="Lead Technical Program Manager"
-                      className={`w-full px-5 py-4 bg-white/5 border-2 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-lg text-white placeholder-gray-500 ${
+                      className={`w-full px-4 sm:px-5 py-3 sm:py-4 bg-white/5 border-2 rounded-xl focus:ring-4 focus:ring-white/20 focus:border-white/40 transition-all text-[16px] sm:text-lg text-white placeholder-gray-500 min-h-[48px] ${
                         extractionError.title ? 'border-red-500' : 'border-white/20'
                       }`}
                     />
@@ -2605,11 +2612,11 @@ export default function TailorResume() {
         </div>
 
         {/* Tailor Button */}
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto px-4 sm:px-0">
         <button
           onClick={handleTailor}
           disabled={loading || !selectedResumeId}
-          className={`w-full py-6 rounded-2xl font-bold text-xl transition-all ${
+          className={`w-full py-4 sm:py-6 rounded-2xl font-bold text-lg sm:text-xl transition-all min-h-[56px] ${
             loading || !selectedResumeId
               ? 'bg-white/10 text-gray-500 cursor-not-allowed'
               : 'btn-primary'

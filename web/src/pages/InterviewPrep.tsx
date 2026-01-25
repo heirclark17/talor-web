@@ -721,12 +721,12 @@ export default function InterviewPrep() {
   return (
     <div className="min-h-screen bg-black">
       <ThemeToggle />
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={() => navigate('/tailor')}
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 transition-colors"
+            className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 transition-colors min-h-[44px]"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Resume
@@ -749,46 +749,46 @@ export default function InterviewPrep() {
             </div>
           )}
 
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">Interview Preparation</h1>
-              <p className="text-gray-400">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">Interview Preparation</h1>
+              <p className="text-sm sm:text-base text-gray-400">
                 AI-generated interview prep for {prepData.role_analysis.job_title} at{' '}
                 {prepData.company_profile.name}
               </p>
             </div>
 
             {/* Control Bar */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               <button
                 onClick={expandAll}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
               >
                 <ChevronDown size={18} />
-                <span className="text-sm font-medium">Expand All</span>
+                <span className="text-sm font-medium hidden sm:inline">Expand All</span>
               </button>
               <button
                 onClick={collapseAll}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
               >
                 <ChevronUp size={18} />
-                <span className="text-sm font-medium">Collapse All</span>
+                <span className="text-sm font-medium hidden sm:inline">Collapse All</span>
               </button>
               <button
                 onClick={exportToPDF}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
               >
                 <Printer size={18} />
-                <span className="text-sm font-medium">Print</span>
+                <span className="text-sm font-medium hidden sm:inline">Print</span>
               </button>
 
               <div className="relative">
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all"
+                  className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
                 >
                   <FileDown size={18} />
-                  <span className="text-sm font-medium">Export</span>
+                  <span className="text-sm font-medium hidden sm:inline">Export</span>
                   <ChevronDown size={16} />
                 </button>
 
@@ -822,19 +822,19 @@ export default function InterviewPrep() {
         </div>
 
         {/* Interview Date & Progress Dashboard */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Interview Date Countdown */}
-          <div className="glass rounded-2xl p-6">
+          <div className="glass rounded-2xl p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-6 h-6 text-white" strokeWidth={2} />
-              <h3 className="text-xl font-bold text-white">Interview Date</h3>
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={2} />
+              <h3 className="text-lg sm:text-xl font-bold text-white">Interview Date</h3>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <input
                 type="date"
                 value={interviewDate}
                 onChange={(e) => saveInterviewDate(e.target.value)}
-                className="bg-white/5 border border-white/20 rounded-lg p-3 text-white flex-1"
+                className="bg-white/5 border border-white/20 rounded-lg p-3 text-white flex-1 text-[16px] min-h-[44px]"
                 style={{ colorScheme: 'dark' }}
               />
               {daysUntilInterview !== null && (
@@ -849,8 +849,8 @@ export default function InterviewPrep() {
           </div>
 
           {/* Progress Dashboard */}
-          <div className="glass rounded-2xl p-6">
-            <h3 className="text-xl font-bold text-white mb-4">Preparation Progress</h3>
+          <div className="glass rounded-2xl p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Preparation Progress</h3>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm mb-1">
@@ -881,7 +881,7 @@ export default function InterviewPrep() {
         </div>
 
         {/* Grid Layout - Section Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {/* Company Profile Card */}
           <button
             onClick={() => openModal('companyProfile')}
@@ -1080,12 +1080,12 @@ export default function InterviewPrep() {
 
             {/* Modal Content */}
             <div
-              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900/95 rounded-3xl border border-white/10 shadow-2xl"
+              className="relative w-full max-w-4xl max-h-[90vh] sm:max-h-[90vh] h-full sm:h-auto overflow-y-auto bg-gray-900/95 sm:rounded-3xl border-0 sm:border border-white/10 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm p-6 border-b border-white/10 flex items-center justify-between z-10">
-                <h2 className="text-2xl font-bold text-white">
+              <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm p-4 sm:p-6 border-b border-white/10 flex items-center justify-between z-10">
+                <h2 className="text-xl sm:text-2xl font-bold text-white">
                   {activeModal === 'companyProfile' && 'Company Profile'}
                   {activeModal === 'roleAnalysis' && 'Role Analysis'}
                   {activeModal === 'valuesAndCulture' && 'Values & Culture'}
@@ -1099,14 +1099,14 @@ export default function InterviewPrep() {
                 </h2>
                 <button
                   onClick={closeModal}
-                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  className="p-2 rounded-lg hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   <X className="w-6 h-6 text-gray-400" />
                 </button>
               </div>
 
               {/* Modal Body */}
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {/* Company Profile Modal Content */}
                 {activeModal === 'companyProfile' && (
                   <div className="space-y-4">

@@ -414,7 +414,7 @@ export default function UploadResume() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
             <button
               onClick={() => navigate('/tailor', { state: { selectedResumeId: parsedResume.resume_id } })}
               className="flex-1 btn-primary"
@@ -423,14 +423,14 @@ export default function UploadResume() {
             </button>
             <button
               onClick={() => navigate('/tailor')}
-              className="btn-secondary"
+              className="btn-secondary w-full sm:w-auto"
             >
               View All Resumes
             </button>
             <button
               onClick={() => handleDeleteResume(parsedResume.resume_id, parsedResume.filename)}
               disabled={deletingId === parsedResume.resume_id}
-              className="btn-secondary flex items-center gap-2 hover:bg-red-500/20 hover:border-red-500/50 transition-colors"
+              className="btn-secondary flex items-center justify-center gap-2 hover:bg-red-500/20 hover:border-red-500/50 transition-colors w-full sm:w-auto"
               title="Delete this uploaded resume"
             >
               {deletingId === parsedResume.resume_id ? (
@@ -441,7 +441,7 @@ export default function UploadResume() {
               ) : (
                 <>
                   <Trash2 className="w-5 h-5" />
-                  Delete This Resume
+                  Delete
                 </>
               )}
             </button>
