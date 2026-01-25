@@ -8,6 +8,7 @@ backend/
 .env
 .env.example
 *.md
+!mobile/*.md
 database/
 dist/
 electron/
