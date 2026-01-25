@@ -93,6 +93,9 @@ export default function UploadResumeScreen() {
         <TouchableOpacity
           style={styles.closeButton}
           onPress={() => navigation.goBack()}
+          accessibilityRole="button"
+          accessibilityLabel="Close upload screen"
+          accessibilityHint="Returns to the previous screen"
         >
           <X color={COLORS.dark.text} size={24} />
         </TouchableOpacity>
@@ -126,12 +129,21 @@ export default function UploadResumeScreen() {
               <TouchableOpacity
                 style={styles.changeButton}
                 onPress={handleSelectFile}
+                accessibilityRole="button"
+                accessibilityLabel="Change selected file"
+                accessibilityHint="Opens document picker to select a different resume file"
               >
                 <Text style={styles.changeButtonText}>Change File</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity style={styles.dropZone} onPress={handleSelectFile}>
+            <TouchableOpacity
+              style={styles.dropZone}
+              onPress={handleSelectFile}
+              accessibilityRole="button"
+              accessibilityLabel="Select resume file"
+              accessibilityHint="Opens document picker to choose a PDF or Word document"
+            >
               <View style={styles.uploadIcon}>
                 <Upload color={COLORS.dark.textTertiary} size={48} />
               </View>
@@ -181,6 +193,10 @@ export default function UploadResumeScreen() {
             style={[styles.uploadButton, uploading && styles.uploadButtonDisabled]}
             onPress={handleUpload}
             disabled={uploading}
+            accessibilityRole="button"
+            accessibilityLabel={uploading ? 'Uploading resume' : 'Upload resume to server'}
+            accessibilityHint="Sends the selected resume file to be processed"
+            accessibilityState={{ disabled: uploading, busy: uploading }}
           >
             {uploading ? (
               <ActivityIndicator color={COLORS.dark.background} />

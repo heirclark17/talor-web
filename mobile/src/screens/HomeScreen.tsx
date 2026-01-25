@@ -130,6 +130,9 @@ export default function HomeScreen() {
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => handleTailor(item.id)}
+          accessibilityRole="button"
+          accessibilityLabel={`Tailor ${item.filename} for a specific job`}
+          accessibilityHint="Opens the resume tailoring screen"
         >
           <Target color={COLORS.primary} size={20} />
           <Text style={styles.actionText}>Tailor</Text>
@@ -139,6 +142,10 @@ export default function HomeScreen() {
           style={[styles.actionButton, styles.deleteButton]}
           onPress={() => handleDelete(item.id)}
           disabled={deletingId === item.id}
+          accessibilityRole="button"
+          accessibilityLabel={`Delete ${item.filename}`}
+          accessibilityHint="Permanently removes this resume"
+          accessibilityState={{ disabled: deletingId === item.id }}
         >
           {deletingId === item.id ? (
             <ActivityIndicator size="small" color={COLORS.danger} />
@@ -165,6 +172,9 @@ export default function HomeScreen() {
       <TouchableOpacity
         style={styles.uploadButton}
         onPress={() => navigation.navigate('UploadResume')}
+        accessibilityRole="button"
+        accessibilityLabel="Upload your first resume"
+        accessibilityHint="Opens document picker to select a resume file"
       >
         <Upload color={COLORS.dark.text} size={20} />
         <Text style={styles.uploadButtonText}>Upload Resume</Text>
@@ -190,6 +200,9 @@ export default function HomeScreen() {
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('UploadResume')}
+          accessibilityRole="button"
+          accessibilityLabel="Upload new resume"
+          accessibilityHint="Opens document picker to add another resume"
         >
           <Upload color={COLORS.dark.text} size={20} />
         </TouchableOpacity>
