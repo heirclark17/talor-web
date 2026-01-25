@@ -81,15 +81,20 @@ export default function TailorResumeScreen() {
 
     setExtracting(true);
     try {
+      console.log('Extracting job from URL:', jobUrl);
       const result = await api.extractJobDetails(jobUrl);
+      console.log('Extract result:', result);
+
       if (result.success && result.data) {
         setCompany(result.data.company || '');
         setJobTitle(result.data.title || '');
+        Alert.alert('Success', 'Job details extracted successfully!');
       } else {
-        Alert.alert('Note', 'Could not extract job details. Please enter them manually.');
+        Alert.alert('Error', result.error || 'Could not extract job details. Please enter them manually.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error extracting job:', error);
+      Alert.alert('Error', error.message || 'Failed to extract job details. Please try again.');
     } finally {
       setExtracting(false);
     }
@@ -264,7 +269,10 @@ export default function TailorResumeScreen() {
                 />
               </View>
               <TouchableOpacity
-                style={[styles.extractButton, extracting && styles.extractButtonDisabled]}
+                style={[
+                  styles.extractButton,
+                  (extracting || !jobUrl.trim()) && styles.extractButtonDisabled
+                ]}
                 onPress={handleExtractJob}
                 disabled={extracting || !jobUrl.trim()}
               >
