@@ -113,12 +113,21 @@ export default function TailorResumeScreen() {
 
     setTailoring(true);
     try {
+      console.log('Tailoring resume with params:', {
+        baseResumeId: selectedResumeId,
+        jobUrl: jobUrl.trim() || undefined,
+        company: company.trim() || undefined,
+        jobTitle: jobTitle.trim() || undefined,
+      });
+
       const result = await api.tailorResume({
         baseResumeId: selectedResumeId,
         jobUrl: jobUrl.trim() || undefined,
         company: company.trim() || undefined,
         jobTitle: jobTitle.trim() || undefined,
       });
+
+      console.log('Tailor result:', result);
 
       if (result.success && result.data) {
         Alert.alert(
@@ -131,11 +140,12 @@ export default function TailorResumeScreen() {
         setCompany('');
         setJobTitle('');
       } else {
-        Alert.alert('Error', result.error || 'Failed to tailor resume');
+        console.error('Tailoring failed:', result.error);
+        Alert.alert('Error', result.error || 'Failed to tailor resume. Please try again.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error tailoring:', error);
-      Alert.alert('Error', 'Failed to tailor resume');
+      Alert.alert('Error', error.message || 'Failed to tailor resume. Please check your connection.');
     } finally {
       setTailoring(false);
     }
