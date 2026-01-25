@@ -117,8 +117,8 @@ export const api = {
     jobTitle?: string;
   }): Promise<ApiResponse> {
     try {
-      console.log('API: Sending tailor request to /api/tailor');
-      const response = await fetchWithAuth('/api/tailor', {
+      console.log('API: Sending tailor request to /api/tailor/tailor');
+      const response = await fetchWithAuth('/api/tailor/tailor', {
         method: 'POST',
         body: JSON.stringify({
           base_resume_id: params.baseResumeId,
@@ -148,7 +148,7 @@ export const api = {
 
   async getTailoredResume(tailoredResumeId: number): Promise<ApiResponse> {
     try {
-      const response = await fetchWithAuth(`/api/tailored/${tailoredResumeId}`);
+      const response = await fetchWithAuth(`/api/tailor/tailored/${tailoredResumeId}`);
       const data = await response.json();
       return { success: response.ok, data };
     } catch (error: any) {
@@ -167,7 +167,7 @@ export const api = {
     }
   ): Promise<ApiResponse> {
     try {
-      const response = await fetchWithAuth(`/api/tailored/${tailoredResumeId}`, {
+      const response = await fetchWithAuth(`/api/tailor/tailored/${tailoredResumeId}`, {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
