@@ -39,10 +39,15 @@ export default function HomeScreen() {
     try {
       const result = await api.getResumes();
       if (result.success) {
-        setResumes(result.data || []);
+        const resumeList = Array.isArray(result.data) ? result.data : [];
+        setResumes(resumeList);
+      } else {
+        console.error('Failed to load resumes:', result.error);
+        setResumes([]);
       }
     } catch (error) {
       console.error('Error loading resumes:', error);
+      setResumes([]);
     } finally {
       setLoading(false);
       setRefreshing(false);

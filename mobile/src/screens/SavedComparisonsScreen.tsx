@@ -47,10 +47,15 @@ export default function SavedComparisonsScreen() {
     try {
       const result = await api.getSavedComparisons();
       if (result.success && result.data) {
-        setComparisons(result.data);
+        const comparisonsList = Array.isArray(result.data) ? result.data : [];
+        setComparisons(comparisonsList);
+      } else {
+        console.error('Failed to load comparisons:', result.error);
+        setComparisons([]);
       }
     } catch (error) {
       console.error('Error loading comparisons:', error);
+      setComparisons([]);
     } finally {
       setLoading(false);
       setRefreshing(false);

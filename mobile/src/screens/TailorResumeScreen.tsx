@@ -48,15 +48,20 @@ export default function TailorResumeScreen() {
     try {
       const result = await api.getResumes();
       if (result.success && result.data) {
-        setResumes(result.data);
+        const resumeList = Array.isArray(result.data) ? result.data : [];
+        setResumes(resumeList);
         // If initialResumeId is set, use it; otherwise use the first resume
-        if (result.data.length > 0 && !selectedResumeId) {
-          const targetId = initialResumeId || result.data[0].id;
+        if (resumeList.length > 0 && !selectedResumeId) {
+          const targetId = initialResumeId || resumeList[0].id;
           setSelectedResumeId(targetId);
         }
+      } else {
+        console.error('Failed to load resumes:', result.error);
+        setResumes([]);
       }
     } catch (error) {
       console.error('Error loading resumes:', error);
+      setResumes([]);
     } finally {
       setLoading(false);
     }
@@ -131,7 +136,7 @@ export default function TailorResumeScreen() {
     }
   };
 
-  const selectedResume = resumes.find((r) => r.id === selectedResumeId);
+  const selectedResume = resumes?.find((r) => r.id === selectedResumeId);
 
   if (loading) {
     return (

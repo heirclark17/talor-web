@@ -32,10 +32,13 @@ export const api = {
   async getResumes(): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/resumes');
-      const data = await response.json();
+      const json = await response.json();
+      // Backend returns array directly, not wrapped in {data: ...}
+      const data = Array.isArray(json) ? json : (json.data || []);
       return { success: true, data };
     } catch (error: any) {
-      return { success: false, error: error.message };
+      console.error('Error fetching resumes:', error);
+      return { success: false, data: [], error: error.message };
     }
   },
 
@@ -152,10 +155,12 @@ export const api = {
   async listInterviewPreps(): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/interview-prep/list');
-      const data = await response.json();
-      return { success: response.ok, data, error: data.error };
+      const json = await response.json();
+      const data = Array.isArray(json) ? json : (json.data || []);
+      return { success: response.ok, data };
     } catch (error: any) {
-      return { success: false, error: error.message };
+      console.error('Error fetching interview preps:', error);
+      return { success: false, data: [], error: error.message };
     }
   },
 
@@ -163,10 +168,12 @@ export const api = {
   async getSavedComparisons(): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/saved-comparisons/list');
-      const data = await response.json();
+      const json = await response.json();
+      const data = Array.isArray(json) ? json : (json.data || []);
       return { success: true, data };
     } catch (error: any) {
-      return { success: false, error: error.message };
+      console.error('Error fetching saved comparisons:', error);
+      return { success: false, data: [], error: error.message };
     }
   },
 

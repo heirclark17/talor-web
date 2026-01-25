@@ -37,10 +37,15 @@ export default function InterviewPrepListScreen() {
     try {
       const result = await api.listInterviewPreps();
       if (result.success && result.data) {
-        setPreps(result.data);
+        const prepsList = Array.isArray(result.data) ? result.data : [];
+        setPreps(prepsList);
+      } else {
+        console.error('Failed to load interview preps:', result.error);
+        setPreps([]);
       }
     } catch (error) {
       console.error('Error loading interview preps:', error);
+      setPreps([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
