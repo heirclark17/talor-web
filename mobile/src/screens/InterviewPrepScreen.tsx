@@ -180,16 +180,36 @@ const ExpandableSection: React.FC<{
 };
 
 // Bullet List Component
-const BulletList: React.FC<{ items: string[]; icon?: React.ReactNode }> = ({ items, icon }) => (
-  <View style={styles.bulletList}>
-    {items.map((item, index) => (
-      <View key={index} style={styles.bulletItem}>
-        {icon || <View style={styles.bulletDot} />}
-        <Text style={styles.bulletText}>{item}</Text>
-      </View>
-    ))}
-  </View>
-);
+const BulletList: React.FC<{ items: any[]; icon?: React.ReactNode }> = ({ items, icon }) => {
+  // Handle undefined or non-array items
+  if (!items || !Array.isArray(items)) {
+    return null;
+  }
+
+  return (
+    <View style={styles.bulletList}>
+      {items.map((item, index) => {
+        // Handle items that might be objects or strings
+        let displayText: string;
+        if (typeof item === 'string') {
+          displayText = item;
+        } else if (item && typeof item === 'object') {
+          // Try common text properties
+          displayText = item.title || item.name || item.text || item.description || JSON.stringify(item);
+        } else {
+          displayText = String(item || '');
+        }
+
+        return (
+          <View key={index} style={styles.bulletItem}>
+            {icon || <View style={styles.bulletDot} />}
+            <Text style={styles.bulletText}>{displayText}</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+};
 
 // Chip/Badge Component
 const Chip: React.FC<{ label: string; color?: string }> = ({ label, color = COLORS.primary }) => (
@@ -430,33 +450,35 @@ export default function InterviewPrepScreen() {
           icon={<Target color={COLORS.purple} size={20} />}
           accentColor={COLORS.purple}
         >
-          {role_analysis?.core_responsibilities && role_analysis.core_responsibilities.length > 0 && (
+          {role_analysis?.core_responsibilities && Array.isArray(role_analysis.core_responsibilities) && role_analysis.core_responsibilities.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Core Responsibilities</Text>
               <BulletList items={role_analysis.core_responsibilities} />
             </View>
           )}
-          {role_analysis?.must_have_skills && role_analysis.must_have_skills.length > 0 && (
+          {role_analysis?.must_have_skills && Array.isArray(role_analysis.must_have_skills) && role_analysis.must_have_skills.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Must-Have Skills</Text>
               <View style={styles.chipContainer}>
-                {role_analysis.must_have_skills.map((skill, index) => (
-                  <Chip key={index} label={skill} color={COLORS.success} />
-                ))}
+                {role_analysis.must_have_skills.map((skill, index) => {
+                  const label = typeof skill === 'string' ? skill : (skill?.name || skill?.skill || JSON.stringify(skill));
+                  return <Chip key={index} label={label} color={COLORS.success} />;
+                })}
               </View>
             </View>
           )}
-          {role_analysis?.nice_to_have_skills && role_analysis.nice_to_have_skills.length > 0 && (
+          {role_analysis?.nice_to_have_skills && Array.isArray(role_analysis.nice_to_have_skills) && role_analysis.nice_to_have_skills.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Nice-to-Have Skills</Text>
               <View style={styles.chipContainer}>
-                {role_analysis.nice_to_have_skills.map((skill, index) => (
-                  <Chip key={index} label={skill} color={COLORS.dark.textSecondary} />
-                ))}
+                {role_analysis.nice_to_have_skills.map((skill, index) => {
+                  const label = typeof skill === 'string' ? skill : (skill?.name || skill?.skill || JSON.stringify(skill));
+                  return <Chip key={index} label={label} color={COLORS.dark.textSecondary} />;
+                })}
               </View>
             </View>
           )}
-          {role_analysis?.success_signals_6_12_months && role_analysis.success_signals_6_12_months.length > 0 && (
+          {role_analysis?.success_signals_6_12_months && Array.isArray(role_analysis.success_signals_6_12_months) && role_analysis.success_signals_6_12_months.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Success Signals (6-12 Months)</Text>
               <BulletList
@@ -473,20 +495,26 @@ export default function InterviewPrepScreen() {
           icon={<Heart color={COLORS.error} size={20} />}
           accentColor={COLORS.error}
         >
-          {values_and_culture?.stated_values && values_and_culture.stated_values.length > 0 && (
+          {values_and_culture?.stated_values && Array.isArray(values_and_culture.stated_values) && values_and_culture.stated_values.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Company Values</Text>
-              {values_and_culture.stated_values.map((value, index) => (
-                <View key={index} style={styles.valueCard}>
-                  <Text style={styles.valueName}>{value.name}</Text>
-                  <Text style={styles.valueDescription}>
-                    {value.description || value.source_snippet || 'No description available'}
-                  </Text>
-                </View>
-              ))}
+              {values_and_culture.stated_values.map((value, index) => {
+                // Handle case where value might be a string or object
+                const name = typeof value === 'string' ? value : (value?.name || value?.title || '');
+                const description = typeof value === 'object' ? (value?.description || value?.source_snippet || '') : '';
+
+                return (
+                  <View key={index} style={styles.valueCard}>
+                    <Text style={styles.valueName}>{name}</Text>
+                    {description ? (
+                      <Text style={styles.valueDescription}>{description}</Text>
+                    ) : null}
+                  </View>
+                );
+              })}
             </View>
           )}
-          {values_and_culture?.practical_implications && values_and_culture.practical_implications.length > 0 && (
+          {values_and_culture?.practical_implications && Array.isArray(values_and_culture.practical_implications) && values_and_culture.practical_implications.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>What This Means for You</Text>
               <BulletList items={values_and_culture.practical_implications} />
@@ -500,45 +528,60 @@ export default function InterviewPrepScreen() {
           icon={<Newspaper color={COLORS.info} size={20} />}
           accentColor={COLORS.info}
         >
-          {strategy_and_news?.strategic_themes && strategy_and_news.strategic_themes.length > 0 && (
+          {strategy_and_news?.strategic_themes && Array.isArray(strategy_and_news.strategic_themes) && strategy_and_news.strategic_themes.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Strategic Themes</Text>
-              {strategy_and_news.strategic_themes.map((theme, index) => (
-                <View key={index} style={styles.themeCard}>
-                  <Text style={styles.themeName}>{theme.theme}</Text>
-                  <Text style={styles.themeRationale}>{theme.rationale}</Text>
-                </View>
-              ))}
+              {strategy_and_news.strategic_themes.map((theme, index) => {
+                const themeName = typeof theme === 'string' ? theme : (theme?.theme || theme?.name || '');
+                const rationale = typeof theme === 'object' ? (theme?.rationale || theme?.description || '') : '';
+
+                return (
+                  <View key={index} style={styles.themeCard}>
+                    <Text style={styles.themeName}>{themeName}</Text>
+                    {rationale ? <Text style={styles.themeRationale}>{rationale}</Text> : null}
+                  </View>
+                );
+              })}
             </View>
           )}
-          {strategy_and_news?.technology_focus && strategy_and_news.technology_focus.length > 0 && (
+          {strategy_and_news?.technology_focus && Array.isArray(strategy_and_news.technology_focus) && strategy_and_news.technology_focus.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Technology Focus</Text>
-              {strategy_and_news.technology_focus.map((tech, index) => (
-                <View key={index} style={styles.techCard}>
-                  <Text style={styles.techName}>{tech.technology}</Text>
-                  <Text style={styles.techDescription}>{tech.description}</Text>
-                  {tech.relevance_to_role && (
-                    <Text style={styles.techRelevance}>Relevance: {tech.relevance_to_role}</Text>
-                  )}
-                </View>
-              ))}
+              {strategy_and_news.technology_focus.map((tech, index) => {
+                const techName = typeof tech === 'string' ? tech : (tech?.technology || tech?.name || '');
+                const description = typeof tech === 'object' ? (tech?.description || '') : '';
+                const relevance = typeof tech === 'object' ? (tech?.relevance_to_role || '') : '';
+
+                return (
+                  <View key={index} style={styles.techCard}>
+                    <Text style={styles.techName}>{techName}</Text>
+                    {description ? <Text style={styles.techDescription}>{description}</Text> : null}
+                    {relevance ? <Text style={styles.techRelevance}>Relevance: {relevance}</Text> : null}
+                  </View>
+                );
+              })}
             </View>
           )}
-          {strategy_and_news?.recent_events && strategy_and_news.recent_events.length > 0 && (
+          {strategy_and_news?.recent_events && Array.isArray(strategy_and_news.recent_events) && strategy_and_news.recent_events.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Recent News</Text>
-              {strategy_and_news.recent_events.slice(0, 5).map((event, index) => (
-                <View key={index} style={styles.newsItem}>
-                  <Text style={styles.newsHeadline}>{event.title || event.headline}</Text>
-                  {event.date && <Text style={styles.newsDate}>{event.date}</Text>}
-                  {event.source && <Text style={styles.newsSource}>Source: {event.source}</Text>}
-                  <Text style={styles.newsSummary}>{event.summary}</Text>
-                  {event.impact_summary && (
-                    <Text style={styles.newsImpact}>Impact: {event.impact_summary}</Text>
-                  )}
-                </View>
-              ))}
+              {strategy_and_news.recent_events.slice(0, 5).map((event, index) => {
+                const headline = typeof event === 'string' ? event : (event?.title || event?.headline || '');
+                const date = typeof event === 'object' ? (event?.date || '') : '';
+                const source = typeof event === 'object' ? (event?.source || '') : '';
+                const summary = typeof event === 'object' ? (event?.summary || '') : '';
+                const impact = typeof event === 'object' ? (event?.impact_summary || '') : '';
+
+                return (
+                  <View key={index} style={styles.newsItem}>
+                    <Text style={styles.newsHeadline}>{headline}</Text>
+                    {date ? <Text style={styles.newsDate}>{date}</Text> : null}
+                    {source ? <Text style={styles.newsSource}>Source: {source}</Text> : null}
+                    {summary ? <Text style={styles.newsSummary}>{summary}</Text> : null}
+                    {impact ? <Text style={styles.newsImpact}>Impact: {impact}</Text> : null}
+                  </View>
+                );
+              })}
             </View>
           )}
         </ExpandableSection>
@@ -549,7 +592,7 @@ export default function InterviewPrepScreen() {
           icon={<ClipboardList color={COLORS.success} size={20} />}
           accentColor={COLORS.success}
         >
-          {interview_preparation?.research_tasks && interview_preparation.research_tasks.length > 0 && (
+          {interview_preparation?.research_tasks && Array.isArray(interview_preparation.research_tasks) && interview_preparation.research_tasks.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Research Tasks</Text>
               <BulletList
@@ -558,7 +601,7 @@ export default function InterviewPrepScreen() {
               />
             </View>
           )}
-          {interview_preparation?.day_of_checklist && interview_preparation.day_of_checklist.length > 0 && (
+          {interview_preparation?.day_of_checklist && Array.isArray(interview_preparation.day_of_checklist) && interview_preparation.day_of_checklist.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Day-of Checklist</Text>
               <BulletList
@@ -567,15 +610,18 @@ export default function InterviewPrepScreen() {
               />
             </View>
           )}
-          {interview_preparation?.practice_questions_for_candidate && interview_preparation.practice_questions_for_candidate.length > 0 && (
+          {interview_preparation?.practice_questions_for_candidate && Array.isArray(interview_preparation.practice_questions_for_candidate) && interview_preparation.practice_questions_for_candidate.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Practice Questions</Text>
-              {interview_preparation.practice_questions_for_candidate.map((question, index) => (
-                <View key={index} style={styles.practiceQuestion}>
-                  <HelpCircle color={COLORS.primary} size={16} />
-                  <Text style={styles.practiceQuestionText}>{question}</Text>
-                </View>
-              ))}
+              {interview_preparation.practice_questions_for_candidate.map((question, index) => {
+                const questionText = typeof question === 'string' ? question : (question?.question || question?.text || JSON.stringify(question));
+                return (
+                  <View key={index} style={styles.practiceQuestion}>
+                    <HelpCircle color={COLORS.primary} size={16} />
+                    <Text style={styles.practiceQuestionText}>{questionText}</Text>
+                  </View>
+                );
+              })}
             </View>
           )}
         </ExpandableSection>
@@ -586,31 +632,31 @@ export default function InterviewPrepScreen() {
           icon={<MessageCircle color={COLORS.warning} size={20} />}
           accentColor={COLORS.warning}
         >
-          {questions_to_ask_interviewer?.product && questions_to_ask_interviewer.product.length > 0 && (
+          {questions_to_ask_interviewer?.product && Array.isArray(questions_to_ask_interviewer.product) && questions_to_ask_interviewer.product.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>About the Product</Text>
               <BulletList items={questions_to_ask_interviewer.product} />
             </View>
           )}
-          {questions_to_ask_interviewer?.team && questions_to_ask_interviewer.team.length > 0 && (
+          {questions_to_ask_interviewer?.team && Array.isArray(questions_to_ask_interviewer.team) && questions_to_ask_interviewer.team.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>About the Team</Text>
               <BulletList items={questions_to_ask_interviewer.team} />
             </View>
           )}
-          {questions_to_ask_interviewer?.culture && questions_to_ask_interviewer.culture.length > 0 && (
+          {questions_to_ask_interviewer?.culture && Array.isArray(questions_to_ask_interviewer.culture) && questions_to_ask_interviewer.culture.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>About Culture</Text>
               <BulletList items={questions_to_ask_interviewer.culture} />
             </View>
           )}
-          {questions_to_ask_interviewer?.performance && questions_to_ask_interviewer.performance.length > 0 && (
+          {questions_to_ask_interviewer?.performance && Array.isArray(questions_to_ask_interviewer.performance) && questions_to_ask_interviewer.performance.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>About Performance</Text>
               <BulletList items={questions_to_ask_interviewer.performance} />
             </View>
           )}
-          {questions_to_ask_interviewer?.strategy && questions_to_ask_interviewer.strategy.length > 0 && (
+          {questions_to_ask_interviewer?.strategy && Array.isArray(questions_to_ask_interviewer.strategy) && questions_to_ask_interviewer.strategy.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>About Strategy</Text>
               <BulletList items={questions_to_ask_interviewer.strategy} />
@@ -624,37 +670,54 @@ export default function InterviewPrepScreen() {
           icon={<Award color={COLORS.purple} size={20} />}
           accentColor={COLORS.purple}
         >
-          {candidate_positioning?.resume_focus_areas && candidate_positioning.resume_focus_areas.length > 0 && (
+          {candidate_positioning?.resume_focus_areas && Array.isArray(candidate_positioning.resume_focus_areas) && candidate_positioning.resume_focus_areas.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Resume Focus Areas</Text>
               <BulletList items={candidate_positioning.resume_focus_areas} />
             </View>
           )}
-          {candidate_positioning?.story_prompts && candidate_positioning.story_prompts.length > 0 && (
+          {candidate_positioning?.story_prompts && Array.isArray(candidate_positioning.story_prompts) && candidate_positioning.story_prompts.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>STAR Story Prompts</Text>
-              {candidate_positioning.story_prompts.map((prompt, index) => (
-                <View key={index} style={styles.storyPromptCard}>
-                  <View style={styles.storyPromptHeader}>
-                    <Lightbulb color={COLORS.warning} size={16} />
-                    <Text style={styles.storyPromptTitle}>{prompt.title}</Text>
+              {candidate_positioning.story_prompts.map((prompt, index) => {
+                // Handle case where prompt might be a string or have different structure
+                const title = typeof prompt === 'string' ? prompt : (prompt?.title || '');
+                const description = typeof prompt === 'object' ? (prompt?.description || '') : '';
+
+                return (
+                  <View key={index} style={styles.storyPromptCard}>
+                    <View style={styles.storyPromptHeader}>
+                      <Lightbulb color={COLORS.warning} size={16} />
+                      <Text style={styles.storyPromptTitle}>{title}</Text>
+                    </View>
+                    {description ? (
+                      <Text style={styles.storyPromptDescription}>{description}</Text>
+                    ) : null}
                   </View>
-                  <Text style={styles.storyPromptDescription}>{prompt.description}</Text>
-                </View>
-              ))}
+                );
+              })}
             </View>
           )}
-          {candidate_positioning?.keyword_map && candidate_positioning.keyword_map.length > 0 && (
+          {candidate_positioning?.keyword_map && Array.isArray(candidate_positioning.keyword_map) && candidate_positioning.keyword_map.length > 0 && (
             <View style={styles.subsection}>
               <Text style={styles.subsectionTitle}>Keywords to Use</Text>
-              {candidate_positioning.keyword_map.map((item, index) => (
-                <View key={index} style={styles.keywordItem}>
-                  <Text style={styles.keywordLabel}>
-                    {item.company_term} → {item.candidate_equivalent}
-                  </Text>
-                  <Text style={styles.keywordContext}>{item.context}</Text>
-                </View>
-              ))}
+              {candidate_positioning.keyword_map.map((item, index) => {
+                // Handle case where item structure might vary
+                const companyTerm = item?.company_term || item?.term || '';
+                const candidateEquivalent = item?.candidate_equivalent || item?.equivalent || '';
+                const context = item?.context || '';
+
+                return (
+                  <View key={index} style={styles.keywordItem}>
+                    <Text style={styles.keywordLabel}>
+                      {companyTerm} → {candidateEquivalent}
+                    </Text>
+                    {context ? (
+                      <Text style={styles.keywordContext}>{context}</Text>
+                    ) : null}
+                  </View>
+                );
+              })}
             </View>
           )}
         </ExpandableSection>
