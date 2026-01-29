@@ -1,7 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { AlertTriangle } from 'lucide-react-native';
-import { COLORS, SPACING, RADIUS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
 
 interface Props {
   children: ReactNode;
@@ -92,13 +92,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
     color: COLORS.dark.text,
     marginBottom: SPACING.md,
     textAlign: 'center',
   },
   message: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
@@ -113,14 +114,14 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.danger,
     marginBottom: SPACING.sm,
   },
   errorText: {
     fontSize: 11,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
-    fontFamily: 'monospace',
   },
   button: {
     backgroundColor: COLORS.primary,
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textAlign: 'center',
   },
 });

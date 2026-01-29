@@ -13,16 +13,17 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Briefcase, Building2, ChevronRight, Target } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 interface InterviewPrep {
   id: number;
   tailored_resume_id: number;
-  company: string;
+  company_name: string;
   job_title: string;
+  job_location?: string;
   created_at: string;
-  questions_count?: number;
+  updated_at?: string;
 }
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -77,8 +78,8 @@ export default function InterviewPrepListScreen() {
       style={styles.card}
       onPress={() => navigation.navigate('InterviewPrep', { tailoredResumeId: item.tailored_resume_id })}
       accessibilityRole="button"
-      accessibilityLabel={`Interview prep for ${item.company} ${item.job_title}`}
-      accessibilityHint={`${item.questions_count || 'No'} questions prepared. Created on ${formatDate(item.created_at)}`}
+      accessibilityLabel={`Interview prep for ${item.company_name} ${item.job_title}`}
+      accessibilityHint={`Created on ${formatDate(item.created_at)}`}
     >
       <View style={styles.cardContent}>
         <View style={styles.iconContainer}>
@@ -88,14 +89,14 @@ export default function InterviewPrepListScreen() {
           <View style={styles.cardHeader}>
             <Building2 color={COLORS.dark.textSecondary} size={14} />
             <Text style={styles.company} numberOfLines={1}>
-              {item.company || 'Unknown Company'}
+              {item.company_name || 'Unknown Company'}
             </Text>
           </View>
           <Text style={styles.jobTitle} numberOfLines={2}>
             {item.job_title || 'Interview Prep'}
           </Text>
           <Text style={styles.meta}>
-            {item.questions_count ? `${item.questions_count} questions • ` : ''}
+            {item.job_location ? `${item.job_location} • ` : ''}
             {formatDate(item.created_at)}
           </Text>
         </View>
@@ -175,6 +176,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     color: COLORS.dark.textSecondary,
     fontSize: 16,
+    fontFamily: FONTS.regular,
   },
   header: {
     paddingHorizontal: SPACING.lg,
@@ -182,7 +184,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
   },
   list: {
@@ -225,17 +227,19 @@ const styles = StyleSheet.create({
   },
   company: {
     fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     flex: 1,
   },
   jobTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     marginBottom: 4,
   },
   meta: {
     fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
   },
   emptyState: {
@@ -251,12 +255,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
@@ -273,7 +278,7 @@ const styles = StyleSheet.create({
   },
   tailorButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.background,
   },
 });

@@ -14,32 +14,37 @@ import {
   User,
   Bell,
   Moon,
+  Sun,
   Shield,
   HelpCircle,
   Mail,
   ExternalLink,
   Trash2,
-  LogOut,
   ChevronRight,
-  Info,
   BookOpen,
   TrendingUp,
+  Palette,
+  Image as ImageIcon,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { clearUserSession, getUserId } from '../utils/userSession';
-import { COLORS, SPACING, RADIUS, STORAGE_KEYS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useTheme } from '../context/ThemeContext';
+import { GlassCard } from '../components/glass/GlassCard';
+import { BackgroundSelector } from '../components/glass/BackgroundSelector';
+import { getBackgroundById } from '../constants/backgrounds';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { isDark, themeMode, setThemeMode, colors, backgroundId, customBackgroundUri } = useTheme();
   const [userId, setUserId] = useState<string>('');
-  const [darkMode, setDarkMode] = useState(true);
   const [notifications, setNotifications] = useState(true);
+  const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -78,6 +83,28 @@ export default function SettingsScreen() {
     );
   };
 
+  const handleToggleTheme = () => {
+    // Cycle through: dark -> light -> system -> dark
+    if (themeMode === 'dark') {
+      setThemeMode('light');
+    } else if (themeMode === 'light') {
+      setThemeMode('system');
+    } else {
+      setThemeMode('dark');
+    }
+  };
+
+  const getThemeModeLabel = () => {
+    switch (themeMode) {
+      case 'dark':
+        return 'Dark';
+      case 'light':
+        return 'Light';
+      case 'system':
+        return 'System';
+    }
+  };
+
   const handleContact = () => {
     Linking.openURL('mailto:support@talor.app?subject=Mobile App Support');
   };
@@ -90,8 +117,13 @@ export default function SettingsScreen() {
     Linking.openURL('https://talor.app/terms');
   };
 
+  // Get current background name
+  const currentBackgroundName = customBackgroundUri
+    ? 'Custom Photo'
+    : getBackgroundById(backgroundId)?.name || 'Default';
+
   const renderSection = (title: string) => (
-    <Text style={styles.sectionTitle}>{title}</Text>
+    <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>{title}</Text>
   );
 
   const renderItem = (
@@ -103,50 +135,62 @@ export default function SettingsScreen() {
     accessibilityHint?: string
   ) => (
     <TouchableOpacity
-      style={styles.item}
+      style={[styles.item, { borderBottomColor: colors.border }]}
       onPress={onPress}
       disabled={!onPress && !rightElement}
-      accessibilityRole={onPress ? "button" : "none"}
+      accessibilityRole={onPress ? 'button' : 'none'}
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
     >
       <View style={styles.itemLeft}>
-        <View style={[styles.iconContainer, destructive && styles.iconContainerDestructive]}>
+        <View
+          style={[
+            styles.iconContainer,
+            { backgroundColor: colors.backgroundTertiary },
+            destructive && { backgroundColor: ALPHA_COLORS.danger.bg },
+          ]}
+        >
           {icon}
         </View>
-        <Text style={[styles.itemLabel, destructive && styles.itemLabelDestructive]}>
+        <Text
+          style={[
+            styles.itemLabel,
+            { color: colors.text },
+            destructive && { color: COLORS.danger },
+          ]}
+        >
           {label}
         </Text>
       </View>
-      {rightElement || (onPress && <ChevronRight color={COLORS.dark.textTertiary} size={20} />)}
+      {rightElement || (onPress && <ChevronRight color={colors.textTertiary} size={20} />)}
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Settings</Text>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         {/* Account Section */}
         {renderSection('ACCOUNT')}
-        <View style={styles.card}>
+        <GlassCard padding={0} material="thin">
           {renderItem(
-            <User color={COLORS.dark.textSecondary} size={20} />,
+            <User color={colors.textSecondary} size={20} />,
             'User ID',
             undefined,
-            <Text style={styles.itemValue} numberOfLines={1}>
+            <Text style={[styles.itemValue, { color: colors.textSecondary }]} numberOfLines={1}>
               {userId.slice(0, 16)}...
             </Text>
           )}
-        </View>
+        </GlassCard>
 
         {/* Features Section */}
         {renderSection('FEATURES')}
-        <View style={styles.card}>
+        <GlassCard padding={0} material="thin">
           {renderItem(
-            <BookOpen color={COLORS.dark.textSecondary} size={20} />,
+            <BookOpen color={colors.textSecondary} size={20} />,
             'STAR Stories',
             () => navigation.navigate('StarStories'),
             undefined,
@@ -154,47 +198,71 @@ export default function SettingsScreen() {
             'Manage your behavioral interview stories'
           )}
           {renderItem(
-            <TrendingUp color={COLORS.dark.textSecondary} size={20} />,
+            <TrendingUp color={colors.textSecondary} size={20} />,
             'Career Path Designer',
             () => navigation.navigate('CareerPathDesigner'),
             undefined,
             false,
             'Plan your career progression with AI guidance'
           )}
-        </View>
+        </GlassCard>
+
+        {/* Appearance Section */}
+        {renderSection('APPEARANCE')}
+        <GlassCard padding={0} material="thin">
+          {renderItem(
+            isDark ? (
+              <Moon color={colors.textSecondary} size={20} />
+            ) : (
+              <Sun color={colors.textSecondary} size={20} />
+            ),
+            'Theme',
+            handleToggleTheme,
+            <View style={styles.themeIndicator}>
+              <Text style={[styles.themeLabel, { color: colors.textSecondary }]}>
+                {getThemeModeLabel()}
+              </Text>
+              <ChevronRight color={colors.textTertiary} size={20} />
+            </View>,
+            false,
+            'Toggle between dark, light, and system theme'
+          )}
+          {renderItem(
+            <Palette color={colors.textSecondary} size={20} />,
+            'Background',
+            () => setShowBackgroundSelector(true),
+            <View style={styles.themeIndicator}>
+              <Text style={[styles.themeLabel, { color: colors.textSecondary }]}>
+                {currentBackgroundName}
+              </Text>
+              <ChevronRight color={colors.textTertiary} size={20} />
+            </View>,
+            false,
+            'Choose a custom background'
+          )}
+        </GlassCard>
 
         {/* Preferences Section */}
         {renderSection('PREFERENCES')}
-        <View style={styles.card}>
+        <GlassCard padding={0} material="thin">
           {renderItem(
-            <Moon color={COLORS.dark.textSecondary} size={20} />,
-            'Dark Mode',
-            undefined,
-            <Switch
-              value={darkMode}
-              onValueChange={setDarkMode}
-              trackColor={{ false: COLORS.dark.border, true: COLORS.primary }}
-              thumbColor={COLORS.dark.text}
-            />
-          )}
-          {renderItem(
-            <Bell color={COLORS.dark.textSecondary} size={20} />,
+            <Bell color={colors.textSecondary} size={20} />,
             'Notifications',
             undefined,
             <Switch
               value={notifications}
               onValueChange={setNotifications}
-              trackColor={{ false: COLORS.dark.border, true: COLORS.primary }}
-              thumbColor={COLORS.dark.text}
+              trackColor={{ false: colors.border, true: COLORS.primary }}
+              thumbColor={colors.text}
             />
           )}
-        </View>
+        </GlassCard>
 
         {/* Support Section */}
         {renderSection('SUPPORT')}
-        <View style={styles.card}>
+        <GlassCard padding={0} material="thin">
           {renderItem(
-            <HelpCircle color={COLORS.dark.textSecondary} size={20} />,
+            <HelpCircle color={colors.textSecondary} size={20} />,
             'Help Center',
             () => Linking.openURL('https://talor.app/help'),
             undefined,
@@ -202,20 +270,20 @@ export default function SettingsScreen() {
             'Opens help documentation in browser'
           )}
           {renderItem(
-            <Mail color={COLORS.dark.textSecondary} size={20} />,
+            <Mail color={colors.textSecondary} size={20} />,
             'Contact Support',
             handleContact,
             undefined,
             false,
             'Send an email to support team'
           )}
-        </View>
+        </GlassCard>
 
         {/* Legal Section */}
         {renderSection('LEGAL')}
-        <View style={styles.card}>
+        <GlassCard padding={0} material="thin">
           {renderItem(
-            <Shield color={COLORS.dark.textSecondary} size={20} />,
+            <Shield color={colors.textSecondary} size={20} />,
             'Privacy Policy',
             handlePrivacy,
             undefined,
@@ -223,18 +291,18 @@ export default function SettingsScreen() {
             'View privacy and data protection policy'
           )}
           {renderItem(
-            <ExternalLink color={COLORS.dark.textSecondary} size={20} />,
+            <ExternalLink color={colors.textSecondary} size={20} />,
             'Terms of Service',
             handleTerms,
             undefined,
             false,
             'View terms and conditions of use'
           )}
-        </View>
+        </GlassCard>
 
         {/* Data Section */}
         {renderSection('DATA')}
-        <View style={styles.card}>
+        <GlassCard padding={0} material="thin">
           {renderItem(
             <Trash2 color={COLORS.danger} size={20} />,
             'Clear Local Data',
@@ -243,20 +311,33 @@ export default function SettingsScreen() {
             true,
             'Deletes all local session data and user ID'
           )}
-        </View>
+        </GlassCard>
 
         {/* App Info */}
         <View style={styles.appInfo}>
-          <View style={styles.appIcon}>
+          <GlassCard
+            style={styles.appIcon}
+            padding={SPACING.md}
+            material="thin"
+            shadow="none"
+          >
             <Settings color={COLORS.primary} size={32} />
-          </View>
-          <Text style={styles.appName}>Talor</Text>
-          <Text style={styles.appVersion}>Version 1.0.0</Text>
-          <Text style={styles.appCopyright}>
+          </GlassCard>
+          <Text style={[styles.appName, { color: colors.text }]}>Talor</Text>
+          <Text style={[styles.appVersion, { color: colors.textSecondary }]}>
+            Version 1.0.0
+          </Text>
+          <Text style={[styles.appCopyright, { color: colors.textTertiary }]}>
             {new Date().getFullYear()} Talor. All rights reserved.
           </Text>
         </View>
       </ScrollView>
+
+      {/* Background Selector Modal */}
+      <BackgroundSelector
+        visible={showBackgroundSelector}
+        onClose={() => setShowBackgroundSelector(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -264,7 +345,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   header: {
     paddingHorizontal: SPACING.lg,
@@ -272,8 +352,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: COLORS.dark.text,
+    fontFamily: FONTS.extralight,
   },
   content: {
     flex: 1,
@@ -281,21 +360,14 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: SPACING.lg,
     paddingTop: SPACING.sm,
+    paddingBottom: 120, // Extra space for floating tab bar
   },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.dark.textTertiary,
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
     marginTop: SPACING.lg,
     letterSpacing: 0.5,
-  },
-  card: {
-    backgroundColor: COLORS.dark.glass,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
-    overflow: 'hidden',
   },
   item: {
     flexDirection: 'row',
@@ -304,7 +376,6 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     minHeight: 56,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.dark.border,
   },
   itemLeft: {
     flexDirection: 'row',
@@ -315,26 +386,28 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: RADIUS.sm,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
   },
-  iconContainerDestructive: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-  },
   itemLabel: {
     fontSize: 16,
-    color: COLORS.dark.text,
+    fontFamily: FONTS.regular,
     flex: 1,
-  },
-  itemLabelDestructive: {
-    color: COLORS.danger,
   },
   itemValue: {
     fontSize: 14,
-    color: COLORS.dark.textSecondary,
+    fontFamily: FONTS.regular,
     maxWidth: 120,
+  },
+  themeIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  themeLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
   },
   appInfo: {
     alignItems: 'center',
@@ -342,29 +415,20 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   appIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.dark.glass,
-    borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: SPACING.md,
   },
   appName: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.dark.text,
+    fontFamily: FONTS.bold,
     marginBottom: SPACING.xs,
   },
   appVersion: {
     fontSize: 14,
-    color: COLORS.dark.textSecondary,
+    fontFamily: FONTS.regular,
     marginBottom: SPACING.sm,
   },
   appCopyright: {
     fontSize: 12,
-    color: COLORS.dark.textTertiary,
+    fontFamily: FONTS.regular,
   },
 });

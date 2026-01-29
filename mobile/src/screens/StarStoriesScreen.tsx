@@ -16,7 +16,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BookOpen, Trash2, X, Plus } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 interface StarStory {
@@ -338,6 +338,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     color: COLORS.dark.textSecondary,
     fontSize: 16,
+    fontFamily: FONTS.regular,
   },
   header: {
     flexDirection: 'row',
@@ -348,7 +349,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
   },
   addButton: {
@@ -391,17 +392,19 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     marginBottom: 2,
   },
   cardTheme: {
     fontSize: 13,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     marginBottom: 4,
   },
   cardDate: {
     fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
   },
   deleteButton: {
@@ -424,12 +427,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
@@ -446,7 +450,7 @@ const styles = StyleSheet.create({
   },
   createButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.background,
   },
   modalContainer: {
@@ -470,7 +474,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
   },
   headerPlaceholder: {
@@ -484,7 +488,7 @@ const styles = StyleSheet.create({
   },
   storyTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     marginBottom: SPACING.md,
   },
@@ -498,7 +502,7 @@ const styles = StyleSheet.create({
   },
   themeBadgeText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primary,
   },
   section: {
@@ -506,7 +510,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.textSecondary,
     marginBottom: SPACING.sm,
     textTransform: 'uppercase',
@@ -514,6 +518,7 @@ const styles = StyleSheet.create({
   },
   sectionText: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.text,
     lineHeight: 24,
   },
@@ -530,6 +535,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 13,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.text,
   },
   bulletPoint: {
@@ -538,6 +544,7 @@ const styles = StyleSheet.create({
   },
   bullet: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.primary,
     marginRight: SPACING.sm,
     lineHeight: 24,
@@ -545,11 +552,13 @@ const styles = StyleSheet.create({
   bulletText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.text,
     lineHeight: 24,
   },
   metaText: {
     fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
     marginBottom: 4,
   },

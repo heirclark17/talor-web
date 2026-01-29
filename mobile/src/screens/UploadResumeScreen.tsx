@@ -14,7 +14,7 @@ import { X, Upload, FileText, CheckCircle } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
   },
   placeholder: {
@@ -265,18 +265,20 @@ const styles = StyleSheet.create({
   },
   dropZoneTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   dropZoneText: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.md,
   },
   supportedFormats: {
     fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
   },
   filePreview: {
@@ -288,13 +290,14 @@ const styles = StyleSheet.create({
   },
   fileName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     textAlign: 'center',
     marginBottom: SPACING.xs,
   },
   fileSize: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     marginBottom: SPACING.lg,
   },
@@ -306,7 +309,7 @@ const styles = StyleSheet.create({
   },
   changeButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primary,
   },
   successState: {
@@ -318,12 +321,13 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.success,
     marginBottom: SPACING.sm,
   },
   successText: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
   },
@@ -336,7 +340,7 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     marginBottom: SPACING.lg,
   },
@@ -356,12 +360,13 @@ const styles = StyleSheet.create({
   },
   infoNumberText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
   },
   infoText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     lineHeight: 20,
   },
@@ -385,7 +390,7 @@ const styles = StyleSheet.create({
   },
   uploadButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.background,
   },
 });

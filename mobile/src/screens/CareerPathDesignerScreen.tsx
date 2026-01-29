@@ -28,7 +28,7 @@ import {
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -1223,11 +1223,11 @@ const styles = StyleSheet.create({
   welcomeBadgeText: {
     color: COLORS.dark.text,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   welcomeTitle: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     textAlign: 'center',
     marginBottom: SPACING.md,
@@ -1235,6 +1235,7 @@ const styles = StyleSheet.create({
   },
   welcomeSubtitle: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xxl,
@@ -1265,12 +1266,13 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     marginBottom: SPACING.xs,
   },
   featureText: {
     fontSize: 13,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
   },
@@ -1286,7 +1288,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.background,
   },
   secondaryButton: {
@@ -1299,6 +1301,7 @@ const styles = StyleSheet.create({
   },
   welcomeFooter: {
     fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
     marginTop: SPACING.md,
   },
@@ -1307,13 +1310,14 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     marginBottom: SPACING.sm,
     textAlign: 'center',
   },
   screenSubtitle: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     marginBottom: SPACING.xl,
     textAlign: 'center',
@@ -1323,7 +1327,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     marginBottom: SPACING.md,
     textAlign: 'center',
@@ -1344,12 +1348,13 @@ const styles = StyleSheet.create({
   },
   resumeName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     marginBottom: 4,
   },
   resumeDate: {
     fontSize: 13,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
   },
   divider: {
@@ -1366,6 +1371,7 @@ const styles = StyleSheet.create({
     color: COLORS.dark.textSecondary,
     paddingHorizontal: SPACING.md,
     fontSize: 14,
+    fontFamily: FONTS.regular,
   },
   uploadZone: {
     backgroundColor: COLORS.dark.glass,
@@ -1381,13 +1387,14 @@ const styles = StyleSheet.create({
   },
   uploadTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     marginTop: SPACING.md,
     textAlign: 'center',
   },
   uploadSubtext: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     marginTop: SPACING.xs,
     textAlign: 'center',
@@ -1415,6 +1422,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: COLORS.danger,
     fontSize: 14,
+    fontFamily: FONTS.regular,
   },
   navigationButtons: {
     flexDirection: 'row',
@@ -1431,7 +1439,7 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: COLORS.dark.textSecondary,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   questionsContainer: {
     flex: 1,
@@ -1459,7 +1467,7 @@ const styles = StyleSheet.create({
   stepDotText: {
     color: COLORS.dark.textSecondary,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   stepHeader: {
     alignItems: 'center',
@@ -1476,12 +1484,13 @@ const styles = StyleSheet.create({
   },
   stepTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     marginBottom: SPACING.xs,
   },
   stepSubtitle: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
   },
@@ -1493,7 +1502,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
   },
   input: {
@@ -1504,6 +1513,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     color: COLORS.dark.text,
     fontSize: 16,
+    fontFamily: FONTS.regular,
     minHeight: 48,
   },
   inputMargin: {
@@ -1511,6 +1521,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 13,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
   },
   chipGrid: {
@@ -1535,7 +1546,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
   },
   chipTextSelected: {
@@ -1553,13 +1564,14 @@ const styles = StyleSheet.create({
   },
   chipSubtext: {
     fontSize: 11,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
     marginTop: 2,
   },
   linkText: {
     color: COLORS.primary,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginTop: SPACING.xs,
   },
   switchRow: {
@@ -1569,6 +1581,7 @@ const styles = StyleSheet.create({
   },
   stepLabel: {
     fontSize: 13,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
     textAlign: 'center',
     marginTop: SPACING.lg,
@@ -1593,19 +1606,21 @@ const styles = StyleSheet.create({
   },
   generatingTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     textAlign: 'center',
     marginBottom: SPACING.md,
   },
   generatingMessage: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xs,
   },
   generatingSubtext: {
     fontSize: 13,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
@@ -1628,6 +1643,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
     textAlign: 'center',
   },
@@ -1657,6 +1673,7 @@ const styles = StyleSheet.create({
   stepText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
   },
   stepTextCompleted: {
@@ -1670,13 +1687,14 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     marginTop: SPACING.lg,
     marginBottom: SPACING.sm,
   },
   errorMessage: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
@@ -1704,19 +1722,21 @@ const styles = StyleSheet.create({
   },
   resultsTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     marginBottom: SPACING.sm,
     textAlign: 'center',
   },
   resultsSubtitle: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xs,
   },
   resultsDate: {
     fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
   },
   planContent: {
@@ -1728,6 +1748,7 @@ const styles = StyleSheet.create({
   },
   planText: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.text,
     textAlign: 'center',
     marginBottom: SPACING.sm,

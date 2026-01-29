@@ -19,7 +19,8 @@
       "infoPlist": {
         "UIBackgroundModes": [],
         "NSDocumentsFolderUsageDescription": "Allow Talor to access documents to upload your resume",
-        "NSPhotoLibraryUsageDescription": "Allow Talor to access photos"
+        "NSPhotoLibraryUsageDescription": "Allow Talor to access photos",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -35,7 +36,15 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-document-picker"
-    ]
+      "expo-document-picker",
+      "expo-system-ui",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "04d139f0-2456-4fbb-8115-84c8749f3dc4"
+      }
+    },
+    "owner": "heirclarks-organization"
   }
 }

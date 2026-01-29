@@ -21,7 +21,7 @@ import {
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 interface SavedComparison {
@@ -259,6 +259,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     color: COLORS.dark.textSecondary,
     fontSize: 16,
+    fontFamily: FONTS.regular,
   },
   header: {
     flexDirection: 'row',
@@ -269,11 +270,12 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
   },
   headerCount: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
   },
   list: {
@@ -307,7 +309,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.text,
     marginBottom: SPACING.xs,
   },
@@ -319,6 +321,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 13,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
   },
   bottomRow: {
@@ -329,6 +332,7 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 12,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textTertiary,
   },
   scoreBadge: {
@@ -339,7 +343,7 @@ const styles = StyleSheet.create({
   },
   scoreText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   cardActions: {
     flexDirection: 'row',
@@ -366,7 +370,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primary,
   },
   emptyState: {
@@ -382,12 +386,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.extralight,
     color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
@@ -404,7 +409,7 @@ const styles = StyleSheet.create({
   },
   tailorButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.dark.background,
   },
 });

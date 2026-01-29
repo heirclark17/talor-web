@@ -1,9 +1,11 @@
 import React from 'react';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FileText, Target, Briefcase, BookmarkCheck, Settings } from 'lucide-react-native';
 import { COLORS, FONTS } from '../utils/constants';
+import { useTheme } from '../context/ThemeContext';
+import { GlassTabBar } from '../components/glass/GlassTabBar';
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';
@@ -43,42 +45,15 @@ export type MainTabParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-// Custom dark theme
-const DarkTheme = {
-  ...DefaultTheme,
-  dark: true,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: COLORS.primary,
-    background: COLORS.dark.background,
-    card: COLORS.dark.backgroundSecondary,
-    text: COLORS.dark.text,
-    border: COLORS.dark.border,
-    notification: COLORS.danger,
-  },
-};
-
-// Tab Navigator
+// Tab Navigator with Glass Tab Bar
 function MainTabs() {
+  const { colors, isDark } = useTheme();
+
   return (
     <Tab.Navigator
+      tabBar={(props) => <GlassTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: COLORS.dark.backgroundSecondary,
-          borderTopColor: COLORS.dark.border,
-          borderTopWidth: 1,
-          paddingTop: 8,
-          paddingBottom: 8,
-          height: 80,
-        },
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.dark.textTertiary,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontFamily: FONTS.semibold,
-          marginTop: 4,
-        },
       }}
     >
       <Tab.Screen
@@ -127,12 +102,29 @@ function MainTabs() {
 
 // Main App Navigator
 export default function AppNavigator() {
+  const { colors, isDark } = useTheme();
+
+  // Create custom theme based on current theme mode
+  const navigationTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      primary: COLORS.primary,
+      background: 'transparent', // Transparent to show background layer
+      card: 'transparent',
+      text: colors.text,
+      border: colors.border,
+      notification: COLORS.danger,
+    },
+  };
+
   return (
-    <NavigationContainer theme={DarkTheme}>
+    <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: COLORS.dark.background },
+          contentStyle: { backgroundColor: 'transparent' },
+          animation: 'fade',
         }}
       >
         <Stack.Screen name="Main" component={MainTabs} />

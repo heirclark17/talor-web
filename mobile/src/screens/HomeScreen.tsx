@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,14 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FileText, Upload, Trash2, Target, ChevronRight } from 'lucide-react-native';
+import { FileText, Upload, Trash2, Target } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useTheme } from '../context/ThemeContext';
+import { GlassCard } from '../components/glass/GlassCard';
+import { GlassButton } from '../components/glass/GlassButton';
 
 interface Resume {
   id: number;
@@ -30,6 +33,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors, isDark } = useTheme();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -108,77 +112,69 @@ export default function HomeScreen() {
   };
 
   const renderItem = ({ item }: { item: Resume }) => (
-    <View style={styles.card}>
+    <GlassCard style={styles.card} material="thin">
       <View style={styles.cardHeader}>
-        <View style={styles.iconContainer}>
-          <FileText color={COLORS.dark.text} size={24} />
+        <View style={[styles.iconContainer, { backgroundColor: colors.backgroundTertiary }]}>
+          <FileText color={colors.text} size={24} />
         </View>
         <View style={styles.cardContent}>
-          <Text style={styles.filename} numberOfLines={1}>
+          <Text style={[styles.filename, { color: colors.text }]} numberOfLines={1}>
             {item.filename}
           </Text>
           {item.name && (
-            <Text style={styles.name}>{item.name}</Text>
+            <Text style={[styles.name, { color: colors.textSecondary }]}>{item.name}</Text>
           )}
-          <Text style={styles.meta}>
-            {item.skills_count} skills • {formatDate(item.uploaded_at)}
+          <Text style={[styles.meta, { color: colors.textTertiary }]}>
+            {item.skills_count} skills {'\u2022'} {formatDate(item.uploaded_at)}
           </Text>
         </View>
       </View>
 
       <View style={styles.cardActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
+        <GlassButton
+          label="Tailor"
+          variant="secondary"
+          size="sm"
+          icon={<Target color={COLORS.primary} size={18} />}
           onPress={() => handleTailor(item.id)}
-          accessibilityRole="button"
-          accessibilityLabel={`Tailor ${item.filename} for a specific job`}
-          accessibilityHint="Opens the resume tailoring screen"
-        >
-          <Target color={COLORS.primary} size={20} />
-          <Text style={styles.actionText}>Tailor</Text>
-        </TouchableOpacity>
+          style={styles.actionButton}
+        />
 
-        <TouchableOpacity
-          style={[styles.actionButton, styles.deleteButton]}
+        <GlassButton
+          label={deletingId === item.id ? '' : 'Delete'}
+          variant="danger"
+          size="sm"
+          icon={
+            deletingId === item.id ? (
+              <ActivityIndicator size="small" color={COLORS.danger} />
+            ) : (
+              <Trash2 color={COLORS.danger} size={18} />
+            )
+          }
           onPress={() => handleDelete(item.id)}
           disabled={deletingId === item.id}
-          accessibilityRole="button"
-          accessibilityLabel={`Delete ${item.filename}`}
-          accessibilityHint="Permanently removes this resume"
-          accessibilityState={{ disabled: deletingId === item.id }}
-        >
-          {deletingId === item.id ? (
-            <ActivityIndicator size="small" color={COLORS.danger} />
-          ) : (
-            <>
-              <Trash2 color={COLORS.danger} size={20} />
-              <Text style={[styles.actionText, styles.deleteText]}>Delete</Text>
-            </>
-          )}
-        </TouchableOpacity>
+          style={styles.actionButton}
+        />
       </View>
-    </View>
+    </GlassCard>
   );
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <View style={styles.emptyIcon}>
-        <FileText color={COLORS.dark.textTertiary} size={64} />
+        <FileText color={colors.textTertiary} size={64} />
       </View>
-      <Text style={styles.emptyTitle}>No Resumes Yet</Text>
-      <Text style={styles.emptyText}>
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>No Resumes Yet</Text>
+      <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
         Upload your first resume to get started with tailoring for specific jobs.
       </Text>
-      <TouchableOpacity
-        style={styles.uploadButton}
+      <GlassButton
+        label="Upload Resume"
+        variant="primary"
+        size="lg"
+        icon={<Upload color="#ffffff" size={20} />}
         onPress={() => navigation.navigate('UploadResume')}
-        accessibilityRole="button"
-        accessibilityLabel="Upload your first resume"
-        accessibilityHint="Opens document picker to select a resume file"
-      >
-        <Upload color={COLORS.dark.text} size={20} />
-        <Text style={styles.uploadButtonText}>Upload Resume</Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 
@@ -187,7 +183,9 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading resumes...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+            Loading resumes...
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -196,16 +194,14 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Resumes</Text>
-        <TouchableOpacity
-          style={styles.addButton}
+        <Text style={[styles.title, { color: colors.text }]}>My Resumes</Text>
+        <GlassButton
+          variant="secondary"
+          size="sm"
+          icon={<Upload color={colors.text} size={20} />}
           onPress={() => navigation.navigate('UploadResume')}
-          accessibilityRole="button"
-          accessibilityLabel="Upload new resume"
-          accessibilityHint="Opens document picker to add another resume"
-        >
-          <Upload color={COLORS.dark.text} size={20} />
-        </TouchableOpacity>
+          style={styles.addButton}
+        />
       </View>
 
       <FlatList
@@ -229,7 +225,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   loadingContainer: {
     flex: 1,
@@ -238,8 +233,8 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.md,
-    color: COLORS.dark.textSecondary,
     fontSize: 16,
+    fontFamily: FONTS.regular,
   },
   header: {
     flexDirection: 'row',
@@ -250,29 +245,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: COLORS.dark.text,
+    fontFamily: FONTS.extralight,
   },
   addButton: {
     width: 44,
     height: 44,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.dark.glass,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
   },
   list: {
     padding: SPACING.lg,
     paddingTop: SPACING.sm,
+    paddingBottom: 120, // Extra space for floating tab bar
   },
   card: {
-    backgroundColor: COLORS.dark.glass,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
-    padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
   cardHeader: {
@@ -283,7 +267,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: RADIUS.md,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
@@ -293,18 +276,17 @@ const styles = StyleSheet.create({
   },
   filename: {
     fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.dark.text,
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   name: {
     fontSize: 14,
-    color: COLORS.dark.textSecondary,
+    fontFamily: FONTS.regular,
     marginBottom: 4,
   },
   meta: {
     fontSize: 12,
-    color: COLORS.dark.textTertiary,
+    fontFamily: FONTS.regular,
   },
   cardActions: {
     flexDirection: 'row',
@@ -313,25 +295,6 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.dark.backgroundTertiary,
-    minHeight: 44,
-  },
-  deleteButton: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-  },
-  actionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.primary,
-  },
-  deleteText: {
-    color: COLORS.danger,
   },
   emptyState: {
     flex: 1,
@@ -346,29 +309,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.dark.text,
+    fontFamily: FONTS.extralight,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: 16,
-    color: COLORS.dark.textSecondary,
+    fontFamily: FONTS.regular,
     textAlign: 'center',
     marginBottom: SPACING.xl,
-  },
-  uploadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    backgroundColor: COLORS.dark.text,
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.md,
-    minHeight: 48,
-  },
-  uploadButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.dark.background,
   },
 });
