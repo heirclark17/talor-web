@@ -1601,7 +1601,18 @@ export default function InterviewPrepScreen() {
   const [loadingExecutiveInsights, setLoadingExecutiveInsights] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
+  // Debug: Log when section changes
+  const handleSectionPress = (section: string) => {
+    console.log('=== CARD PRESSED ===', section);
+    console.log('Current selectedSection:', selectedSection);
+    const newValue = selectedSection === section ? null : section;
+    console.log('Setting to:', newValue);
+    setSelectedSection(newValue);
+  };
+
   useEffect(() => {
+    console.log('=== InterviewPrepScreen mounted ===');
+    console.log('tailoredResumeId:', tailoredResumeId);
     loadInterviewPrep();
   }, [tailoredResumeId]);
 
@@ -1868,14 +1879,15 @@ export default function InterviewPrepScreen() {
           </View>
         </View>
 
-        {/* Stacked Frosted Glass Navigation Cards */}
+        {/* Individual Frosted Glass Navigation Cards */}
         <View style={styles.cardStack}>
           {/* Company Insights Section */}
           <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>COMPANY INSIGHTS</Text>
-          <GlassCard padding={0} material="thin" style={styles.stackedCard}>
+
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
-              onPress={() => setSelectedSection(selectedSection === 'companyProfile' ? null : 'companyProfile')}
+              onPress={() => handleSectionPress('companyProfile')}
               activeOpacity={0.7}
             >
               <View style={styles.stackedCardLeft}>
@@ -1891,12 +1903,12 @@ export default function InterviewPrepScreen() {
               </View>
               <ChevronRight color={colors.textTertiary} size={20} />
             </TouchableOpacity>
+          </GlassCard>
 
-            <View style={[styles.stackedCardDivider, { backgroundColor: colors.border }]} />
-
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
-              onPress={() => setSelectedSection(selectedSection === 'valuesCulture' ? null : 'valuesCulture')}
+              onPress={() => handleSectionPress('valuesCulture')}
               activeOpacity={0.7}
             >
               <View style={styles.stackedCardLeft}>
@@ -1912,12 +1924,12 @@ export default function InterviewPrepScreen() {
               </View>
               <ChevronRight color={colors.textTertiary} size={20} />
             </TouchableOpacity>
+          </GlassCard>
 
-            <View style={[styles.stackedCardDivider, { backgroundColor: colors.border }]} />
-
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
-              onPress={() => setSelectedSection(selectedSection === 'strategyNews' ? null : 'strategyNews')}
+              onPress={() => handleSectionPress('strategyNews')}
               activeOpacity={0.7}
             >
               <View style={styles.stackedCardLeft}>
@@ -1937,10 +1949,11 @@ export default function InterviewPrepScreen() {
 
           {/* Role & Preparation Section */}
           <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>ROLE & PREPARATION</Text>
-          <GlassCard padding={0} material="thin" style={styles.stackedCard}>
+
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
-              onPress={() => setSelectedSection(selectedSection === 'roleAnalysis' ? null : 'roleAnalysis')}
+              onPress={() => handleSectionPress('roleAnalysis')}
               activeOpacity={0.7}
             >
               <View style={styles.stackedCardLeft}>
@@ -1956,12 +1969,12 @@ export default function InterviewPrepScreen() {
               </View>
               <ChevronRight color={colors.textTertiary} size={20} />
             </TouchableOpacity>
+          </GlassCard>
 
-            <View style={[styles.stackedCardDivider, { backgroundColor: colors.border }]} />
-
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
-              onPress={() => setSelectedSection(selectedSection === 'preparation' ? null : 'preparation')}
+              onPress={() => handleSectionPress('preparation')}
               activeOpacity={0.7}
             >
               <View style={styles.stackedCardLeft}>
@@ -1977,12 +1990,12 @@ export default function InterviewPrepScreen() {
               </View>
               <ChevronRight color={colors.textTertiary} size={20} />
             </TouchableOpacity>
+          </GlassCard>
 
-            <View style={[styles.stackedCardDivider, { backgroundColor: colors.border }]} />
-
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
-              onPress={() => setSelectedSection(selectedSection === 'questions' ? null : 'questions')}
+              onPress={() => handleSectionPress('questions')}
               activeOpacity={0.7}
             >
               <View style={styles.stackedCardLeft}>
@@ -1998,12 +2011,12 @@ export default function InterviewPrepScreen() {
               </View>
               <ChevronRight color={colors.textTertiary} size={20} />
             </TouchableOpacity>
+          </GlassCard>
 
-            <View style={[styles.stackedCardDivider, { backgroundColor: colors.border }]} />
-
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
-              onPress={() => setSelectedSection(selectedSection === 'positioning' ? null : 'positioning')}
+              onPress={() => handleSectionPress('positioning')}
               activeOpacity={0.7}
             >
               <View style={styles.stackedCardLeft}>
@@ -2025,10 +2038,14 @@ export default function InterviewPrepScreen() {
           {interviewPrepId && (
             <>
               <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>AI PRACTICE</Text>
-              <GlassCard padding={0} material="thin" style={styles.stackedCard}>
+
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
                 <TouchableOpacity
                   style={styles.stackedCardItem}
-                  onPress={() => navigation.navigate('BehavioralTechnicalQuestions' as any, { interviewPrepId })}
+                  onPress={() => {
+                    console.log('=== AI Card Pressed: BehavioralTechnical ===');
+                    navigation.navigate('BehavioralTechnicalQuestions' as any, { interviewPrepId });
+                  }}
                   activeOpacity={0.7}
                 >
                   <View style={styles.stackedCardLeft}>
@@ -2049,12 +2066,15 @@ export default function InterviewPrepScreen() {
                   </View>
                   <ChevronRight color={colors.textTertiary} size={20} />
                 </TouchableOpacity>
+              </GlassCard>
 
-                <View style={[styles.stackedCardDivider, { backgroundColor: colors.border }]} />
-
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
                 <TouchableOpacity
                   style={styles.stackedCardItem}
-                  onPress={() => navigation.navigate('CommonQuestions' as any, { interviewPrepId })}
+                  onPress={() => {
+                    console.log('=== AI Card Pressed: CommonQuestions ===');
+                    navigation.navigate('CommonQuestions' as any, { interviewPrepId });
+                  }}
                   activeOpacity={0.7}
                 >
                   <View style={styles.stackedCardLeft}>
@@ -2075,12 +2095,15 @@ export default function InterviewPrepScreen() {
                   </View>
                   <ChevronRight color={colors.textTertiary} size={20} />
                 </TouchableOpacity>
+              </GlassCard>
 
-                <View style={[styles.stackedCardDivider, { backgroundColor: colors.border }]} />
-
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
                 <TouchableOpacity
                   style={styles.stackedCardItem}
-                  onPress={() => navigation.navigate('PracticeQuestions' as any, { interviewPrepId, tailoredResumeId })}
+                  onPress={() => {
+                    console.log('=== AI Card Pressed: PracticeQuestions ===');
+                    navigation.navigate('PracticeQuestions' as any, { interviewPrepId, tailoredResumeId });
+                  }}
                   activeOpacity={0.7}
                 >
                   <View style={styles.stackedCardLeft}>
@@ -2525,6 +2548,11 @@ const styles = StyleSheet.create({
   },
   stackedCard: {
     marginBottom: SPACING.sm,
+  },
+  individualCard: {
+    marginBottom: SPACING.md,
+    borderRadius: RADIUS.xl, // More rounded edges
+    overflow: 'hidden',
   },
   stackedCardItem: {
     flexDirection: 'row',
