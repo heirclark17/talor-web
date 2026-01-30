@@ -1033,7 +1033,6 @@ class ApiClient {
       };
     }
   }
-}
 
   // =========================================================================
   // INTERVIEW PREP MANAGEMENT METHODS
@@ -1578,9 +1577,9 @@ class ApiClient {
   }
 
   /**
-   * Generate a STAR story using AI
+   * Generate a STAR story using AI from selected experiences
    */
-  async generateStarStory(data: {
+  async generateStarStoryFromExperience(data: {
     tailored_resume_id: number;
     experience_indices: number[];
     story_theme: string;
