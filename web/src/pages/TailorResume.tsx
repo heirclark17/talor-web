@@ -150,6 +150,7 @@ export default function TailorResume() {
   const [savingSection, setSavingSection] = useState<string | null>(null)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
   const [mobileTab, setMobileTab] = useState<'original' | 'tailored'>('tailored')
 
   // New analysis states
@@ -191,14 +192,16 @@ export default function TailorResume() {
     }
   }, [selectedResumeId])
 
-  // Mobile detection
+  // Mobile and tablet detection
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+    const checkDeviceSize = () => {
+      const width = window.innerWidth
+      setIsMobile(width < 768)
+      setIsTablet(width >= 768 && width < 1024)
     }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    checkDeviceSize()
+    window.addEventListener('resize', checkDeviceSize)
+    return () => window.removeEventListener('resize', checkDeviceSize)
   }, [])
 
   // Keyboard shortcuts
@@ -729,25 +732,11 @@ export default function TailorResume() {
     setAnalysisProgress(forceRefresh ? 'Refreshing AI analysis...' : 'Loading AI analysis...')
     setAnalysisEstimate(forceRefresh ? 60 : 5) // Much faster if cached
 
-    const userId = localStorage.getItem('talor_user_id')
-    const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
-
     try {
-      // Use the new combined endpoint with caching and parallel execution
-      const response = await fetch(`${API_BASE_URL}/api/resume-analysis/analyze-all`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        },
-        body: JSON.stringify({
-          tailored_resume_id: tailoredResumeId,
-          force_refresh: forceRefresh
-        })
-      })
+      const result = await api.analyzeAll(tailoredResumeId, forceRefresh)
 
-      if (response.ok) {
-        const data = await response.json()
+      if (result.success && result.data) {
+        const data = result.data
 
         // Set all results at once
         if (data.analysis) setAnalysis(data.analysis)
@@ -761,8 +750,7 @@ export default function TailorResume() {
           setAnalysisProgress(`Analysis complete (${data.elapsed_seconds?.toFixed(1)}s)`)
         }
       } else {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || 'Failed to load analysis')
+        throw new Error(result.error || 'Failed to load analysis')
       }
 
       setAnalysisEstimate(0)
@@ -778,36 +766,16 @@ export default function TailorResume() {
     if (!tailoredResume?.id) return
 
     try {
-      const userId = localStorage.getItem('talor_user_id')
-      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+      const result = await api.exportResumeAnalysis(tailoredResume.id, format)
 
-      const response = await fetch(`${API_BASE_URL}/api/resume-analysis/export`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        },
-        body: JSON.stringify({
-          tailored_resume_id: tailoredResume.id,
-          format: format
-        })
-      })
-
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
+      if (result.success && result.data) {
+        const url = window.URL.createObjectURL(result.data)
         const a = document.createElement('a')
         a.href = url
 
-        // Get filename from Content-Disposition header
-        const contentDisposition = response.headers.get('Content-Disposition')
-        let filename = `TailoredResume.${format}`
-        if (contentDisposition) {
-          const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
-          if (filenameMatch) {
-            filename = filenameMatch[1]
-          }
-        }
+        // Generate filename based on company and title
+        const companyName = tailoredResume.company?.replace(/[^a-zA-Z0-9]/g, '_') || 'Tailored'
+        const filename = `${companyName}_Resume.${format}`
 
         a.download = filename
         document.body.appendChild(a)
@@ -815,7 +783,7 @@ export default function TailorResume() {
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
       } else {
-        alert('Error downloading resume')
+        alert(result.error || 'Error downloading resume')
       }
     } catch (error) {
       console.error('Error downloading resume:', error)
@@ -1385,37 +1353,63 @@ export default function TailorResume() {
           {/* Tab Content: Side-by-Side Comparison */}
           {activeTab === 'comparison' && (
             <>
-              {/* Mobile Tab Switcher */}
+              {/* Mobile Tab Switcher - Enhanced for better visibility */}
               {isMobile && (
-                <div className="flex border-b border-white/10 mb-6">
-                  <button
-                    className={`flex-1 py-3 text-center font-medium transition-all ${
-                      mobileTab === 'original'
-                        ? 'border-b-2 border-white text-white'
-                        : 'text-gray-400 hover:text-gray-300'
-                    }`}
-                    onClick={() => setMobileTab('original')}
-                  >
-                    Original
-                  </button>
-                  <button
-                    className={`flex-1 py-3 text-center font-medium transition-all ${
-                      mobileTab === 'tailored'
-                        ? 'border-b-2 border-white text-white'
-                        : 'text-gray-400 hover:text-gray-300'
-                    }`}
-                    onClick={() => setMobileTab('tailored')}
-                  >
-                    Tailored ✨
-                  </button>
+                <div className="mb-6">
+                  <div className="glass rounded-xl p-1 border border-white/10">
+                    <div className="flex" role="tablist" aria-label="Resume comparison tabs">
+                      <button
+                        id="original-tab"
+                        role="tab"
+                        aria-selected={mobileTab === 'original'}
+                        aria-controls="original-resume-panel"
+                        className={`flex-1 py-3 px-4 text-center font-medium transition-all rounded-lg min-h-[48px] ${
+                          mobileTab === 'original'
+                            ? 'bg-white/10 text-white shadow-lg'
+                            : 'text-gray-400 hover:text-gray-300 hover:bg-white/5'
+                        }`}
+                        onClick={() => setMobileTab('original')}
+                      >
+                        <span className="flex items-center justify-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Original
+                        </span>
+                      </button>
+                      <button
+                        id="tailored-tab"
+                        role="tab"
+                        aria-selected={mobileTab === 'tailored'}
+                        aria-controls="tailored-resume-panel"
+                        className={`flex-1 py-3 px-4 text-center font-medium transition-all rounded-lg min-h-[48px] ${
+                          mobileTab === 'tailored'
+                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                            : 'text-gray-400 hover:text-gray-300 hover:bg-white/5'
+                        }`}
+                        onClick={() => setMobileTab('tailored')}
+                      >
+                        <span className="flex items-center justify-center gap-2">
+                          <Sparkles className="w-4 h-4" />
+                          Tailored
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-center text-xs text-gray-500 mt-2">
+                    Swipe or tap to switch between versions
+                  </p>
                 </div>
               )}
 
               {/* Side-by-Side Comparison */}
-              <div className={`${isMobile ? '' : 'grid grid-cols-2 gap-6'}`}>
+              <div className={`${isMobile ? '' : isTablet ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-2 gap-6'}`}>
               {/* Show only selected tab on mobile */}
               {(!isMobile || mobileTab === 'original') && (
-                <div className={`glass rounded-2xl overflow-hidden border border-white/20 ${isMobile ? 'mb-6' : ''}`}>
+                <div
+                  id="original-resume-panel"
+                  role={isMobile ? "tabpanel" : undefined}
+                  aria-labelledby={isMobile ? "original-tab" : undefined}
+                  className={`glass rounded-2xl overflow-hidden border border-white/20 ${isMobile ? 'mb-6' : ''}`}
+                >
               <div className="glass p-6 border-b border-white/10">
                 <div className="flex items-center gap-3 mb-2">
                   <FileText className="w-6 h-6 text-white" />
@@ -1641,7 +1635,12 @@ export default function TailorResume() {
 
             {/* Tailored Resume */}
             {(!isMobile || mobileTab === 'tailored') && (
-              <div className={`glass rounded-2xl overflow-hidden border border-white/40 ${isMobile ? '' : ''}`}>
+              <div
+                id="tailored-resume-panel"
+                role={isMobile ? "tabpanel" : undefined}
+                aria-labelledby={isMobile ? "tailored-tab" : undefined}
+                className={`glass rounded-2xl overflow-hidden border border-white/40 ${isMobile ? '' : ''}`}
+              >
               <div className="glass p-6 border-b border-white/20">
                 <div className="flex items-center gap-3 mb-2">
                   <Sparkles className="w-6 h-6 text-white" />
@@ -2152,6 +2151,24 @@ export default function TailorResume() {
           {/* Tab Content: AI Analysis & Insights */}
           {activeTab === 'analysis' && (
             <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-semibold text-white">AI Analysis</h3>
+                </div>
+                <button
+                  onClick={() => tailoredResume?.id && loadAllAnalysis(tailoredResume.id, true)}
+                  disabled={loadingAnalysis || !tailoredResume?.id}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Refresh analysis"
+                  title="Refresh AI analysis (clears cache)"
+                >
+                  <RotateCcw className={`w-4 h-4 ${loadingAnalysis ? 'animate-spin' : ''}`} />
+                  <span className="text-sm font-medium hidden sm:inline">
+                    {loadingAnalysis ? 'Refreshing...' : 'Refresh'}
+                  </span>
+                </button>
+              </div>
               <ResumeAnalysis analysis={analysis} loading={loadingAnalysis} />
             </div>
           )}
@@ -2159,6 +2176,24 @@ export default function TailorResume() {
           {/* Tab Content: Match & Keywords */}
           {activeTab === 'insights' && (
             <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-green-400" />
+                  <h3 className="text-lg font-semibold text-white">Match Score & Keywords</h3>
+                </div>
+                <button
+                  onClick={() => tailoredResume?.id && loadAllAnalysis(tailoredResume.id, true)}
+                  disabled={loadingAnalysis || !tailoredResume?.id}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Refresh analysis"
+                  title="Refresh AI analysis (clears cache)"
+                >
+                  <RotateCcw className={`w-4 h-4 ${loadingAnalysis ? 'animate-spin' : ''}`} />
+                  <span className="text-sm font-medium hidden sm:inline">
+                    {loadingAnalysis ? 'Refreshing...' : 'Refresh'}
+                  </span>
+                </button>
+              </div>
               <MatchScore matchScore={matchScore} loading={loadingAnalysis} />
               <KeywordPanel keywords={keywords} loading={loadingAnalysis} />
             </div>
@@ -2324,9 +2359,15 @@ export default function TailorResume() {
               <div className="p-2 bg-red-500/20 rounded-lg">
                 <AlertCircle className="w-6 h-6 text-red-500" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="font-bold text-white text-lg">Error</p>
-                <p className="text-red-400">{error}</p>
+                <p className="text-red-400 mb-3">{error}</p>
+                <button
+                  onClick={() => setError(null)}
+                  className="text-sm text-red-400 hover:text-red-300 underline transition-colors min-h-[44px] px-2"
+                >
+                  Dismiss and try again
+                </button>
               </div>
             </div>
           </div>

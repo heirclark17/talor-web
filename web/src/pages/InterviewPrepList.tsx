@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Calendar, MapPin, Trash2, Eye, Loader, AlertCircle } from 'lucide-react'
-import { getUserId } from '../utils/userSession'
-
-// API base URL - same logic as API client
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+import { api } from '../api/client'
 
 interface InterviewPrepItem {
   id: number
@@ -32,25 +29,13 @@ export default function InterviewPrepList() {
       setLoading(true)
       setError(null)
 
-      const userId = getUserId()
-      const response = await fetch(`${API_BASE_URL}/api/interview-prep/list`, {
-        method: 'GET',
-        headers: {
-          'X-User-ID': userId
-        }
-      })
+      const result = await api.listInterviewPreps()
 
-      if (!response.ok) {
-        throw new Error(`Failed to load interview preps: ${response.status}`)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to load interview preps')
       }
 
-      const data = await response.json()
-
-      if (data.success) {
-        setPreps(data.interview_preps || [])
-      } else {
-        throw new Error('Failed to load interview preps')
-      }
+      setPreps(result.data?.interview_preps || [])
     } catch (err) {
       console.error('Error fetching interview preps:', err)
       setError(err instanceof Error ? err.message : 'Failed to load interview preps')
@@ -67,22 +52,14 @@ export default function InterviewPrepList() {
     try {
       setDeletingId(prepId)
 
-      const response = await fetch(`${API_BASE_URL}/api/interview-prep/${prepId}`, {
-        method: 'DELETE'
-      })
+      const result = await api.deleteInterviewPrep(prepId)
 
-      if (!response.ok) {
-        throw new Error('Failed to delete interview prep')
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete interview prep')
       }
 
-      const data = await response.json()
-
-      if (data.success) {
-        // Remove from local state
-        setPreps(preps.filter(p => p.id !== prepId))
-      } else {
-        throw new Error('Failed to delete interview prep')
-      }
+      // Remove from local state
+      setPreps(preps.filter(p => p.id !== prepId))
     } catch (err) {
       console.error('Error deleting interview prep:', err)
       alert('Failed to delete interview prep. Please try again.')

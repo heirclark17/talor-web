@@ -199,6 +199,16 @@ export default function InterviewPrep() {
   const [companyResearch, setCompanyResearch] = useState<CompanyResearchData | null>(null)
   const [companyNews, setCompanyNews] = useState<NewsData | null>(null)
   const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestionsData | null>(null)
+  const [companyValues, setCompanyValues] = useState<{
+    values: Array<{
+      name: string;
+      description: string;
+      evidence: string;
+      discussion_tips: string[];
+    }>;
+    culture_keywords: string[];
+    how_to_demonstrate: string[];
+  } | null>(null)
   const [certifications, setCertifications] = useState<any>(null)
   const [loadingRealData, setLoadingRealData] = useState(false)
   const [loadingCertifications, setLoadingCertifications] = useState(false)
@@ -439,51 +449,16 @@ export default function InterviewPrep() {
         return
       }
 
-      // Fetch all three data sources in parallel
-      const [researchResult, newsResult, questionsResult] = await Promise.allSettled([
+      // Fetch all four data sources in parallel using centralized API client
+      const [researchResult, newsResult, questionsResult, valuesResult] = await Promise.allSettled([
         // Company research
-        fetch(`${API_BASE_URL}/api/interview-prep/company-research`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-ID': localStorage.getItem('talor_user_id') || '',
-          },
-          body: JSON.stringify({
-            company_name: companyName,
-            industry: industry || null,
-            job_title: jobTitle || null,
-          }),
-        }).then(res => res.json()),
-
+        api.getCompanyResearch(companyName, industry || undefined, jobTitle || undefined),
         // Company news
-        fetch(`${API_BASE_URL}/api/interview-prep/company-news`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-ID': localStorage.getItem('talor_user_id') || '',
-          },
-          body: JSON.stringify({
-            company_name: companyName,
-            industry: industry || null,
-            job_title: jobTitle || null,
-            days_back: 90,
-          }),
-        }).then(res => res.json()),
-
+        api.getCompanyNews(companyName, industry || undefined, jobTitle || undefined, 90),
         // Interview questions
-        fetch(`${API_BASE_URL}/api/interview-prep/interview-questions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-ID': localStorage.getItem('talor_user_id') || '',
-          },
-          body: JSON.stringify({
-            company_name: companyName,
-            job_title: jobTitle || null,
-            role_category: null,
-            max_questions: 30,
-          }),
-        }).then(res => res.json()),
+        api.getInterviewQuestions(companyName, jobTitle || undefined, 30),
+        // Company values (new endpoint)
+        api.getCompanyValues(companyName),
       ])
 
       // Handle company research result
@@ -508,6 +483,14 @@ export default function InterviewPrep() {
         console.log('✓ Interview questions loaded:', questionsResult.value.data.questions?.length, 'questions')
       } else {
         console.error('Failed to load interview questions:', questionsResult)
+      }
+
+      // Handle company values result - merge with prep data if available
+      if (valuesResult.status === 'fulfilled' && valuesResult.value?.success) {
+        setCompanyValues(valuesResult.value.data)
+        console.log('✓ Company values loaded:', valuesResult.value.data.values?.length, 'values')
+      } else {
+        console.error('Failed to load company values:', valuesResult)
       }
     } catch (err: any) {
       console.error('Error fetching real data:', err)
@@ -580,7 +563,7 @@ export default function InterviewPrep() {
     localStorage.setItem(`interview-prep-star-stories-${tailoredResumeId}`, JSON.stringify(updated))
   }
 
-  // Load certifications
+  // Load certifications using centralized API client
   const loadCertifications = async () => {
     if (!interviewPrepId) {
       console.log('No interview prep ID, cannot load certifications')
@@ -589,28 +572,17 @@ export default function InterviewPrep() {
 
     console.log('Loading certifications for interview prep ID:', interviewPrepId)
     setLoadingCertifications(true)
-    const userId = localStorage.getItem('talor_user_id')
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/certifications/recommend`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        },
-        body: JSON.stringify({ interview_prep_id: interviewPrepId })
-      })
+      const result = await api.getCertificationRecommendations(interviewPrepId)
 
-      console.log('Certifications API response status:', response.status)
+      console.log('Certifications API result:', result)
 
-      if (response.ok) {
-        const data = await response.json()
-        console.log('Certifications data received:', data)
-        console.log('Setting certifications to:', data.certifications)
-        setCertifications(data.certifications)
+      if (result.success && result.data) {
+        console.log('Setting certifications to:', result.data.certifications)
+        setCertifications(result.data.certifications)
       } else {
-        const errorText = await response.text()
-        console.error('Certifications API error:', response.status, errorText)
+        console.error('Certifications API error:', result.error)
       }
     } catch (error) {
       console.error('Error loading certifications:', error)
@@ -1239,6 +1211,75 @@ export default function InterviewPrep() {
                 {/* Values & Culture Modal Content */}
                 {activeModal === 'valuesAndCulture' && (
                   <div className="space-y-6">
+                    {/* Enhanced Company Values from API */}
+                    {companyValues && companyValues.values && companyValues.values.length > 0 && (
+                      <div className="mb-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <h4 className="text-white font-semibold">Company Values</h4>
+                          <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Deep Research</span>
+                        </div>
+                        <div className="space-y-4">
+                          {companyValues.values.map((value, idx) => (
+                            <div key={idx} className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 p-4 rounded-lg border border-purple-500/20">
+                              <h5 className="text-white font-semibold mb-2 flex items-center gap-2">
+                                <Star className="w-4 h-4 text-purple-400" />
+                                {value.name}
+                              </h5>
+                              <p className="text-gray-300 text-sm mb-3">{value.description}</p>
+                              {value.evidence && (
+                                <div className="mb-3 pl-3 border-l-2 border-purple-500/30">
+                                  <p className="text-gray-400 text-xs italic">{value.evidence}</p>
+                                </div>
+                              )}
+                              {value.discussion_tips && value.discussion_tips.length > 0 && (
+                                <div>
+                                  <p className="text-xs text-gray-500 uppercase mb-2">How to Discuss in Interview:</p>
+                                  <ul className="space-y-1">
+                                    {value.discussion_tips.map((tip, tipIdx) => (
+                                      <li key={tipIdx} className="text-green-300 text-sm flex gap-2">
+                                        <span className="text-green-500">•</span>
+                                        <span>{tip}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Culture Keywords */}
+                        {companyValues.culture_keywords && companyValues.culture_keywords.length > 0 && (
+                          <div className="mt-4">
+                            <p className="text-xs text-gray-500 uppercase mb-2">Culture Keywords to Use:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {companyValues.culture_keywords.map((keyword, idx) => (
+                                <span key={idx} className="px-3 py-1 bg-white/10 text-gray-300 rounded-full text-sm">
+                                  {keyword}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* How to Demonstrate */}
+                        {companyValues.how_to_demonstrate && companyValues.how_to_demonstrate.length > 0 && (
+                          <div className="mt-4 p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                            <p className="text-blue-400 font-medium text-sm mb-2">How to Demonstrate These Values:</p>
+                            <ul className="space-y-2">
+                              {companyValues.how_to_demonstrate.map((item, idx) => (
+                                <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                                  <span className="text-blue-400">→</span>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Original Stated Values */}
                     <div className="space-y-4">
                       {prepData.values_and_culture.stated_values.map((value, idx) => (
                         <div key={idx} className="bg-white/5 p-4 rounded-lg">

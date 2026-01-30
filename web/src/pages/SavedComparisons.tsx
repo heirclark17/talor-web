@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bookmark, Calendar, Building2, Briefcase, Trash2, Loader2, Pin } from 'lucide-react'
+import { api } from '../api/client'
 
 interface SavedComparisonItem {
   id: number
@@ -29,22 +30,13 @@ export default function SavedComparisons() {
       setLoading(true)
       setError(null)
 
-      const userId = localStorage.getItem('talor_user_id')
-      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+      const result = await api.listSavedComparisons()
 
-      const response = await fetch(`${API_BASE_URL}/api/saved-comparisons/list`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to load saved comparisons')
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to load saved comparisons')
       }
 
-      const data = await response.json()
-      setComparisons(data)
+      setComparisons(result.data || [])
     } catch (err: any) {
       console.error('Error loading saved comparisons:', err)
       setError(err.message || 'Failed to load saved comparisons')
@@ -59,19 +51,10 @@ export default function SavedComparisons() {
     }
 
     try {
-      const userId = localStorage.getItem('talor_user_id')
-      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+      const result = await api.deleteSavedComparison(comparisonId)
 
-      const response = await fetch(`${API_BASE_URL}/api/saved-comparisons/${comparisonId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete comparison')
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete comparison')
       }
 
       // Remove from list
@@ -84,22 +67,12 @@ export default function SavedComparisons() {
 
   const handleTogglePin = async (comparisonId: number, currentPinned: boolean) => {
     try {
-      const userId = localStorage.getItem('talor_user_id')
-      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
-
-      const response = await fetch(`${API_BASE_URL}/api/saved-comparisons/${comparisonId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        },
-        body: JSON.stringify({
-          is_pinned: !currentPinned
-        })
+      const result = await api.updateSavedComparison(comparisonId, {
+        is_pinned: !currentPinned,
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to update pin status')
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update pin status')
       }
 
       // Update local state

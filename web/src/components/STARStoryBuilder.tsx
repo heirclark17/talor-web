@@ -521,38 +521,39 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <h5 className="text-xl font-semibold text-white flex-1">{story.title}</h5>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2" role="group" aria-label={`Actions for ${story.title}`}>
                       <button
                         onClick={() => toggleCollapse(story.id!)}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        title={collapsedStories.has(story.id!) ? "Expand story" : "Collapse story"}
+                        className="min-w-[44px] min-h-[44px] p-2 hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
+                        aria-label={collapsedStories.has(story.id!) ? "Expand story" : "Collapse story"}
+                        aria-expanded={!collapsedStories.has(story.id!)}
                       >
                         {collapsedStories.has(story.id!) ? (
-                          <ChevronDown className="w-5 h-5 text-gray-400" />
+                          <ChevronDown className="w-5 h-5 text-gray-400" aria-hidden="true" />
                         ) : (
-                          <ChevronUp className="w-5 h-5 text-gray-400" />
+                          <ChevronUp className="w-5 h-5 text-gray-400" aria-hidden="true" />
                         )}
                       </button>
                       <button
                         onClick={() => setPracticingStory(story)}
-                        className="p-2 hover:bg-green-500/20 rounded-lg transition-colors"
-                        title="Practice this story"
+                        className="min-w-[44px] min-h-[44px] p-2 hover:bg-green-500/20 rounded-lg transition-colors flex items-center justify-center"
+                        aria-label="Practice this story"
                       >
-                        <Play className="w-5 h-5 text-green-400" />
+                        <Play className="w-5 h-5 text-green-400" aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => startEditing(story)}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        title="Edit story"
+                        className="min-w-[44px] min-h-[44px] p-2 hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
+                        aria-label="Edit story"
                       >
-                        <Edit className="w-5 h-5 text-gray-400" />
+                        <Edit className="w-5 h-5 text-gray-400" aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => deleteStory(story.id!)}
-                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
-                        title="Delete story"
+                        className="min-w-[44px] min-h-[44px] p-2 hover:bg-red-500/20 rounded-lg transition-colors flex items-center justify-center"
+                        aria-label="Delete story"
                       >
-                        <Trash2 className="w-5 h-5 text-red-400" />
+                        <Trash2 className="w-5 h-5 text-red-400" aria-hidden="true" />
                       </button>
                     </div>
                   </div>

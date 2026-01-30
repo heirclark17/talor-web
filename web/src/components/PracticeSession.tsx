@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Play, Pause, RotateCcw, X, Clock, Mic, MicOff, CheckCircle } from 'lucide-react'
+import { Play, Pause, RotateCcw, X, Clock, Mic, MicOff, CheckCircle, FileDown, Trash2 } from 'lucide-react'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 interface STARStory {
   id?: string
@@ -174,20 +175,43 @@ export default function PracticeSession({ story, onClose }: Props) {
     return Math.min(100, (sectionElapsed / totalSectionTime) * 100)
   }
 
+  // Focus trap for accessibility - traps focus within modal
+  const modalRef = useFocusTrap<HTMLDivElement>(true, { restoreFocus: true })
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [onClose])
+
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="glass rounded-2xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="practice-session-title"
+    >
+      <div
+        ref={modalRef}
+        className="glass rounded-2xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+      >
         {/* Header */}
         <div className="sticky top-0 glass border-b border-white/10 p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white mb-1">Practice Session</h2>
+            <h2 id="practice-session-title" className="text-2xl font-bold text-white mb-1">Practice Session</h2>
             <p className="text-gray-400">{story.title}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            className="min-w-[44px] min-h-[44px] p-2 hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
+            aria-label="Close practice session"
           >
-            <X className="w-6 h-6 text-gray-400" />
+            <X className="w-6 h-6 text-gray-400" aria-hidden="true" />
           </button>
         </div>
 
@@ -199,9 +223,10 @@ export default function PracticeSession({ story, onClose }: Props) {
                 <h3 className="text-lg font-bold text-blue-400">How to Use This Practice Session</h3>
                 <button
                   onClick={() => setShowInstructions(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="min-w-[44px] min-h-[44px] text-gray-400 hover:text-white transition-colors flex items-center justify-center"
+                  aria-label="Dismiss instructions"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
               <div className="space-y-3 text-sm text-gray-300">
@@ -230,45 +255,50 @@ export default function PracticeSession({ story, onClose }: Props) {
           )}
 
           {/* Audio Recording Controls */}
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-4" role="group" aria-label="Recording controls">
             {!isRecording && !audioUrl && (
               <button
                 onClick={startRecording}
-                className="btn-secondary flex items-center gap-2 px-6 py-3"
+                className="btn-secondary flex items-center gap-2 px-6 py-3 min-h-[44px]"
                 disabled={isRunning}
+                aria-label="Start audio recording"
               >
-                <Mic className="w-5 h-5" />
+                <Mic className="w-5 h-5" aria-hidden="true" />
                 Start Recording
               </button>
             )}
             {isRecording && (
               <button
                 onClick={stopRecording}
-                className="btn-danger flex items-center gap-2 px-6 py-3 animate-pulse"
+                className="btn-danger flex items-center gap-2 px-6 py-3 min-h-[44px] animate-pulse"
+                aria-label="Stop audio recording"
+                aria-live="polite"
               >
-                <MicOff className="w-5 h-5" />
+                <MicOff className="w-5 h-5" aria-hidden="true" />
                 Stop Recording
               </button>
             )}
             {audioUrl && !isRecording && (
               <div className="glass rounded-xl p-4 border border-white/10 flex items-center gap-4 w-full max-w-2xl">
                 <div className="flex-1">
-                  <audio src={audioUrl} controls className="w-full" />
+                  <audio src={audioUrl} controls className="w-full" aria-label="Your recorded practice session" />
                 </div>
                 <button
                   onClick={downloadRecording}
-                  className="btn-secondary px-4 py-2 text-sm"
+                  className="btn-secondary min-w-[44px] min-h-[44px] px-4 py-2 text-sm flex items-center justify-center"
+                  aria-label="Download recording"
                 >
-                  <FileDown className="w-4 h-4" />
+                  <FileDown className="w-4 h-4" aria-hidden="true" />
                 </button>
                 <button
                   onClick={() => {
                     setAudioUrl(null)
                     setAudioBlob(null)
                   }}
-                  className="btn-secondary px-4 py-2 text-sm"
+                  className="btn-secondary min-w-[44px] min-h-[44px] px-4 py-2 text-sm flex items-center justify-center"
+                  aria-label="Delete recording"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
             )}
@@ -349,13 +379,14 @@ export default function PracticeSession({ story, onClose }: Props) {
           )}
 
           {/* Controls */}
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-4" role="group" aria-label="Timer controls">
             {!isRunning && seconds === 0 && (
               <button
                 onClick={handleStart}
-                className="btn-primary flex items-center gap-2 px-8 py-4 text-lg"
+                className="btn-primary flex items-center gap-2 px-8 py-4 text-lg min-h-[44px]"
+                aria-label="Start practice timer"
               >
-                <Play className="w-6 h-6" />
+                <Play className="w-6 h-6" aria-hidden="true" />
                 Start Practice
               </button>
             )}
@@ -363,9 +394,10 @@ export default function PracticeSession({ story, onClose }: Props) {
             {!isRunning && seconds > 0 && currentSection !== 'complete' && (
               <button
                 onClick={handleStart}
-                className="btn-primary flex items-center gap-2 px-8 py-4"
+                className="btn-primary flex items-center gap-2 px-8 py-4 min-h-[44px]"
+                aria-label="Resume practice timer"
               >
-                <Play className="w-6 h-6" />
+                <Play className="w-6 h-6" aria-hidden="true" />
                 Resume
               </button>
             )}
@@ -373,9 +405,10 @@ export default function PracticeSession({ story, onClose }: Props) {
             {isRunning && (
               <button
                 onClick={handlePause}
-                className="btn-secondary flex items-center gap-2 px-8 py-4"
+                className="btn-secondary flex items-center gap-2 px-8 py-4 min-h-[44px]"
+                aria-label="Pause practice timer"
               >
-                <Pause className="w-6 h-6" />
+                <Pause className="w-6 h-6" aria-hidden="true" />
                 Pause
               </button>
             )}
@@ -383,9 +416,10 @@ export default function PracticeSession({ story, onClose }: Props) {
             {seconds > 0 && (
               <button
                 onClick={handleReset}
-                className="btn-secondary flex items-center gap-2 px-8 py-4"
+                className="btn-secondary flex items-center gap-2 px-8 py-4 min-h-[44px]"
+                aria-label="Reset practice timer"
               >
-                <RotateCcw className="w-6 h-6" />
+                <RotateCcw className="w-6 h-6" aria-hidden="true" />
                 Reset
               </button>
             )}

@@ -692,7 +692,7 @@ export default function CareerPathDesigner() {
             </p>
 
             {/* Feature highlights */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto mb-10 sm:mb-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 max-w-4xl mx-auto mb-10 sm:mb-16">
               <div className="glass rounded-lg p-6 sm:p-8 text-center">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-white/10 flex items-center justify-center mb-3 sm:mb-4 mx-auto">
                   <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
@@ -892,9 +892,21 @@ export default function CareerPathDesigner() {
             </div>
 
             {error && (
-              <div className="mb-8 glass rounded-lg p-4 border-2 border-red-500/50 flex items-start gap-3">
-                <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-red-400">{error}</p>
+              <div className="mb-8 glass rounded-lg p-4 border-2 border-red-500/50">
+                <div className="flex items-start gap-3">
+                  <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-red-400 mb-3">{error}</p>
+                    {(error.toLowerCase().includes('failed') || error.toLowerCase().includes('network') || error.toLowerCase().includes('timeout')) && (
+                      <button
+                        onClick={() => setError(undefined)}
+                        className="text-sm text-red-400 hover:text-red-300 underline transition-colors"
+                      >
+                        Dismiss and try again
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1526,9 +1538,21 @@ export default function CareerPathDesigner() {
             )}
 
             {error && (
-              <div className="mt-6 glass rounded-lg p-4 border-2 border-red-500/50 flex items-start gap-3">
-                <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-red-400">{error}</p>
+              <div className="mt-6 glass rounded-lg p-4 border-2 border-red-500/50">
+                <div className="flex items-start gap-3">
+                  <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-red-400 mb-3">{error}</p>
+                    {(error.toLowerCase().includes('failed') || error.toLowerCase().includes('network') || error.toLowerCase().includes('timeout')) && (
+                      <button
+                        onClick={() => setError(undefined)}
+                        className="text-sm text-red-400 hover:text-red-300 underline transition-colors"
+                      >
+                        Dismiss and try again
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 

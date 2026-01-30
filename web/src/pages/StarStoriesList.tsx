@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Calendar, Briefcase, Trash2, Eye, Loader, AlertCircle, Sparkles } from 'lucide-react'
-import { getUserId } from '../utils/userSession'
-
-// API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+import { api } from '../api/client'
 
 interface StarStory {
   id: number
@@ -38,25 +35,13 @@ export default function StarStoriesList() {
       setLoading(true)
       setError(null)
 
-      const userId = getUserId()
-      const response = await fetch(`${API_BASE_URL}/api/star-stories/list`, {
-        method: 'GET',
-        headers: {
-          'X-User-ID': userId
-        }
-      })
+      const result = await api.listStarStories()
 
-      if (!response.ok) {
-        throw new Error(`Failed to load STAR stories: ${response.status}`)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to load STAR stories')
       }
 
-      const data = await response.json()
-
-      if (data.success) {
-        setStories(data.stories || [])
-      } else {
-        throw new Error('Failed to load STAR stories')
-      }
+      setStories(result.data || [])
     } catch (err) {
       console.error('Error fetching STAR stories:', err)
       setError(err instanceof Error ? err.message : 'Failed to load STAR stories')
@@ -73,28 +58,16 @@ export default function StarStoriesList() {
     try {
       setDeletingId(storyId)
 
-      const userId = getUserId()
-      const response = await fetch(`${API_BASE_URL}/api/star-stories/${storyId}`, {
-        method: 'DELETE',
-        headers: {
-          'X-User-ID': userId
-        }
-      })
+      const result = await api.deleteStarStory(storyId)
 
-      if (!response.ok) {
-        throw new Error('Failed to delete STAR story')
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete STAR story')
       }
 
-      const data = await response.json()
-
-      if (data.success) {
-        // Remove from local state
-        setStories(stories.filter(s => s.id !== storyId))
-        if (selectedStory?.id === storyId) {
-          setSelectedStory(null)
-        }
-      } else {
-        throw new Error('Failed to delete STAR story')
+      // Remove from local state
+      setStories(stories.filter(s => s.id !== storyId))
+      if (selectedStory?.id === storyId) {
+        setSelectedStory(null)
       }
     } catch (err) {
       console.error('Error deleting STAR story:', err)

@@ -1035,6 +1035,836 @@ class ApiClient {
   }
 }
 
+  // =========================================================================
+  // INTERVIEW PREP MANAGEMENT METHODS
+  // =========================================================================
+
+  /**
+   * Delete an interview prep by ID
+   */
+  async deleteInterviewPrep(prepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * List all interview preps for the user
+   */
+  async listInterviewPreps(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/list`, {
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Generate behavioral and technical questions for interview prep
+   */
+  async generateBehavioralTechnicalQuestions(data: {
+    job_title: string;
+    company_name: string;
+    tailored_resume_id: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/interview-prep/generate-behavioral-technical-questions`,
+        {
+          method: 'POST',
+          headers: {
+            ...this.getHeaders(),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data || result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // =========================================================================
+  // COMPANY RESEARCH METHODS
+  // =========================================================================
+
+  /**
+   * Get company research data
+   */
+  async getCompanyResearch(companyName: string, industry?: string, jobTitle?: string): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/company-research`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_name: companyName,
+          industry: industry || null,
+          job_title: jobTitle || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data.data || data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get company news
+   */
+  async getCompanyNews(companyName: string, industry?: string, jobTitle?: string, daysBack?: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/company-news`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_name: companyName,
+          industry: industry || null,
+          job_title: jobTitle || null,
+          days_back: daysBack || 90,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data.data || data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get company values
+   */
+  async getCompanyValues(companyName: string): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/company-values`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ company_name: companyName }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data.data || data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get interview questions for a company/role
+   */
+  async getInterviewQuestions(companyName: string, jobTitle?: string, maxQuestions?: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/interview-questions`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_name: companyName,
+          job_title: jobTitle || null,
+          role_category: null,
+          max_questions: maxQuestions || 30,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data.data || data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // =========================================================================
+  // RESUME ANALYSIS METHODS
+  // =========================================================================
+
+  /**
+   * Export resume analysis as PDF or DOCX
+   */
+  async exportResumeAnalysis(tailoredResumeId: number, format: 'pdf' | 'docx'): Promise<ApiResponse<Blob>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/resume-analysis/export`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tailored_resume_id: tailoredResumeId,
+          format,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return {
+          success: false,
+          error: errorData.detail || errorData.error || `HTTP ${response.status}`,
+        };
+      }
+
+      const blob = await response.blob();
+      return {
+        success: true,
+        data: blob,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Analyze all aspects of a tailored resume (combined endpoint with caching)
+   * Returns analysis, keywords, and match score in one call
+   */
+  async analyzeAll(tailoredResumeId: number, forceRefresh: boolean = false): Promise<ApiResponse<{
+    analysis: any;
+    keywords: any;
+    match_score: any;
+    cached: boolean;
+    elapsed_seconds: number;
+  }>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/resume-analysis/analyze-all`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tailored_resume_id: tailoredResumeId,
+          force_refresh: forceRefresh,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Clear analysis cache for a tailored resume (to force re-analysis)
+   */
+  async clearAnalysisCache(tailoredResumeId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/resume-analysis/cache/${tailoredResumeId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // =========================================================================
+  // STAR STORIES METHODS
+  // =========================================================================
+
+  /**
+   * List all STAR stories for the user
+   */
+  async listStarStories(tailoredResumeId?: number): Promise<ApiResponse> {
+    try {
+      const url = tailoredResumeId
+        ? `${this.baseUrl}/api/star-stories/list?tailored_resume_id=${tailoredResumeId}`
+        : `${this.baseUrl}/api/star-stories/list`;
+
+      const response = await fetch(url, {
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data.stories || data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Create a new STAR story
+   */
+  async createStarStory(storyData: {
+    tailored_resume_id: number;
+    title: string;
+    story_theme?: string;
+    company_context?: string;
+    situation: string;
+    task: string;
+    action: string;
+    result: string;
+    key_themes?: string[];
+    talking_points?: string[];
+    experience_indices?: number[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/star-stories/`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(storyData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data.story || data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Update a STAR story
+   */
+  async updateStarStory(storyId: number, storyData: {
+    title?: string;
+    situation?: string;
+    task?: string;
+    action?: string;
+    result?: string;
+    key_themes?: string[];
+    talking_points?: string[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/star-stories/${storyId}`, {
+        method: 'PUT',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(storyData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Delete a STAR story
+   */
+  async deleteStarStory(storyId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/star-stories/${storyId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Generate a STAR story using AI
+   */
+  async generateStarStory(data: {
+    tailored_resume_id: number;
+    experience_indices: number[];
+    story_theme: string;
+    tone?: string;
+    company_context?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/generate-star-story`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.story || result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // =========================================================================
+  // SAVED COMPARISONS METHODS
+  // =========================================================================
+
+  /**
+   * Save a resume comparison
+   */
+  async saveComparison(data: {
+    tailored_resume_id: number;
+    title?: string;
+    tags?: string[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/saved-comparisons/save`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * List all saved comparisons
+   */
+  async listSavedComparisons(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/saved-comparisons/list`, {
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get a specific saved comparison
+   */
+  async getSavedComparison(comparisonId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/saved-comparisons/${comparisonId}`, {
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Update a saved comparison
+   */
+  async updateSavedComparison(comparisonId: number, data: {
+    title?: string;
+    is_pinned?: boolean;
+    tags?: string[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/saved-comparisons/${comparisonId}`, {
+        method: 'PUT',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Delete a saved comparison
+   */
+  async deleteSavedComparison(comparisonId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/saved-comparisons/${comparisonId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // =========================================================================
+  // CERTIFICATION RECOMMENDATIONS METHODS
+  // =========================================================================
+
+  /**
+   * Get certification recommendations for a role
+   */
+  async getCertificationRecommendations(interviewPrepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/certifications/recommend`, {
+        method: 'POST',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ interview_prep_id: interviewPrepId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data.certifications || data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // =========================================================================
+  // TAILORED RESUME METHODS
+  // =========================================================================
+
+  /**
+   * Get a specific tailored resume
+   */
+  async getTailoredResume(tailoredResumeId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/tailor/tailored/${tailoredResumeId}`, {
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+}
+
 // Export singleton instance
 export const api = new ApiClient();
 

@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+/* Tailwind v4 Theme Configuration - Set Urbanist as default font */
+@theme {
+  --font-sans: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 /* Tailwind v4 includes preflight (CSS reset) - no need for additional universal reset */
 
 /* Theme Variables - Enhanced for Readability */
@@ -27,9 +32,19 @@
   --text-tertiary: #6b7280;
   --border-color: #374151;
   --accent-color: #60a5fa;
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  /* WCAG 2.1 AA compliant: increased from 0.04 to 0.12 for better contrast ratio (>4.5:1) */
+  --glass-bg: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.15);
   --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Apply Urbanist font to all elements */
+*, *::before, *::after {
+  font-family: inherit;
+}
+
+html {
+  font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 body {
@@ -42,6 +57,11 @@ body {
   line-height: 1.6;
   font-size: 16px;
   transition: background-color 0.3s, color 0.3s;
+}
+
+/* Ensure inputs, buttons, and form elements use Urbanist */
+input, button, textarea, select {
+  font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* Glassmorphism utility classes - Adaptive for Light & Dark Mode */
@@ -368,6 +388,21 @@ body {
   animation: scaleIn 0.6s ease-out forwards;
 }
 
+.animate-slide-down {
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Initial hidden state for elements that will animate */
 .animate-on-scroll {
   opacity: 0;
@@ -554,4 +589,92 @@ body {
   border: 2px solid #10b981 !important;
   background: rgba(16, 185, 129, 0.1) !important;
   transition: all 0.3s ease;
+}
+
+/* ============================================
+   WCAG 2.1 Accessibility: Reduced Motion Support
+   ============================================
+   Users who prefer reduced motion (vestibular disorders, motion sensitivity)
+   will have animations disabled or minimized.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable specific continuous animations */
+  .animate-float,
+  .animate-pulse-slow,
+  .animate-gradient,
+  .animate-spin {
+    animation: none !important;
+  }
+
+  /* Disable scroll-triggered animations */
+  .animate-fade-in-up,
+  .animate-fade-in,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-scale-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Ensure elements that would animate are visible */
+  .animate-on-scroll {
+    opacity: 1 !important;
+  }
+
+  /* Disable particle animations */
+  .particle {
+    animation: none !important;
+  }
+
+  /* Disable hover transforms */
+  .glass-hover:hover,
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .btn-danger:hover {
+    transform: none !important;
+  }
+}
+
+/* ============================================
+   Focus Visible Styles for Keyboard Navigation
+   ============================================
+   Enhanced focus indicators for keyboard users
+*/
+:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Skip link for screen readers */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: auto;
+  height: auto;
+  padding: 1rem 2rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 2px solid var(--accent-color);
+  border-radius: 8px;
+  z-index: 9999;
 }

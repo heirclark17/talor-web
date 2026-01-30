@@ -8,6 +8,7 @@ import InterviewPrepList from './pages/InterviewPrepList'
 import StarStoriesList from './pages/StarStoriesList'
 import SavedComparisons from './pages/SavedComparisons'
 import CareerPathDesigner from './pages/CareerPathDesigner'
+import OnboardingTour from './components/OnboardingTour'
 import { useScrollAnimation } from './hooks/useScrollAnimation'
 
 function Dashboard() {
@@ -92,7 +93,7 @@ function Dashboard() {
           }`}>
             Why Talor Works Better
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 lg:gap-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 md:gap-8 lg:gap-12">
             {/* Feature 1 */}
             <div className={`text-center animate-on-scroll ${
               featuresAnimation.isVisible ? 'animate-fade-in-up delay-100' : ''
@@ -253,12 +254,12 @@ function AppContent() {
   }, [mobileMenuOpen])
 
   const navLinks = [
-    { to: '/upload', icon: Upload, label: 'Upload' },
-    { to: '/tailor', icon: Target, label: 'Tailor' },
-    { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep' },
-    { to: '/star-stories', icon: Sparkles, label: 'STAR Stories' },
-    { to: '/saved-comparisons', icon: Bookmark, label: 'Saved' },
-    { to: '/career-path', icon: TrendingUp, label: 'Career Path' },
+    { to: '/upload', icon: Upload, label: 'Upload', tourId: 'upload' },
+    { to: '/tailor', icon: Target, label: 'Tailor', tourId: 'tailor' },
+    { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep', tourId: 'interview-prep' },
+    { to: '/star-stories', icon: Sparkles, label: 'STAR Stories', tourId: 'star-stories' },
+    { to: '/saved-comparisons', icon: Bookmark, label: 'Saved', tourId: 'saved' },
+    { to: '/career-path', icon: TrendingUp, label: 'Career Path', tourId: 'career-path' },
   ]
 
   return (
@@ -274,33 +275,37 @@ function AppContent() {
               </Link>
 
               {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+              <nav className="hidden lg:flex items-center gap-6 xl:gap-8" aria-label="Main navigation">
                 {navLinks.map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`flex items-center gap-2 transition-colors ${
+                    data-tour={link.tourId}
+                    className={`flex items-center gap-2 py-2 px-1 min-h-[44px] transition-colors ${
                       location.pathname === link.to
                         ? 'text-white'
                         : 'text-gray-400 hover:text-white'
                     }`}
+                    aria-current={location.pathname === link.to ? 'page' : undefined}
                   >
-                    <link.icon className="w-5 h-5" />
+                    <link.icon className="w-5 h-5" aria-hidden="true" />
                     <span className="text-sm xl:text-base font-medium">{link.label}</span>
                   </Link>
                 ))}
-              </div>
+              </nav>
 
-              {/* Mobile Hamburger Button */}
+              {/* Mobile Hamburger Button - 44px minimum touch target for WCAG compliance */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
-                aria-label="Toggle menu"
+                className="lg:hidden min-w-[44px] min-h-[44px] p-2 text-white hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
+                aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-nav-menu"
               >
                 {mobileMenuOpen ? (
-                  <X className="w-6 h-6" />
+                  <X className="w-6 h-6" aria-hidden="true" />
                 ) : (
-                  <Menu className="w-6 h-6" />
+                  <Menu className="w-6 h-6" aria-hidden="true" />
                 )}
               </button>
             </div>
@@ -308,35 +313,53 @@ function AppContent() {
 
           {/* Mobile Navigation Drawer */}
           {mobileMenuOpen && (
-            <div className="lg:hidden fixed inset-0 top-[65px] z-40">
-              {/* Backdrop */}
+            <div
+              id="mobile-nav-menu"
+              className="lg:hidden fixed inset-0 top-[65px] z-40 animate-fade-in"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+            >
+              {/* Backdrop - clickable to close */}
               <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
                 onClick={() => setMobileMenuOpen(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setMobileMenuOpen(false)
+                  }
+                }}
+                aria-hidden="true"
               />
 
               {/* Menu Panel */}
-              <div className="relative glass border-t border-white/10 bg-black/90 backdrop-blur-xl">
+              <nav
+                className="relative glass border-t border-white/10 bg-black/90 backdrop-blur-xl animate-slide-down"
+                aria-label="Mobile navigation"
+              >
                 <div className="container mx-auto px-4 py-4">
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2" role="menu">
                     {navLinks.map((link) => (
                       <Link
                         key={link.to}
                         to={link.to}
+                        data-tour={`mobile-${link.tourId}`}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${
+                        role="menuitem"
+                        className={`flex items-center gap-3 p-3 min-h-[44px] rounded-xl transition-all duration-200 ${
                           location.pathname === link.to
                             ? 'bg-white/10 text-white'
-                            : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                            : 'text-gray-300 hover:bg-white/5 hover:text-white active:scale-95'
                         }`}
+                        aria-current={location.pathname === link.to ? 'page' : undefined}
                       >
-                        <link.icon className="w-5 h-5" />
+                        <link.icon className="w-5 h-5" aria-hidden="true" />
                         <span className="text-base font-medium">{link.label}</span>
                       </Link>
                     ))}
                   </div>
                 </div>
-              </div>
+              </nav>
             </div>
           )}
         </nav>
@@ -357,6 +380,8 @@ function AppContent() {
         </Routes>
       </main>
 
+      {/* Onboarding Tour - Shows on first visit */}
+      {!isLandingPage && <OnboardingTour />}
     </div>
   )
 }
