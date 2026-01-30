@@ -1,10 +1,338 @@
 import { API_BASE_URL } from '../utils/constants';
 import { getUserId } from '../utils/userSession';
 
+/**
+ * Convert snake_case keys to camelCase recursively
+ * Handles nested objects and arrays
+ */
+function snakeToCamel(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => snakeToCamel(item));
+  }
+
+  if (typeof obj === 'object') {
+    const converted: any = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        // Convert snake_case to camelCase
+        const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+        converted[camelKey] = snakeToCamel(obj[key]);
+      }
+    }
+    return converted;
+  }
+
+  return obj;
+}
+
 interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
   error?: string;
+}
+
+// Interview Readiness Score interface
+export interface ReadinessScore {
+  confidence_level: number;
+  preparation_level: string;
+  strengths: string[];
+  areas_for_improvement: string[];
+  recommendations: string[];
+}
+
+// Values Alignment interface
+export interface ValuesAlignment {
+  alignment_score: number;
+  matched_values: Array<{
+    value: string;
+    company_context?: string;
+    candidate_evidence?: string;
+  }>;
+  value_gaps: Array<{
+    value: string;
+    company_context?: string;
+    suggestion?: string;
+  }>;
+  cultural_fit_insights: string;
+}
+
+// Company Research interface
+export interface CompanyResearch {
+  company_overview: string;
+  recent_news: Array<{
+    headline: string;
+    date?: string;
+    summary: string;
+    source?: string;
+    url?: string;
+  }>;
+  key_products_services: string[];
+  competitors: Array<{
+    name: string;
+    context?: string;
+  }>;
+  financial_health: {
+    summary: string;
+    status: 'good' | 'fair' | 'poor';
+  };
+  employee_sentiment: {
+    summary: string;
+    rating?: number;
+    sentiment: 'positive' | 'neutral' | 'negative';
+  };
+}
+
+// Strategic News interface
+export interface StrategicNewsItem {
+  headline: string;
+  date: string;
+  source: string;
+  summary: string;
+  relevance_to_interview: string;
+  talking_points: string[];
+}
+
+export interface StrategicNews {
+  news_items: StrategicNewsItem[];
+}
+
+// Competitive Intelligence interface
+export interface CompetitiveIntelligence {
+  market_position: string;
+  competitive_advantages: string[];
+  challenges: string[];
+  differentiation_strategy: string;
+  interview_angles: string[];
+}
+
+// Interview Strategy interface
+export interface InterviewStrategy {
+  recommended_approach: string;
+  key_themes_to_emphasize: string[];
+  stories_to_prepare: Array<{
+    theme: string;
+    description: string;
+  }>;
+  questions_to_ask_interviewer: string[];
+  pre_interview_checklist: string[];
+}
+
+// Executive Insights interface
+export interface ExecutiveInsights {
+  executive_priorities: string[];
+  leadership_style: string;
+  decision_making_factors: string[];
+  strategic_initiatives: string[];
+  c_suite_talking_points: string[];
+}
+
+// Career Trajectory Analysis interface (Feature #13)
+export interface CareerTrajectoryAnalysis {
+  current_position_assessment: string;
+  growth_potential: {
+    score: number;
+    factors: string[];
+  };
+  trajectory_path: Array<{
+    role: string;
+    timeline: string;
+    requirements: string[];
+  }>;
+  recommended_next_steps: string[];
+  market_insights: {
+    demand: 'high' | 'medium' | 'low';
+    salary_range: string;
+    top_companies: string[];
+  };
+}
+
+// Skill Gaps Analysis interface (Feature #14)
+export interface SkillGapsAnalysis {
+  identified_gaps: Array<{
+    skill: string;
+    importance: 'critical' | 'high' | 'medium' | 'low';
+    current_level: 'none' | 'beginner' | 'intermediate' | 'advanced';
+    target_level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  }>;
+  industry_demand: {
+    trending_skills: string[];
+    market_saturation: Record<string, 'high' | 'medium' | 'low'>;
+  };
+  learning_resources: Array<{
+    skill: string;
+    resources: Array<{
+      type: 'course' | 'book' | 'certification' | 'bootcamp';
+      title: string;
+      provider: string;
+      url?: string;
+      cost?: string;
+      duration?: string;
+    }>;
+  }>;
+  priority_ranking: string[];
+}
+
+// Detailed Career Plan interface (Feature #15)
+export interface DetailedCareerPlan {
+  plan_id: number;
+  summary: string;
+  milestones: Array<{
+    title: string;
+    description: string;
+    timeline: string;
+    completion_criteria: string[];
+  }>;
+  action_items: Array<{
+    category: string;
+    task: string;
+    priority: 'high' | 'medium' | 'low';
+    deadline: string;
+    resources: string[];
+  }>;
+  timeline_breakdown: {
+    phase_1: { duration: string; focus: string; goals: string[] };
+    phase_2: { duration: string; focus: string; goals: string[] };
+    phase_3: { duration: string; focus: string; goals: string[] };
+  };
+  skill_development_path: Array<{
+    skill: string;
+    current_proficiency: number;
+    target_proficiency: number;
+    learning_plan: string[];
+  }>;
+}
+
+// STAR Story Analysis interface (Feature #18)
+export interface StarStoryAnalysis {
+  overall_score: number;
+  component_scores: {
+    situation: { score: number; feedback: string };
+    task: { score: number; feedback: string };
+    action: { score: number; feedback: string };
+    result: { score: number; feedback: string };
+  };
+  strengths: string[];
+  areas_for_improvement: string[];
+  impact_assessment: {
+    quantifiable_results: boolean;
+    leadership_demonstrated: boolean;
+    problem_solving_shown: boolean;
+  };
+  suggestions: string[];
+}
+
+// Story Suggestions interface (Feature #19)
+export interface StorySuggestions {
+  improvement_tips: Array<{
+    component: 'situation' | 'task' | 'action' | 'result';
+    current_text: string;
+    suggestion: string;
+    reasoning: string;
+  }>;
+  alternative_framings: Array<{
+    perspective: string;
+    reframed_story: {
+      situation: string;
+      task: string;
+      action: string;
+      result: string;
+    };
+  }>;
+  impact_enhancements: Array<{
+    type: 'metrics' | 'scope' | 'leadership' | 'innovation';
+    enhancement: string;
+  }>;
+  keyword_recommendations: string[];
+}
+
+// Story Variations interface (Feature #20)
+export interface StoryVariations {
+  variations: Array<{
+    context: string;
+    tone: string;
+    story: {
+      situation: string;
+      task: string;
+      action: string;
+      result: string;
+    };
+    optimal_use_case: string;
+  }>;
+  usage_guide: {
+    technical_interviews: string;
+    behavioral_interviews: string;
+    executive_presentations: string;
+    networking_events: string;
+  };
+}
+
+// Practice Response interfaces
+export interface SavePracticeResponseRequest {
+  interviewPrepId: number;
+  questionText: string;
+  questionCategory?: string;
+  starStory?: object;
+  writtenAnswer?: string;
+  practiceDurationSeconds?: number;
+}
+
+export interface SavePracticeResponseResponse {
+  success: boolean;
+  data: {
+    id: number;
+    times_practiced: number;
+    message: string;
+  };
+}
+
+// Practice History interfaces
+export interface PracticeHistoryItem {
+  id: number;
+  question_text: string;
+  question_category?: string;
+  response_text?: string;
+  star_story?: {
+    situation: string;
+    task: string;
+    action: string;
+    result: string;
+  };
+  practiced_at: string;
+  duration_seconds?: number;
+  times_practiced: number;
+}
+
+// Resume Analysis interfaces
+export interface KeywordOptimization {
+  score: number;
+  missing_keywords: string[];
+  suggestions: string;
+}
+
+export interface ATSCompatibility {
+  score: number;
+  issues: string[];
+  recommendations: string;
+}
+
+export interface ImprovementRecommendation {
+  category: string;
+  priority: 'high' | 'medium' | 'low';
+  recommendation: string;
+  example: string;
+}
+
+export interface ResumeAnalysis {
+  overall_score: number;
+  strengths: string[];
+  weaknesses: string[];
+  keyword_optimization: KeywordOptimization;
+  ats_compatibility: ATSCompatibility;
+  improvement_recommendations: ImprovementRecommendation[];
 }
 
 // Base fetch with auth headers
@@ -153,6 +481,44 @@ export const api = {
       return { success: response.ok, data };
     } catch (error: any) {
       console.error('Error fetching tailored resume:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Batch tailoring - tailor resume for multiple jobs at once (max 10)
+  async tailorResumeBatch(params: {
+    baseResumeId: number;
+    jobUrls: string[];
+  }): Promise<ApiResponse> {
+    try {
+      // Validate max 10 URLs
+      if (params.jobUrls.length > 10) {
+        return {
+          success: false,
+          error: 'Maximum 10 job URLs allowed',
+        };
+      }
+
+      const response = await fetchWithAuth('/api/tailor/tailor/batch', {
+        method: 'POST',
+        body: JSON.stringify({
+          base_resume_id: params.baseResumeId,
+          job_urls: params.jobUrls,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || data.detail || `Server error: ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error batch tailoring resume:', error);
       return { success: false, error: error.message };
     }
   },
@@ -412,14 +778,7 @@ export const api = {
   },
 
   // Save practice response
-  async savePracticeResponse(params: {
-    interviewPrepId: number;
-    questionText: string;
-    questionCategory?: string;
-    starStory?: object;
-    writtenAnswer?: string;
-    practiceDurationSeconds?: number;
-  }): Promise<ApiResponse> {
+  async savePracticeResponse(params: SavePracticeResponseRequest): Promise<ApiResponse<SavePracticeResponseResponse>> {
     try {
       const response = await fetchWithAuth('/api/interview-prep/save-practice-response', {
         method: 'POST',
@@ -448,6 +807,18 @@ export const api = {
       return { success: response.ok, data };
     } catch (error: any) {
       console.error('Error fetching practice responses:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get practice history for an interview prep
+  async getPracticeHistory(interviewPrepId: number): Promise<ApiResponse<PracticeHistoryItem[]>> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${interviewPrepId}/practice-history`);
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching practice history:', error);
       return { success: false, error: error.message };
     }
   },
@@ -534,6 +905,21 @@ export const api = {
     }
   },
 
+    // Base Resume Analysis endpoint
+  async analyzeResume(resumeId: number): Promise<ApiResponse<ResumeAnalysis>> {
+    try {
+      const response = await fetchWithAuth('/api/resumes/analyze', {
+        method: 'POST',
+        body: JSON.stringify({ resume_id: resumeId }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data: data.analysis };
+    } catch (error: any) {
+      console.error('Error analyzing resume:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
   // Resume analysis endpoints
   async analyzeAll(tailoredResumeId: number, forceRefresh = false): Promise<ApiResponse> {
     try {
@@ -611,11 +997,14 @@ export const api = {
 
   // STAR stories endpoints
   async createStarStory(params: {
+    title?: string;
     situation: string;
     task: string;
     action: string;
     result: string;
     tags?: string[];
+    key_themes?: string[];
+    talking_points?: string[];
   }): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/star-stories/', {
@@ -727,9 +1116,92 @@ export const api = {
         }),
       });
       const data = await response.json();
-      return { success: response.ok, data };
+
+      // Convert snake_case keys to camelCase for frontend consistency
+      const convertedResult = {
+        ...data,
+        plan: data.plan ? snakeToCamel(data.plan) : null,
+        planId: data.plan_id || data.planId,
+      };
+
+      return { success: response.ok, data: convertedResult };
     } catch (error: any) {
       console.error('Error generating career plan:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Generate career path plan (ASYNC - uses Perplexity + OpenAI)
+   * Returns job_id immediately, poll getCareerPlanJobStatus for results
+   */
+  async generateCareerPlanAsync(intake: any): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/career-path/generate-async', {
+        method: 'POST',
+        body: JSON.stringify({ intake }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // For 422 validation errors, include detailed error info
+        let errorMsg = result.detail || result.error || `HTTP ${response.status}`;
+
+        // If there's a detail array (FastAPI validation errors), format it
+        if (Array.isArray(result.detail)) {
+          const validationErrors = result.detail.map((err: any) =>
+            `${err.loc?.join('.') || 'field'}: ${err.msg}`
+          ).join('; ');
+          errorMsg = `Validation errors: ${validationErrors}`;
+        }
+
+        return {
+          success: false,
+          error: errorMsg,
+          data: result,
+        };
+      }
+
+      return {
+        success: true,
+        data: result, // Contains: { success: true, job_id: "...", message: "..." }
+      };
+    } catch (error: any) {
+      console.error('Error generating async career plan:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Get status of async career plan generation job
+   * Poll this endpoint until status === 'completed' or 'failed'
+   */
+  async getCareerPlanJobStatus(jobId: string): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/career-path/job/${jobId}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      // Convert snake_case keys from backend to camelCase for frontend
+      const convertedResult = {
+        ...result,
+        plan: result.plan ? snakeToCamel(result.plan) : null,
+        planId: result.plan_id || result.planId,
+      };
+
+      return {
+        success: true,
+        data: convertedResult,
+      };
+    } catch (error: any) {
+      console.error('Error getting career plan job status:', error);
       return { success: false, error: error.message };
     }
   },
@@ -766,6 +1238,646 @@ export const api = {
       return { success: response.ok, data };
     } catch (error: any) {
       console.error('Error deleting career plan:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Certification recommendations
+  async getCertificationRecommendations(interviewPrepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/certifications/recommend', {
+        method: 'POST',
+        body: JSON.stringify({ interview_prep_id: interviewPrepId }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error getting certification recommendations:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Export resume as PDF or DOCX
+  async exportResume(tailoredResumeId: number, format: 'pdf' | 'docx' = 'pdf'): Promise<ApiResponse<string>> {
+    try {
+      const response = await fetchWithAuth('/api/resume-analysis/export', {
+        method: 'POST',
+        body: JSON.stringify({
+          tailored_resume_id: tailoredResumeId,
+          format: format,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        return { success: false, error: error.detail || 'Export failed' };
+      }
+
+      // Return the download URL or blob URL
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      return { success: true, data: url };
+    } catch (error: any) {
+      console.error('Error exporting resume:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Interview readiness score
+  async calculateReadiness(interviewPrepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/calculate-readiness', {
+        method: 'POST',
+        body: JSON.stringify({ interview_prep_id: interviewPrepId }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error calculating readiness:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Values alignment for interview
+  async getValuesAlignment(interviewPrepId: number): Promise<ApiResponse<ValuesAlignment>> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${interviewPrepId}/values-alignment`);
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error getting values alignment:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Save STAR story for a specific question
+  async saveQuestionStarStory(params: {
+    interviewPrepId: number;
+    questionId: string;
+    starStory: object;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/save-question-star-story', {
+        method: 'POST',
+        body: JSON.stringify({
+          interview_prep_id: params.interviewPrepId,
+          question_id: params.questionId,
+          star_story: params.starStory,
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error saving question STAR story:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get interview readiness score
+  async getInterviewReadinessScore(prepId: number): Promise<ApiResponse<ReadinessScore>> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${prepId}/readiness-score`);
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching interview readiness score:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get company research for interview prep
+  async getCompanyResearchForPrep(prepId: number): Promise<ApiResponse<CompanyResearch>> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${prepId}/company-research`);
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching company research:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get strategic news for interview prep
+  async getStrategicNews(prepId: number): Promise<ApiResponse<StrategicNewsItem[]>> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${prepId}/strategic-news`);
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching strategic news:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get competitive intelligence for interview prep
+  async getCompetitiveIntelligence(prepId: number): Promise<ApiResponse<CompetitiveIntelligence>> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${prepId}/competitive-intelligence`);
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching competitive intelligence:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get interview strategy for interview prep
+  async getInterviewStrategy(prepId: number): Promise<ApiResponse<InterviewStrategy>> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${prepId}/interview-strategy`);
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching interview strategy:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get executive insights for interview prep
+  async getExecutiveInsights(prepId: number): Promise<ApiResponse<ExecutiveInsights>> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${prepId}/executive-insights`);
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching executive insights:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Feature #13: Career Trajectory Analysis
+  async analyzeCareerTrajectory(params: {
+    resumeId: number;
+    targetRole?: string;
+    industry?: string;
+  }): Promise<ApiResponse<CareerTrajectoryAnalysis>> {
+    try {
+      const response = await fetchWithAuth('/api/career/analyze-trajectory', {
+        method: 'POST',
+        body: JSON.stringify({
+          resume_id: params.resumeId,
+          target_role: params.targetRole,
+          industry: params.industry,
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error analyzing career trajectory:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Feature #14: Skill Gaps Analysis
+  async getSkillGaps(params: {
+    resumeId: number;
+    targetRole: string;
+  }): Promise<ApiResponse<SkillGapsAnalysis>> {
+    try {
+      const response = await fetchWithAuth('/api/career/skill-gaps', {
+        method: 'GET',
+        headers: {
+          'X-Resume-ID': params.resumeId.toString(),
+          'X-Target-Role': params.targetRole,
+        },
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching skill gaps:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Feature #15: Career Plan Generation (enhanced)
+  async generateDetailedCareerPlan(params: {
+    resumeId: number;
+    currentRole: string;
+    targetRole: string;
+    timeline?: string;
+  }): Promise<ApiResponse<DetailedCareerPlan>> {
+    try {
+      const response = await fetchWithAuth('/api/career/generate-plan', {
+        method: 'POST',
+        body: JSON.stringify({
+          resume_id: params.resumeId,
+          current_role: params.currentRole,
+          target_role: params.targetRole,
+          timeline: params.timeline || '6months',
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error generating career plan:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Feature #16: Export Saved Items
+  async exportSavedItems(format: 'pdf' | 'json' = 'json'): Promise<ApiResponse<Blob>> {
+    try {
+      const response = await fetchWithAuth(`/api/saved/export?format=${format}`);
+
+      if (!response.ok) {
+        const error = await response.json();
+        return { success: false, error: error.detail || 'Export failed' };
+      }
+
+      const blob = await response.blob();
+      return { success: true, data: blob };
+    } catch (error: any) {
+      console.error('Error exporting saved items:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Feature #17: Bulk Delete Saved Items
+  async bulkDeleteSavedItems(comparisonIds: number[]): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/saved/bulk-delete', {
+        method: 'POST',
+        body: JSON.stringify({ comparison_ids: comparisonIds }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error bulk deleting saved items:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Feature #18: STAR Story Analysis
+  async analyzeStarStory(storyId: number): Promise<ApiResponse<StarStoryAnalysis>> {
+    try {
+      const response = await fetchWithAuth(`/api/star-stories/${storyId}/analyze`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error analyzing STAR story:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Feature #19: Story Suggestions
+  async getStorySuggestions(storyId: number): Promise<ApiResponse<StorySuggestions>> {
+    try {
+      const response = await fetchWithAuth(`/api/star-stories/${storyId}/suggestions`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error fetching story suggestions:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Feature #20: Generate Story Variations
+  async generateStoryVariations(params: {
+    storyId: number;
+    contexts: string[];
+    tones?: string[];
+  }): Promise<ApiResponse<StoryVariations>> {
+    try {
+      const response = await fetchWithAuth(`/api/star-stories/${params.storyId}/variations`, {
+        method: 'POST',
+        body: JSON.stringify({
+          contexts: params.contexts,
+          tones: params.tones || ['professional', 'conversational'],
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error generating story variations:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // =========================================================================
+  // INTERVIEW INTELLIGENCE METHODS (matching web app)
+  // =========================================================================
+
+  /**
+   * Score content relevance to specific job
+   */
+  async scoreContentRelevance(data: {
+    content_items: any[];
+    job_description: string;
+    job_title: string;
+    content_type?: 'strategy' | 'news';
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/score-relevance', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error: any) {
+      console.error('Error scoring content relevance:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Generate talking points for interview
+   */
+  async generateTalkingPoints(data: {
+    content: any;
+    job_description: string;
+    job_title: string;
+    company_name: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/generate-talking-points', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error: any) {
+      console.error('Error generating talking points:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Analyze job alignment
+   */
+  async analyzeJobAlignment(data: {
+    company_research: any;
+    job_description: string;
+    job_title: string;
+    company_name: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/analyze-job-alignment', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error: any) {
+      console.error('Error analyzing job alignment:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Calculate interview readiness score (POST version)
+   */
+  async calculateInterviewReadiness(data: {
+    prep_data: any;
+    sections_completed: string[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/calculate-readiness', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error: any) {
+      console.error('Error calculating interview readiness:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Generate values alignment scorecard
+   */
+  async generateValuesAlignment(data: {
+    stated_values: any[];
+    candidate_background: string;
+    job_description: string;
+    company_name: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/values-alignment', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.detail || result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error: any) {
+      console.error('Error generating values alignment:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // =========================================================================
+  // ADDITIONAL CAREER PATH METHODS (matching web app)
+  // =========================================================================
+
+  /**
+   * Refresh events for a career plan
+   */
+  async refreshCareerPlanEvents(planId: number, location: string): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/career-path/refresh-events', {
+        method: 'POST',
+        body: JSON.stringify({ plan_id: planId, location }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: result };
+    } catch (error: any) {
+      console.error('Error refreshing career plan events:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Auto-generate typical tasks for a job role using Perplexity AI
+   */
+  async generateTasksForRole(roleTitle: string, industry?: string): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/career-path/generate-tasks', {
+        method: 'POST',
+        body: JSON.stringify({
+          role_title: roleTitle,
+          industry: industry || '',
+        }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: result };
+    } catch (error: any) {
+      console.error('Error generating tasks for role:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // =========================================================================
+  // RESUME ANALYSIS CACHE METHODS (matching web app)
+  // =========================================================================
+
+  /**
+   * Clear analysis cache for a tailored resume (to force re-analysis)
+   */
+  async clearAnalysisCache(tailoredResumeId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/resume-analysis/cache/${tailoredResumeId}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error clearing analysis cache:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Export resume analysis as PDF or DOCX
+   */
+  async exportResumeAnalysis(tailoredResumeId: number, format: 'pdf' | 'docx'): Promise<ApiResponse<Blob>> {
+    try {
+      const response = await fetchWithAuth('/api/resume-analysis/export', {
+        method: 'POST',
+        body: JSON.stringify({
+          tailored_resume_id: tailoredResumeId,
+          format,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return {
+          success: false,
+          error: errorData.detail || errorData.error || `HTTP ${response.status}`,
+        };
+      }
+
+      const blob = await response.blob();
+      return { success: true, data: blob };
+    } catch (error: any) {
+      console.error('Error exporting resume analysis:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // =========================================================================
+  // COMPANY RESEARCH METHODS (matching web app)
+  // =========================================================================
+
+  /**
+   * Get company values
+   */
+  async getCompanyValues(companyName: string): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/company-values', {
+        method: 'POST',
+        body: JSON.stringify({ company_name: companyName }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: data.data || data };
+    } catch (error: any) {
+      console.error('Error fetching company values:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Get interview questions for a company/role
+   */
+  async getInterviewQuestions(companyName: string, jobTitle?: string, maxQuestions?: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/interview-questions', {
+        method: 'POST',
+        body: JSON.stringify({
+          company_name: companyName,
+          job_title: jobTitle || null,
+          role_category: null,
+          max_questions: maxQuestions || 30,
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: data.data || data };
+    } catch (error: any) {
+      console.error('Error fetching interview questions:', error);
       return { success: false, error: error.message };
     }
   },
