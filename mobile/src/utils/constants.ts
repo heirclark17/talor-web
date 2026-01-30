@@ -45,6 +45,7 @@ export const COLORS = {
   error: '#ef4444',
   purple: '#8b5cf6',
   info: '#06b6d4',
+  cyan: '#06b6d4',
 };
 
 // Typography - Urbanist font family
@@ -56,6 +57,7 @@ export const FONTS = {
   semibold: 'Urbanist_600SemiBold',
   bold: 'Urbanist_700Bold',
   extrabold: 'Urbanist_800ExtraBold',
+  italic: 'Urbanist_400Regular', // Fallback - Urbanist doesn't have separate italic
 };
 
 // Spacing
@@ -68,12 +70,15 @@ export const SPACING = {
   xxl: 48,
 };
 
+// Tab Bar
+export const TAB_BAR_HEIGHT = 85; // Height of tab bar + safe area padding
+
 // Border Radius
 export const RADIUS = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
+  sm: 10,
+  md: 16,
+  lg: 24,
+  xl: 32,
   full: 9999,
 };
 

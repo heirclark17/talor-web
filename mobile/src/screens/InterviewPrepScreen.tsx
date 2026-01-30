@@ -1598,6 +1598,7 @@ export default function InterviewPrepScreen() {
   const [loadingInterviewStrategy, setLoadingInterviewStrategy] = useState(false);
   const [executiveInsights, setExecutiveInsights] = useState<ExecutiveInsights | null>(null);
   const [loadingExecutiveInsights, setLoadingExecutiveInsights] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
   useEffect(() => {
     loadInterviewPrep();
@@ -1833,85 +1834,7 @@ export default function InterviewPrepScreen() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        {/* Action Buttons */}
-        {interviewPrepId && (
-          <View style={styles.actionButtonsContainer}>
-            <GlassButton
-              variant="primary"
-              size="sm"
-              label="Common Questions"
-              icon={<MessageCircle color="#ffffff" size={18} />}
-              onPress={() => {
-                navigation.navigate('CommonQuestions' as any, { interviewPrepId });
-              }}
-              style={styles.actionButtonFlex}
-            />
-
-            <GlassButton
-              variant="secondary"
-              size="sm"
-              label="Practice Questions"
-              icon={<ClipboardList color={colors.text} size={18} />}
-              onPress={() => {
-                navigation.navigate('PracticeQuestions' as any, {
-                  interviewPrepId,
-                  tailoredResumeId
-                });
-              }}
-              style={styles.actionButtonFlex}
-            />
-
-            <GlassButton
-              variant="secondary"
-              size="sm"
-              label="Behavioral & Technical"
-              icon={<Brain color={colors.text} size={18} />}
-              onPress={() => {
-                navigation.navigate('BehavioralTechnicalQuestions' as any, {
-                  interviewPrepId
-                });
-              }}
-              style={styles.actionButtonFlex}
-            />
-          </View>
-        )}
-
-        {/* Interview Readiness Score */}
-        {interviewPrepId && readinessScore && (
-          <ReadinessScoreCard score={readinessScore} loading={loadingReadiness} colors={colors} />
-        )}
-
-        {/* Values Alignment */}
-        {interviewPrepId && valuesAlignment && (
-          <ValuesAlignmentCard alignment={valuesAlignment} loading={loadingValuesAlignment} colors={colors} />
-        )}
-
-        {/* Company Research */}
-        {interviewPrepId && companyResearch && (
-          <CompanyResearchCard research={companyResearch} loading={loadingCompanyResearch} colors={colors} />
-        )}
-
-        {/* Strategic News */}
-        {interviewPrepId && strategicNews && strategicNews.length > 0 && (
-          <StrategicNewsCard newsItems={strategicNews} loading={loadingStrategicNews} colors={colors} />
-        )}
-
-        {/* Competitive Intelligence */}
-        {interviewPrepId && competitiveIntelligence && (
-          <CompetitiveIntelligenceCard intelligence={competitiveIntelligence} loading={loadingCompetitiveIntelligence} colors={colors} />
-        )}
-
-        {/* Interview Strategy */}
-        {interviewPrepId && interviewStrategy && (
-          <InterviewStrategyCard strategy={interviewStrategy} loading={loadingInterviewStrategy} colors={colors} />
-        )}
-
-        {/* Executive Insights */}
-        {interviewPrepId && executiveInsights && (
-          <ExecutiveInsightsCard insights={executiveInsights} loading={loadingExecutiveInsights} colors={colors} />
-        )}
-
-        {/* Job Info Card */}
+        {/* Job Info Card - Header */}
         <View style={[styles.jobCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
           <View style={styles.jobCardHeader}>
             <View style={[styles.jobIcon, { backgroundColor: colors.backgroundTertiary }]}>
@@ -1944,30 +1867,262 @@ export default function InterviewPrepScreen() {
           </View>
         </View>
 
-        {/* Company Profile Section */}
-        <ExpandableSection
-          title="Company Profile"
-          icon={<Building2 color={COLORS.primary} size={20} />}
-          defaultExpanded={true}
-          accentColor={COLORS.primary}
-          colors={colors}
-        >
-          {company_profile?.overview_paragraph && (
-            <Text style={[styles.overviewText, { color: colors.textSecondary }]}>{company_profile.overview_paragraph}</Text>
-          )}
-          {company_profile?.size_estimate && (
-            <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, { color: colors.text }]}>Company Size:</Text>
-              <Text style={[styles.infoValue, { color: colors.textSecondary }]}>{company_profile.size_estimate}</Text>
+        {/* Grid of Navigation Cards - Matching Web Layout */}
+        <View style={styles.cardGrid}>
+          {/* Company Profile Card */}
+          <TouchableOpacity
+            style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+            onPress={() => setSelectedSection(selectedSection === 'companyProfile' ? null : 'companyProfile')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.navCardHeader}>
+              <View style={[styles.navCardIcon, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                <Building2 color={COLORS.primary} size={22} />
+              </View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>Company Profile</Text>
             </View>
+            <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+              {company_profile?.name} - {company_profile?.industry}
+            </Text>
+            <View style={styles.navCardFooter}>
+              <Text style={[styles.navCardAction, { color: COLORS.primary }]}>View Details</Text>
+              <ChevronDown color={COLORS.primary} size={16} />
+            </View>
+          </TouchableOpacity>
+
+          {/* Role Analysis Card */}
+          <TouchableOpacity
+            style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+            onPress={() => setSelectedSection(selectedSection === 'roleAnalysis' ? null : 'roleAnalysis')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.navCardHeader}>
+              <View style={[styles.navCardIcon, { backgroundColor: ALPHA_COLORS.success.bg }]}>
+                <Target color={COLORS.success} size={22} />
+              </View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>Role Analysis</Text>
+            </View>
+            <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+              {role_analysis?.job_title} - {role_analysis?.seniority_level}
+            </Text>
+            <View style={styles.navCardFooter}>
+              <Text style={[styles.navCardAction, { color: COLORS.success }]}>View Details</Text>
+              <ChevronDown color={COLORS.success} size={16} />
+            </View>
+          </TouchableOpacity>
+
+          {/* Values & Culture Card */}
+          <TouchableOpacity
+            style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+            onPress={() => setSelectedSection(selectedSection === 'valuesCulture' ? null : 'valuesCulture')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.navCardHeader}>
+              <View style={[styles.navCardIcon, { backgroundColor: ALPHA_COLORS.warning.bg }]}>
+                <Heart color={COLORS.warning} size={22} />
+              </View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>Values & Culture</Text>
+            </View>
+            <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+              {values_and_culture?.stated_values?.length || 0} core values identified
+            </Text>
+            <View style={styles.navCardFooter}>
+              <Text style={[styles.navCardAction, { color: COLORS.warning }]}>View Details</Text>
+              <ChevronDown color={COLORS.warning} size={16} />
+            </View>
+          </TouchableOpacity>
+
+          {/* Strategy & News Card */}
+          <TouchableOpacity
+            style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+            onPress={() => setSelectedSection(selectedSection === 'strategyNews' ? null : 'strategyNews')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.navCardHeader}>
+              <View style={[styles.navCardIcon, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
+                <Newspaper color={COLORS.purple} size={22} />
+              </View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>Strategy & News</Text>
+            </View>
+            <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+              {strategy_and_news?.recent_events?.length || 0} recent updates
+            </Text>
+            <View style={styles.navCardFooter}>
+              <Text style={[styles.navCardAction, { color: COLORS.purple }]}>View Details</Text>
+              <ChevronDown color={COLORS.purple} size={16} />
+            </View>
+          </TouchableOpacity>
+
+          {/* Preparation Checklist Card */}
+          <TouchableOpacity
+            style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+            onPress={() => setSelectedSection(selectedSection === 'preparation' ? null : 'preparation')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.navCardHeader}>
+              <View style={[styles.navCardIcon, { backgroundColor: ALPHA_COLORS.info.bg }]}>
+                <CheckCircle color={COLORS.info} size={22} />
+              </View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>Preparation Checklist</Text>
+            </View>
+            <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+              {interview_preparation?.research_tasks?.length || 0} tasks to complete
+            </Text>
+            <View style={styles.navCardFooter}>
+              <Text style={[styles.navCardAction, { color: COLORS.info }]}>View Details</Text>
+              <ChevronDown color={COLORS.info} size={16} />
+            </View>
+          </TouchableOpacity>
+
+          {/* Questions to Ask Card */}
+          <TouchableOpacity
+            style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+            onPress={() => setSelectedSection(selectedSection === 'questions' ? null : 'questions')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.navCardHeader}>
+              <View style={[styles.navCardIcon, { backgroundColor: ALPHA_COLORS.danger.bg }]}>
+                <HelpCircle color={COLORS.error} size={22} />
+              </View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>Questions to Ask</Text>
+            </View>
+            <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+              Questions prepared for interviewer
+            </Text>
+            <View style={styles.navCardFooter}>
+              <Text style={[styles.navCardAction, { color: COLORS.error }]}>View Details</Text>
+              <ChevronDown color={COLORS.error} size={16} />
+            </View>
+          </TouchableOpacity>
+
+          {/* Behavioral & Technical Card - AI */}
+          {interviewPrepId && (
+            <TouchableOpacity
+              style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              onPress={() => navigation.navigate('BehavioralTechnicalQuestions' as any, { interviewPrepId })}
+              activeOpacity={0.7}
+            >
+              <View style={styles.navCardHeader}>
+                <View style={[styles.navCardIcon, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
+                  <Brain color={COLORS.purple} size={22} />
+                </View>
+                <Text style={[styles.navCardTitle, { color: colors.text }]}>Behavioral & Technical</Text>
+                <View style={styles.aiBadge}>
+                  <Text style={styles.aiBadgeText}>AI</Text>
+                </View>
+              </View>
+              <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+                Practice questions with STAR story builder
+              </Text>
+              <View style={styles.navCardFooter}>
+                <Text style={[styles.navCardAction, { color: COLORS.purple }]}>View Details</Text>
+                <ChevronDown color={COLORS.purple} size={16} />
+              </View>
+            </TouchableOpacity>
           )}
-        </ExpandableSection>
+
+          {/* Common Questions Card - AI */}
+          {interviewPrepId && (
+            <TouchableOpacity
+              style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              onPress={() => navigation.navigate('CommonQuestions' as any, { interviewPrepId })}
+              activeOpacity={0.7}
+            >
+              <View style={styles.navCardHeader}>
+                <View style={[styles.navCardIcon, { backgroundColor: '#ec489920' }]}>
+                  <MessageCircle color="#ec4899" size={22} />
+                </View>
+                <Text style={[styles.navCardTitle, { color: colors.text }]}>Common Questions</Text>
+                <View style={styles.aiBadge}>
+                  <Text style={styles.aiBadgeText}>AI</Text>
+                </View>
+              </View>
+              <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+                Questions people commonly struggle with
+              </Text>
+              <View style={styles.navCardFooter}>
+                <Text style={[styles.navCardAction, { color: '#ec4899' }]}>View Details</Text>
+                <ChevronDown color="#ec4899" size={16} />
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {/* Practice Questions Card - AI */}
+          {interviewPrepId && (
+            <TouchableOpacity
+              style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              onPress={() => navigation.navigate('PracticeQuestions' as any, { interviewPrepId, tailoredResumeId })}
+              activeOpacity={0.7}
+            >
+              <View style={styles.navCardHeader}>
+                <View style={[styles.navCardIcon, { backgroundColor: ALPHA_COLORS.success.bg }]}>
+                  <ClipboardList color={COLORS.success} size={22} />
+                </View>
+                <Text style={[styles.navCardTitle, { color: colors.text }]}>Practice Questions</Text>
+                <View style={styles.aiBadge}>
+                  <Text style={styles.aiBadgeText}>AI</Text>
+                </View>
+              </View>
+              <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+                Job-specific practice with STAR stories
+              </Text>
+              <View style={styles.navCardFooter}>
+                <Text style={[styles.navCardAction, { color: COLORS.success }]}>View Details</Text>
+                <ChevronDown color={COLORS.success} size={16} />
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {/* Candidate Positioning Card */}
+          <TouchableOpacity
+            style={[styles.navCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+            onPress={() => setSelectedSection(selectedSection === 'positioning' ? null : 'positioning')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.navCardHeader}>
+              <View style={[styles.navCardIcon, { backgroundColor: '#10b98120' }]}>
+                <Award color="#10b981" size={22} />
+              </View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>Candidate Positioning</Text>
+            </View>
+            <Text style={[styles.navCardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+              Resume focus areas & keyword mapping
+            </Text>
+            <View style={styles.navCardFooter}>
+              <Text style={[styles.navCardAction, { color: '#10b981' }]}>View Details</Text>
+              <ChevronDown color="#10b981" size={16} />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Expandable Detail Sections - Show below grid when selected */}
+        {selectedSection === 'companyProfile' && (
+          <ExpandableSection
+            title="Company Profile"
+            icon={<Building2 color={COLORS.primary} size={20} />}
+            defaultExpanded={true}
+            accentColor={COLORS.primary}
+            colors={colors}
+          >
+            {company_profile?.overview_paragraph && (
+              <Text style={[styles.overviewText, { color: colors.textSecondary }]}>{company_profile.overview_paragraph}</Text>
+            )}
+            {company_profile?.size_estimate && (
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { color: colors.text }]}>Company Size:</Text>
+                <Text style={[styles.infoValue, { color: colors.textSecondary }]}>{company_profile.size_estimate}</Text>
+              </View>
+            )}
+          </ExpandableSection>
+        )}
 
         {/* Role Analysis Section */}
+        {selectedSection === 'roleAnalysis' && (
         <ExpandableSection
           title="Role Analysis"
           icon={<Target color={COLORS.purple} size={20} />}
           accentColor={COLORS.purple}
+          defaultExpanded={true}
           colors={colors}
         >
           {role_analysis?.core_responsibilities && Array.isArray(role_analysis.core_responsibilities) && role_analysis.core_responsibilities.length > 0 && (
@@ -2009,12 +2164,15 @@ export default function InterviewPrepScreen() {
             </View>
           )}
         </ExpandableSection>
+        )}
 
         {/* Values & Culture Section */}
+        {selectedSection === 'valuesCulture' && (
         <ExpandableSection
           title="Values & Culture"
           icon={<Heart color={COLORS.error} size={20} />}
           accentColor={COLORS.error}
+          defaultExpanded={true}
           colors={colors}
         >
           {values_and_culture?.stated_values && Array.isArray(values_and_culture.stated_values) && values_and_culture.stated_values.length > 0 && (
@@ -2043,12 +2201,15 @@ export default function InterviewPrepScreen() {
             </View>
           )}
         </ExpandableSection>
+        )}
 
         {/* Strategy & News Section */}
+        {selectedSection === 'strategyNews' && (
         <ExpandableSection
           title="Strategy & Recent News"
           icon={<Newspaper color={COLORS.info} size={20} />}
           accentColor={COLORS.info}
+          defaultExpanded={true}
           colors={colors}
         >
           {strategy_and_news?.strategic_themes && Array.isArray(strategy_and_news.strategic_themes) && strategy_and_news.strategic_themes.length > 0 && (
@@ -2108,12 +2269,15 @@ export default function InterviewPrepScreen() {
             </View>
           )}
         </ExpandableSection>
+        )}
 
         {/* Interview Preparation Section */}
+        {selectedSection === 'preparation' && (
         <ExpandableSection
           title="Preparation Checklist"
           icon={<ClipboardList color={COLORS.success} size={20} />}
           accentColor={COLORS.success}
+          defaultExpanded={true}
           colors={colors}
         >
           {interview_preparation?.research_tasks && Array.isArray(interview_preparation.research_tasks) && interview_preparation.research_tasks.length > 0 && (
@@ -2151,12 +2315,15 @@ export default function InterviewPrepScreen() {
             </View>
           )}
         </ExpandableSection>
+        )}
 
         {/* Questions to Ask Section */}
+        {selectedSection === 'questions' && (
         <ExpandableSection
           title="Questions to Ask"
           icon={<MessageCircle color={COLORS.warning} size={20} />}
           accentColor={COLORS.warning}
+          defaultExpanded={true}
           colors={colors}
         >
           {questions_to_ask_interviewer?.product && Array.isArray(questions_to_ask_interviewer.product) && questions_to_ask_interviewer.product.length > 0 && (
@@ -2190,12 +2357,15 @@ export default function InterviewPrepScreen() {
             </View>
           )}
         </ExpandableSection>
+        )}
 
         {/* Candidate Positioning Section */}
+        {selectedSection === 'positioning' && (
         <ExpandableSection
           title="Your Positioning"
           icon={<Award color={COLORS.purple} size={20} />}
           accentColor={COLORS.purple}
+          defaultExpanded={true}
           colors={colors}
         >
           {candidate_positioning?.resume_focus_areas && Array.isArray(candidate_positioning.resume_focus_areas) && candidate_positioning.resume_focus_areas.length > 0 && (
@@ -2249,6 +2419,7 @@ export default function InterviewPrepScreen() {
             </View>
           )}
         </ExpandableSection>
+        )}
 
         {/* Bottom padding */}
         <View style={{ height: SPACING.xl }} />
@@ -2299,7 +2470,7 @@ const styles = StyleSheet.create({
     paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   actionButtonsContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: SPACING.md,
     marginBottom: SPACING.lg,
   },
@@ -2327,6 +2498,64 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
+  },
+  // Card Grid - matches web layout
+  cardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  navCard: {
+    width: '48%',
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+  },
+  navCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+    flexWrap: 'wrap',
+  },
+  navCardIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: RADIUS.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  navCardTitle: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    flex: 1,
+  },
+  navCardDescription: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+    marginBottom: SPACING.sm,
+  },
+  navCardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  navCardAction: {
+    fontSize: 12,
+    fontFamily: FONTS.medium,
+  },
+  aiBadge: {
+    backgroundColor: '#8B5CF6',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  aiBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.semibold,
+    color: '#FFFFFF',
   },
   jobCardHeader: {
     flexDirection: 'row',
