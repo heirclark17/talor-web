@@ -2558,8 +2558,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: SPACING.md,
-    minHeight: 64,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xl,
+    minHeight: 88,
   },
   stackedCardLeft: {
     flexDirection: 'row',
@@ -2567,19 +2568,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   stackedCardIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: RADIUS.md,
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SPACING.md,
+    marginRight: SPACING.lg,
   },
   stackedCardContent: {
     flex: 1,
   },
   stackedCardTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.medium,
+    fontSize: 18,
+    fontFamily: FONTS.semibold,
   },
   stackedCardTitleRow: {
     flexDirection: 'row',
@@ -2587,9 +2588,10 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   stackedCardSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: FONTS.regular,
-    marginTop: 2,
+    marginTop: 4,
+    lineHeight: 20,
   },
   stackedCardDivider: {
     height: 1,
