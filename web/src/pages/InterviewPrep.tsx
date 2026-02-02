@@ -311,6 +311,22 @@ export default function InterviewPrep() {
         setPrepData(result.data.prep_data)
         setInterviewPrepId(result.data.interview_prep_id)
 
+        // Check for cached data from database (permanent storage)
+        const cachedData = result.data.cached_data
+        const hasCachedData = cachedData && (
+          cachedData.company_research ||
+          cachedData.strategic_news ||
+          cachedData.values_alignment
+        )
+
+        if (hasCachedData) {
+          console.log('✓ Using permanently cached data from database')
+          if (cachedData.company_research) setCompanyResearch(cachedData.company_research)
+          if (cachedData.strategic_news) setCompanyNews(cachedData.strategic_news)
+          if (cachedData.values_alignment) setCompanyValues(cachedData.values_alignment)
+          if (cachedData.competitive_intelligence) setInterviewQuestions(cachedData.competitive_intelligence)
+        }
+
         // Also fetch the tailored resume to get base resume ID
         const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
           headers: {
@@ -324,8 +340,10 @@ export default function InterviewPrep() {
             console.warn('Tailored resume not found:', errorData)
             // Interview prep exists but tailored resume is deleted - show warning
             setWarning(`The original resume for this interview prep has been deleted. Some features like STAR Story Builder may not work.`)
-            // Still show the interview prep data we have
-            await fetchRealData(result.data.prep_data)
+            // Only fetch real data if not already cached
+            if (!hasCachedData) {
+              await fetchRealData(result.data.prep_data, false, result.data.interview_prep_id)
+            }
           } else {
             throw new Error(`Failed to fetch tailored resume: ${tailoredResponse.status}`)
           }
@@ -348,8 +366,10 @@ export default function InterviewPrep() {
             setBaseResumeExperiences(experiences || [])
           }
 
-          // Fetch real data from backend services
-          await fetchRealData(result.data.prep_data)
+          // Only fetch real data from AI if not already cached in database
+          if (!hasCachedData) {
+            await fetchRealData(result.data.prep_data, false, result.data.interview_prep_id)
+          }
         }
       }
     } catch (err: any) {
@@ -376,7 +396,7 @@ export default function InterviewPrep() {
     }
   }
 
-  const fetchRelatedData = async (interviewPrepData: InterviewPrepData) => {
+  const fetchRelatedData = async (interviewPrepData: InterviewPrepData, prepId?: number) => {
     try {
       // Fetch the tailored resume to get base resume ID
       const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
@@ -405,7 +425,7 @@ export default function InterviewPrep() {
         }
 
         // Fetch real data from backend services
-        await fetchRealData(interviewPrepData)
+        await fetchRealData(interviewPrepData, false, prepId)
       }
     } catch (err) {
       console.error('Error fetching related data:', err)
@@ -423,7 +443,7 @@ export default function InterviewPrep() {
         setPrepData(result.data.prep_data)
         setInterviewPrepId(result.data.interview_prep_id)
         // After setting prep data, fetch related resume data and real data
-        await fetchRelatedData(result.data.prep_data)
+        await fetchRelatedData(result.data.prep_data, result.data.interview_prep_id)
         return result.data.prep_data
       } else {
         throw new Error(result.error || 'Failed to generate interview prep')
@@ -436,48 +456,18 @@ export default function InterviewPrep() {
     }
   }
 
-  const fetchRealData = async (prepData: InterviewPrepData, forceRefresh: boolean = false) => {
+  const fetchRealData = async (prepData: InterviewPrepData, forceRefresh: boolean = false, prepId?: number) => {
     try {
       setLoadingRealData(true)
 
       const companyName = prepData.company_profile?.name
       const industry = prepData.company_profile?.industry
       const jobTitle = prepData.role_analysis?.job_title
+      const currentPrepId = prepId || interviewPrepId
 
       if (!companyName) {
         console.log('No company name found, skipping real data fetch')
         return
-      }
-
-      // Cache key based on tailored resume ID
-      const cacheKey = `interview-prep-realdata-${tailoredResumeId}`
-      const CACHE_DURATION_MS = 24 * 60 * 60 * 1000 // 24 hours
-
-      // Check for cached data first (unless force refresh)
-      if (!forceRefresh) {
-        try {
-          const cachedStr = localStorage.getItem(cacheKey)
-          if (cachedStr) {
-            const cached = JSON.parse(cachedStr)
-            const cacheAge = Date.now() - (cached.timestamp || 0)
-
-            if (cacheAge < CACHE_DURATION_MS) {
-              console.log('✓ Using cached real data (age:', Math.round(cacheAge / 60000), 'minutes)')
-
-              if (cached.companyResearch) setCompanyResearch(cached.companyResearch)
-              if (cached.companyNews) setCompanyNews(cached.companyNews)
-              if (cached.interviewQuestions) setInterviewQuestions(cached.interviewQuestions)
-              if (cached.companyValues) setCompanyValues(cached.companyValues)
-
-              setLoadingRealData(false)
-              return
-            } else {
-              console.log('Cache expired, fetching fresh data...')
-            }
-          }
-        } catch (cacheErr) {
-          console.warn('Error reading cache:', cacheErr)
-        }
       }
 
       console.log('Fetching fresh real data from AI services...')
@@ -533,12 +523,31 @@ export default function InterviewPrep() {
         console.error('Failed to load company values:', valuesResult)
       }
 
-      // Save to cache
-      try {
-        localStorage.setItem(cacheKey, JSON.stringify(cacheData))
-        console.log('✓ Real data cached for 24 hours')
-      } catch (cacheErr) {
-        console.warn('Failed to cache real data:', cacheErr)
+      // Save to database for permanent caching (instead of just localStorage)
+      if (currentPrepId) {
+        try {
+          const saveResponse = await fetch(`${API_BASE_URL}/api/interview-prep/${currentPrepId}/cache`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-User-ID': localStorage.getItem('talor_user_id') || '',
+            },
+            body: JSON.stringify({
+              company_research: cacheData.companyResearch || null,
+              strategic_news: cacheData.companyNews || null,
+              values_alignment: cacheData.companyValues || null,
+              interview_questions: cacheData.interviewQuestions || null,
+            }),
+          })
+
+          if (saveResponse.ok) {
+            console.log('✓ Real data permanently saved to database')
+          } else {
+            console.warn('Failed to save to database, data will be refetched on next visit')
+          }
+        } catch (saveErr) {
+          console.warn('Failed to save real data to database:', saveErr)
+        }
       }
     } catch (err: any) {
       console.error('Error fetching real data:', err)
