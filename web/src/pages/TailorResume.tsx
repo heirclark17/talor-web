@@ -2466,7 +2466,7 @@ export default function TailorResume() {
                     </button>
 
                     {/* Resume content - clickable to select */}
-                    <label className="flex-1 cursor-pointer">
+                    <label className="flex-1 min-w-0 cursor-pointer">
                       <input
                         type="radio"
                         name="resume"
@@ -2475,9 +2475,9 @@ export default function TailorResume() {
                         onChange={() => setSelectedResumeId(resume.id)}
                         className="sr-only"
                       />
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="font-bold text-white text-lg mb-2">{resume.filename}</p>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-white text-lg mb-2 break-words">{resume.filename}</p>
                           {resume.summary && (
                             <p className="text-gray-400 line-clamp-2 mb-3">
                               {resume.summary}
