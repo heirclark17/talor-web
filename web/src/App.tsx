@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
@@ -8,7 +8,10 @@ import InterviewPrepList from './pages/InterviewPrepList'
 import StarStoriesList from './pages/StarStoriesList'
 import SavedComparisons from './pages/SavedComparisons'
 import CareerPathDesigner from './pages/CareerPathDesigner'
+import Home from './pages/Home'
+import SettingsPage from './pages/Settings'
 import OnboardingTour from './components/OnboardingTour'
+import ErrorBoundary from './components/ErrorBoundary'
 import { useScrollAnimation } from './hooks/useScrollAnimation'
 
 function Dashboard() {
@@ -254,12 +257,14 @@ function AppContent() {
   }, [mobileMenuOpen])
 
   const navLinks = [
+    { to: '/resumes', icon: FileText, label: 'Resumes', tourId: 'resumes' },
     { to: '/upload', icon: Upload, label: 'Upload', tourId: 'upload' },
     { to: '/tailor', icon: Target, label: 'Tailor', tourId: 'tailor' },
     { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep', tourId: 'interview-prep' },
     { to: '/star-stories', icon: Sparkles, label: 'STAR Stories', tourId: 'star-stories' },
     { to: '/saved-comparisons', icon: Bookmark, label: 'Saved', tourId: 'saved' },
     { to: '/career-path', icon: TrendingUp, label: 'Career Path', tourId: 'career-path' },
+    { to: '/settings', icon: Settings, label: 'Settings', tourId: 'settings' },
   ]
 
   return (
@@ -367,17 +372,20 @@ function AppContent() {
 
       {/* Main Content */}
       <main>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/upload" element={<UploadResume />} />
-          <Route path="/tailor" element={<TailorResume />} />
-          <Route path="/interview-preps" element={<InterviewPrepList />} />
-          <Route path="/interview-prep/:tailoredResumeId" element={<InterviewPrep />} />
-          <Route path="/star-stories" element={<StarStoriesList />} />
-          <Route path="/saved-comparisons" element={<SavedComparisons />} />
-          <Route path="/career-path" element={<CareerPathDesigner />} />
-          <Route path="/resumes" element={<div className="p-8"><h1 className="text-3xl font-bold text-white">My Resumes</h1></div>} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/resumes" element={<Home />} />
+            <Route path="/upload" element={<UploadResume />} />
+            <Route path="/tailor" element={<TailorResume />} />
+            <Route path="/interview-preps" element={<InterviewPrepList />} />
+            <Route path="/interview-prep/:tailoredResumeId" element={<InterviewPrep />} />
+            <Route path="/star-stories" element={<StarStoriesList />} />
+            <Route path="/saved-comparisons" element={<SavedComparisons />} />
+            <Route path="/career-path" element={<CareerPathDesigner />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
 
       {/* Onboarding Tour - Shows on first visit */}
