@@ -22,8 +22,18 @@ interface ParsedResume {
     summary: string
     skills: string[]
     experience: Array<{
-      header: string
-      bullets: string[]
+      header?: string
+      bullets?: string[]
+      title?: string
+      position?: string
+      role?: string
+      job_title?: string
+      company?: string
+      location?: string
+      dates?: string
+      date_range?: string
+      duration?: string
+      description?: string
     }>
     education: string
     certifications: string
@@ -62,9 +72,6 @@ export default function UploadResume() {
       const result = await api.deleteResume(resumeId)
 
       if (result.success) {
-        // Remove from list
-        setExistingResumes(prev => prev.filter(r => r.id !== resumeId))
-
         // If this was the currently displayed parsed resume, clear it
         if (parsedResume?.resume_id === resumeId) {
           setParsedResume(null)

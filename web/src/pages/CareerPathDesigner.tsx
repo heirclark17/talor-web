@@ -8,7 +8,7 @@ import {
   FileText, Download, RefreshCw, ArrowLeft, Loader2, Upload,
   Check, ChevronRight, Target, Clock, MapPin, X, ChevronDown,
   Users, GraduationCap, Heart, Lightbulb, Building, Globe,
-  Zap, Code, Shield, TrendingDown
+  Zap, Code, Shield, TrendingDown, FolderOpen
 } from 'lucide-react'
 
 type WizardStep = 'welcome' | 'upload' | 'questions' | 'generating' | 'results'
@@ -22,6 +22,10 @@ export default function CareerPathDesigner() {
   const [error, setError] = useState<string>()
   const [plan, setPlan] = useState<CareerPlanType>()
   const [planId, setPlanId] = useState<number>()
+
+  // Saved career plans
+  const [savedPlans, setSavedPlans] = useState<any[]>([])
+  const [loadingSavedPlans, setLoadingSavedPlans] = useState(false)
 
   // Async job status
   const [jobId, setJobId] = useState<string>()
@@ -120,6 +124,52 @@ export default function CareerPathDesigner() {
       }
     }
   }, [])
+
+  // Load saved career plans on mount
+  useEffect(() => {
+    const loadSavedPlans = async () => {
+      setLoadingSavedPlans(true)
+      try {
+        const result = await api.listCareerPlans()
+        if (result.success && Array.isArray(result.data)) {
+          setSavedPlans(result.data)
+        }
+      } catch (err) {
+        console.error('Failed to load saved career plans:', err)
+      } finally {
+        setLoadingSavedPlans(false)
+      }
+    }
+    loadSavedPlans()
+  }, [])
+
+  // Load a saved career plan
+  const handleLoadSavedPlan = async (savedPlanId: number) => {
+    setLoading(true)
+    setError(undefined)
+    try {
+      const result = await api.getCareerPlan(savedPlanId)
+      if (result.success && result.data) {
+        const planData = result.data.plan || result.data
+        setPlan(planData)
+        setPlanId(savedPlanId)
+        // Set context from saved plan if available
+        if (result.data.intake_json) {
+          const intake = result.data.intake_json
+          if (intake.current_role_title) setCurrentRole(intake.current_role_title)
+          if (intake.target_role_interest) setDreamRole(intake.target_role_interest)
+          if (intake.timeline) setTimeline(intake.timeline)
+        }
+        setStep('results')
+      } else {
+        setError('Failed to load career plan')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load career plan')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Save intake data whenever it changes
   useEffect(() => {
@@ -716,12 +766,57 @@ export default function CareerPathDesigner() {
               </div>
             </div>
 
+            {/* Saved Career Plans */}
+            {loadingSavedPlans ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
+                <span className="ml-3 text-gray-400">Loading saved plans...</span>
+              </div>
+            ) : savedPlans.length > 0 && (
+              <div className="max-w-2xl mx-auto mb-10 px-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <FolderOpen className="w-5 h-5 text-white/60" />
+                  <h3 className="text-lg font-semibold text-white">Your Saved Career Plans</h3>
+                </div>
+                <div className="glass rounded-2xl p-4 border border-white/10 space-y-3">
+                  {savedPlans.slice(0, 5).map((savedPlan: any) => (
+                    <button
+                      key={savedPlan.id}
+                      onClick={() => handleLoadSavedPlan(savedPlan.id)}
+                      disabled={loading}
+                      className="w-full glass rounded-lg p-4 border border-white/10 hover:border-white/30 transition-all text-left flex items-center justify-between group disabled:opacity-50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                          <TrendingUp className="w-5 h-5 text-white/60" />
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">
+                            {savedPlan.intake_json?.target_role_interest || savedPlan.plan_json?.targetRoles?.[0]?.title || 'Career Plan'}
+                          </div>
+                          <div className="text-sm text-gray-400">
+                            Created {new Date(savedPlan.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                    </button>
+                  ))}
+                </div>
+                {savedPlans.length > 5 && (
+                  <p className="text-sm text-gray-500 text-center mt-2">
+                    Showing 5 of {savedPlans.length} saved plans
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="flex flex-col items-center gap-4 px-4">
               <button
                 onClick={() => setStep('upload')}
                 className="btn-primary inline-flex items-center gap-2 text-base sm:text-lg w-full sm:w-auto justify-center"
               >
-                Get Started
+                {savedPlans.length > 0 ? 'Create New Plan' : 'Get Started'}
                 <ChevronRight className="w-5 h-5" />
               </button>
               <button

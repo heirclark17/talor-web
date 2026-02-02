@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactElement } from 'react'
 import { Search, Briefcase, TrendingUp, Award, Wrench, X } from 'lucide-react'
 
 interface Keyword {
@@ -38,7 +38,7 @@ export default function KeywordPanel({ keywords, loading }: KeywordPanelProps) {
     tools_technologies: 'Tools & Technologies'
   }
 
-  const categoryIcons: Record<string, JSX.Element> = {
+  const categoryIcons: Record<string, ReactElement> = {
     technical_skills: <Briefcase className="w-4 h-4" />,
     soft_skills: <TrendingUp className="w-4 h-4" />,
     industry_terms: <Award className="w-4 h-4" />,

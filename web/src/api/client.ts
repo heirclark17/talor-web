@@ -198,6 +198,37 @@ class ApiClient {
   }
 
   /**
+   * Analyze a resume for strengths, weaknesses, and improvement recommendations
+   */
+  async analyzeResume(resumeId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/resumes/${resumeId}/analyze`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
    * Extract job details from URL (company name, job title, description)
    */
   async extractJobDetails(jobUrl: string): Promise<ApiResponse> {
@@ -1840,6 +1871,42 @@ class ApiClient {
     try {
       const response = await fetch(`${this.baseUrl}/api/tailor/tailored/${tailoredResumeId}`, {
         headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Update a tailored resume (summary, skills, alignment)
+   */
+  async updateTailoredResume(tailoredResumeId: number, updateData: {
+    summary?: string;
+    competencies?: string[];
+    alignment_statement?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/tailoring/tailored/${tailoredResumeId}`, {
+        method: 'PUT',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(updateData),
       });
 
       const data = await response.json();

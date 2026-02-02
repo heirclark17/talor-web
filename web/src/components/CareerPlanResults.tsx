@@ -191,7 +191,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                 {quickStart.topCert.name}
               </h3>
               <p className="text-xs text-gray-400 mb-2 line-clamp-2">
-                {quickStart.topCert.whyRecommended || 'Recommended for your target role'}
+                {quickStart.topCert.whatItUnlocks || 'Recommended for your target role'}
               </p>
               <div className="flex items-center justify-between">
                 <span className={`text-xs px-2 py-0.5 rounded ${

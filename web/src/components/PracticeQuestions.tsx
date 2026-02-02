@@ -205,7 +205,7 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
 
       // Stop recording if active
       if (isRecording) {
-        recordingBlob = await stopRecording(questionIndex)
+        recordingBlob = await stopRecording(questionIndex) ?? null
         duration = Math.floor((Date.now() - (recordingStartTime[questionIndex] || Date.now())) / 1000)
       }
 

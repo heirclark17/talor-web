@@ -157,7 +157,7 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
   const downloadRecording = (recording: Recording) => {
     const a = document.createElement('a')
     a.href = recording.url
-    a.download = `recording-${recording.questionIndex + 1}-${recording.timestamp}.webm`
+    a.download = `recording-${(recording.questionIndex ?? 0) + 1}-${recording.timestamp}.webm`
     a.click()
   }
 
