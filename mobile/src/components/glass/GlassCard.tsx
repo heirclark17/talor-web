@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
-import { StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
+import { StyleSheet, View, ViewStyle, StyleProp, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LiquidGlassView, isLiquidGlassSupported } from './LiquidGlassWrapper';
 import { useTheme } from '../../context/ThemeContext';
 import { GLASS, SHADOWS, RADIUS, SPACING } from '../../utils/constants';
 
@@ -18,6 +19,10 @@ interface GlassCardProps {
   useBlur?: boolean;
   /** Add border */
   bordered?: boolean;
+  /** Make interactive (grows on touch with shimmer) - iOS 26 only */
+  interactive?: boolean;
+  /** Tint color for liquid glass effect */
+  tintColor?: string;
 }
 
 export function GlassCard({
@@ -29,6 +34,8 @@ export function GlassCard({
   style,
   useBlur = true,
   bordered = true,
+  interactive = false,
+  tintColor,
 }: GlassCardProps) {
   const { isDark, colors } = useTheme();
   const { blur, opacity } = GLASS.materials[material];
@@ -43,10 +50,18 @@ export function GlassCard({
     ? `rgba(255, 255, 255, ${opacity * 0.4})`
     : `rgba(0, 0, 0, ${opacity * 0.15})`;
 
+  // Liquid glass tint color
+  const glassTint = tintColor || (isDark
+    ? `rgba(255, 255, 255, ${opacity * 0.15})`
+    : `rgba(100, 150, 200, ${opacity * 0.2})`);
+
+  // Map material to liquid glass effect
+  const liquidGlassEffect = material === 'ultraThin' || material === 'thin' ? 'clear' : 'regular';
+
   const containerStyle: ViewStyle = {
     borderRadius,
     overflow: 'hidden',
-    ...(bordered && {
+    ...(bordered && !isLiquidGlassSupported && {
       borderWidth: 1,
       borderColor,
     }),
@@ -57,7 +72,27 @@ export function GlassCard({
     padding,
   };
 
-  if (useBlur) {
+  // Use native Liquid Glass on iOS 26+
+  if (Platform.OS === 'ios' && isLiquidGlassSupported) {
+    return (
+      <LiquidGlassView
+        style={[
+          containerStyle,
+          { padding },
+          style,
+        ]}
+        effect={liquidGlassEffect}
+        interactive={interactive}
+        tintColor={glassTint}
+        colorScheme={isDark ? 'dark' : 'light'}
+      >
+        {children}
+      </LiquidGlassView>
+    );
+  }
+
+  // Fallback: expo-blur for older iOS / Android
+  if (useBlur && Platform.OS === 'ios') {
     return (
       <View style={[containerStyle, style]}>
         <BlurView
@@ -73,7 +108,7 @@ export function GlassCard({
     );
   }
 
-  // Fallback without blur (more performant)
+  // Fallback without blur (Android or performance mode)
   return (
     <View
       style={[

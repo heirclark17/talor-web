@@ -3,23 +3,31 @@ const path = require('path');
 
 const config = getDefaultConfig(__dirname);
 
-// Only watch the mobile directory, exclude parent project files
+// Get the parent project root
+const projectRoot = path.resolve(__dirname, '..');
+
+// Only watch the mobile directory
 config.watchFolders = [__dirname];
 
 // Exclude parent project's dist, electron, and other non-mobile directories
 config.resolver.blockList = [
-  /.*\/dist\/.*/,
-  /.*\/electron\/.*/,
-  /.*\/backend\/.*/,
-  /.*\/web\/.*/,
-  /.*[/\\]\.\.\/node_modules\/.*/,
-  // Block specific problematic files
-  /.*[/\\]dist[/\\]main[/\\]index\.js/,
+  // Block parent project directories
+  new RegExp(`${projectRoot.replace(/[\\]/g, '/')}/(dist|electron|backend|web)/.*`),
+  new RegExp(`${projectRoot.replace(/[\\]/g, '\\\\')}\\\\(dist|electron|backend|web)\\\\.*`),
 ];
 
-// Ensure node_modules resolution stays within mobile
+// Ensure node_modules resolution includes nested packages
 config.resolver.nodeModulesPaths = [
   path.resolve(__dirname, 'node_modules'),
+  path.resolve(__dirname, 'node_modules/react-native/node_modules'),
 ];
+
+// Map nested dependencies that Metro has trouble finding
+config.resolver.extraNodeModules = {
+  '@react-native/virtualized-lists': path.resolve(
+    __dirname,
+    'node_modules/react-native/node_modules/@react-native/virtualized-lists'
+  ),
+};
 
 module.exports = config;

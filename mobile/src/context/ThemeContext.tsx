@@ -174,8 +174,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         ...getGlassBackground(material),
         borderWidth: 1,
         borderColor: isDark
-          ? 'rgba(255, 255, 255, 0.1)'
-          : 'rgba(0, 0, 0, 0.08)',
+          ? ALPHA_COLORS.white[10]
+          : ALPHA_COLORS.black[10],
         borderRadius: 16,
         overflow: 'hidden' as const,
       };

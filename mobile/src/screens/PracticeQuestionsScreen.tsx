@@ -19,11 +19,17 @@ import {
   Play,
   Save,
   Clock,
+  CheckCircle,
+  History,
+  Calendar,
+  TrendingUp,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
+import { api, PracticeHistoryItem } from '../api/client';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { GlassButton } from '../components/glass/GlassButton';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useTheme } from '../hooks/useTheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type PracticeQuestionsRouteProp = RouteProp<RootStackParamList, 'PracticeQuestions'>;
@@ -43,9 +49,20 @@ interface STARStory {
   result: string;
 }
 
+interface SavedPracticeResponse {
+  id: number;
+  question_text: string;
+  question_category?: string;
+  written_answer?: string;
+  star_story?: STARStory;
+  times_practiced: number;
+  last_practiced_at: string;
+}
+
 export default function PracticeQuestionsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<PracticeQuestionsRouteProp>();
+  const { colors } = useTheme();
   const { interviewPrepId, tailoredResumeId } = route.params;
 
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -54,20 +71,70 @@ export default function PracticeQuestionsScreen() {
   const [starStories, setStarStories] = useState<Map<number, STARStory>>(new Map());
   const [generatingStory, setGeneratingStory] = useState<number | null>(null);
   const [savingResponse, setSavingResponse] = useState<number | null>(null);
+  const [savedResponses, setSavedResponses] = useState<Map<number, boolean>>(new Map());
   const [practiceStartTime, setPracticeStartTime] = useState<Map<number, number>>(new Map());
   const [userAnswers, setUserAnswers] = useState<Map<number, string>>(new Map());
+
+  // History tab state
+  const [activeTab, setActiveTab] = useState<'practice' | 'history'>('practice');
+  const [practiceHistory, setPracticeHistory] = useState<PracticeHistoryItem[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [expandedHistoryItem, setExpandedHistoryItem] = useState<number | null>(null);
 
   useEffect(() => {
     loadPracticeQuestions();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'history') {
+      loadPracticeHistory();
+    }
+  }, [activeTab]);
+
+  const loadSavedResponses = async (loadedQuestions: PracticeQuestion[]) => {
+    try {
+      const result = await api.getPracticeResponses(interviewPrepId);
+      if (result.success && result.data && Array.isArray(result.data)) {
+        // Map saved responses to questions
+        const savedMap = new Map<number, boolean>();
+        const answersMap = new Map<number, string>();
+
+        (result.data as SavedPracticeResponse[]).forEach((response) => {
+          const questionIndex = loadedQuestions.findIndex(q => q.question === response.question_text);
+          if (questionIndex !== -1) {
+            savedMap.set(questionIndex, true);
+            if (response.written_answer) {
+              answersMap.set(questionIndex, response.written_answer);
+            }
+          }
+        });
+
+        setSavedResponses(savedMap);
+        setUserAnswers(answersMap);
+      }
+    } catch (error) {
+      console.error('Error loading saved responses:', error);
+    }
+  };
+
   const loadPracticeQuestions = async () => {
+    console.log('=== PracticeQuestions: Starting to generate for interviewPrepId:', interviewPrepId);
     setLoading(true);
     try {
       const result = await api.generatePracticeQuestions(interviewPrepId, 10);
+      console.log('=== PracticeQuestions API Result keys:', Object.keys(result.data || {}));
+      console.log('=== PracticeQuestions API Result:', JSON.stringify(result, null, 2).slice(0, 1000));
+
       if (result.success && result.data) {
-        setQuestions(result.data.questions || []);
+        // Handle nested data structure - API might return { success, data: { data: {...} } }
+        const responseData = result.data.data || result.data;
+        const loadedQuestions = responseData.questions || [];
+        console.log('=== PracticeQuestions: Setting questions count:', loadedQuestions.length);
+        setQuestions(loadedQuestions);
+        // Load saved responses after questions are loaded
+        await loadSavedResponses(loadedQuestions);
       } else {
+        console.log('=== PracticeQuestions API Error:', result.error);
         Alert.alert('Error', result.error || 'Failed to load practice questions');
       }
     } catch (error) {
@@ -75,6 +142,23 @@ export default function PracticeQuestionsScreen() {
       Alert.alert('Error', 'Failed to load practice questions');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPracticeHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const result = await api.getPracticeHistory(interviewPrepId);
+      if (result.success && result.data) {
+        setPracticeHistory(result.data);
+      } else {
+        Alert.alert('Error', result.error || 'Failed to load practice history');
+      }
+    } catch (error) {
+      console.error('Error loading practice history:', error);
+      Alert.alert('Error', 'Failed to load practice history');
+    } finally {
+      setLoadingHistory(false);
     }
   };
 
@@ -115,20 +199,36 @@ export default function PracticeQuestionsScreen() {
       const duration = startTime ? Math.floor((Date.now() - startTime) / 1000) : undefined;
 
       const result = await api.savePracticeResponse({
-        interview_prep_id: interviewPrepId,
-        question_text: question.question,
-        question_category: question.category,
-        star_story: starStory,
-        written_answer: writtenAnswer,
-        practice_duration_seconds: duration,
+        interviewPrepId: interviewPrepId,
+        questionText: question.question,
+        questionCategory: question.category,
+        starStory: starStory,
+        writtenAnswer: writtenAnswer,
+        practiceDurationSeconds: duration,
       });
 
       if (result.success) {
-        Alert.alert('Success', 'Practice response saved successfully');
+        // Mark as saved
+        const newSaved = new Map(savedResponses);
+        newSaved.set(index, true);
+        setSavedResponses(newSaved);
+
         // Clear practice time
         const newTimes = new Map(practiceStartTime);
         newTimes.delete(index);
         setPracticeStartTime(newTimes);
+
+        // Reload practice history if we're on that tab
+        if (activeTab === 'history') {
+          await loadPracticeHistory();
+        }
+
+        // Show success feedback
+        Alert.alert(
+          '✓ Response Saved',
+          'Your practice response has been saved successfully.',
+          [{ text: 'OK', style: 'default' }]
+        );
       } else {
         Alert.alert('Error', result.error || 'Failed to save response');
       }
@@ -161,19 +261,57 @@ export default function PracticeQuestionsScreen() {
             accessibilityRole="button"
             accessibilityLabel="Go back"
           >
-            <ArrowLeft color={COLORS.dark.text} size={24} />
+            <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Practice Questions</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Practice Questions</Text>
           <View style={styles.headerPlaceholder} />
         </View>
 
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading practice questions...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading practice questions...</Text>
         </View>
       </SafeAreaView>
     );
   }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) {
+      return `${diffMins}m ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    } else if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
+
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return 'N/A';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
+  };
+
+  const calculateCompletionStats = () => {
+    const totalQuestions = questions.length;
+    const practicedQuestions = practiceHistory.length;
+    const percentage = totalQuestions > 0 ? Math.round((practicedQuestions / totalQuestions) * 100) : 0;
+
+    return {
+      total: totalQuestions,
+      practiced: practicedQuestions,
+      percentage,
+    };
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -184,21 +322,62 @@ export default function PracticeQuestionsScreen() {
           accessibilityRole="button"
           accessibilityLabel="Go back"
         >
-          <ArrowLeft color={COLORS.dark.text} size={24} />
+          <ArrowLeft color={colors.text} size={24} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Practice Questions</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Practice Questions</Text>
         <View style={styles.headerPlaceholder} />
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={styles.introCard}>
-          <Sparkles color={COLORS.purple} size={24} />
-          <Text style={styles.introTitle}>Job-Specific Practice</Text>
-          <Text style={styles.introText}>
-            These questions are tailored to this specific role. Practice with AI-generated STAR stories or
-            write your own answers.
+      {/* Tab Navigation */}
+      <View style={[styles.tabContainer, { backgroundColor: colors.backgroundSecondary, borderBottomColor: colors.border }]}>
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            activeTab === 'practice' && { borderBottomColor: COLORS.primary },
+          ]}
+          onPress={() => setActiveTab('practice')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeTab === 'practice' }}
+        >
+          <Play color={activeTab === 'practice' ? COLORS.primary : colors.textSecondary} size={18} />
+          <Text style={[
+            styles.tabText,
+            { color: activeTab === 'practice' ? COLORS.primary : colors.textSecondary }
+          ]}>
+            Practice
           </Text>
-        </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            activeTab === 'history' && { borderBottomColor: COLORS.primary },
+          ]}
+          onPress={() => setActiveTab('history')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeTab === 'history' }}
+        >
+          <History color={activeTab === 'history' ? COLORS.primary : colors.textSecondary} size={18} />
+          <Text style={[
+            styles.tabText,
+            { color: activeTab === 'history' ? COLORS.primary : colors.textSecondary }
+          ]}>
+            History {practiceHistory.length > 0 && `(${practiceHistory.length})`}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        {activeTab === 'practice' && (
+          <>
+            <View style={[styles.introCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+              <Sparkles color={COLORS.purple} size={24} />
+              <Text style={[styles.introTitle, { color: colors.text }]}>Job-Specific Practice</Text>
+              <Text style={[styles.introText, { color: colors.textSecondary }]}>
+                These questions are tailored to this specific role. Practice with AI-generated STAR stories or
+                write your own answers.
+              </Text>
+            </View>
 
         {questions.map((question, index) => {
           const isExpanded = expandedQuestion === index;
@@ -206,9 +385,11 @@ export default function PracticeQuestionsScreen() {
           const isGeneratingStory = generatingStory === index;
           const isSaving = savingResponse === index;
           const isPracticing = practiceStartTime.has(index);
+          const isSaved = savedResponses.get(index) || false;
+          const answerLength = userAnswers.get(index)?.length || 0;
 
           return (
-            <View key={index} style={styles.questionCard}>
+            <View key={index} style={[styles.questionCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
               <TouchableOpacity
                 style={styles.questionHeader}
                 onPress={() => toggleExpanded(index)}
@@ -246,12 +427,12 @@ export default function PracticeQuestionsScreen() {
                   </View>
                 </View>
 
-                <Text style={styles.questionText}>{question.question}</Text>
+                <Text style={[styles.questionText, { color: colors.text }]}>{question.question}</Text>
 
                 {isExpanded ? (
-                  <ChevronUp color={COLORS.dark.textSecondary} size={20} />
+                  <ChevronUp color={colors.textSecondary} size={20} />
                 ) : (
-                  <ChevronDown color={COLORS.dark.textSecondary} size={20} />
+                  <ChevronDown color={colors.textSecondary} size={20} />
                 )}
               </TouchableOpacity>
 
@@ -259,17 +440,17 @@ export default function PracticeQuestionsScreen() {
                 <View style={styles.answerContent}>
                   {/* Why Asked */}
                   <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Why This Question Is Asked</Text>
-                    <Text style={styles.sectionText}>{question.why_asked}</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Why This Question Is Asked</Text>
+                    <Text style={[styles.sectionText, { color: colors.textSecondary }]}>{question.why_asked}</Text>
                   </View>
 
                   {/* Key Skills */}
                   <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Key Skills Tested</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Key Skills Tested</Text>
                     <View style={styles.skillsContainer}>
                       {question.key_skills_tested.map((skill, idx) => (
-                        <View key={idx} style={styles.skillChip}>
-                          <Text style={styles.skillText}>{skill}</Text>
+                        <View key={idx} style={[styles.skillChip, { backgroundColor: colors.backgroundTertiary }]}>
+                          <Text style={[styles.skillText, { color: colors.text }]}>{skill}</Text>
                         </View>
                       ))}
                     </View>
@@ -279,43 +460,51 @@ export default function PracticeQuestionsScreen() {
                   {isGeneratingStory && (
                     <View style={styles.generatingContainer}>
                       <ActivityIndicator size="small" color={COLORS.primary} />
-                      <Text style={styles.generatingText}>Generating STAR story...</Text>
+                      <Text style={[styles.generatingText, { color: colors.textSecondary }]}>Generating STAR story...</Text>
                     </View>
                   )}
 
                   {starStory && (
-                    <View style={styles.starContainer}>
+                    <View style={[styles.starContainer, { backgroundColor: colors.backgroundTertiary }]}>
                       <Text style={styles.starTitle}>AI-Generated STAR Story</Text>
 
                       <View style={styles.starSection}>
-                        <Text style={styles.starLabel}>Situation</Text>
-                        <Text style={styles.starText}>{starStory.situation}</Text>
+                        <Text style={[styles.starLabel, { color: colors.text }]}>Situation</Text>
+                        <Text style={[styles.starText, { color: colors.textSecondary }]}>{starStory.situation}</Text>
                       </View>
 
                       <View style={styles.starSection}>
-                        <Text style={styles.starLabel}>Task</Text>
-                        <Text style={styles.starText}>{starStory.task}</Text>
+                        <Text style={[styles.starLabel, { color: colors.text }]}>Task</Text>
+                        <Text style={[styles.starText, { color: colors.textSecondary }]}>{starStory.task}</Text>
                       </View>
 
                       <View style={styles.starSection}>
-                        <Text style={styles.starLabel}>Action</Text>
-                        <Text style={styles.starText}>{starStory.action}</Text>
+                        <Text style={[styles.starLabel, { color: colors.text }]}>Action</Text>
+                        <Text style={[styles.starText, { color: colors.textSecondary }]}>{starStory.action}</Text>
                       </View>
 
                       <View style={styles.starSection}>
-                        <Text style={styles.starLabel}>Result</Text>
-                        <Text style={styles.starText}>{starStory.result}</Text>
+                        <Text style={[styles.starLabel, { color: colors.text }]}>Result</Text>
+                        <Text style={[styles.starText, { color: colors.textSecondary }]}>{starStory.result}</Text>
                       </View>
                     </View>
                   )}
 
                   {/* Practice Area */}
                   <View style={styles.practiceSection}>
-                    <Text style={styles.sectionTitle}>Your Answer</Text>
+                    <View style={styles.practiceSectionHeader}>
+                      <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Answer</Text>
+                      {isSaved && (
+                        <View style={styles.savedBadge}>
+                          <CheckCircle color={COLORS.success} size={14} />
+                          <Text style={styles.savedBadgeText}>Saved</Text>
+                        </View>
+                      )}
+                    </View>
                     <TextInput
-                      style={styles.answerInput}
+                      style={[styles.answerInput, { backgroundColor: colors.backgroundTertiary, borderColor: isSaved ? COLORS.success : colors.border, color: colors.text }]}
                       placeholder="Write your answer here..."
-                      placeholderTextColor={COLORS.dark.textTertiary}
+                      placeholderTextColor={colors.textTertiary}
                       multiline
                       numberOfLines={6}
                       value={userAnswers.get(index) || ''}
@@ -323,6 +512,12 @@ export default function PracticeQuestionsScreen() {
                         const newAnswers = new Map(userAnswers);
                         newAnswers.set(index, text);
                         setUserAnswers(newAnswers);
+                        // Clear saved status when user edits
+                        if (isSaved) {
+                          const newSaved = new Map(savedResponses);
+                          newSaved.set(index, false);
+                          setSavedResponses(newSaved);
+                        }
                       }}
                       onFocus={() => {
                         if (!isPracticing) {
@@ -331,12 +526,19 @@ export default function PracticeQuestionsScreen() {
                       }}
                     />
 
-                    {isPracticing && (
-                      <View style={styles.practiceTimer}>
-                        <Clock color={COLORS.warning} size={14} />
-                        <Text style={styles.timerText}>Practice in progress...</Text>
-                      </View>
-                    )}
+                    <View style={styles.practiceFooter}>
+                      {isPracticing && (
+                        <View style={styles.practiceTimer}>
+                          <Clock color={COLORS.warning} size={14} />
+                          <Text style={styles.timerText}>Practice in progress...</Text>
+                        </View>
+                      )}
+                      {answerLength > 0 && (
+                        <Text style={[styles.characterCounter, { color: colors.textTertiary }]}>
+                          {answerLength} characters
+                        </Text>
+                      )}
+                    </View>
                   </View>
 
                   {/* Action Buttons */}
@@ -354,36 +556,25 @@ export default function PracticeQuestionsScreen() {
                     )}
 
                     {!isPracticing && (
-                      <TouchableOpacity
-                        style={[styles.actionButton, { backgroundColor: COLORS.success }]}
+                      <GlassButton
+                        variant="primary"
+                        size="sm"
                         onPress={() => startPractice(index)}
-                        accessibilityRole="button"
-                        accessibilityLabel="Start practice timer"
-                      >
-                        <Play color={COLORS.dark.background} size={16} />
-                        <Text style={[styles.actionButtonText, { color: COLORS.dark.background }]}>
-                          Start Practice
-                        </Text>
-                      </TouchableOpacity>
+                        icon={<Play color="#ffffff" size={16} />}
+                        label="Start Practice"
+                      />
                     )}
 
                     {(starStory || userAnswers.get(index)) && (
-                      <TouchableOpacity
-                        style={[styles.actionButton, { backgroundColor: COLORS.info }]}
+                      <GlassButton
+                        variant="secondary"
+                        size="sm"
                         onPress={() => handleSaveResponse(index)}
+                        loading={isSaving}
                         disabled={isSaving}
-                        accessibilityRole="button"
-                        accessibilityLabel="Save practice response"
-                      >
-                        {isSaving ? (
-                          <ActivityIndicator size="small" color={COLORS.dark.background} />
-                        ) : (
-                          <Save color={COLORS.dark.background} size={16} />
-                        )}
-                        <Text style={[styles.actionButtonText, { color: COLORS.dark.background }]}>
-                          {isSaving ? 'Saving...' : 'Save Response'}
-                        </Text>
-                      </TouchableOpacity>
+                        icon={<Save color={colors.text} size={16} />}
+                        label={isSaving ? 'Saving...' : 'Save Response'}
+                      />
                     )}
                   </View>
                 </View>
@@ -391,6 +582,198 @@ export default function PracticeQuestionsScreen() {
             </View>
           );
         })}
+          </>
+        )}
+
+        {activeTab === 'history' && (
+          <>
+            {/* Stats Card */}
+            {practiceHistory.length > 0 && (
+              <View style={[styles.statsCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <View style={styles.statRow}>
+                  <View style={styles.statItem}>
+                    <TrendingUp color={COLORS.success} size={20} />
+                    <Text style={[styles.statValue, { color: colors.text }]}>
+                      {calculateCompletionStats().percentage}%
+                    </Text>
+                    <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Completion</Text>
+                  </View>
+
+                  <View style={styles.statItem}>
+                    <CheckCircle color={COLORS.primary} size={20} />
+                    <Text style={[styles.statValue, { color: colors.text }]}>
+                      {practiceHistory.length}
+                    </Text>
+                    <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Practiced</Text>
+                  </View>
+
+                  <View style={styles.statItem}>
+                    <Calendar color={COLORS.warning} size={20} />
+                    <Text style={[styles.statValue, { color: colors.text }]}>
+                      {questions.length}
+                    </Text>
+                    <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {loadingHistory ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                  Loading practice history...
+                </Text>
+              </View>
+            ) : practiceHistory.length === 0 ? (
+              <View style={[styles.emptyState, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <History color={colors.textTertiary} size={48} />
+                <Text style={[styles.emptyStateTitle, { color: colors.text }]}>No Practice History</Text>
+                <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>
+                  Start practicing questions to see your history here.
+                </Text>
+                <GlassButton
+                  variant="primary"
+                  size="md"
+                  onPress={() => setActiveTab('practice')}
+                  label="Start Practicing"
+                  style={{ marginTop: SPACING.md }}
+                />
+              </View>
+            ) : (
+              <>
+                {practiceHistory.map((item, index) => {
+                  const isExpanded = expandedHistoryItem === index;
+
+                  return (
+                    <View
+                      key={item.id}
+                      style={[
+                        styles.historyCard,
+                        { backgroundColor: colors.glass, borderColor: colors.glassBorder },
+                      ]}
+                    >
+                      <TouchableOpacity
+                        style={styles.historyHeader}
+                        onPress={() => setExpandedHistoryItem(isExpanded ? null : index)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Practice history item ${index + 1}`}
+                      >
+                        <View style={styles.historyHeaderTop}>
+                          {item.question_category && (
+                            <View style={[styles.categoryBadge, { marginBottom: SPACING.xs }]}>
+                              <Text style={styles.categoryText}>{item.question_category}</Text>
+                            </View>
+                          )}
+                          <View style={styles.historyMetaRow}>
+                            <View style={styles.historyMetaItem}>
+                              <Clock color={colors.textTertiary} size={12} />
+                              <Text style={[styles.historyMetaText, { color: colors.textSecondary }]}>
+                                {formatDate(item.practiced_at)}
+                              </Text>
+                            </View>
+                            {item.duration_seconds && (
+                              <View style={styles.historyMetaItem}>
+                                <Text style={[styles.historyMetaText, { color: colors.textSecondary }]}>
+                                  Duration: {formatDuration(item.duration_seconds)}
+                                </Text>
+                              </View>
+                            )}
+                            <View style={styles.historyMetaItem}>
+                              <Text style={[styles.historyMetaText, { color: colors.textSecondary }]}>
+                                Practiced {item.times_practiced}x
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+
+                        <Text style={[styles.historyQuestionText, { color: colors.text }]} numberOfLines={isExpanded ? undefined : 2}>
+                          {item.question_text}
+                        </Text>
+
+                        {isExpanded ? (
+                          <ChevronUp color={colors.textSecondary} size={20} style={styles.chevron} />
+                        ) : (
+                          <ChevronDown color={colors.textSecondary} size={20} style={styles.chevron} />
+                        )}
+                      </TouchableOpacity>
+
+                      {isExpanded && (
+                        <View style={styles.historyContent}>
+                          {/* User's Written Response */}
+                          {item.response_text && (
+                            <View style={styles.historySection}>
+                              <Text style={[styles.historySectionTitle, { color: colors.text }]}>
+                                Your Response
+                              </Text>
+                              <Text style={[styles.historyResponseText, { color: colors.textSecondary }]}>
+                                {item.response_text}
+                              </Text>
+                            </View>
+                          )}
+
+                          {/* STAR Story if available */}
+                          {item.star_story && (
+                            <View style={[styles.starContainer, { backgroundColor: colors.backgroundTertiary, marginTop: SPACING.md }]}>
+                              <Text style={styles.starTitle}>STAR Story</Text>
+
+                              <View style={styles.starSection}>
+                                <Text style={[styles.starLabel, { color: colors.text }]}>Situation</Text>
+                                <Text style={[styles.starText, { color: colors.textSecondary }]}>
+                                  {item.star_story.situation}
+                                </Text>
+                              </View>
+
+                              <View style={styles.starSection}>
+                                <Text style={[styles.starLabel, { color: colors.text }]}>Task</Text>
+                                <Text style={[styles.starText, { color: colors.textSecondary }]}>
+                                  {item.star_story.task}
+                                </Text>
+                              </View>
+
+                              <View style={styles.starSection}>
+                                <Text style={[styles.starLabel, { color: colors.text }]}>Action</Text>
+                                <Text style={[styles.starText, { color: colors.textSecondary }]}>
+                                  {item.star_story.action}
+                                </Text>
+                              </View>
+
+                              <View style={styles.starSection}>
+                                <Text style={[styles.starLabel, { color: colors.text }]}>Result</Text>
+                                <Text style={[styles.starText, { color: colors.textSecondary }]}>
+                                  {item.star_story.result}
+                                </Text>
+                              </View>
+                            </View>
+                          )}
+
+                          {/* Practice Again Button */}
+                          <GlassButton
+                            variant="secondary"
+                            size="sm"
+                            onPress={() => {
+                              setActiveTab('practice');
+                              // Find the question in the practice list
+                              const questionIndex = questions.findIndex(
+                                q => q.question === item.question_text
+                              );
+                              if (questionIndex !== -1) {
+                                setExpandedQuestion(questionIndex);
+                              }
+                            }}
+                            icon={<Play color={colors.text} size={16} />}
+                            label="Practice Again"
+                            style={{ marginTop: SPACING.md }}
+                          />
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+              </>
+            )}
+          </>
+        )}
 
         <View style={{ height: SPACING.xl }} />
       </ScrollView>
@@ -401,7 +784,6 @@ export default function PracticeQuestionsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   header: {
     flexDirection: 'row',
@@ -409,8 +791,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.dark.border,
   },
   backButton: {
     width: 44,
@@ -421,7 +801,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
   },
   headerPlaceholder: {
     width: 44,
@@ -433,7 +812,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.md,
-    color: COLORS.dark.textSecondary,
     fontSize: 16,
     fontFamily: FONTS.regular,
   },
@@ -442,12 +820,11 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: SPACING.lg,
+    paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   introCard: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
     alignItems: 'center',
@@ -455,22 +832,18 @@ const styles = StyleSheet.create({
   introTitle: {
     fontSize: 20,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginTop: SPACING.sm,
     marginBottom: SPACING.xs,
   },
   introText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
   },
   questionCard: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
@@ -493,7 +866,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   categoryBadge: {
-    backgroundColor: `${COLORS.info}20`,
+    backgroundColor: ALPHA_COLORS.info.bg,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
     borderRadius: RADIUS.sm,
@@ -506,15 +879,12 @@ const styles = StyleSheet.create({
   questionText: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     lineHeight: 22,
     marginBottom: SPACING.sm,
   },
   answerContent: {
     padding: SPACING.lg,
-    paddingTop: 0,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.dark.border,
+    paddingTop: SPACING.md,
   },
   section: {
     marginBottom: SPACING.md,
@@ -522,13 +892,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: SPACING.xs,
   },
   sectionText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     lineHeight: 20,
   },
   skillsContainer: {
@@ -537,7 +905,6 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   skillChip: {
-    backgroundColor: COLORS.dark.backgroundTertiary,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
     borderRadius: RADIUS.sm,
@@ -545,7 +912,6 @@ const styles = StyleSheet.create({
   skillText: {
     fontSize: 12,
     fontFamily: FONTS.medium,
-    color: COLORS.dark.text,
   },
   generatingContainer: {
     flexDirection: 'row',
@@ -557,10 +923,8 @@ const styles = StyleSheet.create({
   generatingText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
   },
   starContainer: {
-    backgroundColor: COLORS.dark.backgroundTertiary,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
     marginBottom: SPACING.md,
@@ -577,41 +941,65 @@ const styles = StyleSheet.create({
   starLabel: {
     fontSize: 13,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: 4,
     textTransform: 'uppercase',
   },
   starText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     lineHeight: 20,
   },
   practiceSection: {
     marginBottom: SPACING.md,
   },
+  practiceSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.xs,
+  },
+  savedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: `${COLORS.success}20`,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+  },
+  savedBadgeText: {
+    fontSize: 11,
+    fontFamily: FONTS.semibold,
+    color: COLORS.success,
+  },
   answerInput: {
-    backgroundColor: COLORS.dark.backgroundTertiary,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.dark.border,
     padding: SPACING.md,
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     minHeight: 120,
     textAlignVertical: 'top',
+  },
+  practiceFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: SPACING.xs,
   },
   practiceTimer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
-    marginTop: SPACING.xs,
   },
   timerText: {
     fontSize: 12,
     fontFamily: FONTS.medium,
     color: COLORS.warning,
+  },
+  characterCounter: {
+    fontSize: 11,
+    fontFamily: FONTS.regular,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -632,5 +1020,118 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: FONTS.semibold,
     color: COLORS.primary,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    paddingHorizontal: SPACING.md,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabText: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  statsCard: {
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  statItem: {
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  statValue: {
+    fontSize: 24,
+    fontFamily: FONTS.bold,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+  },
+  emptyState: {
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.xl,
+    alignItems: 'center',
+    marginTop: SPACING.xl,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontFamily: FONTS.semibold,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  historyCard: {
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    marginBottom: SPACING.md,
+    overflow: 'hidden',
+  },
+  historyHeader: {
+    padding: SPACING.lg,
+  },
+  historyHeaderTop: {
+    marginBottom: SPACING.sm,
+  },
+  historyMetaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  historyMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  historyMetaText: {
+    fontSize: 11,
+    fontFamily: FONTS.regular,
+  },
+  historyQuestionText: {
+    fontSize: 15,
+    fontFamily: FONTS.semibold,
+    lineHeight: 21,
+    marginTop: SPACING.xs,
+  },
+  chevron: {
+    marginTop: SPACING.xs,
+    alignSelf: 'center',
+  },
+  historyContent: {
+    padding: SPACING.lg,
+    paddingTop: 0,
+  },
+  historySection: {
+    marginBottom: SPACING.md,
+  },
+  historySectionTitle: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    marginBottom: SPACING.xs,
+  },
+  historyResponseText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
   },
 });

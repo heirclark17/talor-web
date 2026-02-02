@@ -5,3 +5,6 @@ export { GlassContainer, default as GlassContainerDefault } from './GlassContain
 export { GlassTabBar, default as GlassTabBarDefault } from './GlassTabBar';
 export { BackgroundLayer, default as BackgroundLayerDefault } from './BackgroundLayer';
 export { BackgroundSelector, default as BackgroundSelectorDefault } from './BackgroundSelector';
+
+// Re-export liquid glass utilities
+export { isLiquidGlassSupported } from './LiquidGlassWrapper';

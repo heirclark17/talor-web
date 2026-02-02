@@ -16,19 +16,18 @@ import { useNavigation, useFocusEffect, useRoute, RouteProp } from '@react-navig
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   Target, Link, FileText, ChevronDown, Sparkles, Building2, ArrowLeft,
-  Check, Download, RefreshCw, Bookmark, Briefcase, ChevronRight
+  Check, Download, RefreshCw, Bookmark, Briefcase, ChevronRight, BarChart3,
+  Key, Share2
 } from 'lucide-react-native';
+import { MatchScore, KeywordPanel, ResumeAnalysis } from '../components';
+import { GlassButton } from '../components/glass/GlassButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
-
-interface Resume {
-  id: number;
-  filename: string;
-  name?: string;
-  skills_count: number;
-}
+import { useTheme } from '../hooks/useTheme';
+import { exportAndShare, ExportFormat } from '../utils/fileExport';
+import { useResumeStore } from '../stores/resumeStore';
 
 interface BaseResumeData {
   id: number;
@@ -63,15 +62,17 @@ type TailorResumeRouteProp = RouteProp<RootStackParamList, 'TailorResume'>;
 export default function TailorResumeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<TailorResumeRouteProp>();
+  const { colors } = useTheme();
   const initialResumeId = route.params?.resumeId;
 
-  // Form state
-  const [resumes, setResumes] = useState<Resume[]>([]);
+  // Zustand store for shared resume data
+  const { resumes, loading, fetchResumes, setSelectedResumeId: setStoreSelectedResumeId } = useResumeStore();
+
+  // Form state (screen-specific)
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(initialResumeId || null);
   const [jobUrl, setJobUrl] = useState('');
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
-  const [loading, setLoading] = useState(true);
   const [tailoring, setTailoring] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [showResumeSelector, setShowResumeSelector] = useState(false);
@@ -80,38 +81,32 @@ export default function TailorResumeScreen() {
   const [showComparison, setShowComparison] = useState(false);
   const [baseResumeData, setBaseResumeData] = useState<BaseResumeData | null>(null);
   const [tailoredResumeData, setTailoredResumeData] = useState<TailoredResumeData | null>(null);
-  const [activeTab, setActiveTab] = useState<'original' | 'tailored'>('tailored');
+  const [activeTab, setActiveTab] = useState<'original' | 'tailored' | 'keywords' | 'analysis'>('tailored');
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportProgress, setExportProgress] = useState(0);
 
-  const loadResumes = async () => {
-    try {
-      const result = await api.getResumes();
-      if (result.success && result.data) {
-        const resumeList = Array.isArray(result.data) ? result.data : [];
-        setResumes(resumeList);
-        if (resumeList.length > 0 && !selectedResumeId) {
-          const targetId = initialResumeId || resumeList[0].id;
-          setSelectedResumeId(targetId);
-        }
-      } else {
-        console.error('Failed to load resumes:', result.error);
-        setResumes([]);
-      }
-    } catch (error) {
-      console.error('Error loading resumes:', error);
-      setResumes([]);
-    } finally {
-      setLoading(false);
+  // Analysis state
+  const [analysisData, setAnalysisData] = useState<any>(null);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+  const [keywordsData, setKeywordsData] = useState<any>(null);
+  const [loadingKeywords, setLoadingKeywords] = useState(false);
+
+  // Set selected resume when resumes are loaded
+  useEffect(() => {
+    if (resumes.length > 0 && !selectedResumeId) {
+      const targetId = initialResumeId || resumes[0].id;
+      setSelectedResumeId(targetId);
     }
-  };
+  }, [resumes, selectedResumeId, initialResumeId]);
 
   useFocusEffect(
     useCallback(() => {
-      // Only load if not showing comparison
+      // Only fetch if not showing comparison
       if (!showComparison) {
-        loadResumes();
+        fetchResumes();
       }
-    }, [showComparison])
+    }, [showComparison, fetchResumes])
   );
 
   const handleExtractJob = async () => {
@@ -200,10 +195,101 @@ export default function TailorResumeScreen() {
     setShowComparison(false);
     setBaseResumeData(null);
     setTailoredResumeData(null);
+    setAnalysisData(null);
     setJobUrl('');
     setCompany('');
     setJobTitle('');
     setActiveTab('tailored');
+  };
+
+  const loadAnalysis = async () => {
+    if (!tailoredResumeData || loadingAnalysis) return;
+
+    setLoadingAnalysis(true);
+    try {
+      const result = await api.analyzeAll(tailoredResumeData.id);
+      if (result.success && result.data) {
+        setAnalysisData(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading analysis:', error);
+    } finally {
+      setLoadingAnalysis(false);
+    }
+  };
+
+  // Load analysis when switching to analysis tab
+  useEffect(() => {
+    if (activeTab === 'analysis' && !analysisData && tailoredResumeData) {
+      loadAnalysis();
+    }
+  }, [activeTab, tailoredResumeData]);
+
+  // Load keywords when switching to keywords tab (uses analyzeAll which includes keywords)
+  const loadKeywords = async () => {
+    if (!tailoredResumeData || loadingKeywords) return;
+
+    setLoadingKeywords(true);
+    try {
+      // Use analyzeAll which returns keyword data as part of its response
+      const result = await api.analyzeAll(tailoredResumeData.id);
+      if (result.success && result.data) {
+        // Extract keywords data from the analysis response
+        setKeywordsData(result.data.keywords || result.data);
+        // Also update analysisData if not already loaded
+        if (!analysisData) {
+          setAnalysisData(result.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading keywords:', error);
+    } finally {
+      setLoadingKeywords(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'keywords' && !keywordsData && tailoredResumeData) {
+      loadKeywords();
+    }
+  }, [activeTab, tailoredResumeData]);
+
+  // Export resume function
+  const handleExport = async (format: ExportFormat) => {
+    if (!tailoredResumeData) return;
+
+    setExporting(true);
+    setExportProgress(0);
+
+    try {
+      const success = await exportAndShare({
+        tailoredResumeId: tailoredResumeData.id,
+        format,
+        filename: `${tailoredResumeData.company}_${tailoredResumeData.title}_Resume`,
+        onProgress: setExportProgress,
+      });
+
+      if (success) {
+        // Share sheet handled by exportAndShare
+      }
+    } catch (error: any) {
+      Alert.alert('Export Failed', error.message || 'Unable to export resume');
+    } finally {
+      setExporting(false);
+      setExportProgress(0);
+    }
+  };
+
+  const showExportOptions = () => {
+    Alert.alert(
+      'Export Resume',
+      'Choose a format to export your tailored resume',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'PDF', onPress: () => handleExport('pdf') },
+        { text: 'Word (DOCX)', onPress: () => handleExport('docx') },
+      ]
+    );
   };
 
   const handleSaveComparison = async () => {
@@ -230,7 +316,7 @@ export default function TailorResumeScreen() {
 
   const handleViewInterviewPrep = () => {
     if (tailoredResumeData) {
-      navigation.navigate('InterviewPrep', { tailoredResumeId: tailoredResumeData.id });
+      navigation.navigate('InterviewPreps' as any, { screen: 'InterviewPrep', params: { tailoredResumeId: tailoredResumeData.id } });
     }
   };
 
@@ -242,7 +328,7 @@ export default function TailorResumeScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
@@ -258,11 +344,11 @@ export default function TailorResumeScreen() {
             style={styles.comparisonBackButton}
             onPress={handleStartNew}
           >
-            <ArrowLeft color={COLORS.dark.text} size={24} />
+            <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
           <View style={styles.comparisonHeaderContent}>
-            <Text style={styles.comparisonTitle}>Resume Comparison</Text>
-            <Text style={styles.comparisonSubtitle}>
+            <Text style={[styles.comparisonTitle, { color: colors.text }]}>Resume Comparison</Text>
+            <Text style={[styles.comparisonSubtitle, { color: colors.textSecondary }]}>
               Tailored for {tailoredResumeData.company}
             </Text>
           </View>
@@ -275,32 +361,61 @@ export default function TailorResumeScreen() {
         </View>
 
         {/* Tab Switcher */}
-        <View style={styles.tabContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={[styles.tabScrollContainer, { backgroundColor: colors.backgroundSecondary }]}
+          contentContainerStyle={styles.tabScrollContent}
+        >
           <TouchableOpacity
-            style={[styles.tab, activeTab === 'original' && styles.tabActive]}
+            style={[styles.tab, activeTab === 'original' && [styles.tabActive, { backgroundColor: colors.glass }]]}
             onPress={() => setActiveTab('original')}
           >
             <FileText
-              color={activeTab === 'original' ? COLORS.primary : COLORS.dark.textSecondary}
-              size={18}
+              color={activeTab === 'original' ? COLORS.primary : colors.textSecondary}
+              size={14}
             />
-            <Text style={[styles.tabText, activeTab === 'original' && styles.tabTextActive]}>
+            <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'original' && [styles.tabTextActive, { color: colors.text }]]}>
               Original
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.tab, activeTab === 'tailored' && styles.tabActive]}
+            style={[styles.tab, activeTab === 'tailored' && [styles.tabActive, { backgroundColor: colors.glass }]]}
             onPress={() => setActiveTab('tailored')}
           >
             <Sparkles
-              color={activeTab === 'tailored' ? COLORS.success : COLORS.dark.textSecondary}
-              size={18}
+              color={activeTab === 'tailored' ? COLORS.success : colors.textSecondary}
+              size={14}
             />
-            <Text style={[styles.tabText, activeTab === 'tailored' && styles.tabTextActive]}>
+            <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'tailored' && [styles.tabTextActive, { color: colors.text }]]}>
               Tailored
             </Text>
           </TouchableOpacity>
-        </View>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'keywords' && [styles.tabActive, { backgroundColor: colors.glass }]]}
+            onPress={() => setActiveTab('keywords')}
+          >
+            <Key
+              color={activeTab === 'keywords' ? COLORS.warning : colors.textSecondary}
+              size={14}
+            />
+            <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'keywords' && [styles.tabTextActive, { color: colors.text }]]}>
+              Keywords
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'analysis' && [styles.tabActive, { backgroundColor: colors.glass }]]}
+            onPress={() => setActiveTab('analysis')}
+          >
+            <BarChart3
+              color={activeTab === 'analysis' ? COLORS.info : colors.textSecondary}
+              size={14}
+            />
+            <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'analysis' && [styles.tabTextActive, { color: colors.text }]]}>
+              Analysis
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
 
         {/* Content */}
         <ScrollView style={styles.comparisonContent} contentContainerStyle={styles.comparisonContentContainer}>
@@ -308,61 +423,61 @@ export default function TailorResumeScreen() {
             // Original Resume Content
             <View>
               {/* Summary */}
-              <View style={styles.comparisonSection}>
-                <Text style={styles.sectionHeader}>Professional Summary</Text>
+              <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.sectionHeader, { color: colors.text }]}>Professional Summary</Text>
                 <View style={styles.sectionContent}>
-                  <Text style={styles.sectionText}>
+                  <Text style={[styles.sectionText, { color: colors.text }]}>
                     {baseResumeData.summary || 'No summary available'}
                   </Text>
                 </View>
               </View>
 
               {/* Skills */}
-              <View style={styles.comparisonSection}>
-                <Text style={styles.sectionHeader}>Skills</Text>
+              <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.sectionHeader, { color: colors.text }]}>Skills</Text>
                 <View style={styles.skillsContainer}>
                   {(baseResumeData.skills || []).map((skill, index) => (
                     <View key={index} style={styles.skillPill}>
-                      <Text style={styles.skillText}>{skill}</Text>
+                      <Text style={[styles.skillText, { color: colors.text }]}>{skill}</Text>
                     </View>
                   ))}
                   {(!baseResumeData.skills || baseResumeData.skills.length === 0) && (
-                    <Text style={styles.emptyText}>No skills listed</Text>
+                    <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No skills listed</Text>
                   )}
                 </View>
               </View>
 
               {/* Experience */}
-              <View style={styles.comparisonSection}>
-                <Text style={styles.sectionHeader}>Experience</Text>
+              <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.sectionHeader, { color: colors.text }]}>Experience</Text>
                 {(baseResumeData.experience || []).map((exp, index) => (
                   <View key={index} style={styles.experienceItem}>
-                    <Text style={styles.experienceHeader}>{exp.header || exp.title}</Text>
+                    <Text style={[styles.experienceHeader, { color: colors.text }]}>{exp.header || exp.title}</Text>
                     {(exp.bullets || []).map((bullet: string, bIndex: number) => (
-                      <Text key={bIndex} style={styles.bulletPoint}>• {bullet}</Text>
+                      <Text key={bIndex} style={[styles.bulletPoint, { color: colors.textSecondary }]}>• {bullet}</Text>
                     ))}
                   </View>
                 ))}
                 {(!baseResumeData.experience || baseResumeData.experience.length === 0) && (
-                  <Text style={styles.emptyText}>No experience listed</Text>
+                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No experience listed</Text>
                 )}
               </View>
 
               {/* Education */}
-              <View style={styles.comparisonSection}>
-                <Text style={styles.sectionHeader}>Education</Text>
+              <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.sectionHeader, { color: colors.text }]}>Education</Text>
                 <View style={styles.sectionContent}>
-                  <Text style={styles.sectionText}>
+                  <Text style={[styles.sectionText, { color: colors.text }]}>
                     {baseResumeData.education || 'No education listed'}
                   </Text>
                 </View>
               </View>
 
               {/* Certifications */}
-              <View style={styles.comparisonSection}>
-                <Text style={styles.sectionHeader}>Certifications</Text>
+              <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.sectionHeader, { color: colors.text }]}>Certifications</Text>
                 <View style={styles.sectionContent}>
-                  <Text style={styles.sectionText}>
+                  <Text style={[styles.sectionText, { color: colors.text }]}>
                     {baseResumeData.certifications || 'No certifications listed'}
                   </Text>
                 </View>
@@ -372,24 +487,24 @@ export default function TailorResumeScreen() {
             // Tailored Resume Content
             <View>
               {/* Summary - Highlighted as changed */}
-              <View style={[styles.comparisonSection, styles.changedSection]}>
+              <View style={[styles.comparisonSection, styles.changedSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                 <View style={styles.sectionHeaderRow}>
-                  <Text style={styles.sectionHeader}>Professional Summary</Text>
+                  <Text style={[styles.sectionHeader, { color: colors.text }]}>Professional Summary</Text>
                   <View style={styles.changedBadge}>
                     <Text style={styles.changedBadgeText}>Enhanced</Text>
                   </View>
                 </View>
                 <View style={styles.sectionContent}>
-                  <Text style={styles.sectionText}>
+                  <Text style={[styles.sectionText, { color: colors.text }]}>
                     {tailoredResumeData.summary}
                   </Text>
                 </View>
               </View>
 
               {/* Core Competencies - Highlighted as changed */}
-              <View style={[styles.comparisonSection, styles.changedSection]}>
+              <View style={[styles.comparisonSection, styles.changedSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                 <View style={styles.sectionHeaderRow}>
-                  <Text style={styles.sectionHeader}>Core Competencies</Text>
+                  <Text style={[styles.sectionHeader, { color: colors.text }]}>Core Competencies</Text>
                   <View style={styles.changedBadge}>
                     <Text style={styles.changedBadgeText}>Tailored</Text>
                   </View>
@@ -397,45 +512,45 @@ export default function TailorResumeScreen() {
                 <View style={styles.skillsContainer}>
                   {tailoredResumeData.competencies.map((skill, index) => (
                     <View key={index} style={[styles.skillPill, styles.tailoredSkillPill]}>
-                      <Text style={styles.skillText}>{skill}</Text>
+                      <Text style={[styles.skillText, { color: colors.text }]}>{skill}</Text>
                     </View>
                   ))}
                 </View>
               </View>
 
               {/* Experience - Highlighted as changed */}
-              <View style={[styles.comparisonSection, styles.changedSection]}>
+              <View style={[styles.comparisonSection, styles.changedSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                 <View style={styles.sectionHeaderRow}>
-                  <Text style={styles.sectionHeader}>Experience</Text>
+                  <Text style={[styles.sectionHeader, { color: colors.text }]}>Experience</Text>
                   <View style={styles.changedBadge}>
                     <Text style={styles.changedBadgeText}>Reframed</Text>
                   </View>
                 </View>
                 {tailoredResumeData.experience.map((exp, index) => (
                   <View key={index} style={styles.experienceItem}>
-                    <Text style={styles.experienceHeader}>{exp.header}</Text>
+                    <Text style={[styles.experienceHeader, { color: colors.text }]}>{exp.header}</Text>
                     {(exp.bullets || []).map((bullet: string, bIndex: number) => (
-                      <Text key={bIndex} style={styles.bulletPoint}>• {bullet}</Text>
+                      <Text key={bIndex} style={[styles.bulletPoint, { color: colors.textSecondary }]}>• {bullet}</Text>
                     ))}
                   </View>
                 ))}
               </View>
 
               {/* Education */}
-              <View style={styles.comparisonSection}>
-                <Text style={styles.sectionHeader}>Education</Text>
+              <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.sectionHeader, { color: colors.text }]}>Education</Text>
                 <View style={styles.sectionContent}>
-                  <Text style={styles.sectionText}>
+                  <Text style={[styles.sectionText, { color: colors.text }]}>
                     {tailoredResumeData.education || baseResumeData.education || 'No education listed'}
                   </Text>
                 </View>
               </View>
 
               {/* Certifications */}
-              <View style={styles.comparisonSection}>
-                <Text style={styles.sectionHeader}>Certifications</Text>
+              <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.sectionHeader, { color: colors.text }]}>Certifications</Text>
                 <View style={styles.sectionContent}>
-                  <Text style={styles.sectionText}>
+                  <Text style={[styles.sectionText, { color: colors.text }]}>
                     {tailoredResumeData.certifications || baseResumeData.certifications || 'No certifications listed'}
                   </Text>
                 </View>
@@ -443,20 +558,114 @@ export default function TailorResumeScreen() {
 
               {/* Alignment Statement - New Section */}
               {tailoredResumeData.alignment_statement && (
-                <View style={[styles.comparisonSection, styles.newSection]}>
+                <View style={[styles.comparisonSection, styles.newSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                   <View style={styles.sectionHeaderRow}>
-                    <Text style={styles.sectionHeader}>Company Alignment</Text>
+                    <Text style={[styles.sectionHeader, { color: colors.text }]}>Company Alignment</Text>
                     <View style={styles.newBadge}>
                       <Text style={styles.newBadgeText}>New</Text>
                     </View>
                   </View>
                   <View style={styles.sectionContent}>
-                    <Text style={styles.sectionText}>
+                    <Text style={[styles.sectionText, { color: colors.text }]}>
                       {tailoredResumeData.alignment_statement}
                     </Text>
                   </View>
                 </View>
               )}
+            </View>
+          )}
+
+          {/* Keywords Tab Content */}
+          {activeTab === 'keywords' && (
+            <View style={{ gap: SPACING.lg }}>
+              {loadingKeywords ? (
+                <View style={styles.loadingKeywords}>
+                  <ActivityIndicator size="large" color={COLORS.warning} />
+                  <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                    Analyzing keywords...
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  {/* Keyword Match Summary */}
+                  {keywordsData && (
+                    <View style={[styles.keywordSummary, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                      <View style={styles.keywordSummaryHeader}>
+                        <Key color={COLORS.warning} size={24} />
+                        <View style={styles.keywordSummaryContent}>
+                          <Text style={[styles.keywordSummaryTitle, { color: colors.text }]}>
+                            Keyword Match Score
+                          </Text>
+                          <Text style={[styles.keywordSummaryScore, { color: COLORS.warning }]}>
+                            {keywordsData.match_score || keywordsData.matchScore || 0}%
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Keywords Panel - Full Component */}
+                  <KeywordPanel
+                    keywords={keywordsData || analysisData?.keywords}
+                    loading={loadingKeywords}
+                  />
+
+                  {/* Missing Keywords Section */}
+                  {keywordsData?.missing_keywords && keywordsData.missing_keywords.length > 0 && (
+                    <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                      <Text style={[styles.sectionHeader, { color: colors.text }]}>Missing Keywords</Text>
+                      <Text style={[styles.keywordHelpText, { color: colors.textSecondary }]}>
+                        Consider adding these keywords to improve your match score
+                      </Text>
+                      <View style={styles.skillsContainer}>
+                        {keywordsData.missing_keywords.map((keyword: string, index: number) => (
+                          <View key={index} style={[styles.skillPill, styles.missingKeywordPill]}>
+                            <Text style={[styles.skillText, { color: COLORS.warning }]}>{keyword}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Matched Keywords Section */}
+                  {keywordsData?.matched_keywords && keywordsData.matched_keywords.length > 0 && (
+                    <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                      <Text style={[styles.sectionHeader, { color: colors.text }]}>Matched Keywords</Text>
+                      <View style={styles.skillsContainer}>
+                        {keywordsData.matched_keywords.map((keyword: string, index: number) => (
+                          <View key={index} style={[styles.skillPill, styles.matchedKeywordPill]}>
+                            <Check color={COLORS.success} size={12} />
+                            <Text style={[styles.skillText, { color: COLORS.success }]}>{keyword}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+                </>
+              )}
+            </View>
+          )}
+
+          {/* Analysis Tab Content */}
+          {activeTab === 'analysis' && (
+            <View style={{ gap: SPACING.lg }}>
+              {/* Match Score */}
+              <MatchScore
+                matchScore={analysisData?.match_score}
+                loading={loadingAnalysis}
+              />
+
+              {/* Keyword Analysis */}
+              <KeywordPanel
+                keywords={analysisData?.keywords}
+                loading={loadingAnalysis}
+              />
+
+              {/* Detailed Change Explanations */}
+              <ResumeAnalysis
+                analysis={analysisData?.changes}
+                loading={loadingAnalysis}
+              />
             </View>
           )}
         </ScrollView>
@@ -465,7 +674,7 @@ export default function TailorResumeScreen() {
         <View style={styles.comparisonFooter}>
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity
-              style={styles.secondaryButton}
+              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
               onPress={handleSaveComparison}
               disabled={saving}
             >
@@ -478,11 +687,24 @@ export default function TailorResumeScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
+              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              onPress={showExportOptions}
+              disabled={exporting}
+            >
+              {exporting ? (
+                <ActivityIndicator size="small" color={COLORS.success} />
+              ) : (
+                <Download color={COLORS.success} size={18} />
+              )}
+              <Text style={[styles.secondaryButtonText, { color: COLORS.success }]}>Export</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={styles.interviewPrepButton}
               onPress={handleViewInterviewPrep}
             >
               <Briefcase color="#fff" size={18} />
-              <Text style={styles.interviewPrepButtonText}>Interview Prep</Text>
+              <Text style={styles.interviewPrepButtonText}>Prep</Text>
               <ChevronRight color="#fff" size={18} />
             </TouchableOpacity>
           </View>
@@ -491,8 +713,8 @@ export default function TailorResumeScreen() {
             style={styles.startNewButton}
             onPress={handleStartNew}
           >
-            <RefreshCw color={COLORS.dark.textSecondary} size={18} />
-            <Text style={styles.startNewButtonText}>Start New Tailoring</Text>
+            <RefreshCw color={colors.textSecondary} size={18} />
+            <Text style={[styles.startNewButtonText, { color: colors.textSecondary }]}>Start New Tailoring</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -504,21 +726,21 @@ export default function TailorResumeScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <Text style={styles.title}>Tailor Resume</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Tailor Resume</Text>
         </View>
         <View style={styles.emptyState}>
           <View style={styles.emptyIcon}>
-            <FileText color={COLORS.dark.textTertiary} size={64} />
+            <FileText color={colors.textTertiary} size={64} />
           </View>
-          <Text style={styles.emptyTitle}>No Resumes</Text>
-          <Text style={styles.emptyText}>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>No Resumes</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
             Upload a resume first to start tailoring it for specific jobs.
           </Text>
           <TouchableOpacity
-            style={styles.uploadButton}
+            style={[styles.uploadButton, { backgroundColor: colors.text }]}
             onPress={() => navigation.navigate('UploadResume')}
           >
-            <Text style={styles.uploadButtonText}>Upload Resume</Text>
+            <Text style={[styles.uploadButtonText, { color: colors.background }]}>Upload Resume</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -541,10 +763,10 @@ export default function TailorResumeScreen() {
               accessibilityLabel="Go back"
               accessibilityHint="Returns to the previous screen"
             >
-              <ArrowLeft color={COLORS.dark.text} size={24} />
+              <ArrowLeft color={colors.text} size={24} />
             </TouchableOpacity>
           )}
-          <Text style={[styles.title, initialResumeId && styles.titleWithBack]}>Tailor Resume</Text>
+          <Text style={[styles.title, { color: colors.text }, initialResumeId ? styles.titleWithBack : undefined]}>Tailor Resume</Text>
         </View>
 
         <ScrollView
@@ -554,9 +776,9 @@ export default function TailorResumeScreen() {
         >
           {/* Resume Selector */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Select Resume</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Select Resume</Text>
             <TouchableOpacity
-              style={styles.selector}
+              style={[styles.selector, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
               onPress={() => setShowResumeSelector(!showResumeSelector)}
               accessibilityRole="button"
               accessibilityLabel={`Resume selector: ${selectedResume?.filename || 'No resume selected'}`}
@@ -565,25 +787,25 @@ export default function TailorResumeScreen() {
             >
               <View style={styles.selectorContent}>
                 <FileText color={COLORS.primary} size={20} />
-                <Text style={styles.selectorText} numberOfLines={1}>
+                <Text style={[styles.selectorText, { color: colors.text }]} numberOfLines={1}>
                   {selectedResume?.filename || 'Select a resume'}
                 </Text>
               </View>
               <ChevronDown
-                color={COLORS.dark.textSecondary}
+                color={colors.textSecondary}
                 size={20}
                 style={showResumeSelector ? { transform: [{ rotate: '180deg' }] } : {}}
               />
             </TouchableOpacity>
 
             {showResumeSelector && (
-              <View style={styles.selectorDropdown}>
+              <View style={[styles.selectorDropdown, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
                 {resumes.map((resume) => (
                   <TouchableOpacity
                     key={resume.id}
                     style={[
                       styles.selectorOption,
-                      selectedResumeId === resume.id && styles.selectorOptionSelected,
+                      selectedResumeId === resume.id && [styles.selectorOptionSelected, { backgroundColor: colors.glass }],
                     ]}
                     onPress={() => {
                       setSelectedResumeId(resume.id);
@@ -596,14 +818,14 @@ export default function TailorResumeScreen() {
                   >
                     <Text
                       style={[
-                        styles.selectorOptionText,
+                        styles.selectorOptionText, { color: colors.text },
                         selectedResumeId === resume.id && styles.selectorOptionTextSelected,
                       ]}
                       numberOfLines={1}
                     >
                       {resume.filename}
                     </Text>
-                    <Text style={styles.selectorOptionMeta}>
+                    <Text style={[styles.selectorOptionMeta, { color: colors.textTertiary }]}>
                       {resume.skills_count} skills
                     </Text>
                   </TouchableOpacity>
@@ -614,14 +836,14 @@ export default function TailorResumeScreen() {
 
           {/* Job URL Input */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Job Posting URL</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Job Posting URL</Text>
             <View style={styles.inputRow}>
-              <View style={styles.inputWrapper}>
-                <Link color={COLORS.dark.textTertiary} size={20} style={styles.inputIcon} />
+              <View style={[styles.inputWrapper, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Link color={colors.textTertiary} size={20} style={styles.inputIcon} />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="https://linkedin.com/jobs/..."
-                  placeholderTextColor={COLORS.dark.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={jobUrl}
                   onChangeText={setJobUrl}
                   autoCapitalize="none"
@@ -629,45 +851,35 @@ export default function TailorResumeScreen() {
                   keyboardType="url"
                 />
               </View>
-              <TouchableOpacity
-                style={[
-                  styles.extractButton,
-                  (extracting || !jobUrl.trim()) && styles.extractButtonDisabled
-                ]}
+              <GlassButton
+                variant="primary"
                 onPress={handleExtractJob}
                 disabled={extracting || !jobUrl.trim()}
-                accessibilityRole="button"
-                accessibilityLabel={extracting ? 'Extracting job details' : 'Extract job details from URL'}
-                accessibilityHint="Uses AI to extract company name and job title from the job posting URL"
-                accessibilityState={{ disabled: extracting || !jobUrl.trim(), busy: extracting }}
-              >
-                {extracting ? (
-                  <ActivityIndicator size="small" color={COLORS.dark.text} />
-                ) : (
-                  <Sparkles color={COLORS.dark.text} size={20} />
-                )}
-              </TouchableOpacity>
+                loading={extracting}
+                icon={!extracting ? <Sparkles color="#fff" size={20} /> : undefined}
+                style={styles.extractButton}
+              />
             </View>
-            <Text style={styles.inputHint}>
+            <Text style={[styles.inputHint, { color: colors.textTertiary }]}>
               Paste a job URL to auto-extract company and job details
             </Text>
           </View>
 
           {/* Manual Entry */}
           <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR ENTER MANUALLY</Text>
-            <View style={styles.dividerLine} />
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+            <Text style={[styles.dividerText, { color: colors.textTertiary }]}>OR ENTER MANUALLY</Text>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Company</Text>
-            <View style={styles.inputWrapper}>
-              <Building2 color={COLORS.dark.textTertiary} size={20} style={styles.inputIcon} />
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Company</Text>
+            <View style={[styles.inputWrapper, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+              <Building2 color={colors.textTertiary} size={20} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="Company name"
-                placeholderTextColor={COLORS.dark.textTertiary}
+                placeholderTextColor={colors.textTertiary}
                 value={company}
                 onChangeText={setCompany}
               />
@@ -675,13 +887,13 @@ export default function TailorResumeScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Job Title</Text>
-            <View style={styles.inputWrapper}>
-              <Target color={COLORS.dark.textTertiary} size={20} style={styles.inputIcon} />
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Job Title</Text>
+            <View style={[styles.inputWrapper, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+              <Target color={colors.textTertiary} size={20} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="Job title"
-                placeholderTextColor={COLORS.dark.textTertiary}
+                placeholderTextColor={colors.textTertiary}
                 value={jobTitle}
                 onChangeText={setJobTitle}
               />
@@ -690,27 +902,15 @@ export default function TailorResumeScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={[styles.tailorButton, tailoring && styles.tailorButtonDisabled]}
+          <GlassButton
+            label={tailoring ? 'Tailoring...' : 'Tailor Resume'}
+            variant="primary"
             onPress={handleTailor}
             disabled={tailoring}
-            accessibilityRole="button"
-            accessibilityLabel={tailoring ? 'Tailoring resume in progress' : 'Tailor resume for this job'}
-            accessibilityHint="Uses AI to customize your resume for the specific company and job posting"
-            accessibilityState={{ disabled: tailoring, busy: tailoring }}
-          >
-            {tailoring ? (
-              <>
-                <ActivityIndicator color={COLORS.dark.background} />
-                <Text style={styles.tailorButtonText}>Tailoring...</Text>
-              </>
-            ) : (
-              <>
-                <Target color={COLORS.dark.background} size={20} />
-                <Text style={styles.tailorButtonText}>Tailor Resume</Text>
-              </>
-            )}
-          </TouchableOpacity>
+            loading={tailoring}
+            icon={!tailoring ? <Target color="#fff" size={20} /> : undefined}
+            fullWidth
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -720,7 +920,6 @@ export default function TailorResumeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   flex: {
     flex: 1,
@@ -732,7 +931,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.md,
-    color: COLORS.dark.textSecondary,
     fontSize: 16,
     fontFamily: FONTS.regular,
   },
@@ -753,7 +951,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
   },
   titleWithBack: {
     fontSize: 24,
@@ -764,6 +961,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: SPACING.lg,
     paddingTop: SPACING.sm,
+    paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   section: {
     marginBottom: SPACING.lg,
@@ -771,7 +969,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.textSecondary,
     marginBottom: SPACING.sm,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -780,10 +977,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.md,
     minHeight: 48,
   },
@@ -796,31 +991,24 @@ const styles = StyleSheet.create({
   selectorText: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     flex: 1,
   },
   selectorDropdown: {
     marginTop: SPACING.sm,
-    backgroundColor: COLORS.dark.backgroundSecondary,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.dark.border,
     overflow: 'hidden',
   },
   selectorOption: {
     padding: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.dark.border,
     minHeight: 48,
     justifyContent: 'center',
   },
   selectorOptionSelected: {
-    backgroundColor: COLORS.dark.glass,
   },
   selectorOptionText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
   },
   selectorOptionTextSelected: {
     color: COLORS.primary,
@@ -829,7 +1017,6 @@ const styles = StyleSheet.create({
   selectorOptionMeta: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
     marginTop: 2,
   },
   inputRow: {
@@ -840,10 +1027,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     minHeight: 48,
   },
   inputIcon: {
@@ -853,24 +1038,16 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     padding: SPACING.md,
   },
   extractButton: {
     width: 48,
     height: 48,
-    backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  extractButtonDisabled: {
-    opacity: 0.5,
+    paddingHorizontal: 0,
   },
   inputHint: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
     marginTop: SPACING.xs,
   },
   divider: {
@@ -881,36 +1058,14 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: COLORS.dark.border,
   },
   dividerText: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
     marginHorizontal: SPACING.md,
   },
   footer: {
     padding: SPACING.lg,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.dark.border,
-  },
-  tailorButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.md,
-    minHeight: 48,
-  },
-  tailorButtonDisabled: {
-    opacity: 0.7,
-  },
-  tailorButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
   },
   emptyState: {
     flex: 1,
@@ -925,18 +1080,15 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
   },
   uploadButton: {
-    backgroundColor: COLORS.dark.text,
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.md,
@@ -946,7 +1098,6 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.background,
   },
 
   // Comparison View Styles
@@ -955,8 +1106,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.dark.border,
   },
   comparisonBackButton: {
     width: 44,
@@ -972,21 +1121,19 @@ const styles = StyleSheet.create({
   comparisonTitle: {
     fontSize: 24,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
   },
   comparisonSubtitle: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     marginTop: 2,
   },
   successBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    backgroundColor: ALPHA_COLORS.success.bg,
     borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.3)',
+    borderColor: ALPHA_COLORS.success.border,
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
     padding: SPACING.md,
@@ -997,33 +1144,34 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.semibold,
     color: COLORS.success,
   },
-  tabContainer: {
-    flexDirection: 'row',
+  tabScrollContainer: {
     marginHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
-    backgroundColor: COLORS.dark.backgroundSecondary,
-    borderRadius: RADIUS.md,
-    padding: 4,
+    marginTop: SPACING.sm,
+    borderRadius: RADIUS.sm,
+    maxHeight: 40,
+  },
+  tabScrollContent: {
+    padding: 3,
+    gap: 6,
+    alignItems: 'center',
   },
   tab: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.sm,
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: SPACING.sm,
     borderRadius: RADIUS.sm,
+    height: 32,
   },
   tabActive: {
-    backgroundColor: COLORS.dark.glass,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: FONTS.medium,
-    color: COLORS.dark.textSecondary,
   },
   tabTextActive: {
-    color: COLORS.dark.text,
   },
   comparisonContent: {
     flex: 1,
@@ -1032,10 +1180,8 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   comparisonSection: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
@@ -1052,18 +1198,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.dark.border,
   },
   sectionHeader: {
     fontSize: 14,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     padding: SPACING.md,
     paddingBottom: 0,
   },
   changedBadge: {
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    backgroundColor: ALPHA_COLORS.success.bg,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,
     borderRadius: RADIUS.sm,
@@ -1075,7 +1218,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   newBadge: {
-    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    backgroundColor: ALPHA_COLORS.primary.bg,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,
     borderRadius: RADIUS.sm,
@@ -1092,7 +1235,6 @@ const styles = StyleSheet.create({
   sectionText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 22,
   },
   skillsContainer: {
@@ -1102,41 +1244,34 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   skillPill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: ALPHA_COLORS.neutral.bg,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
     borderRadius: RADIUS.full,
   },
   tailoredSkillPill: {
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    backgroundColor: ALPHA_COLORS.success.bg,
   },
   skillText: {
     fontSize: 12,
     fontFamily: FONTS.medium,
-    color: COLORS.dark.text,
   },
   experienceItem: {
     padding: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.dark.border,
   },
   experienceHeader: {
     fontSize: 14,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   bulletPoint: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     lineHeight: 20,
     marginBottom: 4,
   },
   comparisonFooter: {
     padding: SPACING.lg,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.dark.border,
     gap: SPACING.sm,
   },
   actionButtonsRow: {
@@ -1148,9 +1283,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: SPACING.xs,
-    backgroundColor: COLORS.dark.glass,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
     borderRadius: RADIUS.md,
@@ -1188,6 +1321,50 @@ const styles = StyleSheet.create({
   startNewButtonText: {
     fontSize: 14,
     fontFamily: FONTS.medium,
-    color: COLORS.dark.textSecondary,
+  },
+  loadingKeywords: {
+    padding: SPACING.xl,
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  keywordSummary: {
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.lg,
+  },
+  keywordSummaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  keywordSummaryContent: {
+    flex: 1,
+  },
+  keywordSummaryTitle: {
+    fontSize: 14,
+    fontFamily: FONTS.medium,
+  },
+  keywordSummaryScore: {
+    fontSize: 32,
+    fontFamily: FONTS.bold,
+  },
+  keywordHelpText: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  missingKeywordPill: {
+    backgroundColor: ALPHA_COLORS.warning.bg,
+    borderWidth: 1,
+    borderColor: ALPHA_COLORS.warning.border,
+  },
+  matchedKeywordPill: {
+    backgroundColor: ALPHA_COLORS.success.bg,
+    borderWidth: 1,
+    borderColor: ALPHA_COLORS.success.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
 });

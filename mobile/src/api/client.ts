@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '../utils/constants';
 import { getUserId } from '../utils/userSession';
+import { fetchWithAuth as secureFetchWithAuth, snakeToCamel as baseSnakeToCamel } from './base';
 
 /**
  * Convert snake_case keys to camelCase recursively
@@ -335,26 +336,29 @@ export interface ResumeAnalysis {
   improvement_recommendations: ImprovementRecommendation[];
 }
 
-// Base fetch with auth headers
+// Base fetch with auth headers - uses secure fetchWithAuth from base.ts
+// This wrapper maintains backwards compatibility while ensuring all API calls
+// go through security controls (host validation, rate limiting)
 const fetchWithAuth = async (
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> => {
-  const userId = await getUserId();
-
-  const headers: Record<string, string> = {
-    'X-User-ID': userId,
-    ...(options.headers as Record<string, string>),
-  };
-
-  // Don't set Content-Type for FormData (browser will set it with boundary)
-  if (!(options.body instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
+  // Convert RequestInit body to object for base.ts compatibility
+  let body: object | FormData | undefined;
+  if (options.body instanceof FormData) {
+    body = options.body;
+  } else if (typeof options.body === 'string') {
+    try {
+      body = JSON.parse(options.body);
+    } catch {
+      // If not JSON, pass as-is (shouldn't happen in normal usage)
+      body = undefined;
+    }
   }
 
-  return fetch(`${API_BASE_URL}${endpoint}`, {
+  return secureFetchWithAuth(endpoint, {
     ...options,
-    headers,
+    body,
   });
 };
 
@@ -997,6 +1001,8 @@ export const api = {
 
   // STAR stories endpoints
   async createStarStory(params: {
+    tailored_resume_id?: number;
+    experience_indices?: number[];
     title?: string;
     situation: string;
     task: string;
@@ -1005,6 +1011,16 @@ export const api = {
     tags?: string[];
     key_themes?: string[];
     talking_points?: string[];
+    probing_questions?: {
+      situation: string[];
+      action: string[];
+      result: string[];
+    };
+    challenge_questions?: {
+      situation: string[];
+      action: string[];
+      result: string[];
+    };
   }): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/star-stories/', {
@@ -1019,9 +1035,12 @@ export const api = {
     }
   },
 
-  async listStarStories(): Promise<ApiResponse> {
+  async listStarStories(tailoredResumeId?: number): Promise<ApiResponse> {
     try {
-      const response = await fetchWithAuth('/api/star-stories/list');
+      const url = tailoredResumeId
+        ? `/api/star-stories/list?tailored_resume_id=${tailoredResumeId}`
+        : '/api/star-stories/list';
+      const response = await fetchWithAuth(url);
       const data = await response.json();
       const stories = Array.isArray(data) ? data : [];
       return { success: true, data: stories };

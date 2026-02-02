@@ -13,6 +13,12 @@ export interface AccessibilityProps {
     checked?: boolean;
     busy?: boolean;
   };
+  accessibilityValue?: {
+    text?: string;
+    min?: number;
+    max?: number;
+    now?: number;
+  };
 }
 
 /**

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  TextInput,
+  Clipboard,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -23,11 +25,19 @@ import {
   CheckCircle2,
   Zap,
   BookOpen,
+  Sparkles,
+  Edit3,
+  Save,
+  Copy,
+  X,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useTheme } from '../hooks/useTheme';
+import { GlassCard } from '../components/glass/GlassCard';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type BehavioralTechnicalQuestionsRouteProp = RouteProp<RootStackParamList, 'BehavioralTechnicalQuestions'>;
@@ -111,9 +121,17 @@ interface QuestionsData {
 
 type TabType = 'behavioral' | 'technical';
 
+interface StarStory {
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+}
+
 export default function BehavioralTechnicalQuestionsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<BehavioralTechnicalQuestionsRouteProp>();
+  const { colors } = useTheme();
   const { interviewPrepId } = route.params;
 
   const [data, setData] = useState<QuestionsData | null>(null);
@@ -122,17 +140,128 @@ export default function BehavioralTechnicalQuestionsScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('behavioral');
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
 
+  // AI STAR story states
+  const [aiGeneratingStory, setAiGeneratingStory] = useState<Record<string, boolean>>({});
+  const [aiGeneratedStories, setAiGeneratedStories] = useState<Record<string, StarStory>>({});
+
+  // User-edited STAR stories
+  const [starStories, setStarStories] = useState<Record<string, StarStory>>({});
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [savingStory, setSavingStory] = useState(false);
+
   useEffect(() => {
     handleGenerateQuestions();
+    loadSavedStories();
   }, []);
 
+  // Load saved STAR stories from AsyncStorage
+  const loadSavedStories = async () => {
+    try {
+      const saved = await AsyncStorage.getItem(`bt-questions-stories-${interviewPrepId}`);
+      if (saved) {
+        setStarStories(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error loading saved stories:', error);
+    }
+  };
+
+  // Generate AI STAR story for a behavioral question
+  const generateAiStarStory = useCallback(async (questionKey: string, questionText: string, forceRegenerate = false) => {
+    // Don't regenerate if already exists (unless forced) or is being generated
+    if (!forceRegenerate && (aiGeneratedStories[questionKey] || aiGeneratingStory[questionKey] || starStories[questionKey])) {
+      return;
+    }
+
+    setAiGeneratingStory(prev => ({ ...prev, [questionKey]: true }));
+
+    try {
+      const result = await api.generatePracticeStarStory(interviewPrepId, questionText);
+      if (result.success && result.data?.star_story) {
+        const story = result.data.star_story;
+        setAiGeneratedStories(prev => ({
+          ...prev,
+          [questionKey]: {
+            situation: story.situation || '',
+            task: story.task || '',
+            action: story.action || '',
+            result: story.result || '',
+          }
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to generate AI STAR story:', err);
+      Alert.alert('Error', 'Failed to generate AI STAR story');
+    } finally {
+      setAiGeneratingStory(prev => ({ ...prev, [questionKey]: false }));
+    }
+  }, [interviewPrepId, aiGeneratedStories, aiGeneratingStory, starStories]);
+
+  // Update STAR story field
+  const updateStarStory = async (questionKey: string, field: keyof StarStory, value: string) => {
+    const story = starStories[questionKey] || { situation: '', task: '', action: '', result: '' };
+    const updated = { ...starStories, [questionKey]: { ...story, [field]: value } };
+    setStarStories(updated);
+    try {
+      await AsyncStorage.setItem(`bt-questions-stories-${interviewPrepId}`, JSON.stringify(updated));
+    } catch (error) {
+      console.error('Error saving story to storage:', error);
+    }
+  };
+
+  // Save STAR story to backend
+  const saveStarStory = async (questionKey: string, questionText: string, questionType: 'behavioral' | 'technical') => {
+    const story = starStories[questionKey];
+    if (!story) return;
+
+    setSavingStory(true);
+    try {
+      const result = await api.saveQuestionStarStory({
+        interviewPrepId: interviewPrepId,
+        questionId: questionKey,
+        starStory: story,
+      });
+
+      if (result.success) {
+        setEditingQuestionId(null);
+        Alert.alert('Success', 'STAR story saved successfully!');
+      } else {
+        Alert.alert('Error', result.error || 'Failed to save STAR story');
+      }
+    } catch (err) {
+      console.error('Failed to save STAR story:', err);
+      Alert.alert('Error', 'Failed to save STAR story');
+    } finally {
+      setSavingStory(false);
+    }
+  };
+
+  // Copy AI story to editable fields
+  const copyAiStoryToEdit = (questionKey: string) => {
+    const aiStory = aiGeneratedStories[questionKey];
+    if (aiStory) {
+      setStarStories(prev => ({ ...prev, [questionKey]: { ...aiStory } }));
+      setEditingQuestionId(questionKey);
+    }
+  };
+
   const handleGenerateQuestions = async () => {
+    console.log('=== Starting to generate questions for interviewPrepId:', interviewPrepId);
     setGenerating(true);
     try {
       const result = await api.generateBehavioralTechnicalQuestions(interviewPrepId);
+      console.log('=== API Result keys:', Object.keys(result.data || {}));
+      console.log('=== API Result:', JSON.stringify(result, null, 2).slice(0, 1000));
+
       if (result.success && result.data) {
-        setData(result.data);
+        // Handle nested data structure - API might return { success, data: { data: {...} } }
+        const questionsData = result.data.data || result.data;
+        console.log('=== Questions data keys:', Object.keys(questionsData || {}));
+        console.log('=== Behavioral questions count:', questionsData?.behavioral?.questions?.length);
+        console.log('=== Technical questions count:', questionsData?.technical?.questions?.length);
+        setData(questionsData);
       } else {
+        console.log('=== API Error:', result.error);
         Alert.alert('Error', result.error || 'Failed to generate questions');
       }
     } catch (error) {
@@ -143,7 +272,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
     }
   };
 
-  const toggleExpanded = (type: string, id: number) => {
+  const toggleExpanded = (type: string, id: number, questionText?: string) => {
     const key = `${type}-${id}`;
     setExpandedQuestions(prev => {
       const newSet = new Set(prev);
@@ -151,6 +280,10 @@ export default function BehavioralTechnicalQuestionsScreen() {
         newSet.delete(key);
       } else {
         newSet.add(key);
+        // Auto-generate AI STAR story when expanding a behavioral question
+        if (type === 'behavioral' && questionText) {
+          generateAiStarStory(key, questionText);
+        }
       }
       return newSet;
     });
@@ -193,16 +326,16 @@ export default function BehavioralTechnicalQuestionsScreen() {
             accessibilityRole="button"
             accessibilityLabel="Go back"
           >
-            <ArrowLeft color={COLORS.dark.text} size={24} />
+            <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Interview Questions</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Interview Questions</Text>
           <View style={styles.headerPlaceholder} />
         </View>
 
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Generating your questions...</Text>
-          <Text style={styles.loadingSubtext}>
+          <Text style={[styles.loadingText, { color: colors.text }]}>Generating your questions...</Text>
+          <Text style={[styles.loadingSubtext, { color: colors.textSecondary }]}>
             Researching company tech stack and creating personalized questions
           </Text>
         </View>
@@ -219,9 +352,9 @@ export default function BehavioralTechnicalQuestionsScreen() {
           accessibilityRole="button"
           accessibilityLabel="Go back"
         >
-          <ArrowLeft color={COLORS.dark.text} size={24} />
+          <ArrowLeft color={colors.text} size={24} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Interview Questions</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Interview Questions</Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={handleGenerateQuestions}
@@ -236,26 +369,26 @@ export default function BehavioralTechnicalQuestionsScreen() {
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'behavioral' && styles.activeTab]}
+          style={[styles.tab, { backgroundColor: colors.glass, borderColor: colors.border }, activeTab === 'behavioral' && styles.activeTab]}
           onPress={() => setActiveTab('behavioral')}
         >
           <Brain
-            color={activeTab === 'behavioral' ? COLORS.primary : COLORS.dark.textSecondary}
+            color={activeTab === 'behavioral' ? COLORS.primary : colors.textSecondary}
             size={18}
           />
-          <Text style={[styles.tabText, activeTab === 'behavioral' && styles.activeTabText]}>
+          <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'behavioral' && styles.activeTabText]}>
             Behavioral ({data?.behavioral?.questions?.length || 0})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'technical' && styles.activeTab]}
+          style={[styles.tab, { backgroundColor: colors.glass, borderColor: colors.border }, activeTab === 'technical' && styles.activeTab]}
           onPress={() => setActiveTab('technical')}
         >
           <Code
-            color={activeTab === 'technical' ? COLORS.primary : COLORS.dark.textSecondary}
+            color={activeTab === 'technical' ? COLORS.primary : colors.textSecondary}
             size={18}
           />
-          <Text style={[styles.tabText, activeTab === 'technical' && styles.activeTabText]}>
+          <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'technical' && styles.activeTabText]}>
             Technical ({data?.technical?.questions?.length || 0})
           </Text>
         </TouchableOpacity>
@@ -264,23 +397,23 @@ export default function BehavioralTechnicalQuestionsScreen() {
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         {/* Summary Card */}
         {data?.summary && (
-          <View style={styles.summaryCard}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryNumber}>{data.summary.total_questions}</Text>
-                <Text style={styles.summaryLabel}>Total Questions</Text>
+                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Total Questions</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Text style={[styles.summaryNumber, { color: COLORS.success }]}>
                   {data.summary.skill_matches}
                 </Text>
-                <Text style={styles.summaryLabel}>Skill Matches</Text>
+                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Skill Matches</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Text style={[styles.summaryNumber, { color: COLORS.warning }]}>
                   {data.summary.skill_gaps}
                 </Text>
-                <Text style={styles.summaryLabel}>Skill Gaps</Text>
+                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Skill Gaps</Text>
               </View>
             </View>
           </View>
@@ -295,18 +428,23 @@ export default function BehavioralTechnicalQuestionsScreen() {
                   <BookOpen color={COLORS.info} size={16} />
                   <Text style={styles.contextTitle}>Company Context</Text>
                 </View>
-                <Text style={styles.contextText}>{data.behavioral.company_context}</Text>
+                <Text style={[styles.contextText, { color: colors.text }]}>{data.behavioral.company_context}</Text>
               </View>
             )}
 
             {/* Behavioral Questions */}
             {data?.behavioral?.questions?.map((question) => {
-              const isExpanded = expandedQuestions.has(`behavioral-${question.id}`);
+              const questionKey = `behavioral-${question.id}`;
+              const isExpanded = expandedQuestions.has(questionKey);
+              const aiStory = aiGeneratedStories[questionKey];
+              const userStory = starStories[questionKey];
+              const isGeneratingAi = aiGeneratingStory[questionKey];
+              const isEditing = editingQuestionId === questionKey;
               return (
-                <View key={`behavioral-${question.id}`} style={styles.questionCard}>
+                <View key={questionKey} style={[styles.questionCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                   <TouchableOpacity
                     style={styles.questionHeader}
-                    onPress={() => toggleExpanded('behavioral', question.id)}
+                    onPress={() => toggleExpanded('behavioral', question.id, question.question)}
                   >
                     <View style={styles.questionMeta}>
                       <View style={[styles.difficultyBadge, { backgroundColor: `${getDifficultyColor(question.difficulty)}20` }]}>
@@ -322,11 +460,11 @@ export default function BehavioralTechnicalQuestionsScreen() {
                       </View>
                     </View>
                     <View style={styles.questionRow}>
-                      <Text style={styles.questionText}>{question.question}</Text>
+                      <Text style={[styles.questionText, { color: colors.text }]}>{question.question}</Text>
                       {isExpanded ? (
-                        <ChevronUp color={COLORS.dark.textSecondary} size={20} />
+                        <ChevronUp color={colors.textSecondary} size={20} />
                       ) : (
-                        <ChevronDown color={COLORS.dark.textSecondary} size={20} />
+                        <ChevronDown color={colors.textSecondary} size={20} />
                       )}
                     </View>
                   </TouchableOpacity>
@@ -337,51 +475,212 @@ export default function BehavioralTechnicalQuestionsScreen() {
                       <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                           <Target color={COLORS.primary} size={16} />
-                          <Text style={styles.sectionTitle}>Competency Tested</Text>
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>Competency Tested</Text>
                         </View>
-                        <Text style={styles.sectionText}>{question.competency_tested}</Text>
+                        <Text style={[styles.sectionText, { color: colors.textSecondary }]}>{question.competency_tested}</Text>
                       </View>
 
                       {/* Why Asked */}
                       <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                           <Lightbulb color={COLORS.info} size={16} />
-                          <Text style={styles.sectionTitle}>Why It's Asked</Text>
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>Why It's Asked</Text>
                         </View>
-                        <Text style={styles.sectionText}>{question.why_asked}</Text>
+                        <Text style={[styles.sectionText, { color: colors.textSecondary }]}>{question.why_asked}</Text>
                       </View>
 
                       {/* STAR Prompt */}
                       <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                           <Zap color={COLORS.warning} size={16} />
-                          <Text style={styles.sectionTitle}>STAR Framework Hints</Text>
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>STAR Framework Hints</Text>
                         </View>
-                        <View style={styles.starContainer}>
+                        <View style={[styles.starContainer, { backgroundColor: colors.backgroundTertiary }]}>
                           <View style={styles.starItem}>
                             <Text style={styles.starLabel}>S - Situation</Text>
-                            <Text style={styles.starHint}>{question.star_prompt.situation_hint}</Text>
+                            <Text style={[styles.starHint, { color: colors.text }]}>{question.star_prompt.situation_hint}</Text>
                           </View>
                           <View style={styles.starItem}>
                             <Text style={styles.starLabel}>T - Task</Text>
-                            <Text style={styles.starHint}>{question.star_prompt.task_hint}</Text>
+                            <Text style={[styles.starHint, { color: colors.text }]}>{question.star_prompt.task_hint}</Text>
                           </View>
                           <View style={styles.starItem}>
                             <Text style={styles.starLabel}>A - Action</Text>
-                            <Text style={styles.starHint}>{question.star_prompt.action_hint}</Text>
+                            <Text style={[styles.starHint, { color: colors.text }]}>{question.star_prompt.action_hint}</Text>
                           </View>
                           <View style={styles.starItem}>
                             <Text style={styles.starLabel}>R - Result</Text>
-                            <Text style={styles.starHint}>{question.star_prompt.result_hint}</Text>
+                            <Text style={[styles.starHint, { color: colors.text }]}>{question.star_prompt.result_hint}</Text>
                           </View>
                         </View>
+                      </View>
+
+                      {/* AI-Generated STAR Story */}
+                      <View style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                          <Sparkles color={COLORS.purple} size={16} />
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>AI-Generated STAR Story</Text>
+                          <View style={{ flex: 1 }} />
+                          {aiStory && !isEditing && (
+                            <TouchableOpacity
+                              style={styles.actionButton}
+                              onPress={() => copyAiStoryToEdit(questionKey)}
+                            >
+                              <Edit3 color={COLORS.primary} size={14} />
+                              <Text style={styles.actionButtonText}>Edit</Text>
+                            </TouchableOpacity>
+                          )}
+                          <TouchableOpacity
+                            style={[styles.actionButton, { marginLeft: SPACING.xs }]}
+                            onPress={() => generateAiStarStory(questionKey, question.question, true)}
+                            disabled={isGeneratingAi}
+                          >
+                            <RefreshCw color={COLORS.info} size={14} />
+                            <Text style={[styles.actionButtonText, { color: COLORS.info }]}>
+                              {isGeneratingAi ? 'Generating...' : 'Regenerate'}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+
+                        {isGeneratingAi ? (
+                          <View style={[styles.aiStoryContainer, { backgroundColor: colors.backgroundTertiary }]}>
+                            <ActivityIndicator size="small" color={COLORS.purple} />
+                            <Text style={[styles.aiGeneratingText, { color: colors.textSecondary }]}>
+                              Generating personalized STAR story based on your resume...
+                            </Text>
+                          </View>
+                        ) : isEditing ? (
+                          <View style={[styles.aiStoryContainer, { backgroundColor: colors.backgroundTertiary }]}>
+                            <View style={styles.editStarItem}>
+                              <Text style={styles.editStarLabel}>Situation</Text>
+                              <TextInput
+                                style={[styles.editStarInput, { color: colors.text, backgroundColor: colors.background, borderColor: colors.border }]}
+                                value={userStory?.situation || ''}
+                                onChangeText={(text) => updateStarStory(questionKey, 'situation', text)}
+                                multiline
+                                placeholder="Describe the context and situation..."
+                                placeholderTextColor={colors.textTertiary}
+                              />
+                            </View>
+                            <View style={styles.editStarItem}>
+                              <Text style={styles.editStarLabel}>Task</Text>
+                              <TextInput
+                                style={[styles.editStarInput, { color: colors.text, backgroundColor: colors.background, borderColor: colors.border }]}
+                                value={userStory?.task || ''}
+                                onChangeText={(text) => updateStarStory(questionKey, 'task', text)}
+                                multiline
+                                placeholder="What was your responsibility?"
+                                placeholderTextColor={colors.textTertiary}
+                              />
+                            </View>
+                            <View style={styles.editStarItem}>
+                              <Text style={styles.editStarLabel}>Action</Text>
+                              <TextInput
+                                style={[styles.editStarInput, { color: colors.text, backgroundColor: colors.background, borderColor: colors.border }]}
+                                value={userStory?.action || ''}
+                                onChangeText={(text) => updateStarStory(questionKey, 'action', text)}
+                                multiline
+                                placeholder="What specific actions did you take?"
+                                placeholderTextColor={colors.textTertiary}
+                              />
+                            </View>
+                            <View style={styles.editStarItem}>
+                              <Text style={styles.editStarLabel}>Result</Text>
+                              <TextInput
+                                style={[styles.editStarInput, { color: colors.text, backgroundColor: colors.background, borderColor: colors.border }]}
+                                value={userStory?.result || ''}
+                                onChangeText={(text) => updateStarStory(questionKey, 'result', text)}
+                                multiline
+                                placeholder="What was the outcome?"
+                                placeholderTextColor={colors.textTertiary}
+                              />
+                            </View>
+                            <View style={styles.editButtonRow}>
+                              <TouchableOpacity
+                                style={[styles.cancelButton, { borderColor: colors.border }]}
+                                onPress={() => setEditingQuestionId(null)}
+                              >
+                                <X color={colors.textSecondary} size={16} />
+                                <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Cancel</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[styles.saveButton, savingStory && styles.saveButtonDisabled]}
+                                onPress={() => saveStarStory(questionKey, question.question, 'behavioral')}
+                                disabled={savingStory}
+                              >
+                                {savingStory ? (
+                                  <ActivityIndicator size="small" color="#fff" />
+                                ) : (
+                                  <>
+                                    <Save color="#fff" size={16} />
+                                    <Text style={styles.saveButtonText}>Save Story</Text>
+                                  </>
+                                )}
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+                        ) : aiStory ? (
+                          <View style={[styles.aiStoryContainer, { backgroundColor: colors.backgroundTertiary }]}>
+                            <View style={styles.aiStarItem}>
+                              <Text style={styles.aiStarLabel}>S - Situation</Text>
+                              <Text style={[styles.aiStarText, { color: colors.text }]}>{aiStory.situation}</Text>
+                            </View>
+                            <View style={styles.aiStarItem}>
+                              <Text style={styles.aiStarLabel}>T - Task</Text>
+                              <Text style={[styles.aiStarText, { color: colors.text }]}>{aiStory.task}</Text>
+                            </View>
+                            <View style={styles.aiStarItem}>
+                              <Text style={styles.aiStarLabel}>A - Action</Text>
+                              <Text style={[styles.aiStarText, { color: colors.text }]}>{aiStory.action}</Text>
+                            </View>
+                            <View style={styles.aiStarItem}>
+                              <Text style={styles.aiStarLabel}>R - Result</Text>
+                              <Text style={[styles.aiStarText, { color: colors.text }]}>{aiStory.result}</Text>
+                            </View>
+                          </View>
+                        ) : userStory ? (
+                          <View style={[styles.aiStoryContainer, { backgroundColor: colors.backgroundTertiary }]}>
+                            <View style={styles.savedStoryHeader}>
+                              <CheckCircle2 color={COLORS.success} size={14} />
+                              <Text style={[styles.savedStoryLabel, { color: COLORS.success }]}>Your Saved Story</Text>
+                              <TouchableOpacity
+                                style={styles.editSavedButton}
+                                onPress={() => setEditingQuestionId(questionKey)}
+                              >
+                                <Edit3 color={COLORS.primary} size={14} />
+                              </TouchableOpacity>
+                            </View>
+                            <View style={styles.aiStarItem}>
+                              <Text style={styles.aiStarLabel}>S - Situation</Text>
+                              <Text style={[styles.aiStarText, { color: colors.text }]}>{userStory.situation}</Text>
+                            </View>
+                            <View style={styles.aiStarItem}>
+                              <Text style={styles.aiStarLabel}>T - Task</Text>
+                              <Text style={[styles.aiStarText, { color: colors.text }]}>{userStory.task}</Text>
+                            </View>
+                            <View style={styles.aiStarItem}>
+                              <Text style={styles.aiStarLabel}>A - Action</Text>
+                              <Text style={[styles.aiStarText, { color: colors.text }]}>{userStory.action}</Text>
+                            </View>
+                            <View style={styles.aiStarItem}>
+                              <Text style={styles.aiStarLabel}>R - Result</Text>
+                              <Text style={[styles.aiStarText, { color: colors.text }]}>{userStory.result}</Text>
+                            </View>
+                          </View>
+                        ) : (
+                          <View style={[styles.aiStoryContainer, { backgroundColor: colors.backgroundTertiary }]}>
+                            <Text style={[styles.noStoryText, { color: colors.textSecondary }]}>
+                              Tap "Regenerate" to generate a personalized STAR story based on your resume.
+                            </Text>
+                          </View>
+                        )}
                       </View>
 
                       {/* Key Themes */}
                       <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                           <CheckCircle2 color={COLORS.success} size={16} />
-                          <Text style={styles.sectionTitle}>Key Themes to Address</Text>
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>Key Themes to Address</Text>
                         </View>
                         <View style={styles.chipContainer}>
                           {question.key_themes.map((theme, idx) => (
@@ -396,12 +695,12 @@ export default function BehavioralTechnicalQuestionsScreen() {
                       <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                           <AlertTriangle color={COLORS.error} size={16} />
-                          <Text style={styles.sectionTitle}>Common Mistakes</Text>
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>Common Mistakes</Text>
                         </View>
                         {question.common_mistakes.map((mistake, idx) => (
                           <View key={idx} style={styles.mistakeItem}>
-                            <Text style={styles.bulletDot}>•</Text>
-                            <Text style={styles.mistakeText}>{mistake}</Text>
+                            <Text style={[styles.bulletDot, { color: colors.textSecondary }]}>*</Text>
+                            <Text style={[styles.mistakeText, { color: colors.textSecondary }]}>{mistake}</Text>
                           </View>
                         ))}
                       </View>
@@ -410,9 +709,9 @@ export default function BehavioralTechnicalQuestionsScreen() {
                       <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                           <Target color={COLORS.primary} size={16} />
-                          <Text style={styles.sectionTitle}>Job Alignment</Text>
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>Job Alignment</Text>
                         </View>
-                        <Text style={styles.sectionText}>{question.job_alignment}</Text>
+                        <Text style={[styles.sectionText, { color: colors.textSecondary }]}>{question.job_alignment}</Text>
                       </View>
                     </View>
                   )}
@@ -424,12 +723,12 @@ export default function BehavioralTechnicalQuestionsScreen() {
           <>
             {/* Tech Stack Analysis */}
             {data?.technical?.tech_stack_analysis && (
-              <View style={styles.techStackCard}>
-                <Text style={styles.techStackTitle}>Tech Stack Analysis</Text>
+              <View style={[styles.techStackCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.techStackTitle, { color: colors.text }]}>Tech Stack Analysis</Text>
 
                 {data.technical.tech_stack_analysis.candidate_matching_skills?.length > 0 && (
                   <View style={styles.techSection}>
-                    <Text style={styles.techSectionTitle}>Your Matching Skills</Text>
+                    <Text style={[styles.techSectionTitle, { color: colors.textSecondary }]}>Your Matching Skills</Text>
                     <View style={styles.chipContainer}>
                       {data.technical.tech_stack_analysis.candidate_matching_skills.map((skill, idx) => (
                         <View key={idx} style={[styles.chip, styles.successChip]}>
@@ -442,7 +741,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
 
                 {data.technical.tech_stack_analysis.skill_gaps?.length > 0 && (
                   <View style={styles.techSection}>
-                    <Text style={styles.techSectionTitle}>Skill Gaps to Address</Text>
+                    <Text style={[styles.techSectionTitle, { color: colors.textSecondary }]}>Skill Gaps to Address</Text>
                     <View style={styles.chipContainer}>
                       {data.technical.tech_stack_analysis.skill_gaps.map((gap, idx) => (
                         <View key={idx} style={[styles.chip, styles.warningChip]}>
@@ -459,7 +758,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
             {data?.technical?.questions?.map((question) => {
               const isExpanded = expandedQuestions.has(`technical-${question.id}`);
               return (
-                <View key={`technical-${question.id}`} style={styles.questionCard}>
+                <View key={`technical-${question.id}`} style={[styles.questionCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                   <TouchableOpacity
                     style={styles.questionHeader}
                     onPress={() => toggleExpanded('technical', question.id)}
@@ -478,18 +777,18 @@ export default function BehavioralTechnicalQuestionsScreen() {
                       </View>
                     </View>
                     <View style={styles.questionRow}>
-                      <Text style={styles.questionText}>{question.question}</Text>
+                      <Text style={[styles.questionText, { color: colors.text }]}>{question.question}</Text>
                       {isExpanded ? (
-                        <ChevronUp color={COLORS.dark.textSecondary} size={20} />
+                        <ChevronUp color={colors.textSecondary} size={20} />
                       ) : (
-                        <ChevronDown color={COLORS.dark.textSecondary} size={20} />
+                        <ChevronDown color={colors.textSecondary} size={20} />
                       )}
                     </View>
                     {/* Technology Focus */}
                     <View style={styles.techFocusContainer}>
                       {question.technology_focus.map((tech, idx) => (
-                        <View key={idx} style={styles.techFocusChip}>
-                          <Text style={styles.techFocusText}>{tech}</Text>
+                        <View key={idx} style={[styles.techFocusChip, { backgroundColor: colors.backgroundTertiary }]}>
+                          <Text style={[styles.techFocusText, { color: colors.textSecondary }]}>{tech}</Text>
                         </View>
                       ))}
                     </View>
@@ -501,12 +800,12 @@ export default function BehavioralTechnicalQuestionsScreen() {
                       <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                           <CheckCircle2 color={COLORS.success} size={16} />
-                          <Text style={styles.sectionTitle}>Expected Answer Points</Text>
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>Expected Answer Points</Text>
                         </View>
                         {question.expected_answer_points.map((point, idx) => (
                           <View key={idx} style={styles.answerPointItem}>
-                            <Text style={styles.bulletDot}>•</Text>
-                            <Text style={styles.answerPointText}>{point}</Text>
+                            <Text style={[styles.bulletDot, { color: colors.textSecondary }]}>*</Text>
+                            <Text style={[styles.answerPointText, { color: colors.text }]}>{point}</Text>
                           </View>
                         ))}
                       </View>
@@ -515,10 +814,10 @@ export default function BehavioralTechnicalQuestionsScreen() {
                       <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                           <Zap color={COLORS.primary} size={16} />
-                          <Text style={styles.sectionTitle}>Leverage Your Experience</Text>
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>Leverage Your Experience</Text>
                         </View>
                         <View style={styles.leverageBox}>
-                          <Text style={styles.leverageText}>
+                          <Text style={[styles.leverageText, { color: colors.text }]}>
                             {question.candidate_skill_leverage.relevant_experience}
                           </Text>
                           {question.candidate_skill_leverage.talking_points?.length > 0 && (
@@ -526,8 +825,8 @@ export default function BehavioralTechnicalQuestionsScreen() {
                               <Text style={styles.talkingPointsTitle}>Key Talking Points:</Text>
                               {question.candidate_skill_leverage.talking_points.map((point, idx) => (
                                 <View key={idx} style={styles.talkingPointItem}>
-                                  <Text style={styles.bulletDot}>•</Text>
-                                  <Text style={styles.talkingPointText}>{point}</Text>
+                                  <Text style={[styles.bulletDot, { color: colors.textSecondary }]}>*</Text>
+                                  <Text style={[styles.talkingPointText, { color: colors.text }]}>{point}</Text>
                                 </View>
                               ))}
                             </View>
@@ -535,7 +834,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
                           {question.candidate_skill_leverage.skill_bridge && (
                             <View style={styles.skillBridgeContainer}>
                               <Text style={styles.skillBridgeTitle}>Skill Bridge:</Text>
-                              <Text style={styles.skillBridgeText}>
+                              <Text style={[styles.skillBridgeText, { color: colors.text }]}>
                                 {question.candidate_skill_leverage.skill_bridge}
                               </Text>
                             </View>
@@ -548,12 +847,12 @@ export default function BehavioralTechnicalQuestionsScreen() {
                         <View style={styles.section}>
                           <View style={styles.sectionHeader}>
                             <Brain color={COLORS.info} size={16} />
-                            <Text style={styles.sectionTitle}>Likely Follow-ups</Text>
+                            <Text style={[styles.sectionTitle, { color: colors.text }]}>Likely Follow-ups</Text>
                           </View>
                           {question.follow_up_questions.map((followUp, idx) => (
                             <View key={idx} style={styles.followUpItem}>
-                              <Text style={styles.bulletDot}>•</Text>
-                              <Text style={styles.followUpText}>{followUp}</Text>
+                              <Text style={[styles.bulletDot, { color: colors.textSecondary }]}>*</Text>
+                              <Text style={[styles.followUpText, { color: colors.textSecondary }]}>{followUp}</Text>
                             </View>
                           ))}
                         </View>
@@ -564,11 +863,11 @@ export default function BehavioralTechnicalQuestionsScreen() {
                         <View style={styles.section}>
                           <View style={styles.sectionHeader}>
                             <AlertTriangle color={COLORS.error} size={16} />
-                            <Text style={styles.sectionTitle}>Avoid These Mistakes</Text>
+                            <Text style={[styles.sectionTitle, { color: colors.text }]}>Avoid These Mistakes</Text>
                           </View>
                           {question.red_flags.map((flag, idx) => (
                             <View key={idx} style={styles.redFlagItem}>
-                              <Text style={styles.bulletDot}>•</Text>
+                              <Text style={[styles.bulletDot, { color: colors.textSecondary }]}>*</Text>
                               <Text style={styles.redFlagText}>{flag}</Text>
                             </View>
                           ))}
@@ -579,9 +878,9 @@ export default function BehavioralTechnicalQuestionsScreen() {
                       <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                           <Target color={COLORS.primary} size={16} />
-                          <Text style={styles.sectionTitle}>Job Alignment</Text>
+                          <Text style={[styles.sectionTitle, { color: colors.text }]}>Job Alignment</Text>
                         </View>
-                        <Text style={styles.sectionText}>{question.job_alignment}</Text>
+                        <Text style={[styles.sectionText, { color: colors.textSecondary }]}>{question.job_alignment}</Text>
                       </View>
                     </View>
                   )}
@@ -591,8 +890,8 @@ export default function BehavioralTechnicalQuestionsScreen() {
 
             {/* Preparation Strategy */}
             {data?.technical?.preparation_strategy && (
-              <View style={styles.prepStrategyCard}>
-                <Text style={styles.prepStrategyTitle}>Preparation Strategy</Text>
+              <View style={[styles.prepStrategyCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.prepStrategyTitle, { color: colors.text }]}>Preparation Strategy</Text>
 
                 {data.technical.preparation_strategy.high_priority_topics?.length > 0 && (
                   <View style={styles.prepSection}>
@@ -600,7 +899,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
                     {data.technical.preparation_strategy.high_priority_topics.map((topic, idx) => (
                       <View key={idx} style={styles.prepItem}>
                         <Text style={styles.prepNumber}>{idx + 1}</Text>
-                        <Text style={styles.prepText}>{topic}</Text>
+                        <Text style={[styles.prepText, { color: colors.text }]}>{topic}</Text>
                       </View>
                     ))}
                   </View>
@@ -612,7 +911,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
                     {data.technical.preparation_strategy.hands_on_practice.map((practice, idx) => (
                       <View key={idx} style={styles.prepItem}>
                         <Text style={styles.prepNumber}>{idx + 1}</Text>
-                        <Text style={styles.prepText}>{practice}</Text>
+                        <Text style={[styles.prepText, { color: colors.text }]}>{practice}</Text>
                       </View>
                     ))}
                   </View>
@@ -631,7 +930,6 @@ export default function BehavioralTechnicalQuestionsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   header: {
     flexDirection: 'row',
@@ -639,8 +937,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.dark.border,
   },
   backButton: {
     width: 44,
@@ -651,7 +947,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
   },
   headerPlaceholder: {
     width: 44,
@@ -672,14 +967,12 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
     fontSize: 18,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     textAlign: 'center',
   },
   loadingSubtext: {
     marginTop: SPACING.sm,
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
   },
   tabContainer: {
@@ -696,18 +989,15 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.md,
-    backgroundColor: COLORS.dark.glass,
     borderWidth: 1,
-    borderColor: COLORS.dark.border,
   },
   activeTab: {
-    backgroundColor: `${COLORS.primary}20`,
+    backgroundColor: ALPHA_COLORS.primary.bg,
     borderColor: COLORS.primary,
   },
   tabText: {
     fontSize: 14,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.textSecondary,
   },
   activeTabText: {
     color: COLORS.primary,
@@ -717,12 +1007,11 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: SPACING.md,
+    paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   summaryCard: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
@@ -741,14 +1030,13 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     marginTop: 4,
   },
   contextCard: {
-    backgroundColor: `${COLORS.info}10`,
+    backgroundColor: ALPHA_COLORS.info.bg,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: `${COLORS.info}30`,
+    borderColor: ALPHA_COLORS.info.border,
     padding: SPACING.md,
     marginBottom: SPACING.md,
   },
@@ -766,21 +1054,17 @@ const styles = StyleSheet.create({
   contextText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 20,
   },
   techStackCard: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
   techStackTitle: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: SPACING.md,
   },
   techSection: {
@@ -789,14 +1073,11 @@ const styles = StyleSheet.create({
   techSectionTitle: {
     fontSize: 13,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.textSecondary,
     marginBottom: SPACING.sm,
   },
   questionCard: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
@@ -825,7 +1106,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
     borderRadius: RADIUS.sm,
-    backgroundColor: `${COLORS.primary}20`,
+    backgroundColor: ALPHA_COLORS.primary.bg,
   },
   categoryText: {
     fontSize: 11,
@@ -841,7 +1122,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     lineHeight: 22,
   },
   techFocusContainer: {
@@ -851,7 +1131,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   techFocusChip: {
-    backgroundColor: COLORS.dark.backgroundTertiary,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
     borderRadius: RADIUS.sm,
@@ -859,13 +1138,10 @@ const styles = StyleSheet.create({
   techFocusText: {
     fontSize: 11,
     fontFamily: FONTS.medium,
-    color: COLORS.dark.textSecondary,
   },
   answerContent: {
     padding: SPACING.lg,
-    paddingTop: 0,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.dark.border,
+    paddingTop: SPACING.md,
   },
   section: {
     marginBottom: SPACING.lg,
@@ -879,16 +1155,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
   },
   sectionText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     lineHeight: 20,
   },
   starContainer: {
-    backgroundColor: COLORS.dark.backgroundTertiary,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
   },
@@ -904,7 +1177,6 @@ const styles = StyleSheet.create({
   starHint: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 18,
   },
   chipContainer: {
@@ -913,7 +1185,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   chip: {
-    backgroundColor: `${COLORS.primary}20`,
+    backgroundColor: ALPHA_COLORS.primary.bg,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 6,
     borderRadius: RADIUS.sm,
@@ -924,13 +1196,13 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   successChip: {
-    backgroundColor: `${COLORS.success}20`,
+    backgroundColor: ALPHA_COLORS.success.bg,
   },
   successChipText: {
     color: COLORS.success,
   },
   warningChip: {
-    backgroundColor: `${COLORS.warning}20`,
+    backgroundColor: ALPHA_COLORS.warning.bg,
   },
   warningChipText: {
     color: COLORS.warning,
@@ -942,7 +1214,6 @@ const styles = StyleSheet.create({
   },
   bulletDot: {
     fontSize: 14,
-    color: COLORS.dark.textSecondary,
     marginRight: SPACING.sm,
     marginTop: 2,
   },
@@ -950,7 +1221,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     lineHeight: 20,
   },
   answerPointItem: {
@@ -962,11 +1232,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 20,
   },
   leverageBox: {
-    backgroundColor: `${COLORS.primary}10`,
+    backgroundColor: ALPHA_COLORS.primary.bg,
     borderRadius: RADIUS.md,
     borderLeftWidth: 3,
     borderLeftColor: COLORS.primary,
@@ -975,7 +1244,6 @@ const styles = StyleSheet.create({
   leverageText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 20,
   },
   talkingPointsContainer: {
@@ -996,14 +1264,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 18,
   },
   skillBridgeContainer: {
     marginTop: SPACING.sm,
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: `${COLORS.primary}30`,
+    borderTopColor: ALPHA_COLORS.primary.border,
   },
   skillBridgeTitle: {
     fontSize: 13,
@@ -1014,7 +1281,6 @@ const styles = StyleSheet.create({
   skillBridgeText: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 18,
   },
   followUpItem: {
@@ -1026,7 +1292,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     lineHeight: 20,
     fontStyle: 'italic',
   },
@@ -1043,17 +1308,14 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   prepStrategyCard: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.lg,
     marginTop: SPACING.md,
   },
   prepStrategyTitle: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: SPACING.md,
   },
   prepSection: {
@@ -1080,7 +1342,120 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 20,
+  },
+  // AI STAR Story styles
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+    backgroundColor: ALPHA_COLORS.primary.bg,
+  },
+  actionButtonText: {
+    fontSize: 12,
+    fontFamily: FONTS.medium,
+    color: COLORS.primary,
+  },
+  aiStoryContainer: {
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+  },
+  aiGeneratingText: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    marginTop: SPACING.sm,
+    textAlign: 'center',
+  },
+  aiStarItem: {
+    marginBottom: SPACING.md,
+  },
+  aiStarLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.bold,
+    color: COLORS.purple,
+    marginBottom: 4,
+  },
+  aiStarText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  noStoryText: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  editStarItem: {
+    marginBottom: SPACING.md,
+  },
+  editStarLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.bold,
+    color: COLORS.purple,
+    marginBottom: 6,
+  },
+  editStarInput: {
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  editButtonRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  cancelButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontFamily: FONTS.medium,
+  },
+  saveButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.success,
+  },
+  saveButtonDisabled: {
+    opacity: 0.6,
+  },
+  saveButtonText: {
+    fontSize: 14,
+    fontFamily: FONTS.medium,
+    color: '#fff',
+  },
+  savedStoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginBottom: SPACING.md,
+  },
+  savedStoryLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    flex: 1,
+  },
+  editSavedButton: {
+    padding: SPACING.xs,
   },
 });

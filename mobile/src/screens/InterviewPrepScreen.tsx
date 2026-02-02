@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -18,160 +18,40 @@ import {
   ChevronRight,
   Sparkles,
   Target,
-  Users,
   Newspaper,
   Briefcase,
   CheckCircle,
-  MessageCircle,
-  FileText,
-  Award,
-  Lightbulb,
   MapPin,
   TrendingUp,
   Cpu,
-  Heart,
-  ClipboardList,
   HelpCircle,
+  Heart,
+  Award,
   Star,
   Brain,
-  AlertTriangle,
-  Package,
-  DollarSign,
-  ThumbsUp,
-  Info,
-  Compass,
-  Map,
-  BookOpen,
-  Check,
-  Crown,
+  MessageCircle,
+  ClipboardList,
+  RefreshCw,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GlassButton } from '../components/glass/GlassButton';
-import { api, ReadinessScore, ValuesAlignment, CompanyResearch, StrategicNewsItem, CompetitiveIntelligence, InterviewStrategy, ExecutiveInsights } from '../api/client';
+import { ReadinessScore, ValuesAlignment, CompanyResearch, StrategicNewsItem, CompetitiveIntelligence, InterviewStrategy, ExecutiveInsights } from '../api/client';
 import { COLORS, SPACING, RADIUS, FONTS, TAB_BAR_HEIGHT, ALPHA_COLORS } from '../utils/constants';
 import { GlassCard } from '../components/glass/GlassCard';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
-
-// Type definitions matching backend prep_data structure
-interface CompanyProfile {
-  name: string;
-  industry: string;
-  locations: string[];
-  size_estimate: string;
-  overview_paragraph: string;
-}
-
-interface StatedValue {
-  name: string;
-  title?: string;
-  description?: string;
-  source_snippet?: string;
-  url?: string;
-  source_url?: string;
-}
-
-interface ValuesAndCulture {
-  stated_values: StatedValue[];
-  practical_implications: string[];
-  cultural_priorities?: string[];
-}
-
-interface StrategyAndNews {
-  recent_events: Array<{
-    title?: string;
-    headline?: string;
-    date?: string;
-    summary: string;
-    source?: string;
-    url?: string;
-    source_url?: string;
-    impact_summary?: string;
-  }>;
-  strategic_themes: Array<{
-    theme: string;
-    name?: string;
-    rationale: string;
-    description?: string;
-  }>;
-  technology_focus: Array<{
-    technology: string;
-    name?: string;
-    description: string;
-    relevance_to_role: string;
-  }>;
-}
-
-interface SkillItem {
-  name?: string;
-  skill?: string;
-}
-
-interface RoleAnalysis {
-  job_title: string;
-  seniority_level: string;
-  core_responsibilities: string[];
-  must_have_skills: Array<string | SkillItem>;
-  nice_to_have_skills: Array<string | SkillItem>;
-  success_signals_6_12_months: string[];
-}
-
-interface PracticeQuestion {
-  question?: string;
-  text?: string;
-}
-
-interface InterviewPreparation {
-  research_tasks: string[];
-  practice_questions_for_candidate: Array<string | PracticeQuestion>;
-  day_of_checklist: string[];
-}
-
-interface CandidatePositioning {
-  resume_focus_areas: string[];
-  story_prompts: Array<{
-    title: string;
-    description: string;
-    star_hint?: {
-      situation: string;
-      task: string;
-      action: string;
-      result: string;
-    };
-  }>;
-  keyword_map: Array<{
-    company_term: string;
-    term?: string;
-    candidate_equivalent: string;
-    equivalent?: string;
-    context: string;
-  }>;
-}
-
-interface QuestionsToAsk {
-  product: string[];
-  team: string[];
-  culture: string[];
-  performance: string[];
-  strategy: string[];
-}
-
-interface PrepData {
-  company_profile: CompanyProfile;
-  values_and_culture: ValuesAndCulture;
-  strategy_and_news: StrategyAndNews;
-  role_analysis: RoleAnalysis;
-  interview_preparation: InterviewPreparation;
-  candidate_positioning: CandidatePositioning;
-  questions_to_ask_interviewer: QuestionsToAsk;
-}
-
-interface InterviewPrepResponse {
-  success: boolean;
-  interview_prep_id: number;
-  prep_data: PrepData;
-  created_at: string;
-}
+import { useInterviewPrepStore, selectCachedPrep } from '../stores';
+import {
+  PrepData,
+  InterviewPrepResponse,
+  CompanyProfile,
+  ValuesAndCulture,
+  StrategyAndNews,
+  RoleAnalysis,
+  InterviewPreparation,
+  CandidatePositioning,
+  QuestionsToAsk,
+  SkillItem,
+} from '../components/interviewPrep/types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type InterviewPrepRouteProp = RouteProp<RootStackParamList, 'InterviewPrep'>;
@@ -254,1326 +134,10 @@ const Chip: React.FC<{ label: string; color?: string }> = ({ label, color = COLO
   </View>
 );
 
-// Confidence Level Progress Bar Component
-const ConfidenceBar: React.FC<{
-  level: number;
-  color: string;
-}> = ({ level, color }) => (
-  <View style={styles.confidenceBarContainer}>
-    <View style={[styles.confidenceBarBackground, { borderColor: `${color}40` }]}>
-      <View
-        style={[
-          styles.confidenceBarFill,
-          { width: `${level}%`, backgroundColor: color }
-        ]}
-      />
-    </View>
-    <Text style={[styles.confidenceBarLabel, { color }]}>{level}%</Text>
-  </View>
-);
-
-// Readiness Score Card Component
-const ReadinessScoreCard: React.FC<{
-  score: ReadinessScore;
-  loading: boolean;
-  colors: any;
-}> = ({ score, loading, colors }) => {
-  const getConfidenceColor = (level: number) => {
-    if (level >= 80) return COLORS.success;
-    if (level >= 60) return COLORS.warning;
-    return COLORS.error;
-  };
-
-  const confidenceColor = getConfidenceColor(score.confidence_level);
-
-  if (loading) {
-    return (
-      <GlassCard style={styles.readinessCard} material="regular">
-        <View style={styles.readinessHeader}>
-          <View style={[styles.readinessIcon, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
-            <Award color={COLORS.primary} size={24} />
-          </View>
-          <Text style={[styles.readinessTitle, { color: colors.text }]}>Interview Readiness Score</Text>
-        </View>
-        <ActivityIndicator size="small" color={COLORS.primary} style={styles.readinessLoader} />
-      </GlassCard>
-    );
-  }
-
-  return (
-    <GlassCard style={styles.readinessCard} material="regular">
-      <View style={styles.readinessHeader}>
-        <View style={[styles.readinessIcon, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
-          <Award color={COLORS.primary} size={24} />
-        </View>
-        <Text style={[styles.readinessTitle, { color: colors.text }]}>Interview Readiness Score</Text>
-      </View>
-
-      {/* Confidence Level with Progress Bar */}
-      <View style={styles.readinessSection}>
-        <Text style={[styles.readinessSectionTitle, { color: colors.text }]}>Overall Confidence</Text>
-        <ConfidenceBar level={score.confidence_level} color={confidenceColor} />
-      </View>
-
-      {/* Preparation Level Badge */}
-      <View style={styles.readinessSection}>
-        <Text style={[styles.readinessSectionTitle, { color: colors.text }]}>Preparation Level</Text>
-        <View style={[styles.preparationBadge, { backgroundColor: ALPHA_COLORS.info.bg, borderColor: ALPHA_COLORS.info.border }]}>
-          <Target color={COLORS.info} size={16} />
-          <Text style={[styles.preparationBadgeText, { color: COLORS.info }]}>{score.preparation_level}</Text>
-        </View>
-      </View>
-
-      {/* Strengths */}
-      {score.strengths && score.strengths.length > 0 && (
-        <View style={styles.readinessSection}>
-          <Text style={[styles.readinessSectionTitle, { color: colors.text }]}>Strengths</Text>
-          {score.strengths.map((strength, index) => (
-            <View key={index} style={styles.readinessItem}>
-              <CheckCircle color={COLORS.success} size={16} />
-              <Text style={[styles.readinessItemText, { color: colors.textSecondary }]}>{strength}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Areas for Improvement */}
-      {score.areas_for_improvement && score.areas_for_improvement.length > 0 && (
-        <View style={styles.readinessSection}>
-          <Text style={[styles.readinessSectionTitle, { color: colors.text }]}>Areas for Improvement</Text>
-          {score.areas_for_improvement.map((area, index) => (
-            <View key={index} style={styles.readinessItem}>
-              <AlertTriangle color={COLORS.warning} size={16} />
-              <Text style={[styles.readinessItemText, { color: colors.textSecondary }]}>{area}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Recommendations */}
-      {score.recommendations && score.recommendations.length > 0 && (
-        <View style={styles.readinessSection}>
-          <Text style={[styles.readinessSectionTitle, { color: colors.text }]}>Recommendations</Text>
-          {score.recommendations.map((recommendation, index) => (
-            <View key={index} style={styles.readinessItem}>
-              <Lightbulb color={COLORS.purple} size={16} />
-              <Text style={[styles.readinessItemText, { color: colors.textSecondary }]}>{recommendation}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </GlassCard>
-  );
-};
-
-// Values Alignment Card Component
-const ValuesAlignmentCard: React.FC<{
-  alignment: ValuesAlignment;
-  loading: boolean;
-  colors: any;
-}> = ({ alignment, loading, colors }) => {
-  const getAlignmentColor = (score: number) => {
-    if (score >= 80) return COLORS.success;
-    if (score >= 60) return COLORS.warning;
-    return COLORS.error;
-  };
-
-  const alignmentColor = getAlignmentColor(alignment.alignment_score);
-
-  if (loading) {
-    return (
-      <GlassCard style={styles.valuesCard} material="regular">
-        <>
-          <View style={styles.valuesHeader}>
-            <View style={[styles.valuesIcon, { backgroundColor: ALPHA_COLORS.danger.bg }]}>
-              <Heart color={COLORS.error} size={24} />
-            </View>
-            <Text style={[styles.valuesTitle, { color: colors.text }]}>Values Alignment</Text>
-          </View>
-          <ActivityIndicator size="small" color={COLORS.primary} style={styles.valuesLoader} />
-        </>
-      </GlassCard>
-    );
-  }
-
-  return (
-    <GlassCard style={styles.valuesCard} material="regular">
-      <>
-        <View style={styles.valuesHeader}>
-          <View style={[styles.valuesIcon, { backgroundColor: ALPHA_COLORS.danger.bg }]}>
-            <Heart color={COLORS.error} size={24} />
-          </View>
-          <Text style={[styles.valuesTitle, { color: colors.text }]}>Values Alignment</Text>
-        </View>
-
-      {/* Alignment Score with Progress Bar */}
-      <View style={styles.valuesSection}>
-        <Text style={[styles.valuesSectionTitle, { color: colors.text }]}>Alignment Score</Text>
-        <ConfidenceBar level={alignment.alignment_score} color={alignmentColor} />
-      </View>
-
-      {/* Matched Values */}
-      {alignment.matched_values && alignment.matched_values.length > 0 && (
-        <View style={styles.valuesSection}>
-          <Text style={[styles.valuesSectionTitle, { color: colors.text }]}>Matched Values</Text>
-          {alignment.matched_values.map((match, index) => (
-            <View key={index} style={styles.valuesMatchItem}>
-              <View style={styles.valuesMatchHeader}>
-                <CheckCircle color={COLORS.success} size={16} />
-                <Text style={[styles.valuesMatchValue, { color: colors.text }]}>{match.value}</Text>
-              </View>
-              {match.company_context && (
-                <Text style={[styles.valuesMatchContext, { color: colors.textSecondary }]}>
-                  Company: {match.company_context}
-                </Text>
-              )}
-              {match.candidate_evidence && (
-                <Text style={[styles.valuesMatchEvidence, { color: colors.textTertiary }]}>
-                  Your evidence: {match.candidate_evidence}
-                </Text>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Value Gaps */}
-      {alignment.value_gaps && alignment.value_gaps.length > 0 && (
-        <View style={styles.valuesSection}>
-          <Text style={[styles.valuesSectionTitle, { color: colors.text }]}>Areas to Develop</Text>
-          {alignment.value_gaps.map((gap, index) => (
-            <View key={index} style={styles.valuesGapItem}>
-              <View style={styles.valuesGapHeader}>
-                <AlertTriangle color={COLORS.warning} size={16} />
-                <Text style={[styles.valuesGapValue, { color: colors.text }]}>{gap.value}</Text>
-              </View>
-              {gap.company_context && (
-                <Text style={[styles.valuesGapContext, { color: colors.textSecondary }]}>
-                  Company: {gap.company_context}
-                </Text>
-              )}
-              {gap.suggestion && (
-                <View style={[styles.valuesSuggestionBox, { backgroundColor: ALPHA_COLORS.warning.bg, borderColor: ALPHA_COLORS.warning.border }]}>
-                  <Lightbulb color={COLORS.warning} size={14} />
-                  <Text style={[styles.valuesSuggestionText, { color: colors.textSecondary }]}>
-                    {gap.suggestion}
-                  </Text>
-                </View>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-
-        {/* Cultural Fit Insights */}
-        {alignment.cultural_fit_insights && (
-          <View style={styles.valuesSection}>
-            <Text style={[styles.valuesSectionTitle, { color: colors.text }]}>Cultural Fit Insights</Text>
-            <View style={[styles.valuesInsightsBox, { backgroundColor: colors.backgroundTertiary }]}>
-              <Users color={COLORS.purple} size={16} />
-              <Text style={[styles.valuesInsightsText, { color: colors.textSecondary }]}>
-                {alignment.cultural_fit_insights}
-              </Text>
-            </View>
-          </View>
-        )}
-      </>
-    </GlassCard>
-  );
-};
-
-// Strategic News Card Component
-const StrategicNewsCard: React.FC<{
-  newsItems: StrategicNewsItem[];
-  loading: boolean;
-  colors: any;
-}> = ({ newsItems, loading, colors }) => {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-
-  const toggleNewsItem = (index: number) => {
-    setExpandedIndex(expandedIndex === index ? null : index);
-  };
-
-  const getTimeAgo = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-      if (diffInDays === 0) return 'Today';
-      if (diffInDays === 1) return '1 day ago';
-      if (diffInDays < 7) return `${diffInDays} days ago`;
-      if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-      return `${Math.floor(diffInDays / 30)} months ago`;
-    } catch {
-      return dateString;
-    }
-  };
-
-  if (loading) {
-    return (
-      <GlassCard style={styles.strategicNewsCard} material="regular">
-        <View style={styles.strategicNewsHeader}>
-          <View style={[styles.strategicNewsIcon, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
-            <TrendingUp color={COLORS.purple} size={24} />
-          </View>
-          <Text style={[styles.strategicNewsTitle, { color: colors.text }]}>Strategic News & Insights</Text>
-        </View>
-        <ActivityIndicator size="small" color={COLORS.primary} style={styles.strategicNewsLoader} />
-      </GlassCard>
-    );
-  }
-
-  if (!newsItems || newsItems.length === 0) {
-    return null;
-  }
-
-  return (
-    <GlassCard style={styles.strategicNewsCard} material="regular">
-      <>
-        <View style={styles.strategicNewsHeader}>
-          <View style={[styles.strategicNewsIcon, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
-            <TrendingUp color={COLORS.purple} size={24} />
-          </View>
-          <Text style={[styles.strategicNewsTitle, { color: colors.text }]}>Strategic News & Insights</Text>
-        </View>
-
-        <Text style={[styles.strategicNewsSubtitle, { color: colors.textSecondary }]}>
-          Recent developments relevant to your interview
-        </Text>
-
-        <View style={styles.strategicNewsList}>
-          {newsItems.map((item, index) => (
-            <View
-              key={index}
-              style={[styles.strategicNewsItem, { backgroundColor: colors.backgroundTertiary }]}
-            >
-              <TouchableOpacity
-                style={styles.strategicNewsItemHeader}
-                onPress={() => toggleNewsItem(index)}
-                accessibilityRole="button"
-              >
-                <View style={styles.strategicNewsItemHeaderLeft}>
-                  <View style={[styles.newsRecencyBadge, { backgroundColor: ALPHA_COLORS.purple.bg, borderColor: COLORS.purple }]}>
-                    <Text style={[styles.newsRecencyText, { color: COLORS.purple }]}>
-                      {getTimeAgo(item.date)}
-                    </Text>
-                  </View>
-                </View>
-                {expandedIndex === index ? (
-                  <ChevronUp color={colors.textSecondary} size={18} />
-                ) : (
-                  <ChevronDown color={colors.textSecondary} size={18} />
-                )}
-              </TouchableOpacity>
-
-              <Text style={[styles.strategicNewsHeadline, { color: colors.text }]}>
-                {item.headline}
-              </Text>
-
-              {item.source && (
-                <View style={styles.strategicNewsSourceRow}>
-                  <Newspaper color={colors.textTertiary} size={12} />
-                  <Text style={[styles.strategicNewsSource, { color: colors.textTertiary }]}>
-                    {item.source}
-                  </Text>
-                </View>
-              )}
-
-              {expandedIndex === index && (
-                <View style={styles.strategicNewsExpandedContent}>
-                  {/* Summary */}
-                  <View style={styles.strategicNewsSection}>
-                    <Text style={[styles.strategicNewsSectionTitle, { color: colors.text }]}>Summary</Text>
-                    <Text style={[styles.strategicNewsSectionText, { color: colors.textSecondary }]}>
-                      {item.summary}
-                    </Text>
-                  </View>
-
-                  {/* Relevance to Interview */}
-                  <View style={[styles.strategicNewsSection, styles.relevanceSection]}>
-                    <View style={styles.strategicNewsSectionHeader}>
-                      <Target color={COLORS.info} size={16} />
-                      <Text style={[styles.strategicNewsSectionTitle, { color: COLORS.info }]}>
-                        Why This Matters
-                      </Text>
-                    </View>
-                    <Text style={[styles.strategicNewsSectionText, { color: colors.textSecondary }]}>
-                      {item.relevance_to_interview}
-                    </Text>
-                  </View>
-
-                  {/* Talking Points */}
-                  {item.talking_points && item.talking_points.length > 0 && (
-                    <View style={styles.strategicNewsSection}>
-                      <View style={styles.strategicNewsSectionHeader}>
-                        <Lightbulb color={COLORS.purple} size={16} />
-                        <Text style={[styles.strategicNewsSectionTitle, { color: COLORS.purple }]}>
-                          Talking Points
-                        </Text>
-                      </View>
-                      {item.talking_points.map((point, pointIndex) => (
-                        <View key={pointIndex} style={styles.talkingPointItem}>
-                          <View style={[styles.talkingPointDot, { backgroundColor: COLORS.purple }]} />
-                          <Text style={[styles.talkingPointText, { color: colors.textSecondary }]}>
-                            {point}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  )}
-                </View>
-              )}
-            </View>
-          ))}
-        </View>
-      </>
-    </GlassCard>
-  );
-};
-
-// Company Research Card Component
-const CompanyResearchCard: React.FC<{
-  research: CompanyResearch;
-  loading: boolean;
-  colors: any;
-}> = ({ research, loading, colors }) => {
-  const [expandedSection, setExpandedSection] = useState<string | null>('overview');
-
-  const getFinancialStatusColor = (status: string) => {
-    if (status === 'good') return COLORS.success;
-    if (status === 'fair') return COLORS.warning;
-    return COLORS.error;
-  };
-
-  const getSentimentColor = (sentiment: string) => {
-    if (sentiment === 'positive') return COLORS.success;
-    if (sentiment === 'neutral') return COLORS.warning;
-    return COLORS.error;
-  };
-
-  const toggleSection = (section: string) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };
-
-  if (loading) {
-    return (
-      <GlassCard style={styles.companyResearchCard} material="regular">
-        <View style={styles.companyResearchHeader}>
-          <View style={[styles.companyResearchIcon, { backgroundColor: ALPHA_COLORS.info.bg }]}>
-            <Building2 color={COLORS.info} size={24} />
-          </View>
-          <Text style={[styles.companyResearchTitle, { color: colors.text }]}>Company Research</Text>
-        </View>
-        <ActivityIndicator size="small" color={COLORS.primary} style={styles.companyResearchLoader} />
-      </GlassCard>
-    );
-  }
-
-  return (
-    <GlassCard style={styles.companyResearchCard} material="regular">
-      <>
-        <View style={styles.companyResearchHeader}>
-          <View style={[styles.companyResearchIcon, { backgroundColor: ALPHA_COLORS.info.bg }]}>
-            <Building2 color={COLORS.info} size={24} />
-          </View>
-          <Text style={[styles.companyResearchTitle, { color: colors.text }]}>Company Research</Text>
-        </View>
-
-        {/* Company Overview */}
-        <View style={styles.companyResearchSection}>
-          <TouchableOpacity
-            style={styles.companyResearchSubheader}
-            onPress={() => toggleSection('overview')}
-            accessibilityRole="button"
-          >
-            <View style={styles.companyResearchSubheaderLeft}>
-              <Info color={COLORS.info} size={16} />
-              <Text style={[styles.companyResearchSubtitle, { color: colors.text }]}>Company Overview</Text>
-            </View>
-            {expandedSection === 'overview' ? (
-              <ChevronUp color={colors.textSecondary} size={18} />
-            ) : (
-              <ChevronDown color={colors.textSecondary} size={18} />
-            )}
-          </TouchableOpacity>
-          {expandedSection === 'overview' && research.company_overview && (
-            <Text style={[styles.companyResearchText, { color: colors.textSecondary }]}>
-              {research.company_overview}
-            </Text>
-          )}
-        </View>
-
-        {/* Recent News */}
-        {research.recent_news && research.recent_news.length > 0 && (
-          <View style={styles.companyResearchSection}>
-            <TouchableOpacity
-              style={styles.companyResearchSubheader}
-              onPress={() => toggleSection('news')}
-              accessibilityRole="button"
-            >
-              <View style={styles.companyResearchSubheaderLeft}>
-                <Newspaper color={COLORS.purple} size={16} />
-                <Text style={[styles.companyResearchSubtitle, { color: colors.text }]}>
-                  Recent News ({research.recent_news.length})
-                </Text>
-              </View>
-              {expandedSection === 'news' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'news' && (
-              <View style={styles.companyResearchList}>
-                {research.recent_news.map((newsItem, index) => (
-                  <View
-                    key={index}
-                    style={[styles.companyResearchNewsItem, { backgroundColor: colors.backgroundTertiary }]}
-                  >
-                    <Text style={[styles.companyResearchNewsHeadline, { color: colors.text }]}>
-                      {newsItem.headline}
-                    </Text>
-                    {newsItem.date && (
-                      <Text style={[styles.companyResearchNewsDate, { color: colors.textTertiary }]}>
-                        {newsItem.date}
-                      </Text>
-                    )}
-                    <Text style={[styles.companyResearchNewsSummary, { color: colors.textSecondary }]}>
-                      {newsItem.summary}
-                    </Text>
-                    {newsItem.source && (
-                      <Text style={[styles.companyResearchNewsSource, { color: colors.textTertiary }]}>
-                        Source: {newsItem.source}
-                      </Text>
-                    )}
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Key Products & Services */}
-        {research.key_products_services && research.key_products_services.length > 0 && (
-          <View style={styles.companyResearchSection}>
-            <TouchableOpacity
-              style={styles.companyResearchSubheader}
-              onPress={() => toggleSection('products')}
-              accessibilityRole="button"
-            >
-              <View style={styles.companyResearchSubheaderLeft}>
-                <Package color={COLORS.success} size={16} />
-                <Text style={[styles.companyResearchSubtitle, { color: colors.text }]}>
-                  Key Products & Services
-                </Text>
-              </View>
-              {expandedSection === 'products' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'products' && (
-              <View style={styles.companyResearchList}>
-                {research.key_products_services.map((product, index) => (
-                  <View key={index} style={styles.companyResearchBulletItem}>
-                    <View style={[styles.bulletDot, { backgroundColor: COLORS.success }]} />
-                    <Text style={[styles.companyResearchBulletText, { color: colors.textSecondary }]}>
-                      {product}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Competitors */}
-        {research.competitors && research.competitors.length > 0 && (
-          <View style={styles.companyResearchSection}>
-            <TouchableOpacity
-              style={styles.companyResearchSubheader}
-              onPress={() => toggleSection('competitors')}
-              accessibilityRole="button"
-            >
-              <View style={styles.companyResearchSubheaderLeft}>
-                <TrendingUp color={COLORS.warning} size={16} />
-                <Text style={[styles.companyResearchSubtitle, { color: colors.text }]}>
-                  Key Competitors
-                </Text>
-              </View>
-              {expandedSection === 'competitors' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'competitors' && (
-              <View style={styles.companyResearchList}>
-                {research.competitors.map((competitor, index) => (
-                  <View
-                    key={index}
-                    style={[styles.companyResearchCompetitorItem, { backgroundColor: colors.backgroundTertiary }]}
-                  >
-                    <Text style={[styles.companyResearchCompetitorName, { color: colors.text }]}>
-                      {competitor.name}
-                    </Text>
-                    {competitor.context && (
-                      <Text style={[styles.companyResearchCompetitorContext, { color: colors.textSecondary }]}>
-                        {competitor.context}
-                      </Text>
-                    )}
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Financial Health */}
-        {research.financial_health && (
-          <View style={styles.companyResearchSection}>
-            <View style={styles.companyResearchInlineHeader}>
-              <View style={styles.companyResearchSubheaderLeft}>
-                <DollarSign color={getFinancialStatusColor(research.financial_health.status)} size={16} />
-                <Text style={[styles.companyResearchSubtitle, { color: colors.text }]}>Financial Health</Text>
-              </View>
-              <View
-                style={[
-                  styles.companyResearchStatusBadge,
-                  {
-                    backgroundColor: `${getFinancialStatusColor(research.financial_health.status)}20`,
-                    borderColor: getFinancialStatusColor(research.financial_health.status),
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.companyResearchStatusText,
-                    { color: getFinancialStatusColor(research.financial_health.status) },
-                  ]}
-                >
-                  {research.financial_health.status.toUpperCase()}
-                </Text>
-              </View>
-            </View>
-            <Text style={[styles.companyResearchText, { color: colors.textSecondary, marginTop: SPACING.sm }]}>
-              {research.financial_health.summary}
-            </Text>
-          </View>
-        )}
-
-        {/* Employee Sentiment */}
-        {research.employee_sentiment && (
-          <View style={styles.companyResearchSection}>
-            <View style={styles.companyResearchInlineHeader}>
-              <View style={styles.companyResearchSubheaderLeft}>
-                <ThumbsUp color={getSentimentColor(research.employee_sentiment.sentiment)} size={16} />
-                <Text style={[styles.companyResearchSubtitle, { color: colors.text }]}>Employee Sentiment</Text>
-              </View>
-              <View style={styles.companyResearchRatingContainer}>
-                {research.employee_sentiment.rating && (
-                  <View style={styles.companyResearchRating}>
-                    <Star
-                      color={getSentimentColor(research.employee_sentiment.sentiment)}
-                      size={14}
-                      fill={getSentimentColor(research.employee_sentiment.sentiment)}
-                    />
-                    <Text
-                      style={[
-                        styles.companyResearchRatingText,
-                        { color: getSentimentColor(research.employee_sentiment.sentiment) },
-                      ]}
-                    >
-                      {research.employee_sentiment.rating.toFixed(1)}
-                    </Text>
-                  </View>
-                )}
-                <View
-                  style={[
-                    styles.companyResearchStatusBadge,
-                    {
-                      backgroundColor: `${getSentimentColor(research.employee_sentiment.sentiment)}20`,
-                      borderColor: getSentimentColor(research.employee_sentiment.sentiment),
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.companyResearchStatusText,
-                      { color: getSentimentColor(research.employee_sentiment.sentiment) },
-                    ]}
-                  >
-                    {research.employee_sentiment.sentiment.toUpperCase()}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <Text style={[styles.companyResearchText, { color: colors.textSecondary, marginTop: SPACING.sm }]}>
-              {research.employee_sentiment.summary}
-            </Text>
-          </View>
-        )}
-      </>
-    </GlassCard>
-  );
-};
-
-// Competitive Intelligence Card Component
-const CompetitiveIntelligenceCard: React.FC<{
-  intelligence: CompetitiveIntelligence;
-  loading: boolean;
-  colors: any;
-}> = ({ intelligence, loading, colors }) => {
-  const [expandedSection, setExpandedSection] = useState<string | null>('interview_angles');
-
-  const toggleSection = (section: string) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };
-
-  if (loading) {
-    return (
-      <GlassCard style={styles.competitiveCard} material="regular">
-        <View style={styles.competitiveHeader}>
-          <View style={[styles.competitiveIcon, { backgroundColor: ALPHA_COLORS.warning.bg }]}>
-            <Target color={COLORS.warning} size={24} />
-          </View>
-          <Text style={[styles.competitiveTitle, { color: colors.text }]}>Competitive Intelligence</Text>
-        </View>
-        <ActivityIndicator size="small" color={COLORS.primary} style={styles.competitiveLoader} />
-      </GlassCard>
-    );
-  }
-
-  return (
-    <GlassCard style={styles.competitiveCard} material="regular">
-      <>
-        <View style={styles.competitiveHeader}>
-          <View style={[styles.competitiveIcon, { backgroundColor: ALPHA_COLORS.warning.bg }]}>
-            <Target color={COLORS.warning} size={24} />
-          </View>
-          <Text style={[styles.competitiveTitle, { color: colors.text }]}>Competitive Intelligence</Text>
-        </View>
-
-        <Text style={[styles.competitiveSubtitle, { color: colors.textSecondary }]}>
-          Strategic positioning and market context
-        </Text>
-
-        {/* Interview Angles - Most Important */}
-        <View style={styles.competitiveSection}>
-          <TouchableOpacity
-            style={styles.competitiveSubheader}
-            onPress={() => toggleSection('interview_angles')}
-            accessibilityRole="button"
-          >
-            <View style={styles.competitiveSubheaderLeft}>
-              <Lightbulb color={COLORS.warning} size={16} />
-              <Text style={[styles.competitiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                Interview Angles
-              </Text>
-            </View>
-            {expandedSection === 'interview_angles' ? (
-              <ChevronUp color={colors.textSecondary} size={18} />
-            ) : (
-              <ChevronDown color={colors.textSecondary} size={18} />
-            )}
-          </TouchableOpacity>
-          {expandedSection === 'interview_angles' && intelligence.interview_angles && intelligence.interview_angles.length > 0 && (
-            <View style={[styles.competitiveHighlightBox, { backgroundColor: ALPHA_COLORS.warning.bg, borderColor: COLORS.warning }]}>
-              {intelligence.interview_angles.map((angle, index) => (
-                <View key={index} style={styles.competitiveAngleItem}>
-                  <View style={[styles.competitiveAngleDot, { backgroundColor: COLORS.warning }]} />
-                  <Text style={[styles.competitiveAngleText, { color: colors.text }]}>
-                    {angle}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* Market Position */}
-        {intelligence.market_position && (
-          <View style={styles.competitiveSection}>
-            <TouchableOpacity
-              style={styles.competitiveSubheader}
-              onPress={() => toggleSection('market_position')}
-              accessibilityRole="button"
-            >
-              <View style={styles.competitiveSubheaderLeft}>
-                <TrendingUp color={COLORS.info} size={16} />
-                <Text style={[styles.competitiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Market Position
-                </Text>
-              </View>
-              {expandedSection === 'market_position' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'market_position' && (
-              <View style={[styles.competitiveInfoBox, { backgroundColor: colors.backgroundTertiary }]}>
-                <Text style={[styles.competitiveText, { color: colors.textSecondary }]}>
-                  {intelligence.market_position}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Competitive Advantages */}
-        {intelligence.competitive_advantages && intelligence.competitive_advantages.length > 0 && (
-          <View style={styles.competitiveSection}>
-            <TouchableOpacity
-              style={styles.competitiveSubheader}
-              onPress={() => toggleSection('advantages')}
-              accessibilityRole="button"
-            >
-              <View style={styles.competitiveSubheaderLeft}>
-                <CheckCircle color={COLORS.success} size={16} />
-                <Text style={[styles.competitiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Competitive Advantages
-                </Text>
-              </View>
-              {expandedSection === 'advantages' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'advantages' && (
-              <View style={styles.competitiveList}>
-                {intelligence.competitive_advantages.map((advantage, index) => (
-                  <View key={index} style={styles.competitiveAdvantageItem}>
-                    <View style={[styles.competitiveCheckIcon, { backgroundColor: ALPHA_COLORS.success.bg }]}>
-                      <CheckCircle color={COLORS.success} size={14} />
-                    </View>
-                    <Text style={[styles.competitiveListText, { color: colors.textSecondary }]}>
-                      {advantage}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Challenges */}
-        {intelligence.challenges && intelligence.challenges.length > 0 && (
-          <View style={styles.competitiveSection}>
-            <TouchableOpacity
-              style={styles.competitiveSubheader}
-              onPress={() => toggleSection('challenges')}
-              accessibilityRole="button"
-            >
-              <View style={styles.competitiveSubheaderLeft}>
-                <AlertTriangle color={COLORS.error} size={16} />
-                <Text style={[styles.competitiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Challenges
-                </Text>
-              </View>
-              {expandedSection === 'challenges' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'challenges' && (
-              <View style={styles.competitiveList}>
-                {intelligence.challenges.map((challenge, index) => (
-                  <View key={index} style={styles.competitiveChallengeItem}>
-                    <View style={[styles.competitiveWarningIcon, { backgroundColor: ALPHA_COLORS.danger.bg }]}>
-                      <AlertTriangle color={COLORS.error} size={14} />
-                    </View>
-                    <Text style={[styles.competitiveListText, { color: colors.textSecondary }]}>
-                      {challenge}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Differentiation Strategy */}
-        {intelligence.differentiation_strategy && (
-          <View style={styles.competitiveSection}>
-            <TouchableOpacity
-              style={styles.competitiveSubheader}
-              onPress={() => toggleSection('differentiation')}
-              accessibilityRole="button"
-            >
-              <View style={styles.competitiveSubheaderLeft}>
-                <Award color={COLORS.purple} size={16} />
-                <Text style={[styles.competitiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Differentiation Strategy
-                </Text>
-              </View>
-              {expandedSection === 'differentiation' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'differentiation' && (
-              <View style={[styles.competitiveInfoBox, { backgroundColor: colors.backgroundTertiary }]}>
-                <Text style={[styles.competitiveText, { color: colors.textSecondary }]}>
-                  {intelligence.differentiation_strategy}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
-      </>
-    </GlassCard>
-  );
-};
-
-// Interview Strategy Card Component
-const InterviewStrategyCard: React.FC<{
-  strategy: InterviewStrategy;
-  loading: boolean;
-  colors: any;
-}> = ({ strategy, loading, colors }) => {
-  const [expandedSection, setExpandedSection] = useState<string | null>('approach');
-
-  const toggleSection = (section: string) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };
-
-  if (loading) {
-    return (
-      <GlassCard style={styles.strategyCard} material="regular">
-        <View style={styles.strategyHeader}>
-          <View style={[styles.strategyIcon, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
-            <Compass color={COLORS.primary} size={24} />
-          </View>
-          <Text style={[styles.strategyTitle, { color: colors.text }]}>Interview Strategy</Text>
-        </View>
-        <ActivityIndicator size="small" color={COLORS.primary} style={styles.strategyLoader} />
-      </GlassCard>
-    );
-  }
-
-  return (
-    <GlassCard style={styles.strategyCard} material="regular">
-      <>
-        <View style={styles.strategyHeader}>
-          <View style={[styles.strategyIcon, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
-            <Compass color={COLORS.primary} size={24} />
-          </View>
-          <Text style={[styles.strategyTitle, { color: colors.text }]}>Interview Strategy</Text>
-        </View>
-
-        <Text style={[styles.strategySubtitle, { color: colors.textSecondary }]}>
-          Your game plan for interview success
-        </Text>
-
-        {/* Recommended Approach */}
-        {strategy.recommended_approach && (
-          <View style={styles.strategySection}>
-            <TouchableOpacity
-              style={styles.strategySubheader}
-              onPress={() => toggleSection('approach')}
-              accessibilityRole="button"
-            >
-              <View style={styles.strategySubheaderLeft}>
-                <Map color={COLORS.primary} size={16} />
-                <Text style={[styles.strategySubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Recommended Approach
-                </Text>
-              </View>
-              {expandedSection === 'approach' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'approach' && (
-              <View style={[styles.strategyHighlightBox, { backgroundColor: ALPHA_COLORS.primary.bg, borderColor: COLORS.primary }]}>
-                <Text style={[styles.strategyText, { color: colors.text }]}>
-                  {strategy.recommended_approach}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Key Themes to Emphasize */}
-        {strategy.key_themes_to_emphasize && strategy.key_themes_to_emphasize.length > 0 && (
-          <View style={styles.strategySection}>
-            <TouchableOpacity
-              style={styles.strategySubheader}
-              onPress={() => toggleSection('themes')}
-              accessibilityRole="button"
-            >
-              <View style={styles.strategySubheaderLeft}>
-                <Star color={COLORS.warning} size={16} />
-                <Text style={[styles.strategySubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Key Themes to Emphasize
-                </Text>
-              </View>
-              {expandedSection === 'themes' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'themes' && (
-              <View style={styles.strategyList}>
-                {strategy.key_themes_to_emphasize.map((theme, index) => (
-                  <View key={index} style={styles.strategyThemeItem}>
-                    <View style={[styles.strategyThemeDot, { backgroundColor: COLORS.warning }]} />
-                    <Text style={[styles.strategyListText, { color: colors.textSecondary }]}>
-                      {theme}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Stories to Prepare */}
-        {strategy.stories_to_prepare && strategy.stories_to_prepare.length > 0 && (
-          <View style={styles.strategySection}>
-            <TouchableOpacity
-              style={styles.strategySubheader}
-              onPress={() => toggleSection('stories')}
-              accessibilityRole="button"
-            >
-              <View style={styles.strategySubheaderLeft}>
-                <BookOpen color={COLORS.purple} size={16} />
-                <Text style={[styles.strategySubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Stories to Prepare
-                </Text>
-              </View>
-              {expandedSection === 'stories' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'stories' && (
-              <View style={styles.strategyList}>
-                {strategy.stories_to_prepare.map((story, index) => (
-                  <View key={index} style={styles.strategyStoryItem}>
-                    <View style={[styles.strategyStoryIcon, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
-                      <Text style={[styles.strategyStoryNumber, { color: COLORS.purple }]}>{index + 1}</Text>
-                    </View>
-                    <View style={styles.strategyStoryContent}>
-                      <Text style={[styles.strategyStoryTheme, { color: colors.text }]}>
-                        {story.theme}
-                      </Text>
-                      <Text style={[styles.strategyStoryDescription, { color: colors.textSecondary }]}>
-                        {story.description}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Questions to Ask Interviewer */}
-        {strategy.questions_to_ask_interviewer && strategy.questions_to_ask_interviewer.length > 0 && (
-          <View style={styles.strategySection}>
-            <TouchableOpacity
-              style={styles.strategySubheader}
-              onPress={() => toggleSection('questions')}
-              accessibilityRole="button"
-            >
-              <View style={styles.strategySubheaderLeft}>
-                <HelpCircle color={COLORS.info} size={16} />
-                <Text style={[styles.strategySubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Questions to Ask Interviewer
-                </Text>
-              </View>
-              {expandedSection === 'questions' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'questions' && (
-              <View style={[styles.strategyHighlightBox, { backgroundColor: ALPHA_COLORS.info.bg, borderColor: COLORS.info }]}>
-                {strategy.questions_to_ask_interviewer.map((question, index) => (
-                  <View key={index} style={styles.strategyQuestionItem}>
-                    <View style={[styles.strategyQuestionDot, { backgroundColor: COLORS.info }]} />
-                    <Text style={[styles.strategyQuestionText, { color: colors.text }]}>
-                      {question}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Pre-Interview Checklist */}
-        {strategy.pre_interview_checklist && strategy.pre_interview_checklist.length > 0 && (
-          <View style={styles.strategySection}>
-            <TouchableOpacity
-              style={styles.strategySubheader}
-              onPress={() => toggleSection('checklist')}
-              accessibilityRole="button"
-            >
-              <View style={styles.strategySubheaderLeft}>
-                <CheckCircle color={COLORS.success} size={16} />
-                <Text style={[styles.strategySubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Pre-Interview Checklist
-                </Text>
-              </View>
-              {expandedSection === 'checklist' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'checklist' && (
-              <View style={styles.strategyList}>
-                {strategy.pre_interview_checklist.map((item, index) => (
-                  <View key={index} style={styles.strategyChecklistItem}>
-                    <View style={[styles.strategyCheckbox, { borderColor: COLORS.success }]}>
-                      <Check color={COLORS.success} size={14} />
-                    </View>
-                    <Text style={[styles.strategyListText, { color: colors.textSecondary }]}>
-                      {item}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-      </>
-    </GlassCard>
-  );
-};
-
-// Executive Insights Card Component
-const ExecutiveInsightsCard: React.FC<{
-  insights: ExecutiveInsights;
-  loading: boolean;
-  colors: any;
-}> = ({ insights, loading, colors }) => {
-  const [expandedSection, setExpandedSection] = useState<string | null>('priorities');
-
-  const toggleSection = (section: string) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };
-
-  if (loading) {
-    return (
-      <GlassCard style={styles.executiveCard} material="regular">
-        <View style={styles.executiveHeader}>
-          <View style={[styles.executiveIcon, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
-            <Crown color={COLORS.purple} size={24} />
-          </View>
-          <Text style={[styles.executiveTitle, { color: colors.text }]}>Executive Insights</Text>
-        </View>
-        <ActivityIndicator size="small" color={COLORS.purple} style={styles.executiveLoader} />
-      </GlassCard>
-    );
-  }
-
-  return (
-    <GlassCard style={styles.executiveCard} material="regular">
-      <>
-        <View style={styles.executiveHeader}>
-          <View style={[styles.executiveIcon, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
-            <Crown color={COLORS.purple} size={24} />
-          </View>
-          <Text style={[styles.executiveTitle, { color: colors.text }]}>Executive Insights</Text>
-        </View>
-
-        <Text style={[styles.executiveSubtitle, { color: colors.textSecondary }]}>
-          Navigate C-suite conversations with confidence
-        </Text>
-
-        {/* Executive Priorities */}
-        {insights.executive_priorities && insights.executive_priorities.length > 0 && (
-          <View style={styles.executiveSection}>
-            <TouchableOpacity
-              style={styles.executiveSubheader}
-              onPress={() => toggleSection('priorities')}
-              accessibilityRole="button"
-            >
-              <View style={styles.executiveSubheaderLeft}>
-                <Target color={COLORS.purple} size={16} />
-                <Text style={[styles.executiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Executive Priorities
-                </Text>
-              </View>
-              {expandedSection === 'priorities' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'priorities' && (
-              <View style={styles.executiveList}>
-                {insights.executive_priorities.map((priority, index) => (
-                  <View key={index} style={styles.executivePriorityItem}>
-                    <View style={[styles.executivePriorityDot, { backgroundColor: COLORS.purple }]} />
-                    <Text style={[styles.executiveListText, { color: colors.textSecondary }]}>
-                      {priority}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Leadership Style */}
-        {insights.leadership_style && (
-          <View style={styles.executiveSection}>
-            <TouchableOpacity
-              style={styles.executiveSubheader}
-              onPress={() => toggleSection('leadership')}
-              accessibilityRole="button"
-            >
-              <View style={styles.executiveSubheaderLeft}>
-                <Users color={COLORS.info} size={16} />
-                <Text style={[styles.executiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Leadership Style
-                </Text>
-              </View>
-              {expandedSection === 'leadership' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'leadership' && (
-              <View style={[styles.executiveHighlightBox, { backgroundColor: ALPHA_COLORS.info.bg, borderColor: COLORS.info }]}>
-                <Text style={[styles.executiveText, { color: colors.text }]}>
-                  {insights.leadership_style}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Decision Making Factors */}
-        {insights.decision_making_factors && insights.decision_making_factors.length > 0 && (
-          <View style={styles.executiveSection}>
-            <TouchableOpacity
-              style={styles.executiveSubheader}
-              onPress={() => toggleSection('decisions')}
-              accessibilityRole="button"
-            >
-              <View style={styles.executiveSubheaderLeft}>
-                <Brain color={COLORS.warning} size={16} />
-                <Text style={[styles.executiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Decision Making Factors
-                </Text>
-              </View>
-              {expandedSection === 'decisions' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'decisions' && (
-              <View style={styles.executiveList}>
-                {insights.decision_making_factors.map((factor, index) => (
-                  <View key={index} style={styles.executiveFactorItem}>
-                    <View style={[styles.executiveFactorIcon, { backgroundColor: ALPHA_COLORS.warning.bg }]}>
-                      <Text style={[styles.executiveFactorNumber, { color: COLORS.warning }]}>{index + 1}</Text>
-                    </View>
-                    <Text style={[styles.executiveListText, { color: colors.textSecondary, flex: 1 }]}>
-                      {factor}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Strategic Initiatives */}
-        {insights.strategic_initiatives && insights.strategic_initiatives.length > 0 && (
-          <View style={styles.executiveSection}>
-            <TouchableOpacity
-              style={styles.executiveSubheader}
-              onPress={() => toggleSection('initiatives')}
-              accessibilityRole="button"
-            >
-              <View style={styles.executiveSubheaderLeft}>
-                <TrendingUp color={COLORS.success} size={16} />
-                <Text style={[styles.executiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  Strategic Initiatives
-                </Text>
-              </View>
-              {expandedSection === 'initiatives' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'initiatives' && (
-              <View style={styles.executiveList}>
-                {insights.strategic_initiatives.map((initiative, index) => (
-                  <View key={index} style={styles.executiveInitiativeItem}>
-                    <View style={[styles.executiveInitiativeDot, { backgroundColor: COLORS.success }]} />
-                    <Text style={[styles.executiveListText, { color: colors.textSecondary }]}>
-                      {initiative}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* C-Suite Talking Points - Featured with special styling */}
-        {insights.c_suite_talking_points && insights.c_suite_talking_points.length > 0 && (
-          <View style={styles.executiveSection}>
-            <TouchableOpacity
-              style={styles.executiveSubheader}
-              onPress={() => toggleSection('talking_points')}
-              accessibilityRole="button"
-            >
-              <View style={styles.executiveSubheaderLeft}>
-                <MessageCircle color={COLORS.primary} size={16} />
-                <Text style={[styles.executiveSubtitle, { color: colors.text, fontFamily: FONTS.semibold }]}>
-                  C-Suite Talking Points
-                </Text>
-                <View style={[styles.executiveFeaturedBadge, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
-                  <Text style={[styles.executiveFeaturedBadgeText, { color: COLORS.primary }]}>KEY</Text>
-                </View>
-              </View>
-              {expandedSection === 'talking_points' ? (
-                <ChevronUp color={colors.textSecondary} size={18} />
-              ) : (
-                <ChevronDown color={colors.textSecondary} size={18} />
-              )}
-            </TouchableOpacity>
-            {expandedSection === 'talking_points' && (
-              <View style={[styles.executiveFeaturedBox, { backgroundColor: ALPHA_COLORS.primary.bg, borderColor: COLORS.primary }]}>
-                {insights.c_suite_talking_points.map((point, index) => (
-                  <View key={index} style={styles.executiveTalkingPointItem}>
-                    <View style={[styles.executiveTalkingPointIcon, { backgroundColor: COLORS.primary }]}>
-                      <Lightbulb color="#FFFFFF" size={14} />
-                    </View>
-                    <Text style={[styles.executiveTalkingPointText, { color: colors.text }]}>
-                      {point}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-      </>
-    </GlassCard>
-  );
-};
+// NOTE: Card components (ReadinessScoreCard, ValuesAlignmentCard, CompanyResearchCard,
+// StrategicNewsCard, CompetitiveIntelligenceCard, InterviewStrategyCard, ExecutiveInsightsCard)
+// have been extracted to ../components/interviewPrep/ for reusability.
+// They are not currently used in this screen but available for future use.
 
 export default function InterviewPrepScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -1581,24 +145,38 @@ export default function InterviewPrepScreen() {
   const { colors } = useTheme();
   const { tailoredResumeId } = route.params;
 
-  const [prepData, setPrepData] = useState<PrepData | null>(null);
-  const [interviewPrepId, setInterviewPrepId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const [readinessScore, setReadinessScore] = useState<ReadinessScore | null>(null);
-  const [loadingReadiness, setLoadingReadiness] = useState(false);
-  const [valuesAlignment, setValuesAlignment] = useState<ValuesAlignment | null>(null);
-  const [loadingValuesAlignment, setLoadingValuesAlignment] = useState(false);
-  const [companyResearch, setCompanyResearch] = useState<CompanyResearch | null>(null);
-  const [loadingCompanyResearch, setLoadingCompanyResearch] = useState(false);
-  const [strategicNews, setStrategicNews] = useState<StrategicNewsItem[] | null>(null);
-  const [loadingStrategicNews, setLoadingStrategicNews] = useState(false);
-  const [competitiveIntelligence, setCompetitiveIntelligence] = useState<CompetitiveIntelligence | null>(null);
-  const [loadingCompetitiveIntelligence, setLoadingCompetitiveIntelligence] = useState(false);
-  const [interviewStrategy, setInterviewStrategy] = useState<InterviewStrategy | null>(null);
-  const [loadingInterviewStrategy, setLoadingInterviewStrategy] = useState(false);
-  const [executiveInsights, setExecutiveInsights] = useState<ExecutiveInsights | null>(null);
-  const [loadingExecutiveInsights, setLoadingExecutiveInsights] = useState(false);
+  // Use the interview prep store for caching
+  const {
+    loading,
+    generating,
+    loadingReadiness,
+    loadingValuesAlignment,
+    loadingCompanyResearch,
+    loadingStrategicNews,
+    loadingCompetitiveIntelligence,
+    loadingInterviewStrategy,
+    loadingExecutiveInsights,
+    loadingCertifications,
+    getInterviewPrep,
+    generateInterviewPrep,
+    deleteInterviewPrep,
+  } = useInterviewPrepStore();
+
+  // Get cached data for this tailoredResumeId
+  const cachedPrep = useInterviewPrepStore((state) => selectCachedPrep(state, tailoredResumeId));
+
+  // Extract data from cache
+  const prepData = cachedPrep?.prepData || null;
+  const interviewPrepId = cachedPrep?.interviewPrepId || null;
+  const readinessScore = cachedPrep?.readinessScore || null;
+  const valuesAlignment = cachedPrep?.valuesAlignment || null;
+  const companyResearch = cachedPrep?.companyResearch || null;
+  const strategicNews = cachedPrep?.strategicNews || null;
+  const competitiveIntelligence = cachedPrep?.competitiveIntelligence || null;
+  const interviewStrategy = cachedPrep?.interviewStrategy || null;
+  const executiveInsights = cachedPrep?.executiveInsights || null;
+  const certificationRecommendations = cachedPrep?.certificationRecommendations || null;
+
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
   // Debug: Log when section changes
@@ -1610,164 +188,43 @@ export default function InterviewPrepScreen() {
     setSelectedSection(newValue);
   };
 
+  // Load interview prep on mount (uses cache if available)
   useEffect(() => {
     console.log('=== InterviewPrepScreen mounted ===');
     console.log('tailoredResumeId:', tailoredResumeId);
-    loadInterviewPrep();
+    console.log('cachedPrep exists:', !!cachedPrep);
+
+    // Only fetch if not cached
+    if (!cachedPrep) {
+      getInterviewPrep(tailoredResumeId);
+    }
   }, [tailoredResumeId]);
 
-  const loadInterviewPrep = async () => {
-    setLoading(true);
-    try {
-      const result = await api.getInterviewPrep(tailoredResumeId);
-      if (result.success && result.data) {
-        const data = result.data as InterviewPrepResponse;
-        setPrepData(data.prep_data);
-        setInterviewPrepId(data.interview_prep_id);
-        // Load readiness score, values alignment, company research, strategic news, competitive intelligence, interview strategy, and executive insights after getting interview prep
-        if (data.interview_prep_id) {
-          loadReadinessScore(data.interview_prep_id);
-          loadValuesAlignment(data.interview_prep_id);
-          loadCompanyResearch(data.interview_prep_id);
-          loadStrategicNews(data.interview_prep_id);
-          loadCompetitiveIntelligence(data.interview_prep_id);
-          loadInterviewStrategy(data.interview_prep_id);
-          loadExecutiveInsights(data.interview_prep_id);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading interview prep:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadReadinessScore = async (prepId: number) => {
-    setLoadingReadiness(true);
-    try {
-      const result = await api.getInterviewReadinessScore(prepId);
-      if (result.success && result.data) {
-        setReadinessScore(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading readiness score:', error);
-    } finally {
-      setLoadingReadiness(false);
-    }
-  };
-
-  const loadValuesAlignment = async (prepId: number) => {
-    setLoadingValuesAlignment(true);
-    try {
-      const result = await api.getValuesAlignment(prepId);
-      if (result.success && result.data) {
-        setValuesAlignment(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading values alignment:', error);
-    } finally {
-      setLoadingValuesAlignment(false);
-    }
-  };
-
-  const loadCompanyResearch = async (prepId: number) => {
-    setLoadingCompanyResearch(true);
-    try {
-      const result = await api.getCompanyResearchForPrep(prepId);
-      if (result.success && result.data) {
-        setCompanyResearch(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading company research:', error);
-    } finally {
-      setLoadingCompanyResearch(false);
-    }
-  };
-
-  const loadStrategicNews = async (prepId: number) => {
-    setLoadingStrategicNews(true);
-    try {
-      const result = await api.getStrategicNews(prepId);
-      if (result.success && result.data) {
-        setStrategicNews(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading strategic news:', error);
-    } finally {
-      setLoadingStrategicNews(false);
-    }
-  };
-
-  const loadCompetitiveIntelligence = async (prepId: number) => {
-    setLoadingCompetitiveIntelligence(true);
-    try {
-      const result = await api.getCompetitiveIntelligence(prepId);
-      if (result.success && result.data) {
-        setCompetitiveIntelligence(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading competitive intelligence:', error);
-    } finally {
-      setLoadingCompetitiveIntelligence(false);
-    }
-  };
-
-  const loadInterviewStrategy = async (prepId: number) => {
-    setLoadingInterviewStrategy(true);
-    try {
-      const result = await api.getInterviewStrategy(prepId);
-      if (result.success && result.data) {
-        setInterviewStrategy(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading interview strategy:', error);
-    } finally {
-      setLoadingInterviewStrategy(false);
-    }
-  };
-
-  const loadExecutiveInsights = async (prepId: number) => {
-    setLoadingExecutiveInsights(true);
-    try {
-      const result = await api.getExecutiveInsights(prepId);
-      if (result.success && result.data) {
-        setExecutiveInsights(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading executive insights:', error);
-    } finally {
-      setLoadingExecutiveInsights(false);
-    }
-  };
-
+  // Handle generate prep
   const handleGeneratePrep = async () => {
-    setGenerating(true);
-    try {
-      const result = await api.generateInterviewPrep(tailoredResumeId);
-      if (result.success && result.data) {
-        const data = result.data as InterviewPrepResponse;
-        setPrepData(data.prep_data);
-        setInterviewPrepId(data.interview_prep_id);
-        // Load AI features after generating interview prep
-        if (data.interview_prep_id) {
-          loadReadinessScore(data.interview_prep_id);
-          loadValuesAlignment(data.interview_prep_id);
-          loadCompanyResearch(data.interview_prep_id);
-          loadStrategicNews(data.interview_prep_id);
-          loadCompetitiveIntelligence(data.interview_prep_id);
-          loadInterviewStrategy(data.interview_prep_id);
-          loadExecutiveInsights(data.interview_prep_id);
-        }
-      } else {
-        Alert.alert('Error', result.error || 'Failed to generate interview prep');
-      }
-    } catch (error) {
-      console.error('Error generating prep:', error);
+    const result = await generateInterviewPrep(tailoredResumeId);
+    if (!result) {
       Alert.alert('Error', 'Failed to generate interview prep');
-    } finally {
-      setGenerating(false);
     }
   };
+
+  // Handle refresh - force re-fetch from server
+  const handleRefresh = useCallback(() => {
+    Alert.alert(
+      'Refresh Interview Prep',
+      'This will reload all data from the server. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Refresh',
+          onPress: () => {
+            deleteInterviewPrep(tailoredResumeId);
+            getInterviewPrep(tailoredResumeId);
+          },
+        },
+      ]
+    );
+  }, [tailoredResumeId]);
 
   if (loading) {
     return (
@@ -1842,15 +299,22 @@ export default function InterviewPrepScreen() {
           <ArrowLeft color={colors.text} size={24} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Interview Prep</Text>
-        <View style={styles.headerPlaceholder} />
+        <TouchableOpacity
+          style={styles.refreshButton}
+          onPress={handleRefresh}
+          accessibilityRole="button"
+          accessibilityLabel="Refresh interview prep data"
+        >
+          <RefreshCw color={colors.textSecondary} size={20} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        {/* Job Info Card - Header */}
-        <View style={[styles.jobCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+        {/* Job Info Card - Header in Frosted Glass */}
+        <GlassCard material="thin" borderRadius={RADIUS.xl} style={styles.jobCardGlass}>
           <View style={styles.jobCardHeader}>
-            <View style={[styles.jobIcon, { backgroundColor: colors.backgroundTertiary }]}>
-              <Building2 color={COLORS.primary} size={24} />
+            <View style={[styles.jobIcon, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+              <Building2 color={COLORS.primary} size={28} />
             </View>
             <View style={styles.jobInfo}>
               <Text style={[styles.jobCompany, { color: colors.textSecondary }]}>{company_profile?.name || 'Company'}</Text>
@@ -1877,13 +341,14 @@ export default function InterviewPrepScreen() {
               </View>
             )}
           </View>
-        </View>
+        </GlassCard>
 
-        {/* Individual Frosted Glass Navigation Cards */}
+        {/* Individual Frosted Glass Navigation Cards - Expandable content below each card */}
         <View style={styles.cardStack}>
           {/* Company Insights Section */}
           <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>COMPANY INSIGHTS</Text>
 
+          {/* Company Profile Card + Expandable */}
           <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
@@ -1892,7 +357,7 @@ export default function InterviewPrepScreen() {
             >
               <View style={styles.stackedCardLeft}>
                 <View style={[styles.stackedCardIcon, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
-                  <Building2 color={COLORS.primary} size={20} />
+                  <Building2 color={COLORS.primary} size={24} />
                 </View>
                 <View style={styles.stackedCardContent}>
                   <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Company Profile</Text>
@@ -1901,10 +366,34 @@ export default function InterviewPrepScreen() {
                   </Text>
                 </View>
               </View>
-              <ChevronRight color={colors.textTertiary} size={20} />
+              {selectedSection === 'companyProfile' ? (
+                <ChevronDown color={COLORS.primary} size={20} />
+              ) : (
+                <ChevronRight color={colors.textTertiary} size={20} />
+              )}
             </TouchableOpacity>
+            {selectedSection === 'companyProfile' && (
+              <View style={[styles.expandedContent, { borderTopColor: colors.border }]}>
+                {company_profile?.overview_paragraph && (
+                  <Text style={[styles.expandedText, { color: colors.textSecondary }]}>{company_profile.overview_paragraph}</Text>
+                )}
+                {company_profile?.size_estimate && (
+                  <View style={styles.expandedRow}>
+                    <Text style={[styles.expandedLabel, { color: colors.text }]}>Company Size:</Text>
+                    <Text style={[styles.expandedValue, { color: colors.textSecondary }]}>{company_profile.size_estimate}</Text>
+                  </View>
+                )}
+                {company_profile?.industry && (
+                  <View style={styles.expandedRow}>
+                    <Text style={[styles.expandedLabel, { color: colors.text }]}>Industry:</Text>
+                    <Text style={[styles.expandedValue, { color: colors.textSecondary }]}>{company_profile.industry}</Text>
+                  </View>
+                )}
+              </View>
+            )}
           </GlassCard>
 
+          {/* Values & Culture Card + Expandable */}
           <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
@@ -1913,7 +402,7 @@ export default function InterviewPrepScreen() {
             >
               <View style={styles.stackedCardLeft}>
                 <View style={[styles.stackedCardIcon, { backgroundColor: ALPHA_COLORS.warning.bg }]}>
-                  <Heart color={COLORS.warning} size={20} />
+                  <Heart color={COLORS.warning} size={24} />
                 </View>
                 <View style={styles.stackedCardContent}>
                   <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Values & Culture</Text>
@@ -1922,10 +411,41 @@ export default function InterviewPrepScreen() {
                   </Text>
                 </View>
               </View>
-              <ChevronRight color={colors.textTertiary} size={20} />
+              {selectedSection === 'valuesCulture' ? (
+                <ChevronDown color={COLORS.warning} size={20} />
+              ) : (
+                <ChevronRight color={colors.textTertiary} size={20} />
+              )}
             </TouchableOpacity>
+            {selectedSection === 'valuesCulture' && (
+              <View style={[styles.expandedContent, { borderTopColor: colors.border }]}>
+                {values_and_culture?.stated_values && values_and_culture.stated_values.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Core Values</Text>
+                    {values_and_culture.stated_values.map((value, index) => (
+                      <View key={index} style={styles.bulletItem}>
+                        <View style={[styles.bulletDot, { backgroundColor: COLORS.warning }]} />
+                        <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{value.name || value.title || 'Unknown Value'}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+                {values_and_culture?.practical_implications && values_and_culture.practical_implications.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Practical Implications</Text>
+                    {values_and_culture.practical_implications.map((implication, index) => (
+                      <View key={index} style={styles.bulletItem}>
+                        <View style={[styles.bulletDot, { backgroundColor: COLORS.warning }]} />
+                        <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{implication}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
           </GlassCard>
 
+          {/* Strategy & News Card + Expandable */}
           <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
@@ -1934,7 +454,7 @@ export default function InterviewPrepScreen() {
             >
               <View style={styles.stackedCardLeft}>
                 <View style={[styles.stackedCardIcon, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
-                  <Newspaper color={COLORS.purple} size={20} />
+                  <Newspaper color={COLORS.purple} size={24} />
                 </View>
                 <View style={styles.stackedCardContent}>
                   <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Strategy & News</Text>
@@ -1943,13 +463,97 @@ export default function InterviewPrepScreen() {
                   </Text>
                 </View>
               </View>
-              <ChevronRight color={colors.textTertiary} size={20} />
+              {selectedSection === 'strategyNews' ? (
+                <ChevronDown color={COLORS.purple} size={20} />
+              ) : (
+                <ChevronRight color={colors.textTertiary} size={20} />
+              )}
             </TouchableOpacity>
+            {selectedSection === 'strategyNews' && (
+              <View style={[styles.expandedContent, { borderTopColor: colors.border }]}>
+                {/* Strategic Themes */}
+                {strategy_and_news?.strategic_themes && strategy_and_news.strategic_themes.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Strategic Themes</Text>
+                    {strategy_and_news.strategic_themes.map((theme, index) => (
+                      <View key={index} style={styles.strategyItem}>
+                        <View style={styles.strategyItemHeader}>
+                          <View style={[styles.strategyDot, { backgroundColor: COLORS.purple }]} />
+                          <Text style={[styles.strategyItemTitle, { color: colors.text }]}>{theme.theme || theme.name}</Text>
+                        </View>
+                        <Text style={[styles.strategyItemDesc, { color: colors.textSecondary }]}>{theme.rationale || theme.description}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* Technology Focus */}
+                {strategy_and_news?.technology_focus && strategy_and_news.technology_focus.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Technology Focus</Text>
+                    {strategy_and_news.technology_focus.map((tech, index) => (
+                      <View key={index} style={styles.techFocusItem}>
+                        <View style={[styles.techBadge, { backgroundColor: ALPHA_COLORS.info.bg }]}>
+                          <Cpu color={COLORS.info} size={14} />
+                          <Text style={[styles.techBadgeText, { color: COLORS.info }]}>{tech.technology || tech.name}</Text>
+                        </View>
+                        <Text style={[styles.techDescription, { color: colors.textSecondary }]}>{tech.description}</Text>
+                        {tech.relevance_to_role && (
+                          <View style={styles.relevanceContainer}>
+                            <Text style={[styles.relevanceLabel, { color: COLORS.success }]}>Role Relevance:</Text>
+                            <Text style={[styles.relevanceText, { color: colors.textSecondary }]}>{tech.relevance_to_role}</Text>
+                          </View>
+                        )}
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* Recent Events */}
+                {strategy_and_news?.recent_events && strategy_and_news.recent_events.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Recent Developments</Text>
+                    {strategy_and_news.recent_events.slice(0, 5).map((event, index) => (
+                      <View key={index} style={styles.newsItem}>
+                        <View style={styles.newsHeader}>
+                          <Newspaper color={COLORS.purple} size={14} />
+                          <Text style={[styles.newsTitle, { color: colors.text }]} numberOfLines={2}>
+                            {event.title || event.headline || event.summary}
+                          </Text>
+                        </View>
+                        {event.summary && event.summary !== (event.title || event.headline) && (
+                          <Text style={[styles.newsSummary, { color: colors.textSecondary }]} numberOfLines={3}>
+                            {event.summary}
+                          </Text>
+                        )}
+                        {event.impact_summary && (
+                          <View style={styles.impactContainer}>
+                            <TrendingUp color={COLORS.warning} size={12} />
+                            <Text style={[styles.impactText, { color: colors.textSecondary }]}>
+                              Impact: {event.impact_summary}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={styles.newsFooter}>
+                          {event.date && (
+                            <Text style={[styles.newsDate, { color: colors.textTertiary }]}>{event.date}</Text>
+                          )}
+                          {event.source && (
+                            <Text style={[styles.newsSource, { color: colors.textTertiary }]}>• {event.source}</Text>
+                          )}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
           </GlassCard>
 
           {/* Role & Preparation Section */}
           <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>ROLE & PREPARATION</Text>
 
+          {/* Role Analysis Card + Expandable */}
           <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
@@ -1958,7 +562,7 @@ export default function InterviewPrepScreen() {
             >
               <View style={styles.stackedCardLeft}>
                 <View style={[styles.stackedCardIcon, { backgroundColor: ALPHA_COLORS.success.bg }]}>
-                  <Target color={COLORS.success} size={20} />
+                  <Target color={COLORS.success} size={24} />
                 </View>
                 <View style={styles.stackedCardContent}>
                   <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Role Analysis</Text>
@@ -1967,10 +571,45 @@ export default function InterviewPrepScreen() {
                   </Text>
                 </View>
               </View>
-              <ChevronRight color={colors.textTertiary} size={20} />
+              {selectedSection === 'roleAnalysis' ? (
+                <ChevronDown color={COLORS.success} size={20} />
+              ) : (
+                <ChevronRight color={colors.textTertiary} size={20} />
+              )}
             </TouchableOpacity>
+            {selectedSection === 'roleAnalysis' && (
+              <View style={[styles.expandedContent, { borderTopColor: colors.border }]}>
+                {role_analysis?.core_responsibilities && role_analysis.core_responsibilities.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Core Responsibilities</Text>
+                    {role_analysis.core_responsibilities.slice(0, 5).map((resp, index) => (
+                      <View key={index} style={styles.bulletItem}>
+                        <View style={[styles.bulletDot, { backgroundColor: COLORS.success }]} />
+                        <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{resp}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+                {role_analysis?.must_have_skills && role_analysis.must_have_skills.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Must-Have Skills</Text>
+                    <View style={styles.chipContainer}>
+                      {role_analysis.must_have_skills.map((skill, index) => {
+                        const label = typeof skill === 'string' ? skill : (skill?.name || skill?.skill || '');
+                        return (
+                          <View key={index} style={[styles.chip, { backgroundColor: ALPHA_COLORS.success.bg }]}>
+                            <Text style={[styles.chipText, { color: COLORS.success }]}>{label}</Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </View>
+                )}
+              </View>
+            )}
           </GlassCard>
 
+          {/* Preparation Checklist Card + Expandable */}
           <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
@@ -1979,7 +618,7 @@ export default function InterviewPrepScreen() {
             >
               <View style={styles.stackedCardLeft}>
                 <View style={[styles.stackedCardIcon, { backgroundColor: ALPHA_COLORS.info.bg }]}>
-                  <CheckCircle color={COLORS.info} size={20} />
+                  <CheckCircle color={COLORS.info} size={24} />
                 </View>
                 <View style={styles.stackedCardContent}>
                   <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Preparation Checklist</Text>
@@ -1988,10 +627,41 @@ export default function InterviewPrepScreen() {
                   </Text>
                 </View>
               </View>
-              <ChevronRight color={colors.textTertiary} size={20} />
+              {selectedSection === 'preparation' ? (
+                <ChevronDown color={COLORS.info} size={20} />
+              ) : (
+                <ChevronRight color={colors.textTertiary} size={20} />
+              )}
             </TouchableOpacity>
+            {selectedSection === 'preparation' && (
+              <View style={[styles.expandedContent, { borderTopColor: colors.border }]}>
+                {interview_preparation?.research_tasks && interview_preparation.research_tasks.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Research Tasks</Text>
+                    {interview_preparation.research_tasks.map((task, index) => (
+                      <View key={index} style={styles.bulletItem}>
+                        <View style={[styles.bulletDot, { backgroundColor: COLORS.info }]} />
+                        <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{task}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+                {interview_preparation?.day_of_checklist && interview_preparation.day_of_checklist.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Day-of Checklist</Text>
+                    {interview_preparation.day_of_checklist.map((item: string, index: number) => (
+                      <View key={index} style={styles.bulletItem}>
+                        <View style={[styles.bulletDot, { backgroundColor: COLORS.info }]} />
+                        <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{item}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
           </GlassCard>
 
+          {/* Questions to Ask Card + Expandable */}
           <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
@@ -2000,7 +670,7 @@ export default function InterviewPrepScreen() {
             >
               <View style={styles.stackedCardLeft}>
                 <View style={[styles.stackedCardIcon, { backgroundColor: ALPHA_COLORS.danger.bg }]}>
-                  <HelpCircle color={COLORS.error} size={20} />
+                  <HelpCircle color={COLORS.error} size={24} />
                 </View>
                 <View style={styles.stackedCardContent}>
                   <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Questions to Ask</Text>
@@ -2009,10 +679,38 @@ export default function InterviewPrepScreen() {
                   </Text>
                 </View>
               </View>
-              <ChevronRight color={colors.textTertiary} size={20} />
+              {selectedSection === 'questions' ? (
+                <ChevronDown color={COLORS.error} size={20} />
+              ) : (
+                <ChevronRight color={colors.textTertiary} size={20} />
+              )}
             </TouchableOpacity>
+            {selectedSection === 'questions' && (
+              <View style={[styles.expandedContent, { borderTopColor: colors.border }]}>
+                {questions_to_ask_interviewer ? (
+                  <View style={styles.expandedSection}>
+                    {Object.entries(questions_to_ask_interviewer).map(([category, questions]) => (
+                      questions && (questions as string[]).length > 0 && (
+                        <View key={category} style={{ marginBottom: SPACING.md }}>
+                          <Text style={[styles.expandedSectionTitle, { color: colors.text, textTransform: 'capitalize' }]}>{category}</Text>
+                          {(questions as string[]).map((question: string, index: number) => (
+                            <View key={index} style={styles.bulletItem}>
+                              <View style={[styles.bulletDot, { backgroundColor: COLORS.error }]} />
+                              <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{question}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )
+                    ))}
+                  </View>
+                ) : (
+                  <Text style={[styles.expandedText, { color: colors.textSecondary }]}>No questions generated yet.</Text>
+                )}
+              </View>
+            )}
           </GlassCard>
 
+          {/* Candidate Positioning Card + Expandable */}
           <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
@@ -2021,7 +719,7 @@ export default function InterviewPrepScreen() {
             >
               <View style={styles.stackedCardLeft}>
                 <View style={[styles.stackedCardIcon, { backgroundColor: '#10b98120' }]}>
-                  <Award color="#10b981" size={20} />
+                  <Award color="#10b981" size={24} />
                 </View>
                 <View style={styles.stackedCardContent}>
                   <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Candidate Positioning</Text>
@@ -2030,8 +728,108 @@ export default function InterviewPrepScreen() {
                   </Text>
                 </View>
               </View>
-              <ChevronRight color={colors.textTertiary} size={20} />
+              {selectedSection === 'positioning' ? (
+                <ChevronDown color="#10b981" size={20} />
+              ) : (
+                <ChevronRight color={colors.textTertiary} size={20} />
+              )}
             </TouchableOpacity>
+            {selectedSection === 'positioning' && (
+              <View style={[styles.expandedContent, { borderTopColor: colors.border }]}>
+                {/* Resume Focus Areas */}
+                {candidate_positioning?.resume_focus_areas && candidate_positioning.resume_focus_areas.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Resume Focus Areas</Text>
+                    <Text style={[styles.sectionHint, { color: colors.textTertiary }]}>Key areas to highlight in your resume</Text>
+                    {candidate_positioning.resume_focus_areas.map((area, index) => (
+                      <View key={index} style={styles.focusAreaItem}>
+                        <View style={[styles.focusAreaNumber, { backgroundColor: '#10b98120' }]}>
+                          <Text style={[styles.focusAreaNumberText, { color: '#10b981' }]}>{index + 1}</Text>
+                        </View>
+                        <Text style={[styles.focusAreaText, { color: colors.textSecondary }]}>{area}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* Keyword Mapping */}
+                {candidate_positioning?.keyword_map && candidate_positioning.keyword_map.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Keyword Translation</Text>
+                    <Text style={[styles.sectionHint, { color: colors.textTertiary }]}>Map your experience to company terminology</Text>
+                    {candidate_positioning.keyword_map.map((keyword, index) => (
+                      <View key={index} style={[styles.keywordMapItem, { backgroundColor: colors.backgroundTertiary }]}>
+                        <View style={styles.keywordRow}>
+                          <View style={[styles.keywordBadge, { backgroundColor: ALPHA_COLORS.info.bg }]}>
+                            <Text style={[styles.keywordBadgeText, { color: COLORS.info }]}>Company uses</Text>
+                          </View>
+                          <Text style={[styles.keywordText, { color: colors.text }]}>{keyword.company_term || keyword.term}</Text>
+                        </View>
+                        <View style={styles.keywordArrow}>
+                          <ChevronDown color={colors.textTertiary} size={16} />
+                        </View>
+                        <View style={styles.keywordRow}>
+                          <View style={[styles.keywordBadge, { backgroundColor: '#10b98120' }]}>
+                            <Text style={[styles.keywordBadgeText, { color: '#10b981' }]}>You say</Text>
+                          </View>
+                          <Text style={[styles.keywordText, { color: colors.text }]}>{keyword.candidate_equivalent || keyword.equivalent}</Text>
+                        </View>
+                        {keyword.context && (
+                          <Text style={[styles.keywordContext, { color: colors.textTertiary }]}>{keyword.context}</Text>
+                        )}
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* Story Prompts */}
+                {candidate_positioning?.story_prompts && candidate_positioning.story_prompts.length > 0 && (
+                  <View style={styles.expandedSection}>
+                    <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Story Prompts for Interviews</Text>
+                    <Text style={[styles.sectionHint, { color: colors.textTertiary }]}>STAR story ideas based on your experience</Text>
+                    {candidate_positioning.story_prompts.map((prompt, index) => (
+                      <View key={index} style={[styles.storyPromptCard, { backgroundColor: colors.backgroundTertiary, borderLeftColor: '#10b981' }]}>
+                        <View style={styles.storyPromptHeader}>
+                          <Star color="#f59e0b" size={16} />
+                          <Text style={[styles.storyPromptTitle, { color: colors.text }]}>{prompt.title}</Text>
+                        </View>
+                        <Text style={[styles.storyPromptDescription, { color: colors.textSecondary }]}>{prompt.description}</Text>
+                        {prompt.star_hint && (
+                          <View style={styles.starHintContainer}>
+                            <Text style={[styles.starHintLabel, { color: colors.textTertiary }]}>STAR Hint:</Text>
+                            <View style={styles.starHintRow}>
+                              <Text style={[styles.starLetter, { color: COLORS.success }]}>S</Text>
+                              <Text style={[styles.starHintText, { color: colors.textSecondary }]} numberOfLines={2}>{prompt.star_hint.situation}</Text>
+                            </View>
+                            <View style={styles.starHintRow}>
+                              <Text style={[styles.starLetter, { color: COLORS.info }]}>T</Text>
+                              <Text style={[styles.starHintText, { color: colors.textSecondary }]} numberOfLines={2}>{prompt.star_hint.task}</Text>
+                            </View>
+                            <View style={styles.starHintRow}>
+                              <Text style={[styles.starLetter, { color: COLORS.purple }]}>A</Text>
+                              <Text style={[styles.starHintText, { color: colors.textSecondary }]} numberOfLines={2}>{prompt.star_hint.action}</Text>
+                            </View>
+                            <View style={styles.starHintRow}>
+                              <Text style={[styles.starLetter, { color: COLORS.warning }]}>R</Text>
+                              <Text style={[styles.starHintText, { color: colors.textSecondary }]} numberOfLines={2}>{prompt.star_hint.result}</Text>
+                            </View>
+                          </View>
+                        )}
+                      </View>
+                    ))}
+                    {/* Build Stories Button */}
+                    <TouchableOpacity
+                      style={[styles.buildStoriesButton, { backgroundColor: '#10b98120' }]}
+                      onPress={() => navigation.navigate('STARStoryBuilder' as any, { interviewPrepId, tailoredResumeId })}
+                    >
+                      <Star color="#10b981" size={18} />
+                      <Text style={[styles.buildStoriesButtonText, { color: '#10b981' }]}>Build Full STAR Stories</Text>
+                      <ChevronRight color="#10b981" size={18} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
           </GlassCard>
 
           {/* AI Practice Section */}
@@ -2125,335 +923,73 @@ export default function InterviewPrepScreen() {
                   <ChevronRight color={colors.textTertiary} size={20} />
                 </TouchableOpacity>
               </GlassCard>
+
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+                <TouchableOpacity
+                  style={styles.stackedCardItem}
+                  onPress={() => {
+                    console.log('=== AI Card Pressed: STARStoryBuilder ===');
+                    navigation.navigate('STARStoryBuilder' as any, { interviewPrepId, tailoredResumeId });
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.stackedCardLeft}>
+                    <View style={[styles.stackedCardIcon, { backgroundColor: '#f59e0b20' }]}>
+                      <Star color="#f59e0b" size={20} />
+                    </View>
+                    <View style={styles.stackedCardContent}>
+                      <View style={styles.stackedCardTitleRow}>
+                        <Text style={[styles.stackedCardTitle, { color: colors.text }]}>STAR Story Builder</Text>
+                        <View style={styles.aiBadge}>
+                          <Text style={styles.aiBadgeText}>AI</Text>
+                        </View>
+                      </View>
+                      <Text style={[styles.stackedCardSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+                        Build stories from your experiences
+                      </Text>
+                    </View>
+                  </View>
+                  <ChevronRight color={colors.textTertiary} size={20} />
+                </TouchableOpacity>
+              </GlassCard>
+
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+                <TouchableOpacity
+                  style={styles.stackedCardItem}
+                  onPress={() => {
+                    console.log('=== AI Card Pressed: Certifications ===');
+                    navigation.navigate('Certifications' as any, { interviewPrepId });
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.stackedCardLeft}>
+                    <View style={[styles.stackedCardIcon, { backgroundColor: '#8b5cf620' }]}>
+                      <Award color="#8b5cf6" size={20} />
+                    </View>
+                    <View style={styles.stackedCardContent}>
+                      <View style={styles.stackedCardTitleRow}>
+                        <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Certifications</Text>
+                        {loadingCertifications ? (
+                          <ActivityIndicator size="small" color="#8b5cf6" style={{ marginLeft: 8 }} />
+                        ) : certificationRecommendations ? (
+                          <CheckCircle color={COLORS.success} size={16} style={{ marginLeft: 8 }} />
+                        ) : (
+                          <View style={styles.aiBadge}>
+                            <Text style={styles.aiBadgeText}>AI</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={[styles.stackedCardSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+                        {loadingCertifications ? 'Loading recommendations...' : 'Recommended certifications for this role'}
+                      </Text>
+                    </View>
+                  </View>
+                  <ChevronRight color={colors.textTertiary} size={20} />
+                </TouchableOpacity>
+              </GlassCard>
             </>
           )}
         </View>
-
-        {/* Expandable Detail Sections - Show below grid when selected */}
-        {selectedSection === 'companyProfile' && (
-          <ExpandableSection
-            title="Company Profile"
-            icon={<Building2 color={COLORS.primary} size={20} />}
-            defaultExpanded={true}
-            accentColor={COLORS.primary}
-            colors={colors}
-          >
-            {company_profile?.overview_paragraph && (
-              <Text style={[styles.overviewText, { color: colors.textSecondary }]}>{company_profile.overview_paragraph}</Text>
-            )}
-            {company_profile?.size_estimate && (
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoLabel, { color: colors.text }]}>Company Size:</Text>
-                <Text style={[styles.infoValue, { color: colors.textSecondary }]}>{company_profile.size_estimate}</Text>
-              </View>
-            )}
-          </ExpandableSection>
-        )}
-
-        {/* Role Analysis Section */}
-        {selectedSection === 'roleAnalysis' && (
-        <ExpandableSection
-          title="Role Analysis"
-          icon={<Target color={COLORS.purple} size={20} />}
-          accentColor={COLORS.purple}
-          defaultExpanded={true}
-          colors={colors}
-        >
-          {role_analysis?.core_responsibilities && Array.isArray(role_analysis.core_responsibilities) && role_analysis.core_responsibilities.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Core Responsibilities</Text>
-              <BulletList items={role_analysis.core_responsibilities} textColor={colors.textSecondary} />
-            </View>
-          )}
-          {role_analysis?.must_have_skills && Array.isArray(role_analysis.must_have_skills) && role_analysis.must_have_skills.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Must-Have Skills</Text>
-              <View style={styles.chipContainer}>
-                {role_analysis.must_have_skills.map((skill, index) => {
-                  const label = typeof skill === 'string' ? skill : (skill?.name || skill?.skill || JSON.stringify(skill));
-                  return <Chip key={index} label={label} color={COLORS.success} />;
-                })}
-              </View>
-            </View>
-          )}
-          {role_analysis?.nice_to_have_skills && Array.isArray(role_analysis.nice_to_have_skills) && role_analysis.nice_to_have_skills.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Nice-to-Have Skills</Text>
-              <View style={styles.chipContainer}>
-                {role_analysis.nice_to_have_skills.map((skill, index) => {
-                  const label = typeof skill === 'string' ? skill : (skill?.name || skill?.skill || JSON.stringify(skill));
-                  return <Chip key={index} label={label} color={colors.textSecondary} />;
-                })}
-              </View>
-            </View>
-          )}
-          {role_analysis?.success_signals_6_12_months && Array.isArray(role_analysis.success_signals_6_12_months) && role_analysis.success_signals_6_12_months.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Success Signals (6-12 Months)</Text>
-              <BulletList
-                items={role_analysis.success_signals_6_12_months}
-                icon={<Star color={COLORS.warning} size={12} />}
-                textColor={colors.textSecondary}
-              />
-            </View>
-          )}
-        </ExpandableSection>
-        )}
-
-        {/* Values & Culture Section */}
-        {selectedSection === 'valuesCulture' && (
-        <ExpandableSection
-          title="Values & Culture"
-          icon={<Heart color={COLORS.error} size={20} />}
-          accentColor={COLORS.error}
-          defaultExpanded={true}
-          colors={colors}
-        >
-          {values_and_culture?.stated_values && Array.isArray(values_and_culture.stated_values) && values_and_culture.stated_values.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Company Values</Text>
-              {values_and_culture.stated_values.map((value, index) => {
-                // Handle case where value might be a string or object
-                const name = typeof value === 'string' ? value : (value?.name || value?.title || '');
-                const description = typeof value === 'object' ? (value?.description || value?.source_snippet || '') : '';
-
-                return (
-                  <View key={index} style={[styles.valueCard, { backgroundColor: colors.backgroundTertiary }]}>
-                    <Text style={[styles.valueName, { color: colors.text }]}>{name}</Text>
-                    {description ? (
-                      <Text style={[styles.valueDescription, { color: colors.textSecondary }]}>{description}</Text>
-                    ) : null}
-                  </View>
-                );
-              })}
-            </View>
-          )}
-          {values_and_culture?.practical_implications && Array.isArray(values_and_culture.practical_implications) && values_and_culture.practical_implications.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>What This Means for You</Text>
-              <BulletList items={values_and_culture.practical_implications} textColor={colors.textSecondary} />
-            </View>
-          )}
-        </ExpandableSection>
-        )}
-
-        {/* Strategy & News Section */}
-        {selectedSection === 'strategyNews' && (
-        <ExpandableSection
-          title="Strategy & Recent News"
-          icon={<Newspaper color={COLORS.info} size={20} />}
-          accentColor={COLORS.info}
-          defaultExpanded={true}
-          colors={colors}
-        >
-          {strategy_and_news?.strategic_themes && Array.isArray(strategy_and_news.strategic_themes) && strategy_and_news.strategic_themes.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Strategic Themes</Text>
-              {strategy_and_news.strategic_themes.map((theme, index) => {
-                const themeName = typeof theme === 'string' ? theme : (theme?.theme || theme?.name || '');
-                const rationale = typeof theme === 'object' ? (theme?.rationale || theme?.description || '') : '';
-
-                return (
-                  <View key={index} style={[styles.themeCard, { backgroundColor: colors.backgroundTertiary }]}>
-                    <Text style={[styles.themeName, { color: colors.text }]}>{themeName}</Text>
-                    {rationale ? <Text style={[styles.themeRationale, { color: colors.textSecondary }]}>{rationale}</Text> : null}
-                  </View>
-                );
-              })}
-            </View>
-          )}
-          {strategy_and_news?.technology_focus && Array.isArray(strategy_and_news.technology_focus) && strategy_and_news.technology_focus.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Technology Focus</Text>
-              {strategy_and_news.technology_focus.map((tech, index) => {
-                const techName = typeof tech === 'string' ? tech : (tech?.technology || tech?.name || '');
-                const description = typeof tech === 'object' ? (tech?.description || '') : '';
-                const relevance = typeof tech === 'object' ? (tech?.relevance_to_role || '') : '';
-
-                return (
-                  <View key={index} style={[styles.techCard, { backgroundColor: colors.backgroundTertiary }]}>
-                    <Text style={styles.techName}>{techName}</Text>
-                    {description ? <Text style={[styles.techDescription, { color: colors.textSecondary }]}>{description}</Text> : null}
-                    {relevance ? <Text style={[styles.techRelevance, { color: colors.textTertiary }]}>Relevance: {relevance}</Text> : null}
-                  </View>
-                );
-              })}
-            </View>
-          )}
-          {strategy_and_news?.recent_events && Array.isArray(strategy_and_news.recent_events) && strategy_and_news.recent_events.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Recent News</Text>
-              {strategy_and_news.recent_events.slice(0, 5).map((event, index) => {
-                const headline = typeof event === 'string' ? event : (event?.title || event?.headline || '');
-                const date = typeof event === 'object' ? (event?.date || '') : '';
-                const source = typeof event === 'object' ? (event?.source || '') : '';
-                const summary = typeof event === 'object' ? (event?.summary || '') : '';
-                const impact = typeof event === 'object' ? (event?.impact_summary || '') : '';
-
-                return (
-                  <View key={index} style={[styles.newsItem, { backgroundColor: colors.backgroundTertiary }]}>
-                    <Text style={[styles.newsHeadline, { color: colors.text }]}>{headline}</Text>
-                    {date ? <Text style={[styles.newsDate, { color: colors.textTertiary }]}>{date}</Text> : null}
-                    {source ? <Text style={[styles.newsSource, { color: colors.textTertiary }]}>Source: {source}</Text> : null}
-                    {summary ? <Text style={[styles.newsSummary, { color: colors.textSecondary }]}>{summary}</Text> : null}
-                    {impact ? <Text style={styles.newsImpact}>Impact: {impact}</Text> : null}
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </ExpandableSection>
-        )}
-
-        {/* Interview Preparation Section */}
-        {selectedSection === 'preparation' && (
-        <ExpandableSection
-          title="Preparation Checklist"
-          icon={<ClipboardList color={COLORS.success} size={20} />}
-          accentColor={COLORS.success}
-          defaultExpanded={true}
-          colors={colors}
-        >
-          {interview_preparation?.research_tasks && Array.isArray(interview_preparation.research_tasks) && interview_preparation.research_tasks.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Research Tasks</Text>
-              <BulletList
-                items={interview_preparation.research_tasks}
-                icon={<CheckCircle color={COLORS.success} size={14} />}
-                textColor={colors.textSecondary}
-              />
-            </View>
-          )}
-          {interview_preparation?.day_of_checklist && Array.isArray(interview_preparation.day_of_checklist) && interview_preparation.day_of_checklist.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Day-of Checklist</Text>
-              <BulletList
-                items={interview_preparation.day_of_checklist}
-                icon={<CheckCircle color={COLORS.warning} size={14} />}
-                textColor={colors.textSecondary}
-              />
-            </View>
-          )}
-          {interview_preparation?.practice_questions_for_candidate && Array.isArray(interview_preparation.practice_questions_for_candidate) && interview_preparation.practice_questions_for_candidate.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Practice Questions</Text>
-              {interview_preparation.practice_questions_for_candidate.map((question, index) => {
-                const questionText = typeof question === 'string' ? question : (question?.question || question?.text || JSON.stringify(question));
-                return (
-                  <View key={index} style={[styles.practiceQuestion, { backgroundColor: colors.backgroundTertiary }]}>
-                    <HelpCircle color={COLORS.primary} size={16} />
-                    <Text style={[styles.practiceQuestionText, { color: colors.textSecondary }]}>{questionText}</Text>
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </ExpandableSection>
-        )}
-
-        {/* Questions to Ask Section */}
-        {selectedSection === 'questions' && (
-        <ExpandableSection
-          title="Questions to Ask"
-          icon={<MessageCircle color={COLORS.warning} size={20} />}
-          accentColor={COLORS.warning}
-          defaultExpanded={true}
-          colors={colors}
-        >
-          {questions_to_ask_interviewer?.product && Array.isArray(questions_to_ask_interviewer.product) && questions_to_ask_interviewer.product.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>About the Product</Text>
-              <BulletList items={questions_to_ask_interviewer.product} textColor={colors.textSecondary} />
-            </View>
-          )}
-          {questions_to_ask_interviewer?.team && Array.isArray(questions_to_ask_interviewer.team) && questions_to_ask_interviewer.team.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>About the Team</Text>
-              <BulletList items={questions_to_ask_interviewer.team} textColor={colors.textSecondary} />
-            </View>
-          )}
-          {questions_to_ask_interviewer?.culture && Array.isArray(questions_to_ask_interviewer.culture) && questions_to_ask_interviewer.culture.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>About Culture</Text>
-              <BulletList items={questions_to_ask_interviewer.culture} textColor={colors.textSecondary} />
-            </View>
-          )}
-          {questions_to_ask_interviewer?.performance && Array.isArray(questions_to_ask_interviewer.performance) && questions_to_ask_interviewer.performance.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>About Performance</Text>
-              <BulletList items={questions_to_ask_interviewer.performance} textColor={colors.textSecondary} />
-            </View>
-          )}
-          {questions_to_ask_interviewer?.strategy && Array.isArray(questions_to_ask_interviewer.strategy) && questions_to_ask_interviewer.strategy.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>About Strategy</Text>
-              <BulletList items={questions_to_ask_interviewer.strategy} textColor={colors.textSecondary} />
-            </View>
-          )}
-        </ExpandableSection>
-        )}
-
-        {/* Candidate Positioning Section */}
-        {selectedSection === 'positioning' && (
-        <ExpandableSection
-          title="Your Positioning"
-          icon={<Award color={COLORS.purple} size={20} />}
-          accentColor={COLORS.purple}
-          defaultExpanded={true}
-          colors={colors}
-        >
-          {candidate_positioning?.resume_focus_areas && Array.isArray(candidate_positioning.resume_focus_areas) && candidate_positioning.resume_focus_areas.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Resume Focus Areas</Text>
-              <BulletList items={candidate_positioning.resume_focus_areas} textColor={colors.textSecondary} />
-            </View>
-          )}
-          {candidate_positioning?.story_prompts && Array.isArray(candidate_positioning.story_prompts) && candidate_positioning.story_prompts.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>STAR Story Prompts</Text>
-              {candidate_positioning.story_prompts.map((prompt, index) => {
-                // Handle case where prompt might be a string or have different structure
-                const title = typeof prompt === 'string' ? prompt : (prompt?.title || '');
-                const description = typeof prompt === 'object' ? (prompt?.description || '') : '';
-
-                return (
-                  <View key={index} style={[styles.storyPromptCard, { backgroundColor: colors.backgroundTertiary }]}>
-                    <View style={styles.storyPromptHeader}>
-                      <Lightbulb color={COLORS.warning} size={16} />
-                      <Text style={[styles.storyPromptTitle, { color: colors.text }]}>{title}</Text>
-                    </View>
-                    {description ? (
-                      <Text style={[styles.storyPromptDescription, { color: colors.textSecondary }]}>{description}</Text>
-                    ) : null}
-                  </View>
-                );
-              })}
-            </View>
-          )}
-          {candidate_positioning?.keyword_map && Array.isArray(candidate_positioning.keyword_map) && candidate_positioning.keyword_map.length > 0 && (
-            <View style={styles.subsection}>
-              <Text style={[styles.subsectionTitle, { color: colors.text }]}>Keywords to Use</Text>
-              {candidate_positioning.keyword_map.map((item, index) => {
-                // Handle case where item structure might vary
-                const companyTerm = item?.company_term || item?.term || '';
-                const candidateEquivalent = item?.candidate_equivalent || item?.equivalent || '';
-                const context = item?.context || '';
-
-                return (
-                  <View key={index} style={[styles.keywordItem, { backgroundColor: colors.backgroundTertiary }]}>
-                    <Text style={styles.keywordLabel}>
-                      {companyTerm} → {candidateEquivalent}
-                    </Text>
-                    {context ? (
-                      <Text style={[styles.keywordContext, { color: colors.textSecondary }]}>{context}</Text>
-                    ) : null}
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </ExpandableSection>
-        )}
 
         {/* Bottom padding */}
         <View style={{ height: SPACING.xl }} />
@@ -2495,6 +1031,12 @@ const styles = StyleSheet.create({
   },
   headerPlaceholder: {
     width: 44,
+  },
+  refreshButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     flex: 1,
@@ -2608,6 +1150,78 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.semibold,
     color: '#FFFFFF',
   },
+  // Expanded content styles for inline card expansion
+  expandedContent: {
+    borderTopWidth: 1,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+  },
+  expandedText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 22,
+    marginBottom: SPACING.md,
+  },
+  expandedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  expandedLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    marginRight: SPACING.sm,
+  },
+  expandedValue: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    flex: 1,
+  },
+  expandedSection: {
+    marginBottom: SPACING.md,
+  },
+  expandedSectionTitle: {
+    fontSize: 15,
+    fontFamily: FONTS.semibold,
+    marginBottom: SPACING.sm,
+  },
+  bulletItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.sm,
+  },
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginTop: 7,
+    marginRight: SPACING.sm,
+  },
+  bulletText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+    flex: 1,
+  },
+  chip: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.sm,
+    marginRight: SPACING.xs,
+    marginBottom: SPACING.xs,
+  },
+  chipText: {
+    fontSize: 12,
+    fontFamily: FONTS.medium,
+  },
+  chipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  // Job card in glass
+  jobCardGlass: {
+    marginBottom: SPACING.lg,
+  },
   jobCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -2707,41 +1321,6 @@ const styles = StyleSheet.create({
   },
   bulletList: {
     marginTop: SPACING.xs,
-  },
-  bulletItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.sm,
-    paddingRight: SPACING.md,
-  },
-  bulletDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: COLORS.primary,
-    marginTop: 6,
-    marginRight: SPACING.sm,
-  },
-  bulletText: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
-    lineHeight: 20,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.xs,
-    marginTop: SPACING.xs,
-  },
-  chip: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: RADIUS.sm,
-  },
-  chipText: {
-    fontSize: 12,
-    fontFamily: FONTS.medium,
   },
   valueCard: {
     borderRadius: RADIUS.md,
@@ -2845,6 +1424,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
+    borderLeftWidth: 3,
   },
   storyPromptHeader: {
     flexDirection: 'row',
@@ -2983,7 +1563,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 12,
     borderRadius: RADIUS.full,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: ALPHA_COLORS.white[10],
     borderWidth: 1,
     overflow: 'hidden',
   },
@@ -3047,7 +1627,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: ALPHA_COLORS.white[5],
   },
   valuesMatchHeader: {
     flexDirection: 'row',
@@ -3076,7 +1656,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: ALPHA_COLORS.white[5],
   },
   valuesGapHeader: {
     flexDirection: 'row',
@@ -3334,13 +1914,13 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: ALPHA_COLORS.white[5],
   },
   strategicNewsSection: {
     marginBottom: SPACING.md,
   },
   relevanceSection: {
-    backgroundColor: 'rgba(52, 152, 219, 0.05)',
+    backgroundColor: ALPHA_COLORS.info.bg,
     padding: SPACING.md,
     borderRadius: RADIUS.sm,
     borderLeftWidth: 3,
@@ -3784,5 +2364,199 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: FONTS.medium,
     lineHeight: 20,
+  },
+  // Enhanced Strategy & News Styles
+  strategyItem: {
+    marginBottom: SPACING.md,
+  },
+  strategyItemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  strategyDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: SPACING.sm,
+  },
+  strategyItemTitle: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  strategyItemDesc: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+    marginLeft: SPACING.md + 8,
+  },
+  techFocusItem: {
+    marginBottom: SPACING.md,
+  },
+  techBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  techBadgeText: {
+    fontSize: 13,
+    fontFamily: FONTS.semibold,
+  },
+  relevanceContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 6,
+    paddingLeft: SPACING.xs,
+  },
+  relevanceLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    marginRight: 4,
+  },
+  relevanceText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    lineHeight: 16,
+  },
+  newsHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: 6,
+  },
+  newsTitle: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    lineHeight: 20,
+  },
+  impactContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 6,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    backgroundColor: ALPHA_COLORS.warning.bg,
+    borderRadius: RADIUS.sm,
+    alignSelf: 'flex-start',
+  },
+  impactText: {
+    fontSize: 12,
+    fontFamily: FONTS.medium,
+    lineHeight: 16,
+  },
+  newsFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  // Enhanced Candidate Positioning Styles
+  sectionHint: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    marginBottom: SPACING.md,
+    fontStyle: 'italic',
+  },
+  focusAreaItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.sm,
+  },
+  focusAreaNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+  },
+  focusAreaNumberText: {
+    fontSize: 12,
+    fontFamily: FONTS.bold,
+  },
+  focusAreaText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+    paddingTop: 2,
+  },
+  keywordMapItem: {
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    marginBottom: SPACING.md,
+  },
+  keywordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  keywordArrow: {
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  keywordBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
+  keywordBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+    textTransform: 'uppercase',
+  },
+  keywordText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.medium,
+  },
+  starHintContainer: {
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: ALPHA_COLORS.white[10],
+  },
+  starHintLabel: {
+    fontSize: 11,
+    fontFamily: FONTS.semibold,
+    textTransform: 'uppercase',
+    marginBottom: SPACING.xs,
+  },
+  starHintRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  starLetter: {
+    width: 20,
+    fontSize: 14,
+    fontFamily: FONTS.bold,
+    marginRight: 4,
+  },
+  starHintText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    lineHeight: 16,
+  },
+  buildStoriesButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
+    marginTop: SPACING.md,
+  },
+  buildStoriesButtonText: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
   },
 });

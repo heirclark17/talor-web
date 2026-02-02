@@ -13,11 +13,13 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { BookOpen, Trash2, X, Plus } from 'lucide-react-native';
+import { BookOpen, Trash2, X, Plus, ArrowLeft, BarChart3, Lightbulb, Copy, TrendingUp } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useTheme } from '../hooks/useTheme';
+import { STARStoryBuilder } from '../components';
 
 interface StarStory {
   id: number;
@@ -38,11 +40,27 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function StarStoriesScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const [stories, setStories] = useState<StarStory[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [selectedStory, setSelectedStory] = useState<StarStory | null>(null);
+  const [showBuilder, setShowBuilder] = useState(false);
+  const [editingStory, setEditingStory] = useState<StarStory | null>(null);
+
+  // Feature #18: Story Analysis
+  const [storyAnalysis, setStoryAnalysis] = useState<any>(null);
+  const [analyzingStoryId, setAnalyzingStoryId] = useState<number | null>(null);
+
+  // Feature #19: Story Suggestions
+  const [storySuggestions, setStorySuggestions] = useState<any>(null);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+  // Feature #20: Story Variations
+  const [storyVariations, setStoryVariations] = useState<any>(null);
+  const [generatingVariations, setGeneratingVariations] = useState(false);
+  const [showVariationsModal, setShowVariationsModal] = useState(false);
 
   const loadStories = async () => {
     try {
@@ -115,28 +133,130 @@ export default function StarStoriesScreen() {
     });
   };
 
+  const handleSaveStory = async (story: any) => {
+    try {
+      const result = await api.createStarStory({
+        title: story.title,
+        situation: story.situation,
+        task: story.task,
+        action: story.action,
+        result: story.result,
+        key_themes: story.key_themes,
+        talking_points: story.talking_points,
+      });
+
+      if (result.success) {
+        setShowBuilder(false);
+        setEditingStory(null);
+        loadStories();
+        Alert.alert('Success', 'STAR story saved successfully!');
+      } else {
+        Alert.alert('Error', result.error || 'Failed to save STAR story');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save STAR story');
+    }
+  };
+
+  const handleGenerateAI = async (title: string) => {
+    // AI generation requires a tailored resume context
+    // For standalone STAR story creation, return null to indicate
+    // that the user should manually fill in the story details
+    console.log('AI STAR story generation requested for:', title);
+    Alert.alert(
+      'Manual Entry Required',
+      'Please fill in your STAR story details manually. AI-assisted generation is available when creating stories from your tailored resume context.'
+    );
+    return null;
+  };
+
+  // Feature #18: Analyze STAR Story
+  const handleAnalyzeStory = async (storyId: number) => {
+    setAnalyzingStoryId(storyId);
+    setStoryAnalysis(null);
+
+    try {
+      const result = await api.analyzeStarStory(storyId);
+
+      if (result.success && result.data) {
+        setStoryAnalysis(result.data);
+      } else {
+        Alert.alert('Analysis Failed', result.error || 'Could not analyze STAR story');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to analyze story');
+    } finally {
+      setAnalyzingStoryId(null);
+    }
+  };
+
+  // Feature #19: Get Story Suggestions
+  const handleGetSuggestions = async (storyId: number) => {
+    setLoadingSuggestions(true);
+    setStorySuggestions(null);
+
+    try {
+      const result = await api.getStorySuggestions(storyId);
+
+      if (result.success && result.data) {
+        setStorySuggestions(result.data);
+      } else {
+        Alert.alert('Suggestions Failed', result.error || 'Could not get story suggestions');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to get suggestions');
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  // Feature #20: Generate Story Variations
+  const handleGenerateVariations = async (storyId: number) => {
+    setGeneratingVariations(true);
+    setStoryVariations(null);
+
+    try {
+      const result = await api.generateStoryVariations({
+        storyId: storyId,
+        contexts: ['technical_interview', 'behavioral_interview', 'executive_presentation', 'networking'],
+        tones: ['professional', 'conversational', 'enthusiastic'],
+      });
+
+      if (result.success && result.data) {
+        setStoryVariations(result.data);
+        setShowVariationsModal(true);
+      } else {
+        Alert.alert('Generation Failed', result.error || 'Could not generate story variations');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to generate variations');
+    } finally {
+      setGeneratingVariations(false);
+    }
+  };
+
   const renderStoryCard = ({ item }: { item: StarStory }) => (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
       onPress={() => setSelectedStory(item)}
       accessibilityRole="button"
       accessibilityLabel={`STAR story: ${item.title || 'Untitled'}`}
       accessibilityHint={`Theme: ${item.story_theme || 'No theme'}. Created ${formatDate(item.created_at)}`}
     >
       <View style={styles.cardContent}>
-        <View style={styles.iconContainer}>
+        <View style={[styles.iconContainer, { backgroundColor: colors.backgroundTertiary }]}>
           <BookOpen color={COLORS.primary} size={24} />
         </View>
         <View style={styles.cardText}>
-          <Text style={styles.cardTitle} numberOfLines={1}>
+          <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>
             {item.title || 'Untitled Story'}
           </Text>
           {item.story_theme && (
-            <Text style={styles.cardTheme} numberOfLines={1}>
+            <Text style={[styles.cardTheme, { color: colors.textSecondary }]} numberOfLines={1}>
               {item.story_theme}
             </Text>
           )}
-          <Text style={styles.cardDate}>{formatDate(item.created_at)}</Text>
+          <Text style={[styles.cardDate, { color: colors.textTertiary }]}>{formatDate(item.created_at)}</Text>
         </View>
       </View>
       <TouchableOpacity
@@ -163,21 +283,21 @@ export default function StarStoriesScreen() {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <View style={styles.emptyIcon}>
-        <BookOpen color={COLORS.dark.textTertiary} size={64} />
+        <BookOpen color={colors.textTertiary} size={64} />
       </View>
-      <Text style={styles.emptyTitle}>No STAR Stories</Text>
-      <Text style={styles.emptyText}>
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>No STAR Stories</Text>
+      <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
         Create behavioral interview stories using the Situation, Task, Action, Result framework.
       </Text>
       <TouchableOpacity
-        style={styles.createButton}
+        style={[styles.createButton, { backgroundColor: colors.text }]}
         onPress={() => {
-          // TODO: Navigate to create STAR story screen
-          Alert.alert('Coming Soon', 'STAR story creation screen coming soon!');
+          setEditingStory(null);
+          setShowBuilder(true);
         }}
       >
-        <Plus color={COLORS.dark.background} size={20} />
-        <Text style={styles.createButtonText}>Create Story</Text>
+        <Plus color={colors.background} size={20} />
+        <Text style={[styles.createButtonText, { color: colors.background }]}>Create Story</Text>
       </TouchableOpacity>
     </View>
   );
@@ -187,7 +307,7 @@ export default function StarStoriesScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading STAR stories...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading STAR stories...</Text>
         </View>
       </SafeAreaView>
     );
@@ -196,13 +316,13 @@ export default function StarStoriesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>STAR Stories</Text>
+        <Text style={[styles.title, { color: colors.text }]}>STAR Stories</Text>
         {stories.length > 0 && (
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => {
-              // TODO: Navigate to create STAR story screen
-              Alert.alert('Coming Soon', 'STAR story creation screen coming soon!');
+              setEditingStory(null);
+              setShowBuilder(true);
             }}
           >
             <Plus color={COLORS.primary} size={24} />
@@ -225,6 +345,45 @@ export default function StarStoriesScreen() {
         }
       />
 
+      {/* STAR Story Builder Modal */}
+      <Modal
+        visible={showBuilder}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setShowBuilder(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowBuilder(false)}
+            >
+              <ArrowLeft color={colors.text} size={24} />
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {editingStory ? 'Edit STAR Story' : 'New STAR Story'}
+            </Text>
+            <View style={styles.headerPlaceholder} />
+          </View>
+
+          <STARStoryBuilder
+            initialStory={editingStory ? {
+              id: editingStory.id.toString(),
+              title: editingStory.title,
+              situation: editingStory.situation,
+              task: editingStory.task,
+              action: editingStory.action,
+              result: editingStory.result,
+              key_themes: editingStory.key_themes || [],
+              talking_points: editingStory.talking_points || [],
+            } : undefined}
+            onSave={handleSaveStory}
+            onCancel={() => setShowBuilder(false)}
+            onGenerateAI={handleGenerateAI}
+          />
+        </SafeAreaView>
+      </Modal>
+
       {/* Story Detail Modal */}
       <Modal
         visible={selectedStory !== null}
@@ -239,55 +398,256 @@ export default function StarStoriesScreen() {
                 style={styles.closeButton}
                 onPress={() => setSelectedStory(null)}
               >
-                <X color={COLORS.dark.text} size={24} />
+                <X color={colors.text} size={24} />
               </TouchableOpacity>
-              <Text style={styles.modalTitle}>STAR Story</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>STAR Story</Text>
               <View style={styles.headerPlaceholder} />
             </View>
 
             <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentContainer}>
-              <Text style={styles.storyTitle}>{selectedStory.title || 'Untitled Story'}</Text>
+              <Text style={[styles.storyTitle, { color: colors.text }]}>{selectedStory.title || 'Untitled Story'}</Text>
 
               {selectedStory.story_theme && (
-                <View style={styles.themeBadge}>
+                <View style={[styles.themeBadge, { backgroundColor: colors.backgroundTertiary }]}>
                   <Text style={styles.themeBadgeText}>{selectedStory.story_theme}</Text>
+                </View>
+              )}
+
+              {/* Feature #18, #19, #20: Action buttons */}
+              <View style={styles.storyActions}>
+                <TouchableOpacity
+                  style={[styles.storyActionButton, { backgroundColor: colors.backgroundTertiary }]}
+                  onPress={() => handleAnalyzeStory(selectedStory.id)}
+                  disabled={analyzingStoryId === selectedStory.id}
+                >
+                  {analyzingStoryId === selectedStory.id ? (
+                    <ActivityIndicator size="small" color={COLORS.primary} />
+                  ) : (
+                    <>
+                      <BarChart3 color={COLORS.primary} size={18} />
+                      <Text style={[styles.storyActionText, { color: COLORS.primary }]}>Analyze</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.storyActionButton, { backgroundColor: colors.backgroundTertiary }]}
+                  onPress={() => handleGetSuggestions(selectedStory.id)}
+                  disabled={loadingSuggestions}
+                >
+                  {loadingSuggestions ? (
+                    <ActivityIndicator size="small" color={COLORS.primary} />
+                  ) : (
+                    <>
+                      <Lightbulb color={COLORS.primary} size={18} />
+                      <Text style={[styles.storyActionText, { color: COLORS.primary }]}>Suggest</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.storyActionButton, { backgroundColor: colors.backgroundTertiary }]}
+                  onPress={() => handleGenerateVariations(selectedStory.id)}
+                  disabled={generatingVariations}
+                >
+                  {generatingVariations ? (
+                    <ActivityIndicator size="small" color={COLORS.primary} />
+                  ) : (
+                    <>
+                      <Copy color={COLORS.primary} size={18} />
+                      <Text style={[styles.storyActionText, { color: COLORS.primary }]}>Variations</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {/* Feature #18: Story Analysis Results */}
+              {storyAnalysis && (
+                <View style={[styles.analysisSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <View style={styles.analysisSectionHeader}>
+                    <BarChart3 color={COLORS.primary} size={24} />
+                    <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>STAR Analysis</Text>
+                  </View>
+
+                  <View style={styles.scoreCard}>
+                    <Text style={[styles.overallScoreLabel, { color: colors.textSecondary }]}>Overall Score</Text>
+                    <Text style={[styles.overallScore, { color: COLORS.primary }]}>{storyAnalysis.overall_score}/100</Text>
+                  </View>
+
+                  {storyAnalysis.component_scores && (
+                    <View style={styles.componentScores}>
+                      {Object.entries(storyAnalysis.component_scores).map(([key, value]: [string, any]) => (
+                        <View key={key} style={styles.componentRow}>
+                          <Text style={[styles.componentLabel, { color: colors.text }]}>
+                            {key.charAt(0).toUpperCase() + key.slice(1)}
+                          </Text>
+                          <View style={styles.componentRight}>
+                            <Text style={[styles.componentScore, { color: value.score >= 80 ? COLORS.success : value.score >= 60 ? COLORS.warning : COLORS.danger }]}>
+                              {value.score}
+                            </Text>
+                            <Text style={[styles.componentFeedback, { color: colors.textSecondary }]}>
+                              {value.feedback}
+                            </Text>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {storyAnalysis.strengths && storyAnalysis.strengths.length > 0 && (
+                    <View style={styles.feedbackSection}>
+                      <Text style={[styles.feedbackTitle, { color: COLORS.success }]}>Strengths</Text>
+                      {storyAnalysis.strengths.map((strength: string, index: number) => (
+                        <Text key={index} style={[styles.feedbackText, { color: colors.text }]}>• {strength}</Text>
+                      ))}
+                    </View>
+                  )}
+
+                  {storyAnalysis.areas_for_improvement && storyAnalysis.areas_for_improvement.length > 0 && (
+                    <View style={styles.feedbackSection}>
+                      <Text style={[styles.feedbackTitle, { color: COLORS.warning }]}>Areas for Improvement</Text>
+                      {storyAnalysis.areas_for_improvement.map((area: string, index: number) => (
+                        <Text key={index} style={[styles.feedbackText, { color: colors.text }]}>• {area}</Text>
+                      ))}
+                    </View>
+                  )}
+
+                  {storyAnalysis.impact_assessment && (
+                    <View style={styles.impactAssessment}>
+                      <Text style={[styles.feedbackTitle, { color: colors.text }]}>Impact Assessment</Text>
+                      <View style={styles.impactRow}>
+                        <Text style={[styles.impactLabel, { color: colors.textSecondary }]}>Quantifiable Results:</Text>
+                        <Text style={[styles.impactValue, { color: storyAnalysis.impact_assessment.quantifiable_results ? COLORS.success : COLORS.danger }]}>
+                          {storyAnalysis.impact_assessment.quantifiable_results ? 'Yes' : 'No'}
+                        </Text>
+                      </View>
+                      <View style={styles.impactRow}>
+                        <Text style={[styles.impactLabel, { color: colors.textSecondary }]}>Leadership Demonstrated:</Text>
+                        <Text style={[styles.impactValue, { color: storyAnalysis.impact_assessment.leadership_demonstrated ? COLORS.success : COLORS.danger }]}>
+                          {storyAnalysis.impact_assessment.leadership_demonstrated ? 'Yes' : 'No'}
+                        </Text>
+                      </View>
+                      <View style={styles.impactRow}>
+                        <Text style={[styles.impactLabel, { color: colors.textSecondary }]}>Problem Solving:</Text>
+                        <Text style={[styles.impactValue, { color: storyAnalysis.impact_assessment.problem_solving_shown ? COLORS.success : COLORS.danger }]}>
+                          {storyAnalysis.impact_assessment.problem_solving_shown ? 'Yes' : 'No'}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              )}
+
+              {/* Feature #19: Story Suggestions Results */}
+              {storySuggestions && (
+                <View style={[styles.analysisSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <View style={styles.analysisSectionHeader}>
+                    <Lightbulb color={COLORS.primary} size={24} />
+                    <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Improvement Suggestions</Text>
+                  </View>
+
+                  {storySuggestions.improvement_tips && storySuggestions.improvement_tips.length > 0 && (
+                    <View style={styles.suggestionsGroup}>
+                      <Text style={[styles.suggestionsGroupTitle, { color: colors.text }]}>Component Improvements</Text>
+                      {storySuggestions.improvement_tips.map((tip: any, index: number) => (
+                        <View key={index} style={[styles.suggestionCard, { backgroundColor: colors.backgroundTertiary }]}>
+                          <Text style={[styles.suggestionComponent, { color: COLORS.primary }]}>
+                            {tip.component.toUpperCase()}
+                          </Text>
+                          <Text style={[styles.suggestionText, { color: colors.text }]}>{tip.suggestion}</Text>
+                          <Text style={[styles.suggestionReason, { color: colors.textSecondary }]}>
+                            {tip.reasoning}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {storySuggestions.alternative_framings && storySuggestions.alternative_framings.length > 0 && (
+                    <View style={styles.suggestionsGroup}>
+                      <Text style={[styles.suggestionsGroupTitle, { color: colors.text }]}>Alternative Framings</Text>
+                      {storySuggestions.alternative_framings.map((framing: any, index: number) => (
+                        <View key={index} style={[styles.framingCard, { backgroundColor: colors.backgroundTertiary }]}>
+                          <Text style={[styles.framingPerspective, { color: COLORS.primary }]}>
+                            {framing.perspective}
+                          </Text>
+                          <Text style={[styles.framingLabel, { color: colors.textSecondary }]}>Situation:</Text>
+                          <Text style={[styles.framingText, { color: colors.text }]}>{framing.reframed_story.situation}</Text>
+                          <Text style={[styles.framingLabel, { color: colors.textSecondary }]}>Result:</Text>
+                          <Text style={[styles.framingText, { color: colors.text }]}>{framing.reframed_story.result}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {storySuggestions.impact_enhancements && storySuggestions.impact_enhancements.length > 0 && (
+                    <View style={styles.suggestionsGroup}>
+                      <Text style={[styles.suggestionsGroupTitle, { color: colors.text }]}>Impact Enhancements</Text>
+                      {storySuggestions.impact_enhancements.map((enhancement: any, index: number) => (
+                        <View key={index} style={styles.enhancementRow}>
+                          <TrendingUp color={COLORS.success} size={16} />
+                          <View style={styles.enhancementContent}>
+                            <Text style={[styles.enhancementType, { color: COLORS.success }]}>
+                              {enhancement.type.toUpperCase()}
+                            </Text>
+                            <Text style={[styles.enhancementText, { color: colors.text }]}>
+                              {enhancement.enhancement}
+                            </Text>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {storySuggestions.keyword_recommendations && storySuggestions.keyword_recommendations.length > 0 && (
+                    <View style={styles.suggestionsGroup}>
+                      <Text style={[styles.suggestionsGroupTitle, { color: colors.text }]}>Recommended Keywords</Text>
+                      <View style={styles.keywordsContainer}>
+                        {storySuggestions.keyword_recommendations.map((keyword: string, index: number) => (
+                          <View key={index} style={[styles.keywordChip, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                            <Text style={[styles.keywordText, { color: COLORS.primary }]}>{keyword}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
                 </View>
               )}
 
               {selectedStory.company_context && (
                 <View style={styles.section}>
-                  <Text style={styles.sectionLabel}>Company Context</Text>
-                  <Text style={styles.sectionText}>{selectedStory.company_context}</Text>
+                  <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Company Context</Text>
+                  <Text style={[styles.sectionText, { color: colors.text }]}>{selectedStory.company_context}</Text>
                 </View>
               )}
 
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Situation</Text>
-                <Text style={styles.sectionText}>{selectedStory.situation}</Text>
+                <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Situation</Text>
+                <Text style={[styles.sectionText, { color: colors.text }]}>{selectedStory.situation}</Text>
               </View>
 
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Task</Text>
-                <Text style={styles.sectionText}>{selectedStory.task}</Text>
+                <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Task</Text>
+                <Text style={[styles.sectionText, { color: colors.text }]}>{selectedStory.task}</Text>
               </View>
 
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Action</Text>
-                <Text style={styles.sectionText}>{selectedStory.action}</Text>
+                <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Action</Text>
+                <Text style={[styles.sectionText, { color: colors.text }]}>{selectedStory.action}</Text>
               </View>
 
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Result</Text>
-                <Text style={styles.sectionText}>{selectedStory.result}</Text>
+                <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Result</Text>
+                <Text style={[styles.sectionText, { color: colors.text }]}>{selectedStory.result}</Text>
               </View>
 
               {selectedStory.key_themes && selectedStory.key_themes.length > 0 && (
                 <View style={styles.section}>
-                  <Text style={styles.sectionLabel}>Key Themes</Text>
+                  <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Key Themes</Text>
                   <View style={styles.tagsList}>
                     {selectedStory.key_themes.map((theme, index) => (
-                      <View key={index} style={styles.tag}>
-                        <Text style={styles.tagText}>{theme}</Text>
+                      <View key={index} style={[styles.tag, { backgroundColor: colors.backgroundTertiary }]}>
+                        <Text style={[styles.tagText, { color: colors.text }]}>{theme}</Text>
                       </View>
                     ))}
                   </View>
@@ -296,22 +656,22 @@ export default function StarStoriesScreen() {
 
               {selectedStory.talking_points && selectedStory.talking_points.length > 0 && (
                 <View style={styles.section}>
-                  <Text style={styles.sectionLabel}>Talking Points</Text>
+                  <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Talking Points</Text>
                   {selectedStory.talking_points.map((point, index) => (
                     <View key={index} style={styles.bulletPoint}>
                       <Text style={styles.bullet}>•</Text>
-                      <Text style={styles.bulletText}>{point}</Text>
+                      <Text style={[styles.bulletText, { color: colors.text }]}>{point}</Text>
                     </View>
                   ))}
                 </View>
               )}
 
               <View style={styles.section}>
-                <Text style={styles.metaText}>
+                <Text style={[styles.metaText, { color: colors.textTertiary }]}>
                   Created: {formatDate(selectedStory.created_at)}
                 </Text>
                 {selectedStory.updated_at !== selectedStory.created_at && (
-                  <Text style={styles.metaText}>
+                  <Text style={[styles.metaText, { color: colors.textTertiary }]}>
                     Updated: {formatDate(selectedStory.updated_at)}
                   </Text>
                 )}
@@ -320,6 +680,104 @@ export default function StarStoriesScreen() {
           </SafeAreaView>
         )}
       </Modal>
+
+      {/* Feature #20: Story Variations Modal */}
+      <Modal
+        visible={showVariationsModal}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setShowVariationsModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowVariationsModal(false)}
+            >
+              <X color={colors.text} size={24} />
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Story Variations</Text>
+            <View style={styles.headerPlaceholder} />
+          </View>
+
+          {storyVariations && (
+            <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentContainer}>
+              {storyVariations.variations && storyVariations.variations.length > 0 && (
+                <>
+                  {storyVariations.variations.map((variation: any, index: number) => (
+                    <View key={index} style={[styles.variationCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                      <View style={styles.variationHeader}>
+                        <View style={[styles.variationBadge, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                          <Text style={[styles.variationContext, { color: COLORS.primary }]}>
+                            {variation.context.replace(/_/g, ' ').toUpperCase()}
+                          </Text>
+                        </View>
+                        <View style={[styles.variationBadge, { backgroundColor: colors.backgroundTertiary }]}>
+                          <Text style={[styles.variationTone, { color: colors.text }]}>
+                            {variation.tone}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.variationContent}>
+                        <Text style={[styles.variationLabel, { color: colors.textSecondary }]}>Situation</Text>
+                        <Text style={[styles.variationText, { color: colors.text }]}>
+                          {variation.story.situation}
+                        </Text>
+                      </View>
+
+                      <View style={styles.variationContent}>
+                        <Text style={[styles.variationLabel, { color: colors.textSecondary }]}>Task</Text>
+                        <Text style={[styles.variationText, { color: colors.text }]}>
+                          {variation.story.task}
+                        </Text>
+                      </View>
+
+                      <View style={styles.variationContent}>
+                        <Text style={[styles.variationLabel, { color: colors.textSecondary }]}>Action</Text>
+                        <Text style={[styles.variationText, { color: colors.text }]}>
+                          {variation.story.action}
+                        </Text>
+                      </View>
+
+                      <View style={styles.variationContent}>
+                        <Text style={[styles.variationLabel, { color: colors.textSecondary }]}>Result</Text>
+                        <Text style={[styles.variationText, { color: colors.text }]}>
+                          {variation.story.result}
+                        </Text>
+                      </View>
+
+                      {variation.optimal_use_case && (
+                        <View style={[styles.useCaseBox, { backgroundColor: colors.backgroundTertiary }]}>
+                          <Text style={[styles.useCaseLabel, { color: colors.textSecondary }]}>Best For:</Text>
+                          <Text style={[styles.useCaseText, { color: colors.text }]}>
+                            {variation.optimal_use_case}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </>
+              )}
+
+              {storyVariations.usage_guide && (
+                <View style={[styles.usageGuideCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.usageGuideTitle, { color: colors.text }]}>Usage Guide</Text>
+
+                  {Object.entries(storyVariations.usage_guide).map(([key, value]: [string, any]) => (
+                    <View key={key} style={styles.guideSection}>
+                      <Text style={[styles.guideLabel, { color: COLORS.primary }]}>
+                        {key.replace(/_/g, ' ').toUpperCase()}
+                      </Text>
+                      <Text style={[styles.guideText, { color: colors.text }]}>{value}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -327,7 +785,6 @@ export default function StarStoriesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   loadingContainer: {
     flex: 1,
@@ -336,7 +793,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.md,
-    color: COLORS.dark.textSecondary,
     fontSize: 16,
     fontFamily: FONTS.regular,
   },
@@ -350,7 +806,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
   },
   addButton: {
     width: 44,
@@ -361,14 +816,13 @@ const styles = StyleSheet.create({
   list: {
     padding: SPACING.lg,
     paddingTop: SPACING.sm,
+    paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
     minHeight: 80,
@@ -382,7 +836,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: RADIUS.md,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
@@ -393,19 +846,16 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: 2,
   },
   cardTheme: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     marginBottom: 4,
   },
   cardDate: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
   },
   deleteButton: {
     width: 44,
@@ -428,13 +878,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
   },
@@ -442,7 +890,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.dark.text,
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.md,
@@ -451,11 +898,9 @@ const styles = StyleSheet.create({
   createButtonText: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.background,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -463,8 +908,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.dark.border,
   },
   closeButton: {
     width: 44,
@@ -475,7 +918,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
   },
   headerPlaceholder: {
     width: 44,
@@ -489,12 +931,10 @@ const styles = StyleSheet.create({
   storyTitle: {
     fontSize: 24,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     marginBottom: SPACING.md,
   },
   themeBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: COLORS.dark.backgroundTertiary,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
     borderRadius: RADIUS.md,
@@ -511,7 +951,6 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 14,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.textSecondary,
     marginBottom: SPACING.sm,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -519,7 +958,6 @@ const styles = StyleSheet.create({
   sectionText: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 24,
   },
   tagsList: {
@@ -528,7 +966,6 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   tag: {
-    backgroundColor: COLORS.dark.backgroundTertiary,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
     borderRadius: RADIUS.md,
@@ -536,7 +973,6 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
   },
   bulletPoint: {
     flexDirection: 'row',
@@ -553,13 +989,282 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     lineHeight: 24,
   },
   metaText: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
     marginBottom: 4,
+  },
+  // Story Actions (Features #18, #19, #20)
+  storyActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.xl,
+  },
+  storyActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
+    minHeight: 40,
+  },
+  storyActionText: {
+    fontSize: 13,
+    fontFamily: FONTS.semibold,
+  },
+  // Analysis Section (Feature #18)
+  analysisSection: {
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+    marginBottom: SPACING.xl,
+  },
+  analysisSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  analysisSectionTitle: {
+    fontSize: 18,
+    fontFamily: FONTS.semibold,
+  },
+  scoreCard: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  overallScoreLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    marginBottom: 4,
+  },
+  overallScore: {
+    fontSize: 48,
+    fontFamily: FONTS.extralight,
+  },
+  componentScores: {
+    gap: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  componentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  componentLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    flex: 1,
+  },
+  componentRight: {
+    flex: 2,
+  },
+  componentScore: {
+    fontSize: 20,
+    fontFamily: FONTS.semibold,
+    marginBottom: 4,
+  },
+  componentFeedback: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+  },
+  feedbackSection: {
+    marginBottom: SPACING.md,
+  },
+  feedbackTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+    marginBottom: SPACING.sm,
+  },
+  feedbackText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  impactAssessment: {
+    marginTop: SPACING.md,
+  },
+  impactRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  impactLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+  },
+  impactValue: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  // Suggestions Section (Feature #19)
+  suggestionsGroup: {
+    marginBottom: SPACING.xl,
+  },
+  suggestionsGroupTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+    marginBottom: SPACING.md,
+  },
+  suggestionCard: {
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  suggestionComponent: {
+    fontSize: 11,
+    fontFamily: FONTS.semibold,
+    marginBottom: 4,
+  },
+  suggestionText: {
+    fontSize: 15,
+    fontFamily: FONTS.semibold,
+    marginBottom: 4,
+  },
+  suggestionReason: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+  },
+  framingCard: {
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  framingPerspective: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    marginBottom: SPACING.sm,
+  },
+  framingLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    marginTop: SPACING.xs,
+    marginBottom: 2,
+  },
+  framingText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+    marginBottom: SPACING.xs,
+  },
+  enhancementRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  enhancementContent: {
+    flex: 1,
+  },
+  enhancementType: {
+    fontSize: 11,
+    fontFamily: FONTS.semibold,
+    marginBottom: 2,
+  },
+  enhancementText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  keywordsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  keywordChip: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+  },
+  keywordText: {
+    fontSize: 13,
+    fontFamily: FONTS.semibold,
+  },
+  // Variations Section (Feature #20)
+  variationCard: {
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+  },
+  variationHeader: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  variationBadge: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.md,
+  },
+  variationContext: {
+    fontSize: 11,
+    fontFamily: FONTS.semibold,
+  },
+  variationTone: {
+    fontSize: 11,
+    fontFamily: FONTS.regular,
+  },
+  variationContent: {
+    marginBottom: SPACING.md,
+  },
+  variationLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  variationText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  useCaseBox: {
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  useCaseLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    marginBottom: 4,
+  },
+  useCaseText: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+  },
+  usageGuideCard: {
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+  },
+  usageGuideTitle: {
+    fontSize: 20,
+    fontFamily: FONTS.semibold,
+    marginBottom: SPACING.md,
+  },
+  guideSection: {
+    marginBottom: SPACING.md,
+  },
+  guideLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    marginBottom: 4,
+  },
+  guideText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
   },
 });

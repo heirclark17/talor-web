@@ -18,11 +18,17 @@ import {
   Trash2,
   Target,
   ChevronRight,
+  Download,
+  CheckSquare,
+  Square,
+  X as XIcon,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useTheme } from '../hooks/useTheme';
+import { GlassCard } from '../components/glass/GlassCard';
 
 interface SavedComparison {
   id: number;
@@ -38,10 +44,19 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SavedComparisonsScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const [comparisons, setComparisons] = useState<SavedComparison[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  // Feature #16: Export functionality
+  const [exporting, setExporting] = useState(false);
+
+  // Feature #17: Bulk delete
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const loadComparisons = async () => {
     try {
@@ -103,7 +118,7 @@ export default function SavedComparisonsScreen() {
   };
 
   const handleViewInterviewPrep = (tailoredResumeId: number) => {
-    navigation.navigate('InterviewPrep', { tailoredResumeId });
+    navigation.navigate('InterviewPreps' as any, { screen: 'InterviewPrep', params: { tailoredResumeId } });
   };
 
   const formatDate = (dateString: string) => {
@@ -116,38 +131,139 @@ export default function SavedComparisonsScreen() {
   };
 
   const getScoreColor = (score?: number) => {
-    if (!score) return COLORS.dark.textTertiary;
+    if (!score) return colors.textTertiary;
     if (score >= 80) return COLORS.success;
     if (score >= 60) return COLORS.warning;
     return COLORS.danger;
   };
 
+  // Feature #16: Export saved items
+  const handleExport = async (format: 'pdf' | 'json' = 'json') => {
+    setExporting(true);
+    try {
+      const result = await api.exportSavedItems(format);
+
+      if (result.success && result.data) {
+        // Create download link
+        const blob = result.data;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `saved-comparisons-${Date.now()}.${format}`;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        Alert.alert('Success', `Exported ${comparisons.length} items as ${format.toUpperCase()}`);
+      } else {
+        Alert.alert('Export Failed', result.error || 'Could not export saved items');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to export saved items');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // Feature #17: Bulk delete saved items
+  const toggleSelection = (id: number) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === comparisons.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(comparisons.map(c => c.id));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) {
+      Alert.alert('No Selection', 'Please select items to delete');
+      return;
+    }
+
+    Alert.alert(
+      'Delete Selected Items',
+      `Are you sure you want to delete ${selectedIds.length} saved ${selectedIds.length === 1 ? 'comparison' : 'comparisons'}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setBulkDeleting(true);
+            try {
+              const result = await api.bulkDeleteSavedItems(selectedIds);
+
+              if (result.success) {
+                setComparisons(prev => prev.filter(c => !selectedIds.includes(c.id)));
+                setSelectedIds([]);
+                setSelectionMode(false);
+                Alert.alert('Success', `Deleted ${selectedIds.length} ${selectedIds.length === 1 ? 'item' : 'items'}`);
+              } else {
+                Alert.alert('Error', result.error || 'Failed to delete items');
+              }
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete items');
+            } finally {
+              setBulkDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const cancelSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedIds([]);
+  };
+
   const renderItem = ({ item }: { item: SavedComparison }) => (
-    <View style={styles.card}>
+    <GlassCard style={styles.card} material="regular" shadow="subtle">
       <View style={styles.cardContent}>
-        <View style={styles.iconContainer}>
+        {/* Feature #17: Selection checkbox */}
+        {selectionMode && (
+          <TouchableOpacity
+            style={styles.selectionCheckbox}
+            onPress={() => toggleSelection(item.id)}
+          >
+            {selectedIds.includes(item.id) ? (
+              <CheckSquare color={COLORS.primary} size={24} />
+            ) : (
+              <Square color={colors.textTertiary} size={24} />
+            )}
+          </TouchableOpacity>
+        )}
+
+        <View style={[styles.iconContainer, { backgroundColor: colors.backgroundTertiary }]}>
           <BookmarkCheck color={COLORS.primary} size={24} />
         </View>
         <View style={styles.cardText}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
             {item.title}
           </Text>
           {item.company && (
             <View style={styles.metaRow}>
-              <Building2 color={COLORS.dark.textTertiary} size={12} />
-              <Text style={styles.metaText}>{item.company}</Text>
+              <Building2 color={colors.textTertiary} size={12} />
+              <Text style={[styles.metaText, { color: colors.textSecondary }]}>{item.company}</Text>
             </View>
           )}
           {item.job_title && (
             <View style={styles.metaRow}>
-              <Briefcase color={COLORS.dark.textTertiary} size={12} />
-              <Text style={styles.metaText}>{item.job_title}</Text>
+              <Briefcase color={colors.textTertiary} size={12} />
+              <Text style={[styles.metaText, { color: colors.textSecondary }]}>{item.job_title}</Text>
             </View>
           )}
           <View style={styles.bottomRow}>
-            <Text style={styles.dateText}>{formatDate(item.created_at)}</Text>
+            <Text style={[styles.dateText, { color: colors.textTertiary }]}>{formatDate(item.created_at)}</Text>
             {item.match_score !== undefined && (
-              <View style={styles.scoreBadge}>
+              <View style={[styles.scoreBadge, { backgroundColor: colors.backgroundTertiary }]}>
                 <Text style={[styles.scoreText, { color: getScoreColor(item.match_score) }]}>
                   {item.match_score}% match
                 </Text>
@@ -157,9 +273,9 @@ export default function SavedComparisonsScreen() {
         </View>
       </View>
 
-      <View style={styles.cardActions}>
+      <View style={[styles.cardActions, { borderTopColor: colors.border }]}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[styles.actionButton, { backgroundColor: colors.backgroundTertiary }]}
           onPress={() => handleViewInterviewPrep(item.tailored_resume_id)}
           accessibilityRole="button"
           accessibilityLabel={`View interview prep for ${item.company} ${item.job_title}`}
@@ -170,7 +286,7 @@ export default function SavedComparisonsScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, styles.deleteButton]}
+          style={[styles.actionButton, styles.deleteButton, { backgroundColor: ALPHA_COLORS.danger.bg }]}
           onPress={() => handleDelete(item.id)}
           disabled={deletingId === item.id}
           accessibilityRole="button"
@@ -185,24 +301,24 @@ export default function SavedComparisonsScreen() {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </GlassCard>
   );
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <View style={styles.emptyIcon}>
-        <BookmarkCheck color={COLORS.dark.textTertiary} size={64} />
+        <BookmarkCheck color={colors.textTertiary} size={64} />
       </View>
-      <Text style={styles.emptyTitle}>No Saved Comparisons</Text>
-      <Text style={styles.emptyText}>
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>No Saved Comparisons</Text>
+      <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
         Save tailored resume comparisons to quickly access them later and track your applications.
       </Text>
       <TouchableOpacity
-        style={styles.tailorButton}
-        onPress={() => navigation.navigate('Main' as any)}
+        style={[styles.tailorButton, { backgroundColor: colors.text }]}
+        onPress={() => navigation.navigate('Tailor' as any)}
       >
-        <Target color={COLORS.dark.background} size={20} />
-        <Text style={styles.tailorButtonText}>Tailor a Resume</Text>
+        <Target color={colors.background} size={20} />
+        <Text style={[styles.tailorButtonText, { color: colors.background }]}>Tailor a Resume</Text>
       </TouchableOpacity>
     </View>
   );
@@ -212,7 +328,7 @@ export default function SavedComparisonsScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading saved comparisons...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading saved comparisons...</Text>
         </View>
       </SafeAreaView>
     );
@@ -221,11 +337,85 @@ export default function SavedComparisonsScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Saved</Text>
-        {comparisons.length > 0 && (
-          <Text style={styles.headerCount}>{comparisons.length} items</Text>
+        <View style={styles.headerLeft}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Saved</Text>
+          {comparisons.length > 0 && !selectionMode && (
+            <Text style={[styles.headerCount, { color: colors.textSecondary }]}>{comparisons.length} items</Text>
+          )}
+          {selectionMode && (
+            <Text style={[styles.headerCount, { color: COLORS.primary }]}>
+              {selectedIds.length} selected
+            </Text>
+          )}
+        </View>
+
+        {/* Feature #16 & #17: Action buttons */}
+        {comparisons.length > 0 && !selectionMode && (
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => handleExport('json')}
+              disabled={exporting}
+            >
+              {exporting ? (
+                <ActivityIndicator size="small" color={COLORS.primary} />
+              ) : (
+                <Download color={COLORS.primary} size={20} />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => setSelectionMode(true)}
+            >
+              <CheckSquare color={COLORS.primary} size={20} />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {selectionMode && (
+          <View style={styles.selectionActions}>
+            <TouchableOpacity
+              style={styles.selectionButton}
+              onPress={toggleSelectAll}
+            >
+              <Text style={[styles.selectionButtonText, { color: COLORS.primary }]}>
+                {selectedIds.length === comparisons.length ? 'Deselect All' : 'Select All'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.selectionButton}
+              onPress={cancelSelectionMode}
+            >
+              <XIcon color={colors.textSecondary} size={20} />
+            </TouchableOpacity>
+          </View>
         )}
       </View>
+
+      {/* Feature #17: Bulk delete bar */}
+      {selectionMode && selectedIds.length > 0 && (
+        <View style={[styles.bulkActionBar, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+          <Text style={[styles.bulkActionText, { color: colors.text }]}>
+            {selectedIds.length} {selectedIds.length === 1 ? 'item' : 'items'} selected
+          </Text>
+          <TouchableOpacity
+            style={[styles.bulkDeleteButton, { backgroundColor: ALPHA_COLORS.danger.bg }]}
+            onPress={handleBulkDelete}
+            disabled={bulkDeleting}
+          >
+            {bulkDeleting ? (
+              <ActivityIndicator size="small" color={COLORS.danger} />
+            ) : (
+              <>
+                <Trash2 color={COLORS.danger} size={18} />
+                <Text style={[styles.bulkDeleteText, { color: COLORS.danger }]}>Delete</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
 
       <FlatList
         data={comparisons}
@@ -248,7 +438,6 @@ export default function SavedComparisonsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   loadingContainer: {
     flex: 1,
@@ -257,37 +446,87 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.md,
-    color: COLORS.dark.textSecondary,
     fontSize: 16,
     fontFamily: FONTS.regular,
   },
   header: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+  },
+  headerLeft: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.lg,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectionActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: SPACING.sm,
+  },
+  selectionButton: {
+    padding: SPACING.sm,
+  },
+  selectionButtonText: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  bulkActionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+  },
+  bulkActionText: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+  },
+  bulkDeleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
+    minHeight: 36,
+  },
+  bulkDeleteText: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  selectionCheckbox: {
+    marginRight: SPACING.sm,
   },
   headerTitle: {
     fontSize: 32,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
   },
   headerCount: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
   },
   list: {
     padding: SPACING.lg,
     paddingTop: SPACING.sm,
+    paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   card: {
-    backgroundColor: COLORS.dark.glass,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
-    padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
   cardContent: {
@@ -299,7 +538,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: RADIUS.md,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
@@ -310,7 +548,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: SPACING.xs,
   },
   metaRow: {
@@ -322,7 +559,6 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
   },
   bottomRow: {
     flexDirection: 'row',
@@ -333,12 +569,10 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
   },
   scoreBadge: {
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     borderRadius: RADIUS.sm,
   },
   scoreText: {
@@ -348,8 +582,6 @@ const styles = StyleSheet.create({
   cardActions: {
     flexDirection: 'row',
     gap: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.dark.border,
     paddingTop: SPACING.md,
   },
   actionButton: {
@@ -360,13 +592,11 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.md,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     minHeight: 44,
   },
   deleteButton: {
     flex: 0,
     width: 44,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
   },
   actionText: {
     fontSize: 14,
@@ -387,13 +617,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
   },
@@ -401,7 +629,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.dark.text,
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.md,
@@ -410,6 +637,5 @@ const styles = StyleSheet.create({
   tailorButtonText: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.background,
   },
 });

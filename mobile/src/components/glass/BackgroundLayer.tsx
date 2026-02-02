@@ -18,6 +18,7 @@ import Animated, {
 import { PatternBackground } from '../patterns/PatternBackground';
 import { getBackgroundById, DEFAULT_BACKGROUND_ID } from '../../constants/backgrounds';
 import { useTheme } from '../../context/ThemeContext';
+import { ALPHA_COLORS } from '../../utils/constants';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -110,8 +111,8 @@ export function BackgroundLayer({ children }: BackgroundLayerProps) {
               styles.overlay,
               {
                 backgroundColor: isDark
-                  ? 'rgba(0, 0, 0, 0.5)'
-                  : 'rgba(255, 255, 255, 0.3)',
+                  ? ALPHA_COLORS.black[50]
+                  : ALPHA_COLORS.white[30],
               },
             ]}
           />
@@ -164,7 +165,7 @@ export function BackgroundLayer({ children }: BackgroundLayerProps) {
           <LinearGradient
             colors={[
               'transparent',
-              isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)',
+              isDark ? ALPHA_COLORS.black[20] : ALPHA_COLORS.white[20],
             ] as [string, string]}
             style={styles.gradient}
             start={{ x: 0, y: 0 }}

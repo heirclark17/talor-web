@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  ActivityIndicator,
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -16,11 +15,14 @@ import * as DocumentPicker from 'expo-document-picker';
 import { api } from '../api/client';
 import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useTheme } from '../hooks/useTheme';
+import { GlassButton } from '../components/glass/GlassButton';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function UploadResumeScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -97,21 +99,21 @@ export default function UploadResumeScreen() {
           accessibilityLabel="Close upload screen"
           accessibilityHint="Returns to the previous screen"
         >
-          <X color={COLORS.dark.text} size={24} />
+          <X color={colors.text} size={24} />
         </TouchableOpacity>
-        <Text style={styles.title}>Upload Resume</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Upload Resume</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={styles.uploadArea}>
+        <View style={[styles.uploadArea, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
           {uploadSuccess ? (
             <View style={styles.successState}>
               <View style={styles.successIcon}>
                 <CheckCircle color={COLORS.success} size={64} />
               </View>
               <Text style={styles.successTitle}>Upload Successful!</Text>
-              <Text style={styles.successText}>
+              <Text style={[styles.successText, { color: colors.textSecondary }]}>
                 Your resume has been uploaded and is being processed.
               </Text>
             </View>
@@ -120,10 +122,10 @@ export default function UploadResumeScreen() {
               <View style={styles.fileIcon}>
                 <FileText color={COLORS.primary} size={48} />
               </View>
-              <Text style={styles.fileName} numberOfLines={2}>
+              <Text style={[styles.fileName, { color: colors.text }]} numberOfLines={2}>
                 {selectedFile.name}
               </Text>
-              <Text style={styles.fileSize}>
+              <Text style={[styles.fileSize, { color: colors.textSecondary }]}>
                 {formatFileSize(selectedFile.size)}
               </Text>
               <TouchableOpacity
@@ -145,42 +147,42 @@ export default function UploadResumeScreen() {
               accessibilityHint="Opens document picker to choose a PDF or Word document"
             >
               <View style={styles.uploadIcon}>
-                <Upload color={COLORS.dark.textTertiary} size={48} />
+                <Upload color={colors.textTertiary} size={48} />
               </View>
-              <Text style={styles.dropZoneTitle}>Select Resume</Text>
-              <Text style={styles.dropZoneText}>
+              <Text style={[styles.dropZoneTitle, { color: colors.text }]}>Select Resume</Text>
+              <Text style={[styles.dropZoneText, { color: colors.textSecondary }]}>
                 Tap to select a PDF or Word document
               </Text>
-              <Text style={styles.supportedFormats}>
+              <Text style={[styles.supportedFormats, { color: colors.textTertiary }]}>
                 Supported formats: PDF, DOC, DOCX
               </Text>
             </TouchableOpacity>
           )}
         </View>
 
-        <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>What happens next?</Text>
+        <View style={[styles.infoSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+          <Text style={[styles.infoTitle, { color: colors.text }]}>What happens next?</Text>
           <View style={styles.infoItem}>
             <View style={styles.infoNumber}>
-              <Text style={styles.infoNumberText}>1</Text>
+              <Text style={[styles.infoNumberText, { color: colors.text }]}>1</Text>
             </View>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
               We'll extract your experience, skills, and education
             </Text>
           </View>
           <View style={styles.infoItem}>
             <View style={styles.infoNumber}>
-              <Text style={styles.infoNumberText}>2</Text>
+              <Text style={[styles.infoNumberText, { color: colors.text }]}>2</Text>
             </View>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
               Use AI to tailor your resume for specific job postings
             </Text>
           </View>
           <View style={styles.infoItem}>
             <View style={styles.infoNumber}>
-              <Text style={styles.infoNumberText}>3</Text>
+              <Text style={[styles.infoNumberText, { color: colors.text }]}>3</Text>
             </View>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
               Get interview prep materials based on your tailored resume
             </Text>
           </View>
@@ -189,24 +191,16 @@ export default function UploadResumeScreen() {
 
       {selectedFile && !uploadSuccess && (
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={[styles.uploadButton, uploading && styles.uploadButtonDisabled]}
-            onPress={handleUpload}
+          <GlassButton
+            label="Upload Resume"
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={uploading}
             disabled={uploading}
-            accessibilityRole="button"
-            accessibilityLabel={uploading ? 'Uploading resume' : 'Upload resume to server'}
-            accessibilityHint="Sends the selected resume file to be processed"
-            accessibilityState={{ disabled: uploading, busy: uploading }}
-          >
-            {uploading ? (
-              <ActivityIndicator color={COLORS.dark.background} />
-            ) : (
-              <>
-                <Upload color={COLORS.dark.background} size={20} />
-                <Text style={styles.uploadButtonText}>Upload Resume</Text>
-              </>
-            )}
-          </TouchableOpacity>
+            icon={<Upload color="#ffffff" size={20} />}
+            onPress={handleUpload}
+          />
         </View>
       )}
     </SafeAreaView>
@@ -216,7 +210,6 @@ export default function UploadResumeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   header: {
     flexDirection: 'row',
@@ -224,8 +217,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.dark.border,
   },
   closeButton: {
     width: 44,
@@ -236,7 +227,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
   },
   placeholder: {
     width: 44,
@@ -248,10 +238,8 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   uploadArea: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.xl,
     marginBottom: SPACING.xl,
   },
@@ -266,20 +254,17 @@ const styles = StyleSheet.create({
   dropZoneTitle: {
     fontSize: 20,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: SPACING.sm,
   },
   dropZoneText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.md,
   },
   supportedFormats: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
   },
   filePreview: {
     alignItems: 'center',
@@ -291,14 +276,12 @@ const styles = StyleSheet.create({
   fileName: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     textAlign: 'center',
     marginBottom: SPACING.xs,
   },
   fileSize: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     marginBottom: SPACING.lg,
   },
   changeButton: {
@@ -328,20 +311,16 @@ const styles = StyleSheet.create({
   successText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
   },
   infoSection: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.lg,
   },
   infoTitle: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: SPACING.lg,
   },
   infoItem: {
@@ -361,36 +340,14 @@ const styles = StyleSheet.create({
   infoNumberText: {
     fontSize: 12,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
   },
   infoText: {
     flex: 1,
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     lineHeight: 20,
   },
   footer: {
     padding: SPACING.lg,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.dark.border,
-  },
-  uploadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    backgroundColor: COLORS.dark.text,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.md,
-    minHeight: 48,
-  },
-  uploadButtonDisabled: {
-    opacity: 0.7,
-  },
-  uploadButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
-    color: COLORS.dark.background,
   },
 });

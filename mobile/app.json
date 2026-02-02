@@ -45,6 +45,12 @@
         "projectId": "04d139f0-2456-4fbb-8115-84c8749f3dc4"
       }
     },
-    "owner": "heirclarks-organization"
+    "owner": "heirclarks-organization",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/04d139f0-2456-4fbb-8115-84c8749f3dc4"
+    }
   }
 }

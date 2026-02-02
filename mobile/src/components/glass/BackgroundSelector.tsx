@@ -21,6 +21,7 @@ import {
   Crown,
   Sparkles,
 } from 'lucide-react-native';
+import { GlassButton } from './GlassButton';
 import {
   BACKGROUNDS,
   BACKGROUND_CATEGORIES,
@@ -29,7 +30,7 @@ import {
   getBackgroundById,
 } from '../../constants/backgrounds';
 import { useTheme } from '../../context/ThemeContext';
-import { COLORS, FONTS, SPACING, RADIUS } from '../../utils/constants';
+import { COLORS, FONTS, SPACING, RADIUS, ALPHA_COLORS } from '../../utils/constants';
 
 interface BackgroundSelectorProps {
   visible: boolean;
@@ -327,15 +328,26 @@ export function BackgroundSelector({ visible, onClose }: BackgroundSelectorProps
                 key={category}
                 style={[
                   styles.categoryTab,
-                  isActive && styles.categoryTabActive,
-                  isActive && { backgroundColor: COLORS.primary },
+                  {
+                    backgroundColor: isActive
+                      ? isDark
+                        ? ALPHA_COLORS.primary.bg
+                        : ALPHA_COLORS.primary.bgSubtle
+                      : colors.glass,
+                    borderColor: isActive
+                      ? ALPHA_COLORS.primary.border
+                      : isDark
+                        ? ALPHA_COLORS.white[10]
+                        : ALPHA_COLORS.black[10],
+                    borderWidth: 1,
+                  },
                 ]}
                 onPress={() => handleCategoryChange(category)}
               >
                 <Text
                   style={[
                     styles.categoryTabText,
-                    { color: isActive ? '#ffffff' : colors.textSecondary },
+                    { color: isActive ? COLORS.primary : colors.textSecondary },
                   ]}
                 >
                   {BACKGROUND_CATEGORIES[category].name}
@@ -347,7 +359,11 @@ export function BackgroundSelector({ visible, onClose }: BackgroundSelectorProps
           <TouchableOpacity
             style={[
               styles.categoryTab,
-              { borderColor: colors.border },
+              {
+                backgroundColor: colors.glass,
+                borderColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10],
+                borderWidth: 1,
+              },
             ]}
             onPress={handlePickImage}
           >
@@ -373,13 +389,13 @@ export function BackgroundSelector({ visible, onClose }: BackgroundSelectorProps
         {/* Confirm Button */}
         {previewId && (
           <View style={styles.footer}>
-            <TouchableOpacity
-              style={[styles.confirmButton, { backgroundColor: COLORS.primary }]}
+            <GlassButton
+              variant="primary"
+              fullWidth
               onPress={handleConfirmSelection}
-            >
-              <Check size={20} color="#ffffff" />
-              <Text style={styles.confirmButtonText}>Apply Background</Text>
-            </TouchableOpacity>
+              icon={<Check size={20} color="#ffffff" />}
+              label="Apply Background"
+            />
           </View>
         )}
       </View>
@@ -432,7 +448,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: ALPHA_COLORS.white[10],
   },
   previewCardTitle: {
     fontSize: 16,
@@ -461,9 +477,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  categoryTabActive: {
     borderColor: 'transparent',
   },
   categoryTabText: {
@@ -498,7 +511,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: ALPHA_COLORS.white[10],
     borderStyle: 'dashed',
   },
   checkmark: {
@@ -519,7 +532,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: ALPHA_COLORS.black[50],
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -530,7 +543,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
-    backgroundColor: 'rgba(239, 68, 68, 0.9)',
+    backgroundColor: ALPHA_COLORS.danger.border,
   },
   animatedText: {
     fontSize: 8,
@@ -547,18 +560,5 @@ const styles = StyleSheet.create({
   footer: {
     padding: SPACING.lg,
     paddingBottom: SPACING.xl,
-  },
-  confirmButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.md,
-  },
-  confirmButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
-    color: '#ffffff',
   },
 });

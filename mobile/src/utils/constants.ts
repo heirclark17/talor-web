@@ -71,7 +71,7 @@ export const SPACING = {
 };
 
 // Tab Bar
-export const TAB_BAR_HEIGHT = 85; // Height of tab bar + safe area padding
+export const TAB_BAR_HEIGHT = 100; // Height of tab bar (65px) + safe area padding (~35px)
 
 // Border Radius
 export const RADIUS = {
@@ -101,36 +101,69 @@ export const GLASS = {
 
 // ========== ALPHA COLORS (for badges/overlays/semantic) ==========
 export const ALPHA_COLORS = {
+  // Semantic colors with alpha variants
   danger: {
     bg: 'rgba(239, 68, 68, 0.15)',
+    bgSubtle: 'rgba(239, 68, 68, 0.10)',
     border: 'rgba(239, 68, 68, 0.30)',
     text: 'rgba(239, 68, 68, 1)',
   },
   success: {
     bg: 'rgba(16, 185, 129, 0.15)',
+    bgSubtle: 'rgba(16, 185, 129, 0.10)',
     border: 'rgba(16, 185, 129, 0.30)',
     text: 'rgba(16, 185, 129, 1)',
   },
   primary: {
     bg: 'rgba(59, 130, 246, 0.15)',
+    bgSubtle: 'rgba(59, 130, 246, 0.10)',
+    bgStrong: 'rgba(59, 130, 246, 0.20)',
     border: 'rgba(59, 130, 246, 0.30)',
     text: 'rgba(59, 130, 246, 1)',
   },
   warning: {
     bg: 'rgba(245, 158, 11, 0.15)',
+    bgSubtle: 'rgba(245, 158, 11, 0.10)',
     border: 'rgba(245, 158, 11, 0.30)',
     text: 'rgba(245, 158, 11, 1)',
   },
   info: {
     bg: 'rgba(6, 182, 212, 0.15)',
+    bgSubtle: 'rgba(6, 182, 212, 0.10)',
     border: 'rgba(6, 182, 212, 0.30)',
     text: 'rgba(6, 182, 212, 1)',
   },
   purple: {
     bg: 'rgba(139, 92, 246, 0.15)',
+    bgSubtle: 'rgba(139, 92, 246, 0.10)',
     border: 'rgba(139, 92, 246, 0.30)',
     text: 'rgba(139, 92, 246, 1)',
   },
+  // White-based alpha colors (for dark mode)
+  white: {
+    5: 'rgba(255, 255, 255, 0.05)',
+    10: 'rgba(255, 255, 255, 0.10)',
+    15: 'rgba(255, 255, 255, 0.15)',
+    20: 'rgba(255, 255, 255, 0.20)',
+    30: 'rgba(255, 255, 255, 0.30)',
+    50: 'rgba(255, 255, 255, 0.50)',
+    70: 'rgba(255, 255, 255, 0.70)',
+    80: 'rgba(255, 255, 255, 0.80)',
+    90: 'rgba(255, 255, 255, 0.90)',
+  },
+  // Black-based alpha colors (for light mode)
+  black: {
+    3: 'rgba(0, 0, 0, 0.03)',
+    5: 'rgba(0, 0, 0, 0.05)',
+    10: 'rgba(0, 0, 0, 0.10)',
+    15: 'rgba(0, 0, 0, 0.15)',
+    20: 'rgba(0, 0, 0, 0.20)',
+    30: 'rgba(0, 0, 0, 0.30)',
+    50: 'rgba(0, 0, 0, 0.50)',
+    70: 'rgba(0, 0, 0, 0.70)',
+    80: 'rgba(0, 0, 0, 0.80)',
+  },
+  // Neutral (legacy support)
   neutral: {
     bg: 'rgba(255, 255, 255, 0.10)',
     border: 'rgba(255, 255, 255, 0.20)',
@@ -140,6 +173,22 @@ export const ALPHA_COLORS = {
     bg: 'rgba(0, 0, 0, 0.10)',
     border: 'rgba(0, 0, 0, 0.20)',
     text: 'rgba(0, 0, 0, 0.70)',
+  },
+  // Overlay colors
+  overlay: {
+    light: 'rgba(0, 0, 0, 0.50)',
+    medium: 'rgba(0, 0, 0, 0.60)',
+    dark: 'rgba(0, 0, 0, 0.70)',
+    heavy: 'rgba(0, 0, 0, 0.80)',
+  },
+  // Glass tints
+  glass: {
+    light: 'rgba(255, 255, 255, 0.25)',
+    medium: 'rgba(255, 255, 255, 0.15)',
+    subtle: 'rgba(255, 255, 255, 0.10)',
+    dark: 'rgba(0, 0, 0, 0.25)',
+    darkMedium: 'rgba(0, 0, 0, 0.15)',
+    darkSubtle: 'rgba(0, 0, 0, 0.10)',
   },
 };
 
@@ -180,12 +229,13 @@ export const SHADOWS = {
     shadowRadius: 24,
     elevation: 12,
   },
-  // Glass-specific shadows with color tint
+  // Glass-specific shadows - iOS 26 Liquid Glass compliant
+  // Uses black shadow color with soft diffusion for glass effect
   glass: {
-    shadowColor: '#3b82f6',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
     elevation: 6,
   },
 };

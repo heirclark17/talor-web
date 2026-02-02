@@ -334,7 +334,7 @@ function renderCircuitBoard(random: () => number, color: string) {
   return <G>{elements}</G>;
 }
 
-function renderMeshGradient(random: () => number, colors: string[]) {
+function renderMeshGradient(random: () => number, colors: readonly string[]) {
   const elements: React.ReactNode[] = [];
   const blobCount = 6;
 
@@ -531,7 +531,7 @@ function renderStarfield(random: () => number, color: string) {
   return <G>{elements}</G>;
 }
 
-function renderAuroraBands(random: () => number, colors: string[]) {
+function renderAuroraBands(random: () => number, colors: readonly string[]) {
   const elements: React.ReactNode[] = [];
   const bandCount = 5;
 

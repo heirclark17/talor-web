@@ -25,11 +25,20 @@ import {
   ChevronRight,
   ArrowLeft,
   X,
+  BarChart3,
+  BookOpen,
+  Lightbulb,
+  AlertCircle,
+  FolderOpen,
+  Briefcase,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useTheme } from '../hooks/useTheme';
+import { CareerPlanResults, CareerPathCertifications } from '../components';
+import { useResumeStore } from '../stores/resumeStore';
 import * as DocumentPicker from 'expo-document-picker';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -45,11 +54,35 @@ interface CareerPlan {
 
 export default function CareerPathDesignerScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
+
+  // Resume store
+  const {
+    resumes: existingResumes,
+    loading: loadingResumes,
+    fetchResumes,
+  } = useResumeStore();
+
   const [step, setStep] = useState<WizardStep>('welcome');
   const [questionStep, setQuestionStep] = useState<QuestionStep>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [plan, setPlan] = useState<CareerPlan>();
+
+  // Saved career plans
+  const [savedPlans, setSavedPlans] = useState<any[]>([]);
+  const [loadingSavedPlans, setLoadingSavedPlans] = useState(false);
+
+  // Feature #13: Career Trajectory Analysis
+  const [trajectoryAnalysis, setTrajectoryAnalysis] = useState<any>(null);
+  const [loadingTrajectory, setLoadingTrajectory] = useState(false);
+
+  // Feature #14: Skill Gaps Analysis
+  const [skillGaps, setSkillGaps] = useState<any>(null);
+  const [loadingSkillGaps, setLoadingSkillGaps] = useState(false);
+
+  // Feature #15: Detailed Career Plan
+  const [showDetailedPlan, setShowDetailedPlan] = useState(false);
 
   // Async job status
   const [jobId, setJobId] = useState<string>();
@@ -60,10 +93,6 @@ export default function CareerPathDesignerScreen() {
   const [resumeFile, setResumeFile] = useState<any>(null);
   const [resumeId, setResumeId] = useState<number | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-
-  // Existing resumes
-  const [existingResumes, setExistingResumes] = useState<any[]>([]);
-  const [loadingResumes, setLoadingResumes] = useState(false);
 
   // Basic Profile (Step 1)
   const [dreamRole, setDreamRole] = useState('');
@@ -97,23 +126,68 @@ export default function CareerPathDesignerScreen() {
   useFocusEffect(
     useCallback(() => {
       if (step === 'upload' && existingResumes.length === 0) {
-        loadExistingResumes();
+        fetchResumes();
       }
+    }, [step, existingResumes.length, fetchResumes])
+  );
+
+  // Load saved career plans on welcome screen
+  useFocusEffect(
+    useCallback(() => {
+      const loadSavedPlans = async () => {
+        if (step === 'welcome') {
+          setLoadingSavedPlans(true);
+          try {
+            const result = await api.listCareerPlans();
+            if (result.success && Array.isArray(result.data)) {
+              setSavedPlans(result.data);
+            }
+          } catch (err) {
+            console.error('Failed to load saved career plans:', err);
+          } finally {
+            setLoadingSavedPlans(false);
+          }
+        }
+      };
+      loadSavedPlans();
     }, [step])
   );
 
-  const loadExistingResumes = async () => {
-    setLoadingResumes(true);
+  // Load a saved career plan
+  const handleLoadSavedPlan = async (planId: number) => {
+    setLoading(true);
+    setError(undefined);
     try {
-      const response = await api.getResumes();
-      if (response.success && response.data) {
-        const resumeList = Array.isArray(response.data) ? response.data : [];
-        setExistingResumes(resumeList);
+      const result = await api.getCareerPlan(planId);
+      if (result.success && result.data) {
+        const planData = result.data;
+        setPlan({
+          id: planId,
+          profileSummary: planData.profile_summary || planData.profileSummary,
+          generatedAt: planData.created_at || planData.generatedAt,
+          estimated_timeline: planData.estimated_timeline || planData.estimatedTimeline,
+          milestones: planData.milestones || [],
+          skill_gaps: planData.skill_gaps || planData.skillGaps || [],
+          immediate_actions: planData.immediate_actions || planData.immediateActions || [],
+          long_term_goals: planData.long_term_goals || planData.longTermGoals || [],
+          salary_progression: planData.salary_progression || planData.salaryProgression,
+          summary: planData.summary,
+          certifications: planData.certifications || [],
+          networking_events: planData.networking_events || planData.networkingEvents || [],
+          learning_resources: planData.learning_resources || planData.learningResources || [],
+        });
+        // Set the context from saved plan
+        if (planData.current_role) setCurrentRole(planData.current_role);
+        if (planData.target_role) setDreamRole(planData.target_role);
+        if (planData.timeline) setTimeline(planData.timeline);
+        setStep('results');
+      } else {
+        setError('Failed to load career plan');
       }
-    } catch (err) {
-      console.error('Failed to load resumes:', err);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load career plan');
     } finally {
-      setLoadingResumes(false);
+      setLoading(false);
     }
   };
 
@@ -255,60 +329,127 @@ export default function CareerPathDesignerScreen() {
         transition_motivation: transitionMotivation,
       };
 
-      const createJobResult = await api.generateCareerPlanAsync(intake);
+      // Try async generation first (better results with web research)
+      setJobMessage('Starting career analysis with AI research...');
+      setJobProgress(10);
 
-      if (!createJobResult.success || !createJobResult.data?.job_id) {
-        const errorMsg = createJobResult.error || 'Failed to start career plan generation';
-        setError(`Generation failed: ${errorMsg}`);
-        setStep('questions');
+      const asyncResult = await api.generateCareerPlanAsync(intake);
+
+      if (asyncResult.success && asyncResult.data?.job_id) {
+        // Async generation started - poll for results
+        const asyncJobId = asyncResult.data.job_id;
+        setJobId(asyncJobId);
+        setJobMessage('Researching industry trends and opportunities...');
+        setJobProgress(20);
+
+        // Poll for job completion
+        const pollInterval = 3000; // 3 seconds
+        const maxPolls = 60; // Max 3 minutes
+        let pollCount = 0;
+
+        const pollForResults = async () => {
+          pollCount++;
+          const statusResult = await api.getCareerPlanJobStatus(asyncJobId);
+
+          if (!statusResult.success) {
+            throw new Error(statusResult.error || 'Failed to get job status');
+          }
+
+          const status = statusResult.data?.status;
+          const progress = statusResult.data?.progress || 0;
+
+          // Update progress and message based on status
+          if (status === 'processing') {
+            const progressMessages = [
+              'Analyzing your background...',
+              'Researching target role requirements...',
+              'Identifying skill gaps...',
+              'Finding relevant certifications...',
+              'Discovering networking opportunities...',
+              'Building your personalized roadmap...',
+            ];
+            const msgIndex = Math.min(Math.floor(progress / 20), progressMessages.length - 1);
+            setJobMessage(progressMessages[msgIndex]);
+            setJobProgress(20 + Math.min(progress * 0.7, 70)); // Cap at 90%
+
+            if (pollCount < maxPolls) {
+              setTimeout(pollForResults, pollInterval);
+            } else {
+              throw new Error('Career plan generation timed out. Please try again.');
+            }
+          } else if (status === 'completed') {
+            // Success - process the results
+            setJobProgress(100);
+            setJobMessage('Career plan generated!');
+
+            const planData = statusResult.data?.plan || statusResult.data;
+            setPlan({
+              id: statusResult.data?.planId,
+              profileSummary: planData?.profileSummary || planData?.profile_summary || `Career transition from ${currentRole} to ${dreamRole}`,
+              generatedAt: new Date().toISOString(),
+              estimated_timeline: planData?.estimatedTimeline || planData?.estimated_timeline || timeline,
+              milestones: planData?.milestones || [],
+              skill_gaps: planData?.skillGaps || planData?.skill_gaps || [],
+              immediate_actions: planData?.immediateActions || planData?.immediate_actions || [],
+              long_term_goals: planData?.longTermGoals || planData?.long_term_goals || [],
+              salary_progression: planData?.salaryProgression || planData?.salary_progression,
+              summary: planData?.summary,
+              certifications: planData?.certifications || [],
+              networking_events: planData?.networkingEvents || planData?.networking_events || [],
+              learning_resources: planData?.learningResources || planData?.learning_resources || [],
+            });
+            setStep('results');
+            setLoading(false);
+          } else if (status === 'failed') {
+            throw new Error(statusResult.data?.error || 'Career plan generation failed');
+          }
+        };
+
+        // Start polling
+        setTimeout(pollForResults, pollInterval);
+      } else {
+        // Async failed, fall back to sync generation
+        console.log('Async generation not available, falling back to sync...');
+        setJobMessage('Generating your personalized career plan...');
+        setJobProgress(30);
+
+        const result = await api.generateCareerPlan({
+          currentRole: currentRole || 'Current Position',
+          targetRole: dreamRole,
+          resumeId: resumeId || undefined,
+        });
+
+        if (!result.success) {
+          const errorMsg = result.error || 'Failed to generate career plan';
+          setError(`Generation failed: ${errorMsg}`);
+          setStep('questions');
+          setLoading(false);
+          return;
+        }
+
+        setJobProgress(100);
+        setJobMessage('Career plan generated!');
+
+        // Map API response to plan format
+        const planData = result.data?.plan || result.data;
+        setPlan({
+          id: result.data?.planId || result.data?.plan_id,
+          profileSummary: planData?.profileSummary || planData?.profile_summary || `Career transition from ${currentRole} to ${dreamRole}`,
+          generatedAt: new Date().toISOString(),
+          estimated_timeline: planData?.estimatedTimeline || planData?.estimated_timeline || timeline,
+          milestones: planData?.milestones || [],
+          skill_gaps: planData?.skillGaps || planData?.skill_gaps || [],
+          immediate_actions: planData?.immediateActions || planData?.immediate_actions || [],
+          long_term_goals: planData?.longTermGoals || planData?.long_term_goals || [],
+          salary_progression: planData?.salaryProgression || planData?.salary_progression,
+          summary: planData?.summary,
+          certifications: planData?.certifications || [],
+          networking_events: planData?.networkingEvents || planData?.networking_events || [],
+          learning_resources: planData?.learningResources || planData?.learning_resources || [],
+        });
+        setStep('results');
         setLoading(false);
-        return;
       }
-
-      const currentJobId = createJobResult.data.job_id;
-      setJobId(currentJobId);
-
-      // Poll for job status
-      let attempts = 0;
-      const maxAttempts = 120; // 10 minutes with 5-second polling
-      const pollInterval = 5000; // 5 seconds
-
-      const poll = async () => {
-        attempts++;
-
-        if (attempts > maxAttempts) {
-          setError('Career plan generation timed out. Please try again.');
-          setStep('questions');
-          setLoading(false);
-          return;
-        }
-
-        const statusResult = await api.getCareerPlanJobStatus(currentJobId);
-
-        if (!statusResult.success) {
-          setTimeout(poll, pollInterval);
-          return;
-        }
-
-        const jobData = statusResult.data;
-        setJobProgress(jobData.progress || 0);
-        setJobMessage(jobData.message || 'Processing...');
-
-        if (jobData.status === 'completed' && jobData.plan) {
-          setPlan(jobData.plan);
-          setStep('results');
-          setLoading(false);
-        } else if (jobData.status === 'failed') {
-          const errorMsg = jobData.error || 'Career plan generation failed';
-          setError(errorMsg);
-          setStep('questions');
-          setLoading(false);
-        } else {
-          setTimeout(poll, pollInterval);
-        }
-      };
-
-      poll();
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
       setStep('questions');
@@ -371,58 +512,177 @@ export default function CareerPathDesignerScreen() {
     }
   };
 
+  // Feature #13: Analyze Career Trajectory
+  const handleAnalyzeTrajectory = async () => {
+    if (!resumeId) {
+      Alert.alert('Resume Required', 'Please upload a resume first to analyze your career trajectory.');
+      return;
+    }
+
+    setLoadingTrajectory(true);
+    try {
+      const result = await api.analyzeCareerTrajectory({
+        resumeId: resumeId,
+        targetRole: dreamRole,
+        industry: currentIndustry,
+      });
+
+      if (result.success && result.data) {
+        setTrajectoryAnalysis(result.data);
+      } else {
+        Alert.alert('Analysis Failed', result.error || 'Could not analyze career trajectory');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to analyze trajectory');
+    } finally {
+      setLoadingTrajectory(false);
+    }
+  };
+
+  // Feature #14: Get Skill Gaps Analysis
+  const handleAnalyzeSkillGaps = async () => {
+    if (!resumeId || !dreamRole) {
+      Alert.alert('Information Required', 'Please upload a resume and provide your target role.');
+      return;
+    }
+
+    setLoadingSkillGaps(true);
+    try {
+      const result = await api.getSkillGaps({
+        resumeId: resumeId,
+        targetRole: dreamRole,
+      });
+
+      if (result.success && result.data) {
+        setSkillGaps(result.data);
+      } else {
+        Alert.alert('Analysis Failed', result.error || 'Could not analyze skill gaps');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to analyze skill gaps');
+    } finally {
+      setLoadingSkillGaps(false);
+    }
+  };
+
+  // Feature #15: Generate Detailed Career Plan
+  const handleGenerateDetailedPlan = async () => {
+    if (!resumeId || !dreamRole || !currentRole) {
+      Alert.alert('Information Required', 'Please complete all required fields first.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await api.generateDetailedCareerPlan({
+        resumeId: resumeId,
+        currentRole: currentRole,
+        targetRole: dreamRole,
+        timeline: timeline,
+      });
+
+      if (result.success && result.data) {
+        setPlan(result.data as any);
+        setShowDetailedPlan(true);
+        setStep('results');
+      } else {
+        Alert.alert('Generation Failed', result.error || 'Could not generate detailed career plan');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to generate career plan');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Welcome Screen
   if (step === 'welcome') {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.welcomeContainer}>
-            <View style={styles.welcomeBadge}>
+            <View style={[styles.welcomeBadge, { backgroundColor: colors.glass }]}>
               <Sparkles color={COLORS.primary} size={20} />
-              <Text style={styles.welcomeBadgeText}>AI-Powered Career Planning</Text>
+              <Text style={[styles.welcomeBadgeText, { color: colors.text }]}>AI-Powered Career Planning</Text>
             </View>
 
-            <Text style={styles.welcomeTitle}>Design Your Career Transition Path</Text>
+            <Text style={[styles.welcomeTitle, { color: colors.text }]}>Design Your Career Transition Path</Text>
 
-            <Text style={styles.welcomeSubtitle}>
+            <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
               Upload your resume and complete our comprehensive assessment. Get a personalized roadmap with certifications, study materials, tech stacks, and networking events.
             </Text>
 
             <View style={styles.featureGrid}>
-              <View style={styles.featureCard}>
+              <View style={[styles.featureCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                 <View style={styles.featureIcon}>
                   <Upload color={COLORS.primary} size={32} />
                 </View>
-                <Text style={styles.featureTitle}>Upload Resume</Text>
-                <Text style={styles.featureText}>We analyze your experience automatically</Text>
+                <Text style={[styles.featureTitle, { color: colors.text }]}>Upload Resume</Text>
+                <Text style={[styles.featureText, { color: colors.textSecondary }]}>We analyze your experience automatically</Text>
               </View>
 
-              <View style={styles.featureCard}>
+              <View style={[styles.featureCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                 <View style={styles.featureIcon}>
                   <Target color={COLORS.primary} size={32} />
                 </View>
-                <Text style={styles.featureTitle}>Detailed Assessment</Text>
-                <Text style={styles.featureText}>Comprehensive questionnaire for best fit</Text>
+                <Text style={[styles.featureTitle, { color: colors.text }]}>Detailed Assessment</Text>
+                <Text style={[styles.featureText, { color: colors.textSecondary }]}>Comprehensive questionnaire for best fit</Text>
               </View>
 
-              <View style={styles.featureCard}>
+              <View style={[styles.featureCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                 <View style={styles.featureIcon}>
                   <TrendingUp color={COLORS.primary} size={32} />
                 </View>
-                <Text style={styles.featureTitle}>Actionable Plan</Text>
-                <Text style={styles.featureText}>Real certifications, events, and resources</Text>
+                <Text style={[styles.featureTitle, { color: colors.text }]}>Actionable Plan</Text>
+                <Text style={[styles.featureText, { color: colors.textSecondary }]}>Real certifications, events, and resources</Text>
               </View>
             </View>
 
+            {/* Saved Career Plans Section */}
+            {savedPlans.length > 0 && (
+              <View style={styles.savedPlansSection}>
+                <View style={styles.savedPlansHeader}>
+                  <FolderOpen color={COLORS.primary} size={20} />
+                  <Text style={[styles.savedPlansTitle, { color: colors.text }]}>Your Saved Career Plans</Text>
+                </View>
+                {loadingSavedPlans ? (
+                  <ActivityIndicator size="small" color={COLORS.primary} />
+                ) : (
+                  savedPlans.slice(0, 3).map((savedPlan: any) => (
+                    <TouchableOpacity
+                      key={savedPlan.id}
+                      style={[styles.savedPlanItem, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+                      onPress={() => handleLoadSavedPlan(savedPlan.id)}
+                    >
+                      <View style={styles.savedPlanIcon}>
+                        <Briefcase color={COLORS.primary} size={20} />
+                      </View>
+                      <View style={styles.savedPlanInfo}>
+                        <Text style={[styles.savedPlanRole, { color: colors.text }]} numberOfLines={1}>
+                          {savedPlan.target_roles?.[0] || savedPlan.target_role || savedPlan.targetRole || 'Career Plan'}
+                        </Text>
+                        <Text style={[styles.savedPlanDate, { color: colors.textSecondary }]}>
+                          {savedPlan.created_at ? new Date(savedPlan.created_at).toLocaleDateString() : 'Saved'}
+                        </Text>
+                      </View>
+                      <ChevronRight color={colors.textSecondary} size={20} />
+                    </TouchableOpacity>
+                  ))
+                )}
+              </View>
+            )}
+
             <TouchableOpacity
-              style={styles.primaryButton}
+              style={[styles.primaryButton, { backgroundColor: colors.text }]}
               onPress={() => setStep('upload')}
             >
-              <Text style={styles.primaryButtonText}>Get Started</Text>
-              <ChevronRight color={COLORS.dark.background} size={20} />
+              <Text style={[styles.primaryButtonText, { color: colors.background }]}>
+                {savedPlans.length > 0 ? 'Create New Plan' : 'Get Started'}
+              </Text>
+              <ChevronRight color={colors.background} size={20} />
             </TouchableOpacity>
 
-            <Text style={styles.welcomeFooter}>Takes 10-15 minutes for comprehensive assessment</Text>
+            <Text style={[styles.welcomeFooter, { color: colors.textTertiary }]}>Takes 10-15 minutes for comprehensive assessment</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -435,8 +695,8 @@ export default function CareerPathDesignerScreen() {
       <SafeAreaView style={styles.container} edges={['top']}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.uploadContainer}>
-            <Text style={styles.screenTitle}>Upload Your Resume</Text>
-            <Text style={styles.screenSubtitle}>
+            <Text style={[styles.screenTitle, { color: colors.text }]}>Upload Your Resume</Text>
+            <Text style={[styles.screenSubtitle, { color: colors.textSecondary }]}>
               We'll automatically extract your skills, experience, and background
             </Text>
 
@@ -444,67 +704,67 @@ export default function CareerPathDesignerScreen() {
             {existingResumes.length > 0 && !resumeFile && (
               <>
                 <View style={styles.sectionContainer}>
-                  <Text style={styles.sectionTitle}>Select from Your Previous Resumes</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>Select from Your Previous Resumes</Text>
                   {loadingResumes ? (
                     <ActivityIndicator size="large" color={COLORS.primary} />
                   ) : (
                     existingResumes.map((resume: any) => (
                       <TouchableOpacity
                         key={resume.id}
-                        style={styles.resumeItem}
+                        style={[styles.resumeItem, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
                         onPress={() => handleSelectExistingResume(resume.id)}
                       >
                         <View style={styles.resumeInfo}>
-                          <Text style={styles.resumeName}>{resume.filename || `Resume ${resume.id}`}</Text>
-                          <Text style={styles.resumeDate}>
+                          <Text style={[styles.resumeName, { color: colors.text }]}>{resume.filename || `Resume ${resume.id}`}</Text>
+                          <Text style={[styles.resumeDate, { color: colors.textSecondary }]}>
                             Uploaded {new Date(resume.created_at).toLocaleDateString()}
                           </Text>
                         </View>
-                        <ChevronRight color={COLORS.dark.textSecondary} size={20} />
+                        <ChevronRight color={colors.textSecondary} size={20} />
                       </TouchableOpacity>
                     ))
                   )}
                 </View>
 
                 <View style={styles.divider}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>OR</Text>
-                  <View style={styles.dividerLine} />
+                  <View style={[styles.dividerLine, { backgroundColor: colors.glassBorder }]} />
+                  <Text style={[styles.dividerText, { color: colors.textSecondary }]}>OR</Text>
+                  <View style={[styles.dividerLine, { backgroundColor: colors.glassBorder }]} />
                 </View>
               </>
             )}
 
             {/* Upload zone */}
             <TouchableOpacity
-              style={styles.uploadZone}
+              style={[styles.uploadZone, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
               onPress={handleFileSelect}
               disabled={uploadProgress > 0 && uploadProgress < 100}
             >
               {!resumeFile ? (
                 <>
                   <Upload color={COLORS.primary} size={48} />
-                  <Text style={styles.uploadTitle}>Tap to select your resume</Text>
-                  <Text style={styles.uploadSubtext}>Supports PDF, DOC, and DOCX files</Text>
+                  <Text style={[styles.uploadTitle, { color: colors.text }]}>Tap to select your resume</Text>
+                  <Text style={[styles.uploadSubtext, { color: colors.textSecondary }]}>Supports PDF, DOC, and DOCX files</Text>
                 </>
               ) : uploadProgress < 100 ? (
                 <>
                   <ActivityIndicator size="large" color={COLORS.primary} />
-                  <Text style={styles.uploadTitle}>Analyzing your resume...</Text>
-                  <Text style={styles.uploadSubtext}>{uploadProgress}% complete</Text>
+                  <Text style={[styles.uploadTitle, { color: colors.text }]}>Analyzing your resume...</Text>
+                  <Text style={[styles.uploadSubtext, { color: colors.textSecondary }]}>{uploadProgress}% complete</Text>
                 </>
               ) : (
                 <>
-                  <View style={styles.checkIcon}>
+                  <View style={[styles.checkIcon, { backgroundColor: colors.backgroundTertiary }]}>
                     <Check color={COLORS.success} size={32} />
                   </View>
-                  <Text style={styles.uploadTitle}>Resume uploaded successfully!</Text>
-                  <Text style={styles.uploadSubtext}>{resumeFile.name}</Text>
+                  <Text style={[styles.uploadTitle, { color: colors.text }]}>Resume uploaded successfully!</Text>
+                  <Text style={[styles.uploadSubtext, { color: colors.textSecondary }]}>{resumeFile.name}</Text>
                 </>
               )}
             </TouchableOpacity>
 
             {error && (
-              <View style={styles.errorBox}>
+              <View style={[styles.errorBox, { backgroundColor: colors.glass }]}>
                 <X color={COLORS.danger} size={20} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
@@ -515,18 +775,18 @@ export default function CareerPathDesignerScreen() {
                 style={styles.backButton}
                 onPress={() => setStep('welcome')}
               >
-                <ArrowLeft color={COLORS.dark.textSecondary} size={20} />
-                <Text style={styles.backButtonText}>Back</Text>
+                <ArrowLeft color={colors.textSecondary} size={20} />
+                <Text style={[styles.backButtonText, { color: colors.textSecondary }]}>Back</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.primaryButton, !resumeFile && styles.secondaryButton]}
+                style={[styles.primaryButton, { backgroundColor: colors.text }, !resumeFile && styles.secondaryButton]}
                 onPress={() => setStep('questions')}
               >
-                <Text style={[styles.primaryButtonText, !resumeFile && styles.secondaryButtonText]}>
+                <Text style={[styles.primaryButtonText, { color: colors.background }, !resumeFile && styles.secondaryButtonText]}>
                   {resumeFile ? 'Continue' : 'Skip'}
                 </Text>
-                <ChevronRight color={resumeFile ? COLORS.dark.background : COLORS.primary} size={20} />
+                <ChevronRight color={resumeFile ? colors.background : COLORS.primary} size={20} />
               </TouchableOpacity>
             </View>
           </View>
@@ -548,14 +808,15 @@ export default function CareerPathDesignerScreen() {
                   key={num}
                   style={[
                     styles.stepDot,
+                    { backgroundColor: colors.backgroundTertiary },
                     questionStep === num && styles.stepDotActive,
-                    questionStep > num && styles.stepDotCompleted,
+                    questionStep > num && [styles.stepDotCompleted, { backgroundColor: colors.text }],
                   ]}
                 >
                   {questionStep > num ? (
-                    <Check color={COLORS.dark.background} size={16} />
+                    <Check color={colors.background} size={16} />
                   ) : (
-                    <Text style={styles.stepDotText}>{num}</Text>
+                    <Text style={[styles.stepDotText, { color: colors.textSecondary }]}>{num}</Text>
                   )}
                 </View>
               ))}
@@ -565,54 +826,54 @@ export default function CareerPathDesignerScreen() {
             {questionStep === 1 && (
               <View>
                 <View style={styles.stepHeader}>
-                  <View style={styles.stepIcon}>
+                  <View style={[styles.stepIcon, { backgroundColor: colors.backgroundTertiary }]}>
                     <Target color={COLORS.primary} size={32} />
                   </View>
-                  <Text style={styles.stepTitle}>Basic Profile</Text>
-                  <Text style={styles.stepSubtitle}>Tell us about your current role and dream career</Text>
+                  <Text style={[styles.stepTitle, { color: colors.text }]}>Basic Profile</Text>
+                  <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>Tell us about your current role and dream career</Text>
                 </View>
 
                 <View style={styles.formContainer}>
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Dream Role or Career Goal *</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Dream Role or Career Goal *</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
                       value={dreamRole}
                       onChangeText={setDreamRole}
                       placeholder="e.g., Senior Cloud Security Architect"
-                      placeholderTextColor={COLORS.dark.textTertiary}
+                      placeholderTextColor={colors.textTertiary}
                     />
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Current Role Title</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Current Role Title</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
                       value={currentRole}
                       onChangeText={setCurrentRole}
                       placeholder="e.g., IT Manager"
-                      placeholderTextColor={COLORS.dark.textTertiary}
+                      placeholderTextColor={colors.textTertiary}
                     />
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Current Industry</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Current Industry</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
                       value={currentIndustry}
                       onChangeText={setCurrentIndustry}
                       placeholder="e.g., Healthcare, Finance"
-                      placeholderTextColor={COLORS.dark.textTertiary}
+                      placeholderTextColor={colors.textTertiary}
                     />
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Years of Experience: {yearsExperience}</Text>
-                    <Text style={styles.helpText}>Slide to adjust</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Years of Experience: {yearsExperience}</Text>
+                    <Text style={[styles.helpText, { color: colors.textTertiary }]}>Slide to adjust</Text>
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Education Level</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Education Level</Text>
                     <View style={styles.chipGrid}>
                       {[
                         { value: 'high school', label: 'High School' },
@@ -625,13 +886,15 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
                             educationLevel === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setEducationLevel(option.value)}
                         >
                           <Text style={[
                             styles.chipText,
-                            educationLevel === option.value && styles.chipTextSelected,
+                            { color: colors.text },
+                            educationLevel === option.value && { color: colors.background },
                           ]}>
                             {option.label}
                           </Text>
@@ -641,11 +904,11 @@ export default function CareerPathDesignerScreen() {
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Top 3-5 Tasks in Current Role *</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Top 3-5 Tasks in Current Role *</Text>
                     {topTasks.map((task, idx) => (
                       <TextInput
                         key={idx}
-                        style={[styles.input, styles.inputMargin]}
+                        style={[styles.input, styles.inputMargin, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
                         value={task}
                         onChangeText={(text) => {
                           const newTasks = [...topTasks];
@@ -653,7 +916,7 @@ export default function CareerPathDesignerScreen() {
                           setTopTasks(newTasks);
                         }}
                         placeholder={`Task ${idx + 1}`}
-                        placeholderTextColor={COLORS.dark.textTertiary}
+                        placeholderTextColor={colors.textTertiary}
                       />
                     ))}
                     <TouchableOpacity onPress={() => setTopTasks([...topTasks, ''])}>
@@ -662,11 +925,11 @@ export default function CareerPathDesignerScreen() {
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Your Top Strengths (2-5) *</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Your Top Strengths (2-5) *</Text>
                     {strengths.map((strength, idx) => (
                       <TextInput
                         key={idx}
-                        style={[styles.input, styles.inputMargin]}
+                        style={[styles.input, styles.inputMargin, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
                         value={strength}
                         onChangeText={(text) => {
                           const newStrengths = [...strengths];
@@ -674,7 +937,7 @@ export default function CareerPathDesignerScreen() {
                           setStrengths(newStrengths);
                         }}
                         placeholder={`Strength ${idx + 1} (e.g., Leadership)`}
-                        placeholderTextColor={COLORS.dark.textTertiary}
+                        placeholderTextColor={colors.textTertiary}
                       />
                     ))}
                     {strengths.length < 5 && (
@@ -690,16 +953,16 @@ export default function CareerPathDesignerScreen() {
             {questionStep === 2 && (
               <View>
                 <View style={styles.stepHeader}>
-                  <View style={styles.stepIcon}>
+                  <View style={[styles.stepIcon, { backgroundColor: colors.backgroundTertiary }]}>
                     <Building color={COLORS.primary} size={32} />
                   </View>
-                  <Text style={styles.stepTitle}>Target Role Details</Text>
-                  <Text style={styles.stepSubtitle}>Help us understand your career aspirations</Text>
+                  <Text style={[styles.stepTitle, { color: colors.text }]}>Target Role Details</Text>
+                  <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>Help us understand your career aspirations</Text>
                 </View>
 
                 <View style={styles.formContainer}>
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Desired Career Level</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Desired Career Level</Text>
                     <View style={styles.chipGrid}>
                       {[
                         { value: 'entry-level', label: 'Entry Level' },
@@ -712,13 +975,15 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
                             targetRoleLevel === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setTargetRoleLevel(option.value)}
                         >
                           <Text style={[
                             styles.chipText,
-                            targetRoleLevel === option.value && styles.chipTextSelected,
+                            { color: colors.text },
+                            targetRoleLevel === option.value && { color: colors.background },
                           ]}>
                             {option.label}
                           </Text>
@@ -728,7 +993,7 @@ export default function CareerPathDesignerScreen() {
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Target Industries (Select all that apply)</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Target Industries (Select all that apply)</Text>
                     <View style={styles.chipGrid}>
                       {[
                         'Technology', 'Finance', 'Healthcare', 'Education', 'Retail',
@@ -738,13 +1003,15 @@ export default function CareerPathDesignerScreen() {
                           key={industry}
                           style={[
                             styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
                             targetIndustries.includes(industry) && styles.chipSelected,
                           ]}
                           onPress={() => toggleArrayItem(targetIndustries, setTargetIndustries, industry)}
                         >
                           <Text style={[
                             styles.chipText,
-                            targetIndustries.includes(industry) && styles.chipTextSelected,
+                            { color: colors.text },
+                            targetIndustries.includes(industry) && { color: colors.background },
                           ]}>
                             {industry}
                           </Text>
@@ -759,16 +1026,16 @@ export default function CareerPathDesignerScreen() {
             {questionStep === 3 && (
               <View>
                 <View style={styles.stepHeader}>
-                  <View style={styles.stepIcon}>
+                  <View style={[styles.stepIcon, { backgroundColor: colors.backgroundTertiary }]}>
                     <Clock color={COLORS.primary} size={32} />
                   </View>
-                  <Text style={styles.stepTitle}>Work Preferences</Text>
-                  <Text style={styles.stepSubtitle}>Your availability and work style</Text>
+                  <Text style={[styles.stepTitle, { color: colors.text }]}>Work Preferences</Text>
+                  <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>Your availability and work style</Text>
                 </View>
 
                 <View style={styles.formContainer}>
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Transition Timeline</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Transition Timeline</Text>
                     <View style={styles.chipGrid}>
                       {[
                         { value: '3months', label: '3 Months', desc: 'Fast track' },
@@ -779,29 +1046,31 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chipLarge,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
                             timeline === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setTimeline(option.value)}
                         >
                           <Text style={[
                             styles.chipText,
-                            timeline === option.value && styles.chipTextSelected,
+                            { color: colors.text },
+                            timeline === option.value && { color: colors.background },
                           ]}>
                             {option.label}
                           </Text>
-                          <Text style={styles.chipSubtext}>{option.desc}</Text>
+                          <Text style={[styles.chipSubtext, { color: colors.textTertiary }]}>{option.desc}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Hours per Week Available: {timePerWeek} hrs/week</Text>
-                    <Text style={styles.helpText}>Slide to adjust (5-40 hours)</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Hours per Week Available: {timePerWeek} hrs/week</Text>
+                    <Text style={[styles.helpText, { color: colors.textTertiary }]}>Slide to adjust (5-40 hours)</Text>
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Current Employment Status</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Current Employment Status</Text>
                     <View style={styles.chipGrid}>
                       {[
                         { value: 'employed-full-time', label: 'Full-Time' },
@@ -814,13 +1083,15 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
                             currentEmploymentStatus === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setCurrentEmploymentStatus(option.value)}
                         >
                           <Text style={[
                             styles.chipText,
-                            currentEmploymentStatus === option.value && styles.chipTextSelected,
+                            { color: colors.text },
+                            currentEmploymentStatus === option.value && { color: colors.background },
                           ]}>
                             {option.label}
                           </Text>
@@ -830,31 +1101,31 @@ export default function CareerPathDesignerScreen() {
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Your Location</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Your Location</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
                       value={location}
                       onChangeText={setLocation}
                       placeholder="e.g., Austin, TX or Remote"
-                      placeholderTextColor={COLORS.dark.textTertiary}
+                      placeholderTextColor={colors.textTertiary}
                     />
-                    <Text style={styles.helpText}>Helps us find local networking events</Text>
+                    <Text style={[styles.helpText, { color: colors.textTertiary }]}>Helps us find local networking events</Text>
                   </View>
 
                   <View style={styles.formGroup}>
                     <View style={styles.switchRow}>
-                      <Text style={styles.label}>Willing to relocate for opportunities</Text>
+                      <Text style={[styles.label, { color: colors.text }]}>Willing to relocate for opportunities</Text>
                       <Switch
                         value={willingToRelocate}
                         onValueChange={setWillingToRelocate}
-                        trackColor={{ false: COLORS.dark.glassBorder, true: COLORS.primary }}
-                        thumbColor={COLORS.dark.text}
+                        trackColor={{ false: colors.glassBorder, true: COLORS.primary }}
+                        thumbColor={colors.text}
                       />
                     </View>
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Work Preference</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Work Preference</Text>
                     <View style={styles.chipGrid}>
                       {[
                         { value: 'in-person', label: 'In-Person' },
@@ -865,13 +1136,15 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
                             inPersonVsRemote === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setInPersonVsRemote(option.value)}
                         >
                           <Text style={[
                             styles.chipText,
-                            inPersonVsRemote === option.value && styles.chipTextSelected,
+                            { color: colors.text },
+                            inPersonVsRemote === option.value && { color: colors.background },
                           ]}>
                             {option.label}
                           </Text>
@@ -886,16 +1159,16 @@ export default function CareerPathDesignerScreen() {
             {questionStep === 4 && (
               <View>
                 <View style={styles.stepHeader}>
-                  <View style={styles.stepIcon}>
+                  <View style={[styles.stepIcon, { backgroundColor: colors.backgroundTertiary }]}>
                     <GraduationCap color={COLORS.primary} size={32} />
                   </View>
-                  <Text style={styles.stepTitle}>Learning Preferences</Text>
-                  <Text style={styles.stepSubtitle}>How you learn best</Text>
+                  <Text style={[styles.stepTitle, { color: colors.text }]}>Learning Preferences</Text>
+                  <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>How you learn best</Text>
                 </View>
 
                 <View style={styles.formContainer}>
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Preferred Learning Styles (Select all that apply) *</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Preferred Learning Styles (Select all that apply) *</Text>
                     <View style={styles.chipGrid}>
                       {[
                         { value: 'video-courses', label: '📹 Video Courses' },
@@ -909,13 +1182,15 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chipLarge,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
                             learningStyle.includes(option.value) && styles.chipSelected,
                           ]}
                           onPress={() => toggleArrayItem(learningStyle, setLearningStyle, option.value)}
                         >
                           <Text style={[
                             styles.chipText,
-                            learningStyle.includes(option.value) && styles.chipTextSelected,
+                            { color: colors.text },
+                            learningStyle.includes(option.value) && { color: colors.background },
                           ]}>
                             {option.label}
                           </Text>
@@ -925,7 +1200,7 @@ export default function CareerPathDesignerScreen() {
                   </View>
 
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Technical Background</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Technical Background</Text>
                     <View style={styles.chipGrid}>
                       {[
                         { value: 'non-technical', label: 'Non-Technical', desc: 'Little to no tech' },
@@ -937,17 +1212,19 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chipLarge,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
                             technicalBackground === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setTechnicalBackground(option.value)}
                         >
                           <Text style={[
                             styles.chipText,
-                            technicalBackground === option.value && styles.chipTextSelected,
+                            { color: colors.text },
+                            technicalBackground === option.value && { color: colors.background },
                           ]}>
                             {option.label}
                           </Text>
-                          <Text style={styles.chipSubtext}>{option.desc}</Text>
+                          <Text style={[styles.chipSubtext, { color: colors.textTertiary }]}>{option.desc}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -959,16 +1236,16 @@ export default function CareerPathDesignerScreen() {
             {questionStep === 5 && (
               <View>
                 <View style={styles.stepHeader}>
-                  <View style={styles.stepIcon}>
+                  <View style={[styles.stepIcon, { backgroundColor: colors.backgroundTertiary }]}>
                     <Heart color={COLORS.primary} size={32} />
                   </View>
-                  <Text style={styles.stepTitle}>Motivation & Goals</Text>
-                  <Text style={styles.stepSubtitle}>What drives this career change</Text>
+                  <Text style={[styles.stepTitle, { color: colors.text }]}>Motivation & Goals</Text>
+                  <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>What drives this career change</Text>
                 </View>
 
                 <View style={styles.formContainer}>
                   <View style={styles.formGroup}>
-                    <Text style={styles.label}>Why are you transitioning? (Select all that apply) *</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>Why are you transitioning? (Select all that apply) *</Text>
                     <View style={styles.chipGrid}>
                       {[
                         { value: 'better-pay', label: '💰 Better Pay' },
@@ -982,13 +1259,15 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chipLarge,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
                             transitionMotivation.includes(option.value) && styles.chipSelected,
                           ]}
                           onPress={() => toggleArrayItem(transitionMotivation, setTransitionMotivation, option.value)}
                         >
                           <Text style={[
                             styles.chipText,
-                            transitionMotivation.includes(option.value) && styles.chipTextSelected,
+                            { color: colors.text },
+                            transitionMotivation.includes(option.value) && { color: colors.background },
                           ]}>
                             {option.label}
                           </Text>
@@ -1001,7 +1280,7 @@ export default function CareerPathDesignerScreen() {
             )}
 
             {error && (
-              <View style={styles.errorBox}>
+              <View style={[styles.errorBox, { backgroundColor: colors.glass }]}>
                 <X color={COLORS.danger} size={20} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
@@ -1013,31 +1292,31 @@ export default function CareerPathDesignerScreen() {
                 style={styles.backButton}
                 onPress={questionStep > 1 ? handlePrevQuestionStep : () => setStep('upload')}
               >
-                <ArrowLeft color={COLORS.dark.textSecondary} size={20} />
-                <Text style={styles.backButtonText}>{questionStep > 1 ? 'Previous' : 'Back'}</Text>
+                <ArrowLeft color={colors.textSecondary} size={20} />
+                <Text style={[styles.backButtonText, { color: colors.textSecondary }]}>{questionStep > 1 ? 'Previous' : 'Back'}</Text>
               </TouchableOpacity>
 
               {questionStep < 5 ? (
                 <TouchableOpacity
-                  style={styles.primaryButton}
+                  style={[styles.primaryButton, { backgroundColor: colors.text }]}
                   onPress={handleNextQuestionStep}
                 >
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                  <ChevronRight color={COLORS.dark.background} size={20} />
+                  <Text style={[styles.primaryButtonText, { color: colors.background }]}>Continue</Text>
+                  <ChevronRight color={colors.background} size={20} />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  style={styles.primaryButton}
+                  style={[styles.primaryButton, { backgroundColor: colors.text }]}
                   onPress={handleGenerate}
                   disabled={loading}
                 >
-                  <Sparkles color={COLORS.dark.background} size={20} />
-                  <Text style={styles.primaryButtonText}>Generate Plan</Text>
+                  <Sparkles color={colors.background} size={20} />
+                  <Text style={[styles.primaryButtonText, { color: colors.background }]}>Generate Plan</Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            <Text style={styles.stepLabel}>
+            <Text style={[styles.stepLabel, { color: colors.textTertiary }]}>
               Step {questionStep} of 5: {
                 questionStep === 1 ? 'Basic Profile' :
                 questionStep === 2 ? 'Target Role Details' :
@@ -1057,64 +1336,64 @@ export default function CareerPathDesignerScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.generatingContainer}>
-          <View style={styles.generatingCard}>
+          <View style={[styles.generatingCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
             <View style={styles.generatingIcon}>
               <ActivityIndicator size="large" color={COLORS.primary} />
             </View>
 
-            <Text style={styles.generatingTitle}>Crafting Your Personalized Career Roadmap</Text>
+            <Text style={[styles.generatingTitle, { color: colors.text }]}>Crafting Your Personalized Career Roadmap</Text>
 
-            <Text style={styles.generatingMessage}>
+            <Text style={[styles.generatingMessage, { color: colors.textSecondary }]}>
               {jobMessage || `Our AI is researching ${dreamRole} opportunities with real-world data...`}
             </Text>
 
-            <Text style={styles.generatingSubtext}>
+            <Text style={[styles.generatingSubtext, { color: colors.textTertiary }]}>
               This may take 2-3 minutes for comprehensive research
             </Text>
 
             <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
+              <View style={[styles.progressBar, { backgroundColor: colors.backgroundTertiary }]}>
                 <View style={[styles.progressFill, { width: `${jobProgress}%` }]} />
               </View>
-              <Text style={styles.progressText}>{jobProgress}%</Text>
+              <Text style={[styles.progressText, { color: colors.textTertiary }]}>{jobProgress}%</Text>
             </View>
 
             <View style={styles.stepsList}>
               <View style={styles.stepItem}>
-                <View style={styles.stepBullet}>
+                <View style={[styles.stepBullet, { backgroundColor: colors.backgroundTertiary }]}>
                   {jobProgress >= 10 ? (
                     <Check color={COLORS.success} size={16} />
                   ) : (
                     <ActivityIndicator size="small" color={COLORS.primary} />
                   )}
                 </View>
-                <Text style={[styles.stepText, jobProgress >= 10 && styles.stepTextCompleted]}>
+                <Text style={[styles.stepText, { color: colors.textSecondary }, jobProgress >= 10 && { color: colors.text }]}>
                   Researching certifications and job market data
                 </Text>
               </View>
 
               <View style={styles.stepItem}>
-                <View style={styles.stepBullet}>
+                <View style={[styles.stepBullet, { backgroundColor: colors.backgroundTertiary }]}>
                   {jobProgress >= 60 ? (
                     <ActivityIndicator size="small" color={COLORS.primary} />
                   ) : (
-                    <View style={styles.stepDotInactive} />
+                    <View style={[styles.stepDotInactive, { backgroundColor: colors.textTertiary }]} />
                   )}
                 </View>
-                <Text style={[styles.stepText, jobProgress >= 60 && styles.stepTextCompleted]}>
+                <Text style={[styles.stepText, { color: colors.textSecondary }, jobProgress >= 60 && { color: colors.text }]}>
                   Generating personalized plan
                 </Text>
               </View>
 
               <View style={styles.stepItem}>
-                <View style={styles.stepBullet}>
+                <View style={[styles.stepBullet, { backgroundColor: colors.backgroundTertiary }]}>
                   {jobProgress >= 90 ? (
                     <ActivityIndicator size="small" color={COLORS.primary} />
                   ) : (
-                    <View style={styles.stepDotInactive} />
+                    <View style={[styles.stepDotInactive, { backgroundColor: colors.textTertiary }]} />
                   )}
                 </View>
-                <Text style={[styles.stepText, jobProgress >= 90 && styles.stepTextCompleted]}>
+                <Text style={[styles.stepText, { color: colors.textSecondary }, jobProgress >= 90 && { color: colors.text }]}>
                   Finalizing your resume transformation guide
                 </Text>
               </View>
@@ -1132,63 +1411,340 @@ export default function CareerPathDesignerScreen() {
         <SafeAreaView style={styles.container} edges={['top']}>
           <View style={styles.errorContainer}>
             <X color={COLORS.danger} size={64} />
-            <Text style={styles.errorTitle}>Failed to Generate Plan</Text>
-            <Text style={styles.errorMessage}>
+            <Text style={[styles.errorTitle, { color: colors.text }]}>Failed to Generate Plan</Text>
+            <Text style={[styles.errorMessage, { color: colors.textSecondary }]}>
               We couldn't generate your career plan. Please try again.
             </Text>
             <TouchableOpacity
-              style={styles.primaryButton}
+              style={[styles.primaryButton, { backgroundColor: colors.text }]}
               onPress={() => {
                 setStep('questions');
                 setError(undefined);
               }}
             >
-              <Text style={styles.primaryButtonText}>Back to Assessment</Text>
+              <Text style={[styles.primaryButtonText, { color: colors.background }]}>Back to Assessment</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
       );
     }
 
+    // Transform plan data to CareerPlanResults format
+    const planData = {
+      current_role: currentRole || 'Current Role',
+      target_role: dreamRole || 'Target Role',
+      estimated_timeline: plan.estimated_timeline || timeline,
+      milestones: plan.milestones || [],
+      skill_gaps: plan.skill_gaps || [],
+      immediate_actions: plan.immediate_actions || [],
+      long_term_goals: plan.long_term_goals || [],
+      salary_progression: plan.salary_progression,
+    };
+
+    const handleSavePlan = async () => {
+      try {
+        // Save plan is already done during generation
+        Alert.alert('Success', 'Your career plan has been saved!');
+      } catch (error) {
+        Alert.alert('Error', 'Failed to save plan');
+      }
+    };
+
+    const handleExportPlan = async () => {
+      Alert.alert('Export', 'Export functionality coming soon!');
+    };
+
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.resultsContainer}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => {
-                setStep('welcome');
-                setPlan(undefined);
-                setDreamRole('');
-                setQuestionStep(1);
-              }}
-            >
-              <ArrowLeft color={COLORS.dark.textSecondary} size={20} />
-              <Text style={styles.backButtonText}>New Plan</Text>
-            </TouchableOpacity>
+        <View style={styles.resultsHeaderBar}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => {
+              setStep('welcome');
+              setPlan(undefined);
+              setDreamRole('');
+              setQuestionStep(1);
+            }}
+          >
+            <ArrowLeft color={colors.textSecondary} size={20} />
+            <Text style={[styles.backButtonText, { color: colors.textSecondary }]}>New Plan</Text>
+          </TouchableOpacity>
+        </View>
 
-            <View style={styles.resultsHeader}>
-              <View style={styles.resultsIcon}>
-                <TrendingUp color={COLORS.primary} size={32} />
+        {/* Feature #13: Career Trajectory Analysis */}
+        {resumeId && !trajectoryAnalysis && !loadingTrajectory && (
+          <View style={styles.analysisPrompt}>
+            <TouchableOpacity
+              style={[styles.analyzeButton, { backgroundColor: colors.backgroundTertiary }]}
+              onPress={handleAnalyzeTrajectory}
+            >
+              <BarChart3 color={COLORS.primary} size={20} />
+              <Text style={[styles.analyzeButtonText, { color: colors.text }]}>Analyze Career Trajectory</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {loadingTrajectory && (
+          <View style={[styles.analysisCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={[styles.analysisLoadingText, { color: colors.textSecondary }]}>Analyzing your career trajectory...</Text>
+          </View>
+        )}
+
+        {trajectoryAnalysis && (
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={[styles.analysisCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+              <View style={styles.analysisHeader}>
+                <BarChart3 color={COLORS.primary} size={32} />
+                <Text style={[styles.analysisTitle, { color: colors.text }]}>Career Trajectory Analysis</Text>
               </View>
-              <Text style={styles.resultsTitle}>Your Career Transition Plan</Text>
-              <Text style={styles.resultsSubtitle}>
-                {plan.profileSummary || 'Your personalized career transition roadmap'}
-              </Text>
-              {plan.generatedAt && (
-                <Text style={styles.resultsDate}>
-                  Generated {new Date(plan.generatedAt).toLocaleDateString()}
+
+              <View style={styles.analysisSection}>
+                <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Current Position Assessment</Text>
+                <Text style={[styles.analysisText, { color: colors.textSecondary }]}>
+                  {trajectoryAnalysis.current_position_assessment}
                 </Text>
+              </View>
+
+              {trajectoryAnalysis.growth_potential && (
+                <View style={styles.analysisSection}>
+                  <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Growth Potential</Text>
+                  <View style={styles.scoreRow}>
+                    <Text style={[styles.scoreLabel, { color: colors.textSecondary }]}>Score:</Text>
+                    <Text style={[styles.scoreValue, { color: COLORS.primary }]}>
+                      {trajectoryAnalysis.growth_potential.score}/100
+                    </Text>
+                  </View>
+                  {trajectoryAnalysis.growth_potential.factors?.map((factor: string, index: number) => (
+                    <View key={index} style={styles.bulletRow}>
+                      <Text style={styles.bullet}>•</Text>
+                      <Text style={[styles.bulletText, { color: colors.text }]}>{factor}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {trajectoryAnalysis.trajectory_path && trajectoryAnalysis.trajectory_path.length > 0 && (
+                <View style={styles.analysisSection}>
+                  <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Career Path Roadmap</Text>
+                  {trajectoryAnalysis.trajectory_path.map((step: any, index: number) => (
+                    <View key={index} style={[styles.pathStep, { backgroundColor: colors.backgroundTertiary }]}>
+                      <Text style={[styles.pathStepRole, { color: colors.text }]}>{step.role}</Text>
+                      <Text style={[styles.pathStepTimeline, { color: colors.textSecondary }]}>
+                        Timeline: {step.timeline}
+                      </Text>
+                      {step.requirements?.map((req: string, reqIndex: number) => (
+                        <Text key={reqIndex} style={[styles.pathStepReq, { color: colors.textTertiary }]}>
+                          • {req}
+                        </Text>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {trajectoryAnalysis.recommended_next_steps && (
+                <View style={styles.analysisSection}>
+                  <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Recommended Next Steps</Text>
+                  {trajectoryAnalysis.recommended_next_steps.map((step: string, index: number) => (
+                    <View key={index} style={styles.bulletRow}>
+                      <Check color={COLORS.success} size={16} />
+                      <Text style={[styles.bulletText, { color: colors.text }]}>{step}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {trajectoryAnalysis.market_insights && (
+                <View style={styles.analysisSection}>
+                  <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Market Insights</Text>
+                  <View style={styles.insightRow}>
+                    <Text style={[styles.insightLabel, { color: colors.textSecondary }]}>Demand:</Text>
+                    <Text style={[styles.insightValue, { color: trajectoryAnalysis.market_insights.demand === 'high' ? COLORS.success : COLORS.warning }]}>
+                      {trajectoryAnalysis.market_insights.demand.toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles.insightRow}>
+                    <Text style={[styles.insightLabel, { color: colors.textSecondary }]}>Salary Range:</Text>
+                    <Text style={[styles.insightValue, { color: colors.text }]}>
+                      {trajectoryAnalysis.market_insights.salary_range}
+                    </Text>
+                  </View>
+                  {trajectoryAnalysis.market_insights.top_companies?.length > 0 && (
+                    <View style={styles.companiesList}>
+                      <Text style={[styles.companiesLabel, { color: colors.textSecondary }]}>Top Hiring Companies:</Text>
+                      <View style={styles.companiesChips}>
+                        {trajectoryAnalysis.market_insights.top_companies.map((company: string, index: number) => (
+                          <View key={index} style={[styles.companyChip, { backgroundColor: colors.backgroundTertiary }]}>
+                            <Text style={[styles.companyChipText, { color: colors.text }]}>{company}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+                </View>
               )}
             </View>
+          </ScrollView>
+        )}
 
-            {/* Display plan data here - will be enhanced with actual plan content */}
-            <View style={styles.planContent}>
-              <Text style={styles.planText}>Plan generated successfully!</Text>
-              <Text style={styles.planText}>View detailed results on the web version for best experience.</Text>
-            </View>
+        {/* Feature #14: Skill Gaps Analysis */}
+        {resumeId && dreamRole && !skillGaps && !loadingSkillGaps && (
+          <View style={styles.analysisPrompt}>
+            <TouchableOpacity
+              style={[styles.analyzeButton, { backgroundColor: colors.backgroundTertiary }]}
+              onPress={handleAnalyzeSkillGaps}
+            >
+              <Lightbulb color={COLORS.primary} size={20} />
+              <Text style={[styles.analyzeButtonText, { color: colors.text }]}>Analyze Skill Gaps</Text>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
+        )}
+
+        {loadingSkillGaps && (
+          <View style={[styles.analysisCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={[styles.analysisLoadingText, { color: colors.textSecondary }]}>Analyzing skill gaps...</Text>
+          </View>
+        )}
+
+        {skillGaps && (
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={[styles.analysisCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+              <View style={styles.analysisHeader}>
+                <Lightbulb color={COLORS.primary} size={32} />
+                <Text style={[styles.analysisTitle, { color: colors.text }]}>Skill Gaps Analysis</Text>
+              </View>
+
+              {skillGaps.identified_gaps && skillGaps.identified_gaps.length > 0 && (
+                <View style={styles.analysisSection}>
+                  <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Identified Skill Gaps</Text>
+                  {skillGaps.identified_gaps.map((gap: any, index: number) => (
+                    <View key={index} style={[styles.skillGapCard, { backgroundColor: colors.backgroundTertiary }]}>
+                      <View style={styles.skillGapHeader}>
+                        <Text style={[styles.skillGapName, { color: colors.text }]}>{gap.skill}</Text>
+                        <View style={[
+                          styles.importanceBadge,
+                          { backgroundColor: gap.importance === 'critical' ? ALPHA_COLORS.danger.bg : gap.importance === 'high' ? ALPHA_COLORS.warning.bg : colors.glass }
+                        ]}>
+                          <Text style={[
+                            styles.importanceBadgeText,
+                            { color: gap.importance === 'critical' ? COLORS.danger : gap.importance === 'high' ? COLORS.warning : colors.textSecondary }
+                          ]}>
+                            {gap.importance.toUpperCase()}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.skillLevelRow}>
+                        <Text style={[styles.skillLevelLabel, { color: colors.textSecondary }]}>Current: {gap.current_level}</Text>
+                        <Text style={[styles.skillLevelLabel, { color: colors.textSecondary }]}>→</Text>
+                        <Text style={[styles.skillLevelLabel, { color: COLORS.primary }]}>Target: {gap.target_level}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {skillGaps.industry_demand && (
+                <View style={styles.analysisSection}>
+                  <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Industry Demand</Text>
+                  {skillGaps.industry_demand.trending_skills?.length > 0 && (
+                    <View style={styles.trendingSection}>
+                      <Text style={[styles.trendingLabel, { color: colors.textSecondary }]}>Trending Skills:</Text>
+                      <View style={styles.trendingChips}>
+                        {skillGaps.industry_demand.trending_skills.map((skill: string, index: number) => (
+                          <View key={index} style={[styles.trendingChip, { backgroundColor: ALPHA_COLORS.success.bg }]}>
+                            <TrendingUp color={COLORS.success} size={14} />
+                            <Text style={[styles.trendingChipText, { color: COLORS.success }]}>{skill}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+                </View>
+              )}
+
+              {skillGaps.learning_resources && skillGaps.learning_resources.length > 0 && (
+                <View style={styles.analysisSection}>
+                  <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Learning Resources</Text>
+                  {skillGaps.learning_resources.map((item: any, index: number) => (
+                    <View key={index} style={styles.resourceSection}>
+                      <Text style={[styles.resourceSkillName, { color: colors.text }]}>{item.skill}</Text>
+                      {item.resources?.map((resource: any, resIndex: number) => (
+                        <View key={resIndex} style={[styles.resourceCard, { backgroundColor: colors.backgroundTertiary }]}>
+                          <View style={styles.resourceHeader}>
+                            <BookOpen color={COLORS.primary} size={16} />
+                            <Text style={[styles.resourceType, { color: COLORS.primary }]}>{resource.type.toUpperCase()}</Text>
+                          </View>
+                          <Text style={[styles.resourceTitle, { color: colors.text }]}>{resource.title}</Text>
+                          <Text style={[styles.resourceProvider, { color: colors.textSecondary }]}>{resource.provider}</Text>
+                          {resource.duration && (
+                            <Text style={[styles.resourceMeta, { color: colors.textTertiary }]}>Duration: {resource.duration}</Text>
+                          )}
+                          {resource.cost && (
+                            <Text style={[styles.resourceMeta, { color: colors.textTertiary }]}>Cost: {resource.cost}</Text>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {skillGaps.priority_ranking && skillGaps.priority_ranking.length > 0 && (
+                <View style={styles.analysisSection}>
+                  <Text style={[styles.analysisSectionTitle, { color: colors.text }]}>Priority Ranking</Text>
+                  {skillGaps.priority_ranking.map((skill: string, index: number) => (
+                    <View key={index} style={styles.priorityRow}>
+                      <View style={[styles.priorityNumber, { backgroundColor: COLORS.primary }]}>
+                        <Text style={[styles.priorityNumberText, { color: colors.background }]}>{index + 1}</Text>
+                      </View>
+                      <Text style={[styles.prioritySkill, { color: colors.text }]}>{skill}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          </ScrollView>
+        )}
+
+        {planData.milestones.length > 0 ? (
+          <CareerPlanResults
+            planData={planData}
+            onSavePlan={handleSavePlan}
+            onExportPlan={handleExportPlan}
+          />
+        ) : (
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.resultsContainer}>
+              <View style={[styles.resultsHeader, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <View style={[styles.resultsIcon, { backgroundColor: colors.backgroundTertiary }]}>
+                  <TrendingUp color={COLORS.primary} size={32} />
+                </View>
+                <Text style={[styles.resultsTitle, { color: colors.text }]}>
+                  Your Career Transition Plan
+                </Text>
+                <Text style={[styles.resultsSubtitle, { color: colors.textSecondary }]}>
+                  {plan.profileSummary || 'Your personalized career transition roadmap'}
+                </Text>
+                {plan.generatedAt && (
+                  <Text style={[styles.resultsDate, { color: colors.textTertiary }]}>
+                    Generated {new Date(plan.generatedAt).toLocaleDateString()}
+                  </Text>
+                )}
+              </View>
+
+              <View style={[styles.planContent, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <Text style={[styles.planText, { color: colors.text }]}>
+                  Plan generated successfully!
+                </Text>
+                <Text style={[styles.planText, { color: colors.textSecondary }]}>
+                  {plan.summary || 'Your career transition roadmap is ready.'}
+                </Text>
+              </View>
+            </View>
+          </ScrollView>
+        )}
       </SafeAreaView>
     );
   }
@@ -1199,11 +1755,11 @@ export default function CareerPathDesignerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.dark.background,
   },
   scrollContent: {
     flexGrow: 1,
     padding: SPACING.lg,
+    paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   welcomeContainer: {
     flex: 1,
@@ -1214,21 +1770,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.dark.glass,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.full,
     marginBottom: SPACING.xl,
   },
   welcomeBadgeText: {
-    color: COLORS.dark.text,
     fontSize: 14,
     fontFamily: FONTS.semibold,
   },
   welcomeTitle: {
     fontSize: 32,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     textAlign: 'center',
     marginBottom: SPACING.md,
     paddingHorizontal: SPACING.md,
@@ -1236,7 +1789,6 @@ const styles = StyleSheet.create({
   welcomeSubtitle: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xxl,
     paddingHorizontal: SPACING.lg,
@@ -1248,10 +1800,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   featureCard: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.lg,
     alignItems: 'center',
   },
@@ -1259,7 +1809,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: RADIUS.md,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
@@ -1267,20 +1816,17 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: SPACING.xs,
   },
   featureText: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
   },
   primaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.dark.text,
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.md,
@@ -1289,7 +1835,6 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.background,
   },
   secondaryButton: {
     backgroundColor: 'transparent',
@@ -1302,8 +1847,50 @@ const styles = StyleSheet.create({
   welcomeFooter: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
     marginTop: SPACING.md,
+  },
+  savedPlansSection: {
+    width: '100%',
+    marginBottom: SPACING.xl,
+  },
+  savedPlansHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  savedPlansTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+  },
+  savedPlanItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    marginBottom: SPACING.sm,
+  },
+  savedPlanIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: RADIUS.sm,
+    backgroundColor: ALPHA_COLORS.primary.bgSubtle,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  savedPlanInfo: {
+    flex: 1,
+  },
+  savedPlanRole: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    marginBottom: 2,
+  },
+  savedPlanDate: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
   },
   uploadContainer: {
     flex: 1,
@@ -1311,14 +1898,12 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 28,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     marginBottom: SPACING.sm,
     textAlign: 'center',
   },
   screenSubtitle: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     marginBottom: SPACING.xl,
     textAlign: 'center',
   },
@@ -1328,17 +1913,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: SPACING.md,
     textAlign: 'center',
   },
   resumeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
     minHeight: 64,
@@ -1349,13 +1931,11 @@ const styles = StyleSheet.create({
   resumeName: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginBottom: 4,
   },
   resumeDate: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
   },
   divider: {
     flexDirection: 'row',
@@ -1365,19 +1945,15 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: COLORS.dark.glassBorder,
   },
   dividerText: {
-    color: COLORS.dark.textSecondary,
     paddingHorizontal: SPACING.md,
     fontSize: 14,
     fontFamily: FONTS.regular,
   },
   uploadZone: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.xl,
     borderWidth: 2,
-    borderColor: COLORS.dark.glassBorder,
     borderStyle: 'dashed',
     padding: SPACING.xxl,
     alignItems: 'center',
@@ -1388,14 +1964,12 @@ const styles = StyleSheet.create({
   uploadTitle: {
     fontSize: 18,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
     marginTop: SPACING.md,
     textAlign: 'center',
   },
   uploadSubtext: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     marginTop: SPACING.xs,
     textAlign: 'center',
   },
@@ -1403,7 +1977,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1411,7 +1984,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.md,
     borderWidth: 2,
     borderColor: COLORS.danger,
@@ -1437,7 +2009,6 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
   },
   backButtonText: {
-    color: COLORS.dark.textSecondary,
     fontSize: 16,
     fontFamily: FONTS.semibold,
   },
@@ -1454,7 +2025,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1462,10 +2032,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   stepDotCompleted: {
-    backgroundColor: COLORS.dark.text,
   },
   stepDotText: {
-    color: COLORS.dark.textSecondary,
     fontSize: 14,
     fontFamily: FONTS.semibold,
   },
@@ -1477,7 +2045,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
@@ -1485,13 +2052,11 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 24,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     marginBottom: SPACING.xs,
   },
   stepSubtitle: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
   },
   formContainer: {
@@ -1503,15 +2068,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
   },
   input: {
-    backgroundColor: COLORS.dark.backgroundSecondary,
     borderWidth: 2,
-    borderColor: COLORS.dark.glassBorder,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
-    color: COLORS.dark.text,
     fontSize: 16,
     fontFamily: FONTS.regular,
     minHeight: 48,
@@ -1522,7 +2083,6 @@ const styles = StyleSheet.create({
   helpText: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
   },
   chipGrid: {
     flexDirection: 'row',
@@ -1530,9 +2090,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   chip: {
-    backgroundColor: COLORS.dark.backgroundTertiary,
     borderWidth: 2,
-    borderColor: COLORS.dark.glassBorder,
     borderRadius: RADIUS.md,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
@@ -1547,15 +2105,11 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 14,
     fontFamily: FONTS.semibold,
-    color: COLORS.dark.text,
   },
   chipTextSelected: {
-    color: COLORS.dark.background,
   },
   chipLarge: {
-    backgroundColor: COLORS.dark.backgroundTertiary,
     borderWidth: 2,
-    borderColor: COLORS.dark.glassBorder,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
     minHeight: 56,
@@ -1565,7 +2119,6 @@ const styles = StyleSheet.create({
   chipSubtext: {
     fontSize: 11,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
     marginTop: 2,
   },
   linkText: {
@@ -1582,7 +2135,6 @@ const styles = StyleSheet.create({
   stepLabel: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
     textAlign: 'center',
     marginTop: SPACING.lg,
   },
@@ -1593,10 +2145,8 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
   },
   generatingCard: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.xl,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.xxl,
     width: '100%',
     alignItems: 'center',
@@ -1607,21 +2157,18 @@ const styles = StyleSheet.create({
   generatingTitle: {
     fontSize: 20,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     textAlign: 'center',
     marginBottom: SPACING.md,
   },
   generatingMessage: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xs,
   },
   generatingSubtext: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
   },
@@ -1631,7 +2178,6 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 8,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     borderRadius: RADIUS.full,
     overflow: 'hidden',
     marginBottom: SPACING.sm,
@@ -1644,7 +2190,6 @@ const styles = StyleSheet.create({
   progressText: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
     textAlign: 'center',
   },
   stepsList: {
@@ -1660,7 +2205,6 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1668,16 +2212,13 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.dark.textTertiary,
   },
   stepText: {
     flex: 1,
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
   },
   stepTextCompleted: {
-    color: COLORS.dark.text,
   },
   errorContainer: {
     flex: 1,
@@ -1688,25 +2229,27 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 24,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     marginTop: SPACING.lg,
     marginBottom: SPACING.sm,
   },
   errorMessage: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
+  },
+  resultsHeaderBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
   },
   resultsContainer: {
     flex: 1,
   },
   resultsHeader: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.xl,
     alignItems: 'center',
     marginBottom: SPACING.xl,
@@ -1715,7 +2258,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.dark.backgroundTertiary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
@@ -1723,34 +2265,285 @@ const styles = StyleSheet.create({
   resultsTitle: {
     fontSize: 24,
     fontFamily: FONTS.extralight,
-    color: COLORS.dark.text,
     marginBottom: SPACING.sm,
     textAlign: 'center',
   },
   resultsSubtitle: {
     fontSize: 14,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xs,
   },
   resultsDate: {
     fontSize: 12,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.textTertiary,
   },
   planContent: {
-    backgroundColor: COLORS.dark.glass,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
     padding: SPACING.xl,
   },
   planText: {
     fontSize: 16,
     fontFamily: FONTS.regular,
-    color: COLORS.dark.text,
     textAlign: 'center',
     marginBottom: SPACING.sm,
+  },
+  // Career Analysis Styles (Features #13, #14, #15)
+  analysisPrompt: {
+    padding: SPACING.lg,
+  },
+  analyzeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    minHeight: 48,
+  },
+  analyzeButtonText: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+  },
+  analysisCard: {
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.xl,
+    margin: SPACING.lg,
+  },
+  analysisLoadingText: {
+    fontSize: 16,
+    fontFamily: FONTS.regular,
+    textAlign: 'center',
+    marginTop: SPACING.md,
+  },
+  analysisHeader: {
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
+  },
+  analysisTitle: {
+    fontSize: 24,
+    fontFamily: FONTS.extralight,
+    marginTop: SPACING.md,
+  },
+  analysisSection: {
+    marginBottom: SPACING.xl,
+  },
+  analysisSectionTitle: {
+    fontSize: 18,
+    fontFamily: FONTS.semibold,
+    marginBottom: SPACING.md,
+  },
+  analysisText: {
+    fontSize: 16,
+    fontFamily: FONTS.regular,
+    lineHeight: 24,
+  },
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  scoreLabel: {
+    fontSize: 16,
+    fontFamily: FONTS.regular,
+  },
+  scoreValue: {
+    fontSize: 24,
+    fontFamily: FONTS.semibold,
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  bullet: {
+    fontSize: 16,
+    fontFamily: FONTS.regular,
+    color: COLORS.primary,
+    marginTop: 2,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  pathStep: {
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  pathStepRole: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+    marginBottom: 4,
+  },
+  pathStepTimeline: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    marginBottom: SPACING.sm,
+  },
+  pathStepReq: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    marginBottom: 2,
+  },
+  insightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+  },
+  insightLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+  },
+  insightValue: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+  },
+  companiesList: {
+    marginTop: SPACING.md,
+  },
+  companiesLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    marginBottom: SPACING.sm,
+  },
+  companiesChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  companyChip: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+  },
+  companyChipText: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+  },
+  skillGapCard: {
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  skillGapHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+  },
+  skillGapName: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+    flex: 1,
+  },
+  importanceBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+  },
+  importanceBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.semibold,
+  },
+  skillLevelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  skillLevelLabel: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+  },
+  trendingSection: {
+    marginBottom: SPACING.md,
+  },
+  trendingLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    marginBottom: SPACING.sm,
+  },
+  trendingChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  trendingChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+  },
+  trendingChipText: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+  },
+  resourceSection: {
+    marginBottom: SPACING.lg,
+  },
+  resourceSkillName: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+    marginBottom: SPACING.sm,
+  },
+  resourceCard: {
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  resourceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: SPACING.xs,
+  },
+  resourceType: {
+    fontSize: 11,
+    fontFamily: FONTS.semibold,
+  },
+  resourceTitle: {
+    fontSize: 15,
+    fontFamily: FONTS.semibold,
+    marginBottom: 4,
+  },
+  resourceProvider: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    marginBottom: 4,
+  },
+  resourceMeta: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+  },
+  priorityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  priorityNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: RADIUS.full,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  priorityNumberText: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  prioritySkill: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
   },
 });

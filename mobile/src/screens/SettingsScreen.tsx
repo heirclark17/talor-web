@@ -30,7 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { clearUserSession, getUserId } from '../utils/userSession';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../context/ThemeContext';
 import { GlassCard } from '../components/glass/GlassCard';
@@ -192,7 +192,7 @@ export default function SettingsScreen() {
           {renderItem(
             <BookOpen color={colors.textSecondary} size={20} />,
             'STAR Stories',
-            () => navigation.navigate('StarStories'),
+            () => navigation.navigate('Stories' as any),
             undefined,
             false,
             'Manage your behavioral interview stories'
@@ -200,7 +200,7 @@ export default function SettingsScreen() {
           {renderItem(
             <TrendingUp color={colors.textSecondary} size={20} />,
             'Career Path Designer',
-            () => navigation.navigate('CareerPathDesigner'),
+            () => navigation.navigate('Career' as any),
             undefined,
             false,
             'Plan your career progression with AI guidance'
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: SPACING.lg,
     paddingTop: SPACING.sm,
-    paddingBottom: 120, // Extra space for floating tab bar
+    paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   sectionTitle: {
     fontSize: 12,
@@ -375,7 +375,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: SPACING.md,
     minHeight: 56,
-    borderBottomWidth: 1,
   },
   itemLeft: {
     flexDirection: 'row',

@@ -8,8 +8,10 @@ import {
   ViewStyle,
   TextStyle,
   StyleProp,
+  Platform,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LiquidGlassView, isLiquidGlassSupported } from './LiquidGlassWrapper';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
@@ -17,7 +19,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
-import { COLORS, FONTS, RADIUS, SPACING, GLASS, ANIMATION } from '../../utils/constants';
+import { COLORS, FONTS, RADIUS, SPACING, GLASS, ANIMATION, ALPHA_COLORS } from '../../utils/constants';
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -66,17 +68,22 @@ export function GlassButton({
   const sizeConfig = SIZE_CONFIG[size];
 
   const handlePressIn = useCallback(() => {
-    scale.value = withSpring(0.97, {
-      damping: ANIMATION.spring.damping,
-      stiffness: ANIMATION.spring.stiffness,
-    });
+    // Only animate on non-liquid glass (liquid glass handles its own animation)
+    if (!isLiquidGlassSupported || Platform.OS !== 'ios') {
+      scale.value = withSpring(0.97, {
+        damping: ANIMATION.spring.damping,
+        stiffness: ANIMATION.spring.stiffness,
+      });
+    }
   }, [scale]);
 
   const handlePressOut = useCallback(() => {
-    scale.value = withSpring(1, {
-      damping: ANIMATION.spring.damping,
-      stiffness: ANIMATION.spring.stiffness,
-    });
+    if (!isLiquidGlassSupported || Platform.OS !== 'ios') {
+      scale.value = withSpring(1, {
+        damping: ANIMATION.spring.damping,
+        stiffness: ANIMATION.spring.stiffness,
+      });
+    }
   }, [scale]);
 
   const handlePress = useCallback(() => {
@@ -91,7 +98,7 @@ export function GlassButton({
   }));
 
   // Get variant-specific styles
-  const getVariantStyles = (): { bg: string; border: string; text: string; blurTint: 'dark' | 'light' } => {
+  const getVariantStyles = (): { bg: string; border: string; text: string; blurTint: 'dark' | 'light'; tintColor: string } => {
     switch (variant) {
       case 'primary':
         return {
@@ -99,13 +106,15 @@ export function GlassButton({
           border: 'transparent',
           text: '#ffffff',
           blurTint: 'dark',
+          tintColor: 'rgba(59, 130, 246, 0.4)',
         };
       case 'secondary':
         return {
-          bg: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-          border: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)',
+          bg: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[5],
+          border: isDark ? ALPHA_COLORS.white[15] : ALPHA_COLORS.black[10],
           text: colors.text,
           blurTint: isDark ? 'dark' : 'light',
+          tintColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[5],
         };
       case 'ghost':
         return {
@@ -113,20 +122,23 @@ export function GlassButton({
           border: 'transparent',
           text: colors.text,
           blurTint: isDark ? 'dark' : 'light',
+          tintColor: 'transparent',
         };
       case 'danger':
         return {
-          bg: 'rgba(239, 68, 68, 0.15)',
-          border: 'rgba(239, 68, 68, 0.3)',
+          bg: ALPHA_COLORS.danger.bg,
+          border: ALPHA_COLORS.danger.border,
           text: COLORS.danger,
           blurTint: isDark ? 'dark' : 'light',
+          tintColor: ALPHA_COLORS.danger.bg,
         };
       case 'success':
         return {
-          bg: 'rgba(16, 185, 129, 0.15)',
-          border: 'rgba(16, 185, 129, 0.3)',
+          bg: ALPHA_COLORS.success.bg,
+          border: ALPHA_COLORS.success.border,
           text: COLORS.success,
           blurTint: isDark ? 'dark' : 'light',
+          tintColor: ALPHA_COLORS.success.bg,
         };
       default:
         return {
@@ -134,6 +146,7 @@ export function GlassButton({
           border: 'transparent',
           text: '#ffffff',
           blurTint: 'dark',
+          tintColor: 'rgba(59, 130, 246, 0.4)',
         };
     }
   };
@@ -180,7 +193,7 @@ export function GlassButton({
     </>
   );
 
-  // For ghost variant, don't use blur
+  // For ghost variant, don't use glass effect
   if (variant === 'ghost') {
     return (
       <AnimatedTouchable
@@ -196,7 +209,7 @@ export function GlassButton({
     );
   }
 
-  // For primary variant, use solid background
+  // For primary variant, use solid background (no glass)
   if (variant === 'primary') {
     return (
       <AnimatedTouchable
@@ -212,7 +225,32 @@ export function GlassButton({
     );
   }
 
-  // For other variants, use blur effect
+  // Use native Liquid Glass on iOS 26+ for secondary/danger/success variants
+  if (Platform.OS === 'ios' && isLiquidGlassSupported) {
+    return (
+      <TouchableOpacity
+        onPress={handlePress}
+        disabled={isDisabled}
+        activeOpacity={1}
+        style={[fullWidth && { width: '100%' }, style]}
+      >
+        <LiquidGlassView
+          style={[
+            buttonStyle,
+            { borderWidth: 0 }, // Liquid glass handles its own borders
+          ]}
+          effect="clear"
+          interactive={true}
+          tintColor={variantStyles.tintColor}
+          colorScheme={isDark ? 'dark' : 'light'}
+        >
+          {content}
+        </LiquidGlassView>
+      </TouchableOpacity>
+    );
+  }
+
+  // Fallback: expo-blur for older iOS / Android
   return (
     <AnimatedTouchable
       style={[
@@ -227,21 +265,26 @@ export function GlassButton({
       disabled={isDisabled}
       activeOpacity={0.8}
     >
-      <BlurView
-        intensity={GLASS.materials.thin.blur}
-        tint={variantStyles.blurTint}
-        style={styles.blur}
-      >
-        <View
-          style={[
-            buttonStyle,
-            { borderRadius: 0, overflow: 'visible' },
-            style,
-          ]}
+      {Platform.OS === 'ios' ? (
+        <BlurView
+          intensity={GLASS.materials.thin.blur}
+          tint={variantStyles.blurTint}
+          style={styles.blur}
         >
+          <View
+            style={[
+              buttonStyle,
+              { borderRadius: 0, overflow: 'visible' },
+            ]}
+          >
+            {content}
+          </View>
+        </BlurView>
+      ) : (
+        <View style={buttonStyle}>
           {content}
         </View>
-      </BlurView>
+      )}
     </AnimatedTouchable>
   );
 }
