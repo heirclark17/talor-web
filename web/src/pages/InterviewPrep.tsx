@@ -436,7 +436,7 @@ export default function InterviewPrep() {
     }
   }
 
-  const fetchRealData = async (prepData: InterviewPrepData) => {
+  const fetchRealData = async (prepData: InterviewPrepData, forceRefresh: boolean = false) => {
     try {
       setLoadingRealData(true)
 
@@ -448,6 +448,39 @@ export default function InterviewPrep() {
         console.log('No company name found, skipping real data fetch')
         return
       }
+
+      // Cache key based on tailored resume ID
+      const cacheKey = `interview-prep-realdata-${tailoredResumeId}`
+      const CACHE_DURATION_MS = 24 * 60 * 60 * 1000 // 24 hours
+
+      // Check for cached data first (unless force refresh)
+      if (!forceRefresh) {
+        try {
+          const cachedStr = localStorage.getItem(cacheKey)
+          if (cachedStr) {
+            const cached = JSON.parse(cachedStr)
+            const cacheAge = Date.now() - (cached.timestamp || 0)
+
+            if (cacheAge < CACHE_DURATION_MS) {
+              console.log('✓ Using cached real data (age:', Math.round(cacheAge / 60000), 'minutes)')
+
+              if (cached.companyResearch) setCompanyResearch(cached.companyResearch)
+              if (cached.companyNews) setCompanyNews(cached.companyNews)
+              if (cached.interviewQuestions) setInterviewQuestions(cached.interviewQuestions)
+              if (cached.companyValues) setCompanyValues(cached.companyValues)
+
+              setLoadingRealData(false)
+              return
+            } else {
+              console.log('Cache expired, fetching fresh data...')
+            }
+          }
+        } catch (cacheErr) {
+          console.warn('Error reading cache:', cacheErr)
+        }
+      }
+
+      console.log('Fetching fresh real data from AI services...')
 
       // Fetch all four data sources in parallel using centralized API client
       const [researchResult, newsResult, questionsResult, valuesResult] = await Promise.allSettled([
@@ -461,9 +494,13 @@ export default function InterviewPrep() {
         api.getCompanyValues(companyName),
       ])
 
+      // Prepare cache object
+      const cacheData: any = { timestamp: Date.now() }
+
       // Handle company research result
       if (researchResult.status === 'fulfilled' && researchResult.value?.success) {
         setCompanyResearch(researchResult.value.data)
+        cacheData.companyResearch = researchResult.value.data
         console.log('✓ Company research loaded:', researchResult.value.data.strategic_initiatives?.length, 'initiatives')
       } else {
         console.error('Failed to load company research:', researchResult)
@@ -472,6 +509,7 @@ export default function InterviewPrep() {
       // Handle news result
       if (newsResult.status === 'fulfilled' && newsResult.value?.success) {
         setCompanyNews(newsResult.value.data)
+        cacheData.companyNews = newsResult.value.data
         console.log('✓ Company news loaded:', newsResult.value.data.news_articles?.length, 'articles')
       } else {
         console.error('Failed to load company news:', newsResult)
@@ -480,6 +518,7 @@ export default function InterviewPrep() {
       // Handle interview questions result
       if (questionsResult.status === 'fulfilled' && questionsResult.value?.success) {
         setInterviewQuestions(questionsResult.value.data)
+        cacheData.interviewQuestions = questionsResult.value.data
         console.log('✓ Interview questions loaded:', questionsResult.value.data.questions?.length, 'questions')
       } else {
         console.error('Failed to load interview questions:', questionsResult)
@@ -488,9 +527,18 @@ export default function InterviewPrep() {
       // Handle company values result - merge with prep data if available
       if (valuesResult.status === 'fulfilled' && valuesResult.value?.success) {
         setCompanyValues(valuesResult.value.data)
+        cacheData.companyValues = valuesResult.value.data
         console.log('✓ Company values loaded:', valuesResult.value.data.values?.length, 'values')
       } else {
         console.error('Failed to load company values:', valuesResult)
+      }
+
+      // Save to cache
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(cacheData))
+        console.log('✓ Real data cached for 24 hours')
+      } catch (cacheErr) {
+        console.warn('Failed to cache real data:', cacheErr)
       }
     } catch (err: any) {
       console.error('Error fetching real data:', err)
