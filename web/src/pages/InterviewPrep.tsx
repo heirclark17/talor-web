@@ -579,8 +579,9 @@ export default function InterviewPrep() {
       console.log('Certifications API result:', result)
 
       if (result.success && result.data) {
-        console.log('Setting certifications to:', result.data.certifications)
-        setCertifications(result.data.certifications)
+        // result.data already contains the certifications structure (certifications_by_level, recommended_path, etc.)
+        console.log('Setting certifications to:', result.data)
+        setCertifications(result.data)
       } else {
         console.error('Certifications API error:', result.error)
       }
