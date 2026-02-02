@@ -613,6 +613,10 @@ export default function TailorResume() {
   }
 
   const exportToPDF = () => {
+    if (!tailoredResume?.id) {
+      alert('Please tailor a resume first before printing')
+      return
+    }
     window.print()
   }
 
@@ -763,9 +767,13 @@ export default function TailorResume() {
   }
 
   const handleDownloadResume = async (format: 'pdf' | 'docx') => {
-    if (!tailoredResume?.id) return
+    if (!tailoredResume?.id) {
+      alert('Please tailor a resume first before downloading')
+      return
+    }
 
     try {
+      console.log(`Downloading resume ${tailoredResume.id} as ${format}...`)
       const result = await api.exportResumeAnalysis(tailoredResume.id, format)
 
       if (result.success && result.data) {
@@ -782,7 +790,9 @@ export default function TailorResume() {
         a.click()
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
+        console.log(`Resume downloaded successfully: ${filename}`)
       } else {
+        console.error('Export failed:', result.error)
         alert(result.error || 'Error downloading resume')
       }
     } catch (error) {

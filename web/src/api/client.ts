@@ -64,7 +64,8 @@ class ApiClient {
    */
   async backendHealth(): Promise<{ ready: boolean; data?: any; error?: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/health`);
+      // Backend health endpoint is at /health, not /api/health
+      const response = await fetch(`${this.baseUrl}/health`);
       const data = await response.json();
       return { ready: response.ok, data };
     } catch (error: any) {
@@ -81,6 +82,9 @@ class ApiClient {
       // Backend expects 'file' not 'resume'
       formData.append('file', file);
 
+      const userId = getUserId();
+      console.log(`[API] Uploading resume: ${file.name} (${file.size} bytes) for user: ${userId}`);
+
       const response = await fetch(`${this.baseUrl}/api/resumes/upload`, {
         method: 'POST',
         headers: this.getHeaders(),
@@ -90,17 +94,20 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
+        console.error(`[API] Upload failed: HTTP ${response.status}`, data);
         return {
           success: false,
-          error: data.error || `HTTP ${response.status}: ${response.statusText}`,
+          error: data.detail || data.error || `HTTP ${response.status}: ${response.statusText}`,
         };
       }
 
+      console.log(`[API] Upload successful: Resume ID ${data.resume_id}`);
       return {
         success: true,
         data,
       };
     } catch (error: any) {
+      console.error('[API] Upload error:', error);
       return {
         success: false,
         error: error.message,
@@ -113,23 +120,29 @@ class ApiClient {
    */
   async listResumes(): Promise<ApiResponse> {
     try {
+      const userId = getUserId();
+      console.log(`[API] Listing resumes for user: ${userId}`);
+
       const response = await fetch(`${this.baseUrl}/api/resumes/list`, {
         headers: this.getHeaders(),
       });
       const data = await response.json();
 
       if (!response.ok) {
+        console.error(`[API] List resumes failed: HTTP ${response.status}`, data);
         return {
           success: false,
-          error: data.error || `HTTP ${response.status}: ${response.statusText}`,
+          error: data.detail || data.error || `HTTP ${response.status}: ${response.statusText}`,
         };
       }
 
+      console.log(`[API] Found ${data.resumes?.length || 0} resumes`);
       return {
         success: true,
         data,
       };
     } catch (error: any) {
+      console.error('[API] List resumes error:', error);
       return {
         success: false,
         error: error.message,
@@ -1339,6 +1352,8 @@ class ApiClient {
    */
   async exportResumeAnalysis(tailoredResumeId: number, format: 'pdf' | 'docx'): Promise<ApiResponse<Blob>> {
     try {
+      console.log(`[API] Exporting resume ${tailoredResumeId} as ${format}`);
+
       const response = await fetch(`${this.baseUrl}/api/resume-analysis/export`, {
         method: 'POST',
         headers: {
@@ -1353,18 +1368,21 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error(`[API] Export failed: HTTP ${response.status}`, errorData);
         return {
           success: false,
-          error: errorData.detail || errorData.error || `HTTP ${response.status}`,
+          error: errorData.detail || errorData.error || `HTTP ${response.status}: Export failed`,
         };
       }
 
       const blob = await response.blob();
+      console.log(`[API] Export successful: ${blob.size} bytes`);
       return {
         success: true,
         data: blob,
       };
     } catch (error: any) {
+      console.error('[API] Export error:', error);
       return {
         success: false,
         error: error.message,
