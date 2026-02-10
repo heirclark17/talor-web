@@ -9,7 +9,7 @@ import {
   FileText, Download, RefreshCw, ArrowLeft, Loader2, Upload,
   Check, ChevronRight, Target, Clock, MapPin, X, ChevronDown,
   Users, GraduationCap, Heart, Lightbulb, Building, Globe,
-  Zap, Code, Shield, TrendingDown, FolderOpen, Trash2
+  Zap, Code, Shield, TrendingDown, FolderOpen, Trash2, Link2
 } from 'lucide-react'
 
 type WizardStep = 'welcome' | 'upload' | 'questions' | 'generating' | 'results'
@@ -215,6 +215,7 @@ export default function CareerPathDesigner() {
   const [extractingJob, setExtractingJob] = useState(false)
 
   // Basic Profile (Step 1)
+  const [dreamRoleMethod, setDreamRoleMethod] = useState<'type' | 'url' | null>(null)
   const [dreamRole, setDreamRole] = useState('')
   const [jobUrl, setJobUrl] = useState('')
   const [currentRole, setCurrentRole] = useState('')
@@ -1390,36 +1391,86 @@ export default function CareerPathDesigner() {
               </div>
             </div>}
 
-            {/* Job Posting URL & Dream Role */}
-            <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-8 mb-6 space-y-4">
+            {/* Dream Role Method Toggle */}
+            <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-8 mb-6 space-y-5">
               <div>
-                <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
-                  Job Posting URL <span className="text-gray-400 font-normal text-xs">(optional)</span>
+                <label className="text-white font-semibold mb-3 block text-sm sm:text-base">
+                  How would you like to target your next role?
                 </label>
-                <input
-                  type="url"
-                  value={jobUrl}
-                  onChange={(e) => setJobUrl(e.target.value)}
-                  placeholder="https://linkedin.com/jobs/... or any job posting URL"
-                  className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
-                />
-                <p className="text-gray-500 text-xs mt-1">Job details will be extracted when you continue</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setDreamRoleMethod(dreamRoleMethod === 'type' ? null : 'type')}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all text-left ${
+                      dreamRoleMethod === 'type'
+                        ? 'border-white bg-white/10 text-white'
+                        : 'border-white/20 bg-white/5 text-gray-300 hover:border-white/40 hover:bg-white/[0.07]'
+                    }`}
+                  >
+                    <Lightbulb className={`w-5 h-5 flex-shrink-0 ${dreamRoleMethod === 'type' ? 'text-white' : 'text-gray-400'}`} />
+                    <span className="font-medium text-sm sm:text-base">I know my dream role</span>
+                  </button>
+                  <button
+                    onClick={() => setDreamRoleMethod(dreamRoleMethod === 'url' ? null : 'url')}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all text-left ${
+                      dreamRoleMethod === 'url'
+                        ? 'border-white bg-white/10 text-white'
+                        : 'border-white/20 bg-white/5 text-gray-300 hover:border-white/40 hover:bg-white/[0.07]'
+                    }`}
+                  >
+                    <Link2 className={`w-5 h-5 flex-shrink-0 ${dreamRoleMethod === 'url' ? 'text-white' : 'text-gray-400'}`} />
+                    <span className="font-medium text-sm sm:text-base">I have a job posting</span>
+                  </button>
+                </div>
               </div>
 
-              <div>
-                <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
-                  Dream Role or Career Goal {dreamRole ? '' : '*'}
-                  {extractingJob && <span className="text-gray-400 font-normal text-xs ml-2">extracting...</span>}
-                </label>
-                <input
-                  type="text"
-                  value={dreamRole}
-                  onChange={(e) => setDreamRole(e.target.value)}
-                  placeholder="e.g., Senior Cloud Security Architect, Product Manager"
-                  className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
-                  data-testid="dream-role-input"
-                />
-              </div>
+              {dreamRoleMethod === 'type' && (
+                <div>
+                  <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
+                    Dream Role or Career Goal
+                    {extractingJob && <span className="text-gray-400 font-normal text-xs ml-2">extracting...</span>}
+                  </label>
+                  <input
+                    type="text"
+                    value={dreamRole}
+                    onChange={(e) => setDreamRole(e.target.value)}
+                    placeholder="e.g., Senior Cloud Security Architect, Product Manager"
+                    className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
+                    data-testid="dream-role-input"
+                  />
+                </div>
+              )}
+
+              {dreamRoleMethod === 'url' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
+                      Job Posting URL
+                    </label>
+                    <input
+                      type="url"
+                      value={jobUrl}
+                      onChange={(e) => setJobUrl(e.target.value)}
+                      placeholder="https://linkedin.com/jobs/... or any job posting URL"
+                      className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
+                    />
+                    <p className="text-gray-500 text-xs mt-1">Job details will be extracted when you continue</p>
+                  </div>
+                  <div>
+                    <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
+                      Dream Role <span className="text-gray-400 font-normal text-xs">(auto-filled from URL or enter manually)</span>
+                      {extractingJob && <span className="text-gray-400 font-normal text-xs ml-2">extracting...</span>}
+                    </label>
+                    <input
+                      type="text"
+                      value={dreamRole}
+                      onChange={(e) => setDreamRole(e.target.value)}
+                      placeholder="e.g., Senior Cloud Security Architect, Product Manager"
+                      className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
+                      data-testid="dream-role-input"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {error && (
@@ -1451,7 +1502,7 @@ export default function CareerPathDesigner() {
               </button>
 
               <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto order-1 sm:order-2">
-                {(resumeFile || selectedExistingResumeId || jobUrl.trim()) && (
+                {(resumeFile || selectedExistingResumeId || jobUrl.trim() || dreamRole.trim()) && (
                   <button
                     onClick={handleContinueWithAI}
                     disabled={extractingJob}
