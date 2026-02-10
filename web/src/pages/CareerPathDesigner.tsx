@@ -558,6 +558,24 @@ export default function CareerPathDesigner() {
     }
   }
 
+  const handleContinueWithAI = async () => {
+    if (jobUrl.trim() && !dreamRole.trim()) {
+      setExtractingJob(true)
+      try {
+        const result = await api.extractJobDetails(jobUrl.trim())
+        if (result.success && result.data) {
+          const title = result.data.job_title || result.data.title || result.data.Title || ''
+          if (title) setDreamRole(title)
+        }
+      } catch (err) {
+        console.error('Failed to extract job details:', err)
+      } finally {
+        setExtractingJob(false)
+      }
+    }
+    setStep('questions')
+  }
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -645,8 +663,6 @@ export default function CareerPathDesigner() {
           setEducationLevel('associates')
         }
       }
-
-      setTimeout(() => setStep('questions'), 500)
 
     } catch (err: any) {
       setError(err.message || 'Upload failed')
@@ -1252,27 +1268,14 @@ export default function CareerPathDesigner() {
                 <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
                   Job Posting URL <span className="text-gray-400 font-normal text-xs">(optional)</span>
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    value={jobUrl}
-                    onChange={(e) => setJobUrl(e.target.value)}
-                    placeholder="https://linkedin.com/jobs/... or any job posting URL"
-                    className="flex-1 px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
-                  />
-                  <button
-                    onClick={handleExtractJobDetails}
-                    disabled={!jobUrl.trim() || extractingJob}
-                    className="px-4 py-3 rounded-lg font-medium text-sm transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed bg-white/10 hover:bg-white/20 text-white"
-                  >
-                    {extractingJob ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      'Extract'
-                    )}
-                  </button>
-                </div>
-                <p className="text-gray-500 text-xs mt-1">Paste a job URL and click Extract to auto-fill your dream role</p>
+                <input
+                  type="url"
+                  value={jobUrl}
+                  onChange={(e) => setJobUrl(e.target.value)}
+                  placeholder="https://linkedin.com/jobs/... or any job posting URL"
+                  className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
+                />
+                <p className="text-gray-500 text-xs mt-1">Job details will be extracted when you continue</p>
               </div>
 
               <div>
@@ -1313,29 +1316,40 @@ export default function CareerPathDesigner() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <button
                 onClick={() => setStep('welcome')}
-                className="inline-flex items-center gap-2 text-gray-400 hover:text-white font-medium transition-colors order-2 sm:order-1"
+                className="inline-flex items-center gap-2 text-gray-400 hover:text-white font-medium transition-colors order-3 sm:order-1"
               >
                 <ArrowLeft className="w-5 h-5" />
                 Back
               </button>
 
-              {resumeData ? (
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto order-1 sm:order-2">
+                {(resumeFile || jobUrl.trim()) && (
+                  <button
+                    onClick={handleContinueWithAI}
+                    disabled={extractingJob}
+                    className="btn-primary inline-flex items-center gap-2 w-full sm:w-auto justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {extractingJob ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Continue with AI
+                        <ChevronRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+                )}
                 <button
                   onClick={() => setStep('questions')}
-                  className="btn-primary inline-flex items-center gap-2 w-full sm:w-auto justify-center order-1 sm:order-2"
-                >
-                  Continue to Assessment
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => setStep('questions')}
-                  className="btn-secondary inline-flex items-center gap-2 w-full sm:w-auto justify-center order-1 sm:order-2"
+                  className="btn-secondary inline-flex items-center gap-2 w-full sm:w-auto justify-center order-2"
                 >
                   Skip & Continue
                   <ChevronRight className="w-5 h-5" />
                 </button>
-              )}
+              </div>
             </div>
           </div>
         </div>
