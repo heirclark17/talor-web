@@ -1323,7 +1323,7 @@ export default function CareerPathDesigner() {
               </button>
 
               <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto order-1 sm:order-2">
-                {(resumeFile || jobUrl.trim()) && (
+                {(resumeFile || selectedExistingResumeId || jobUrl.trim()) && (
                   <button
                     onClick={handleContinueWithAI}
                     disabled={extractingJob}
