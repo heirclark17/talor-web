@@ -46,6 +46,7 @@ export default function CareerPathDesigner() {
   const [existingResumes, setExistingResumes] = useState<any[]>([])
   const [selectedExistingResumeId, setSelectedExistingResumeId] = useState<number | null>(null)
   const [loadingResumes, setLoadingResumes] = useState(false)
+  const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
 
   // Basic Profile (Step 1)
   const [dreamRole, setDreamRole] = useState('')
@@ -416,6 +417,31 @@ export default function CareerPathDesigner() {
       setError(error.message || 'Failed to load resume')
       setSelectedExistingResumeId(null)
       setUploadProgress(0)
+    }
+  }
+
+  const handleDeleteExistingResume = async (resumeId: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!confirm('Are you sure you want to delete this resume? This action cannot be undone.')) return
+
+    try {
+      setDeletingResumeId(resumeId)
+      const result = await api.deleteResume(resumeId)
+      if (!result.success) {
+        setError(result.error || 'Failed to delete resume')
+        return
+      }
+      setExistingResumes(prev => prev.filter(r => r.id !== resumeId))
+      if (selectedExistingResumeId === resumeId) {
+        setSelectedExistingResumeId(null)
+        setResumeId(null)
+        setResumeData(null)
+        setUploadProgress(0)
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete resume')
+    } finally {
+      setDeletingResumeId(null)
     }
   }
 
@@ -999,12 +1025,14 @@ export default function CareerPathDesigner() {
                 ) : (
                   <div className="space-y-3">
                     {existingResumes.map((resume: any) => (
-                      <button
+                      <div
                         key={resume.id}
-                        onClick={() => handleSelectExistingResume(resume.id)}
-                        className="w-full glass rounded-lg p-4 border border-white/10 hover:border-white/30 transition-all text-left flex items-center justify-between group"
+                        className="w-full glass rounded-lg p-4 border border-white/10 hover:border-white/30 transition-all flex items-center justify-between group"
                       >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <button
+                          onClick={() => handleSelectExistingResume(resume.id)}
+                          className="flex items-center gap-3 min-w-0 flex-1 text-left"
+                        >
                           <FileText className="w-5 h-5 text-white/60 shrink-0" />
                           <div className="min-w-0">
                             <div className="text-white font-medium break-words">{resume.filename || `Resume ${resume.id}`}</div>
@@ -1012,9 +1040,23 @@ export default function CareerPathDesigner() {
                               Uploaded {new Date(resume.created_at).toLocaleDateString()}
                             </div>
                           </div>
+                        </button>
+                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                          <button
+                            onClick={(e) => handleDeleteExistingResume(resume.id, e)}
+                            disabled={deletingResumeId === resume.id}
+                            className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                            title="Delete resume"
+                          >
+                            {deletingResumeId === resume.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors shrink-0" />
-                      </button>
+                      </div>
                     ))}
                   </div>
                 )}
