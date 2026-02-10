@@ -99,11 +99,11 @@ function ElapsedTimer({ estimatedDurationMs }: { estimatedDurationMs?: number })
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-gray-500 text-sm tabular-nums">
+      <span className="text-theme-tertiary text-sm tabular-nums">
         {mins}:{secs.toString().padStart(2, '0')}
       </span>
       {remaining && (
-        <span className="text-gray-600 text-xs">{remaining}</span>
+        <span className="text-theme-tertiary text-xs">{remaining}</span>
       )}
     </div>
   )
@@ -138,20 +138,20 @@ export default function AILoadingScreen({
     <div className="max-w-2xl w-full glass rounded-3xl p-10 sm:p-12">
       <div className="text-center">
         {/* Header icon */}
-        <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6">
+        <div className="w-20 h-20 rounded-full bg-theme-glass-10 flex items-center justify-center mx-auto mb-6">
           {error ? (
             <AlertCircle className="w-10 h-10 text-red-400" />
           ) : forceComplete || overallProgress >= 100 ? (
             <Check className="w-10 h-10 text-green-400" />
           ) : (
-            <Loader2 className="w-10 h-10 text-white animate-spin" />
+            <Loader2 className="w-10 h-10 text-theme animate-spin" />
           )}
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{title}</h2>
-        {subtitle && <p className="text-gray-400 mb-1">{subtitle}</p>}
+        <h2 className="text-2xl sm:text-3xl font-bold text-theme mb-2">{title}</h2>
+        {subtitle && <p className="text-theme-secondary mb-1">{subtitle}</p>}
         {activeStep?.description && (
-          <p className="text-sm text-gray-500 mb-6">{activeStep.description}</p>
+          <p className="text-sm text-theme-tertiary mb-6">{activeStep.description}</p>
         )}
         {!activeStep?.description && <div className="mb-6" />}
 
@@ -166,7 +166,7 @@ export default function AILoadingScreen({
                 </button>
               )}
               {onCancel && (
-                <button onClick={onCancel} className="px-4 py-2 bg-white/10 text-gray-300 rounded-lg text-sm hover:bg-white/20 transition-colors">
+                <button onClick={onCancel} className="px-4 py-2 bg-theme-glass-10 text-theme-secondary rounded-lg text-sm hover:bg-theme-glass-20 transition-colors">
                   Cancel
                 </button>
               )}
@@ -181,16 +181,16 @@ export default function AILoadingScreen({
               const state = getStepState(step, i, mode, overallProgress, steps.length)
               return (
                 <div key={step.id} className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-theme-glass-10 flex items-center justify-center flex-shrink-0">
                     {state === 'done' ? (
                       <Check className="w-4 h-4 text-green-400" />
                     ) : state === 'active' ? (
-                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                      <Loader2 className="w-4 h-4 text-theme animate-spin" />
                     ) : (
                       <div className="w-2 h-2 bg-white/30 rounded-full" />
                     )}
                   </div>
-                  <span className={state === 'pending' ? 'text-gray-500' : 'text-white'}>
+                  <span className={state === 'pending' ? 'text-theme-tertiary' : 'text-theme'}>
                     {step.label}
                   </span>
                 </div>
@@ -201,7 +201,7 @@ export default function AILoadingScreen({
 
         {/* Progress bar */}
         {!error && (
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-4">
+          <div className="h-2 bg-theme-glass-10 rounded-full overflow-hidden mb-4">
             <div
               className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
               style={{ width: `${Math.min(overallProgress, 100)}%` }}
@@ -213,7 +213,7 @@ export default function AILoadingScreen({
         {!error && (
           <div className="flex items-center justify-between">
             <ElapsedTimer estimatedDurationMs={mode.type === 'estimated' ? mode.estimatedDurationMs : undefined} />
-            {footnote && <span className="text-gray-500 text-sm">{footnote}</span>}
+            {footnote && <span className="text-theme-tertiary text-sm">{footnote}</span>}
           </div>
         )}
       </div>
@@ -222,7 +222,7 @@ export default function AILoadingScreen({
 
   if (fullScreen) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-[#0a0a0f]">
+      <div className="min-h-screen flex items-center justify-center p-8 bg-theme">
         {content}
       </div>
     )

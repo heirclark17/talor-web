@@ -34,11 +34,11 @@ export default function EditableResumeCard({
   return (
     <div className={`glass rounded-xl p-6 ${className}`}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-white">{title}</h3>
+        <h3 className="text-lg font-bold text-theme">{title}</h3>
         {isEditable && !isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-3 py-1 text-sm text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+            className="flex items-center gap-2 px-3 py-1 text-sm text-theme-secondary hover:text-theme transition-colors rounded-lg hover:bg-theme-glass-10"
           >
             <Edit2 className="w-4 h-4" />
             Edit
@@ -68,11 +68,11 @@ export default function EditableResumeCard({
         <textarea
           value={editedContent}
           onChange={(e) => setEditedContent(e.target.value)}
-          className="w-full min-h-[150px] bg-white/5 text-white rounded-lg p-4 border border-white/20 focus:border-white/40 focus:outline-none resize-vertical"
+          className="w-full min-h-[150px] bg-theme-glass-5 text-theme rounded-lg p-4 border border-theme-muted focus:border-theme focus:outline-none resize-vertical"
           autoFocus
         />
       ) : (
-        <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+        <div className="text-theme-secondary whitespace-pre-wrap leading-relaxed">
           {content}
         </div>
       )}

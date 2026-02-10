@@ -81,14 +81,14 @@ export default function ResumeAnalysis({ analysis, loading }: ResumeAnalysisProp
     return (
       <div className="p-6 text-center" data-testid="resume-analysis">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-4 text-gray-400">Analyzing resume changes...</p>
+        <p className="mt-4 text-theme-secondary">Analyzing resume changes...</p>
       </div>
     )
   }
 
   if (!analysis || !analysis.sections || analysis.sections.length === 0) {
     return (
-      <div className="p-6 text-center text-gray-400" data-testid="resume-analysis">
+      <div className="p-6 text-center text-theme-secondary" data-testid="resume-analysis">
         <p>No analysis available. Generate a tailored resume to see changes.</p>
       </div>
     )
@@ -97,8 +97,8 @@ export default function ResumeAnalysis({ analysis, loading }: ResumeAnalysisProp
   return (
     <div className="space-y-4" data-testid="resume-analysis">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">AI-Powered Change Analysis</h3>
-        <span className="text-sm text-gray-400">
+        <h3 className="text-lg font-semibold text-theme">AI-Powered Change Analysis</h3>
+        <span className="text-sm text-theme-secondary">
           {analysis.sections.length} section{analysis.sections.length !== 1 ? 's' : ''} modified
         </span>
       </div>
@@ -109,7 +109,7 @@ export default function ResumeAnalysis({ analysis, loading }: ResumeAnalysisProp
         return (
           <div
             key={sectionIdx}
-            className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden"
+            className="bg-theme rounded-lg border border-gray-800 overflow-hidden"
           >
             {/* Section Header */}
             <button
@@ -119,12 +119,12 @@ export default function ResumeAnalysis({ analysis, loading }: ResumeAnalysisProp
             >
               <div className="flex items-center gap-3">
                 {isExpanded ? (
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                  <ChevronDown className="w-5 h-5 text-theme-secondary" />
                 ) : (
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                  <ChevronRight className="w-5 h-5 text-theme-secondary" />
                 )}
-                <span className="font-medium text-white">{section.section_name}</span>
-                <span className="text-sm text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                <span className="font-medium text-theme">{section.section_name}</span>
+                <span className="text-sm text-theme-secondary bg-gray-800 px-2 py-1 rounded">
                   {section.changes.length} change{section.changes.length !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -172,15 +172,15 @@ export default function ResumeAnalysis({ analysis, loading }: ResumeAnalysisProp
                           </div>
 
                           {/* What Changed (Preview) */}
-                          <p className="text-sm text-gray-300 line-clamp-2">
+                          <p className="text-sm text-theme-secondary line-clamp-2">
                             {change.what_changed}
                           </p>
                         </div>
 
                         {isChangeExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          <ChevronDown className="w-5 h-5 text-theme-secondary flex-shrink-0" />
                         ) : (
-                          <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          <ChevronRight className="w-5 h-5 text-theme-secondary flex-shrink-0" />
                         )}
                       </button>
 
@@ -190,8 +190,8 @@ export default function ResumeAnalysis({ analysis, loading }: ResumeAnalysisProp
                           {/* Original vs New Text */}
                           {change.original_text && (
                             <div className="space-y-2">
-                              <p className="text-xs font-semibold text-gray-400 uppercase">Original</p>
-                              <p className="text-sm text-gray-400 italic bg-red-500/5 border-l-2 border-red-500 pl-3 py-2">
+                              <p className="text-xs font-semibold text-theme-secondary uppercase">Original</p>
+                              <p className="text-sm text-theme-secondary italic bg-red-500/5 border-l-2 border-red-500 pl-3 py-2">
                                 {change.original_text}
                               </p>
                             </div>
@@ -199,7 +199,7 @@ export default function ResumeAnalysis({ analysis, loading }: ResumeAnalysisProp
 
                           {change.new_text && (
                             <div className="space-y-2">
-                              <p className="text-xs font-semibold text-gray-400 uppercase">New</p>
+                              <p className="text-xs font-semibold text-theme-secondary uppercase">New</p>
                               <p className="text-sm text-green-400 bg-green-500/5 border-l-2 border-green-500 pl-3 py-2">
                                 {change.new_text}
                               </p>
@@ -209,19 +209,19 @@ export default function ResumeAnalysis({ analysis, loading }: ResumeAnalysisProp
                           {/* Why This Matters */}
                           <div className="space-y-2">
                             <p className="text-xs font-semibold text-blue-400 uppercase">Why This Matters</p>
-                            <p className="text-sm text-gray-300">{change.why_this_matters}</p>
+                            <p className="text-sm text-theme-secondary">{change.why_this_matters}</p>
                           </div>
 
                           {/* What Changed */}
                           <div className="space-y-2">
                             <p className="text-xs font-semibold text-yellow-400 uppercase">What Changed</p>
-                            <p className="text-sm text-gray-300">{change.what_changed}</p>
+                            <p className="text-sm text-theme-secondary">{change.what_changed}</p>
                           </div>
 
                           {/* How It Helps */}
                           <div className="space-y-2">
                             <p className="text-xs font-semibold text-green-400 uppercase">How It Helps</p>
-                            <p className="text-sm text-gray-300">{change.how_it_helps}</p>
+                            <p className="text-sm text-theme-secondary">{change.how_it_helps}</p>
                           </div>
 
                           {/* Job Requirements Matched */}

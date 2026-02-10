@@ -99,14 +99,14 @@ export default function KeywordPanel({ keywords, loading }: KeywordPanelProps) {
     return (
       <div className="p-6 text-center" data-testid="keyword-panel">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-4 text-gray-400">Analyzing keywords...</p>
+        <p className="mt-4 text-theme-secondary">Analyzing keywords...</p>
       </div>
     )
   }
 
   if (!keywords || !keywords.keyword_groups || keywords.keyword_groups.length === 0) {
     return (
-      <div className="p-6 text-center text-gray-400" data-testid="keyword-panel">
+      <div className="p-6 text-center text-theme-secondary" data-testid="keyword-panel">
         <p>No keyword analysis available.</p>
       </div>
     )
@@ -119,34 +119,34 @@ export default function KeywordPanel({ keywords, loading }: KeywordPanelProps) {
       {/* Header with Stats */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Keywords Added</h3>
-          <p className="text-sm text-gray-400">
+          <h3 className="text-lg font-semibold text-theme">Keywords Added</h3>
+          <p className="text-sm text-theme-secondary">
             {keywords.total_keywords_added} total keywords • ATS Score: {keywords.ats_optimization_score}/100
           </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="text-right">
             <div className="text-2xl font-bold text-green-500">{keywords.ats_optimization_score}</div>
-            <div className="text-xs text-gray-400">ATS Score</div>
+            <div className="text-xs text-theme-secondary">ATS Score</div>
           </div>
         </div>
       </div>
 
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-secondary" />
         <input
           type="text"
           placeholder="Search keywords..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-10 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full pl-10 pr-10 py-2 bg-theme border border-gray-800 rounded-lg text-theme placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           data-testid="keyword-search"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-secondary hover:text-theme"
           >
             <X className="w-4 h-4" />
           </button>
@@ -160,7 +160,7 @@ export default function KeywordPanel({ keywords, loading }: KeywordPanelProps) {
           className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
             selectedCategory === null
               ? 'bg-blue-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              : 'bg-gray-800 text-theme-secondary hover:bg-gray-700'
           }`}
         >
           All Categories
@@ -172,7 +172,7 @@ export default function KeywordPanel({ keywords, loading }: KeywordPanelProps) {
             className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
               selectedCategory === group.category
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                : 'bg-gray-800 text-theme-secondary hover:bg-gray-700'
             }`}
             data-testid={`category-filter-${group.category}`}
           >
@@ -188,19 +188,19 @@ export default function KeywordPanel({ keywords, loading }: KeywordPanelProps) {
       {/* Keyword Groups */}
       <div className="space-y-4">
         {filteredGroups.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8 text-theme-secondary">
             <p>No keywords match your search.</p>
           </div>
         ) : (
           filteredGroups.map((group) => (
-            <div key={group.category} className="bg-gray-900 rounded-lg border border-gray-800 p-4">
+            <div key={group.category} className="bg-theme rounded-lg border border-gray-800 p-4">
               {/* Group Header */}
               <div className="flex items-center gap-2 mb-3" data-testid="category-header">
                 {categoryIcons[group.category]}
-                <h4 className="font-semibold text-white">
+                <h4 className="font-semibold text-theme">
                   {categoryLabels[group.category] || group.category}
                 </h4>
-                <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                <span className="text-xs text-theme-secondary bg-gray-800 px-2 py-1 rounded">
                   {group.keywords.length}
                 </span>
               </div>
@@ -217,7 +217,7 @@ export default function KeywordPanel({ keywords, loading }: KeywordPanelProps) {
                       <div className="flex-1 space-y-2">
                         {/* Keyword Name */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium text-white">{keyword.keyword}</span>
+                          <span className="font-medium text-theme">{keyword.keyword}</span>
 
                           {/* ATS Impact */}
                           <span
@@ -237,11 +237,11 @@ export default function KeywordPanel({ keywords, loading }: KeywordPanelProps) {
                         </div>
 
                         {/* Why Added */}
-                        <p className="text-sm text-gray-400">{keyword.why_added}</p>
+                        <p className="text-sm text-theme-secondary">{keyword.why_added}</p>
 
                         {/* Context */}
                         {keyword.context && (
-                          <p className="text-xs text-gray-500 italic">&ldquo;{keyword.context}&rdquo;</p>
+                          <p className="text-xs text-theme-tertiary italic">&ldquo;{keyword.context}&rdquo;</p>
                         )}
 
                         {/* Location Link */}

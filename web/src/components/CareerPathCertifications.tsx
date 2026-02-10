@@ -109,14 +109,14 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
     return (
       <div className="p-6 text-center" data-testid="career-certifications-section">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-4 text-gray-400">Loading certification recommendations...</p>
+        <p className="mt-4 text-theme-secondary">Loading certification recommendations...</p>
       </div>
     )
   }
 
   if (!certifications || certifications.length === 0) {
     return (
-      <div className="p-6 text-center text-gray-400" data-testid="career-certifications-section">
+      <div className="p-6 text-center text-theme-secondary" data-testid="career-certifications-section">
         <p>No certification recommendations available.</p>
       </div>
     )
@@ -130,8 +130,8 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Recommended Certifications</h3>
-          <p className="text-sm text-gray-400">
+          <h3 className="text-lg font-semibold text-theme">Recommended Certifications</h3>
+          <p className="text-sm text-theme-secondary">
             {certifications.length} certifications • {totalWeeks} weeks total study time
           </p>
         </div>
@@ -145,7 +145,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedLevel === 'all'
               ? 'bg-blue-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
           data-testid="level-filter-all"
         >
@@ -156,7 +156,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedLevel === 'foundation'
               ? 'bg-green-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
           data-testid="level-filter-foundation"
         >
@@ -167,7 +167,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedLevel === 'intermediate'
               ? 'bg-yellow-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
           data-testid="level-filter-intermediate"
         >
@@ -178,7 +178,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedLevel === 'advanced'
               ? 'bg-red-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
           data-testid="level-filter-advanced"
         >
@@ -189,7 +189,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
       {/* Certification Cards */}
       <div className="space-y-3">
         {filteredCerts.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8 text-theme-secondary">
             <p>No certifications found for this level.</p>
           </div>
         ) : (
@@ -200,20 +200,20 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
             return (
               <div
                 key={idx}
-                className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden"
+                className="bg-theme rounded-lg border border-theme-subtle overflow-hidden"
                 data-testid="cert-card"
               >
                 {/* Card Header */}
                 <button
                   onClick={() => toggleExpanded(cert.name)}
-                  className="w-full px-4 py-4 flex items-start justify-between hover:bg-gray-800 transition-colors text-left"
+                  className="w-full px-4 py-4 flex items-start justify-between hover:bg-theme-glass-10 transition-colors text-left"
                 >
                   <div className="flex-1 space-y-2">
                     {/* Certification Name */}
                     <div className="flex items-start gap-3">
                       <div className="flex-1">
-                        <h4 className="font-semibold text-white" data-testid="cert-name">{cert.name}</h4>
-                        <p className="text-sm text-gray-400">{cert.certifyingBody}</p>
+                        <h4 className="font-semibold text-theme" data-testid="cert-name">{cert.name}</h4>
+                        <p className="text-sm text-theme-secondary">{cert.certifyingBody}</p>
                       </div>
                     </div>
 
@@ -232,11 +232,11 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                           {cert.priority} priority
                         </span>
                       )}
-                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <span className="text-xs text-theme-secondary flex items-center gap-1">
                         <DollarSign className="w-3 h-3" />
                         {cert.estCostRange}
                       </span>
-                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <span className="text-xs text-theme-secondary flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {cert.estStudyWeeks} weeks
                       </span>
@@ -255,7 +255,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                     </div>
 
                     {/* What It Unlocks Preview */}
-                    <p className="text-sm text-gray-400 line-clamp-2">{cert.whatItUnlocks}</p>
+                    <p className="text-sm text-theme-secondary line-clamp-2">{cert.whatItUnlocks}</p>
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
@@ -268,7 +268,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                       className={`p-2 rounded-lg transition-colors ${
                         isSaved
                           ? 'bg-blue-500 text-white'
-                          : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                          : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
                       }`}
                       data-testid="save-cert-btn"
                     >
@@ -277,34 +277,34 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
 
                     {/* Expand Icon */}
                     {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                      <ChevronDown className="w-5 h-5 text-theme-secondary" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <ChevronRight className="w-5 h-5 text-theme-secondary" />
                     )}
                   </div>
                 </button>
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="px-4 pb-4 space-y-4 border-t border-gray-800">
+                  <div className="px-4 pb-4 space-y-4 border-t border-theme-subtle">
                     {/* What It Unlocks (Full) */}
                     <div className="pt-4">
-                      <h5 className="text-sm font-semibold text-white mb-2">What This Certification Unlocks</h5>
-                      <p className="text-sm text-gray-300" data-testid="cert-description">{cert.whatItUnlocks}</p>
+                      <h5 className="text-sm font-semibold text-theme mb-2">What This Certification Unlocks</h5>
+                      <p className="text-sm text-theme-secondary" data-testid="cert-description">{cert.whatItUnlocks}</p>
                     </div>
 
                     {/* Why Recommended */}
                     {cert.whyRecommended && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2">Why Recommended</h5>
-                        <p className="text-sm text-gray-300">{cert.whyRecommended}</p>
+                        <h5 className="text-sm font-semibold text-theme mb-2">Why Recommended</h5>
+                        <p className="text-sm text-theme-secondary">{cert.whyRecommended}</p>
                       </div>
                     )}
 
                     {/* Skills Gained */}
                     {cert.skillsGained && cert.skillsGained.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2">Skills Gained</h5>
+                        <h5 className="text-sm font-semibold text-theme mb-2">Skills Gained</h5>
                         <div className="flex flex-wrap gap-2">
                           {cert.skillsGained.map((skill, skillIdx) => (
                             <span
@@ -321,39 +321,39 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                     {/* Exam Details */}
                     {cert.examDetails && Object.keys(cert.examDetails).length > 0 && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                        <h5 className="text-sm font-semibold text-theme mb-2 flex items-center gap-2">
                           <FileQuestion className="w-4 h-4" />
                           Exam Details
                         </h5>
-                        <div className="bg-gray-800/50 rounded-lg p-3 space-y-2">
+                        <div className="bg-theme-glass-10 rounded-lg p-3 space-y-2">
                           {cert.examDetails.examCode && (
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-400">Exam Code:</span>
-                              <span className="text-white font-mono">{cert.examDetails.examCode}</span>
+                              <span className="text-theme-secondary">Exam Code:</span>
+                              <span className="text-theme font-mono">{cert.examDetails.examCode}</span>
                             </div>
                           )}
                           {cert.examDetails.passingScore && (
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-400">Passing Score:</span>
-                              <span className="text-white">{cert.examDetails.passingScore}</span>
+                              <span className="text-theme-secondary">Passing Score:</span>
+                              <span className="text-theme">{cert.examDetails.passingScore}</span>
                             </div>
                           )}
                           {cert.examDetails.durationMinutes && (
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-400">Duration:</span>
-                              <span className="text-white">{cert.examDetails.durationMinutes} minutes</span>
+                              <span className="text-theme-secondary">Duration:</span>
+                              <span className="text-theme">{cert.examDetails.durationMinutes} minutes</span>
                             </div>
                           )}
                           {cert.examDetails.numQuestions && (
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-400">Questions:</span>
-                              <span className="text-white">{cert.examDetails.numQuestions}</span>
+                              <span className="text-theme-secondary">Questions:</span>
+                              <span className="text-theme">{cert.examDetails.numQuestions}</span>
                             </div>
                           )}
                           {cert.examDetails.questionTypes && (
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-400">Format:</span>
-                              <span className="text-white">{cert.examDetails.questionTypes}</span>
+                              <span className="text-theme-secondary">Format:</span>
+                              <span className="text-theme">{cert.examDetails.questionTypes}</span>
                             </div>
                           )}
                         </div>
@@ -363,22 +363,22 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                     {/* Key Details Grid */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h5 className="text-xs font-semibold text-gray-400 mb-1">Cost Range</h5>
-                        <p className="text-sm text-white" data-testid="cert-cost">{cert.estCostRange}</p>
+                        <h5 className="text-xs font-semibold text-theme-secondary mb-1">Cost Range</h5>
+                        <p className="text-sm text-theme" data-testid="cert-cost">{cert.estCostRange}</p>
                       </div>
                       <div>
-                        <h5 className="text-xs font-semibold text-gray-400 mb-1">Study Time</h5>
-                        <p className="text-sm text-white" data-testid="cert-duration">{cert.estStudyWeeks} weeks</p>
+                        <h5 className="text-xs font-semibold text-theme-secondary mb-1">Study Time</h5>
+                        <p className="text-sm text-theme" data-testid="cert-duration">{cert.estStudyWeeks} weeks</p>
                       </div>
                       {cert.difficulty && (
                         <div>
-                          <h5 className="text-xs font-semibold text-gray-400 mb-1">Difficulty</h5>
-                          <p className="text-sm text-white capitalize">{cert.difficulty}</p>
+                          <h5 className="text-xs font-semibold text-theme-secondary mb-1">Difficulty</h5>
+                          <p className="text-sm text-theme capitalize">{cert.difficulty}</p>
                         </div>
                       )}
                       {cert.roiRating && (
                         <div>
-                          <h5 className="text-xs font-semibold text-gray-400 mb-1">ROI Rating</h5>
+                          <h5 className="text-xs font-semibold text-theme-secondary mb-1">ROI Rating</h5>
                           <p className={`text-sm font-medium capitalize ${getRoiColor(cert.roiRating)}`} data-testid="cert-roi">
                             {cert.roiRating}
                           </p>
@@ -389,7 +389,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                     {/* Prerequisites */}
                     {cert.prerequisites && cert.prerequisites.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2">Prerequisites</h5>
+                        <h5 className="text-sm font-semibold text-theme mb-2">Prerequisites</h5>
                         <div className="flex flex-wrap gap-2">
                           {cert.prerequisites.map((prereq, prereqIdx) => (
                             <span
@@ -406,7 +406,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                     {/* Alternatives */}
                     {cert.alternatives && cert.alternatives.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2">Alternative Certifications</h5>
+                        <h5 className="text-sm font-semibold text-theme mb-2">Alternative Certifications</h5>
                         <div className="flex flex-wrap gap-2">
                           {cert.alternatives.map((alt, altIdx) => (
                             <span
@@ -423,7 +423,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                     {/* Study Materials */}
                     {cert.studyMaterials && cert.studyMaterials.length > 0 && (
                       <div data-testid="study-resources">
-                        <h5 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                        <h5 className="text-sm font-semibold text-theme mb-2 flex items-center gap-2">
                           <BookOpen className="w-4 h-4" />
                           Study Materials ({cert.studyMaterials.length})
                         </h5>
@@ -431,23 +431,23 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                           {cert.studyMaterials
                             .sort((a, b) => (a.recommendedOrder || 0) - (b.recommendedOrder || 0))
                             .map((material, mIdx) => (
-                              <div key={mIdx} className="bg-gray-800/50 rounded-lg p-3">
+                              <div key={mIdx} className="bg-theme-glass-10 rounded-lg p-3">
                                 <div className="flex items-start justify-between mb-1">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs bg-white/10 px-2 py-0.5 rounded text-white">
+                                    <span className="text-xs bg-theme-glass-10 px-2 py-0.5 rounded text-theme">
                                       #{material.recommendedOrder || mIdx + 1}
                                     </span>
-                                    <span className="text-xs text-gray-400 uppercase">{material.type}</span>
+                                    <span className="text-xs text-theme-secondary uppercase">{material.type}</span>
                                   </div>
                                   <div className="text-right text-xs">
-                                    <span className="text-white">{material.cost}</span>
-                                    <span className="text-gray-400 ml-2">{material.duration}</span>
+                                    <span className="text-theme">{material.cost}</span>
+                                    <span className="text-theme-secondary ml-2">{material.duration}</span>
                                   </div>
                                 </div>
-                                <h6 className="text-white font-medium text-sm">{material.title}</h6>
-                                <p className="text-xs text-gray-400 mb-2">{material.provider}</p>
+                                <h6 className="text-theme font-medium text-sm">{material.title}</h6>
+                                <p className="text-xs text-theme-secondary mb-2">{material.provider}</p>
                                 {material.description && (
-                                  <p className="text-xs text-gray-300 mb-2 line-clamp-2">{material.description}</p>
+                                  <p className="text-xs text-theme-secondary mb-2 line-clamp-2">{material.description}</p>
                                 )}
                                 {material.url && (
                                   <a
@@ -469,23 +469,23 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                     {/* Week-by-Week Study Plan */}
                     {cert.studyPlanWeeks && cert.studyPlanWeeks.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                        <h5 className="text-sm font-semibold text-theme mb-2 flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
                           Week-by-Week Study Plan
                         </h5>
                         <div className="space-y-2">
                           {cert.studyPlanWeeks.map((week, wIdx) => (
-                            <div key={wIdx} className="bg-gray-800/50 rounded-lg p-3 flex gap-3">
+                            <div key={wIdx} className="bg-theme-glass-10 rounded-lg p-3 flex gap-3">
                               <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0 text-sm font-semibold">
                                 {week.week || wIdx + 1}
                               </div>
                               <div className="flex-1">
-                                <div className="text-white font-medium text-sm">{week.focus}</div>
+                                <div className="text-theme font-medium text-sm">{week.focus}</div>
                                 {week.resources && (
-                                  <div className="text-xs text-gray-400 mt-1">📚 {week.resources}</div>
+                                  <div className="text-xs text-theme-secondary mt-1">📚 {week.resources}</div>
                                 )}
                                 {week.practice && (
-                                  <div className="text-xs text-gray-400 mt-1">✏️ {week.practice}</div>
+                                  <div className="text-xs text-theme-secondary mt-1">✏️ {week.practice}</div>
                                 )}
                               </div>
                             </div>
@@ -497,7 +497,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                     {/* Official Links */}
                     {cert.officialLinks && cert.officialLinks.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2">Official Links</h5>
+                        <h5 className="text-sm font-semibold text-theme mb-2">Official Links</h5>
                         <div className="space-y-1">
                           {cert.officialLinks.map((link, lIdx) => (
                             <a
@@ -517,8 +517,8 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
 
                     {/* Source Citations */}
                     {cert.sourceCitations && cert.sourceCitations.length > 0 && (
-                      <div className="bg-gray-800/30 rounded-lg p-3">
-                        <h5 className="text-xs font-semibold text-gray-400 mb-2">Research Sources</h5>
+                      <div className="bg-theme-glass-5 rounded-lg p-3">
+                        <h5 className="text-xs font-semibold text-theme-secondary mb-2">Research Sources</h5>
                         <div className="space-y-1">
                           {cert.sourceCitations.map((source, sIdx) => {
                             const isUrl = source.startsWith('http://') || source.startsWith('https://')
@@ -534,7 +534,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                                 {source}
                               </a>
                             ) : (
-                              <div key={sIdx} className="text-xs text-gray-400">• {source}</div>
+                              <div key={sIdx} className="text-xs text-theme-secondary">• {source}</div>
                             )
                           })}
                         </div>
@@ -550,8 +550,8 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
 
       {/* Certification Roadmap */}
       {certifications.length > 1 && (
-        <div className="bg-gray-900 rounded-lg border border-gray-800 p-6" data-testid="cert-roadmap">
-          <h4 className="font-semibold text-white mb-4 flex items-center gap-2">
+        <div className="bg-theme rounded-lg border border-theme-subtle p-6" data-testid="cert-roadmap">
+          <h4 className="font-semibold text-theme mb-4 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-500" />
             Recommended Certification Path
           </h4>
@@ -570,15 +570,15 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                     {idx + 1}
                   </div>
                   {idx < certifications.length - 1 && (
-                    <div className="w-0.5 flex-1 bg-gray-700 mt-2"></div>
+                    <div className="w-0.5 flex-1 bg-theme-glass-10 mt-2"></div>
                   )}
                 </div>
                 <div className="flex-1 pb-6">
                   <div className="flex items-start justify-between mb-1">
-                    <h5 className="font-medium text-white">{cert.name}</h5>
-                    <span className="text-xs text-gray-400">{cert.estStudyWeeks} weeks</span>
+                    <h5 className="font-medium text-theme">{cert.name}</h5>
+                    <span className="text-xs text-theme-secondary">{cert.estStudyWeeks} weeks</span>
                   </div>
-                  <p className="text-sm text-gray-400">{cert.certifyingBody} • {getLevelLabel(cert.level)}</p>
+                  <p className="text-sm text-theme-secondary">{cert.certifyingBody} • {getLevelLabel(cert.level)}</p>
                 </div>
               </div>
             ))}

@@ -262,7 +262,7 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
       situational: 'bg-green-500/20 text-green-300',
       role_specific: 'bg-orange-500/20 text-orange-300',
     }
-    return colors[category] || 'bg-gray-500/20 text-gray-300'
+    return colors[category] || 'bg-gray-500/20 text-theme-secondary'
   }
 
   const getDifficultyColor = (difficulty: string) => {
@@ -271,14 +271,14 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
       medium: 'text-yellow-400',
       hard: 'text-red-400',
     }
-    return colors[difficulty] || 'text-gray-400'
+    return colors[difficulty] || 'text-theme-secondary'
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 text-white animate-spin mr-2" />
-        <span className="text-gray-300">Loading practice questions...</span>
+        <Loader2 className="w-6 h-6 text-theme animate-spin mr-2" />
+        <span className="text-theme-secondary">Loading practice questions...</span>
       </div>
     )
   }
@@ -288,8 +288,8 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold text-white mb-2">AI Practice Questions</h3>
-          <p className="text-gray-400 text-sm">
+          <h3 className="text-xl font-bold text-theme mb-2">AI Practice Questions</h3>
+          <p className="text-theme-secondary text-sm">
             Get tailored interview questions based on this specific job description
           </p>
         </div>
@@ -324,12 +324,12 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
             return (
               <div
                 key={idx}
-                className="bg-white/5 border border-white/10 rounded-lg overflow-hidden"
+                className="bg-theme-glass-5 border border-theme-subtle rounded-lg overflow-hidden"
               >
                 {/* Question Header */}
                 <button
                   onClick={() => setExpandedQuestion(isExpanded ? null : idx)}
-                  className="w-full p-5 flex items-start justify-between hover:bg-white/5 transition-colors text-left"
+                  className="w-full p-5 flex items-start justify-between hover:bg-theme-glass-5 transition-colors text-left"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -346,26 +346,26 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
                         </span>
                       )}
                     </div>
-                    <h4 className="text-white font-medium text-base leading-relaxed">
+                    <h4 className="text-theme font-medium text-base leading-relaxed">
                       {question.question}
                     </h4>
                   </div>
                   {isExpanded ? (
-                    <ChevronUp className="w-5 h-5 text-gray-400 ml-4 flex-shrink-0" />
+                    <ChevronUp className="w-5 h-5 text-theme-secondary ml-4 flex-shrink-0" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-400 ml-4 flex-shrink-0" />
+                    <ChevronDown className="w-5 h-5 text-theme-secondary ml-4 flex-shrink-0" />
                   )}
                 </button>
 
                 {/* Expanded Content */}
                 {isExpanded && (
-                  <div className="px-5 pb-5 space-y-4 border-t border-white/10 pt-4">
+                  <div className="px-5 pb-5 space-y-4 border-t border-theme-subtle pt-4">
                     {/* Why Asked & Skills */}
                     <div className="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
                       <div className="text-xs font-semibold text-blue-300 mb-2">
                         💡 WHY THIS QUESTION
                       </div>
-                      <p className="text-white/90 text-sm mb-3">{question.why_asked}</p>
+                      <p className="text-theme text-sm mb-3">{question.why_asked}</p>
                       <div className="flex flex-wrap gap-2">
                         <span className="text-xs text-blue-300 font-semibold">Skills tested:</span>
                         {question.key_skills_tested.map((skill, skillIdx) => (
@@ -409,29 +409,29 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
 
                         <div>
                           <div className="text-xs font-semibold text-green-300 mb-1">SITUATION</div>
-                          <p className="text-white/90 text-sm">{starStories[idx].situation}</p>
+                          <p className="text-theme text-sm">{starStories[idx].situation}</p>
                         </div>
 
                         <div>
                           <div className="text-xs font-semibold text-green-300 mb-1">TASK</div>
-                          <p className="text-white/90 text-sm">{starStories[idx].task}</p>
+                          <p className="text-theme text-sm">{starStories[idx].task}</p>
                         </div>
 
                         <div>
                           <div className="text-xs font-semibold text-green-300 mb-1">ACTION</div>
-                          <p className="text-white/90 text-sm">{starStories[idx].action}</p>
+                          <p className="text-theme text-sm">{starStories[idx].action}</p>
                         </div>
 
                         <div>
                           <div className="text-xs font-semibold text-green-300 mb-1">RESULT</div>
-                          <p className="text-white/90 text-sm">{starStories[idx].result}</p>
+                          <p className="text-theme text-sm">{starStories[idx].result}</p>
                         </div>
                       </div>
                     )}
 
                     {/* Written Answer */}
                     <div>
-                      <label className="text-white text-sm font-semibold mb-2 block">
+                      <label className="text-theme text-sm font-semibold mb-2 block">
                         Your Written Answer (Optional)
                       </label>
                       <textarea
@@ -440,14 +440,14 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
                           setWrittenAnswers(prev => ({ ...prev, [idx]: e.target.value }))
                         }
                         placeholder="Type your answer here..."
-                        className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-gray-300 min-h-[100px] focus:outline-none focus:border-white/40"
+                        className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme-secondary min-h-[100px] focus:outline-none focus:border-theme-muted"
                       />
                     </div>
 
                     {/* Recording Controls */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-white text-sm font-semibold mb-2 block">
+                        <label className="text-theme text-sm font-semibold mb-2 block">
                           Audio Recording
                         </label>
                         {!recording[idx] ? (
@@ -470,7 +470,7 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
                       </div>
 
                       <div>
-                        <label className="text-white text-sm font-semibold mb-2 block">
+                        <label className="text-theme text-sm font-semibold mb-2 block">
                           Video Recording
                         </label>
                         {!recording[idx] ? (

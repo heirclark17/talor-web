@@ -74,7 +74,7 @@ export default function ResumeVersionHistory({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+        <Loader2 className="w-5 h-5 text-theme-secondary animate-spin" />
       </div>
     )
   }
@@ -82,16 +82,16 @@ export default function ResumeVersionHistory({
   if (versions.length === 0) {
     return (
       <div className="text-center py-8">
-        <Clock className="w-8 h-8 text-gray-600 mx-auto mb-3" />
-        <p className="text-gray-400 text-sm">No versions yet</p>
-        <p className="text-gray-500 text-xs mt-1">Versions are saved automatically when you make changes</p>
+        <Clock className="w-8 h-8 text-theme-tertiary mx-auto mb-3" />
+        <p className="text-theme-secondary text-sm">No versions yet</p>
+        <p className="text-theme-tertiary text-xs mt-1">Versions are saved automatically when you make changes</p>
       </div>
     )
   }
 
   return (
     <div>
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <h3 className="text-lg font-semibold text-theme mb-4 flex items-center gap-2">
         <Clock className="w-5 h-5" />
         Version History
       </h3>
@@ -117,17 +117,17 @@ export default function ResumeVersionHistory({
         {versions.map((version) => (
           <div
             key={version.id}
-            className="glass rounded-xl border border-white/10 p-4 flex items-center justify-between group hover:border-white/20 transition-colors"
+            className="glass rounded-xl border border-theme-subtle p-4 flex items-center justify-between group hover:border-theme-muted transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm font-medium text-white">
+              <div className="w-8 h-8 rounded-full bg-theme-glass-10 flex items-center justify-center text-sm font-medium text-theme">
                 {version.versionNumber}
               </div>
               <div>
-                <p className="text-white text-sm font-medium">
+                <p className="text-theme text-sm font-medium">
                   Version {version.versionNumber}
                 </p>
-                <p className="text-gray-500 text-xs">
+                <p className="text-theme-tertiary text-xs">
                   {formatDate(version.createdAt)}
                   {version.changeSummary && ` - ${version.changeSummary}`}
                 </p>
@@ -136,7 +136,7 @@ export default function ResumeVersionHistory({
             <button
               onClick={() => handleRestore(version.id, version.versionNumber)}
               disabled={restoring === version.id}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-theme-secondary hover:text-theme hover:bg-theme-glass-10 rounded-lg transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50"
             >
               {restoring === version.id ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />

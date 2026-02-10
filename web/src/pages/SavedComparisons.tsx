@@ -103,8 +103,8 @@ export default function SavedComparisons() {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-white animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading saved comparisons...</p>
+          <Loader2 className="w-12 h-12 text-theme animate-spin mx-auto mb-4" />
+          <p className="text-theme-secondary">Loading saved comparisons...</p>
         </div>
       </div>
     )
@@ -129,10 +129,10 @@ export default function SavedComparisons() {
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-2 sm:gap-3 mb-2">
-            <Bookmark className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Saved Comparisons</h1>
+            <Bookmark className="w-6 h-6 sm:w-8 sm:h-8 text-theme" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-theme">Saved Comparisons</h1>
           </div>
-          <p className="text-sm sm:text-base text-gray-400">
+          <p className="text-sm sm:text-base text-theme-secondary">
             View and manage your saved resume comparisons
           </p>
         </div>
@@ -140,9 +140,9 @@ export default function SavedComparisons() {
         {/* Comparisons List */}
         {comparisons.length === 0 ? (
           <div className="glass rounded-xl p-8 sm:p-12 text-center">
-            <Bookmark className="w-12 h-12 sm:w-16 sm:h-16 text-gray-600 mx-auto mb-4" />
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">No Saved Comparisons</h2>
-            <p className="text-sm sm:text-base text-gray-400 mb-6">
+            <Bookmark className="w-12 h-12 sm:w-16 sm:h-16 text-theme-tertiary mx-auto mb-4" />
+            <h2 className="text-xl sm:text-2xl font-bold text-theme mb-2">No Saved Comparisons</h2>
+            <p className="text-sm sm:text-base text-theme-secondary mb-6">
               Save your resume comparisons to easily return to them later
             </p>
             <button
@@ -157,7 +157,7 @@ export default function SavedComparisons() {
             {comparisons.map((comparison) => (
               <div
                 key={comparison.id}
-                className="glass rounded-xl p-6 hover:bg-white/5 transition-all cursor-pointer group"
+                className="glass rounded-xl p-6 hover:bg-theme-glass-5 transition-all cursor-pointer group"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1" onClick={() => handleViewComparison(comparison.id)}>
@@ -165,12 +165,12 @@ export default function SavedComparisons() {
                       {comparison.is_pinned && (
                         <Pin className="w-5 h-5 text-yellow-400" />
                       )}
-                      <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-lg sm:text-xl font-bold text-theme group-hover:text-blue-400 transition-colors">
                         {comparison.title || `${comparison.company} - ${comparison.position}`}
                       </h3>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-theme-secondary">
                       <div className="flex items-center gap-2">
                         <Building2 className="w-4 h-4" />
                         {comparison.company}
@@ -184,7 +184,7 @@ export default function SavedComparisons() {
                         Saved {formatDate(comparison.saved_at)}
                       </div>
                       {comparison.last_viewed_at && (
-                        <div className="text-gray-500">
+                        <div className="text-theme-tertiary">
                           Last viewed {formatDate(comparison.last_viewed_at)}
                         </div>
                       )}
@@ -213,7 +213,7 @@ export default function SavedComparisons() {
                       className={`p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
                         comparison.is_pinned
                           ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
-                          : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                          : 'bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 hover:text-theme'
                       }`}
                       title={comparison.is_pinned ? 'Unpin' : 'Pin to top'}
                     >

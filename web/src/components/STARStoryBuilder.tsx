@@ -313,15 +313,15 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-2">STAR Story Builder</h3>
-        <p className="text-gray-400">
+        <h3 className="text-2xl font-bold text-theme mb-2">STAR Story Builder</h3>
+        <p className="text-theme-secondary">
           Select experiences from your resume and let AI generate compelling interview stories
         </p>
       </div>
 
       {/* Experience Selection */}
-      <div className="glass rounded-xl p-6 border border-white/10">
-        <h4 className="text-lg font-semibold text-white mb-4">1. Select Your Experiences</h4>
+      <div className="glass rounded-xl p-6 border border-theme-subtle">
+        <h4 className="text-lg font-semibold text-theme mb-4">1. Select Your Experiences</h4>
         <div className="space-y-3">
           {experiences.length === 0 ? (
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
@@ -338,27 +338,27 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                 key={index}
                 className={`flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-all ${
                   selectedExperiences.has(index)
-                    ? 'bg-white/10 border-2 border-white/40'
-                    : 'bg-white/5 border-2 border-white/10 hover:border-white/20'
+                    ? 'bg-theme-glass-10 border-2 border-theme-muted'
+                    : 'bg-theme-glass-5 border-2 border-theme-subtle hover:border-theme-muted'
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={selectedExperiences.has(index)}
                   onChange={() => toggleExperience(index)}
-                  className="mt-1 w-5 h-5 rounded border-white/20 bg-white/10 text-white focus:ring-2 focus:ring-white/50"
+                  className="mt-1 w-5 h-5 rounded border-theme-muted bg-theme-glass-10 text-theme focus:ring-2 focus:ring-white/50"
                 />
                 <div className="flex-1">
-                  <div className="font-semibold text-white mb-1">
+                  <div className="font-semibold text-theme mb-1">
                     {exp.header || exp.title || exp.position || 'Position'}
                   </div>
                   {exp.bullets && exp.bullets.length > 0 && (
-                    <div className="text-sm text-gray-400 space-y-1">
+                    <div className="text-sm text-theme-secondary space-y-1">
                       {exp.bullets.slice(0, 2).map((bullet, i) => (
                         <div key={i}>• {bullet.substring(0, 100)}{bullet.length > 100 ? '...' : ''}</div>
                       ))}
                       {exp.bullets.length > 2 && (
-                        <div className="text-gray-500 italic">+{exp.bullets.length - 2} more achievements</div>
+                        <div className="text-theme-tertiary italic">+{exp.bullets.length - 2} more achievements</div>
                       )}
                     </div>
                   )}
@@ -370,15 +370,15 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       </div>
 
       {/* Theme Selection */}
-      <div className="glass rounded-xl p-6 border border-white/10">
-        <h4 className="text-lg font-semibold text-white mb-4">2. Choose Story Theme</h4>
+      <div className="glass rounded-xl p-6 border border-theme-subtle">
+        <h4 className="text-lg font-semibold text-theme mb-4">2. Choose Story Theme</h4>
         <select
           value={selectedTheme}
           onChange={(e) => setSelectedTheme(e.target.value)}
-          className="w-full px-4 py-3 bg-[#1a1a2e] border-2 border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none"
+          className="w-full px-4 py-3 bg-theme-secondary border-2 border-theme-subtle rounded-lg text-theme focus:border-theme-muted focus:outline-none"
         >
           {storyThemes.map((theme, index) => (
-            <option key={index} value={theme} className="bg-[#1a1a2e] text-white">
+            <option key={index} value={theme} className="bg-theme-secondary text-theme">
               {theme}
             </option>
           ))}
@@ -386,20 +386,20 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       </div>
 
       {/* Tone Selection */}
-      <div className="glass rounded-xl p-6 border border-white/10">
-        <h4 className="text-lg font-semibold text-white mb-4">3. Choose Tone</h4>
+      <div className="glass rounded-xl p-6 border border-theme-subtle">
+        <h4 className="text-lg font-semibold text-theme mb-4">3. Choose Tone</h4>
         <select
           value={selectedTone}
           onChange={(e) => setSelectedTone(e.target.value)}
-          className="w-full px-4 py-3 bg-[#1a1a2e] border-2 border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none"
+          className="w-full px-4 py-3 bg-theme-secondary border-2 border-theme-subtle rounded-lg text-theme focus:border-theme-muted focus:outline-none"
         >
           {TONE_OPTIONS.map((tone) => (
-            <option key={tone.value} value={tone.value} className="bg-[#1a1a2e] text-white">
+            <option key={tone.value} value={tone.value} className="bg-theme-secondary text-theme">
               {tone.label}
             </option>
           ))}
         </select>
-        <p className="text-sm text-gray-400 mt-2">
+        <p className="text-sm text-theme-secondary mt-2">
           {TONE_OPTIONS.find(t => t.value === selectedTone)?.description}
         </p>
       </div>
@@ -435,8 +435,8 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       {stories.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-lg font-semibold text-white">Your STAR Stories ({stories.length})</h4>
-            <p className="text-sm text-gray-400">
+            <h4 className="text-lg font-semibold text-theme">Your STAR Stories ({stories.length})</h4>
+            <p className="text-sm text-theme-secondary">
               All stories are automatically saved and available on the STAR Stories page
             </p>
           </div>
@@ -444,7 +444,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
             <div
               key={story.id}
               data-story-id={story.id}
-              className="glass rounded-xl p-6 border border-white/10">
+              className="glass rounded-xl p-6 border border-theme-subtle">
               {editingStory === story.id ? (
                 // Edit Mode
                 <div className="space-y-4">
@@ -452,50 +452,50 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                     type="text"
                     value={editedStory?.title || ''}
                     onChange={(e) => setEditedStory({ ...editedStory!, title: e.target.value })}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white font-semibold text-xl focus:border-white/40 focus:outline-none"
+                    className="w-full px-4 py-2 bg-theme-glass-5 border border-theme-subtle rounded-lg text-theme font-semibold text-xl focus:border-theme-muted focus:outline-none"
                     placeholder="Story Title"
                   />
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-400 mb-2">Situation (150-250 words)</label>
+                    <label className="block text-sm font-semibold text-theme-secondary mb-2">Situation (150-250 words)</label>
                     <textarea
                       value={editedStory?.situation || ''}
                       onChange={(e) => setEditedStory({ ...editedStory!, situation: e.target.value })}
                       rows={8}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-y"
+                      className="w-full px-4 py-2 bg-theme-glass-5 border border-theme-subtle rounded-lg text-theme focus:border-theme-muted focus:outline-none resize-y"
                       placeholder="Detailed context and background..."
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-400 mb-2">Task (100-150 words)</label>
+                    <label className="block text-sm font-semibold text-theme-secondary mb-2">Task (100-150 words)</label>
                     <textarea
                       value={editedStory?.task || ''}
                       onChange={(e) => setEditedStory({ ...editedStory!, task: e.target.value })}
                       rows={6}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-y"
+                      className="w-full px-4 py-2 bg-theme-glass-5 border border-theme-subtle rounded-lg text-theme focus:border-theme-muted focus:outline-none resize-y"
                       placeholder="What needed to be accomplished and why..."
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-400 mb-2">Action (300-500 words) - Most Important!</label>
+                    <label className="block text-sm font-semibold text-theme-secondary mb-2">Action (300-500 words) - Most Important!</label>
                     <textarea
                       value={editedStory?.action || ''}
                       onChange={(e) => setEditedStory({ ...editedStory!, action: e.target.value })}
                       rows={15}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-y"
+                      className="w-full px-4 py-2 bg-theme-glass-5 border border-theme-subtle rounded-lg text-theme focus:border-theme-muted focus:outline-none resize-y"
                       placeholder="Step-by-step breakdown of what YOU did..."
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-400 mb-2">Result (150-250 words)</label>
+                    <label className="block text-sm font-semibold text-theme-secondary mb-2">Result (150-250 words)</label>
                     <textarea
                       value={editedStory?.result || ''}
                       onChange={(e) => setEditedStory({ ...editedStory!, result: e.target.value })}
                       rows={8}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none resize-y"
+                      className="w-full px-4 py-2 bg-theme-glass-5 border border-theme-subtle rounded-lg text-theme focus:border-theme-muted focus:outline-none resize-y"
                       placeholder="Specific, quantifiable outcomes..."
                     />
                   </div>
@@ -521,18 +521,18 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                 // View Mode
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
-                    <h5 className="text-xl font-semibold text-white flex-1">{story.title}</h5>
+                    <h5 className="text-xl font-semibold text-theme flex-1">{story.title}</h5>
                     <div className="flex gap-2" role="group" aria-label={`Actions for ${story.title}`}>
                       <button
                         onClick={() => toggleCollapse(story.id!)}
-                        className="min-w-[44px] min-h-[44px] p-2 hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
+                        className="min-w-[44px] min-h-[44px] p-2 hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center justify-center"
                         aria-label={collapsedStories.has(story.id!) ? "Expand story" : "Collapse story"}
                         aria-expanded={!collapsedStories.has(story.id!)}
                       >
                         {collapsedStories.has(story.id!) ? (
-                          <ChevronDown className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                          <ChevronDown className="w-5 h-5 text-theme-secondary" aria-hidden="true" />
                         ) : (
-                          <ChevronUp className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                          <ChevronUp className="w-5 h-5 text-theme-secondary" aria-hidden="true" />
                         )}
                       </button>
                       <button
@@ -544,10 +544,10 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                       </button>
                       <button
                         onClick={() => startEditing(story)}
-                        className="min-w-[44px] min-h-[44px] p-2 hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
+                        className="min-w-[44px] min-h-[44px] p-2 hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center justify-center"
                         aria-label="Edit story"
                       >
-                        <Edit className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                        <Edit className="w-5 h-5 text-theme-secondary" aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => deleteStory(story.id!)}
@@ -564,31 +564,31 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                       <div className="space-y-3">
                         <div>
                           <div className="text-sm font-semibold text-green-400 mb-1">Situation</div>
-                          <p className="text-gray-300 whitespace-pre-wrap">{story.situation}</p>
+                          <p className="text-theme-secondary whitespace-pre-wrap">{story.situation}</p>
                         </div>
 
                         <div>
                           <div className="text-sm font-semibold text-blue-400 mb-1">Task</div>
-                          <p className="text-gray-300 whitespace-pre-wrap">{story.task}</p>
+                          <p className="text-theme-secondary whitespace-pre-wrap">{story.task}</p>
                         </div>
 
                         <div>
                           <div className="text-sm font-semibold text-purple-400 mb-1">Action</div>
-                          <p className="text-gray-300 whitespace-pre-wrap">{story.action}</p>
+                          <p className="text-theme-secondary whitespace-pre-wrap">{story.action}</p>
                         </div>
 
                         <div>
                           <div className="text-sm font-semibold text-yellow-400 mb-1">Result</div>
-                          <p className="text-gray-300 whitespace-pre-wrap">{story.result}</p>
+                          <p className="text-theme-secondary whitespace-pre-wrap">{story.result}</p>
                         </div>
                       </div>
 
                       {story.key_themes && story.key_themes.length > 0 && (
                         <div>
-                          <div className="text-sm font-semibold text-gray-400 mb-2">Key Themes</div>
+                          <div className="text-sm font-semibold text-theme-secondary mb-2">Key Themes</div>
                           <div className="flex flex-wrap gap-2">
                             {story.key_themes.map((theme, i) => (
-                              <span key={i} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
+                              <span key={i} className="px-3 py-1 bg-theme-glass-10 text-theme rounded-full text-sm">
                                 {theme}
                               </span>
                             ))}
@@ -598,11 +598,11 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
 
                       {story.talking_points && story.talking_points.length > 0 && (
                         <div>
-                          <div className="text-sm font-semibold text-gray-400 mb-2">Talking Points</div>
+                          <div className="text-sm font-semibold text-theme-secondary mb-2">Talking Points</div>
                           <ul className="space-y-1">
                             {story.talking_points.map((point, i) => (
-                              <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
-                                <span className="text-white mt-1">•</span>
+                              <li key={i} className="text-theme-secondary text-sm flex items-start gap-2">
+                                <span className="text-theme mt-1">•</span>
                                 <span>{point}</span>
                               </li>
                             ))}
@@ -613,7 +613,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                   )}
 
                   {collapsedStories.has(story.id!) && (
-                    <div className="text-sm text-gray-400 italic">
+                    <div className="text-sm text-theme-secondary italic">
                       Story collapsed - click to expand
                     </div>
                   )}

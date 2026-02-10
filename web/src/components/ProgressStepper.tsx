@@ -63,7 +63,7 @@ export default function ProgressStepper({
                       ? 'bg-green-500 text-white'
                       : isCurrent
                         ? 'bg-blue-500 text-white ring-4 ring-blue-500/30'
-                        : 'bg-white/10 text-gray-500'
+                        : 'bg-theme-glass-10 text-theme-tertiary'
                     }
                     ${isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-default'}
                   `}
@@ -79,7 +79,7 @@ export default function ProgressStepper({
                 {index < steps.length - 1 && (
                   <div
                     className={`w-0.5 h-16 my-2 transition-colors duration-200 ${
-                      isCompleted ? 'bg-green-500' : 'bg-white/10'
+                      isCompleted ? 'bg-green-500' : 'bg-theme-glass-10'
                     }`}
                     aria-hidden="true"
                   />
@@ -90,13 +90,13 @@ export default function ProgressStepper({
               <div className="pb-8 pt-1.5">
                 <h4
                   className={`font-semibold ${
-                    isCurrent ? 'text-white' : isCompleted ? 'text-green-400' : 'text-gray-500'
+                    isCurrent ? 'text-theme' : isCompleted ? 'text-green-400' : 'text-theme-tertiary'
                   }`}
                 >
                   {step.label}
                 </h4>
                 {step.description && (
-                  <p className="text-sm text-gray-500 mt-1">{step.description}</p>
+                  <p className="text-sm text-theme-tertiary mt-1">{step.description}</p>
                 )}
               </div>
             </div>
@@ -124,7 +124,7 @@ export default function ProgressStepper({
                     ? 'bg-green-500'
                     : isCurrent
                       ? 'bg-blue-500 ring-2 ring-blue-500/50'
-                      : 'bg-white/20'
+                      : 'bg-theme-glass-20'
                   }
                   ${allowStepClick && isCompleted && onStepClick ? 'cursor-pointer hover:scale-125' : 'cursor-default'}
                 `}
@@ -161,7 +161,7 @@ export default function ProgressStepper({
                       ? 'bg-green-500 text-white'
                       : isCurrent
                         ? 'bg-blue-500 text-white ring-4 ring-blue-500/30'
-                        : 'bg-white/10 text-gray-500 border-2 border-white/20'
+                        : 'bg-theme-glass-10 text-theme-tertiary border-2 border-theme-muted'
                     }
                     ${isClickable ? 'cursor-pointer hover:scale-110 hover:shadow-lg' : 'cursor-default'}
                   `}
@@ -179,13 +179,13 @@ export default function ProgressStepper({
                 <div className="mt-2 text-center">
                   <span
                     className={`text-xs sm:text-sm font-medium ${
-                      isCurrent ? 'text-white' : isCompleted ? 'text-green-400' : 'text-gray-500'
+                      isCurrent ? 'text-theme' : isCompleted ? 'text-green-400' : 'text-theme-tertiary'
                     }`}
                   >
                     {step.label}
                   </span>
                   {step.description && (
-                    <p className="text-xs text-gray-500 mt-0.5 hidden sm:block max-w-[100px]">
+                    <p className="text-xs text-theme-tertiary mt-0.5 hidden sm:block max-w-[100px]">
                       {step.description}
                     </p>
                   )}
@@ -196,7 +196,7 @@ export default function ProgressStepper({
               {index < steps.length - 1 && (
                 <div
                   className={`flex-1 h-1 mx-2 sm:mx-4 rounded-full transition-colors duration-200 ${
-                    isCompleted ? 'bg-green-500' : 'bg-white/10'
+                    isCompleted ? 'bg-green-500' : 'bg-theme-glass-10'
                   }`}
                   aria-hidden="true"
                 />

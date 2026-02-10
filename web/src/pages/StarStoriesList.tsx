@@ -95,7 +95,7 @@ export default function StarStoriesList() {
   }
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-screen bg-theme relative overflow-hidden">
       {/* Animated gradient background */}
       <div className="animate-gradient absolute inset-0 z-0"></div>
 
@@ -113,10 +113,10 @@ export default function StarStoriesList() {
         {/* Header */}
         <div className="max-w-7xl mx-auto mb-8 sm:mb-12">
           <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-            <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">My STAR Stories</h1>
+            <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-theme" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-theme">My STAR Stories</h1>
           </div>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-400">
+          <p className="text-sm sm:text-base lg:text-lg text-theme-secondary">
             Your saved interview stories using the STAR method (Situation, Task, Action, Result)
           </p>
         </div>
@@ -125,8 +125,8 @@ export default function StarStoriesList() {
         {loading && (
           <div className="max-w-7xl mx-auto">
             <div className="glass rounded-2xl p-12 text-center">
-              <Loader className="w-12 h-12 text-white mx-auto mb-4 animate-spin" />
-              <p className="text-gray-400 text-lg">Loading your STAR stories...</p>
+              <Loader className="w-12 h-12 text-theme mx-auto mb-4 animate-spin" />
+              <p className="text-theme-secondary text-lg">Loading your STAR stories...</p>
             </div>
           </div>
         )}
@@ -137,7 +137,7 @@ export default function StarStoriesList() {
             <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
               <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-red-400 mb-2">Error Loading STAR Stories</h3>
-              <p className="text-gray-400 mb-6">{error}</p>
+              <p className="text-theme-secondary mb-6">{error}</p>
               <button
                 onClick={fetchStarStories}
                 className="btn-primary inline-flex items-center gap-2 px-6 py-3"
@@ -151,10 +151,10 @@ export default function StarStoriesList() {
         {/* Empty State */}
         {!loading && !error && stories.length === 0 && (
           <div className="max-w-7xl mx-auto">
-            <div className="glass rounded-2xl p-12 text-center border border-white/10">
-              <Sparkles className="w-16 h-16 text-white/40 mx-auto mb-6" />
-              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3">No STAR Stories Yet</h3>
-              <p className="text-gray-400 mb-6 sm:mb-8 text-base sm:text-lg px-2 sm:px-0">
+            <div className="glass rounded-2xl p-12 text-center border border-theme-subtle">
+              <Sparkles className="w-16 h-16 text-theme-faint mx-auto mb-6" />
+              <h3 className="text-xl sm:text-2xl font-semibold text-theme mb-3">No STAR Stories Yet</h3>
+              <p className="text-theme-secondary mb-6 sm:mb-8 text-base sm:text-lg px-2 sm:px-0">
                 Create interview prep from a tailored resume to generate STAR stories,
                 or create a new tailored resume to get started.
               </p>
@@ -171,7 +171,7 @@ export default function StarStoriesList() {
         {/* STAR Stories List */}
         {!loading && !error && stories.length > 0 && (
           <div className="max-w-7xl mx-auto">
-            <div className="mb-4 text-gray-400 text-sm">
+            <div className="mb-4 text-theme-secondary text-sm">
               {stories.length} {stories.length === 1 ? 'story' : 'stories'} saved
             </div>
 
@@ -184,13 +184,13 @@ export default function StarStoriesList() {
                     className={`glass rounded-xl p-6 border transition-all cursor-pointer ${
                       selectedStory?.id === story.id
                         ? 'border-blue-400 shadow-lg shadow-blue-500/20'
-                        : 'border-white/10 hover:border-white/30'
+                        : 'border-theme-subtle hover:border-theme-muted'
                     }`}
                     onClick={() => setSelectedStory(story)}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white mb-2">
+                        <h3 className="text-lg font-semibold text-theme mb-2">
                           {story.title}
                         </h3>
                         {story.story_theme && (
@@ -199,7 +199,7 @@ export default function StarStoriesList() {
                           </span>
                         )}
                         {story.company_context && (
-                          <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                          <div className="flex items-center gap-2 text-sm text-theme-secondary mb-2">
                             <Briefcase className="w-4 h-4" />
                             <span>{story.company_context}</span>
                           </div>
@@ -222,7 +222,7 @@ export default function StarStoriesList() {
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-4 text-xs text-theme-tertiary">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         <span>{formatDate(story.created_at)}</span>
@@ -234,12 +234,12 @@ export default function StarStoriesList() {
                     {story.key_themes && story.key_themes.length > 0 && (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {story.key_themes.slice(0, 3).map((theme, i) => (
-                          <span key={i} className="px-2 py-1 bg-white/5 text-gray-400 rounded text-xs">
+                          <span key={i} className="px-2 py-1 bg-theme-glass-5 text-theme-secondary rounded text-xs">
                             {theme}
                           </span>
                         ))}
                         {story.key_themes.length > 3 && (
-                          <span className="px-2 py-1 bg-white/5 text-gray-400 rounded text-xs">
+                          <span className="px-2 py-1 bg-theme-glass-5 text-theme-secondary rounded text-xs">
                             +{story.key_themes.length - 3} more
                           </span>
                         )}
@@ -251,8 +251,8 @@ export default function StarStoriesList() {
 
               {/* Story Detail View */}
               {selectedStory ? (
-                <div className="glass rounded-xl p-8 border border-white/10 lg:sticky lg:top-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">{selectedStory.title}</h2>
+                <div className="glass rounded-xl p-8 border border-theme-subtle lg:sticky lg:top-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                  <h2 className="text-xl sm:text-2xl font-bold text-theme mb-4 sm:mb-6">{selectedStory.title}</h2>
 
                   <div className="space-y-6">
                     <div>
@@ -262,7 +262,7 @@ export default function StarStoriesList() {
                         </div>
                         <h3 className="text-sm font-semibold text-green-400 uppercase">Situation</h3>
                       </div>
-                      <p className="text-gray-300 whitespace-pre-wrap">{selectedStory.situation}</p>
+                      <p className="text-theme-secondary whitespace-pre-wrap">{selectedStory.situation}</p>
                     </div>
 
                     <div>
@@ -272,7 +272,7 @@ export default function StarStoriesList() {
                         </div>
                         <h3 className="text-sm font-semibold text-blue-400 uppercase">Task</h3>
                       </div>
-                      <p className="text-gray-300 whitespace-pre-wrap">{selectedStory.task}</p>
+                      <p className="text-theme-secondary whitespace-pre-wrap">{selectedStory.task}</p>
                     </div>
 
                     <div>
@@ -282,7 +282,7 @@ export default function StarStoriesList() {
                         </div>
                         <h3 className="text-sm font-semibold text-purple-400 uppercase">Action</h3>
                       </div>
-                      <p className="text-gray-300 whitespace-pre-wrap">{selectedStory.action}</p>
+                      <p className="text-theme-secondary whitespace-pre-wrap">{selectedStory.action}</p>
                     </div>
 
                     <div>
@@ -292,15 +292,15 @@ export default function StarStoriesList() {
                         </div>
                         <h3 className="text-sm font-semibold text-yellow-400 uppercase">Result</h3>
                       </div>
-                      <p className="text-gray-300 whitespace-pre-wrap">{selectedStory.result}</p>
+                      <p className="text-theme-secondary whitespace-pre-wrap">{selectedStory.result}</p>
                     </div>
 
                     {selectedStory.key_themes && selectedStory.key_themes.length > 0 && (
                       <div>
-                        <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">Key Themes</h3>
+                        <h3 className="text-sm font-semibold text-theme-secondary uppercase mb-3">Key Themes</h3>
                         <div className="flex flex-wrap gap-2">
                           {selectedStory.key_themes.map((theme, i) => (
-                            <span key={i} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
+                            <span key={i} className="px-3 py-1 bg-theme-glass-10 text-theme rounded-full text-sm">
                               {theme}
                             </span>
                           ))}
@@ -310,11 +310,11 @@ export default function StarStoriesList() {
 
                     {selectedStory.talking_points && selectedStory.talking_points.length > 0 && (
                       <div>
-                        <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">Talking Points</h3>
+                        <h3 className="text-sm font-semibold text-theme-secondary uppercase mb-3">Talking Points</h3>
                         <ul className="space-y-2">
                           {selectedStory.talking_points.map((point, i) => (
-                            <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
-                              <span className="text-white mt-1">•</span>
+                            <li key={i} className="text-theme-secondary text-sm flex items-start gap-2">
+                              <span className="text-theme mt-1">•</span>
                               <span>{point}</span>
                             </li>
                           ))}
@@ -324,10 +324,10 @@ export default function StarStoriesList() {
                   </div>
                 </div>
               ) : (
-                <div className="glass rounded-xl p-12 border border-white/10 flex items-center justify-center text-center lg:sticky lg:top-6">
+                <div className="glass rounded-xl p-12 border border-theme-subtle flex items-center justify-center text-center lg:sticky lg:top-6">
                   <div>
-                    <Eye className="w-12 h-12 text-white/40 mx-auto mb-4" />
-                    <p className="text-gray-400">Select a story to view details</p>
+                    <Eye className="w-12 h-12 text-theme-faint mx-auto mb-4" />
+                    <p className="text-theme-secondary">Select a story to view details</p>
                   </div>
                 </div>
               )}

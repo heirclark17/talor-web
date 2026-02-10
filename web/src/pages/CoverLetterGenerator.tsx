@@ -122,11 +122,11 @@ export default function CoverLetterGenerator() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-theme flex items-center gap-3">
             <FileEdit className="w-8 h-8" />
             Cover Letters
           </h1>
-          <p className="text-gray-400 mt-1">{letters.length} cover letter{letters.length !== 1 ? 's' : ''} generated</p>
+          <p className="text-theme-secondary mt-1">{letters.length} cover letter{letters.length !== 1 ? 's' : ''} generated</p>
         </div>
         <button
           onClick={() => setShowGenerator(true)}
@@ -141,12 +141,12 @@ export default function CoverLetterGenerator() {
         {/* Letters List */}
         <div className="lg:col-span-1 space-y-3">
           {loading ? (
-            <div className="text-center py-8 text-gray-400">Loading...</div>
+            <div className="text-center py-8 text-theme-secondary">Loading...</div>
           ) : letters.length === 0 ? (
             <div className="text-center py-8">
-              <FileEdit className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400">No cover letters yet</p>
-              <p className="text-gray-500 text-sm mt-1">Generate your first cover letter</p>
+              <FileEdit className="w-12 h-12 text-theme-tertiary mx-auto mb-3" />
+              <p className="text-theme-secondary">No cover letters yet</p>
+              <p className="text-theme-tertiary text-sm mt-1">Generate your first cover letter</p>
             </div>
           ) : (
             letters.map(letter => (
@@ -154,14 +154,14 @@ export default function CoverLetterGenerator() {
                 key={letter.id}
                 onClick={() => { setSelectedLetter(letter); setEditContent(letter.content) }}
                 className={`glass rounded-xl p-4 border cursor-pointer transition-all ${
-                  selectedLetter?.id === letter.id ? 'border-blue-500/50 bg-blue-500/5' : 'border-white/10 hover:border-white/20'
+                  selectedLetter?.id === letter.id ? 'border-blue-500/50 bg-blue-500/5' : 'border-theme-subtle hover:border-theme-muted'
                 }`}
               >
-                <h3 className="text-white font-medium truncate">{letter.jobTitle}</h3>
-                <p className="text-gray-400 text-sm">{letter.companyName}</p>
+                <h3 className="text-theme font-medium truncate">{letter.jobTitle}</h3>
+                <p className="text-theme-secondary text-sm">{letter.companyName}</p>
                 <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs text-gray-500">{new Date(letter.createdAt).toLocaleDateString()}</span>
-                  <span className="text-xs px-2 py-0.5 bg-white/10 rounded-full text-gray-400 capitalize">{letter.tone}</span>
+                  <span className="text-xs text-theme-tertiary">{new Date(letter.createdAt).toLocaleDateString()}</span>
+                  <span className="text-xs px-2 py-0.5 bg-theme-glass-10 rounded-full text-theme-secondary capitalize">{letter.tone}</span>
                 </div>
               </div>
             ))
@@ -171,23 +171,23 @@ export default function CoverLetterGenerator() {
         {/* Letter Preview/Editor */}
         <div className="lg:col-span-2">
           {selectedLetter ? (
-            <div className="glass rounded-2xl p-6 border border-white/10">
+            <div className="glass rounded-2xl p-6 border border-theme-subtle">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-white">{selectedLetter.jobTitle}</h2>
-                  <p className="text-gray-400 text-sm">{selectedLetter.companyName}</p>
+                  <h2 className="text-lg font-semibold text-theme">{selectedLetter.jobTitle}</h2>
+                  <p className="text-theme-secondary text-sm">{selectedLetter.companyName}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleExport(selectedLetter.id, 'docx')}
-                    className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                    className="p-2 hover:bg-theme-glass-10 rounded-lg text-theme-secondary hover:text-theme transition-colors"
                     title="Export as DOCX"
                   >
                     <Download className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDelete(selectedLetter.id)}
-                    className="p-2 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-colors"
+                    className="p-2 hover:bg-red-500/20 rounded-lg text-theme-secondary hover:text-red-400 transition-colors"
                     title="Delete"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -197,7 +197,7 @@ export default function CoverLetterGenerator() {
               <textarea
                 value={editContent}
                 onChange={e => setEditContent(e.target.value)}
-                className="w-full h-[500px] bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm leading-relaxed focus:outline-none focus:border-white/30 resize-none"
+                className="w-full h-[500px] bg-theme-glass-5 border border-theme-subtle rounded-xl p-4 text-theme text-sm leading-relaxed focus:outline-none focus:border-theme-muted resize-none"
               />
               {editContent !== selectedLetter.content && (
                 <div className="flex justify-end mt-3">
@@ -206,9 +206,9 @@ export default function CoverLetterGenerator() {
               )}
             </div>
           ) : (
-            <div className="glass rounded-2xl p-12 border border-white/10 text-center">
-              <FileEdit className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 text-lg">Select a cover letter to preview and edit</p>
+            <div className="glass rounded-2xl p-12 border border-theme-subtle text-center">
+              <FileEdit className="w-16 h-16 text-theme-tertiary mx-auto mb-4" />
+              <p className="text-theme-secondary text-lg">Select a cover letter to preview and edit</p>
             </div>
           )}
         </div>
@@ -217,28 +217,28 @@ export default function CoverLetterGenerator() {
       {/* Generate Modal */}
       {showGenerator && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0a0a0f]/95 backdrop-blur-sm" onClick={() => !generating && setShowGenerator(false)}>
-          <div className="rounded-2xl p-6 w-full max-w-lg border border-white/10 bg-[#141418]" onClick={e => e.stopPropagation()}>
+          <div className="rounded-2xl p-6 w-full max-w-lg border border-theme-subtle bg-theme" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white">Generate Cover Letter</h2>
-              <button onClick={() => !generating && setShowGenerator(false)} className="p-2 hover:bg-white/10 rounded-lg text-gray-400">
+              <h2 className="text-xl font-bold text-theme">Generate Cover Letter</h2>
+              <button onClick={() => !generating && setShowGenerator(false)} className="p-2 hover:bg-theme-glass-10 rounded-lg text-theme-secondary">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleGenerate} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Job Title *</label>
-                <input required value={jobTitle} onChange={e => setJobTitle(e.target.value)} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30" />
+                <label className="block text-sm text-theme-secondary mb-1">Job Title *</label>
+                <input required value={jobTitle} onChange={e => setJobTitle(e.target.value)} className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted" />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Company Name *</label>
-                <input required value={companyName} onChange={e => setCompanyName(e.target.value)} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30" />
+                <label className="block text-sm text-theme-secondary mb-1">Company Name *</label>
+                <input required value={companyName} onChange={e => setCompanyName(e.target.value)} className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted" />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Job Description *</label>
-                <textarea required value={jobDescription} onChange={e => setJobDescription(e.target.value)} rows={5} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30 resize-none" placeholder="Paste the job description here..." />
+                <label className="block text-sm text-theme-secondary mb-1">Job Description *</label>
+                <textarea required value={jobDescription} onChange={e => setJobDescription(e.target.value)} rows={5} className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted resize-none" placeholder="Paste the job description here..." />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Tone</label>
+                <label className="block text-sm text-theme-secondary mb-2">Tone</label>
                 <div className="grid grid-cols-3 gap-2">
                   {TONES.map(t => (
                     <button
@@ -246,11 +246,11 @@ export default function CoverLetterGenerator() {
                       type="button"
                       onClick={() => setTone(t.value)}
                       className={`p-3 rounded-xl border text-sm text-center transition-all ${
-                        tone === t.value ? 'border-blue-500/50 bg-blue-500/10 text-white' : 'border-white/10 text-gray-400 hover:border-white/20'
+                        tone === t.value ? 'border-blue-500/50 bg-blue-500/10 text-theme' : 'border-theme-subtle text-theme-secondary hover:border-theme-muted'
                       }`}
                     >
                       <div className="font-medium">{t.label}</div>
-                      <div className="text-xs mt-0.5 text-gray-500">{t.desc}</div>
+                      <div className="text-xs mt-0.5 text-theme-tertiary">{t.desc}</div>
                     </button>
                   ))}
                 </div>

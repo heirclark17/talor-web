@@ -59,7 +59,7 @@ export default function ChangeExplanation({ sectionName, changes, originalText, 
   }
 
   return (
-    <div className="mt-4 border-t border-white/10 pt-4">
+    <div className="mt-4 border-t border-theme-subtle pt-4">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-2 text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors w-full"
@@ -72,20 +72,20 @@ export default function ChangeExplanation({ sectionName, changes, originalText, 
       {isExpanded && (
         <div className="mt-4 space-y-4">
           {/* Overall comparison */}
-          <div className="bg-white/5 rounded-lg p-4 space-y-3">
+          <div className="bg-theme-glass-5 rounded-lg p-4 space-y-3">
             <div>
-              <div className="text-xs font-semibold text-gray-400 mb-2">ORIGINAL</div>
-              <p className="text-sm text-gray-300 leading-relaxed">{originalText}</p>
+              <div className="text-xs font-semibold text-theme-secondary mb-2">ORIGINAL</div>
+              <p className="text-sm text-theme-secondary leading-relaxed">{originalText}</p>
             </div>
-            <div className="border-t border-white/10 pt-3">
-              <div className="text-xs font-semibold text-gray-400 mb-2">TAILORED</div>
-              <p className="text-sm text-white leading-relaxed">{tailoredText}</p>
+            <div className="border-t border-theme-subtle pt-3">
+              <div className="text-xs font-semibold text-theme-secondary mb-2">TAILORED</div>
+              <p className="text-sm text-theme leading-relaxed">{tailoredText}</p>
             </div>
           </div>
 
           {/* Detailed changes */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
+            <div className="flex items-center gap-2 text-xs font-semibold text-theme-secondary">
               <Lightbulb className="w-4 h-4" />
               <span>DETAILED CHANGES</span>
             </div>
@@ -93,7 +93,7 @@ export default function ChangeExplanation({ sectionName, changes, originalText, 
             {changes.map((change, index) => (
               <div
                 key={index}
-                className="bg-white/5 rounded-lg p-4 space-y-2 border-l-4"
+                className="bg-theme-glass-5 rounded-lg p-4 space-y-2 border-l-4"
                 style={{
                   borderLeftColor:
                     change.type === 'added'
@@ -112,24 +112,24 @@ export default function ChangeExplanation({ sectionName, changes, originalText, 
                   <div className="flex-1 space-y-2">
                     {change.original && (
                       <div>
-                        <span className="text-xs font-semibold text-gray-500">Before:</span>
-                        <p className="text-sm text-gray-400 line-through">{change.original}</p>
+                        <span className="text-xs font-semibold text-theme-tertiary">Before:</span>
+                        <p className="text-sm text-theme-secondary line-through">{change.original}</p>
                       </div>
                     )}
 
                     {change.changed && (
                       <div>
-                        <span className="text-xs font-semibold text-gray-500">After:</span>
+                        <span className="text-xs font-semibold text-theme-tertiary">After:</span>
                         <p className={`text-sm font-medium ${getChangeColor(change.type)}`}>
                           {change.changed}
                         </p>
                       </div>
                     )}
 
-                    <div className="pt-2 border-t border-white/10">
+                    <div className="pt-2 border-t border-theme-subtle">
                       <div className="flex items-start gap-2">
                         <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-gray-300">{change.reason}</p>
+                        <p className="text-sm text-theme-secondary">{change.reason}</p>
                       </div>
                     </div>
 
@@ -138,7 +138,7 @@ export default function ChangeExplanation({ sectionName, changes, originalText, 
                         {change.keywords.map((keyword, i) => (
                           <span
                             key={i}
-                            className="px-2 py-1 bg-white/10 rounded-full text-xs text-white"
+                            className="px-2 py-1 bg-theme-glass-10 rounded-full text-xs text-theme"
                           >
                             {keyword}
                           </span>

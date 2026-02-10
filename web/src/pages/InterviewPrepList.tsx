@@ -88,7 +88,7 @@ export default function InterviewPrepList() {
   }
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-screen bg-theme relative overflow-hidden">
       {/* Animated gradient background */}
       <div className="animate-gradient absolute inset-0 z-0"></div>
 
@@ -106,10 +106,10 @@ export default function InterviewPrepList() {
         {/* Header */}
         <div className="max-w-6xl mx-auto mb-8 sm:mb-12">
           <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-            <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">My Interview Prep</h1>
+            <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-theme" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-theme">My Interview Prep</h1>
           </div>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-400">
+          <p className="text-sm sm:text-base lg:text-lg text-theme-secondary">
             Access all your saved interview preparation materials. Click any item to view the full prep details.
           </p>
         </div>
@@ -118,8 +118,8 @@ export default function InterviewPrepList() {
         {loading && (
           <div className="max-w-6xl mx-auto">
             <div className="glass rounded-2xl p-12 text-center">
-              <Loader className="w-12 h-12 text-white mx-auto mb-4 animate-spin" />
-              <p className="text-gray-400 text-lg">Loading your interview preps...</p>
+              <Loader className="w-12 h-12 text-theme mx-auto mb-4 animate-spin" />
+              <p className="text-theme-secondary text-lg">Loading your interview preps...</p>
             </div>
           </div>
         )}
@@ -130,7 +130,7 @@ export default function InterviewPrepList() {
             <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
               <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-red-400 mb-2">Error Loading Interview Preps</h3>
-              <p className="text-gray-400 mb-6">{error}</p>
+              <p className="text-theme-secondary mb-6">{error}</p>
               <button
                 onClick={fetchInterviewPreps}
                 className="btn-primary inline-flex items-center gap-2 px-6 py-3"
@@ -144,10 +144,10 @@ export default function InterviewPrepList() {
         {/* Empty State */}
         {!loading && !error && preps.length === 0 && (
           <div className="max-w-6xl mx-auto">
-            <div className="glass rounded-2xl p-12 text-center border border-white/10">
-              <BookOpen className="w-16 h-16 text-white/40 mx-auto mb-6" />
-              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3">No Interview Preps Yet</h3>
-              <p className="text-gray-400 mb-6 sm:mb-8 text-base sm:text-lg px-2 sm:px-0">
+            <div className="glass rounded-2xl p-12 text-center border border-theme-subtle">
+              <BookOpen className="w-16 h-16 text-theme-faint mx-auto mb-6" />
+              <h3 className="text-xl sm:text-2xl font-semibold text-theme mb-3">No Interview Preps Yet</h3>
+              <p className="text-theme-secondary mb-6 sm:mb-8 text-base sm:text-lg px-2 sm:px-0">
                 Create a tailored resume first, then generate interview prep materials from the tailor page.
               </p>
               <button
@@ -163,7 +163,7 @@ export default function InterviewPrepList() {
         {/* Interview Prep List */}
         {!loading && !error && preps.length > 0 && (
           <div className="max-w-6xl mx-auto">
-            <div className="mb-4 text-gray-400 text-sm">
+            <div className="mb-4 text-theme-secondary text-sm">
               {preps.length} {preps.length === 1 ? 'interview prep' : 'interview preps'} found
             </div>
 
@@ -171,25 +171,25 @@ export default function InterviewPrepList() {
               {preps.map((prep) => (
                 <div
                   key={prep.id}
-                  className="glass rounded-xl p-4 sm:p-6 border border-white/10 hover:border-white/30 transition-all group"
+                  className="glass rounded-xl p-4 sm:p-6 border border-theme-subtle hover:border-theme-muted transition-all group"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                        <h3 className="text-lg sm:text-xl font-semibold text-white group-hover:text-blue-400 transition-colors truncate">
+                        <h3 className="text-lg sm:text-xl font-semibold text-theme group-hover:text-blue-400 transition-colors truncate">
                           {prep.company_name}
                         </h3>
-                        <span className="text-xs text-gray-500 bg-white/5 px-2 sm:px-3 py-1 rounded-full flex-shrink-0">
+                        <span className="text-xs text-theme-tertiary bg-theme-glass-5 px-2 sm:px-3 py-1 rounded-full flex-shrink-0">
                           ID: {prep.id}
                         </span>
                       </div>
 
-                      <p className="text-gray-300 text-lg mb-4">
+                      <p className="text-theme-secondary text-lg mb-4">
                         {prep.job_title}
                       </p>
 
-                      <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400">
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-theme-secondary">
                         {prep.job_location && (
                           <div className="flex items-center gap-2">
                             <MapPin className="w-4 h-4" />

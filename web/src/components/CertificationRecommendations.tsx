@@ -155,14 +155,14 @@ export default function CertificationRecommendations({ certifications, loading }
     return (
       <div className="p-6 text-center" data-testid="certifications-section">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-4 text-gray-400">Loading certification recommendations...</p>
+        <p className="mt-4 text-theme-secondary">Loading certification recommendations...</p>
       </div>
     )
   }
 
   if (!certifications) {
     return (
-      <div className="p-6 text-center text-gray-400" data-testid="certifications-section">
+      <div className="p-6 text-center text-theme-secondary" data-testid="certifications-section">
         <p>No certification recommendations available.</p>
       </div>
     )
@@ -175,8 +175,8 @@ export default function CertificationRecommendations({ certifications, loading }
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Recommended Certifications</h3>
-          <p className="text-sm text-gray-400">Personalized recommendations for your career path</p>
+          <h3 className="text-lg font-semibold text-theme">Recommended Certifications</h3>
+          <p className="text-sm text-theme-secondary">Personalized recommendations for your career path</p>
         </div>
         <Award className="w-6 h-6 text-blue-500" />
       </div>
@@ -188,7 +188,7 @@ export default function CertificationRecommendations({ certifications, loading }
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedLevel === 'all'
               ? 'bg-blue-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
         >
           All Levels
@@ -198,7 +198,7 @@ export default function CertificationRecommendations({ certifications, loading }
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedLevel === 'entry'
               ? 'bg-green-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
           data-testid="level-filter-entry"
         >
@@ -209,7 +209,7 @@ export default function CertificationRecommendations({ certifications, loading }
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedLevel === 'mid'
               ? 'bg-yellow-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
           data-testid="level-filter-mid"
         >
@@ -220,7 +220,7 @@ export default function CertificationRecommendations({ certifications, loading }
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedLevel === 'advanced'
               ? 'bg-red-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
           data-testid="level-filter-advanced"
         >
@@ -231,7 +231,7 @@ export default function CertificationRecommendations({ certifications, loading }
       {/* Certification Cards */}
       <div className="space-y-3">
         {filteredCerts.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8 text-theme-secondary">
             <p>No certifications found for this level.</p>
           </div>
         ) : (
@@ -242,20 +242,20 @@ export default function CertificationRecommendations({ certifications, loading }
             return (
               <div
                 key={idx}
-                className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden"
+                className="bg-theme rounded-lg border border-theme-subtle overflow-hidden"
                 data-testid="cert-card"
               >
                 {/* Card Header */}
                 <button
                   onClick={() => toggleExpanded(cert.name)}
-                  className="w-full px-4 py-4 flex items-start justify-between hover:bg-gray-800 transition-colors text-left"
+                  className="w-full px-4 py-4 flex items-start justify-between hover:bg-theme-glass-10 transition-colors text-left"
                 >
                   <div className="flex-1 space-y-2">
                     {/* Certification Name */}
                     <div className="flex items-start gap-3">
                       <div className="flex-1">
-                        <h4 className="font-semibold text-white" data-testid="cert-name">{cert.name}</h4>
-                        <p className="text-sm text-gray-400">{cert.provider}</p>
+                        <h4 className="font-semibold text-theme" data-testid="cert-name">{cert.name}</h4>
+                        <p className="text-sm text-theme-secondary">{cert.provider}</p>
                       </div>
                     </div>
 
@@ -272,11 +272,11 @@ export default function CertificationRecommendations({ certifications, loading }
                       >
                         {cert.priority} priority
                       </span>
-                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <span className="text-xs text-theme-secondary flex items-center gap-1">
                         <DollarSign className="w-3 h-3" />
                         {cert.cost}
                       </span>
-                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <span className="text-xs text-theme-secondary flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {cert.time_to_complete}
                       </span>
@@ -297,7 +297,7 @@ export default function CertificationRecommendations({ certifications, loading }
                       className={`p-2 rounded-lg transition-colors ${
                         isSaved
                           ? 'bg-blue-500 text-white'
-                          : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                          : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
                       }`}
                       data-testid="save-cert-btn"
                     >
@@ -306,26 +306,26 @@ export default function CertificationRecommendations({ certifications, loading }
 
                     {/* Expand Icon */}
                     {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                      <ChevronDown className="w-5 h-5 text-theme-secondary" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <ChevronRight className="w-5 h-5 text-theme-secondary" />
                     )}
                   </div>
                 </button>
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="px-4 pb-4 space-y-4 border-t border-gray-800">
+                  <div className="px-4 pb-4 space-y-4 border-t border-theme-subtle">
                     {/* Why Recommended */}
                     <div className="pt-4">
-                      <h5 className="text-sm font-semibold text-white mb-2">Why Recommended</h5>
-                      <p className="text-sm text-gray-300" data-testid="cert-description">{cert.why_recommended}</p>
+                      <h5 className="text-sm font-semibold text-theme mb-2">Why Recommended</h5>
+                      <p className="text-sm text-theme-secondary" data-testid="cert-description">{cert.why_recommended}</p>
                     </div>
 
                     {/* Skills Gained */}
                     {cert.skills_gained && cert.skills_gained.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2">Skills Gained</h5>
+                        <h5 className="text-sm font-semibold text-theme mb-2">Skills Gained</h5>
                         <div className="flex flex-wrap gap-2">
                           {cert.skills_gained.map((skill, skillIdx) => (
                             <span
@@ -342,19 +342,19 @@ export default function CertificationRecommendations({ certifications, loading }
                     {/* Key Details Grid */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h5 className="text-xs font-semibold text-gray-400 mb-1">Cost</h5>
-                        <p className="text-sm text-white" data-testid="cert-cost">{cert.cost}</p>
+                        <h5 className="text-xs font-semibold text-theme-secondary mb-1">Cost</h5>
+                        <p className="text-sm text-theme" data-testid="cert-cost">{cert.cost}</p>
                       </div>
                       <div>
-                        <h5 className="text-xs font-semibold text-gray-400 mb-1">Time to Complete</h5>
-                        <p className="text-sm text-white" data-testid="cert-duration">{cert.time_to_complete}</p>
+                        <h5 className="text-xs font-semibold text-theme-secondary mb-1">Time to Complete</h5>
+                        <p className="text-sm text-theme" data-testid="cert-duration">{cert.time_to_complete}</p>
                       </div>
                       <div>
-                        <h5 className="text-xs font-semibold text-gray-400 mb-1">Difficulty</h5>
-                        <p className="text-sm text-white capitalize">{cert.difficulty}</p>
+                        <h5 className="text-xs font-semibold text-theme-secondary mb-1">Difficulty</h5>
+                        <p className="text-sm text-theme capitalize">{cert.difficulty}</p>
                       </div>
                       <div>
-                        <h5 className="text-xs font-semibold text-gray-400 mb-1">ROI Rating</h5>
+                        <h5 className="text-xs font-semibold text-theme-secondary mb-1">ROI Rating</h5>
                         <p className={`text-sm font-medium capitalize ${getRoiColor(cert.roi_rating)}`} data-testid="cert-roi">
                           {cert.roi_rating}
                         </p>
@@ -364,31 +364,31 @@ export default function CertificationRecommendations({ certifications, loading }
                     {/* Prerequisites */}
                     {cert.prerequisites && cert.prerequisites !== 'None' && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2">Prerequisites</h5>
-                        <p className="text-sm text-gray-300">{cert.prerequisites}</p>
+                        <h5 className="text-sm font-semibold text-theme mb-2">Prerequisites</h5>
+                        <p className="text-sm text-theme-secondary">{cert.prerequisites}</p>
                       </div>
                     )}
 
                     {/* Exam Details */}
                     {cert.exam_details && (
                       <div>
-                        <h5 className="text-sm font-semibold text-white mb-2">Exam Details</h5>
-                        <div className="bg-gray-800/50 rounded-lg p-3 space-y-2">
+                        <h5 className="text-sm font-semibold text-theme mb-2">Exam Details</h5>
+                        <div className="bg-theme-glass-10 rounded-lg p-3 space-y-2">
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Format:</span>
-                            <span className="text-white">{cert.exam_details.format}</span>
+                            <span className="text-theme-secondary">Format:</span>
+                            <span className="text-theme">{cert.exam_details.format}</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Duration:</span>
-                            <span className="text-white">{cert.exam_details.duration}</span>
+                            <span className="text-theme-secondary">Duration:</span>
+                            <span className="text-theme">{cert.exam_details.duration}</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Passing Score:</span>
-                            <span className="text-white">{cert.exam_details.passing_score}</span>
+                            <span className="text-theme-secondary">Passing Score:</span>
+                            <span className="text-theme">{cert.exam_details.passing_score}</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Validity:</span>
-                            <span className="text-white">{cert.exam_details.validity}</span>
+                            <span className="text-theme-secondary">Validity:</span>
+                            <span className="text-theme">{cert.exam_details.validity}</span>
                           </div>
                         </div>
                       </div>
@@ -397,7 +397,7 @@ export default function CertificationRecommendations({ certifications, loading }
                     {/* Study Resources */}
                     {cert.study_resources && cert.study_resources.length > 0 && (
                       <div data-testid="study-resources">
-                        <h5 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                        <h5 className="text-sm font-semibold text-theme mb-2 flex items-center gap-2">
                           <BookOpen className="w-4 h-4" />
                           Study Resources
                         </h5>
@@ -421,8 +421,8 @@ export default function CertificationRecommendations({ certifications, loading }
 
       {/* Recommended Certification Path */}
       {certifications.recommended_path && certifications.recommended_path.length > 0 && (
-        <div className="bg-gray-900 rounded-lg border border-gray-800 p-6" data-testid="cert-roadmap">
-          <h4 className="font-semibold text-white mb-4 flex items-center gap-2">
+        <div className="bg-theme rounded-lg border border-theme-subtle p-6" data-testid="cert-roadmap">
+          <h4 className="font-semibold text-theme mb-4 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-500" />
             Recommended Certification Path
           </h4>
@@ -437,15 +437,15 @@ export default function CertificationRecommendations({ certifications, loading }
                     {step.step}
                   </div>
                   {idx < certifications.recommended_path.length - 1 && (
-                    <div className="w-0.5 flex-1 bg-gray-700 mt-2"></div>
+                    <div className="w-0.5 flex-1 bg-theme-glass-10 mt-2"></div>
                   )}
                 </div>
                 <div className="flex-1 pb-6">
                   <div className="flex items-start justify-between mb-1">
-                    <h5 className="font-medium text-white">{step.certification}</h5>
-                    <span className="text-xs text-gray-400">{step.timeline}</span>
+                    <h5 className="font-medium text-theme">{step.certification}</h5>
+                    <span className="text-xs text-theme-secondary">{step.timeline}</span>
                   </div>
-                  <p className="text-sm text-gray-400">{step.rationale}</p>
+                  <p className="text-sm text-theme-secondary">{step.rationale}</p>
                 </div>
               </div>
             ))}
@@ -455,9 +455,9 @@ export default function CertificationRecommendations({ certifications, loading }
 
       {/* Personalized Advice */}
       {certifications.personalized_advice && (
-        <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-          <h4 className="font-semibold text-white mb-3">Personalized Career Advice</h4>
-          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+        <div className="bg-theme rounded-lg border border-theme-subtle p-6">
+          <h4 className="font-semibold text-theme mb-3">Personalized Career Advice</h4>
+          <p className="text-sm text-theme-secondary leading-relaxed whitespace-pre-line">
             {certifications.personalized_advice}
           </p>
         </div>

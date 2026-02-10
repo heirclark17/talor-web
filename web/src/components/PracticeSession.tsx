@@ -160,7 +160,7 @@ export default function PracticeSession({ story, onClose }: Props) {
       case 'result':
         return 'text-yellow-400'
       default:
-        return 'text-white'
+        return 'text-theme'
     }
   }
 
@@ -198,20 +198,20 @@ export default function PracticeSession({ story, onClose }: Props) {
     >
       <div
         ref={modalRef}
-        className="rounded-2xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-y-auto bg-[#141418]"
+        className="rounded-2xl border border-theme-subtle max-w-4xl w-full max-h-[90vh] overflow-y-auto bg-theme"
       >
         {/* Header */}
-        <div className="sticky top-0 border-b border-white/10 p-6 flex items-center justify-between bg-[#141418] rounded-t-2xl">
+        <div className="sticky top-0 border-b border-theme-subtle p-6 flex items-center justify-between bg-theme rounded-t-2xl">
           <div>
-            <h2 id="practice-session-title" className="text-2xl font-bold text-white mb-1">Practice Session</h2>
-            <p className="text-gray-400">{story.title}</p>
+            <h2 id="practice-session-title" className="text-2xl font-bold text-theme mb-1">Practice Session</h2>
+            <p className="text-theme-secondary">{story.title}</p>
           </div>
           <button
             onClick={onClose}
-            className="min-w-[44px] min-h-[44px] p-2 hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
+            className="min-w-[44px] min-h-[44px] p-2 hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center justify-center"
             aria-label="Close practice session"
           >
-            <X className="w-6 h-6 text-gray-400" aria-hidden="true" />
+            <X className="w-6 h-6 text-theme-secondary" aria-hidden="true" />
           </button>
         </div>
 
@@ -223,16 +223,16 @@ export default function PracticeSession({ story, onClose }: Props) {
                 <h3 className="text-lg font-bold text-blue-400">How to Use This Practice Session</h3>
                 <button
                   onClick={() => setShowInstructions(false)}
-                  className="min-w-[44px] min-h-[44px] text-gray-400 hover:text-white transition-colors flex items-center justify-center"
+                  className="min-w-[44px] min-h-[44px] text-theme-secondary hover:text-theme transition-colors flex items-center justify-center"
                   aria-label="Dismiss instructions"
                 >
                   <X className="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
-              <div className="space-y-3 text-sm text-gray-300">
+              <div className="space-y-3 text-sm text-theme-secondary">
                 <p className="flex items-start gap-2">
                   <span className="text-blue-400 font-bold">1.</span>
-                  <span>Click <strong className="text-white">"Start Practice"</strong> to begin the timer and recording (optional)</span>
+                  <span>Click <strong className="text-theme">"Start Practice"</strong> to begin the timer and recording (optional)</span>
                 </p>
                 <p className="flex items-start gap-2">
                   <span className="text-blue-400 font-bold">2.</span>
@@ -244,11 +244,11 @@ export default function PracticeSession({ story, onClose }: Props) {
                 </p>
                 <p className="flex items-start gap-2">
                   <span className="text-blue-400 font-bold">4.</span>
-                  <span>Try to complete your story within <strong className="text-white">3-5 minutes</strong> total</span>
+                  <span>Try to complete your story within <strong className="text-theme">3-5 minutes</strong> total</span>
                 </p>
                 <p className="flex items-start gap-2">
                   <span className="text-blue-400 font-bold">5.</span>
-                  <span>Use the <strong className="text-white">Record</strong> button to capture your practice and <strong className="text-white">Play</strong> to review</span>
+                  <span>Use the <strong className="text-theme">Record</strong> button to capture your practice and <strong className="text-theme">Play</strong> to review</span>
                 </p>
               </div>
             </div>
@@ -279,7 +279,7 @@ export default function PracticeSession({ story, onClose }: Props) {
               </button>
             )}
             {audioUrl && !isRecording && (
-              <div className="glass rounded-xl p-4 border border-white/10 flex items-center gap-4 w-full max-w-2xl">
+              <div className="glass rounded-xl p-4 border border-theme-subtle flex items-center gap-4 w-full max-w-2xl">
                 <div className="flex-1">
                   <audio src={audioUrl} controls className="w-full" aria-label="Your recorded practice session" />
                 </div>
@@ -306,15 +306,15 @@ export default function PracticeSession({ story, onClose }: Props) {
 
           {/* Timer Display */}
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 glass rounded-2xl px-8 py-4 border border-white/10">
-              <Clock className="w-8 h-8 text-white" />
-              <div className="text-5xl font-bold text-white font-mono">{formatTime(seconds)}</div>
-              <div className="text-sm text-gray-400">/ {formatTime(targetTime)}</div>
+            <div className="inline-flex items-center gap-3 glass rounded-2xl px-8 py-4 border border-theme-subtle">
+              <Clock className="w-8 h-8 text-theme" />
+              <div className="text-5xl font-bold text-theme font-mono">{formatTime(seconds)}</div>
+              <div className="text-sm text-theme-secondary">/ {formatTime(targetTime)}</div>
             </div>
 
             {/* Overall Progress */}
             <div className="mt-4 max-w-md mx-auto">
-              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-2 bg-theme-glass-10 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-green-400 via-purple-400 to-yellow-400 transition-all duration-300"
                   style={{ width: `${Math.min(100, (seconds / targetTime) * 100)}%` }}
@@ -325,18 +325,18 @@ export default function PracticeSession({ story, onClose }: Props) {
 
           {/* Current Section */}
           {currentSection !== 'complete' && (
-            <div className="glass rounded-xl p-6 border border-white/10">
+            <div className="glass rounded-xl p-6 border border-theme-subtle">
               <div className="flex items-center justify-between mb-4">
                 <h3 className={`text-2xl font-bold uppercase ${getSectionColor(currentSection)}`}>
                   {currentSection}
                 </h3>
-                <div className="text-sm text-gray-400">
+                <div className="text-sm text-theme-secondary">
                   {formatTime(Math.floor(getSectionProgress() / 100 * (sectionTime[currentSection as keyof typeof sectionTime] || 60)))} / {formatTime(sectionTime[currentSection as keyof typeof sectionTime] || 60)}
                 </div>
               </div>
 
               {/* Section Progress */}
-              <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-4">
+              <div className="h-2 bg-theme-glass-10 rounded-full overflow-hidden mb-4">
                 <div
                   className={`h-full transition-all duration-300 ${
                     currentSection === 'situation' ? 'bg-green-400' :
@@ -349,8 +349,8 @@ export default function PracticeSession({ story, onClose }: Props) {
               </div>
 
               {/* Section Content (Reference) */}
-              <div className="bg-white/5 rounded-lg p-4 mb-4 max-h-40 overflow-y-auto">
-                <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+              <div className="bg-theme-glass-5 rounded-lg p-4 mb-4 max-h-40 overflow-y-auto">
+                <p className="text-theme-secondary text-sm leading-relaxed whitespace-pre-wrap">
                   {story[currentSection as keyof STARStory] as string}
                 </p>
               </div>
@@ -366,13 +366,13 @@ export default function PracticeSession({ story, onClose }: Props) {
 
           {/* Complete State */}
           {currentSection === 'complete' && (
-            <div className="glass rounded-xl p-8 border border-white/10 text-center">
+            <div className="glass rounded-xl p-8 border border-theme-subtle text-center">
               <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-white mb-2">Great Job!</h3>
-              <p className="text-gray-400 mb-4">
+              <h3 className="text-2xl font-bold text-theme mb-2">Great Job!</h3>
+              <p className="text-theme-secondary mb-4">
                 You completed your practice session in {formatTime(seconds)}
               </p>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-theme-tertiary">
                 Target time: 3-5 minutes {seconds >= 180 && seconds <= 300 ? '✓' : ''}
               </div>
             </div>
@@ -428,11 +428,11 @@ export default function PracticeSession({ story, onClose }: Props) {
           {/* Key Themes & Talking Points (Quick Reference) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {story.key_themes && story.key_themes.length > 0 && (
-              <div className="glass rounded-xl p-6 border border-white/10">
-                <h4 className="text-sm font-semibold text-gray-400 uppercase mb-3">Key Themes</h4>
+              <div className="glass rounded-xl p-6 border border-theme-subtle">
+                <h4 className="text-sm font-semibold text-theme-secondary uppercase mb-3">Key Themes</h4>
                 <div className="flex flex-wrap gap-2">
                   {story.key_themes.map((theme, i) => (
-                    <span key={i} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm">
+                    <span key={i} className="px-3 py-1 bg-theme-glass-10 text-theme rounded-full text-sm">
                       {theme}
                     </span>
                   ))}
@@ -441,12 +441,12 @@ export default function PracticeSession({ story, onClose }: Props) {
             )}
 
             {story.talking_points && story.talking_points.length > 0 && (
-              <div className="glass rounded-xl p-6 border border-white/10">
-                <h4 className="text-sm font-semibold text-gray-400 uppercase mb-3">Talking Points</h4>
+              <div className="glass rounded-xl p-6 border border-theme-subtle">
+                <h4 className="text-sm font-semibold text-theme-secondary uppercase mb-3">Talking Points</h4>
                 <ul className="space-y-2">
                   {story.talking_points.slice(0, 3).map((point, i) => (
-                    <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
-                      <span className="text-white mt-0.5">•</span>
+                    <li key={i} className="text-theme-secondary text-sm flex items-start gap-2">
+                      <span className="text-theme mt-0.5">•</span>
                       <span>{point}</span>
                     </li>
                   ))}

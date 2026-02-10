@@ -3,21 +3,21 @@ import { SignUp as ClerkSignUp } from '@clerk/clerk-react'
 export default function SignUp() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="glass rounded-2xl p-8 border border-white/10">
+      <div className="glass rounded-2xl p-8 border border-theme-subtle">
         <ClerkSignUp
           appearance={{
             elements: {
               rootBox: 'mx-auto',
               card: 'bg-transparent shadow-none',
-              headerTitle: 'text-white',
-              headerSubtitle: 'text-gray-400',
-              socialButtonsBlockButton: 'bg-white/10 border-white/20 text-white hover:bg-white/20',
-              formFieldLabel: 'text-gray-300',
-              formFieldInput: 'bg-white/10 border-white/20 text-white',
+              headerTitle: 'text-theme',
+              headerSubtitle: 'text-theme-secondary',
+              socialButtonsBlockButton: 'bg-theme-glass-10 border-theme-muted text-theme hover:bg-theme-glass-20',
+              formFieldLabel: 'text-theme-secondary',
+              formFieldInput: 'bg-theme-glass-10 border-theme-muted text-theme',
               footerActionLink: 'text-blue-400 hover:text-blue-300',
               formButtonPrimary: 'bg-blue-500 hover:bg-blue-600',
-              dividerLine: 'bg-white/20',
-              dividerText: 'text-gray-500',
+              dividerLine: 'bg-theme-glass-20',
+              dividerText: 'text-theme-tertiary',
             },
           }}
           routing="path"

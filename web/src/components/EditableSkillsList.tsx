@@ -54,11 +54,11 @@ export default function EditableSkillsList({
   return (
     <div className={`glass rounded-xl p-6 ${className}`}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-white">{title}</h3>
+        <h3 className="text-lg font-bold text-theme">{title}</h3>
         {isEditable && !isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-3 py-1 text-sm text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+            className="flex items-center gap-2 px-3 py-1 text-sm text-theme-secondary hover:text-theme transition-colors rounded-lg hover:bg-theme-glass-10"
           >
             <Edit2 className="w-4 h-4" />
             Edit
@@ -92,7 +92,7 @@ export default function EditableSkillsList({
                 type="text"
                 value={skill}
                 onChange={(e) => handleEditSkill(index, e.target.value)}
-                className="flex-1 bg-white/5 text-white rounded-lg px-3 py-2 border border-white/20 focus:border-white/40 focus:outline-none"
+                className="flex-1 bg-theme-glass-5 text-theme rounded-lg px-3 py-2 border border-theme-muted focus:border-theme focus:outline-none"
               />
               <button
                 onClick={() => handleDeleteSkill(index)}
@@ -110,7 +110,7 @@ export default function EditableSkillsList({
               onChange={(e) => setNewSkill(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
               placeholder="Add new skill..."
-              className="flex-1 bg-white/5 text-white rounded-lg px-3 py-2 border border-white/20 focus:border-white/40 focus:outline-none placeholder-gray-500"
+              className="flex-1 bg-theme-glass-5 text-theme rounded-lg px-3 py-2 border border-theme-muted focus:border-theme focus:outline-none placeholder-theme-tertiary"
             />
             <button
               onClick={handleAddSkill}
@@ -125,7 +125,7 @@ export default function EditableSkillsList({
           {skills.map((skill, index) => (
             <span
               key={index}
-              className="px-3 py-1 bg-white/10 text-white rounded-full text-sm font-medium"
+              className="px-3 py-1 bg-theme-glass-10 text-theme rounded-full text-sm font-medium"
             >
               {skill}
             </span>

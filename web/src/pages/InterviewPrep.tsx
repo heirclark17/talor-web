@@ -745,11 +745,11 @@ export default function InterviewPrep() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6">
+      <div className="min-h-screen bg-theme flex items-center justify-center p-6">
         <div className="glass rounded-3xl p-8 max-w-md w-full text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Error Loading Interview Prep</h2>
-          <p className="text-gray-400 mb-6">{error}</p>
+          <h2 className="text-2xl font-bold text-theme mb-2">Error Loading Interview Prep</h2>
+          <p className="text-theme-secondary mb-6">{error}</p>
           <div className="flex flex-col gap-3">
             <button
               onClick={async () => {
@@ -772,11 +772,11 @@ export default function InterviewPrep() {
 
   if (!prepData) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6">
+      <div className="min-h-screen bg-theme flex items-center justify-center p-6">
         <div className="glass rounded-3xl p-8 max-w-md w-full text-center">
           <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">No Interview Prep Available</h2>
-          <p className="text-gray-400 mb-6">Generate interview prep to get started.</p>
+          <h2 className="text-2xl font-bold text-theme mb-2">No Interview Prep Available</h2>
+          <p className="text-theme-secondary mb-6">Generate interview prep to get started.</p>
           <button onClick={generateInterviewPrep} className="btn-primary">
             Generate Interview Prep
           </button>
@@ -789,14 +789,14 @@ export default function InterviewPrep() {
   const daysUntilInterview = getDaysUntilInterview()
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-theme">
       <ThemeToggle />
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <button
             onClick={() => navigate('/tailor')}
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 transition-colors min-h-[44px]"
+            className="flex items-center gap-2 text-theme-secondary hover:text-theme mb-4 transition-colors min-h-[44px]"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Resume
@@ -808,11 +808,11 @@ export default function InterviewPrep() {
               <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-yellow-400 text-sm font-medium mb-1">Warning</p>
-                <p className="text-gray-300 text-sm">{warning}</p>
+                <p className="text-theme-secondary text-sm">{warning}</p>
               </div>
               <button
                 onClick={() => setWarning(null)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-theme-secondary hover:text-theme transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -821,8 +821,8 @@ export default function InterviewPrep() {
 
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">Interview Preparation</h1>
-              <p className="text-sm sm:text-base text-gray-400">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-theme mb-2">Interview Preparation</h1>
+              <p className="text-sm sm:text-base text-theme-secondary">
                 AI-generated interview prep for {prepData.role_analysis.job_title} at{' '}
                 {prepData.company_profile.name}
               </p>
@@ -832,21 +832,21 @@ export default function InterviewPrep() {
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               <button
                 onClick={expandAll}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
               >
                 <ChevronDown size={18} />
                 <span className="text-sm font-medium hidden sm:inline">Expand All</span>
               </button>
               <button
                 onClick={collapseAll}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
               >
                 <ChevronUp size={18} />
                 <span className="text-sm font-medium hidden sm:inline">Collapse All</span>
               </button>
               <button
                 onClick={exportToPDF}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
               >
                 <Printer size={18} />
                 <span className="text-sm font-medium hidden sm:inline">Print</span>
@@ -855,7 +855,7 @@ export default function InterviewPrep() {
               <div className="relative">
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 transition-all min-h-[44px]"
+                  className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
                 >
                   <FileDown size={18} />
                   <span className="text-sm font-medium hidden sm:inline">Export</span>
@@ -863,13 +863,13 @@ export default function InterviewPrep() {
                 </button>
 
                 {showExportMenu && (
-                  <div className="absolute right-0 top-full mt-2 bg-gray-900 rounded-xl shadow-2xl border border-white/10 py-2 min-w-[200px] z-10">
+                  <div className="absolute right-0 top-full mt-2 bg-theme rounded-xl shadow-2xl border border-theme-subtle py-2 min-w-[200px] z-10">
                     <button
                       onClick={() => {
                         exportToPDF()
                         setShowExportMenu(false)
                       }}
-                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                      className="w-full px-4 py-2 text-left text-theme hover:bg-theme-glass-10 transition-colors flex items-center gap-3"
                     >
                       <FileDown size={16} />
                       PDF Document
@@ -879,7 +879,7 @@ export default function InterviewPrep() {
                         sendEmail()
                         setShowExportMenu(false)
                       }}
-                      className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                      className="w-full px-4 py-2 text-left text-theme hover:bg-theme-glass-10 transition-colors flex items-center gap-3"
                     >
                       <Mail size={16} />
                       Email to Self
@@ -896,15 +896,15 @@ export default function InterviewPrep() {
           {/* Interview Date Countdown */}
           <div className="glass rounded-2xl p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={2} />
-              <h3 className="text-lg sm:text-xl font-bold text-white">Interview Date</h3>
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-theme" strokeWidth={2} />
+              <h3 className="text-lg sm:text-xl font-bold text-theme">Interview Date</h3>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <input
                 type="date"
                 value={interviewDate}
                 onChange={(e) => saveInterviewDate(e.target.value)}
-                className="bg-white/5 border border-white/20 rounded-lg p-3 text-white flex-1 text-[16px] min-h-[44px]"
+                className="bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme flex-1 text-[16px] min-h-[44px]"
                 style={{ colorScheme: 'dark' }}
               />
               {daysUntilInterview !== null && (
@@ -912,7 +912,7 @@ export default function InterviewPrep() {
                   <div className={`text-4xl font-bold ${daysUntilInterview <= 3 ? 'text-red-500' : daysUntilInterview <= 7 ? 'text-yellow-500' : 'text-green-500'}`}>
                     {daysUntilInterview}
                   </div>
-                  <div className="text-sm text-gray-400">days until</div>
+                  <div className="text-sm text-theme-secondary">days until</div>
                 </div>
               )}
             </div>
@@ -920,14 +920,14 @@ export default function InterviewPrep() {
 
           {/* Progress Dashboard */}
           <div className="glass rounded-2xl p-4 sm:p-6">
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Preparation Progress</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-theme mb-4">Preparation Progress</h3>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">Research Tasks</span>
-                  <span className="text-white font-medium">{progressStats.researchCompleted}/{progressStats.researchTotal}</span>
+                  <span className="text-theme-secondary">Research Tasks</span>
+                  <span className="text-theme font-medium">{progressStats.researchCompleted}/{progressStats.researchTotal}</span>
                 </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-theme-glass-10 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-500 rounded-full transition-all"
                     style={{ width: `${(progressStats.researchCompleted / progressStats.researchTotal) * 100}%` }}
@@ -936,10 +936,10 @@ export default function InterviewPrep() {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">Day-Of Checklist</span>
-                  <span className="text-white font-medium">{progressStats.checklistCompleted}/{progressStats.checklistTotal}</span>
+                  <span className="text-theme-secondary">Day-Of Checklist</span>
+                  <span className="text-theme font-medium">{progressStats.checklistCompleted}/{progressStats.checklistTotal}</span>
                 </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-theme-glass-10 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-green-500 rounded-full transition-all"
                     style={{ width: `${(progressStats.checklistCompleted / progressStats.checklistTotal) * 100}%` }}
@@ -955,15 +955,15 @@ export default function InterviewPrep() {
           {/* Company Profile Card */}
           <button
             onClick={() => openModal('companyProfile')}
-            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-blue-500/20">
                 <Building2 className="w-6 h-6 text-blue-400" />
               </div>
-              <h3 className="text-lg font-bold text-white">Company Profile</h3>
+              <h3 className="text-lg font-bold text-theme">Company Profile</h3>
             </div>
-            <p className="text-gray-400 text-sm line-clamp-2">{prepData.company_profile.name} - {prepData.company_profile.industry}</p>
+            <p className="text-theme-secondary text-sm line-clamp-2">{prepData.company_profile.name} - {prepData.company_profile.industry}</p>
             <div className="mt-3 text-blue-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
               View Details <ChevronRight className="w-4 h-4" />
             </div>
@@ -972,15 +972,15 @@ export default function InterviewPrep() {
           {/* Role Analysis Card */}
           <button
             onClick={() => openModal('roleAnalysis')}
-            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-green-500/20">
                 <Target className="w-6 h-6 text-green-400" />
               </div>
-              <h3 className="text-lg font-bold text-white">Role Analysis</h3>
+              <h3 className="text-lg font-bold text-theme">Role Analysis</h3>
             </div>
-            <p className="text-gray-400 text-sm line-clamp-2">{prepData.role_analysis.job_title} - {prepData.role_analysis.seniority_level}</p>
+            <p className="text-theme-secondary text-sm line-clamp-2">{prepData.role_analysis.job_title} - {prepData.role_analysis.seniority_level}</p>
             <div className="mt-3 text-green-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
               View Details <ChevronRight className="w-4 h-4" />
             </div>
@@ -990,15 +990,15 @@ export default function InterviewPrep() {
           {prepData.values_and_culture.stated_values.length > 0 && (
             <button
               onClick={() => openModal('valuesAndCulture')}
-              className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+              className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 rounded-lg bg-yellow-500/20">
                   <Star className="w-6 h-6 text-yellow-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Values & Culture</h3>
+                <h3 className="text-lg font-bold text-theme">Values & Culture</h3>
               </div>
-              <p className="text-gray-400 text-sm line-clamp-2">{prepData.values_and_culture.stated_values.length} core values identified</p>
+              <p className="text-theme-secondary text-sm line-clamp-2">{prepData.values_and_culture.stated_values.length} core values identified</p>
               <div className="mt-3 text-yellow-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
                 View Details <ChevronRight className="w-4 h-4" />
               </div>
@@ -1009,15 +1009,15 @@ export default function InterviewPrep() {
           {(prepData.strategy_and_news.recent_events.length > 0 || prepData.strategy_and_news.strategic_themes.length > 0) && (
             <button
               onClick={() => openModal('strategy')}
-              className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+              className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 rounded-lg bg-purple-500/20">
                   <TrendingUp className="w-6 h-6 text-purple-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Strategy & News</h3>
+                <h3 className="text-lg font-bold text-theme">Strategy & News</h3>
               </div>
-              <p className="text-gray-400 text-sm line-clamp-2">
+              <p className="text-theme-secondary text-sm line-clamp-2">
                 {companyNews?.news_articles?.length || prepData.strategy_and_news.recent_events.length} recent updates
               </p>
               <div className="mt-3 text-purple-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
@@ -1029,15 +1029,15 @@ export default function InterviewPrep() {
           {/* Interview Preparation Card */}
           <button
             onClick={() => openModal('preparation')}
-            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-cyan-500/20">
                 <CheckCircle2 className="w-6 h-6 text-cyan-400" />
               </div>
-              <h3 className="text-lg font-bold text-white">Preparation Checklist</h3>
+              <h3 className="text-lg font-bold text-theme">Preparation Checklist</h3>
             </div>
-            <p className="text-gray-400 text-sm line-clamp-2">
+            <p className="text-theme-secondary text-sm line-clamp-2">
               {progressStats.researchCompleted}/{progressStats.researchTotal} tasks completed
             </p>
             <div className="mt-3 text-cyan-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
@@ -1048,15 +1048,15 @@ export default function InterviewPrep() {
           {/* Questions to Ask Card */}
           <button
             onClick={() => openModal('questions')}
-            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-orange-500/20">
                 <MessageSquare className="w-6 h-6 text-orange-400" />
               </div>
-              <h3 className="text-lg font-bold text-white">Questions to Ask</h3>
+              <h3 className="text-lg font-bold text-theme">Questions to Ask</h3>
             </div>
-            <p className="text-gray-400 text-sm line-clamp-2">
+            <p className="text-theme-secondary text-sm line-clamp-2">
               {Object.values(prepData.questions_to_ask_interviewer).flat().length + customQuestions.length} questions prepared
             </p>
             <div className="mt-3 text-orange-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
@@ -1068,16 +1068,16 @@ export default function InterviewPrep() {
           {interviewPrepId && (
             <button
               onClick={() => openModal('behavioralTechnical')}
-              className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+              className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20">
                   <Target className="w-6 h-6 text-purple-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Behavioral & Technical</h3>
+                <h3 className="text-lg font-bold text-theme">Behavioral & Technical</h3>
                 <span className="text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white px-2 py-0.5 rounded">AI</span>
               </div>
-              <p className="text-gray-400 text-sm line-clamp-2">Practice questions with STAR story builder</p>
+              <p className="text-theme-secondary text-sm line-clamp-2">Practice questions with STAR story builder</p>
               <div className="mt-3 text-purple-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
                 View Details <ChevronRight className="w-4 h-4" />
               </div>
@@ -1088,15 +1088,15 @@ export default function InterviewPrep() {
           {interviewPrepId && (
             <button
               onClick={() => openModal('commonQuestions')}
-              className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+              className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 rounded-lg bg-pink-500/20">
                   <MessageSquare className="w-6 h-6 text-pink-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Common Questions</h3>
+                <h3 className="text-lg font-bold text-theme">Common Questions</h3>
               </div>
-              <p className="text-gray-400 text-sm line-clamp-2">Questions people commonly struggle with</p>
+              <p className="text-theme-secondary text-sm line-clamp-2">Questions people commonly struggle with</p>
               <div className="mt-3 text-pink-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
                 View Details <ChevronRight className="w-4 h-4" />
               </div>
@@ -1106,15 +1106,15 @@ export default function InterviewPrep() {
           {/* Certifications Card */}
           <button
             onClick={() => openModal('certifications')}
-            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-blue-500/20">
                 <Award className="w-6 h-6 text-blue-400" />
               </div>
-              <h3 className="text-lg font-bold text-white">Certifications</h3>
+              <h3 className="text-lg font-bold text-theme">Certifications</h3>
             </div>
-            <p className="text-gray-400 text-sm line-clamp-2">Recommended certifications for this role</p>
+            <p className="text-theme-secondary text-sm line-clamp-2">Recommended certifications for this role</p>
             <div className="mt-3 text-blue-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
               View Details <ChevronRight className="w-4 h-4" />
             </div>
@@ -1123,16 +1123,16 @@ export default function InterviewPrep() {
           {/* Candidate Positioning Card */}
           <button
             onClick={() => openModal('positioning')}
-            className="glass rounded-2xl p-6 text-left hover:bg-white/10 transition-all hover:scale-[1.02] group cursor-pointer"
+            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-emerald-500/20">
                 <Award className="w-6 h-6 text-emerald-400" />
               </div>
-              <h3 className="text-lg font-bold text-white">Candidate Positioning</h3>
+              <h3 className="text-lg font-bold text-theme">Candidate Positioning</h3>
               <span className="text-xs bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded">STAR Builder</span>
             </div>
-            <p className="text-gray-400 text-sm line-clamp-2">Resume focus areas & keyword mapping</p>
+            <p className="text-theme-secondary text-sm line-clamp-2">Resume focus areas & keyword mapping</p>
             <div className="mt-3 text-emerald-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
               View Details <ChevronRight className="w-4 h-4" />
             </div>
@@ -1150,12 +1150,12 @@ export default function InterviewPrep() {
 
             {/* Modal Content */}
             <div
-              className="relative w-full max-w-4xl max-h-[90vh] sm:max-h-[90vh] h-full sm:h-auto overflow-y-auto bg-[#141418] sm:rounded-3xl border-0 sm:border border-white/10 shadow-2xl"
+              className="relative w-full max-w-4xl max-h-[90vh] sm:max-h-[90vh] h-full sm:h-auto overflow-y-auto bg-theme sm:rounded-3xl border-0 sm:border border-theme-subtle shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="sticky top-0 bg-[#141418] p-4 sm:p-6 border-b border-white/10 flex items-center justify-between z-10">
-                <h2 className="text-xl sm:text-2xl font-bold text-white">
+              <div className="sticky top-0 bg-theme p-4 sm:p-6 border-b border-theme-subtle flex items-center justify-between z-10">
+                <h2 className="text-xl sm:text-2xl font-bold text-theme">
                   {activeModal === 'companyProfile' && 'Company Profile'}
                   {activeModal === 'roleAnalysis' && 'Role Analysis'}
                   {activeModal === 'valuesAndCulture' && 'Values & Culture'}
@@ -1169,9 +1169,9 @@ export default function InterviewPrep() {
                 </h2>
                 <button
                   onClick={closeModal}
-                  className="p-2 rounded-lg hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="p-2 rounded-lg hover:bg-theme-glass-10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
-                  <X className="w-6 h-6 text-gray-400" />
+                  <X className="w-6 h-6 text-theme-secondary" />
                 </button>
               </div>
 
@@ -1181,8 +1181,8 @@ export default function InterviewPrep() {
                 {activeModal === 'companyProfile' && (
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-2">{prepData.company_profile.name}</h3>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-4">
+                      <h3 className="text-xl font-bold text-theme mb-2">{prepData.company_profile.name}</h3>
+                      <div className="flex flex-wrap gap-4 text-sm text-theme-secondary mb-4">
                         <span className="flex items-center gap-2">
                           <Briefcase className="w-4 h-4" />
                           {prepData.company_profile.industry}
@@ -1200,14 +1200,14 @@ export default function InterviewPrep() {
                           </span>
                         )}
                       </div>
-                      <p className="text-gray-300 leading-relaxed">{prepData.company_profile.overview_paragraph}</p>
+                      <p className="text-theme-secondary leading-relaxed">{prepData.company_profile.overview_paragraph}</p>
                     </div>
 
                     {/* Notes Section */}
-                    <div className="mt-6 pt-6 border-t border-white/10">
+                    <div className="mt-6 pt-6 border-t border-theme-subtle">
                       <button
                         onClick={() => setShowNotesFor(showNotesFor === 'companyProfile' ? null : 'companyProfile')}
-                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                        className="flex items-center gap-2 text-sm text-theme-secondary hover:text-theme transition-colors"
                       >
                         <FileText size={16} />
                         {notes.companyProfile ? 'Edit Notes' : 'Add Notes'}
@@ -1217,12 +1217,12 @@ export default function InterviewPrep() {
                           value={notes.companyProfile || ''}
                           onChange={(e) => updateNote('companyProfile', e.target.value)}
                           placeholder="Add your notes about the company here..."
-                          className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
+                          className="w-full mt-3 bg-theme-glass-5 border border-theme-muted rounded-lg p-4 text-theme-secondary min-h-[100px]"
                         />
                       )}
                       {notes.companyProfile && showNotesFor !== 'companyProfile' && (
-                        <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
-                          <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.companyProfile}</p>
+                        <div className="mt-3 p-4 bg-theme-glass-5 rounded-lg border border-theme-subtle">
+                          <p className="text-theme-secondary text-sm whitespace-pre-wrap">{notes.companyProfile}</p>
                         </div>
                       )}
                     </div>
@@ -1233,16 +1233,16 @@ export default function InterviewPrep() {
                 {activeModal === 'roleAnalysis' && (
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-lg font-bold text-white mb-2">{prepData.role_analysis.job_title}</h3>
-                      <p className="text-gray-400 text-sm mb-4">{prepData.role_analysis.seniority_level}</p>
+                      <h3 className="text-lg font-bold text-theme mb-2">{prepData.role_analysis.job_title}</h3>
+                      <p className="text-theme-secondary text-sm mb-4">{prepData.role_analysis.seniority_level}</p>
                     </div>
 
                     <div>
-                      <h4 className="text-white font-semibold mb-3">Core Responsibilities</h4>
+                      <h4 className="text-theme font-semibold mb-3">Core Responsibilities</h4>
                       <ul className="space-y-2">
                         {prepData.role_analysis.core_responsibilities.map((resp, idx) => (
-                          <li key={idx} className="text-gray-300 flex gap-2">
-                            <span className="text-white/40">•</span>
+                          <li key={idx} className="text-theme-secondary flex gap-2">
+                            <span className="text-theme-faint">•</span>
                             <span>{resp}</span>
                           </li>
                         ))}
@@ -1251,7 +1251,7 @@ export default function InterviewPrep() {
 
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
-                        <h4 className="text-white font-semibold mb-3">Must-Have Skills</h4>
+                        <h4 className="text-theme font-semibold mb-3">Must-Have Skills</h4>
                         <div className="flex flex-wrap gap-2">
                           {prepData.role_analysis.must_have_skills.map((skill, idx) => (
                             <span key={idx} className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
@@ -1262,7 +1262,7 @@ export default function InterviewPrep() {
                       </div>
 
                       <div>
-                        <h4 className="text-white font-semibold mb-3">Nice-to-Have Skills</h4>
+                        <h4 className="text-theme font-semibold mb-3">Nice-to-Have Skills</h4>
                         <div className="flex flex-wrap gap-2">
                           {prepData.role_analysis.nice_to_have_skills.map((skill, idx) => (
                             <span key={idx} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
@@ -1274,17 +1274,17 @@ export default function InterviewPrep() {
                     </div>
 
                     {prepData.role_analysis.success_signals_6_12_months && (
-                      <div className="bg-white/5 p-4 rounded-lg">
-                        <h4 className="text-white font-semibold mb-2">Success in 6-12 Months</h4>
-                        <p className="text-gray-300 text-sm">{prepData.role_analysis.success_signals_6_12_months}</p>
+                      <div className="bg-theme-glass-5 p-4 rounded-lg">
+                        <h4 className="text-theme font-semibold mb-2">Success in 6-12 Months</h4>
+                        <p className="text-theme-secondary text-sm">{prepData.role_analysis.success_signals_6_12_months}</p>
                       </div>
                     )}
 
                     {/* Notes Section */}
-                    <div className="mt-6 pt-6 border-t border-white/10">
+                    <div className="mt-6 pt-6 border-t border-theme-subtle">
                       <button
                         onClick={() => setShowNotesFor(showNotesFor === 'roleAnalysis' ? null : 'roleAnalysis')}
-                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                        className="flex items-center gap-2 text-sm text-theme-secondary hover:text-theme transition-colors"
                       >
                         <FileText size={16} />
                         {notes.roleAnalysis ? 'Edit Notes' : 'Add Notes'}
@@ -1294,12 +1294,12 @@ export default function InterviewPrep() {
                           value={notes.roleAnalysis || ''}
                           onChange={(e) => updateNote('roleAnalysis', e.target.value)}
                           placeholder="Add your notes about the role requirements..."
-                          className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
+                          className="w-full mt-3 bg-theme-glass-5 border border-theme-muted rounded-lg p-4 text-theme-secondary min-h-[100px]"
                         />
                       )}
                       {notes.roleAnalysis && showNotesFor !== 'roleAnalysis' && (
-                        <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
-                          <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.roleAnalysis}</p>
+                        <div className="mt-3 p-4 bg-theme-glass-5 rounded-lg border border-theme-subtle">
+                          <p className="text-theme-secondary text-sm whitespace-pre-wrap">{notes.roleAnalysis}</p>
                         </div>
                       )}
                     </div>
@@ -1313,25 +1313,25 @@ export default function InterviewPrep() {
                     {companyValues && companyValues.values && companyValues.values.length > 0 && (
                       <div className="mb-6">
                         <div className="flex items-center gap-2 mb-4">
-                          <h4 className="text-white font-semibold">Company Values</h4>
+                          <h4 className="text-theme font-semibold">Company Values</h4>
                           <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Deep Research</span>
                         </div>
                         <div className="space-y-4">
                           {companyValues.values.map((value, idx) => (
                             <div key={idx} className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 p-4 rounded-lg border border-purple-500/20">
-                              <h5 className="text-white font-semibold mb-2 flex items-center gap-2">
+                              <h5 className="text-theme font-semibold mb-2 flex items-center gap-2">
                                 <Star className="w-4 h-4 text-purple-400" />
                                 {value.name}
                               </h5>
-                              <p className="text-gray-300 text-sm mb-3">{value.description}</p>
+                              <p className="text-theme-secondary text-sm mb-3">{value.description}</p>
                               {value.evidence && (
                                 <div className="mb-3 pl-3 border-l-2 border-purple-500/30">
-                                  <p className="text-gray-400 text-xs italic">{value.evidence}</p>
+                                  <p className="text-theme-secondary text-xs italic">{value.evidence}</p>
                                 </div>
                               )}
                               {value.discussion_tips && value.discussion_tips.length > 0 && (
                                 <div>
-                                  <p className="text-xs text-gray-500 uppercase mb-2">How to Discuss in Interview:</p>
+                                  <p className="text-xs text-theme-tertiary uppercase mb-2">How to Discuss in Interview:</p>
                                   <ul className="space-y-1">
                                     {value.discussion_tips.map((tip, tipIdx) => (
                                       <li key={tipIdx} className="text-green-300 text-sm flex gap-2">
@@ -1349,10 +1349,10 @@ export default function InterviewPrep() {
                         {/* Culture Keywords */}
                         {companyValues.culture_keywords && companyValues.culture_keywords.length > 0 && (
                           <div className="mt-4">
-                            <p className="text-xs text-gray-500 uppercase mb-2">Culture Keywords to Use:</p>
+                            <p className="text-xs text-theme-tertiary uppercase mb-2">Culture Keywords to Use:</p>
                             <div className="flex flex-wrap gap-2">
                               {companyValues.culture_keywords.map((keyword, idx) => (
-                                <span key={idx} className="px-3 py-1 bg-white/10 text-gray-300 rounded-full text-sm">
+                                <span key={idx} className="px-3 py-1 bg-theme-glass-10 text-theme-secondary rounded-full text-sm">
                                   {keyword}
                                 </span>
                               ))}
@@ -1366,7 +1366,7 @@ export default function InterviewPrep() {
                             <p className="text-blue-400 font-medium text-sm mb-2">How to Demonstrate These Values:</p>
                             <ul className="space-y-2">
                               {companyValues.how_to_demonstrate.map((item, idx) => (
-                                <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                                <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                                   <span className="text-blue-400">→</span>
                                   <span>{item}</span>
                                 </li>
@@ -1380,9 +1380,9 @@ export default function InterviewPrep() {
                     {/* Original Stated Values */}
                     <div className="space-y-4">
                       {prepData.values_and_culture.stated_values.map((value, idx) => (
-                        <div key={idx} className="bg-white/5 p-4 rounded-lg">
-                          <h4 className="text-white font-semibold mb-2">{value.name}</h4>
-                          <p className="text-gray-300 text-sm mb-2">{value.source_snippet}</p>
+                        <div key={idx} className="bg-theme-glass-5 p-4 rounded-lg">
+                          <h4 className="text-theme font-semibold mb-2">{value.name}</h4>
+                          <p className="text-theme-secondary text-sm mb-2">{value.source_snippet}</p>
                           {value.url && (
                             <a
                               href={value.url}
@@ -1399,11 +1399,11 @@ export default function InterviewPrep() {
 
                     {prepData.values_and_culture.practical_implications.length > 0 && (
                       <div>
-                        <h4 className="text-white font-semibold mb-3">Practical Implications</h4>
+                        <h4 className="text-theme font-semibold mb-3">Practical Implications</h4>
                         <ul className="space-y-2">
                           {prepData.values_and_culture.practical_implications.map((impl, idx) => (
-                            <li key={idx} className="text-gray-300 flex gap-2 text-sm">
-                              <span className="text-white/40">→</span>
+                            <li key={idx} className="text-theme-secondary flex gap-2 text-sm">
+                              <span className="text-theme-faint">→</span>
                               <span>{impl}</span>
                             </li>
                           ))}
@@ -1412,10 +1412,10 @@ export default function InterviewPrep() {
                     )}
 
                     {/* Notes Section */}
-                    <div className="mt-6 pt-6 border-t border-white/10">
+                    <div className="mt-6 pt-6 border-t border-theme-subtle">
                       <button
                         onClick={() => setShowNotesFor(showNotesFor === 'valuesAndCulture' ? null : 'valuesAndCulture')}
-                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                        className="flex items-center gap-2 text-sm text-theme-secondary hover:text-theme transition-colors"
                       >
                         <FileText size={16} />
                         {notes.valuesAndCulture ? 'Edit Notes' : 'Add Notes'}
@@ -1425,12 +1425,12 @@ export default function InterviewPrep() {
                           value={notes.valuesAndCulture || ''}
                           onChange={(e) => updateNote('valuesAndCulture', e.target.value)}
                           placeholder="Add your notes about company values and culture..."
-                          className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
+                          className="w-full mt-3 bg-theme-glass-5 border border-theme-muted rounded-lg p-4 text-theme-secondary min-h-[100px]"
                         />
                       )}
                       {notes.valuesAndCulture && showNotesFor !== 'valuesAndCulture' && (
-                        <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
-                          <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.valuesAndCulture}</p>
+                        <div className="mt-3 p-4 bg-theme-glass-5 rounded-lg border border-theme-subtle">
+                          <p className="text-theme-secondary text-sm whitespace-pre-wrap">{notes.valuesAndCulture}</p>
                         </div>
                       )}
                     </div>
@@ -1443,8 +1443,8 @@ export default function InterviewPrep() {
                     {/* Loading State */}
                     {loadingRealData && (
                       <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 text-white animate-spin mr-2" />
-                        <span className="text-gray-300">Fetching latest company data...</span>
+                        <Loader2 className="w-6 h-6 text-theme animate-spin mr-2" />
+                        <span className="text-theme-secondary">Fetching latest company data...</span>
                       </div>
                     )}
 
@@ -1452,22 +1452,22 @@ export default function InterviewPrep() {
                     {companyResearch && companyResearch.strategic_initiatives && companyResearch.strategic_initiatives.length > 0 && (
                       <div className="mb-6">
                         <div className="flex items-center gap-2 mb-3">
-                          <h4 className="text-white font-semibold">Strategic Initiatives</h4>
+                          <h4 className="text-theme font-semibold">Strategic Initiatives</h4>
                           <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
                         </div>
                         <div className="space-y-4">
                           {companyResearch.strategic_initiatives.map((initiative, idx) => (
-                            <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                            <div key={idx} className="bg-theme-glass-5 p-4 rounded-lg border border-theme-subtle">
                               <div className="flex justify-between items-start mb-2">
-                                <h5 className="text-white font-medium">{initiative.title}</h5>
-                                {initiative.date && <span className="text-gray-500 text-sm">{initiative.date}</span>}
+                                <h5 className="text-theme font-medium">{initiative.title}</h5>
+                                {initiative.date && <span className="text-theme-tertiary text-sm">{initiative.date}</span>}
                               </div>
-                              <p className="text-gray-300 text-sm mb-2">{initiative.description}</p>
+                              <p className="text-theme-secondary text-sm mb-2">{initiative.description}</p>
                               {initiative.relevance_to_role && (
                                 <p className="text-blue-300 text-sm italic mb-2">→ {initiative.relevance_to_role}</p>
                               )}
                               <div className="flex items-center gap-2 mt-2">
-                                <span className="text-gray-500 text-xs">Source: {initiative.source}</span>
+                                <span className="text-theme-tertiary text-xs">Source: {initiative.source}</span>
                                 {initiative.url && (
                                   <a
                                     href={initiative.url}
@@ -1488,11 +1488,11 @@ export default function InterviewPrep() {
                     {/* Recent Developments */}
                     {companyResearch && companyResearch.recent_developments && companyResearch.recent_developments.length > 0 && (
                       <div className="mb-6">
-                        <h4 className="text-white font-semibold mb-3">Recent Developments</h4>
+                        <h4 className="text-theme font-semibold mb-3">Recent Developments</h4>
                         <ul className="space-y-2">
                           {companyResearch.recent_developments.map((dev, idx) => (
-                            <li key={idx} className="text-gray-300 flex gap-2 text-sm">
-                              <span className="text-white/40">→</span>
+                            <li key={idx} className="text-theme-secondary flex gap-2 text-sm">
+                              <span className="text-theme-faint">→</span>
                               <span>{dev}</span>
                             </li>
                           ))}
@@ -1503,7 +1503,7 @@ export default function InterviewPrep() {
                     {/* Technology Focus */}
                     {companyResearch && companyResearch.technology_focus && companyResearch.technology_focus.length > 0 && (
                       <div className="mb-6">
-                        <h4 className="text-white font-semibold mb-3">Technology Focus Areas</h4>
+                        <h4 className="text-theme font-semibold mb-3">Technology Focus Areas</h4>
                         <div className="flex flex-wrap gap-2">
                           {companyResearch.technology_focus.map((tech, idx) => (
                             <span key={idx} className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">
@@ -1518,22 +1518,22 @@ export default function InterviewPrep() {
                     {companyNews && companyNews.news_articles && companyNews.news_articles.length > 0 && (
                       <div className="mb-6">
                         <div className="flex items-center gap-2 mb-3">
-                          <h4 className="text-white font-semibold">Recent News ({companyNews.date_range})</h4>
+                          <h4 className="text-theme font-semibold">Recent News ({companyNews.date_range})</h4>
                           <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded">Real Data</span>
                         </div>
                         <div className="space-y-3">
                           {companyNews.news_articles.slice(0, 10).map((article, idx) => (
-                            <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                            <div key={idx} className="bg-theme-glass-5 p-4 rounded-lg border border-theme-subtle">
                               <div className="flex justify-between items-start mb-2">
-                                <h5 className="text-white font-medium">{article.title}</h5>
-                                <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{article.published_date}</span>
+                                <h5 className="text-theme font-medium">{article.title}</h5>
+                                <span className="text-theme-tertiary text-sm whitespace-nowrap ml-2">{article.published_date}</span>
                               </div>
-                              <p className="text-gray-300 text-sm mb-2">{article.summary}</p>
+                              <p className="text-theme-secondary text-sm mb-2">{article.summary}</p>
                               {article.impact_summary && (
                                 <p className="text-blue-300 text-sm italic mb-2">→ {article.impact_summary}</p>
                               )}
                               <div className="flex items-center gap-4 mt-2">
-                                <span className="text-gray-500 text-xs">Source: {article.source}</span>
+                                <span className="text-theme-tertiary text-xs">Source: {article.source}</span>
                                 {article.category && (
                                   <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded">{article.category}</span>
                                 )}
@@ -1563,23 +1563,23 @@ export default function InterviewPrep() {
                         {prepData.strategy_and_news.recent_events.length > 0 && (
                           <div className="mb-6">
                             <div className="flex items-center gap-2 mb-3">
-                              <h4 className="text-white font-semibold">Recent Events</h4>
-                              <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
+                              <h4 className="text-theme font-semibold">Recent Events</h4>
+                              <span className="text-xs text-theme-secondary bg-theme-glass-10 px-2 py-0.5 rounded">AI Analysis</span>
                             </div>
                             <div className="space-y-3">
                               {prepData.strategy_and_news.recent_events.map((event, idx) => (
-                                <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                                <div key={idx} className="bg-theme-glass-5 p-4 rounded-lg border border-theme-subtle">
                                   <div className="flex justify-between items-start mb-2">
-                                    <h5 className="text-white font-medium">{event.title}</h5>
-                                    {event.date && <span className="text-gray-500 text-sm whitespace-nowrap ml-2">{event.date}</span>}
+                                    <h5 className="text-theme font-medium">{event.title}</h5>
+                                    {event.date && <span className="text-theme-tertiary text-sm whitespace-nowrap ml-2">{event.date}</span>}
                                   </div>
                                   {event.summary && (
-                                    <p className="text-gray-300 text-sm mb-2">{event.summary}</p>
+                                    <p className="text-theme-secondary text-sm mb-2">{event.summary}</p>
                                   )}
                                   <p className="text-blue-300 text-sm italic mb-2">→ {event.impact_summary}</p>
                                   <div className="flex items-center gap-4 mt-2">
                                     {event.source && (
-                                      <span className="text-gray-500 text-xs">Source: {event.source}</span>
+                                      <span className="text-theme-tertiary text-xs">Source: {event.source}</span>
                                     )}
                                     {event.url && (
                                       <a
@@ -1601,14 +1601,14 @@ export default function InterviewPrep() {
                         {prepData.strategy_and_news.strategic_themes.length > 0 && (
                           <div className="mb-6">
                             <div className="flex items-center gap-2 mb-3">
-                              <h4 className="text-white font-semibold">Strategic Themes</h4>
-                              <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
+                              <h4 className="text-theme font-semibold">Strategic Themes</h4>
+                              <span className="text-xs text-theme-secondary bg-theme-glass-10 px-2 py-0.5 rounded">AI Analysis</span>
                             </div>
                             <div className="space-y-3">
                               {prepData.strategy_and_news.strategic_themes.map((theme, idx) => (
-                                <div key={idx} className="bg-white/5 p-4 rounded-lg">
-                                  <h5 className="text-white font-medium mb-2">{theme.theme}</h5>
-                                  <p className="text-gray-300 text-sm">{theme.rationale}</p>
+                                <div key={idx} className="bg-theme-glass-5 p-4 rounded-lg">
+                                  <h5 className="text-theme font-medium mb-2">{theme.theme}</h5>
+                                  <p className="text-theme-secondary text-sm">{theme.rationale}</p>
                                 </div>
                               ))}
                             </div>
@@ -1619,16 +1619,16 @@ export default function InterviewPrep() {
                         {prepData.strategy_and_news.technology_focus && prepData.strategy_and_news.technology_focus.length > 0 && (
                           <div className="mb-6">
                             <div className="flex items-center gap-2 mb-3">
-                              <h4 className="text-white font-semibold">Technology Focus Areas</h4>
-                              <span className="text-xs text-gray-400 bg-gray-500/20 px-2 py-0.5 rounded">AI Analysis</span>
+                              <h4 className="text-theme font-semibold">Technology Focus Areas</h4>
+                              <span className="text-xs text-theme-secondary bg-theme-glass-10 px-2 py-0.5 rounded">AI Analysis</span>
                             </div>
                             <div className="space-y-3">
                               {prepData.strategy_and_news.technology_focus.map((tech, idx) => (
-                                <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                                <div key={idx} className="bg-theme-glass-5 p-4 rounded-lg border border-theme-subtle">
                                   <h5 className="text-purple-300 font-medium mb-2">{tech.technology}</h5>
-                                  <p className="text-gray-300 text-sm mb-2">{tech.description}</p>
+                                  <p className="text-theme-secondary text-sm mb-2">{tech.description}</p>
                                   <p className="text-blue-300 text-sm italic">
-                                    <span className="text-gray-500">Relevance to your role:</span> {tech.relevance_to_role}
+                                    <span className="text-theme-tertiary">Relevance to your role:</span> {tech.relevance_to_role}
                                   </p>
                                 </div>
                               ))}
@@ -1641,12 +1641,12 @@ export default function InterviewPrep() {
                     {/* Sources Consulted */}
                     {companyResearch && companyResearch.sources_consulted && companyResearch.sources_consulted.length > 0 && (
                       <div className="mb-6">
-                        <h4 className="text-white font-semibold mb-3">Sources Consulted</h4>
+                        <h4 className="text-theme font-semibold mb-3">Sources Consulted</h4>
                         <div className="space-y-2">
                           {companyResearch.sources_consulted.map((source, idx) => (
                             <div key={idx} className="flex items-center gap-2 text-sm">
-                              <FileText className="w-4 h-4 text-gray-400" />
-                              <span className="text-gray-400">{source.type.replace('_', ' ').toUpperCase()}:</span>
+                              <FileText className="w-4 h-4 text-theme-secondary" />
+                              <span className="text-theme-secondary">{source.type.replace('_', ' ').toUpperCase()}:</span>
                               <a
                                 href={source.url}
                                 target="_blank"
@@ -1662,10 +1662,10 @@ export default function InterviewPrep() {
                     )}
 
                     {/* Notes Section */}
-                    <div className="mt-6 pt-6 border-t border-white/10">
+                    <div className="mt-6 pt-6 border-t border-theme-subtle">
                       <button
                         onClick={() => setShowNotesFor(showNotesFor === 'strategy' ? null : 'strategy')}
-                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                        className="flex items-center gap-2 text-sm text-theme-secondary hover:text-theme transition-colors"
                       >
                         <FileText size={16} />
                         {notes.strategy ? 'Edit Notes' : 'Add Notes'}
@@ -1675,12 +1675,12 @@ export default function InterviewPrep() {
                           value={notes.strategy || ''}
                           onChange={(e) => updateNote('strategy', e.target.value)}
                           placeholder="Add your notes about company strategy and news..."
-                          className="w-full mt-3 bg-white/5 border border-white/20 rounded-lg p-4 text-gray-300 min-h-[100px]"
+                          className="w-full mt-3 bg-theme-glass-5 border border-theme-muted rounded-lg p-4 text-theme-secondary min-h-[100px]"
                         />
                       )}
                       {notes.strategy && showNotesFor !== 'strategy' && (
-                        <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
-                          <p className="text-gray-300 text-sm whitespace-pre-wrap">{notes.strategy}</p>
+                        <div className="mt-3 p-4 bg-theme-glass-5 rounded-lg border border-theme-subtle">
+                          <p className="text-theme-secondary text-sm whitespace-pre-wrap">{notes.strategy}</p>
                         </div>
                       )}
                     </div>
@@ -1692,7 +1692,7 @@ export default function InterviewPrep() {
                   <div className="space-y-6">
                     {prepData.interview_preparation.research_tasks.length > 0 && (
                       <div>
-                        <h4 className="text-white font-semibold mb-3">Research Tasks</h4>
+                        <h4 className="text-theme font-semibold mb-3">Research Tasks</h4>
                         <ul className="space-y-2">
                           {prepData.interview_preparation.research_tasks.map((task, idx) => {
                             const itemId = `research-${idx}`
@@ -1706,10 +1706,10 @@ export default function InterviewPrep() {
                                   {isChecked ? (
                                     <CheckSquare className="w-5 h-5 text-green-500" />
                                   ) : (
-                                    <Square className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                                    <Square className="w-5 h-5 text-theme-secondary group-hover:text-theme transition-colors" />
                                   )}
                                 </button>
-                                <span className={`text-sm ${isChecked ? 'text-gray-500 line-through' : 'text-gray-300'}`}>
+                                <span className={`text-sm ${isChecked ? 'text-theme-tertiary line-through' : 'text-theme-secondary'}`}>
                                   {task}
                                 </span>
                               </li>
@@ -1721,7 +1721,7 @@ export default function InterviewPrep() {
 
                     {prepData.interview_preparation.day_of_checklist.length > 0 && (
                       <div>
-                        <h4 className="text-white font-semibold mb-3">Day-Of Checklist</h4>
+                        <h4 className="text-theme font-semibold mb-3">Day-Of Checklist</h4>
                         <ul className="space-y-2">
                           {prepData.interview_preparation.day_of_checklist.map((item, idx) => {
                             const itemId = `checklist-${idx}`
@@ -1735,10 +1735,10 @@ export default function InterviewPrep() {
                                   {isChecked ? (
                                     <CheckSquare className="w-5 h-5 text-green-500" />
                                   ) : (
-                                    <Square className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                                    <Square className="w-5 h-5 text-theme-secondary group-hover:text-theme transition-colors" />
                                   )}
                                 </button>
-                                <span className={`text-sm ${isChecked ? 'text-gray-500 line-through' : 'text-gray-300'}`}>
+                                <span className={`text-sm ${isChecked ? 'text-theme-tertiary line-through' : 'text-theme-secondary'}`}>
                                   {item}
                                 </span>
                               </li>
@@ -1757,11 +1757,11 @@ export default function InterviewPrep() {
                       {Object.entries(prepData.questions_to_ask_interviewer).map(([category, questions]) => (
                         questions.length > 0 && (
                           <div key={category}>
-                            <h4 className="text-white font-semibold mb-2 capitalize">{category}</h4>
+                            <h4 className="text-theme font-semibold mb-2 capitalize">{category}</h4>
                             <ul className="space-y-1">
                               {questions.map((q, idx) => (
-                                <li key={idx} className="text-gray-300 text-sm flex gap-2">
-                                  <span className="text-white/40">?</span>
+                                <li key={idx} className="text-theme-secondary text-sm flex gap-2">
+                                  <span className="text-theme-faint">?</span>
                                   <span>{q}</span>
                                 </li>
                               ))}
@@ -1773,13 +1773,13 @@ export default function InterviewPrep() {
                       {/* Custom Questions */}
                       {customQuestions.length > 0 && (
                         <div>
-                          <h4 className="text-white font-semibold mb-2">Your Questions</h4>
+                          <h4 className="text-theme font-semibold mb-2">Your Questions</h4>
                           <ul className="space-y-2">
                             {customQuestions.map((q) => (
-                              <li key={q.id} className="flex items-start justify-between gap-2 bg-white/5 p-3 rounded-lg">
+                              <li key={q.id} className="flex items-start justify-between gap-2 bg-theme-glass-5 p-3 rounded-lg">
                                 <div className="flex gap-2 flex-1">
-                                  <span className="text-white/40">?</span>
-                                  <span className="text-gray-300 text-sm">{q.question}</span>
+                                  <span className="text-theme-faint">?</span>
+                                  <span className="text-theme-secondary text-sm">{q.question}</span>
                                 </div>
                                 <button
                                   onClick={() => deleteCustomQuestion(q.id)}
@@ -1798,30 +1798,30 @@ export default function InterviewPrep() {
                     {!showAddQuestion ? (
                       <button
                         onClick={() => setShowAddQuestion(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-white text-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-theme-glass-5 hover:bg-theme-glass-10 rounded-lg transition-colors text-theme text-sm"
                       >
                         <Plus size={16} />
                         Add Your Question
                       </button>
                     ) : (
-                      <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                      <div className="p-4 bg-theme-glass-5 rounded-xl border border-theme-subtle">
                         <input
                           type="text"
                           value={newQuestion}
                           onChange={(e) => setNewQuestion(e.target.value)}
                           placeholder="What's your question?"
-                          className="w-full bg-white/5 border border-white/20 rounded-lg p-3 mb-3 text-white"
+                          className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 mb-3 text-theme"
                         />
                         <select
                           value={newQuestionCategory}
                           onChange={(e) => setNewQuestionCategory(e.target.value)}
-                          className="w-full bg-[#1a1a2e] border border-white/20 rounded-lg p-3 mb-3 text-white"
+                          className="w-full bg-theme-secondary border border-theme-muted rounded-lg p-3 mb-3 text-theme"
                         >
-                          <option value="product" className="bg-[#1a1a2e] text-white">Product</option>
-                          <option value="team" className="bg-[#1a1a2e] text-white">Team</option>
-                          <option value="culture" className="bg-[#1a1a2e] text-white">Culture</option>
-                          <option value="performance" className="bg-[#1a1a2e] text-white">Performance</option>
-                          <option value="strategy" className="bg-[#1a1a2e] text-white">Strategy</option>
+                          <option value="product" className="bg-theme-secondary text-theme">Product</option>
+                          <option value="team" className="bg-theme-secondary text-theme">Team</option>
+                          <option value="culture" className="bg-theme-secondary text-theme">Culture</option>
+                          <option value="performance" className="bg-theme-secondary text-theme">Performance</option>
+                          <option value="strategy" className="bg-theme-secondary text-theme">Strategy</option>
                         </select>
                         <div className="flex gap-2">
                           <button
@@ -1836,7 +1836,7 @@ export default function InterviewPrep() {
                               setShowAddQuestion(false)
                               setNewQuestion('')
                             }}
-                            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-400 rounded-lg transition-colors text-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-theme-glass-5 hover:bg-theme-glass-10 text-theme-secondary rounded-lg transition-colors text-sm"
                           >
                             <X size={16} />
                             Cancel
@@ -1884,7 +1884,7 @@ export default function InterviewPrep() {
                   <div className="space-y-6">
                     {prepData.candidate_positioning.resume_focus_areas.length > 0 && (
                       <div>
-                        <h4 className="text-white font-semibold mb-3">Resume Focus Areas</h4>
+                        <h4 className="text-theme font-semibold mb-3">Resume Focus Areas</h4>
                         <div className="flex flex-wrap gap-2">
                           {prepData.candidate_positioning.resume_focus_areas.map((area, idx) => (
                             <span key={idx} className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm">
@@ -1925,14 +1925,14 @@ export default function InterviewPrep() {
 
                     {prepData.candidate_positioning.keyword_map.length > 0 && (
                       <div>
-                        <h4 className="text-white font-semibold mb-3">Keyword Mapping</h4>
+                        <h4 className="text-theme font-semibold mb-3">Keyword Mapping</h4>
                         <div className="space-y-2">
                           {prepData.candidate_positioning.keyword_map.map((mapping, idx) => (
                             <div key={idx} className="flex items-start gap-3 text-sm">
                               <span className="text-blue-400 font-medium">{mapping.company_term}</span>
-                              <span className="text-gray-500">→</span>
+                              <span className="text-theme-tertiary">→</span>
                               <span className="text-green-400">{mapping.candidate_equivalent}</span>
-                              <span className="text-gray-500 flex-1">({mapping.context})</span>
+                              <span className="text-theme-tertiary flex-1">({mapping.context})</span>
                             </div>
                           ))}
                         </div>

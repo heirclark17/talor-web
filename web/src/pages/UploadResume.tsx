@@ -195,8 +195,8 @@ export default function UploadResume() {
     <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-4xl mx-auto">
         <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">Upload Resume</h1>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-400 mb-6 sm:mb-8 px-2">Upload a new resume to start tailoring for your next job</p>
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-theme mb-4 sm:mb-6">Upload Resume</h1>
+          <p className="text-base sm:text-lg lg:text-xl text-theme-secondary mb-6 sm:mb-8 px-2">Upload a new resume to start tailoring for your next job</p>
 
           {/* Button to use existing resume */}
           <button
@@ -214,24 +214,24 @@ export default function UploadResume() {
           onClick={() => !uploading && fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 text-center transition-all cursor-pointer ${
             uploading
-              ? 'border-white/40 bg-white/5 cursor-wait'
+              ? 'border-theme-muted bg-theme-glass-5 cursor-wait'
               : uploadSuccess
               ? 'border-green-400/50 bg-green-500/10 cursor-pointer'
               : error
               ? 'border-red-400/50 bg-red-500/10 cursor-pointer'
-              : 'border-white/20 hover:border-white/40 hover:bg-white/5'
+              : 'border-theme-muted hover:border-theme-muted hover:bg-theme-glass-5'
           }`}
         >
           {uploading ? (
             <>
-              <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-white mb-3 sm:mb-4 animate-spin" />
-              <p className="text-base sm:text-lg text-white mb-2 font-semibold">Uploading and parsing resume...</p>
+              <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-theme mb-3 sm:mb-4 animate-spin" />
+              <p className="text-base sm:text-lg text-theme mb-2 font-semibold">Uploading and parsing resume...</p>
             </>
           ) : uploadSuccess ? (
             <>
               <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-green-500 mb-3 sm:mb-4" />
-              <p className="text-base sm:text-lg text-white mb-2 font-semibold">Resume uploaded successfully!</p>
-              <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">Parsed {parsedResume?.filename}</p>
+              <p className="text-base sm:text-lg text-theme mb-2 font-semibold">Resume uploaded successfully!</p>
+              <p className="text-xs sm:text-sm text-theme-secondary mb-3 sm:mb-4">Parsed {parsedResume?.filename}</p>
             </>
           ) : error ? (
             <>
@@ -241,9 +241,9 @@ export default function UploadResume() {
             </>
           ) : (
             <>
-              <Upload className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-white mb-3 sm:mb-4" />
-              <p className="text-base sm:text-lg text-white mb-2 font-semibold">Click to select your resume</p>
-              <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">Supports .docx and .pdf files (max 10MB)</p>
+              <Upload className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-theme mb-3 sm:mb-4" />
+              <p className="text-base sm:text-lg text-theme mb-2 font-semibold">Click to select your resume</p>
+              <p className="text-xs sm:text-sm text-theme-secondary mb-3 sm:mb-4">Supports .docx and .pdf files (max 10MB)</p>
             </>
           )}
 
@@ -261,7 +261,7 @@ export default function UploadResume() {
               fileInputRef.current?.click()
             }}
             disabled={uploading}
-            className={uploading ? 'px-8 py-3 rounded-full font-semibold bg-white/10 text-gray-500 cursor-not-allowed' : 'btn-primary'}
+            className={uploading ? 'px-8 py-3 rounded-full font-semibold bg-theme-glass-10 text-theme-tertiary cursor-not-allowed' : 'btn-primary'}
           >
             {uploading ? 'Uploading...' : uploadSuccess ? 'Upload Another Resume' : 'Select File'}
           </button>
@@ -273,24 +273,24 @@ export default function UploadResume() {
         <div className="mt-16 space-y-6">
           {/* Header */}
           <div className="flex items-center gap-3 mb-8">
-            <FileText className="w-8 h-8 text-white" />
+            <FileText className="w-8 h-8 text-theme" />
             <div>
-              <h2 className="text-2xl font-bold text-white">Parsed Resume</h2>
-              <p className="text-sm text-gray-400">Resume ID: {parsedResume.resume_id}</p>
+              <h2 className="text-2xl font-bold text-theme">Parsed Resume</h2>
+              <p className="text-sm text-theme-secondary">Resume ID: {parsedResume.resume_id}</p>
             </div>
           </div>
 
           {/* Contact Information Card - ATS CRITICAL */}
           <div className="glass rounded-xl p-6 border-2 border-blue-500/30">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <h3 className="text-xl font-bold text-theme mb-4 flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-blue-400" />
               Contact Information (ATS Required)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {parsedResume.parsed_data.name ? (
                 <div>
-                  <p className="text-sm text-gray-400">Name</p>
-                  <p className="text-white font-semibold">{parsedResume.parsed_data.name}</p>
+                  <p className="text-sm text-theme-secondary">Name</p>
+                  <p className="text-theme font-semibold">{parsedResume.parsed_data.name}</p>
                 </div>
               ) : (
                 <div className="col-span-2 bg-red-500/10 border border-red-500/30 rounded p-3">
@@ -303,8 +303,8 @@ export default function UploadResume() {
 
               {parsedResume.parsed_data.email ? (
                 <div>
-                  <p className="text-sm text-gray-400">Email</p>
-                  <p className="text-white">{parsedResume.parsed_data.email}</p>
+                  <p className="text-sm text-theme-secondary">Email</p>
+                  <p className="text-theme">{parsedResume.parsed_data.email}</p>
                 </div>
               ) : (
                 <div className="bg-red-500/10 border border-red-500/30 rounded p-3">
@@ -317,8 +317,8 @@ export default function UploadResume() {
 
               {parsedResume.parsed_data.phone ? (
                 <div>
-                  <p className="text-sm text-gray-400">Phone</p>
-                  <p className="text-white">{parsedResume.parsed_data.phone}</p>
+                  <p className="text-sm text-theme-secondary">Phone</p>
+                  <p className="text-theme">{parsedResume.parsed_data.phone}</p>
                 </div>
               ) : (
                 <div className="bg-red-500/10 border border-red-500/30 rounded p-3">
@@ -331,15 +331,15 @@ export default function UploadResume() {
 
               {parsedResume.parsed_data.linkedin && (
                 <div>
-                  <p className="text-sm text-gray-400">LinkedIn</p>
-                  <p className="text-white text-sm truncate">{parsedResume.parsed_data.linkedin}</p>
+                  <p className="text-sm text-theme-secondary">LinkedIn</p>
+                  <p className="text-theme text-sm truncate">{parsedResume.parsed_data.linkedin}</p>
                 </div>
               )}
 
               {parsedResume.parsed_data.location && (
                 <div>
-                  <p className="text-sm text-gray-400">Location</p>
-                  <p className="text-white">{parsedResume.parsed_data.location}</p>
+                  <p className="text-sm text-theme-secondary">Location</p>
+                  <p className="text-theme">{parsedResume.parsed_data.location}</p>
                 </div>
               )}
             </div>
@@ -348,20 +348,20 @@ export default function UploadResume() {
           {/* Summary Card */}
           {parsedResume.parsed_data.summary && (
             <div className="glass rounded-xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Professional Summary</h3>
-              <p className="text-gray-400 leading-relaxed">{parsedResume.parsed_data.summary}</p>
+              <h3 className="text-xl font-bold text-theme mb-4">Professional Summary</h3>
+              <p className="text-theme-secondary leading-relaxed">{parsedResume.parsed_data.summary}</p>
             </div>
           )}
 
           {/* Skills Card */}
           {parsedResume.parsed_data.skills && parsedResume.parsed_data.skills.length > 0 && (
             <div className="glass rounded-xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Skills</h3>
+              <h3 className="text-xl font-bold text-theme mb-4">Skills</h3>
               <div className="flex flex-wrap gap-2">
                 {parsedResume.parsed_data.skills.map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 bg-white/10 text-white rounded-full text-sm font-medium"
+                    className="px-3 py-1 bg-theme-glass-10 text-theme rounded-full text-sm font-medium"
                   >
                     {skill}
                   </span>
@@ -373,14 +373,14 @@ export default function UploadResume() {
           {/* Experience Section - Each job in separate card */}
           {parsedResume.parsed_data.experience && parsedResume.parsed_data.experience.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-xl font-bold text-white">Professional Experience</h3>
+              <h3 className="text-xl font-bold text-theme">Professional Experience</h3>
               {parsedResume.parsed_data.experience.map((job, idx) => (
                 <div key={idx} className="glass rounded-xl p-6">
-                  <h4 className="font-semibold text-white mb-1">
+                  <h4 className="font-semibold text-theme mb-1">
                     {job.header || job.title || job.position || job.role || job.job_title || job.company || 'Position'}
                   </h4>
                   {(job.location || job.dates || job.date_range || job.duration) && (
-                    <p className="text-sm text-gray-400 italic mb-3">
+                    <p className="text-sm text-theme-secondary italic mb-3">
                       {(job.location || '') && (job.dates || job.date_range || job.duration)
                         ? `${job.location} | ${job.dates || job.date_range || job.duration}`
                         : (job.location || job.dates || job.date_range || job.duration)}
@@ -389,15 +389,15 @@ export default function UploadResume() {
                   {job.bullets && Array.isArray(job.bullets) && job.bullets.length > 0 ? (
                     <ul className="list-disc list-inside space-y-1">
                       {job.bullets.map((bullet, bulletIdx) => (
-                        <li key={bulletIdx} className="text-gray-400 text-sm">
+                        <li key={bulletIdx} className="text-theme-secondary text-sm">
                           {bullet}
                         </li>
                       ))}
                     </ul>
                   ) : job.description ? (
-                    <p className="text-gray-400 text-sm">{job.description}</p>
+                    <p className="text-theme-secondary text-sm">{job.description}</p>
                   ) : (
-                    <p className="text-gray-500 text-sm italic">No details available</p>
+                    <p className="text-theme-tertiary text-sm italic">No details available</p>
                   )}
                 </div>
               ))}
@@ -407,16 +407,16 @@ export default function UploadResume() {
           {/* Education Card */}
           {parsedResume.parsed_data.education && (
             <div className="glass rounded-xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Education</h3>
-              <p className="text-gray-400">{parsedResume.parsed_data.education}</p>
+              <h3 className="text-xl font-bold text-theme mb-4">Education</h3>
+              <p className="text-theme-secondary">{parsedResume.parsed_data.education}</p>
             </div>
           )}
 
           {/* Certifications Card */}
           {parsedResume.parsed_data.certifications && (
             <div className="glass rounded-xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Certifications</h3>
-              <p className="text-gray-400">{parsedResume.parsed_data.certifications}</p>
+              <h3 className="text-xl font-bold text-theme mb-4">Certifications</h3>
+              <p className="text-theme-secondary">{parsedResume.parsed_data.certifications}</p>
             </div>
           )}
 

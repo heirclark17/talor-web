@@ -70,10 +70,10 @@ export default class ErrorBoundary extends Component<Props, State> {
             </div>
 
             {/* Error Message */}
-            <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-4">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-theme mb-4">
               Something went wrong
             </h1>
-            <p className="text-gray-400 mb-8 leading-relaxed">
+            <p className="text-theme-secondary mb-8 leading-relaxed">
               We're sorry, but something unexpected happened. Please try refreshing the page or going back to the home page.
             </p>
 
@@ -89,7 +89,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               </button>
               <button
                 onClick={this.handleGoHome}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-xl transition-colors min-h-[44px]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-theme-glass-10 hover:bg-theme-glass-20 text-theme font-medium rounded-xl transition-colors min-h-[44px]"
                 aria-label="Go to home page"
               >
                 <Home className="w-5 h-5" aria-hidden="true" />
@@ -99,7 +99,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
             {/* Dev-only Error Details */}
             {isDev && this.state.error && (
-              <div className="text-left bg-white/5 border border-white/10 rounded-xl p-4 mt-6">
+              <div className="text-left bg-theme-glass-5 border border-theme-subtle rounded-xl p-4 mt-6">
                 <div className="flex items-center gap-2 mb-3">
                   <Bug className="w-4 h-4 text-red-400" aria-hidden="true" />
                   <span className="text-sm font-semibold text-red-400">
@@ -110,8 +110,8 @@ export default class ErrorBoundary extends Component<Props, State> {
                 <div className="space-y-3">
                   {/* Error Name */}
                   <div>
-                    <span className="text-xs text-gray-500 uppercase tracking-wide">Error</span>
-                    <p className="text-sm text-white font-mono mt-1 break-all">
+                    <span className="text-xs text-theme-tertiary uppercase tracking-wide">Error</span>
+                    <p className="text-sm text-theme font-mono mt-1 break-all">
                       {this.state.error.name}: {this.state.error.message}
                     </p>
                   </div>
@@ -119,8 +119,8 @@ export default class ErrorBoundary extends Component<Props, State> {
                   {/* Stack Trace */}
                   {this.state.error.stack && (
                     <div>
-                      <span className="text-xs text-gray-500 uppercase tracking-wide">Stack Trace</span>
-                      <pre className="text-xs text-gray-400 font-mono mt-1 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto bg-black/30 rounded p-2">
+                      <span className="text-xs text-theme-tertiary uppercase tracking-wide">Stack Trace</span>
+                      <pre className="text-xs text-theme-secondary font-mono mt-1 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto bg-black/30 rounded p-2">
                         {this.state.error.stack}
                       </pre>
                     </div>
@@ -129,8 +129,8 @@ export default class ErrorBoundary extends Component<Props, State> {
                   {/* Component Stack */}
                   {this.state.errorInfo?.componentStack && (
                     <div>
-                      <span className="text-xs text-gray-500 uppercase tracking-wide">Component Stack</span>
-                      <pre className="text-xs text-gray-400 font-mono mt-1 overflow-x-auto whitespace-pre-wrap break-all max-h-32 overflow-y-auto bg-black/30 rounded p-2">
+                      <span className="text-xs text-theme-tertiary uppercase tracking-wide">Component Stack</span>
+                      <pre className="text-xs text-theme-secondary font-mono mt-1 overflow-x-auto whitespace-pre-wrap break-all max-h-32 overflow-y-auto bg-black/30 rounded p-2">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </div>
@@ -140,7 +140,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             )}
 
             {/* Help Text */}
-            <p className="text-sm text-gray-500 mt-6">
+            <p className="text-sm text-theme-tertiary mt-6">
               If this problem persists, please{' '}
               <a
                 href="mailto:support@talor.app?subject=Bug Report"

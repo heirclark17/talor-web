@@ -19,7 +19,7 @@ export function Skeleton({
   height,
   animation = 'pulse',
 }: SkeletonProps) {
-  const baseClasses = 'bg-white/10'
+  const baseClasses = 'bg-theme-glass-10'
 
   const variantClasses = {
     text: 'rounded h-4',
@@ -54,7 +54,7 @@ export function Skeleton({
  */
 export function SkeletonCard({ className = '' }: { className?: string }) {
   return (
-    <div className={`glass rounded-xl p-6 border border-white/10 ${className}`}>
+    <div className={`glass rounded-xl p-6 border border-theme-subtle ${className}`}>
       <div className="flex items-start gap-4">
         <Skeleton variant="circular" width={48} height={48} />
         <div className="flex-1 space-y-3">
@@ -76,7 +76,7 @@ export function SkeletonCard({ className = '' }: { className?: string }) {
  */
 export function SkeletonListItem({ className = '' }: { className?: string }) {
   return (
-    <div className={`glass rounded-xl p-4 border border-white/10 flex items-center gap-4 ${className}`}>
+    <div className={`glass rounded-xl p-4 border border-theme-subtle flex items-center gap-4 ${className}`}>
       <Skeleton variant="rounded" width={56} height={56} />
       <div className="flex-1 space-y-2">
         <Skeleton variant="text" width="50%" height={18} />
@@ -92,7 +92,7 @@ export function SkeletonListItem({ className = '' }: { className?: string }) {
  */
 export function SkeletonTableRow({ columns = 4 }: { columns?: number }) {
   return (
-    <tr className="border-b border-white/10">
+    <tr className="border-b border-theme-subtle">
       {Array.from({ length: columns }).map((_, i) => (
         <td key={i} className="py-4 px-4">
           <Skeleton variant="text" width={i === 0 ? '80%' : '60%'} />
@@ -109,7 +109,7 @@ export function SkeletonResumeComparison() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Original Resume */}
-      <div className="glass rounded-xl p-6 border border-white/10 space-y-4">
+      <div className="glass rounded-xl p-6 border border-theme-subtle space-y-4">
         <Skeleton variant="text" width="40%" height={24} />
         <div className="space-y-6">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -127,7 +127,7 @@ export function SkeletonResumeComparison() {
       </div>
 
       {/* Tailored Resume */}
-      <div className="glass rounded-xl p-6 border border-white/10 space-y-4">
+      <div className="glass rounded-xl p-6 border border-theme-subtle space-y-4">
         <Skeleton variant="text" width="40%" height={24} />
         <div className="space-y-6">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -189,7 +189,7 @@ export function SkeletonCareerPath() {
       </div>
 
       {/* Form fields */}
-      <div className="glass rounded-xl p-6 border border-white/10 space-y-6">
+      <div className="glass rounded-xl p-6 border border-theme-subtle space-y-6">
         <Skeleton variant="text" width="30%" height={24} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (

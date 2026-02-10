@@ -294,7 +294,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
       case 'easy': return 'text-green-400 bg-green-500/20'
       case 'medium': return 'text-yellow-400 bg-yellow-500/20'
       case 'hard': return 'text-red-400 bg-red-500/20'
-      default: return 'text-gray-400 bg-gray-500/20'
+      default: return 'text-theme-secondary bg-gray-500/20'
     }
   }
 
@@ -321,20 +321,20 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
       cloud: 'text-indigo-400 bg-indigo-500/20',
       performance: 'text-emerald-400 bg-emerald-500/20',
     }
-    return colors[category.toLowerCase()] || 'text-gray-400 bg-gray-500/20'
+    return colors[category.toLowerCase()] || 'text-theme-secondary bg-gray-500/20'
   }
 
   // Initial state - show generate button
   if (!questionsData && !loading) {
     return (
-      <div className="bg-white/5 rounded-2xl p-8 text-center">
+      <div className="bg-theme-glass-5 rounded-2xl p-8 text-center">
         <div className="flex flex-col items-center gap-4">
           <div className="flex gap-4">
             <Brain className="w-12 h-12 text-purple-400" />
             <Code className="w-12 h-12 text-blue-400" />
           </div>
-          <h3 className="text-xl font-bold text-white">Behavioral & Technical Questions</h3>
-          <p className="text-gray-400 max-w-md">
+          <h3 className="text-xl font-bold text-theme">Behavioral & Technical Questions</h3>
+          <p className="text-theme-secondary max-w-md">
             Generate 10 behavioral and 10 technical interview questions specifically aligned to this role at {companyName}.
             Includes STAR story prompts and tech stack analysis.
           </p>
@@ -381,36 +381,36 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
     <div className="space-y-6">
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-white/5 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-white">{questionsData.summary.total_questions}</div>
-          <div className="text-sm text-gray-400">Total Questions</div>
+        <div className="bg-theme-glass-5 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-theme">{questionsData.summary.total_questions}</div>
+          <div className="text-sm text-theme-secondary">Total Questions</div>
         </div>
         <div className="bg-purple-500/20 rounded-xl p-4 text-center">
           <div className="text-2xl font-bold text-purple-400">{questionsData.summary.behavioral_count}</div>
-          <div className="text-sm text-gray-400">Behavioral</div>
+          <div className="text-sm text-theme-secondary">Behavioral</div>
         </div>
         <div className="bg-blue-500/20 rounded-xl p-4 text-center">
           <div className="text-2xl font-bold text-blue-400">{questionsData.summary.technical_count}</div>
-          <div className="text-sm text-gray-400">Technical</div>
+          <div className="text-sm text-theme-secondary">Technical</div>
         </div>
         <div className="bg-green-500/20 rounded-xl p-4 text-center">
           <div className="text-2xl font-bold text-green-400">{questionsData.summary.skill_matches}</div>
-          <div className="text-sm text-gray-400">Skill Matches</div>
+          <div className="text-sm text-theme-secondary">Skill Matches</div>
         </div>
         <div className="bg-orange-500/20 rounded-xl p-4 text-center">
           <div className="text-2xl font-bold text-orange-400">{questionsData.summary.skill_gaps}</div>
-          <div className="text-sm text-gray-400">Skill Gaps</div>
+          <div className="text-sm text-theme-secondary">Skill Gaps</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1 bg-white/5 rounded-xl">
+      <div className="flex gap-2 p-1 bg-theme-glass-5 rounded-xl">
         <button
           onClick={() => setActiveTab('behavioral')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
             activeTab === 'behavioral'
               ? 'bg-purple-600 text-white'
-              : 'text-gray-400 hover:text-white hover:bg-white/5'
+              : 'text-theme-secondary hover:text-theme hover:bg-theme-glass-5'
           }`}
         >
           <Brain className="w-5 h-5" />
@@ -421,7 +421,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
             activeTab === 'technical'
               ? 'bg-blue-600 text-white'
-              : 'text-gray-400 hover:text-white hover:bg-white/5'
+              : 'text-theme-secondary hover:text-theme hover:bg-theme-glass-5'
           }`}
         >
           <Code className="w-5 h-5" />
@@ -441,7 +441,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
               </h4>
               <ul className="space-y-2">
                 {questionsData.behavioral.preparation_tips.map((tip, idx) => (
-                  <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                  <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                     <span className="text-purple-400">•</span>
                     {tip}
                   </li>
@@ -452,12 +452,12 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
 
           {/* Company Context */}
           {questionsData.behavioral.company_context && (
-            <div className="bg-white/5 rounded-xl p-4">
-              <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
+            <div className="bg-theme-glass-5 rounded-xl p-4">
+              <h4 className="text-theme font-semibold mb-2 flex items-center gap-2">
                 <Target className="w-5 h-5 text-purple-400" />
                 Company Context for Answers
               </h4>
-              <p className="text-gray-300 text-sm">{questionsData.behavioral.company_context}</p>
+              <p className="text-theme-secondary text-sm">{questionsData.behavioral.company_context}</p>
             </div>
           )}
 
@@ -473,17 +473,17 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
               const hasAnyStory = story || aiStory
 
               return (
-                <div key={question.id} className="bg-white/5 rounded-xl overflow-hidden border border-white/10">
+                <div key={question.id} className="bg-theme-glass-5 rounded-xl overflow-hidden border border-theme-subtle">
                   {/* Question Header */}
                   <button
                     onClick={() => toggleQuestion(questionKey, question.question)}
-                    className="w-full p-4 flex items-start gap-4 hover:bg-white/5 transition-colors text-left"
+                    className="w-full p-4 flex items-start gap-4 hover:bg-theme-glass-5 transition-colors text-left"
                   >
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold">
                       {question.id}
                     </div>
                     <div className="flex-1">
-                      <p className="text-white font-medium mb-2">{question.question}</p>
+                      <p className="text-theme font-medium mb-2">{question.question}</p>
                       <div className="flex flex-wrap gap-2">
                         <span className={`text-xs px-2 py-0.5 rounded ${getCategoryColor(question.category)}`}>
                           {question.category.replace('_', ' ')}
@@ -500,42 +500,42 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                       </div>
                     </div>
                     {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                      <ChevronDown className="w-5 h-5 text-theme-secondary" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <ChevronRight className="w-5 h-5 text-theme-secondary" />
                     )}
                   </button>
 
                   {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="p-4 pt-0 space-y-4 border-t border-white/10">
+                    <div className="p-4 pt-0 space-y-4 border-t border-theme-subtle">
                       {/* Why Asked */}
                       <div>
-                        <h5 className="text-gray-400 text-sm font-medium mb-1 flex items-center gap-1">
+                        <h5 className="text-theme-secondary text-sm font-medium mb-1 flex items-center gap-1">
                           <HelpCircle className="w-4 h-4" />
                           Why This Is Asked
                         </h5>
-                        <p className="text-gray-300 text-sm">{question.why_asked}</p>
+                        <p className="text-theme-secondary text-sm">{question.why_asked}</p>
                       </div>
 
                       {/* Competency & Job Alignment */}
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                          <h5 className="text-gray-400 text-sm font-medium mb-1">Competency Tested</h5>
+                          <h5 className="text-theme-secondary text-sm font-medium mb-1">Competency Tested</h5>
                           <p className="text-purple-300 text-sm">{question.competency_tested}</p>
                         </div>
                         <div>
-                          <h5 className="text-gray-400 text-sm font-medium mb-1">Job Alignment</h5>
+                          <h5 className="text-theme-secondary text-sm font-medium mb-1">Job Alignment</h5>
                           <p className="text-blue-300 text-sm">{question.job_alignment}</p>
                         </div>
                       </div>
 
                       {/* Key Themes */}
                       <div>
-                        <h5 className="text-gray-400 text-sm font-medium mb-2">Key Themes to Address</h5>
+                        <h5 className="text-theme-secondary text-sm font-medium mb-2">Key Themes to Address</h5>
                         <div className="flex flex-wrap gap-2">
                           {question.key_themes.map((theme, idx) => (
-                            <span key={idx} className="text-xs px-2 py-1 rounded bg-white/10 text-gray-300">
+                            <span key={idx} className="text-xs px-2 py-1 rounded bg-theme-glass-10 text-theme-secondary">
                               {theme}
                             </span>
                           ))}
@@ -550,7 +550,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                         </h5>
                         <ul className="space-y-1">
                           {question.common_mistakes.map((mistake, idx) => (
-                            <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                            <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                               <span className="text-red-400">×</span>
                               {mistake}
                             </li>
@@ -561,7 +561,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                       {/* STAR Story Section */}
                       <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl p-4">
                         <div className="flex items-center justify-between mb-4">
-                          <h5 className="text-white font-semibold flex items-center gap-2">
+                          <h5 className="text-theme font-semibold flex items-center gap-2">
                             <BookOpen className="w-5 h-5 text-purple-400" />
                             Your STAR Story
                             {aiStory && !story && (
@@ -584,7 +584,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                                     })
                                     generateAiStarStory(questionKey, question.question)
                                   }}
-                                  className="flex items-center gap-1 text-sm text-gray-400 hover:text-white"
+                                  className="flex items-center gap-1 text-sm text-theme-secondary hover:text-theme"
                                 >
                                   <RefreshCw className="w-4 h-4" />
                                   Regenerate
@@ -614,8 +614,8 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                         {isGeneratingAi && (
                           <div className="text-center py-6">
                             <Loader2 className="w-8 h-8 text-purple-400 animate-spin mx-auto mb-3" />
-                            <p className="text-gray-300 text-sm">Generating AI STAR story based on your resume...</p>
-                            <p className="text-gray-500 text-xs mt-1">This uses your experience to craft a compelling answer</p>
+                            <p className="text-theme-secondary text-sm">Generating AI STAR story based on your resume...</p>
+                            <p className="text-theme-tertiary text-xs mt-1">This uses your experience to craft a compelling answer</p>
                           </div>
                         )}
 
@@ -625,19 +625,19 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                             <div className="grid md:grid-cols-2 gap-4 mb-4">
                               <div className="text-sm">
                                 <span className="text-green-400 font-medium">Situation Hint:</span>
-                                <p className="text-gray-400">{question.star_prompt.situation_hint}</p>
+                                <p className="text-theme-secondary">{question.star_prompt.situation_hint}</p>
                               </div>
                               <div className="text-sm">
                                 <span className="text-blue-400 font-medium">Task Hint:</span>
-                                <p className="text-gray-400">{question.star_prompt.task_hint}</p>
+                                <p className="text-theme-secondary">{question.star_prompt.task_hint}</p>
                               </div>
                               <div className="text-sm">
                                 <span className="text-purple-400 font-medium">Action Hint:</span>
-                                <p className="text-gray-400">{question.star_prompt.action_hint}</p>
+                                <p className="text-theme-secondary">{question.star_prompt.action_hint}</p>
                               </div>
                               <div className="text-sm">
                                 <span className="text-yellow-400 font-medium">Result Hint:</span>
-                                <p className="text-gray-400">{question.star_prompt.result_hint}</p>
+                                <p className="text-theme-secondary">{question.star_prompt.result_hint}</p>
                               </div>
                             </div>
 
@@ -649,7 +649,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                                   value={story?.situation || ''}
                                   onChange={(e) => updateStarStory(questionKey, 'situation', e.target.value)}
                                   placeholder="Set the scene: What was the context? When and where did this happen?"
-                                  className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-gray-300 text-sm min-h-[80px]"
+                                  className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme-secondary text-sm min-h-[80px]"
                                 />
                               </div>
                               <div>
@@ -658,7 +658,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                                   value={story?.task || ''}
                                   onChange={(e) => updateStarStory(questionKey, 'task', e.target.value)}
                                   placeholder="What was your responsibility? What needed to be accomplished?"
-                                  className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-gray-300 text-sm min-h-[60px]"
+                                  className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme-secondary text-sm min-h-[60px]"
                                 />
                               </div>
                               <div>
@@ -667,7 +667,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                                   value={story?.action || ''}
                                   onChange={(e) => updateStarStory(questionKey, 'action', e.target.value)}
                                   placeholder="What specific steps did YOU take? Be detailed about your personal contribution."
-                                  className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-gray-300 text-sm min-h-[120px]"
+                                  className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme-secondary text-sm min-h-[120px]"
                                 />
                               </div>
                               <div>
@@ -676,7 +676,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                                   value={story?.result || ''}
                                   onChange={(e) => updateStarStory(questionKey, 'result', e.target.value)}
                                   placeholder="What was the outcome? Include specific metrics and impact."
-                                  className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-gray-300 text-sm min-h-[80px]"
+                                  className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme-secondary text-sm min-h-[80px]"
                                 />
                               </div>
                             </div>
@@ -685,7 +685,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                             <div className="flex gap-2 justify-end">
                               <button
                                 onClick={() => setEditingQuestionId(null)}
-                                className="flex items-center gap-1 px-4 py-2 text-gray-400 hover:text-white"
+                                className="flex items-center gap-1 px-4 py-2 text-theme-secondary hover:text-theme"
                               >
                                 <X className="w-4 h-4" />
                                 Cancel
@@ -709,19 +709,19 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                           <div className="space-y-3">
                             <div>
                               <span className="text-green-400 text-xs font-medium">SITUATION</span>
-                              <p className="text-gray-300 text-sm">{story.situation}</p>
+                              <p className="text-theme-secondary text-sm">{story.situation}</p>
                             </div>
                             <div>
                               <span className="text-blue-400 text-xs font-medium">TASK</span>
-                              <p className="text-gray-300 text-sm">{story.task}</p>
+                              <p className="text-theme-secondary text-sm">{story.task}</p>
                             </div>
                             <div>
                               <span className="text-purple-400 text-xs font-medium">ACTION</span>
-                              <p className="text-gray-300 text-sm">{story.action}</p>
+                              <p className="text-theme-secondary text-sm">{story.action}</p>
                             </div>
                             <div>
                               <span className="text-yellow-400 text-xs font-medium">RESULT</span>
-                              <p className="text-gray-300 text-sm">{story.result}</p>
+                              <p className="text-theme-secondary text-sm">{story.result}</p>
                             </div>
                           </div>
                         ) : !isGeneratingAi && aiStory ? (
@@ -729,27 +729,27 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                           <div className="space-y-3">
                             <div>
                               <span className="text-green-400 text-xs font-medium">SITUATION</span>
-                              <p className="text-gray-300 text-sm">{aiStory.situation}</p>
+                              <p className="text-theme-secondary text-sm">{aiStory.situation}</p>
                             </div>
                             <div>
                               <span className="text-blue-400 text-xs font-medium">TASK</span>
-                              <p className="text-gray-300 text-sm">{aiStory.task}</p>
+                              <p className="text-theme-secondary text-sm">{aiStory.task}</p>
                             </div>
                             <div>
                               <span className="text-purple-400 text-xs font-medium">ACTION</span>
-                              <p className="text-gray-300 text-sm">{aiStory.action}</p>
+                              <p className="text-theme-secondary text-sm">{aiStory.action}</p>
                             </div>
                             <div>
                               <span className="text-yellow-400 text-xs font-medium">RESULT</span>
-                              <p className="text-gray-300 text-sm">{aiStory.result}</p>
+                              <p className="text-theme-secondary text-sm">{aiStory.result}</p>
                             </div>
                             <div className="pt-2 text-center">
-                              <p className="text-gray-500 text-xs">Click "Edit AI Story" above to customize this response</p>
+                              <p className="text-theme-tertiary text-xs">Click "Edit AI Story" above to customize this response</p>
                             </div>
                           </div>
                         ) : !isGeneratingAi ? (
                           <div className="text-center py-4">
-                            <p className="text-gray-400 text-sm mb-2">AI story generation failed</p>
+                            <p className="text-theme-secondary text-sm mb-2">AI story generation failed</p>
                             <div className="flex items-center justify-center gap-3">
                               <button
                                 onClick={() => generateAiStarStory(questionKey, question.question)}
@@ -760,7 +760,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                               </button>
                               <button
                                 onClick={() => setEditingQuestionId(questionKey)}
-                                className="text-gray-400 hover:text-white text-sm flex items-center gap-1"
+                                className="text-theme-secondary hover:text-theme text-sm flex items-center gap-1"
                               >
                                 <Edit className="w-4 h-4" />
                                 Write Manually
@@ -791,7 +791,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
             <div className="grid md:grid-cols-2 gap-6">
               {/* Company Tech Stack */}
               <div>
-                <h5 className="text-white text-sm font-medium mb-2">Company's Tech Stack</h5>
+                <h5 className="text-theme text-sm font-medium mb-2">Company's Tech Stack</h5>
                 <div className="flex flex-wrap gap-2">
                   {[
                     ...questionsData.company_tech_stack.tech_stack,
@@ -807,7 +807,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
 
               {/* Your Matching Skills */}
               <div>
-                <h5 className="text-white text-sm font-medium mb-2 flex items-center gap-1">
+                <h5 className="text-theme text-sm font-medium mb-2 flex items-center gap-1">
                   <CheckCircle2 className="w-4 h-4 text-green-400" />
                   Your Matching Skills
                 </h5>
@@ -823,7 +823,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
               {/* Skill Gaps */}
               {questionsData.technical.tech_stack_analysis.skill_gaps.length > 0 && (
                 <div>
-                  <h5 className="text-white text-sm font-medium mb-2 flex items-center gap-1">
+                  <h5 className="text-theme text-sm font-medium mb-2 flex items-center gap-1">
                     <AlertTriangle className="w-4 h-4 text-orange-400" />
                     Skills to Study
                   </h5>
@@ -840,7 +840,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
               {/* Transferable Skills */}
               {questionsData.technical.tech_stack_analysis.transferable_skills.length > 0 && (
                 <div>
-                  <h5 className="text-white text-sm font-medium mb-2 flex items-center gap-1">
+                  <h5 className="text-theme text-sm font-medium mb-2 flex items-center gap-1">
                     <TrendingUp className="w-4 h-4 text-purple-400" />
                     Transferable Skills
                   </h5>
@@ -848,7 +848,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                     {questionsData.technical.tech_stack_analysis.transferable_skills.slice(0, 3).map((skill, idx) => (
                       <div key={idx} className="text-sm">
                         <span className="text-purple-300">{skill.candidate_skill}</span>
-                        <span className="text-gray-500"> → </span>
+                        <span className="text-theme-tertiary"> → </span>
                         <span className="text-blue-300">{skill.applies_to}</span>
                       </div>
                     ))}
@@ -860,42 +860,42 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
 
           {/* Preparation Strategy */}
           <div className="grid md:grid-cols-3 gap-4">
-            <div className="bg-white/5 rounded-xl p-4">
-              <h5 className="text-white font-medium mb-2 flex items-center gap-2">
+            <div className="bg-theme-glass-5 rounded-xl p-4">
+              <h5 className="text-theme font-medium mb-2 flex items-center gap-2">
                 <Target className="w-4 h-4 text-red-400" />
                 High Priority Topics
               </h5>
               <ul className="space-y-1">
                 {questionsData.technical.preparation_strategy.high_priority_topics.slice(0, 5).map((topic, idx) => (
-                  <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                  <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                     <span className="text-red-400">•</span>
                     {topic}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="bg-white/5 rounded-xl p-4">
-              <h5 className="text-white font-medium mb-2 flex items-center gap-2">
+            <div className="bg-theme-glass-5 rounded-xl p-4">
+              <h5 className="text-theme font-medium mb-2 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-blue-400" />
                 Study Areas
               </h5>
               <ul className="space-y-1">
                 {questionsData.technical.preparation_strategy.recommended_study_areas.slice(0, 5).map((area, idx) => (
-                  <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                  <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                     <span className="text-blue-400">•</span>
                     {area}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="bg-white/5 rounded-xl p-4">
-              <h5 className="text-white font-medium mb-2 flex items-center gap-2">
+            <div className="bg-theme-glass-5 rounded-xl p-4">
+              <h5 className="text-theme font-medium mb-2 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-yellow-400" />
                 Hands-On Practice
               </h5>
               <ul className="space-y-1">
                 {questionsData.technical.preparation_strategy.hands_on_practice.slice(0, 3).map((practice, idx) => (
-                  <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                  <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                     <span className="text-yellow-400">•</span>
                     {practice}
                   </li>
@@ -911,17 +911,17 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
               const isExpanded = expandedQuestions.has(questionKey)
 
               return (
-                <div key={question.id} className="bg-white/5 rounded-xl overflow-hidden border border-white/10">
+                <div key={question.id} className="bg-theme-glass-5 rounded-xl overflow-hidden border border-theme-subtle">
                   {/* Question Header */}
                   <button
                     onClick={() => toggleQuestion(questionKey)}
-                    className="w-full p-4 flex items-start gap-4 hover:bg-white/5 transition-colors text-left"
+                    className="w-full p-4 flex items-start gap-4 hover:bg-theme-glass-5 transition-colors text-left"
                   >
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">
                       {question.id}
                     </div>
                     <div className="flex-1">
-                      <p className="text-white font-medium mb-2">{question.question}</p>
+                      <p className="text-theme font-medium mb-2">{question.question}</p>
                       <div className="flex flex-wrap gap-2">
                         <span className={`text-xs px-2 py-0.5 rounded ${getCategoryColor(question.category)}`}>
                           {question.category.replace('_', ' ')}
@@ -937,24 +937,24 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                       </div>
                     </div>
                     {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                      <ChevronDown className="w-5 h-5 text-theme-secondary" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <ChevronRight className="w-5 h-5 text-theme-secondary" />
                     )}
                   </button>
 
                   {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="p-4 pt-0 space-y-4 border-t border-white/10">
+                    <div className="p-4 pt-0 space-y-4 border-t border-theme-subtle">
                       {/* Expected Answer Points */}
                       <div>
-                        <h5 className="text-white text-sm font-medium mb-2 flex items-center gap-1">
+                        <h5 className="text-theme text-sm font-medium mb-2 flex items-center gap-1">
                           <CheckCircle2 className="w-4 h-4 text-green-400" />
                           Expected Answer Points
                         </h5>
                         <ul className="space-y-1">
                           {question.expected_answer_points.map((point, idx) => (
-                            <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                            <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                               <span className="text-green-400">{idx + 1}.</span>
                               {point}
                             </li>
@@ -964,21 +964,21 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
 
                       {/* Your Skill Leverage */}
                       <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-xl p-4">
-                        <h5 className="text-white font-semibold mb-3 flex items-center gap-2">
+                        <h5 className="text-theme font-semibold mb-3 flex items-center gap-2">
                           <Award className="w-5 h-5 text-green-400" />
                           How to Leverage Your Experience
                         </h5>
                         <div className="space-y-3">
                           <div>
                             <span className="text-green-400 text-sm font-medium">Your Relevant Experience:</span>
-                            <p className="text-gray-300 text-sm">{question.candidate_skill_leverage.relevant_experience}</p>
+                            <p className="text-theme-secondary text-sm">{question.candidate_skill_leverage.relevant_experience}</p>
                           </div>
                           {question.candidate_skill_leverage.talking_points.length > 0 && (
                             <div>
                               <span className="text-blue-400 text-sm font-medium">Talking Points:</span>
                               <ul className="mt-1 space-y-1">
                                 {question.candidate_skill_leverage.talking_points.map((point, idx) => (
-                                  <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                                  <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                                     <span className="text-blue-400">•</span>
                                     {point}
                                   </li>
@@ -989,7 +989,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                           {question.candidate_skill_leverage.skill_bridge && (
                             <div>
                               <span className="text-purple-400 text-sm font-medium">Skill Bridge:</span>
-                              <p className="text-gray-300 text-sm">{question.candidate_skill_leverage.skill_bridge}</p>
+                              <p className="text-theme-secondary text-sm">{question.candidate_skill_leverage.skill_bridge}</p>
                             </div>
                           )}
                         </div>
@@ -998,10 +998,10 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                       {/* Follow-up Questions */}
                       {question.follow_up_questions.length > 0 && (
                         <div>
-                          <h5 className="text-gray-400 text-sm font-medium mb-2">Likely Follow-up Questions</h5>
+                          <h5 className="text-theme-secondary text-sm font-medium mb-2">Likely Follow-up Questions</h5>
                           <ul className="space-y-1">
                             {question.follow_up_questions.map((fq, idx) => (
-                              <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                              <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                                 <span className="text-yellow-400">?</span>
                                 {fq}
                               </li>
@@ -1019,7 +1019,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                           </h5>
                           <ul className="space-y-1">
                             {question.red_flags.map((flag, idx) => (
-                              <li key={idx} className="text-gray-300 text-sm flex gap-2">
+                              <li key={idx} className="text-theme-secondary text-sm flex gap-2">
                                 <span className="text-red-400">×</span>
                                 {flag}
                               </li>
@@ -1030,7 +1030,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
 
                       {/* Job Alignment */}
                       <div>
-                        <h5 className="text-gray-400 text-sm font-medium mb-1">Why This Matters for the Role</h5>
+                        <h5 className="text-theme-secondary text-sm font-medium mb-1">Why This Matters for the Role</h5>
                         <p className="text-blue-300 text-sm">{question.job_alignment}</p>
                       </div>
                     </div>
@@ -1047,7 +1047,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
         <button
           onClick={generateQuestions}
           disabled={loading}
-          className="text-gray-400 hover:text-white text-sm flex items-center gap-1 mx-auto"
+          className="text-theme-secondary hover:text-theme text-sm flex items-center gap-1 mx-auto"
         >
           <Zap className="w-4 h-4" />
           Regenerate Questions

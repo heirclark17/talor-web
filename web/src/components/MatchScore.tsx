@@ -67,14 +67,14 @@ export default function MatchScore({ matchScore, loading }: MatchScoreProps) {
     return (
       <div className="p-6 text-center" data-testid="match-score">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-4 text-gray-400">Calculating match score...</p>
+        <p className="mt-4 text-theme-secondary">Calculating match score...</p>
       </div>
     )
   }
 
   if (!matchScore) {
     return (
-      <div className="p-6 text-center text-gray-400" data-testid="match-score">
+      <div className="p-6 text-center text-theme-secondary" data-testid="match-score">
         <p>No match score available.</p>
       </div>
     )
@@ -86,17 +86,17 @@ export default function MatchScore({ matchScore, loading }: MatchScoreProps) {
   return (
     <div className="space-y-6" data-testid="match-score">
       {/* Overall Score */}
-      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+      <div className="bg-theme rounded-lg border border-gray-800 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-white">Match Score</h3>
-            <p className="text-sm text-gray-400">How well your resume matches this job</p>
+            <h3 className="text-lg font-semibold text-theme">Match Score</h3>
+            <p className="text-sm text-theme-secondary">How well your resume matches this job</p>
           </div>
           <div className="text-right">
             <div className={`text-5xl font-bold ${getScoreColor(validatedScore)}`} data-testid="match-score-value">
               {validatedScore}
             </div>
-            <div className="text-sm text-gray-400" data-testid="match-score-grade">
+            <div className="text-sm text-theme-secondary" data-testid="match-score-grade">
               {matchScore.grade || getScoreGrade(validatedScore)}
             </div>
           </div>
@@ -113,8 +113,8 @@ export default function MatchScore({ matchScore, loading }: MatchScoreProps) {
       </div>
 
       {/* Category Breakdowns */}
-      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-        <h4 className="font-semibold text-white mb-4">Score Breakdown</h4>
+      <div className="bg-theme rounded-lg border border-gray-800 p-6">
+        <h4 className="font-semibold text-theme mb-4">Score Breakdown</h4>
         <div className="space-y-4">
           {Object.entries(matchScore.category_scores).map(([category, score]) => {
             const validatedCategoryScore = Math.max(0, Math.min(100, score))
@@ -126,7 +126,7 @@ export default function MatchScore({ matchScore, loading }: MatchScoreProps) {
             return (
               <div key={category}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-300">{categoryLabel}</span>
+                  <span className="text-sm text-theme-secondary">{categoryLabel}</span>
                   <span
                     className={`text-sm font-medium ${getScoreColor(validatedCategoryScore)}`}
                     data-testid={`category-score-${category}`}
@@ -147,17 +147,17 @@ export default function MatchScore({ matchScore, loading }: MatchScoreProps) {
       </div>
 
       {/* Strengths */}
-      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6" data-testid="match-strengths">
+      <div className="bg-theme rounded-lg border border-gray-800 p-6" data-testid="match-strengths">
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle className="w-5 h-5 text-green-500" />
-          <h4 className="font-semibold text-white">Strengths</h4>
+          <h4 className="font-semibold text-theme">Strengths</h4>
         </div>
         <div className="space-y-2">
           {matchScore.strengths && matchScore.strengths.length > 0 ? (
             matchScore.strengths.map((strength, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2 text-sm text-gray-300"
+                className="flex items-start gap-2 text-sm text-theme-secondary"
                 data-testid="strength-item"
               >
                 <span className="text-green-500 mt-0.5">✓</span>
@@ -165,23 +165,23 @@ export default function MatchScore({ matchScore, loading }: MatchScoreProps) {
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-400">No strengths identified.</p>
+            <p className="text-sm text-theme-secondary">No strengths identified.</p>
           )}
         </div>
       </div>
 
       {/* Gaps */}
       {matchScore.gaps && matchScore.gaps.length > 0 && (
-        <div className="bg-gray-900 rounded-lg border border-gray-800 p-6" data-testid="match-gaps">
+        <div className="bg-theme rounded-lg border border-gray-800 p-6" data-testid="match-gaps">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-5 h-5 text-yellow-500" />
-            <h4 className="font-semibold text-white">Areas for Improvement</h4>
+            <h4 className="font-semibold text-theme">Areas for Improvement</h4>
           </div>
           <div className="space-y-2">
             {matchScore.gaps.map((gap, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2 text-sm text-gray-300"
+                className="flex items-start gap-2 text-sm text-theme-secondary"
                 data-testid="gap-item"
               >
                 <span className="text-yellow-500 mt-0.5">⚠</span>
@@ -193,10 +193,10 @@ export default function MatchScore({ matchScore, loading }: MatchScoreProps) {
       )}
 
       {/* Improvement Suggestions */}
-      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6" data-testid="improvement-suggestions">
+      <div className="bg-theme rounded-lg border border-gray-800 p-6" data-testid="improvement-suggestions">
         <div className="flex items-center gap-2 mb-4">
           <Target className="w-5 h-5 text-blue-500" />
-          <h4 className="font-semibold text-white">Recommendations</h4>
+          <h4 className="font-semibold text-theme">Recommendations</h4>
         </div>
         <div className="space-y-3">
           {matchScore.improvements && matchScore.improvements.length > 0 ? (
@@ -225,20 +225,20 @@ export default function MatchScore({ matchScore, loading }: MatchScoreProps) {
                     )}
                   </div>
                 </div>
-                <p className="text-sm text-white mb-2">{improvement.suggestion}</p>
-                <p className="text-xs text-gray-400">{improvement.rationale}</p>
+                <p className="text-sm text-theme mb-2">{improvement.suggestion}</p>
+                <p className="text-xs text-theme-secondary">{improvement.rationale}</p>
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-400">No recommendations at this time.</p>
+            <p className="text-sm text-theme-secondary">No recommendations at this time.</p>
           )}
         </div>
       </div>
 
       {/* AI Explanation */}
-      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6" data-testid="match-score-explanation">
-        <h4 className="font-semibold text-white mb-3">Detailed Analysis</h4>
-        <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+      <div className="bg-theme rounded-lg border border-gray-800 p-6" data-testid="match-score-explanation">
+        <h4 className="font-semibold text-theme mb-3">Detailed Analysis</h4>
+        <div className="text-sm text-theme-secondary leading-relaxed whitespace-pre-line">
           {matchScore.explanation}
         </div>
       </div>

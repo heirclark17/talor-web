@@ -64,6 +64,44 @@ input, button, textarea, select {
   font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+/* ============================================
+   Theme-Aware Tailwind v4 @utility Directives
+   ============================================
+   These utilities use CSS variables so they adapt
+   automatically when :root.dark / :root.light toggles.
+*/
+
+/* Text utilities */
+@utility text-theme { color: var(--text-primary); }
+@utility text-theme-secondary { color: var(--text-secondary); }
+@utility text-theme-tertiary { color: var(--text-tertiary); }
+@utility text-theme-muted { color: color-mix(in srgb, var(--text-primary) 60%, transparent); }
+@utility text-theme-faint { color: color-mix(in srgb, var(--text-primary) 40%, transparent); }
+@utility text-theme-inverse { color: var(--bg-primary); }
+@utility text-accent { color: var(--accent-color); }
+
+/* Background utilities */
+@utility bg-theme { background-color: var(--bg-primary); }
+@utility bg-theme-secondary { background-color: var(--bg-secondary); }
+@utility bg-theme-tertiary { background-color: var(--bg-tertiary); }
+@utility bg-theme-glass-5 { background-color: color-mix(in srgb, var(--text-primary) 5%, transparent); }
+@utility bg-theme-glass-10 { background-color: color-mix(in srgb, var(--text-primary) 10%, transparent); }
+@utility bg-theme-glass-20 { background-color: color-mix(in srgb, var(--text-primary) 20%, transparent); }
+
+/* Border utilities */
+@utility border-theme { border-color: var(--border-color); }
+@utility border-theme-subtle { border-color: color-mix(in srgb, var(--text-primary) 10%, transparent); }
+@utility border-theme-muted { border-color: color-mix(in srgb, var(--text-primary) 20%, transparent); }
+
+/* Divide utilities */
+@utility divide-theme-subtle { border-color: color-mix(in srgb, var(--text-primary) 10%, transparent); }
+
+/* Placeholder utilities */
+@utility placeholder-theme-tertiary { &::placeholder { color: var(--text-tertiary); } }
+
+/* Inverse utilities (for elements on inverted backgrounds) */
+@utility bg-theme-inverse { background-color: var(--text-primary); }
+
 /* Glassmorphism utility classes - Adaptive for Light & Dark Mode */
 .glass {
   background: var(--glass-bg);
@@ -210,7 +248,7 @@ input, button, textarea, select {
   /* Mobile: Hide or minimize gradient animation for performance */
   .animate-gradient {
     animation: none;
-    background: rgba(255, 255, 255, 0.02);
+    background: color-mix(in srgb, var(--text-primary) 2%, transparent);
   }
 
   /* Mobile: Better form inputs - prevent iOS zoom */
@@ -442,13 +480,25 @@ input, button, textarea, select {
   animation: pulse 4s ease-in-out infinite;
 }
 
-.animate-gradient {
+:root.dark .animate-gradient {
   background: linear-gradient(
     -45deg,
     rgba(255, 255, 255, 0.02),
     rgba(255, 255, 255, 0.05),
     rgba(255, 255, 255, 0.03),
     rgba(255, 255, 255, 0.01)
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+:root.light .animate-gradient {
+  background: linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0.02),
+    rgba(0, 0, 0, 0.04),
+    rgba(0, 0, 0, 0.02),
+    rgba(0, 0, 0, 0.01)
   );
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
@@ -507,10 +557,12 @@ input, button, textarea, select {
   position: absolute;
   width: 2px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   animation: float 8s ease-in-out infinite;
 }
+
+:root.dark .particle { background: rgba(255, 255, 255, 0.3); }
+:root.light .particle { background: rgba(0, 0, 0, 0.15); }
 
 .particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
 .particle:nth-child(2) { top: 40%; left: 30%; animation-delay: 1s; }

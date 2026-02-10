@@ -176,13 +176,13 @@ export default function CommonInterviewQuestions({
           <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <MessageSquare className="w-8 h-8 text-purple-400" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-3">
+          <h3 className="text-2xl font-bold text-theme mb-3">
             Common Interview Questions People Struggle With
           </h3>
-          <p className="text-gray-400 mb-6">
+          <p className="text-theme-secondary mb-6">
             Get tailored answers for the 10 most challenging interview questions, customized to your resume and this specific role at {companyName}.
           </p>
-          <p className="text-sm text-gray-500 mb-8">
+          <p className="text-sm text-theme-tertiary mb-8">
             Each question includes detailed guidance, common mistakes to avoid, and ready-to-use answers you can practice and customize.
           </p>
           <button
@@ -236,27 +236,27 @@ export default function CommonInterviewQuestions({
       <div className="glass p-6 rounded-2xl">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <h3 className="text-2xl font-bold text-theme mb-2 flex items-center gap-2">
               <MessageSquare className="w-6 h-6 text-purple-400" />
               Common Interview Questions
             </h3>
-            <p className="text-gray-400">
-              Tailored for <span className="text-white font-semibold">{jobTitle}</span> at{' '}
-              <span className="text-white font-semibold">{companyName}</span>
+            <p className="text-theme-secondary">
+              Tailored for <span className="text-theme font-semibold">{jobTitle}</span> at{' '}
+              <span className="text-theme font-semibold">{companyName}</span>
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors flex items-center gap-2 text-sm"
+              className="px-4 py-2 bg-theme-glass-5 hover:bg-theme-glass-10 text-theme rounded-lg transition-colors flex items-center gap-2 text-sm"
             >
               <RefreshCw className="w-4 h-4" />
               Regenerate All
             </button>
           </div>
         </div>
-        <p className="text-sm text-gray-500 mt-3 flex items-center gap-2">
+        <p className="text-sm text-theme-tertiary mt-3 flex items-center gap-2">
           <BookOpen className="w-4 h-4" />
           Built using STAR / Present-Past-Future best practices from Indeed, HBR, The Muse, and Big Interview
         </p>
@@ -284,18 +284,18 @@ export default function CommonInterviewQuestions({
               {/* Question Header */}
               <button
                 onClick={() => toggleExpand(question.id)}
-                className="w-full p-6 flex items-center justify-between hover:bg-white/5 transition-colors"
+                className="w-full p-6 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"
               >
                 <div className="flex items-start gap-4 text-left flex-1">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0">
                     <span className="text-sm font-bold text-purple-400">{index + 1}</span>
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold text-white mb-1">
+                    <h4 className="text-lg font-semibold text-theme mb-1">
                       {question.question}
                     </h4>
                     {!isExpanded && (
-                      <p className="text-sm text-gray-400">Click to view guidance</p>
+                      <p className="text-sm text-theme-secondary">Click to view guidance</p>
                     )}
                   </div>
                 </div>
@@ -307,35 +307,35 @@ export default function CommonInterviewQuestions({
                         handleRegenerate(question.id)
                       }}
                       disabled={isRegenerating}
-                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                      className="px-3 py-1.5 bg-theme-glass-5 hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center gap-2 text-sm"
                     >
                       {isRegenerating ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
                         <RefreshCw className="w-4 h-4" />
                       )}
-                      <span className="text-white">Regenerate</span>
+                      <span className="text-theme">Regenerate</span>
                     </button>
                   )}
                   {isExpanded ? (
-                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                    <ChevronUp className="w-5 h-5 text-theme-secondary" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                    <ChevronDown className="w-5 h-5 text-theme-secondary" />
                   )}
                 </div>
               </button>
 
               {/* Expanded Content */}
               {isExpanded && (
-                <div className="border-t border-white/10">
+                <div className="border-t border-theme-subtle">
                   {/* Tabs */}
-                  <div className="flex border-b border-white/10 overflow-x-auto">
+                  <div className="flex border-b border-theme-subtle overflow-x-auto">
                     <button
                       onClick={() => setActiveTab({ ...activeTab, [question.id]: 'why-hard' })}
                       className={`px-6 py-3 text-sm font-medium transition-colors flex-shrink-0 ${
                         currentTab === 'why-hard'
                           ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-500/5'
-                          : 'text-gray-400 hover:text-gray-300'
+                          : 'text-theme-secondary hover:text-theme-secondary'
                       }`}
                     >
                       Why It's Hard
@@ -345,7 +345,7 @@ export default function CommonInterviewQuestions({
                       className={`px-6 py-3 text-sm font-medium transition-colors flex-shrink-0 ${
                         currentTab === 'mistakes'
                           ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-500/5'
-                          : 'text-gray-400 hover:text-gray-300'
+                          : 'text-theme-secondary hover:text-theme-secondary'
                       }`}
                     >
                       Common Mistakes
@@ -355,7 +355,7 @@ export default function CommonInterviewQuestions({
                       className={`px-6 py-3 text-sm font-medium transition-colors flex-shrink-0 ${
                         currentTab === 'builder'
                           ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-500/5'
-                          : 'text-gray-400 hover:text-gray-300'
+                          : 'text-theme-secondary hover:text-theme-secondary'
                       }`}
                     >
                       Answer Builder
@@ -365,7 +365,7 @@ export default function CommonInterviewQuestions({
                       className={`px-6 py-3 text-sm font-medium transition-colors flex-shrink-0 ${
                         currentTab === 'answer'
                           ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-500/5'
-                          : 'text-gray-400 hover:text-gray-300'
+                          : 'text-theme-secondary hover:text-theme-secondary'
                       }`}
                     >
                       What to Say
@@ -379,7 +379,7 @@ export default function CommonInterviewQuestions({
                         <h5 className="text-sm font-semibold text-purple-400 mb-3 uppercase tracking-wide">
                           Why This Question Is Challenging
                         </h5>
-                        <p className="text-gray-300 leading-relaxed">
+                        <p className="text-theme-secondary leading-relaxed">
                           {question.why_hard}
                         </p>
                       </div>
@@ -394,7 +394,7 @@ export default function CommonInterviewQuestions({
                           {question.common_mistakes.map((mistake, idx) => (
                             <li key={idx} className="flex items-start gap-3">
                               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                              <span className="text-gray-300">{mistake}</span>
+                              <span className="text-theme-secondary">{mistake}</span>
                             </li>
                           ))}
                         </ul>
@@ -415,7 +415,7 @@ export default function CommonInterviewQuestions({
                                 <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                                   <span className="text-xs font-bold text-purple-400">{idx + 1}</span>
                                 </div>
-                                <span className="text-gray-300">{step}</span>
+                                <span className="text-theme-secondary">{step}</span>
                               </li>
                             ))}
                           </ol>
@@ -431,7 +431,7 @@ export default function CommonInterviewQuestions({
                             {question.exceptional_answer_builder.customization_checklist.map((item, idx) => (
                               <li key={idx} className="flex items-start gap-3">
                                 <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                                <span className="text-gray-300">{item}</span>
+                                <span className="text-theme-secondary">{item}</span>
                               </li>
                             ))}
                           </ul>
@@ -464,7 +464,7 @@ export default function CommonInterviewQuestions({
                             </h5>
                             <button
                               onClick={() => copyAnswer(`${question.id}-short`, question.what_to_say.short)}
-                              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                              className="px-3 py-1.5 bg-theme-glass-5 hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center gap-2 text-sm"
                             >
                               {isCopied ? (
                                 <>
@@ -474,12 +474,12 @@ export default function CommonInterviewQuestions({
                               ) : (
                                 <>
                                   <Copy className="w-4 h-4" />
-                                  <span className="text-white">Copy</span>
+                                  <span className="text-theme">Copy</span>
                                 </>
                               )}
                             </button>
                           </div>
-                          <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                          <div className="p-4 bg-theme-glass-5 rounded-lg border border-theme-subtle">
                             <p className="text-gray-200 leading-relaxed">
                               {question.what_to_say.short}
                             </p>
@@ -495,14 +495,14 @@ export default function CommonInterviewQuestions({
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => toggleEdit(question.id, question.what_to_say.long)}
-                                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                                className="px-3 py-1.5 bg-theme-glass-5 hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center gap-2 text-sm"
                               >
                                 <Edit3 className="w-4 h-4" />
-                                <span className="text-white">{isEditing ? 'Save' : 'Edit'}</span>
+                                <span className="text-theme">{isEditing ? 'Save' : 'Edit'}</span>
                               </button>
                               <button
                                 onClick={() => copyAnswer(`${question.id}-long`, isEditing ? editedText : question.what_to_say.long)}
-                                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                                className="px-3 py-1.5 bg-theme-glass-5 hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center gap-2 text-sm"
                               >
                                 {isCopied ? (
                                   <>
@@ -512,18 +512,18 @@ export default function CommonInterviewQuestions({
                                 ) : (
                                   <>
                                     <Copy className="w-4 h-4" />
-                                    <span className="text-white">Copy</span>
+                                    <span className="text-theme">Copy</span>
                                   </>
                                 )}
                               </button>
                             </div>
                           </div>
-                          <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                          <div className="p-4 bg-theme-glass-5 rounded-lg border border-theme-subtle">
                             {isEditing ? (
                               <textarea
                                 value={editedText}
                                 onChange={(e) => setEditingAnswers({ ...editingAnswers, [question.id]: e.target.value })}
-                                className="w-full bg-white/5 border border-white/20 rounded-lg p-4 text-gray-200 leading-relaxed resize-y min-h-[200px] focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-4 text-gray-200 leading-relaxed resize-y min-h-[200px] focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                               />
                             ) : (
                               <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">

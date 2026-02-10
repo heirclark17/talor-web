@@ -53,10 +53,10 @@ function Dashboard() {
             heroAnimation.isVisible ? 'animate-fade-in-up' : ''
           }`}
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6 sm:mb-8 lg:mb-12 leading-tight tracking-tight animate-float">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-theme mb-6 sm:mb-8 lg:mb-12 leading-tight tracking-tight animate-float">
             Build a Job-Winning Resume in Minutes with Talor
           </h1>
-          <p className="text-base sm:text-lg text-gray-300 mb-8 sm:mb-10 lg:mb-14 leading-relaxed px-2 sm:px-0">
+          <p className="text-base sm:text-lg text-theme-secondary mb-8 sm:mb-10 lg:mb-14 leading-relaxed px-2 sm:px-0">
             Leverage your professional experience and career goals to create highly
             effective resumes. Our AI-powered platform instantly tailors your resume
             to any job posting with ATS optimization.
@@ -80,16 +80,16 @@ function Dashboard() {
         >
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 text-center">
             <div className={`animate-on-scroll ${socialProofAnimation.isVisible ? 'animate-scale-in delay-100' : ''}`}>
-              <div className="text-4xl sm:text-5xl font-bold text-white mb-2 sm:mb-3">10x</div>
-              <div className="text-sm sm:text-base text-gray-400">Faster Applications</div>
+              <div className="text-4xl sm:text-5xl font-bold text-theme mb-2 sm:mb-3">10x</div>
+              <div className="text-sm sm:text-base text-theme-secondary">Faster Applications</div>
             </div>
             <div className={`animate-on-scroll ${socialProofAnimation.isVisible ? 'animate-scale-in delay-300' : ''}`}>
-              <div className="text-4xl sm:text-5xl font-bold text-white mb-2 sm:mb-3">ATS</div>
-              <div className="text-sm sm:text-base text-gray-400">Optimized Format</div>
+              <div className="text-4xl sm:text-5xl font-bold text-theme mb-2 sm:mb-3">ATS</div>
+              <div className="text-sm sm:text-base text-theme-secondary">Optimized Format</div>
             </div>
             <div className={`animate-on-scroll ${socialProofAnimation.isVisible ? 'animate-scale-in delay-500' : ''}`}>
-              <div className="text-4xl sm:text-5xl font-bold text-white mb-2 sm:mb-3">AI</div>
-              <div className="text-sm sm:text-base text-gray-400">Powered Tailoring</div>
+              <div className="text-4xl sm:text-5xl font-bold text-theme mb-2 sm:mb-3">AI</div>
+              <div className="text-sm sm:text-base text-theme-secondary">Powered Tailoring</div>
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@ function Dashboard() {
           ref={featuresAnimation.ref}
           className="max-w-5xl mx-auto py-16 sm:py-20 lg:py-24"
         >
-          <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center mb-12 sm:mb-16 lg:mb-20 animate-on-scroll ${
+          <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold text-theme text-center mb-12 sm:mb-16 lg:mb-20 animate-on-scroll ${
             featuresAnimation.isVisible ? 'animate-fade-in-up' : ''
           }`}>
             Why Talor Works Better
@@ -109,13 +109,13 @@ function Dashboard() {
             <div className={`text-center animate-on-scroll ${
               featuresAnimation.isVisible ? 'animate-fade-in-up delay-100' : ''
             }`}>
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-float">
-                <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-theme-glass-5 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-float">
+                <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-theme" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">
+              <h3 className="text-lg sm:text-xl font-semibold text-theme mb-3 sm:mb-4">
                 Instant Tailoring
               </h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+              <p className="text-sm sm:text-base text-theme-secondary leading-relaxed">
                 Paste any job URL and our AI instantly customizes your resume to match the role, highlighting relevant experience and skills.
               </p>
             </div>
@@ -124,13 +124,13 @@ function Dashboard() {
             <div className={`text-center animate-on-scroll ${
               featuresAnimation.isVisible ? 'animate-fade-in-up delay-300' : ''
             }`}>
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-float" style={{ animationDelay: '1s' }}>
-                <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-theme-glass-5 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-float" style={{ animationDelay: '1s' }}>
+                <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-theme" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">
+              <h3 className="text-lg sm:text-xl font-semibold text-theme mb-3 sm:mb-4">
                 ATS-Friendly Format
               </h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+              <p className="text-sm sm:text-base text-theme-secondary leading-relaxed">
                 Every resume is formatted to pass Applicant Tracking Systems, ensuring recruiters actually see your application.
               </p>
             </div>
@@ -139,13 +139,13 @@ function Dashboard() {
             <div className={`text-center animate-on-scroll sm:col-span-2 lg:col-span-1 ${
               featuresAnimation.isVisible ? 'animate-fade-in-up delay-500' : ''
             }`}>
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-float" style={{ animationDelay: '2s' }}>
-                <Clock className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-theme-glass-5 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-float" style={{ animationDelay: '2s' }}>
+                <Clock className="w-8 h-8 sm:w-10 sm:h-10 text-theme" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">
+              <h3 className="text-lg sm:text-xl font-semibold text-theme mb-3 sm:mb-4">
                 Save Hours Per Application
               </h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+              <p className="text-sm sm:text-base text-theme-secondary leading-relaxed">
                 Stop manually rewriting your resume for every job. Create tailored versions in seconds instead of hours.
               </p>
             </div>
@@ -155,9 +155,9 @@ function Dashboard() {
         {/* How It Works */}
         <div
           ref={howItWorksAnimation.ref}
-          className="max-w-4xl mx-auto py-16 sm:py-20 lg:py-24 border-t border-white/10"
+          className="max-w-4xl mx-auto py-16 sm:py-20 lg:py-24 border-t border-theme-subtle"
         >
-          <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center mb-12 sm:mb-16 lg:mb-20 animate-on-scroll ${
+          <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold text-theme text-center mb-12 sm:mb-16 lg:mb-20 animate-on-scroll ${
             howItWorksAnimation.isVisible ? 'animate-fade-in-up' : ''
           }`}>
             How It Works
@@ -167,14 +167,14 @@ function Dashboard() {
             <div className={`flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 lg:gap-8 text-center sm:text-left animate-on-scroll ${
               howItWorksAnimation.isVisible ? 'animate-slide-in-left delay-100' : ''
             }`}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-white text-black rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 animate-pulse-slow">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-white text-theme-inverse rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 animate-pulse-slow">
                 <span className="text-xl sm:text-2xl font-bold">1</span>
               </div>
               <div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-3">
+                <h3 className="text-xl sm:text-2xl font-semibold text-theme mb-2 sm:mb-3">
                   Upload Your Base Resume
                 </h3>
-                <p className="text-sm sm:text-base lg:text-lg text-gray-400 leading-relaxed">
+                <p className="text-sm sm:text-base lg:text-lg text-theme-secondary leading-relaxed">
                   Start with your existing resume. Our AI will parse your experience, skills, and education to create your professional profile.
                 </p>
               </div>
@@ -184,14 +184,14 @@ function Dashboard() {
             <div className={`flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 lg:gap-8 text-center sm:text-left animate-on-scroll ${
               howItWorksAnimation.isVisible ? 'animate-slide-in-left delay-300' : ''
             }`}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-white text-black rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 animate-pulse-slow" style={{ animationDelay: '1s' }}>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-white text-theme-inverse rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 animate-pulse-slow" style={{ animationDelay: '1s' }}>
                 <span className="text-xl sm:text-2xl font-bold">2</span>
               </div>
               <div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-3">
+                <h3 className="text-xl sm:text-2xl font-semibold text-theme mb-2 sm:mb-3">
                   Paste Any Job URL
                 </h3>
-                <p className="text-sm sm:text-base lg:text-lg text-gray-400 leading-relaxed">
+                <p className="text-sm sm:text-base lg:text-lg text-theme-secondary leading-relaxed">
                   Simply paste a job posting link from LinkedIn, Indeed, or any company career page. We'll automatically extract requirements and keywords.
                 </p>
               </div>
@@ -201,14 +201,14 @@ function Dashboard() {
             <div className={`flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 lg:gap-8 text-center sm:text-left animate-on-scroll ${
               howItWorksAnimation.isVisible ? 'animate-slide-in-left delay-500' : ''
             }`}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-white text-black rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 animate-pulse-slow" style={{ animationDelay: '2s' }}>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-white text-theme-inverse rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 animate-pulse-slow" style={{ animationDelay: '2s' }}>
                 <span className="text-xl sm:text-2xl font-bold">3</span>
               </div>
               <div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-3">
+                <h3 className="text-xl sm:text-2xl font-semibold text-theme mb-2 sm:mb-3">
                   Download & Apply
                 </h3>
-                <p className="text-sm sm:text-base lg:text-lg text-gray-400 leading-relaxed">
+                <p className="text-sm sm:text-base lg:text-lg text-theme-secondary leading-relaxed">
                   Get your perfectly tailored, ATS-optimized resume instantly. Download as DOCX or PDF and apply with confidence.
                 </p>
               </div>
@@ -223,10 +223,10 @@ function Dashboard() {
             finalCtaAnimation.isVisible ? 'animate-fade-in-up' : ''
           }`}
         >
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 sm:mb-6 lg:mb-8">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-theme mb-4 sm:mb-6 lg:mb-8">
             Ready to Land Your Next Interview?
           </h2>
-          <p className="text-base sm:text-lg text-gray-400 mb-8 sm:mb-10 lg:mb-12">
+          <p className="text-base sm:text-lg text-theme-secondary mb-8 sm:mb-10 lg:mb-12">
             Join professionals who are getting more interviews with tailored resumes.
           </p>
           <button
@@ -235,7 +235,7 @@ function Dashboard() {
           >
             Get Started →
           </button>
-          <p className="text-xs sm:text-sm text-gray-500 mt-3 sm:mt-4">Takes less than 2 minutes to get started</p>
+          <p className="text-xs sm:text-sm text-theme-tertiary mt-3 sm:mt-4">Takes less than 2 minutes to get started</p>
         </div>
       </div>
     </div>
@@ -288,12 +288,12 @@ function AppContent() {
     <div className="min-h-screen">
       {/* Top Navigation - Hidden on landing page and auth pages */}
       {!isLandingPage && !isAuthPage && (
-        <nav className="sticky top-0 z-50 border-b border-white/10" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <nav className="sticky top-0 z-50 border-b border-theme-subtle" style={{ backgroundColor: 'var(--bg-primary)' }}>
           <div className="container mx-auto px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between">
               <Link to="/" className="flex items-center gap-2">
-                <FileText className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-                <span className="text-xl sm:text-2xl font-bold text-white tracking-tight">Talor</span>
+                <FileText className="w-7 h-7 sm:w-8 sm:h-8 text-theme" />
+                <span className="text-xl sm:text-2xl font-bold text-theme tracking-tight">Talor</span>
               </Link>
 
               {/* Desktop Navigation */}
@@ -305,8 +305,8 @@ function AppContent() {
                     data-tour={link.tourId}
                     className={`flex items-center gap-2 py-2 px-1 min-h-[44px] transition-colors ${
                       location.pathname === link.to
-                        ? 'text-white'
-                        : 'text-gray-400 hover:text-white'
+                        ? 'text-theme'
+                        : 'text-theme-secondary hover:text-theme'
                     }`}
                     aria-current={location.pathname === link.to ? 'page' : undefined}
                   >
@@ -334,7 +334,7 @@ function AppContent() {
                 />
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="min-w-[44px] min-h-[44px] p-2 text-white hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
+                  className="min-w-[44px] min-h-[44px] p-2 text-theme hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center justify-center"
                   aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
                   aria-expanded={mobileMenuOpen}
                   aria-controls="mobile-nav-menu"
@@ -360,7 +360,7 @@ function AppContent() {
             >
               {/* Backdrop - clickable to close */}
               <div
-                className="absolute inset-0 bg-[#0a0a0f]/95 backdrop-blur-sm transition-opacity duration-200"
+                className="absolute inset-0 bg-theme/95 backdrop-blur-sm transition-opacity duration-200"
                 onClick={() => setMobileMenuOpen(false)}
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') {
@@ -372,7 +372,7 @@ function AppContent() {
 
               {/* Menu Panel */}
               <nav
-                className="relative border-t border-white/10 bg-[#0a0a0f] animate-slide-down"
+                className="relative border-t border-theme-subtle bg-theme animate-slide-down"
                 aria-label="Mobile navigation"
               >
                 <div className="container mx-auto px-4 py-4">
@@ -386,8 +386,8 @@ function AppContent() {
                         role="menuitem"
                         className={`flex items-center gap-3 p-3 min-h-[44px] rounded-xl transition-all duration-200 ${
                           location.pathname === link.to
-                            ? 'bg-white/10 text-white'
-                            : 'text-gray-300 hover:bg-white/5 hover:text-white active:scale-95'
+                            ? 'bg-theme-glass-10 text-theme'
+                            : 'text-theme-secondary hover:bg-theme-glass-5 hover:text-theme active:scale-95'
                         }`}
                         aria-current={location.pathname === link.to ? 'page' : undefined}
                       >

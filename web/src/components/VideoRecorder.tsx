@@ -185,7 +185,7 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
           className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
             recordingType === 'audio'
               ? 'bg-white text-black'
-              : 'bg-white/10 text-white hover:bg-white/20'
+              : 'bg-theme-glass-10 text-theme hover:bg-theme-glass-20'
           } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <Mic className="w-5 h-5" />
@@ -197,7 +197,7 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
           className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
             recordingType === 'video'
               ? 'bg-white text-black'
-              : 'bg-white/10 text-white hover:bg-white/20'
+              : 'bg-theme-glass-10 text-theme hover:bg-theme-glass-20'
           } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <Video className="w-5 h-5" />
@@ -226,9 +226,9 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
       )}
 
       {/* Current Question */}
-      <div className="glass rounded-xl p-6 border border-white/10">
+      <div className="glass rounded-xl p-6 border border-theme-subtle">
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-white font-semibold">
+          <h4 className="text-theme font-semibold">
             Question {currentQuestionIndex + 1} of {questions.length}
           </h4>
           <div className="flex gap-2">
@@ -236,7 +236,7 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
               <button
                 onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
                 disabled={isRecording}
-                className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-sm text-white transition-colors disabled:opacity-50"
+                className="px-3 py-1 bg-theme-glass-10 hover:bg-theme-glass-20 rounded-lg text-sm text-theme transition-colors disabled:opacity-50"
               >
                 Previous
               </button>
@@ -245,14 +245,14 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
               <button
                 onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
                 disabled={isRecording}
-                className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-sm text-white transition-colors disabled:opacity-50"
+                className="px-3 py-1 bg-theme-glass-10 hover:bg-theme-glass-20 rounded-lg text-sm text-theme transition-colors disabled:opacity-50"
               >
                 Next
               </button>
             )}
           </div>
         </div>
-        <p className="text-gray-300 text-lg leading-relaxed">
+        <p className="text-theme-secondary text-lg leading-relaxed">
           {questions[currentQuestionIndex]}
         </p>
       </div>
@@ -300,39 +300,39 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
       {/* Recordings List */}
       {recordings.length > 0 && (
         <div className="space-y-4">
-          <h4 className="text-white font-semibold text-lg">Your Recordings</h4>
+          <h4 className="text-theme font-semibold text-lg">Your Recordings</h4>
           {recordings.map((recording) => (
-            <div key={recording.id} className="glass rounded-xl p-4 border border-white/10">
+            <div key={recording.id} className="glass rounded-xl p-4 border border-theme-subtle">
               <div className="flex items-center gap-4">
                 <div className="flex-shrink-0">
                   {recording.type === 'video' ? (
-                    <Video className="w-8 h-8 text-white" />
+                    <Video className="w-8 h-8 text-theme" />
                   ) : (
-                    <Mic className="w-8 h-8 text-white" />
+                    <Mic className="w-8 h-8 text-theme" />
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="text-white font-medium">
+                  <div className="text-theme font-medium">
                     Question {(recording.questionIndex || 0) + 1} - {recording.type === 'video' ? 'Video' : 'Audio'}
                   </div>
-                  <div className="text-gray-400 text-sm">
+                  <div className="text-theme-secondary text-sm">
                     Duration: {formatTime(recording.duration)}
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => playRecording(recording)}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    className="p-2 hover:bg-theme-glass-10 rounded-lg transition-colors"
                     title="Play"
                   >
-                    <Play className="w-5 h-5 text-white" />
+                    <Play className="w-5 h-5 text-theme" />
                   </button>
                   <button
                     onClick={() => downloadRecording(recording)}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    className="p-2 hover:bg-theme-glass-10 rounded-lg transition-colors"
                     title="Download"
                   >
-                    <Download className="w-5 h-5 text-white" />
+                    <Download className="w-5 h-5 text-theme" />
                   </button>
                   <button
                     onClick={() => deleteRecording(recording.id)}
@@ -350,7 +350,7 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
 
       {/* Playback Video */}
       {playingRecording && (
-        <div className="fixed inset-0 bg-[#0a0a0f] z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-theme z-50 flex items-center justify-center p-4">
           <div className="max-w-4xl w-full">
             <div className="mb-4 flex justify-end">
               <button
@@ -360,7 +360,7 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
                     playbackVideoRef.current.pause()
                   }
                 }}
-                className="text-white hover:text-gray-300"
+                className="text-theme hover:text-theme-secondary"
               >
                 <Square className="w-8 h-8" />
               </button>
