@@ -961,16 +961,16 @@ export default function CareerPathDesigner() {
                         onClick={() => handleSelectExistingResume(resume.id)}
                         className="w-full glass rounded-lg p-4 border border-white/10 hover:border-white/30 transition-all text-left flex items-center justify-between group"
                       >
-                        <div className="flex items-center gap-3">
-                          <FileText className="w-5 h-5 text-white/60" />
-                          <div>
-                            <div className="text-white font-medium">{resume.filename || `Resume ${resume.id}`}</div>
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <FileText className="w-5 h-5 text-white/60 shrink-0" />
+                          <div className="min-w-0">
+                            <div className="text-white font-medium break-words">{resume.filename || `Resume ${resume.id}`}</div>
                             <div className="text-sm text-gray-400">
                               Uploaded {new Date(resume.created_at).toLocaleDateString()}
                             </div>
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors shrink-0" />
                       </button>
                     ))}
                   </div>
