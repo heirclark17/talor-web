@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
-import { FileEdit, Plus, Download, Loader2, Wand2, ChevronDown, Trash2, X } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { FileEdit, Plus, Download, Loader2, Wand2, ChevronDown, Trash2, X, Upload, FileText, Search } from 'lucide-react'
 import { api } from '../api/client'
 
 interface CoverLetter {
   id: number
   tailoredResumeId: number | null
+  baseResumeId: number | null
   jobTitle: string
   companyName: string
   tone: string
@@ -12,6 +13,15 @@ interface CoverLetter {
   createdAt: string
   updatedAt: string
 }
+
+interface ResumeItem {
+  id: number
+  filename: string
+  candidate_name: string | null
+  uploaded_at: string
+}
+
+type ResumeSource = 'none' | 'existing' | 'upload'
 
 const TONES = [
   { value: 'professional', label: 'Professional', desc: 'Formal and polished' },
@@ -23,6 +33,7 @@ export default function CoverLetterGenerator() {
   const [letters, setLetters] = useState<CoverLetter[]>([])
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
+  const [generationStage, setGenerationStage] = useState<'researching' | 'generating' | null>(null)
   const [showGenerator, setShowGenerator] = useState(false)
   const [selectedLetter, setSelectedLetter] = useState<CoverLetter | null>(null)
   const [editContent, setEditContent] = useState('')
@@ -33,9 +44,50 @@ export default function CoverLetterGenerator() {
   const [jobDescription, setJobDescription] = useState('')
   const [tone, setTone] = useState('professional')
 
+  // Resume picker state
+  const [resumes, setResumes] = useState<ResumeItem[]>([])
+  const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
+  const [resumeSource, setResumeSource] = useState<ResumeSource>('none')
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     loadLetters()
+    loadResumes()
   }, [])
+
+  async function loadResumes() {
+    try {
+      const res = await api.listResumes()
+      if (res.success && res.data) {
+        setResumes(res.data.resumes || [])
+      }
+    } catch (err) {
+      console.error('[CoverLetters] Load resumes error:', err)
+    }
+  }
+
+  async function handleFileUpload(file: File) {
+    if (!file) return
+    const maxSize = 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert('File must be under 10MB')
+      return
+    }
+    setUploading(true)
+    try {
+      const res = await api.uploadResume(file)
+      if (res.success && res.data) {
+        const newResume = res.data.resume || res.data
+        setResumes(prev => [newResume, ...prev])
+        setSelectedResumeId(newResume.id)
+      }
+    } catch (err) {
+      console.error('[CoverLetters] Upload error:', err)
+    } finally {
+      setUploading(false)
+    }
+  }
 
   async function loadLetters() {
     setLoading(true)
@@ -54,20 +106,31 @@ export default function CoverLetterGenerator() {
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault()
     setGenerating(true)
+    setGenerationStage('researching')
+
+    // Switch to "generating" stage after 5 seconds
+    const stageTimer = setTimeout(() => setGenerationStage('generating'), 5000)
+
     try {
-      const res = await api.generateCoverLetter({
+      const params: Record<string, any> = {
         job_title: jobTitle,
         company_name: companyName,
         job_description: jobDescription,
         tone,
-      })
+      }
+      if (resumeSource !== 'none' && selectedResumeId) {
+        params.base_resume_id = selectedResumeId
+      }
+
+      const res = await api.generateCoverLetter(params)
       if (res.success && res.data) {
         loadLetters()
         setShowGenerator(false)
         setJobTitle('')
         setCompanyName('')
         setJobDescription('')
-        // Select the new letter
+        setResumeSource('none')
+        setSelectedResumeId(null)
         if (res.data.cover_letter) {
           setSelectedLetter(res.data.cover_letter)
           setEditContent(res.data.cover_letter.content)
@@ -76,7 +139,9 @@ export default function CoverLetterGenerator() {
     } catch (err) {
       console.error('[CoverLetters] Generate error:', err)
     } finally {
+      clearTimeout(stageTimer)
       setGenerating(false)
+      setGenerationStage(null)
     }
   }
 
@@ -233,6 +298,108 @@ export default function CoverLetterGenerator() {
                 <label className="block text-sm text-theme-secondary mb-1">Company Name *</label>
                 <input required value={companyName} onChange={e => setCompanyName(e.target.value)} className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted" />
               </div>
+
+              {/* Resume Picker */}
+              <div>
+                <label className="block text-sm text-theme-secondary mb-2">Resume (Optional)</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setResumeSource('none'); setSelectedResumeId(null) }}
+                    className={`p-3 rounded-xl border text-sm text-center transition-all ${
+                      resumeSource === 'none' ? 'border-blue-500/50 bg-blue-500/10 text-theme' : 'border-theme-subtle text-theme-secondary hover:border-theme-muted'
+                    }`}
+                  >
+                    <X className="w-4 h-4 mx-auto mb-1" />
+                    <div className="font-medium">None</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setResumeSource('existing')}
+                    className={`p-3 rounded-xl border text-sm text-center transition-all ${
+                      resumeSource === 'existing' ? 'border-blue-500/50 bg-blue-500/10 text-theme' : 'border-theme-subtle text-theme-secondary hover:border-theme-muted'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4 mx-auto mb-1" />
+                    <div className="font-medium">Existing</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setResumeSource('upload')}
+                    className={`p-3 rounded-xl border text-sm text-center transition-all ${
+                      resumeSource === 'upload' ? 'border-blue-500/50 bg-blue-500/10 text-theme' : 'border-theme-subtle text-theme-secondary hover:border-theme-muted'
+                    }`}
+                  >
+                    <Upload className="w-4 h-4 mx-auto mb-1" />
+                    <div className="font-medium">Upload</div>
+                  </button>
+                </div>
+
+                {/* Existing resume dropdown */}
+                {resumeSource === 'existing' && (
+                  <div className="mt-2">
+                    {resumes.length === 0 ? (
+                      <p className="text-xs text-theme-tertiary py-2">No resumes uploaded yet. Use "Upload" instead.</p>
+                    ) : (
+                      <select
+                        value={selectedResumeId ?? ''}
+                        onChange={e => setSelectedResumeId(e.target.value ? Number(e.target.value) : null)}
+                        className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted text-sm"
+                      >
+                        <option value="">Select a resume...</option>
+                        {resumes.map(r => (
+                          <option key={r.id} value={r.id}>
+                            {r.candidate_name || r.filename} — {new Date(r.uploaded_at).toLocaleDateString()}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                )}
+
+                {/* File upload input */}
+                {resumeSource === 'upload' && (
+                  <div className="mt-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.docx"
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0]
+                        if (file) handleFileUpload(file)
+                      }}
+                    />
+                    {uploading ? (
+                      <div className="flex items-center gap-2 text-sm text-theme-secondary py-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Uploading...
+                      </div>
+                    ) : selectedResumeId && resumeSource === 'upload' ? (
+                      <div className="flex items-center justify-between bg-theme-glass-5 border border-theme-subtle rounded-xl px-4 py-2.5">
+                        <span className="text-sm text-theme truncate">
+                          {resumes.find(r => r.id === selectedResumeId)?.filename || 'Resume uploaded'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => { setSelectedResumeId(null); if (fileInputRef.current) fileInputRef.current.value = '' }}
+                          className="text-theme-tertiary hover:text-theme-secondary ml-2"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full px-4 py-2.5 bg-theme-glass-5 border border-dashed border-theme-muted rounded-xl text-sm text-theme-secondary hover:border-theme-muted hover:text-theme transition-all"
+                      >
+                        Choose .pdf or .docx file (max 10MB)
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label className="block text-sm text-theme-secondary mb-1">Job Description *</label>
                 <textarea required value={jobDescription} onChange={e => setJobDescription(e.target.value)} rows={5} className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted resize-none" placeholder="Paste the job description here..." />
@@ -255,8 +422,19 @@ export default function CoverLetterGenerator() {
                   ))}
                 </div>
               </div>
-              <button type="submit" disabled={generating} className="btn-primary w-full py-3 flex items-center justify-center gap-2">
-                {generating ? <><Loader2 className="w-5 h-5 animate-spin" /> Generating...</> : <><Wand2 className="w-5 h-5" /> Generate Cover Letter</>}
+              <button type="submit" disabled={generating || uploading} className="btn-primary w-full py-3 flex items-center justify-center gap-2">
+                {generating ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    {generationStage === 'researching' ? (
+                      <span className="flex items-center gap-1.5"><Search className="w-4 h-4" /> Researching {companyName || 'company'}...</span>
+                    ) : (
+                      <span>Generating cover letter...</span>
+                    )}
+                  </>
+                ) : (
+                  <><Wand2 className="w-5 h-5" /> Generate Cover Letter</>
+                )}
               </button>
             </form>
           </div>

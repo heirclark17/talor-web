@@ -2086,6 +2086,7 @@ class ApiClient {
     job_description: string;
     tone?: string;
     tailored_resume_id?: number;
+    base_resume_id?: number;
   }): Promise<ApiResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/api/cover-letters/generate`, {
