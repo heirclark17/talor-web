@@ -59,6 +59,32 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
     }
   }
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-500/10 text-red-500 border-red-500/20'
+      case 'medium':
+        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+      case 'low':
+        return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+      default:
+        return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+    }
+  }
+
+  const getRoiColor = (roi: string) => {
+    switch (roi.toLowerCase()) {
+      case 'high':
+        return 'text-green-500'
+      case 'medium':
+        return 'text-yellow-500'
+      case 'low':
+        return 'text-blue-500'
+      default:
+        return 'text-gray-500'
+    }
+  }
+
   const getLevelLabel = (level: string) => {
     switch (level) {
       case 'foundation':
@@ -199,6 +225,13 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                       >
                         {getLevelLabel(cert.level)}
                       </span>
+                      {cert.priority && (
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium border capitalize ${getPriorityColor(cert.priority)}`}
+                        >
+                          {cert.priority} priority
+                        </span>
+                      )}
                       <span className="text-xs text-gray-400 flex items-center gap-1">
                         <DollarSign className="w-3 h-3" />
                         {cert.estCostRange}
@@ -207,6 +240,12 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                         <Clock className="w-3 h-3" />
                         {cert.estStudyWeeks} weeks
                       </span>
+                      {cert.roiRating && (
+                        <span className={`text-xs flex items-center gap-1 ${getRoiColor(cert.roiRating)}`}>
+                          <TrendingUp className="w-3 h-3" />
+                          {cert.roiRating} ROI
+                        </span>
+                      )}
                       {cert.studyMaterials && cert.studyMaterials.length > 0 && (
                         <span className="text-xs text-blue-400 flex items-center gap-1">
                           <BookOpen className="w-3 h-3" />
@@ -253,6 +292,31 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                       <h5 className="text-sm font-semibold text-white mb-2">What This Certification Unlocks</h5>
                       <p className="text-sm text-gray-300" data-testid="cert-description">{cert.whatItUnlocks}</p>
                     </div>
+
+                    {/* Why Recommended */}
+                    {cert.whyRecommended && (
+                      <div>
+                        <h5 className="text-sm font-semibold text-white mb-2">Why Recommended</h5>
+                        <p className="text-sm text-gray-300">{cert.whyRecommended}</p>
+                      </div>
+                    )}
+
+                    {/* Skills Gained */}
+                    {cert.skillsGained && cert.skillsGained.length > 0 && (
+                      <div>
+                        <h5 className="text-sm font-semibold text-white mb-2">Skills Gained</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {cert.skillsGained.map((skill, skillIdx) => (
+                            <span
+                              key={skillIdx}
+                              className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs rounded"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Exam Details */}
                     {cert.examDetails && Object.keys(cert.examDetails).length > 0 && (
@@ -306,6 +370,20 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
                         <h5 className="text-xs font-semibold text-gray-400 mb-1">Study Time</h5>
                         <p className="text-sm text-white" data-testid="cert-duration">{cert.estStudyWeeks} weeks</p>
                       </div>
+                      {cert.difficulty && (
+                        <div>
+                          <h5 className="text-xs font-semibold text-gray-400 mb-1">Difficulty</h5>
+                          <p className="text-sm text-white capitalize">{cert.difficulty}</p>
+                        </div>
+                      )}
+                      {cert.roiRating && (
+                        <div>
+                          <h5 className="text-xs font-semibold text-gray-400 mb-1">ROI Rating</h5>
+                          <p className={`text-sm font-medium capitalize ${getRoiColor(cert.roiRating)}`} data-testid="cert-roi">
+                            {cert.roiRating}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Prerequisites */}

@@ -145,6 +145,11 @@ export interface Certification {
     practice?: string
   }>
   sourceCitations: string[]
+  priority?: 'high' | 'medium' | 'low'
+  roiRating?: string
+  difficulty?: string
+  skillsGained?: string[]
+  whyRecommended?: string
 }
 
 // ========== Education Types ==========
