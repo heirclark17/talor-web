@@ -49,6 +49,7 @@ export default function CareerPathDesigner() {
 
   // Basic Profile (Step 1)
   const [dreamRole, setDreamRole] = useState('')
+  const [jobUrl, setJobUrl] = useState('')
   const [currentRole, setCurrentRole] = useState('')
   const [currentIndustry, setCurrentIndustry] = useState('')
   const [yearsExperience, setYearsExperience] = useState(5)
@@ -104,6 +105,7 @@ export default function CareerPathDesigner() {
         setLikes(data.likes || [])
         setDislikes(data.dislikes || [])
         setDreamRole(data.dreamRole || '')
+        setJobUrl(data.jobUrl || '')
         setTargetRoleLevel(data.targetLevel || 'senior')
         setTargetIndustries(data.targetIndustries || [])
         setSpecificCompanies(data.specificCompanies || [])
@@ -227,6 +229,7 @@ export default function CareerPathDesigner() {
       likes,
       dislikes,
       dreamRole,
+      jobUrl,
       targetRoleLevel,
       targetIndustries,
       specificCompanies,
@@ -244,7 +247,7 @@ export default function CareerPathDesigner() {
       certificationAreasInterest
     }
     localStorage.setItem('careerPathIntake', JSON.stringify(data))
-  }, [currentRole, currentIndustry, yearsExperience, educationLevel, topTasks, tools, strengths, likes, dislikes, dreamRole, targetRoleLevel, targetIndustries, specificCompanies, timePerWeek, timeline, currentEmploymentStatus, location, willingToRelocate, inPersonVsRemote, learningStyle, preferredPlatforms, technicalBackground, transitionMotivation, specificTechnologiesInterest, certificationAreasInterest])
+  }, [currentRole, currentIndustry, yearsExperience, educationLevel, topTasks, tools, strengths, likes, dislikes, dreamRole, jobUrl, targetRoleLevel, targetIndustries, specificCompanies, timePerWeek, timeline, currentEmploymentStatus, location, willingToRelocate, inPersonVsRemote, learningStyle, preferredPlatforms, technicalBackground, transitionMotivation, specificTechnologiesInterest, certificationAreasInterest])
 
   // Auto-generate tasks when currentRole changes
   const [isGeneratingTasks, setIsGeneratingTasks] = useState(false)
@@ -344,18 +347,15 @@ export default function CareerPathDesigner() {
       setResumeId(resumeId)
       setUploadProgress(100)
 
-      if (!resumeResult.data.parsed_data) {
-        setError('Failed to parse resume. Please try again.')
-        setSelectedExistingResumeId(null)
-        setUploadProgress(0)
-        return
-      }
+      // getResume returns parsed fields directly on the object (skills, experience, etc.)
+      // unlike uploadResume which nests them under parsed_data
+      const parsedData = resumeResult.data.parsed_data || resumeResult.data
 
-      setResumeData(resumeResult.data.parsed_data)
+      setResumeData(parsedData)
 
       // Auto-fill fields from resume
-      if (resumeResult.data.parsed_data) {
-        const data = resumeResult.data.parsed_data
+      {
+        const data = parsedData
 
         // Parse arrays if they're stringified JSON
         let experience = data.experience || []
@@ -589,6 +589,7 @@ export default function CareerPathDesigner() {
         target_role_level: targetRoleLevel,
         target_industries: targetIndustries,
         specific_companies: specificCompanies,
+        job_url: jobUrl.trim() || undefined,
 
         // Timeline & Availability
         time_per_week: timePerWeek,
@@ -1184,6 +1185,21 @@ export default function CareerPathDesigner() {
                       className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
                       data-testid="dream-role-input"
                     />
+                  </div>
+
+                  {/* Job Posting URL (optional) */}
+                  <div>
+                    <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
+                      Job Posting URL <span className="text-gray-400 font-normal text-xs">(optional)</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={jobUrl}
+                      onChange={(e) => setJobUrl(e.target.value)}
+                      placeholder="https://linkedin.com/jobs/... or any job posting URL"
+                      className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
+                    />
+                    <p className="text-gray-500 text-xs mt-1">Paste a job posting URL to tailor your career plan to that specific role</p>
                   </div>
 
                   {/* Current Role */}
