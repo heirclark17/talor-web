@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Loader2, Sparkles, Save, Trash2, Edit, Check, X, Plus, ChevronDown, ChevronUp, Play } from 'lucide-react'
-import { getUserId } from '../utils/userSession'
-import { api } from '../api/client'
+import { api, getApiHeaders } from '../api/client'
+import { showSuccess, showError } from '../utils/toast'
 import PracticeSession from './PracticeSession'
 
 // API base URL - same logic as API client
@@ -65,9 +65,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       try {
         setLoadingStories(true)
         const response = await fetch(`${API_BASE_URL}/api/star-stories/list?tailored_resume_id=${tailoredResumeId}`, {
-          headers: {
-            'X-User-ID': getUserId(),
-          },
+          headers: getApiHeaders(),
         })
 
         if (response.ok) {
@@ -126,13 +124,13 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
 
     if (selectedExperiences.size === 0) {
       console.log('[STARStoryBuilder] No experiences selected, showing alert')
-      alert('Please select at least one experience')
+      showError('Please select at least one experience')
       return
     }
 
     if (!selectedTheme) {
       console.log('[STARStoryBuilder] No theme selected, showing alert')
-      alert('Please select a story theme')
+      showError('Please select a story theme')
       return
     }
 
@@ -142,10 +140,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
 
       const response = await fetch(`${API_BASE_URL}/api/interview-prep/generate-star-story`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': getUserId(),
-        },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           tailored_resume_id: tailoredResumeId,
           experience_indices: Array.from(selectedExperiences),
@@ -165,10 +160,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         // Save the generated story to database
         const saveResponse = await fetch(`${API_BASE_URL}/api/star-stories/`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-ID': getUserId(),
-          },
+          headers: getApiHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({
             tailored_resume_id: tailoredResumeId,
             title: data.story.title,
@@ -211,16 +203,16 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
             }
           }, 100)
 
-          alert('✓ STAR story generated and saved successfully!\n\nYou can now create another story by selecting different experiences and themes.')
+          showSuccess('STAR story generated and saved!')
         } else {
           throw new Error('Failed to save story: ' + (saveData.error || 'Unknown error'))
         }
       } else {
-        alert('Failed to generate story: ' + (data.error || 'Unknown error'))
+        showError('Failed to generate story: ' + (data.error || 'Unknown error'))
       }
     } catch (error: any) {
       console.error('Error generating story:', error)
-      alert('Failed to generate story: ' + error.message)
+      showError('Failed to generate story: ' + error.message)
     } finally {
       setGenerating(false)
     }
@@ -234,9 +226,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
     try {
       const response = await fetch(`${API_BASE_URL}/api/star-stories/${storyId}`, {
         method: 'DELETE',
-        headers: {
-          'X-User-ID': getUserId(),
-        },
+        headers: getApiHeaders(),
       })
 
       if (!response.ok) {
@@ -248,13 +238,13 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       if (data.success) {
         // Remove from local state
         setStories(stories.filter(s => s.id !== storyId))
-        alert('✓ STAR story deleted successfully!')
+        showSuccess('STAR story deleted')
       } else {
         throw new Error('Failed to delete story')
       }
     } catch (error: any) {
       console.error('Error deleting story:', error)
-      alert('Failed to delete story: ' + error.message)
+      showError('Failed to delete story: ' + error.message)
     }
   }
 
@@ -269,10 +259,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
     try {
       const response = await fetch(`${API_BASE_URL}/api/star-stories/${editingStory}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': getUserId(),
-        },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           title: editedStory.title,
           situation: editedStory.situation,
@@ -294,13 +281,13 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         setStories(stories.map(s => s.id === editingStory ? editedStory : s))
         setEditingStory(null)
         setEditedStory(null)
-        alert('✓ STAR story updated successfully!')
+        showSuccess('STAR story updated')
       } else {
         throw new Error('Failed to update story')
       }
     } catch (error: any) {
       console.error('Error updating story:', error)
-      alert('Failed to update story: ' + error.message)
+      showError('Failed to update story: ' + error.message)
     }
   }
 

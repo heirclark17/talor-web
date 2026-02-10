@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { getUserId, clearUserSession } from '../utils/userSession'
 import { useTheme } from '../contexts/ThemeContext'
+import { showSuccess } from '../utils/toast'
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme()
@@ -38,7 +39,7 @@ export default function Settings() {
     }
 
     clearUserSession()
-    alert('Local data cleared. A new session will be created.')
+    showSuccess('Local data cleared. A new session will be created.')
     setUserId(getUserId())
   }
 
@@ -53,19 +54,11 @@ export default function Settings() {
   }
 
   const handleContact = () => {
-    window.open('mailto:support@talor.app?subject=Web App Support', '_blank')
-  }
-
-  const handlePrivacy = () => {
-    window.open('https://talor.app/privacy', '_blank')
-  }
-
-  const handleTerms = () => {
-    window.open('https://talor.app/terms', '_blank')
+    window.open('mailto:support@talorme.com?subject=Web App Support', '_blank')
   }
 
   const handleHelp = () => {
-    window.open('https://talor.app/help', '_blank')
+    window.open('mailto:support@talorme.com?subject=Help Request', '_blank')
   }
 
   const getThemeLabel = () => {
@@ -227,9 +220,9 @@ export default function Settings() {
             Legal
           </h2>
           <div className="glass rounded-xl border border-theme-subtle overflow-hidden divide-y divide-theme-subtle">
-            <button
-              onClick={handlePrivacy}
-              className="w-full px-4 py-4 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"
+            <Link
+              to="/privacy"
+              className="px-4 py-4 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"
             >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-theme-glass-5 rounded-lg flex items-center justify-center">
@@ -237,20 +230,20 @@ export default function Settings() {
                 </div>
                 <span className="text-theme font-medium">Privacy Policy</span>
               </div>
-              <ExternalLink className="w-5 h-5 text-theme-tertiary" />
-            </button>
-            <button
-              onClick={handleTerms}
-              className="w-full px-4 py-4 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"
+              <ChevronRight className="w-5 h-5 text-theme-tertiary" />
+            </Link>
+            <Link
+              to="/terms"
+              className="px-4 py-4 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"
             >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-theme-glass-5 rounded-lg flex items-center justify-center">
-                  <ExternalLink className="w-5 h-5 text-theme-secondary" />
+                  <Shield className="w-5 h-5 text-theme-secondary" />
                 </div>
                 <span className="text-theme font-medium">Terms of Service</span>
               </div>
-              <ExternalLink className="w-5 h-5 text-theme-tertiary" />
-            </button>
+              <ChevronRight className="w-5 h-5 text-theme-tertiary" />
+            </Link>
           </div>
         </section>
 

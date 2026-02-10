@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
+import { showError } from '../utils/toast'
 
 // LocalStorage keys for clearing old tailored resumes
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
@@ -78,11 +79,11 @@ export default function UploadResume() {
           setUploadSuccess(false)
         }
       } else {
-        alert(`Failed to delete resume: ${result.error}`)
+        showError(`Failed to delete resume: ${result.error}`)
       }
     } catch (err: any) {
       console.error('Error deleting resume:', err)
-      alert(`Error deleting resume: ${err.message}`)
+      showError(`Error deleting resume: ${err.message}`)
     } finally {
       setDeletingId(null)
     }
@@ -92,12 +93,29 @@ export default function UploadResume() {
     const file = event.target.files?.[0]
     if (!file) return
 
+    // Validate file type
+    const allowedExtensions = ['.pdf', '.docx']
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ]
+    const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'))
+    if (!allowedExtensions.includes(fileExtension) && !allowedMimeTypes.includes(file.type)) {
+      setError('Invalid file type. Please upload a .pdf or .docx file.')
+      return
+    }
+
+    // Validate file size (10MB max)
+    const maxSize = 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      setError(`File is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 10MB.`)
+      return
+    }
+
     try {
       setError(null)
       setUploadSuccess(false)
       setUploading(true)
-
-      console.log('Uploading file:', file.name, 'Size:', file.size, 'bytes')
 
       // Upload file directly to backend
       const uploadResult = await api.uploadResume(file)

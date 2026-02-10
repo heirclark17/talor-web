@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bookmark, Calendar, Building2, Briefcase, Trash2, Loader2, Pin } from 'lucide-react'
 import { api } from '../api/client'
+import { showError } from '../utils/toast'
 
 interface SavedComparisonItem {
   id: number
@@ -61,7 +62,7 @@ export default function SavedComparisons() {
       setComparisons(comparisons.filter(c => c.id !== comparisonId))
     } catch (err: any) {
       console.error('Error deleting comparison:', err)
-      alert('Failed to delete comparison')
+      showError('Failed to delete comparison')
     }
   }
 
@@ -81,7 +82,7 @@ export default function SavedComparisons() {
       ))
     } catch (err: any) {
       console.error('Error toggling pin:', err)
-      alert('Failed to update pin status')
+      showError('Failed to update pin status')
     }
   }
 

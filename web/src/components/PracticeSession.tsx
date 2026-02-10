@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Play, Pause, RotateCcw, X, Clock, Mic, MicOff, CheckCircle, FileDown, Trash2 } from 'lucide-react'
 import { useFocusTrap } from '../hooks/useFocusTrap'
+import { showError } from '../utils/toast'
 
 interface STARStory {
   id?: string
@@ -125,7 +126,7 @@ export default function PracticeSession({ story, onClose }: Props) {
       setIsRecording(true)
     } catch (err) {
       console.error('Error accessing microphone:', err)
-      alert('Could not access microphone. Please check your permissions.')
+      showError('Could not access microphone. Please check your permissions.')
     }
   }
 

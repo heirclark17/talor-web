@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { getUserId } from '../utils/userSession'
 import {
   ChevronDown,
   ChevronUp,
@@ -16,7 +15,7 @@ import {
 } from 'lucide-react'
 import AILoadingScreen from './AILoadingScreen'
 import { CommonInterviewQuestion, CommonQuestionsData } from '../types/commonQuestions'
-import { api } from '../api/client'
+import { api, getApiHeaders } from '../api/client'
 
 interface CommonInterviewQuestionsProps {
   interviewPrepId: number
@@ -49,10 +48,7 @@ export default function CommonInterviewQuestions({
     try {
       const response = await fetch(`${api['baseUrl']}/api/interview-prep/common-questions/generate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': getUserId()
-        },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           interview_prep_id: interviewPrepId
         })
@@ -93,10 +89,7 @@ export default function CommonInterviewQuestions({
     try {
       const response = await fetch(`${api['baseUrl']}/api/interview-prep/common-questions/regenerate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': getUserId()
-        },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           interview_prep_id: interviewPrepId,
           question_id: questionId

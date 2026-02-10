@@ -16,6 +16,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { api } from '../api/client'
+import { showError } from '../utils/toast'
 import SearchFilter from '../components/SearchFilter'
 import { SkeletonCard } from '../components/SkeletonLoader'
 
@@ -130,10 +131,10 @@ export default function Home() {
       if (result.success) {
         setResumes((prev) => prev.filter((r) => r.id !== resumeId))
       } else {
-        alert(result.error || 'Failed to delete resume')
+        showError(result.error || 'Failed to delete resume')
       }
     } catch (err) {
-      alert('Failed to delete resume')
+      showError('Failed to delete resume')
     } finally {
       setDeletingId(null)
     }
@@ -152,10 +153,10 @@ export default function Home() {
         setCurrentFilename(filename)
         setAnalysisModal(true)
       } else {
-        alert(result.error || 'Failed to analyze resume')
+        showError(result.error || 'Failed to analyze resume')
       }
     } catch (err) {
-      alert('Failed to analyze resume')
+      showError('Failed to analyze resume')
     } finally {
       setAnalyzingId(null)
     }

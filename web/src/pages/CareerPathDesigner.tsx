@@ -725,6 +725,25 @@ export default function CareerPathDesigner() {
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Validate file type
+    const allowedExtensions = ['.pdf', '.doc', '.docx']
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ]
+    const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'))
+    if (!allowedExtensions.includes(fileExtension) && !allowedMimeTypes.includes(file.type)) {
+      setError('Invalid file type. Please upload a .pdf or .docx file.')
+      return
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      setError(`File is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 10MB.`)
+      return
+    }
+
     setResumeFile(file)
     setError(undefined)
     setUploadProgress(10)

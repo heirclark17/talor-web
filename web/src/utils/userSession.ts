@@ -9,6 +9,9 @@ const USER_ID_KEY = 'talor_user_id';
 // Module-level clerk user ID, set by setClerkUserId()
 let _clerkUserId: string | null = null;
 
+// Module-level cached auth token for API requests
+let _cachedAuthToken: string | null = null;
+
 /**
  * Set the Clerk user ID (called from ClerkProvider context)
  */
@@ -74,4 +77,18 @@ export function clearUserSession(): void {
  */
 export function hasExistingSession(): boolean {
   return localStorage.getItem(USER_ID_KEY) !== null;
+}
+
+/**
+ * Set cached auth token (called from Clerk sync hook)
+ */
+export function setAuthToken(token: string | null): void {
+  _cachedAuthToken = token;
+}
+
+/**
+ * Get cached auth token for API requests
+ */
+export function getAuthToken(): string | null {
+  return _cachedAuthToken;
 }

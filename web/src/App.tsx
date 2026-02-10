@@ -1,26 +1,32 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import { UserButton } from '@clerk/clerk-react'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit } from 'lucide-react'
-import UploadResume from './pages/UploadResume'
-import TailorResume from './pages/TailorResume'
-import InterviewPrep from './pages/InterviewPrep'
-import InterviewPrepList from './pages/InterviewPrepList'
-import StarStoriesList from './pages/StarStoriesList'
-import SavedComparisons from './pages/SavedComparisons'
-import CareerPathDesigner from './pages/CareerPathDesigner'
-import Home from './pages/Home'
-import SettingsPage from './pages/Settings'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2 } from 'lucide-react'
+import { Toaster } from 'react-hot-toast'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
-import ApplicationTracker from './pages/ApplicationTracker'
-import CoverLetterGenerator from './pages/CoverLetterGenerator'
-import OnboardingTour from './components/OnboardingTour'
 import ErrorBoundary from './components/ErrorBoundary'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useScrollAnimation } from './hooks/useScrollAnimation'
 import { useSessionMigration } from './hooks/useSessionMigration'
 import { useClerkUserSync } from './hooks/useClerkUserSync'
+
+// Lazy-loaded page components for code splitting
+const UploadResume = React.lazy(() => import('./pages/UploadResume'))
+const TailorResume = React.lazy(() => import('./pages/TailorResume'))
+const InterviewPrep = React.lazy(() => import('./pages/InterviewPrep'))
+const InterviewPrepList = React.lazy(() => import('./pages/InterviewPrepList'))
+const StarStoriesList = React.lazy(() => import('./pages/StarStoriesList'))
+const SavedComparisons = React.lazy(() => import('./pages/SavedComparisons'))
+const CareerPathDesigner = React.lazy(() => import('./pages/CareerPathDesigner'))
+const Home = React.lazy(() => import('./pages/Home'))
+const SettingsPage = React.lazy(() => import('./pages/Settings'))
+const ApplicationTracker = React.lazy(() => import('./pages/ApplicationTracker'))
+const CoverLetterGenerator = React.lazy(() => import('./pages/CoverLetterGenerator'))
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'))
+const TermsOfService = React.lazy(() => import('./pages/TermsOfService'))
+const NotFound = React.lazy(() => import('./pages/NotFound'))
+const OnboardingTour = React.lazy(() => import('./components/OnboardingTour'))
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -406,27 +412,41 @@ function AppContent() {
       {/* Main Content */}
       <main>
         <ErrorBoundary>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/sign-in/*" element={<SignIn />} />
-            <Route path="/sign-up/*" element={<SignUp />} />
+          <Suspense fallback={
+            <div className="min-h-[60vh] flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-theme-secondary" />
+            </div>
+          }>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/sign-in/*" element={<SignIn />} />
+              <Route path="/sign-up/*" element={<SignUp />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
 
-            {/* Protected routes */}
-            <Route path="/resumes" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/upload" element={<ProtectedRoute><UploadResume /></ProtectedRoute>} />
-            <Route path="/tailor" element={<ProtectedRoute><TailorResume /></ProtectedRoute>} />
-            <Route path="/applications" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
-            <Route path="/interview-preps" element={<ProtectedRoute><InterviewPrepList /></ProtectedRoute>} />
-            <Route path="/interview-prep/:tailoredResumeId" element={<ProtectedRoute><InterviewPrep /></ProtectedRoute>} />
-            <Route path="/star-stories" element={<ProtectedRoute><StarStoriesList /></ProtectedRoute>} />
-            <Route path="/cover-letters" element={<ProtectedRoute><CoverLetterGenerator /></ProtectedRoute>} />
-            <Route path="/saved-comparisons" element={<ProtectedRoute><SavedComparisons /></ProtectedRoute>} />
-            <Route path="/career-path" element={<ProtectedRoute><CareerPathDesigner /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-          </Routes>
+              {/* Protected routes */}
+              <Route path="/resumes" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/upload" element={<ProtectedRoute><UploadResume /></ProtectedRoute>} />
+              <Route path="/tailor" element={<ProtectedRoute><TailorResume /></ProtectedRoute>} />
+              <Route path="/applications" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
+              <Route path="/interview-preps" element={<ProtectedRoute><InterviewPrepList /></ProtectedRoute>} />
+              <Route path="/interview-prep/:tailoredResumeId" element={<ProtectedRoute><InterviewPrep /></ProtectedRoute>} />
+              <Route path="/star-stories" element={<ProtectedRoute><StarStoriesList /></ProtectedRoute>} />
+              <Route path="/cover-letters" element={<ProtectedRoute><CoverLetterGenerator /></ProtectedRoute>} />
+              <Route path="/saved-comparisons" element={<ProtectedRoute><SavedComparisons /></ProtectedRoute>} />
+              <Route path="/career-path" element={<ProtectedRoute><CareerPathDesigner /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+
+              {/* 404 catch-all */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </ErrorBoundary>
       </main>
+
+      {/* Toast notifications */}
+      <Toaster position="bottom-right" toastOptions={{ duration: 4000 }} />
 
       {/* Onboarding Tour - Shows on first visit */}
       {!isLandingPage && !isAuthPage && <OnboardingTour />}

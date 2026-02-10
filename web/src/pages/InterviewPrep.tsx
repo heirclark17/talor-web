@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getUserId } from '../utils/userSession'
 import {
   Loader2,
   AlertCircle,
@@ -36,7 +35,7 @@ import {
   CheckSquare,
   Sparkles
 } from 'lucide-react'
-import { api } from '../api/client'
+import { api, getApiHeaders } from '../api/client'
 import STARStoryBuilder from '../components/STARStoryBuilder'
 import CommonInterviewQuestions from '../components/CommonInterviewQuestions'
 import CertificationRecommendations from '../components/CertificationRecommendations'
@@ -334,9 +333,7 @@ export default function InterviewPrep() {
 
         // Also fetch the tailored resume to get base resume ID
         const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
-          headers: {
-            'X-User-ID': getUserId(),
-          },
+          headers: getApiHeaders(),
         })
 
         if (!tailoredResponse.ok) {
@@ -358,9 +355,7 @@ export default function InterviewPrep() {
 
           // Fetch base resume to get experiences
           const baseResponse = await fetch(`${API_BASE_URL}/api/resumes/${tailoredData.base_resume_id}`, {
-            headers: {
-              'X-User-ID': getUserId(),
-            },
+            headers: getApiHeaders(),
           })
 
           if (baseResponse.ok) {
@@ -409,9 +404,7 @@ export default function InterviewPrep() {
     try {
       // Fetch the tailored resume to get base resume ID
       const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
-        headers: {
-          'X-User-ID': getUserId(),
-        },
+        headers: getApiHeaders(),
       })
 
       if (tailoredResponse.ok) {
@@ -420,9 +413,7 @@ export default function InterviewPrep() {
 
         // Fetch base resume to get experiences
         const baseResponse = await fetch(`${API_BASE_URL}/api/resumes/${tailoredData.base_resume_id}`, {
-          headers: {
-            'X-User-ID': getUserId(),
-          },
+          headers: getApiHeaders(),
         })
 
         if (baseResponse.ok) {
@@ -551,10 +542,7 @@ export default function InterviewPrep() {
         try {
           const saveResponse = await fetch(`${API_BASE_URL}/api/interview-prep/${currentPrepId}/cache`, {
             method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-User-ID': getUserId(),
-            },
+            headers: getApiHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
               company_research: cacheData.companyResearch || null,
               strategic_news: cacheData.companyNews || null,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { getUserId } from '../utils/userSession'
+import { getApiHeaders } from '../api/client'
 import AILoadingScreen from './AILoadingScreen'
 import {
   Loader2,
@@ -161,10 +161,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
     try {
       const response = await fetch(`${API_BASE_URL}/api/interview-prep/generate-behavioral-technical-questions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': getUserId(),
-        },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ interview_prep_id: interviewPrepId }),
       })
 
@@ -205,10 +202,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
     try {
       const response = await fetch(`${API_BASE_URL}/api/interview-prep/generate-practice-star-story`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': getUserId(),
-        },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           interview_prep_id: interviewPrepId,
           question: questionText,
@@ -266,10 +260,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
     try {
       const response = await fetch(`${API_BASE_URL}/api/interview-prep/save-question-star-story`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': getUserId(),
-        },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           interview_prep_id: interviewPrepId,
           question_id: parseInt(questionKey.split('_')[1]),

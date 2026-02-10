@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Calendar, Briefcase, Trash2, Eye, Loader, AlertCircle, Sparkles } from 'lucide-react'
 import { api } from '../api/client'
+import { showError } from '../utils/toast'
 
 interface StarStory {
   id: number
@@ -71,7 +72,7 @@ export default function StarStoriesList() {
       }
     } catch (err) {
       console.error('Error deleting STAR story:', err)
-      alert('Failed to delete STAR story. Please try again.')
+      showError('Failed to delete STAR story. Please try again.')
     } finally {
       setDeletingId(null)
     }

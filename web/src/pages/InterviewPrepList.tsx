@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Calendar, MapPin, Trash2, Eye, Loader, AlertCircle } from 'lucide-react'
 import { api } from '../api/client'
+import { showError } from '../utils/toast'
 
 interface InterviewPrepItem {
   id: number
@@ -62,7 +63,7 @@ export default function InterviewPrepList() {
       setPreps(preps.filter(p => p.id !== prepId))
     } catch (err) {
       console.error('Error deleting interview prep:', err)
-      alert('Failed to delete interview prep. Please try again.')
+      showError('Failed to delete interview prep. Please try again.')
     } finally {
       setDeletingId(null)
     }

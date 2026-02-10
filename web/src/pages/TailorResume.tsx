@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save, RotateCcw, Bookmark, X, Plus } from 'lucide-react'
-import { api } from '../api/client'
-import { getUserId } from '../utils/userSession'
+import { api, getApiHeaders } from '../api/client'
+import { showSuccess, showError } from '../utils/toast'
 import ChangeExplanation from '../components/ChangeExplanation'
 import ResumeAnalysis from '../components/ResumeAnalysis'
 import KeywordPanel from '../components/KeywordPanel'
@@ -247,10 +247,7 @@ export default function TailorResume() {
           const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
           const response = await fetch(`${API_BASE_URL}/api/saved-comparisons/${comparisonId}`, {
-            headers: {
-              'Content-Type': 'application/json',
-              'X-User-ID': getUserId()
-            }
+            headers: getApiHeaders({ 'Content-Type': 'application/json' }),
           })
 
           if (!response.ok) {
@@ -616,7 +613,7 @@ export default function TailorResume() {
 
   const exportToPDF = () => {
     if (!tailoredResume?.id) {
-      alert('Please tailor a resume first before printing')
+      showError('Please tailor a resume first')
       return
     }
     window.print()
@@ -676,9 +673,7 @@ export default function TailorResume() {
 
       // Fetch the tailored resume
       const response = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredId}`, {
-        headers: {
-          'X-User-ID': getUserId()
-        }
+        headers: getApiHeaders(),
       })
 
       if (!response.ok) {
@@ -774,7 +769,7 @@ export default function TailorResume() {
 
   const handleDownloadResume = async (format: 'pdf' | 'docx') => {
     if (!tailoredResume?.id) {
-      alert('Please tailor a resume first before downloading')
+      showError('Please tailor a resume first')
       return
     }
 
@@ -799,11 +794,11 @@ export default function TailorResume() {
         console.log(`Resume downloaded successfully: ${filename}`)
       } else {
         console.error('Export failed:', result.error)
-        alert(result.error || 'Error downloading resume')
+        showError(result.error || 'Error downloading resume')
       }
     } catch (error) {
       console.error('Error downloading resume:', error)
-      alert('Error downloading resume')
+      showError('Error downloading resume')
     }
   }
 
@@ -1089,10 +1084,10 @@ export default function TailorResume() {
         throw new Error(result.error || 'Failed to save comparison')
       }
 
-      alert('Comparison saved successfully! View it in the Saved menu.')
+      showSuccess('Comparison saved! View it in the Saved menu.')
     } catch (err: any) {
       console.error('Error saving comparison:', err)
-      alert('Failed to save comparison')
+      showError('Failed to save comparison')
     }
   }
 

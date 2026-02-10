@@ -3,7 +3,7 @@
  * Replaces Electron IPC calls for web deployment
  */
 
-import { getUserId } from '../utils/userSession';
+import { getUserId, getAuthToken } from '../utils/userSession';
 
 /**
  * Convert snake_case keys to camelCase recursively
@@ -42,6 +42,22 @@ export interface ApiResponse<T = any> {
   error?: string;
 }
 
+/**
+ * Get auth headers for direct fetch calls outside the API client.
+ * Includes both X-User-ID and Authorization Bearer token.
+ */
+export function getApiHeaders(extra?: Record<string, string>): Record<string, string> {
+  const headers: Record<string, string> = {
+    'X-User-ID': getUserId(),
+    ...extra,
+  };
+  const token = getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -50,13 +66,20 @@ class ApiClient {
   }
 
   /**
-   * Get common headers with user ID
+   * Get common headers with user ID and auth token
    */
   private getHeaders(additionalHeaders?: Record<string, string>): HeadersInit {
-    return {
+    const headers: Record<string, string> = {
       'X-User-ID': getUserId(),
       ...additionalHeaders,
     };
+
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return headers;
   }
 
   /**
