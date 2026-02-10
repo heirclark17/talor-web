@@ -123,6 +123,7 @@ export default function TailorResume() {
   const [extractionError, setExtractionError] = useState<{company?: string; title?: string}>({})
 
   const [loading, setLoading] = useState(false)
+  const [loadingComplete, setLoadingComplete] = useState(false)
   const [loadingResumes, setLoadingResumes] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -719,11 +720,16 @@ export default function TailorResume() {
       setSuccess(true)
 
       console.log('Successfully restored tailored resume:', tailoredId)
+
+      // Signal completion so progress bar reaches 100% before unmount
+      setLoadingComplete(true)
+      await new Promise(r => setTimeout(r, 600))
+      setLoadingComplete(false)
+      setLoading(false)
     } catch (err: any) {
       console.error('Error loading tailored resume:', err)
       setError(err.message)
       localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
-    } finally {
       setLoading(false)
     }
   }
@@ -1054,9 +1060,14 @@ export default function TailorResume() {
 
       setSuccess(true)
       setShowComparison(true)
+
+      // Signal completion so progress bar reaches 100% before unmount
+      setLoadingComplete(true)
+      await new Promise(r => setTimeout(r, 600))
+      setLoadingComplete(false)
+      setLoading(false)
     } catch (err: any) {
       setError(err.message)
-    } finally {
       setLoading(false)
     }
   }
@@ -2352,7 +2363,7 @@ export default function TailorResume() {
               { id: 'rewrite', label: 'Rewriting resume content', description: 'Tailoring bullets for maximum impact...' },
               { id: 'finalize', label: 'Finalizing tailored document', description: 'Formatting and polishing your resume...' },
             ]}
-            progress={{ type: 'estimated', estimatedDurationMs: 25000, isComplete: false }}
+            progress={{ type: 'estimated', estimatedDurationMs: 25000, isComplete: loadingComplete }}
           />
         </div>
       )}

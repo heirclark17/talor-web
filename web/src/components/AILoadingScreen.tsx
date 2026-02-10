@@ -222,7 +222,7 @@ export default function AILoadingScreen({
 
   if (fullScreen) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-black/80">
+      <div className="min-h-screen flex items-center justify-center p-8 bg-[#0a0a0f]">
         {content}
       </div>
     )

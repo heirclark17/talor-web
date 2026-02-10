@@ -189,6 +189,7 @@ export default function InterviewPrep() {
   const { tailoredResumeId } = useParams<{ tailoredResumeId: string }>()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const [loadingComplete, setLoadingComplete] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [warning, setWarning] = useState<string | null>(null)
@@ -395,6 +396,10 @@ export default function InterviewPrep() {
       }
     } finally {
       if (!error && !generating) {
+        // Signal completion so progress bar reaches 100% before unmount
+        setLoadingComplete(true)
+        await new Promise(r => setTimeout(r, 600))
+        setLoadingComplete(false)
         setLoading(false)
       }
     }
@@ -733,7 +738,7 @@ export default function InterviewPrep() {
         steps={[
           { id: 'load', label: 'Loading saved data' },
         ]}
-        progress={{ type: 'estimated', estimatedDurationMs: 3000, isComplete: false }}
+        progress={{ type: 'estimated', estimatedDurationMs: 3000, isComplete: loadingComplete }}
       />
     )
   }

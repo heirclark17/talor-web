@@ -129,6 +129,7 @@ interface Props {
 
 export default function BehavioralTechnicalQuestions({ interviewPrepId, companyName, jobTitle }: Props) {
   const [loading, setLoading] = useState(false)
+  const [loadingComplete, setLoadingComplete] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [questionsData, setQuestionsData] = useState<QuestionsData | null>(null)
   const [activeTab, setActiveTab] = useState<'behavioral' | 'technical'>('behavioral')
@@ -178,12 +179,16 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
       const result = await response.json()
       if (result.success) {
         setQuestionsData(result.data)
+        // Signal completion so progress bar reaches 100% before unmount
+        setLoadingComplete(true)
+        await new Promise(r => setTimeout(r, 600))
+        setLoadingComplete(false)
+        setLoading(false)
       } else {
         throw new Error(result.error || 'Failed to generate questions')
       }
     } catch (err: any) {
       setError(err.message)
-    } finally {
       setLoading(false)
     }
   }
@@ -365,7 +370,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
           { id: 'technical', label: 'Building technical questions', description: 'Creating role-specific technical scenarios...' },
           { id: 'finalize', label: 'Finalizing question set', description: 'Organizing and prioritizing questions...' },
         ]}
-        progress={{ type: 'estimated', estimatedDurationMs: 40000, isComplete: false }}
+        progress={{ type: 'estimated', estimatedDurationMs: 40000, isComplete: loadingComplete }}
       />
     )
   }

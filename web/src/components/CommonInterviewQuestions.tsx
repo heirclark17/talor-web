@@ -32,6 +32,7 @@ export default function CommonInterviewQuestions({
   jobTitle
 }: CommonInterviewQuestionsProps) {
   const [loading, setLoading] = useState(false)
+  const [loadingComplete, setLoadingComplete] = useState(false)
   const [data, setData] = useState<CommonQuestionsData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set())
@@ -72,9 +73,14 @@ export default function CommonInterviewQuestions({
         defaultTabs[q.id] = 'why-hard'
       })
       setActiveTab(defaultTabs)
+
+      // Signal completion so progress bar reaches 100% before unmount
+      setLoadingComplete(true)
+      await new Promise(r => setTimeout(r, 600))
+      setLoadingComplete(false)
+      setLoading(false)
     } catch (err: any) {
       setError(err.message || 'Failed to generate questions')
-    } finally {
       setLoading(false)
     }
   }
@@ -219,7 +225,7 @@ export default function CommonInterviewQuestions({
           { id: 'generate', label: 'Generating tailored questions', description: 'Creating role-specific interview questions...' },
           { id: 'answers', label: 'Building sample answers', description: 'Crafting answers using your experience...' },
         ]}
-        progress={{ type: 'estimated', estimatedDurationMs: 45000, isComplete: false }}
+        progress={{ type: 'estimated', estimatedDurationMs: 45000, isComplete: loadingComplete }}
       />
     )
   }
