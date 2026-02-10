@@ -14,6 +14,59 @@ import {
 type WizardStep = 'welcome' | 'upload' | 'questions' | 'generating' | 'results'
 type QuestionStep = 1 | 2 | 3 | 4 | 5
 
+function inferStrengths(experience: any[], skills: string[], summary: string): string[] {
+  const allText = [
+    summary || '',
+    ...experience.map((e: any) => [
+      e.title || '',
+      e.company || '',
+      ...(Array.isArray(e.responsibilities) ? e.responsibilities : []),
+      ...(Array.isArray(e.bullets) ? e.bullets : []),
+      e.description || '',
+    ].join(' ')),
+    ...skills,
+  ].join(' ').toLowerCase()
+
+  const strengthPatterns: [RegExp, string, number][] = [
+    // Leadership & Management
+    [/\b(led|lead|managed|directed|supervised|oversaw|coordinated|spearheaded|headed|mentored|coached)\b/g, 'Leadership & Team Management', 0],
+    [/\b(stakeholder|executive|c-suite|board|cross-functional|cross functional|collaborate|collaboration|partner)\b/g, 'Stakeholder & Executive Communication', 0],
+    [/\b(project manag|program manag|pmo|portfolio|agile|scrum|kanban|sprint|roadmap|milestone)\b/g, 'Program & Project Management', 0],
+    // Strategic
+    [/\b(strateg|vision|roadmap|transform|moderniz|initiative|innovation|architect)\b/g, 'Strategic Planning & Vision', 0],
+    [/\b(budget|cost|financial|roi|revenue|savings|p&l|forecast|resource allocation)\b/g, 'Budget & Financial Management', 0],
+    // Technical
+    [/\b(security|cyber|vulnerability|threat|incident|soc |siem|firewall|penetration|compliance)\b/g, 'Cybersecurity & Risk Management', 0],
+    [/\b(cloud|aws|azure|gcp|infrastructure|devops|ci\/cd|kubernetes|docker|terraform)\b/g, 'Cloud & Infrastructure', 0],
+    [/\b(develop|engineer|code|software|application|api|database|full.?stack|backend|frontend)\b/g, 'Software Development & Engineering', 0],
+    [/\b(data|analytics|reporting|dashboard|metrics|kpi|insight|visualization|tableau|power bi)\b/g, 'Data Analysis & Reporting', 0],
+    // Process & Operations
+    [/\b(process|improv|optimi|efficien|automat|streamlin|workflow|operational excellence)\b/g, 'Process Improvement & Optimization', 0],
+    [/\b(vendor|third.?party|contract|procurement|negotiat|supplier|outsourc)\b/g, 'Vendor & Contract Management', 0],
+    [/\b(risk|governance|audit|compliance|regulat|framework|nist|iso|sox|hipaa|pci|gdpr)\b/g, 'Risk & Compliance Management', 0],
+    // People & Communication
+    [/\b(train|mentor|develop talent|onboard|team building|culture|retention|hiring|recruit)\b/g, 'Talent Development & Mentoring', 0],
+    [/\b(present|communicat|report|document|brief|written|verbal|public speak)\b/g, 'Communication & Presentation', 0],
+    [/\b(problem.?solv|troubleshoot|root cause|diagnos|resolv|debug|investigat)\b/g, 'Problem Solving & Troubleshooting', 0],
+    // Delivery
+    [/\b(deliver|implement|deploy|launch|execut|ship|release|go.?live|migration)\b/g, 'Execution & Delivery', 0],
+    [/\b(client|customer|account|relationship|satisfaction|nps|retention|success)\b/g, 'Client Relationship Management', 0],
+  ]
+
+  // Count matches for each strength
+  const scored = strengthPatterns.map(([regex, label]) => {
+    const matches = allText.match(regex)
+    return { label, count: matches ? matches.length : 0 }
+  })
+
+  // Sort by match count descending, take top 3 with at least 1 match
+  return scored
+    .filter(s => s.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
+    .map(s => s.label)
+}
+
 function inferIndustry(company: string, title: string, skills: string[]): string {
   const all = `${company} ${title} ${skills.join(' ')}`.toLowerCase()
 
@@ -448,6 +501,10 @@ export default function CareerPathDesigner() {
             setEducationLevel('associates')
           }
         }
+
+        // Infer top strengths from resume content
+        const inferredStrengths = inferStrengths(experience, skills, data.summary || '')
+        if (inferredStrengths.length > 0) setStrengths(inferredStrengths)
       }
     } catch (error: any) {
       setError(error.message || 'Failed to load resume')
@@ -573,24 +630,9 @@ export default function CareerPathDesigner() {
         // Set tools/skills
         if (skills.length > 0) setTools(skills.slice(0, 15))
 
-        // Extract strengths from summary
-        const strengthsList: string[] = []
-        if (data.summary && typeof data.summary === 'string') {
-          const summaryLower = data.summary.toLowerCase()
-          const indicators = [
-            { keywords: ['leadership', 'lead', 'led', 'manage'], strength: 'Leadership & Team Management' },
-            { keywords: ['communication', 'stakeholder', 'present'], strength: 'Communication & Stakeholder Management' },
-            { keywords: ['problem-solving', 'troubleshoot', 'resolve'], strength: 'Problem Solving' },
-            { keywords: ['strategic', 'planning', 'roadmap'], strength: 'Strategic Planning' },
-            { keywords: ['technical', 'engineering', 'development'], strength: 'Technical Expertise' }
-          ]
-          indicators.forEach(({ keywords, strength }) => {
-            if (keywords.some(kw => summaryLower.includes(kw)) && !strengthsList.includes(strength)) {
-              strengthsList.push(strength)
-            }
-          })
-        }
-        if (strengthsList.length >= 2) setStrengths(strengthsList.slice(0, 5))
+        // Infer top strengths from resume content
+        const inferredStrengths = inferStrengths(experience, skills, data.summary || '')
+        if (inferredStrengths.length > 0) setStrengths(inferredStrengths)
 
         // Determine education level
         if (education.some((e: any) => e.degree?.toLowerCase().includes('phd'))) {
@@ -1466,7 +1508,14 @@ export default function CareerPathDesigner() {
 
                   {/* Strengths */}
                   <div>
-                    <label className="text-white font-semibold mb-2 block">Your Top Strengths (2-5) *</label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-white font-semibold">Your Top Strengths (2-5) *</label>
+                      {strengths.some(s => s.trim()) && resumeData && (
+                        <span className="text-xs text-blue-400">
+                          ✨ AI-inferred from resume
+                        </span>
+                      )}
+                    </div>
                     {strengths.map((strength, idx) => (
                       <input
                         key={idx}
