@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { getUserId } from '../utils/userSession'
 import {
   ChevronDown,
   ChevronUp,
@@ -49,7 +50,7 @@ export default function CommonInterviewQuestions({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': localStorage.getItem('talor_user_id') || ''
+          'X-User-ID': getUserId()
         },
         body: JSON.stringify({
           interview_prep_id: interviewPrepId
@@ -88,7 +89,7 @@ export default function CommonInterviewQuestions({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': localStorage.getItem('talor_user_id') || ''
+          'X-User-ID': getUserId()
         },
         body: JSON.stringify({
           interview_prep_id: interviewPrepId,

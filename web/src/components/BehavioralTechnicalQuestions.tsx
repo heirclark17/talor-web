@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { getUserId } from '../utils/userSession'
 import AILoadingScreen from './AILoadingScreen'
 import {
   Loader2,
@@ -161,7 +162,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          'X-User-ID': getUserId(),
         },
         body: JSON.stringify({ interview_prep_id: interviewPrepId }),
       })
@@ -201,7 +202,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          'X-User-ID': getUserId(),
         },
         body: JSON.stringify({
           interview_prep_id: interviewPrepId,
@@ -262,7 +263,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          'X-User-ID': getUserId(),
         },
         body: JSON.stringify({
           interview_prep_id: interviewPrepId,

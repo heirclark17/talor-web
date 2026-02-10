@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { getUserId } from '../utils/userSession'
 import {
   Loader2,
   AlertCircle,
@@ -333,7 +334,7 @@ export default function InterviewPrep() {
         // Also fetch the tailored resume to get base resume ID
         const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
           headers: {
-            'X-User-ID': localStorage.getItem('talor_user_id') || '',
+            'X-User-ID': getUserId(),
           },
         })
 
@@ -357,7 +358,7 @@ export default function InterviewPrep() {
           // Fetch base resume to get experiences
           const baseResponse = await fetch(`${API_BASE_URL}/api/resumes/${tailoredData.base_resume_id}`, {
             headers: {
-              'X-User-ID': localStorage.getItem('talor_user_id') || '',
+              'X-User-ID': getUserId(),
             },
           })
 
@@ -404,7 +405,7 @@ export default function InterviewPrep() {
       // Fetch the tailored resume to get base resume ID
       const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
         headers: {
-          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          'X-User-ID': getUserId(),
         },
       })
 
@@ -415,7 +416,7 @@ export default function InterviewPrep() {
         // Fetch base resume to get experiences
         const baseResponse = await fetch(`${API_BASE_URL}/api/resumes/${tailoredData.base_resume_id}`, {
           headers: {
-            'X-User-ID': localStorage.getItem('talor_user_id') || '',
+            'X-User-ID': getUserId(),
           },
         })
 
@@ -547,7 +548,7 @@ export default function InterviewPrep() {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
-              'X-User-ID': localStorage.getItem('talor_user_id') || '',
+              'X-User-ID': getUserId(),
             },
             body: JSON.stringify({
               company_research: cacheData.companyResearch || null,

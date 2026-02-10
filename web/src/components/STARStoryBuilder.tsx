@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Loader2, Sparkles, Save, Trash2, Edit, Check, X, Plus, ChevronDown, ChevronUp, Play } from 'lucide-react'
+import { getUserId } from '../utils/userSession'
 import { api } from '../api/client'
 import PracticeSession from './PracticeSession'
 
@@ -65,7 +66,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         setLoadingStories(true)
         const response = await fetch(`${API_BASE_URL}/api/star-stories/list?tailored_resume_id=${tailoredResumeId}`, {
           headers: {
-            'X-User-ID': localStorage.getItem('talor_user_id') || '',
+            'X-User-ID': getUserId(),
           },
         })
 
@@ -143,7 +144,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          'X-User-ID': getUserId(),
         },
         body: JSON.stringify({
           tailored_resume_id: tailoredResumeId,
@@ -166,7 +167,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-User-ID': localStorage.getItem('talor_user_id') || '',
+            'X-User-ID': getUserId(),
           },
           body: JSON.stringify({
             tailored_resume_id: tailoredResumeId,
@@ -234,7 +235,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
       const response = await fetch(`${API_BASE_URL}/api/star-stories/${storyId}`, {
         method: 'DELETE',
         headers: {
-          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          'X-User-ID': getUserId(),
         },
       })
 
@@ -270,7 +271,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': localStorage.getItem('talor_user_id') || '',
+          'X-User-ID': getUserId(),
         },
         body: JSON.stringify({
           title: editedStory.title,

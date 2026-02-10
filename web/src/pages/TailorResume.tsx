@@ -243,13 +243,12 @@ export default function TailorResume() {
       if (comparisonId && !tailoredResume && !loading) {
         console.log('Loading saved comparison:', comparisonId)
         try {
-          const userId = localStorage.getItem('talor_user_id')
           const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
           const response = await fetch(`${API_BASE_URL}/api/saved-comparisons/${comparisonId}`, {
             headers: {
               'Content-Type': 'application/json',
-              'X-User-ID': userId || ''
+              'X-User-ID': getUserId()
             }
           })
 
@@ -672,13 +671,12 @@ export default function TailorResume() {
   const loadTailoredResumeById = async (tailoredId: number) => {
     try {
       setLoading(true)
-      const userId = localStorage.getItem('talor_user_id')
       const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
       // Fetch the tailored resume
       const response = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredId}`, {
         headers: {
-          'X-User-ID': userId || ''
+          'X-User-ID': getUserId()
         }
       })
 
