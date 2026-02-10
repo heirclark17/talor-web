@@ -1127,7 +1127,7 @@ export default function CareerPathDesigner() {
                         <h3 className="text-xl font-semibold text-white mb-2">
                           Resume uploaded successfully!
                         </h3>
-                        <p className="text-gray-400 mb-4 max-w-full truncate px-4">
+                        <p className="text-gray-400 mb-4 truncate px-4">
                           {resumeFile.name}
                         </p>
                         <button
@@ -1153,7 +1153,7 @@ export default function CareerPathDesigner() {
                 <div className="flex items-start gap-3">
                   <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-red-400 mb-3">{error}</p>
+                    <p className="text-red-400 mb-3 break-words">{error}</p>
                     {(error.toLowerCase().includes('failed') || error.toLowerCase().includes('network') || error.toLowerCase().includes('timeout')) && (
                       <button
                         onClick={() => setError(undefined)}
@@ -1814,7 +1814,7 @@ export default function CareerPathDesigner() {
                 <div className="flex items-start gap-3">
                   <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-red-400 mb-3">{error}</p>
+                    <p className="text-red-400 mb-3 break-words">{error}</p>
                     {(error.toLowerCase().includes('failed') || error.toLowerCase().includes('network') || error.toLowerCase().includes('timeout')) && (
                       <button
                         onClick={() => setError(undefined)}
@@ -1902,7 +1902,7 @@ export default function CareerPathDesigner() {
             <h2 className="text-3xl font-bold text-white mb-4">
               Crafting Your Personalized Career Roadmap
             </h2>
-            <p className="text-lg text-gray-400 mb-2">
+            <p className="text-lg text-gray-400 mb-2 break-words">
               {jobMessage || `Our AI is researching ${dreamRole} opportunities with real-world data...`}
             </p>
             <p className="text-sm text-gray-500 mb-8">
@@ -2067,7 +2067,7 @@ export default function CareerPathDesigner() {
                 </div>
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-white mb-2">Your Career Transition Plan</h1>
-                  <p className="text-gray-400 mb-4">{plan.profileSummary || 'Your personalized career transition roadmap'}</p>
+                  <p className="text-gray-400 mb-4 break-words">{plan.profileSummary || 'Your personalized career transition roadmap'}</p>
                   <div className="flex items-center gap-4 text-sm">
                     {plan.generatedAt && (
                       <>

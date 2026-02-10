@@ -108,7 +108,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
   }, [plan])
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 break-words">
       {/* ===== QUICK START SECTION ===== */}
       <div className="glass rounded-xl border-2 border-blue-500/30 overflow-hidden bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10">
         <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3">
