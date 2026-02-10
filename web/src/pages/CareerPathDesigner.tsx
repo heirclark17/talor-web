@@ -1085,7 +1085,7 @@ export default function CareerPathDesigner() {
                         <h3 className="text-xl font-semibold text-white mb-2">
                           Resume uploaded successfully!
                         </h3>
-                        <p className="text-gray-400 mb-4">
+                        <p className="text-gray-400 mb-4 max-w-full truncate px-4">
                           {resumeFile.name}
                         </p>
                         <button
