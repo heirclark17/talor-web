@@ -8,7 +8,7 @@ import {
   FileText, Download, RefreshCw, ArrowLeft, Loader2, Upload,
   Check, ChevronRight, Target, Clock, MapPin, X, ChevronDown,
   Users, GraduationCap, Heart, Lightbulb, Building, Globe,
-  Zap, Code, Shield, TrendingDown, FolderOpen
+  Zap, Code, Shield, TrendingDown, FolderOpen, Trash2
 } from 'lucide-react'
 
 type WizardStep = 'welcome' | 'upload' | 'questions' | 'generating' | 'results'
@@ -125,23 +125,47 @@ export default function CareerPathDesigner() {
     }
   }, [])
 
+  // Reusable function to refresh saved plans list
+  const refreshSavedPlans = async () => {
+    setLoadingSavedPlans(true)
+    try {
+      const result = await api.listCareerPlans()
+      if (result.success && Array.isArray(result.data)) {
+        setSavedPlans(result.data)
+      }
+    } catch (err) {
+      console.error('Failed to load saved career plans:', err)
+    } finally {
+      setLoadingSavedPlans(false)
+    }
+  }
+
   // Load saved career plans on mount
   useEffect(() => {
-    const loadSavedPlans = async () => {
-      setLoadingSavedPlans(true)
-      try {
-        const result = await api.listCareerPlans()
-        if (result.success && Array.isArray(result.data)) {
-          setSavedPlans(result.data)
-        }
-      } catch (err) {
-        console.error('Failed to load saved career plans:', err)
-      } finally {
-        setLoadingSavedPlans(false)
-      }
-    }
-    loadSavedPlans()
+    refreshSavedPlans()
   }, [])
+
+  // Delete a saved career plan
+  const [deletingPlanId, setDeletingPlanId] = useState<number | null>(null)
+
+  const handleDeletePlan = async (e: React.MouseEvent, planId: number) => {
+    e.stopPropagation() // Prevent triggering the load action
+    if (!confirm('Are you sure you want to delete this career plan?')) return
+
+    setDeletingPlanId(planId)
+    try {
+      const result = await api.deleteCareerPlan(planId)
+      if (result.success) {
+        setSavedPlans(prev => prev.filter(p => p.id !== planId))
+      } else {
+        setError('Failed to delete career plan')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete career plan')
+    } finally {
+      setDeletingPlanId(null)
+    }
+  }
 
   // Load a saved career plan
   const handleLoadSavedPlan = async (savedPlanId: number) => {
@@ -627,6 +651,8 @@ export default function CareerPathDesigner() {
           setPlanId(jobData.planId || jobData.plan_id)
           setStep('results')
           setLoading(false)
+          // Refresh saved plans list so new plan appears
+          refreshSavedPlans()
         } else if (jobData.status === 'failed') {
           const errorMsg = jobData.error || 'Career plan generation failed'
           console.error('❌ Job failed:', errorMsg)
@@ -780,27 +806,43 @@ export default function CareerPathDesigner() {
                 </div>
                 <div className="glass rounded-2xl p-4 border border-white/10 space-y-3">
                   {savedPlans.slice(0, 5).map((savedPlan: any) => (
-                    <button
+                    <div
                       key={savedPlan.id}
-                      onClick={() => handleLoadSavedPlan(savedPlan.id)}
-                      disabled={loading}
-                      className="w-full glass rounded-lg p-4 border border-white/10 hover:border-white/30 transition-all text-left flex items-center justify-between group disabled:opacity-50"
+                      className="w-full glass rounded-lg p-4 border border-white/10 hover:border-white/30 transition-all flex items-center justify-between group"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                      <button
+                        onClick={() => handleLoadSavedPlan(savedPlan.id)}
+                        disabled={loading || deletingPlanId === savedPlan.id}
+                        className="flex items-center gap-3 flex-1 text-left disabled:opacity-50"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
                           <TrendingUp className="w-5 h-5 text-white/60" />
                         </div>
-                        <div>
-                          <div className="text-white font-medium">
-                            {savedPlan.intake_json?.target_role_interest || savedPlan.plan_json?.targetRoles?.[0]?.title || 'Career Plan'}
+                        <div className="min-w-0">
+                          <div className="text-white font-medium truncate">
+                            {savedPlan.dream_role || savedPlan.target_roles?.[0] || 'Career Plan'}
                           </div>
                           <div className="text-sm text-gray-400">
                             Created {new Date(savedPlan.created_at).toLocaleDateString()}
                           </div>
                         </div>
+                      </button>
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <button
+                          onClick={(e) => handleDeletePlan(e, savedPlan.id)}
+                          disabled={deletingPlanId === savedPlan.id}
+                          className="p-2 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all disabled:opacity-50"
+                          title="Delete plan"
+                        >
+                          {deletingPlanId === savedPlan.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </button>
+                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                       </div>
-                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
-                    </button>
+                    </div>
                   ))}
                 </div>
                 {savedPlans.length > 5 && (
