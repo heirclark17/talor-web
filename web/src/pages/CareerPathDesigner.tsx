@@ -47,6 +47,7 @@ export default function CareerPathDesigner() {
   const [selectedExistingResumeId, setSelectedExistingResumeId] = useState<number | null>(null)
   const [loadingResumes, setLoadingResumes] = useState(false)
   const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
+  const [extractingJob, setExtractingJob] = useState(false)
 
   // Basic Profile (Step 1)
   const [dreamRole, setDreamRole] = useState('')
@@ -442,6 +443,26 @@ export default function CareerPathDesigner() {
       setError(err.message || 'Failed to delete resume')
     } finally {
       setDeletingResumeId(null)
+    }
+  }
+
+  const handleExtractJobDetails = async () => {
+    const trimmedUrl = jobUrl.trim()
+    if (!trimmedUrl) return
+
+    setExtractingJob(true)
+    try {
+      const result = await api.extractJobDetails(trimmedUrl)
+      if (result.success && result.data) {
+        const extractedTitle = result.data.job_title || result.data.title || result.data.Title || ''
+        if (extractedTitle) {
+          setDreamRole(extractedTitle)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to extract job details:', err)
+    } finally {
+      setExtractingJob(false)
     }
   }
 
@@ -1148,6 +1169,51 @@ export default function CareerPathDesigner() {
               </div>
             </div>}
 
+            {/* Job Posting URL & Dream Role */}
+            <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-8 mb-6 space-y-4">
+              <div>
+                <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
+                  Job Posting URL <span className="text-gray-400 font-normal text-xs">(optional)</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={jobUrl}
+                    onChange={(e) => setJobUrl(e.target.value)}
+                    placeholder="https://linkedin.com/jobs/... or any job posting URL"
+                    className="flex-1 px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
+                  />
+                  <button
+                    onClick={handleExtractJobDetails}
+                    disabled={!jobUrl.trim() || extractingJob}
+                    className="px-4 py-3 rounded-lg font-medium text-sm transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed bg-white/10 hover:bg-white/20 text-white"
+                  >
+                    {extractingJob ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      'Extract'
+                    )}
+                  </button>
+                </div>
+                <p className="text-gray-500 text-xs mt-1">Paste a job URL and click Extract to auto-fill your dream role</p>
+              </div>
+
+              <div>
+                <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
+                  Dream Role or Career Goal {dreamRole ? '' : '*'}
+                  {extractingJob && <span className="text-gray-400 font-normal text-xs ml-2">extracting...</span>}
+                </label>
+                <input
+                  type="text"
+                  value={dreamRole}
+                  onChange={(e) => setDreamRole(e.target.value)}
+                  placeholder="e.g., Senior Cloud Security Architect, Product Manager"
+                  className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
+                  data-testid="dream-role-input"
+                />
+              </div>
+            </div>
+
             {error && (
               <div className="mb-8 glass rounded-lg p-4 border-2 border-red-500/50">
                 <div className="flex items-start gap-3">
@@ -1258,34 +1324,6 @@ export default function CareerPathDesigner() {
                 </div>
 
                 <div className="glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
-                  {/* Dream Role */}
-                  <div>
-                    <label className="text-white font-semibold mb-2 block text-sm sm:text-base">Dream Role or Career Goal *</label>
-                    <input
-                      type="text"
-                      value={dreamRole}
-                      onChange={(e) => setDreamRole(e.target.value)}
-                      placeholder="e.g., Senior Cloud Security Architect, Product Manager"
-                      className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
-                      data-testid="dream-role-input"
-                    />
-                  </div>
-
-                  {/* Job Posting URL (optional) */}
-                  <div>
-                    <label className="text-white font-semibold mb-2 block text-sm sm:text-base">
-                      Job Posting URL <span className="text-gray-400 font-normal text-xs">(optional)</span>
-                    </label>
-                    <input
-                      type="url"
-                      value={jobUrl}
-                      onChange={(e) => setJobUrl(e.target.value)}
-                      placeholder="https://linkedin.com/jobs/... or any job posting URL"
-                      className="w-full px-3 sm:px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg focus:border-white/40 focus:ring-0 text-white placeholder-gray-500 text-[16px]"
-                    />
-                    <p className="text-gray-500 text-xs mt-1">Paste a job posting URL to tailor your career plan to that specific role</p>
-                  </div>
-
                   {/* Current Role */}
                   <div>
                     <label className="text-white font-semibold mb-2 block text-sm sm:text-base">Current Role Title</label>
