@@ -1146,15 +1146,15 @@ export default function InterviewPrep() {
             onClick={closeModal}
           >
             {/* Blurred Backdrop */}
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+            <div className="absolute inset-0 bg-[#0a0a0f]/95 backdrop-blur-md" />
 
             {/* Modal Content */}
             <div
-              className="relative w-full max-w-4xl max-h-[90vh] sm:max-h-[90vh] h-full sm:h-auto overflow-y-auto bg-gray-900/95 sm:rounded-3xl border-0 sm:border border-white/10 shadow-2xl"
+              className="relative w-full max-w-4xl max-h-[90vh] sm:max-h-[90vh] h-full sm:h-auto overflow-y-auto bg-[#141418] sm:rounded-3xl border-0 sm:border border-white/10 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm p-4 sm:p-6 border-b border-white/10 flex items-center justify-between z-10">
+              <div className="sticky top-0 bg-[#141418] p-4 sm:p-6 border-b border-white/10 flex items-center justify-between z-10">
                 <h2 className="text-xl sm:text-2xl font-bold text-white">
                   {activeModal === 'companyProfile' && 'Company Profile'}
                   {activeModal === 'roleAnalysis' && 'Role Analysis'}
@@ -1815,13 +1815,13 @@ export default function InterviewPrep() {
                         <select
                           value={newQuestionCategory}
                           onChange={(e) => setNewQuestionCategory(e.target.value)}
-                          className="w-full bg-white/5 border border-white/20 rounded-lg p-3 mb-3 text-white"
+                          className="w-full bg-[#1a1a2e] border border-white/20 rounded-lg p-3 mb-3 text-white"
                         >
-                          <option value="product">Product</option>
-                          <option value="team">Team</option>
-                          <option value="culture">Culture</option>
-                          <option value="performance">Performance</option>
-                          <option value="strategy">Strategy</option>
+                          <option value="product" className="bg-[#1a1a2e] text-white">Product</option>
+                          <option value="team" className="bg-[#1a1a2e] text-white">Team</option>
+                          <option value="culture" className="bg-[#1a1a2e] text-white">Culture</option>
+                          <option value="performance" className="bg-[#1a1a2e] text-white">Performance</option>
+                          <option value="strategy" className="bg-[#1a1a2e] text-white">Strategy</option>
                         </select>
                         <div className="flex gap-2">
                           <button

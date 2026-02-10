@@ -216,8 +216,8 @@ export default function CoverLetterGenerator() {
 
       {/* Generate Modal */}
       {showGenerator && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => !generating && setShowGenerator(false)}>
-          <div className="glass rounded-2xl p-6 w-full max-w-lg border border-white/10" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0a0a0f]/95 backdrop-blur-sm" onClick={() => !generating && setShowGenerator(false)}>
+          <div className="rounded-2xl p-6 w-full max-w-lg border border-white/10 bg-[#141418]" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">Generate Cover Letter</h2>
               <button onClick={() => !generating && setShowGenerator(false)} className="p-2 hover:bg-white/10 rounded-lg text-gray-400">

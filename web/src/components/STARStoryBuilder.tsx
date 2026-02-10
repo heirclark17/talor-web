@@ -375,10 +375,10 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         <select
           value={selectedTheme}
           onChange={(e) => setSelectedTheme(e.target.value)}
-          className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none"
+          className="w-full px-4 py-3 bg-[#1a1a2e] border-2 border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none"
         >
           {storyThemes.map((theme, index) => (
-            <option key={index} value={theme} className="bg-gray-900">
+            <option key={index} value={theme} className="bg-[#1a1a2e] text-white">
               {theme}
             </option>
           ))}
@@ -391,10 +391,10 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         <select
           value={selectedTone}
           onChange={(e) => setSelectedTone(e.target.value)}
-          className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none"
+          className="w-full px-4 py-3 bg-[#1a1a2e] border-2 border-white/10 rounded-lg text-white focus:border-white/40 focus:outline-none"
         >
           {TONE_OPTIONS.map((tone) => (
-            <option key={tone.value} value={tone.value} className="bg-gray-900">
+            <option key={tone.value} value={tone.value} className="bg-[#1a1a2e] text-white">
               {tone.label}
             </option>
           ))}

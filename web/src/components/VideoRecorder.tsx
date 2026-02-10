@@ -350,7 +350,7 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
 
       {/* Playback Video */}
       {playingRecording && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-[#0a0a0f] z-50 flex items-center justify-center p-4">
           <div className="max-w-4xl w-full">
             <div className="mb-4 flex justify-end">
               <button

@@ -191,17 +191,17 @@ export default function PracticeSession({ story, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-[#0a0a0f]/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="practice-session-title"
     >
       <div
         ref={modalRef}
-        className="glass rounded-2xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="rounded-2xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-y-auto bg-[#141418]"
       >
         {/* Header */}
-        <div className="sticky top-0 glass border-b border-white/10 p-6 flex items-center justify-between">
+        <div className="sticky top-0 border-b border-white/10 p-6 flex items-center justify-between bg-[#141418] rounded-t-2xl">
           <div>
             <h2 id="practice-session-title" className="text-2xl font-bold text-white mb-1">Practice Session</h2>
             <p className="text-gray-400">{story.title}</p>

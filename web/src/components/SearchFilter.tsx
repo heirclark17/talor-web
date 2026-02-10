@@ -143,14 +143,14 @@ export default function SearchFilter({
               <select
                 value={selectedSort || ''}
                 onChange={(e) => onSortChange?.(e.target.value)}
-                className="appearance-none flex items-center gap-2 px-4 py-3 pr-10 rounded-xl border bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors min-h-[44px] cursor-pointer"
+                className="appearance-none flex items-center gap-2 px-4 py-3 pr-10 rounded-xl border bg-[#1a1a2e] border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors min-h-[44px] cursor-pointer"
                 aria-label="Sort options"
               >
-                <option value="" className="bg-gray-900">
+                <option value="" className="bg-[#1a1a2e] text-white">
                   Sort by...
                 </option>
                 {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value} className="bg-gray-900">
+                  <option key={option.value} value={option.value} className="bg-[#1a1a2e] text-white">
                     {option.label}
                   </option>
                 ))}
@@ -193,13 +193,13 @@ export default function SearchFilter({
                     id={`filter-${filter.key}`}
                     value={selectedFilters[filter.key] || ''}
                     onChange={(e) => handleFilterChange(filter.key, e.target.value)}
-                    className="w-full appearance-none px-4 py-2.5 pr-10 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
+                    className="w-full appearance-none px-4 py-2.5 pr-10 bg-[#1a1a2e] border border-white/10 rounded-lg text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
                   >
-                    <option value="" className="bg-gray-900">
+                    <option value="" className="bg-[#1a1a2e] text-white">
                       All
                     </option>
                     {filter.options.map((option) => (
-                      <option key={option.value} value={option.value} className="bg-gray-900">
+                      <option key={option.value} value={option.value} className="bg-[#1a1a2e] text-white">
                         {option.label}
                       </option>
                     ))}

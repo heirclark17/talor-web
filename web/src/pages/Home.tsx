@@ -382,15 +382,15 @@ export default function Home() {
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-[#0a0a0f]/95 backdrop-blur-sm"
             onClick={closeAnalysisModal}
             aria-hidden="true"
           />
 
           {/* Modal Content */}
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto glass rounded-2xl border border-white/10">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#141418]">
             {/* Header */}
-            <div className="sticky top-0 z-10 glass border-b border-white/10 px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 z-10 border-b border-white/10 px-6 py-4 flex items-center justify-between bg-[#141418]">
               <div className="flex items-center gap-3">
                 <FileSearch className="w-6 h-6 text-white" />
                 <div>

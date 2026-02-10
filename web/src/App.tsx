@@ -360,7 +360,7 @@ function AppContent() {
             >
               {/* Backdrop - clickable to close */}
               <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
+                className="absolute inset-0 bg-[#0a0a0f]/95 backdrop-blur-sm transition-opacity duration-200"
                 onClick={() => setMobileMenuOpen(false)}
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') {
@@ -372,7 +372,7 @@ function AppContent() {
 
               {/* Menu Panel */}
               <nav
-                className="relative glass border-t border-white/10 bg-black/90 backdrop-blur-xl animate-slide-down"
+                className="relative border-t border-white/10 bg-[#0a0a0f] animate-slide-down"
                 aria-label="Mobile navigation"
               >
                 <div className="container mx-auto px-4 py-4">

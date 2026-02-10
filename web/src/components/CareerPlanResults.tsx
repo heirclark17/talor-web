@@ -536,7 +536,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           onClick={closeModal}
         >
           {/* Blurred Backdrop */}
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 backdrop-blur-md" />
 
           {/* Modal Content */}
           <div
