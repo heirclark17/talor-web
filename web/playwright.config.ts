@@ -9,7 +9,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['list'], ['html']],
   use: {
-    baseURL: 'https://web-7oq0jaaou-heirclark17s-projects.vercel.app',
+    baseURL: 'https://talorme.com',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

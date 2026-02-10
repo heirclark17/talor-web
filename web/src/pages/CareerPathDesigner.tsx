@@ -97,6 +97,70 @@ function inferIndustry(company: string, title: string, skills: string[]): string
   return 'Technology'
 }
 
+/**
+ * Extract role title and company from experience entry.
+ * API may return { title, company } OR { header: "Title, Company" }
+ */
+function parseExperienceEntry(exp: any): { title: string; company: string } {
+  if (exp.title) return { title: exp.title, company: exp.company || '' }
+  if (exp.header) {
+    // Format: "Role Title, Company Name" or "Role Title (Details), Company"
+    const parts = exp.header.split(',')
+    if (parts.length >= 2) {
+      return { title: parts.slice(0, -1).join(',').trim(), company: parts[parts.length - 1].trim() }
+    }
+    return { title: exp.header.trim(), company: '' }
+  }
+  return { title: '', company: '' }
+}
+
+/**
+ * Parse education which may be a string or an array
+ */
+function parseEducationLevel(education: any): string | null {
+  let text = ''
+  if (typeof education === 'string') {
+    text = education.toLowerCase()
+  } else if (Array.isArray(education) && education.length > 0) {
+    text = (education[0]?.degree || education[0] || '').toString().toLowerCase()
+  }
+  if (!text) return null
+  if (text.includes('phd') || text.includes('doctor')) return 'phd'
+  if (text.includes('master')) return 'masters'
+  if (text.includes('bachelor') || text.includes('b.a.') || text.includes('b.s.') || text.includes('b.a ') || text.includes('b.s ')) return 'bachelors'
+  if (text.includes('associate')) return 'associates'
+  return null
+}
+
+/**
+ * Estimate years of experience from dates strings like "2018 – 2024"
+ */
+function estimateYearsFromDates(experience: any[]): number {
+  let totalYears = 0
+  for (const exp of experience) {
+    if (exp.duration_years) { totalYears += exp.duration_years; continue }
+    if (exp.start_date && exp.end_date) {
+      try {
+        const start = new Date(exp.start_date)
+        const end = exp.end_date.toLowerCase?.().includes('present') ? new Date() : new Date(exp.end_date)
+        totalYears += Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365))
+      } catch { /* skip */ }
+      continue
+    }
+    // Parse "dates" field like "2018 – 2024" or "2024 – Present"
+    const dates = exp.dates || ''
+    const yearMatches = dates.match(/(\d{4})/g)
+    if (yearMatches && yearMatches.length >= 2) {
+      const startYear = parseInt(yearMatches[0])
+      const endYear = parseInt(yearMatches[yearMatches.length - 1])
+      totalYears += Math.max(0, endYear - startYear)
+    } else if (yearMatches && yearMatches.length === 1 && /present/i.test(dates)) {
+      totalYears += Math.max(0, new Date().getFullYear() - parseInt(yearMatches[0]))
+    }
+  }
+  return Math.round(totalYears)
+}
+
 export default function CareerPathDesigner() {
   const navigate = useNavigate()
   const [step, setStep] = useState<WizardStep>('welcome')
@@ -445,7 +509,6 @@ export default function CareerPathDesigner() {
         // Parse arrays if they're stringified JSON
         let experience = data.experience || []
         let skills = data.skills || []
-        let education = data.education || []
 
         if (typeof experience === 'string') {
           try { experience = JSON.parse(experience) } catch { experience = [] }
@@ -453,54 +516,29 @@ export default function CareerPathDesigner() {
         if (typeof skills === 'string') {
           try { skills = JSON.parse(skills) } catch { skills = [] }
         }
-        if (typeof education === 'string') {
-          try { education = JSON.parse(education) } catch { education = [] }
-        }
 
         if (!Array.isArray(experience)) experience = []
         if (!Array.isArray(skills)) skills = []
-        if (!Array.isArray(education)) education = []
 
-        // Set current role from latest position
-        if (experience[0]?.title) setCurrentRole(experience[0].title)
-        // Infer industry from company, title, and skills
+        // Set current role from latest position (handles both .title and .header formats)
         if (experience.length > 0) {
-          const latestCompany = experience[0]?.company || ''
-          const latestTitle = experience[0]?.title || ''
-          setCurrentIndustry(inferIndustry(latestCompany, latestTitle, skills))
+          const { title, company } = parseExperienceEntry(experience[0])
+          if (title) setCurrentRole(title)
+          setCurrentIndustry(inferIndustry(company, title, skills))
         }
 
         // Calculate years of experience
-        const years = experience.reduce((total: number, exp: any) => {
-          if (exp.start_date && exp.end_date) {
-            const start = new Date(exp.start_date)
-            const end = exp.end_date.toLowerCase().includes('present') ? new Date() : new Date(exp.end_date)
-            const diffYears = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365)
-            return total + Math.max(0, diffYears)
-          }
-          return total
-        }, 0)
-
-        if (years > 0) setYearsExperience(Math.round(years))
+        const years = estimateYearsFromDates(experience)
+        if (years > 0) setYearsExperience(years)
 
         // Set skills/tools
         if (Array.isArray(skills) && skills.length > 0) {
           setTools(skills.slice(0, 20))
         }
 
-        // Set education level
-        if (Array.isArray(education) && education.length > 0) {
-          const highestDegree = education[0]?.degree?.toLowerCase() || ''
-          if (highestDegree.includes('phd') || highestDegree.includes('doctor')) {
-            setEducationLevel('phd')
-          } else if (highestDegree.includes('master')) {
-            setEducationLevel('masters')
-          } else if (highestDegree.includes('bachelor')) {
-            setEducationLevel('bachelors')
-          } else if (highestDegree.includes('associate')) {
-            setEducationLevel('associates')
-          }
-        }
+        // Determine education level (handles string or array)
+        const eduLevel = parseEducationLevel(data.education)
+        if (eduLevel) setEducationLevel(eduLevel)
 
         // Infer top strengths from resume content
         const inferredStrengths = inferStrengths(experience, skills, data.summary || '')
@@ -566,7 +604,6 @@ export default function CareerPathDesigner() {
         const data = resumeData
         let experience = data.experience || []
         let skills = data.skills || []
-        let education = data.education || []
 
         if (typeof experience === 'string') {
           try { experience = JSON.parse(experience) } catch { experience = [] }
@@ -574,38 +611,31 @@ export default function CareerPathDesigner() {
         if (typeof skills === 'string') {
           try { skills = JSON.parse(skills) } catch { skills = [] }
         }
-        if (typeof education === 'string') {
-          try { education = JSON.parse(education) } catch { education = [] }
-        }
         if (!Array.isArray(experience)) experience = []
         if (!Array.isArray(skills)) skills = []
-        if (!Array.isArray(education)) education = []
 
-        // Fill current role if empty
-        if (!currentRole.trim() && experience[0]?.title) {
-          setCurrentRole(experience[0].title)
+        // Fill current role if empty (handles both .title and .header formats)
+        let latestTitle = ''
+        let latestCompany = ''
+        if (experience.length > 0) {
+          const parsed = parseExperienceEntry(experience[0])
+          latestTitle = parsed.title
+          latestCompany = parsed.company
+        }
+
+        if (!currentRole.trim() && latestTitle) {
+          setCurrentRole(latestTitle)
         }
 
         // Fill industry if empty
         if (!currentIndustry.trim() && experience.length > 0) {
-          const latestCompany = experience[0]?.company || ''
-          const latestTitle = experience[0]?.title || ''
           setCurrentIndustry(inferIndustry(latestCompany, latestTitle, skills))
         }
 
         // Fill years if still default
         if (yearsExperience <= 5) {
-          const years = experience.reduce((total: number, exp: any) => {
-            if (exp.duration_years) return total + exp.duration_years
-            if (exp.start_date && exp.end_date) {
-              const start = new Date(exp.start_date)
-              const end = exp.end_date.toLowerCase?.().includes('present') ? new Date() : new Date(exp.end_date)
-              const diffYears = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365)
-              return total + Math.max(0, diffYears)
-            }
-            return total
-          }, 0)
-          if (years > 0) setYearsExperience(Math.round(years))
+          const years = estimateYearsFromDates(experience)
+          if (years > 0) setYearsExperience(years)
         }
 
         // Fill tools/skills if empty
@@ -619,23 +649,13 @@ export default function CareerPathDesigner() {
           if (inferredStrengths.length > 0) setStrengths(inferredStrengths)
         }
 
-        // Fill education if still default
-        if (education.length > 0) {
-          const highestDegree = education[0]?.degree?.toLowerCase() || ''
-          if (highestDegree.includes('phd') || highestDegree.includes('doctor')) {
-            setEducationLevel('phd')
-          } else if (highestDegree.includes('master')) {
-            setEducationLevel('masters')
-          } else if (highestDegree.includes('bachelor')) {
-            setEducationLevel('bachelors')
-          } else if (highestDegree.includes('associate')) {
-            setEducationLevel('associates')
-          }
-        }
+        // Fill education
+        const eduLevel = parseEducationLevel(data.education)
+        if (eduLevel) setEducationLevel(eduLevel)
 
         // Generate tasks from role if tasks are empty
-        const roleForTasks = currentRole.trim() || experience[0]?.title || ''
-        const industryForTasks = currentIndustry.trim() || (experience.length > 0 ? inferIndustry(experience[0]?.company || '', experience[0]?.title || '', skills) : '')
+        const roleForTasks = currentRole.trim() || latestTitle
+        const industryForTasks = currentIndustry.trim() || (experience.length > 0 ? inferIndustry(latestCompany, latestTitle, skills) : '')
         const tasksEmpty = topTasks.filter(t => t.trim()).length === 0
 
         if (roleForTasks.length > 2 && tasksEmpty) {
@@ -706,7 +726,6 @@ export default function CareerPathDesigner() {
         // Parse arrays if they're stringified JSON
         let experience = data.experience || []
         let skills = data.skills || []
-        let education = data.education || []
 
         if (typeof experience === 'string') {
           try { experience = JSON.parse(experience) } catch { experience = [] }
@@ -714,27 +733,19 @@ export default function CareerPathDesigner() {
         if (typeof skills === 'string') {
           try { skills = JSON.parse(skills) } catch { skills = [] }
         }
-        if (typeof education === 'string') {
-          try { education = JSON.parse(education) } catch { education = [] }
-        }
 
         if (!Array.isArray(experience)) experience = []
         if (!Array.isArray(skills)) skills = []
-        if (!Array.isArray(education)) education = []
 
-        // Set current role from latest position
-        if (experience[0]?.title) setCurrentRole(experience[0].title)
-        // Infer industry from company, title, and skills
+        // Set current role from latest position (handles both .title and .header formats)
         if (experience.length > 0) {
-          const latestCompany = experience[0]?.company || ''
-          const latestTitle = experience[0]?.title || ''
-          setCurrentIndustry(inferIndustry(latestCompany, latestTitle, skills))
+          const { title, company } = parseExperienceEntry(experience[0])
+          if (title) setCurrentRole(title)
+          setCurrentIndustry(inferIndustry(company, title, skills))
         }
 
         // Calculate years of experience
-        const years = experience.reduce((total: number, exp: any) => {
-          return total + (exp.duration_years || 0)
-        }, 0)
+        const years = estimateYearsFromDates(experience)
         if (years > 0) setYearsExperience(years)
 
         // Set tools/skills
@@ -744,16 +755,9 @@ export default function CareerPathDesigner() {
         const inferredStrengths = inferStrengths(experience, skills, data.summary || '')
         if (inferredStrengths.length > 0) setStrengths(inferredStrengths)
 
-        // Determine education level
-        if (education.some((e: any) => e.degree?.toLowerCase().includes('phd'))) {
-          setEducationLevel('phd')
-        } else if (education.some((e: any) => e.degree?.toLowerCase().includes('master'))) {
-          setEducationLevel('masters')
-        } else if (education.some((e: any) => e.degree?.toLowerCase().includes('bachelor'))) {
-          setEducationLevel('bachelors')
-        } else if (education.some((e: any) => e.degree?.toLowerCase().includes('associate'))) {
-          setEducationLevel('associates')
-        }
+        // Determine education level (handles string or array)
+        const eduLevel = parseEducationLevel(data.education)
+        if (eduLevel) setEducationLevel(eduLevel)
       }
 
     } catch (err: any) {
