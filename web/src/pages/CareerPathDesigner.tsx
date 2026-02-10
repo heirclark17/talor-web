@@ -102,6 +102,23 @@ function inferIndustry(company: string, title: string, skills: string[]): string
  * Extract role title and company from experience entry.
  * API may return { title, company } OR { header: "Title, Company" }
  */
+/** Extract bullet strings from the most recent experience entry (or first N entries) */
+function extractExperienceBullets(experience: any[], maxEntries: number = 1): string[] {
+  const bullets: string[] = []
+  for (const exp of experience.slice(0, maxEntries)) {
+    if (Array.isArray(exp.responsibilities)) bullets.push(...exp.responsibilities)
+    if (Array.isArray(exp.bullets)) bullets.push(...exp.bullets)
+    if (typeof exp.description === 'string' && exp.description.trim()) {
+      // Split multi-sentence descriptions into individual bullets
+      exp.description.split(/[.;]\s+/).forEach((s: string) => {
+        const trimmed = s.trim()
+        if (trimmed.length > 15) bullets.push(trimmed)
+      })
+    }
+  }
+  return bullets.filter(b => typeof b === 'string' && b.trim().length > 10)
+}
+
 function parseExperienceEntry(exp: any): { title: string; company: string } {
   if (exp.title) return { title: exp.title, company: exp.company || '' }
   if (exp.header) {
@@ -409,10 +426,23 @@ export default function CareerPathDesigner() {
     if (hasRole && hasEmptyTasks && !isGeneratingTasks) {
       setIsGeneratingTasks(true)
 
-      api.generateTasksForRole(currentRole, currentIndustry || undefined)
+      // Extract bullets from resume if available
+      let bullets: string[] | undefined
+      if (resumeData) {
+        let experience = resumeData.experience || []
+        if (typeof experience === 'string') {
+          try { experience = JSON.parse(experience) } catch { experience = [] }
+        }
+        if (Array.isArray(experience)) {
+          bullets = extractExperienceBullets(experience)
+          if (bullets.length === 0) bullets = undefined
+        }
+      }
+
+      api.generateTasksForRole(currentRole, currentIndustry || undefined, bullets)
         .then(response => {
           if (response.success && response.data?.tasks) {
-            console.log('✓ Auto-generated tasks:', response.data.tasks)
+            console.log('✓ Auto-generated tasks:', response.data.tasks, response.data.source)
             setTopTasks(response.data.tasks)
           } else {
             console.warn('✗ Task generation failed:', response.error)
@@ -654,14 +684,15 @@ export default function CareerPathDesigner() {
         const eduLevel = parseEducationLevel(data.education)
         if (eduLevel) setEducationLevel(eduLevel)
 
-        // Generate tasks from role if tasks are empty
+        // Generate tasks from resume bullets if tasks are empty
         const roleForTasks = currentRole.trim() || latestTitle
         const industryForTasks = currentIndustry.trim() || (experience.length > 0 ? inferIndustry(latestCompany, latestTitle, skills) : '')
         const tasksEmpty = topTasks.filter(t => t.trim()).length === 0
 
         if (roleForTasks.length > 2 && tasksEmpty) {
           try {
-            const taskResponse = await api.generateTasksForRole(roleForTasks, industryForTasks || undefined)
+            const bullets = extractExperienceBullets(experience)
+            const taskResponse = await api.generateTasksForRole(roleForTasks, industryForTasks || undefined, bullets.length > 0 ? bullets : undefined)
             if (taskResponse.success && taskResponse.data?.tasks) {
               setTopTasks(taskResponse.data.tasks)
             }
@@ -1514,7 +1545,14 @@ export default function CareerPathDesigner() {
                 <div className="glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
                   {/* Current Role */}
                   <div>
-                    <label className="text-white font-semibold mb-2 block text-sm sm:text-base">Current Role Title</label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-white font-semibold text-sm sm:text-base">Current Role Title</label>
+                      {currentRole.trim() && resumeData && (
+                        <span className="text-xs text-blue-400">
+                          ✨ AI-inferred from resume
+                        </span>
+                      )}
+                    </div>
                     <input
                       type="text"
                       value={currentRole}
@@ -1584,11 +1622,15 @@ export default function CareerPathDesigner() {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-white font-semibold">Top 3-5 Tasks in Current Role *</label>
-                      {isGeneratingTasks && (
+                      {isGeneratingTasks ? (
                         <span className="text-xs text-blue-400 animate-pulse">
-                          ✨ AI is generating tasks...
+                          ✨ AI is inferring from resume...
                         </span>
-                      )}
+                      ) : topTasks.some(t => t.trim()) && resumeData ? (
+                        <span className="text-xs text-blue-400">
+                          ✨ AI-inferred from resume
+                        </span>
+                      ) : null}
                     </div>
                     {topTasks.map((task, idx) => (
                       <input

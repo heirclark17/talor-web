@@ -1069,20 +1069,27 @@ class ApiClient {
   }
 
   /**
-   * Auto-generate typical tasks for a job role using Perplexity AI
+   * Auto-generate typical tasks for a job role.
+   * When experienceBullets are provided, extracts tasks from the actual resume.
+   * Otherwise generates generic tasks with Perplexity AI.
    */
-  async generateTasksForRole(roleTitle: string, industry?: string): Promise<ApiResponse> {
+  async generateTasksForRole(roleTitle: string, industry?: string, experienceBullets?: string[]): Promise<ApiResponse> {
     try {
+      const body: Record<string, any> = {
+        role_title: roleTitle,
+        industry: industry || ''
+      }
+      if (experienceBullets && experienceBullets.length > 0) {
+        body.experience_bullets = experienceBullets
+      }
+
       const response = await fetch(`${this.baseUrl}/api/career-path/generate-tasks`, {
         method: 'POST',
         headers: {
           ...this.getHeaders(),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          role_title: roleTitle,
-          industry: industry || ''
-        }),
+        body: JSON.stringify(body),
       });
 
       const result = await response.json();
@@ -1096,7 +1103,7 @@ class ApiClient {
 
       return {
         success: true,
-        data: result, // Contains: { success: true, role_title: str, industry: str, tasks: List[str] }
+        data: result,
       };
     } catch (error: any) {
       return {
