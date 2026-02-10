@@ -1938,6 +1938,205 @@ export default function InterviewPrep() {
             </div>
           </div>
         )}
+
+        {/* Print-Only Interview Prep View */}
+        {prepData && (
+          <div className="print-content">
+            <div className="max-w-4xl mx-auto bg-white p-8">
+              {/* Header */}
+              <div className="text-center mb-8 border-b-2 border-gray-800 pb-6">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Interview Preparation Guide
+                </h1>
+                <h2 className="text-xl text-gray-700">
+                  {prepData.role_analysis.job_title} at {prepData.company_profile.name}
+                </h2>
+                <p className="text-sm text-gray-500 mt-2">
+                  {prepData.company_profile.industry} | {prepData.company_profile.locations?.join(', ')}
+                </p>
+              </div>
+
+              {/* Company Overview */}
+              <div className="mb-6 print-avoid-break">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  COMPANY OVERVIEW
+                </h3>
+                <p className="text-gray-800 text-sm leading-relaxed">
+                  {prepData.company_profile.overview_paragraph}
+                </p>
+              </div>
+
+              {/* Role Analysis */}
+              <div className="mb-6 print-avoid-break">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  ROLE ANALYSIS
+                </h3>
+                <p className="text-gray-700 text-sm mb-2">
+                  <strong>Seniority:</strong> {prepData.role_analysis.seniority_level}
+                </p>
+                <div className="mb-3">
+                  <p className="text-gray-800 text-sm font-semibold mb-1">Core Responsibilities:</p>
+                  <ul className="text-sm text-gray-800 space-y-1">
+                    {prepData.role_analysis.core_responsibilities.map((r, i) => (
+                      <li key={i} className="ml-4">&#8226; {r}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-gray-800 text-sm font-semibold mb-1">Must-Have Skills:</p>
+                    <ul className="text-sm text-gray-800 space-y-1">
+                      {prepData.role_analysis.must_have_skills.map((s, i) => (
+                        <li key={i} className="ml-4">&#8226; {s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-gray-800 text-sm font-semibold mb-1">Nice-to-Have Skills:</p>
+                    <ul className="text-sm text-gray-800 space-y-1">
+                      {prepData.role_analysis.nice_to_have_skills.map((s, i) => (
+                        <li key={i} className="ml-4">&#8226; {s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Values & Culture */}
+              {prepData.values_and_culture?.stated_values?.length > 0 && (
+                <div className="mb-6 print-avoid-break">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                    VALUES & CULTURE
+                  </h3>
+                  {prepData.values_and_culture.stated_values.map((v, i) => (
+                    <div key={i} className="mb-2">
+                      <p className="text-sm text-gray-800">
+                        <strong>{v.name}:</strong> {v.source_snippet}
+                      </p>
+                    </div>
+                  ))}
+                  {prepData.values_and_culture.practical_implications?.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-gray-800 text-sm font-semibold mb-1">Practical Implications:</p>
+                      <ul className="text-sm text-gray-800 space-y-1">
+                        {prepData.values_and_culture.practical_implications.map((p, i) => (
+                          <li key={i} className="ml-4">&#8226; {p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Strategy & News */}
+              {prepData.strategy_and_news?.strategic_themes?.length > 0 && (
+                <div className="mb-6 print-avoid-break">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                    STRATEGIC THEMES
+                  </h3>
+                  {prepData.strategy_and_news.strategic_themes.map((t, i) => (
+                    <div key={i} className="mb-2">
+                      <p className="text-sm text-gray-800">
+                        <strong>{t.theme}:</strong> {t.rationale}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Practice Questions */}
+              <div className="mb-6 page-break">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  PRACTICE QUESTIONS
+                </h3>
+                <ol className="text-sm text-gray-800 space-y-2">
+                  {prepData.interview_preparation.practice_questions_for_candidate.map((q, i) => (
+                    <li key={i} className="ml-4">{i + 1}. {q}</li>
+                  ))}
+                </ol>
+              </div>
+
+              {/* Questions to Ask Interviewer */}
+              <div className="mb-6 print-avoid-break">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  QUESTIONS TO ASK INTERVIEWER
+                </h3>
+                {Object.entries(prepData.questions_to_ask_interviewer).map(([category, questions]) => (
+                  <div key={category} className="mb-3">
+                    <p className="text-sm font-semibold text-gray-800 capitalize mb-1">{category}:</p>
+                    <ul className="text-sm text-gray-800 space-y-1">
+                      {(questions as string[]).map((q, i) => (
+                        <li key={i} className="ml-4">&#8226; {q}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+
+              {/* Research Tasks */}
+              <div className="mb-6 print-avoid-break">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  RESEARCH TASKS
+                </h3>
+                <ul className="text-sm text-gray-800 space-y-1">
+                  {prepData.interview_preparation.research_tasks.map((t, i) => (
+                    <li key={i} className="ml-4">
+                      <span className="inline-block w-4 h-4 border border-gray-400 mr-2 align-middle" /> {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Day-of Checklist */}
+              <div className="mb-6 print-avoid-break">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  DAY-OF CHECKLIST
+                </h3>
+                <ul className="text-sm text-gray-800 space-y-1">
+                  {prepData.interview_preparation.day_of_checklist.map((item, i) => (
+                    <li key={i} className="ml-4">
+                      <span className="inline-block w-4 h-4 border border-gray-400 mr-2 align-middle" /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Keyword Mapping */}
+              {prepData.candidate_positioning?.keyword_map?.length > 0 && (
+                <div className="mb-6 print-avoid-break">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                    KEYWORD MAPPING
+                  </h3>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Company Term</th>
+                        <th>Your Equivalent</th>
+                        <th>Context</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {prepData.candidate_positioning.keyword_map.map((m, i) => (
+                        <tr key={i}>
+                          <td>{m.company_term}</td>
+                          <td>{m.candidate_equivalent}</td>
+                          <td>{m.context}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Footer */}
+              <div className="mt-8 pt-4 border-t border-gray-300 text-center">
+                <p className="text-xs text-gray-500">
+                  Generated by TalorMe | talorme.com
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

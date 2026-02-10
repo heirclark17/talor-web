@@ -1712,6 +1712,9 @@ class ApiClient {
     tailored_resume_id: number;
     title?: string;
     tags?: string[];
+    analysis_data?: any;
+    keywords_data?: any;
+    match_score_data?: any;
   }): Promise<ApiResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/api/saved-comparisons/save`, {

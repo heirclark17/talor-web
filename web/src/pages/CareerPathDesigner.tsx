@@ -2336,6 +2336,197 @@ export default function CareerPathDesigner() {
 
           {/* Detailed Career Plan Results */}
           <CareerPlanResults plan={plan} timeline={timeline} onExportPDF={exportToPDF} />
+
+          {/* Print-Only Career Plan View */}
+          <div className="print-content">
+            <div className="max-w-4xl mx-auto bg-white p-8">
+              {/* Header */}
+              <div className="text-center mb-8 border-b-2 border-gray-800 pb-6">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Career Transition Plan
+                </h1>
+                <p className="text-gray-700">{plan.profileSummary}</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Timeline: {timeline}
+                  {plan.generatedAt && ` | Generated ${new Date(plan.generatedAt).toLocaleDateString()}`}
+                </p>
+              </div>
+
+              {/* Target Roles */}
+              {plan.targetRoles?.length > 0 && (
+                <div className="mb-6 print-avoid-break">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                    TARGET ROLES
+                  </h3>
+                  {plan.targetRoles.map((role, i) => (
+                    <div key={i} className="mb-4">
+                      <h4 className="font-bold text-gray-900">{role.title}</h4>
+                      <p className="text-sm text-gray-700 mb-1">{role.whyAligned}</p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Salary:</strong> {role.salaryRange} | <strong>Growth:</strong> {role.growthOutlook}
+                      </p>
+                      {role.typicalRequirements?.length > 0 && (
+                        <ul className="text-sm text-gray-800 mt-1 space-y-0.5">
+                          {role.typicalRequirements.map((r, j) => (
+                            <li key={j} className="ml-4">&#8226; {r}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Skills Analysis */}
+              {plan.skillsAnalysis && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                    SKILLS ANALYSIS
+                  </h3>
+                  {plan.skillsAnalysis.alreadyHave?.length > 0 && (
+                    <div className="mb-3 print-avoid-break">
+                      <p className="text-sm font-semibold text-gray-800 mb-1">Transferable Skills:</p>
+                      {plan.skillsAnalysis.alreadyHave.map((s, i) => (
+                        <p key={i} className="text-sm text-gray-800 ml-4 mb-1">
+                          &#8226; <strong>{s.skillName}:</strong> {s.targetRoleMapping}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                  {plan.skillsAnalysis.needToBuild?.length > 0 && (
+                    <div className="mb-3 print-avoid-break">
+                      <p className="text-sm font-semibold text-gray-800 mb-1">Skills to Build:</p>
+                      {plan.skillsAnalysis.needToBuild.map((s, i) => (
+                        <p key={i} className="text-sm text-gray-800 ml-4 mb-1">
+                          &#8226; <strong>{s.skillName}</strong> ({s.priority}): {s.howToBuild} — Est. {s.estimatedTime}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Certifications */}
+              {plan.certificationPath?.length > 0 && (
+                <div className="mb-6 page-break">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                    CERTIFICATION PATH
+                  </h3>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Certification</th>
+                        <th>Body</th>
+                        <th>Level</th>
+                        <th>Study Time</th>
+                        <th>Cost</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {plan.certificationPath.map((c, i) => (
+                        <tr key={i}>
+                          <td className="font-medium">{c.name}</td>
+                          <td>{c.certifyingBody}</td>
+                          <td className="capitalize">{c.level}</td>
+                          <td>{c.estStudyWeeks} weeks</td>
+                          <td>{c.estCostRange}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Experience Plan */}
+              {plan.experiencePlan?.length > 0 && (
+                <div className="mb-6 print-avoid-break">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                    EXPERIENCE BUILDING PLAN
+                  </h3>
+                  {plan.experiencePlan.map((p, i) => (
+                    <div key={i} className="mb-3">
+                      <p className="text-sm text-gray-800">
+                        <strong>{p.title}</strong> ({p.type}) — {p.timeCommitment}
+                      </p>
+                      <p className="text-sm text-gray-700 ml-4">{p.description}</p>
+                      {p.skillsDemonstrated?.length > 0 && (
+                        <p className="text-xs text-gray-600 ml-4 mt-1">
+                          Skills: {p.skillsDemonstrated.join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Timeline */}
+              {plan.timeline?.twelveWeekPlan?.length > 0 && (
+                <div className="mb-6 page-break">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                    12-WEEK ACTION PLAN
+                  </h3>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Week</th>
+                        <th>Tasks</th>
+                        <th>Milestone</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {plan.timeline.twelveWeekPlan.map((w, i) => (
+                        <tr key={i}>
+                          <td className="font-medium">Week {w.weekNumber}</td>
+                          <td>{w.tasks.join('; ')}</td>
+                          <td>{w.milestone || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Resume Assets */}
+              {plan.resumeAssets && (
+                <div className="mb-6 print-avoid-break">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                    RESUME ASSETS
+                  </h3>
+                  <div className="mb-3">
+                    <p className="text-sm font-semibold text-gray-800">Headline:</p>
+                    <p className="text-sm text-gray-800 ml-4">{plan.resumeAssets.headline}</p>
+                  </div>
+                  <div className="mb-3">
+                    <p className="text-sm font-semibold text-gray-800">Summary:</p>
+                    <p className="text-sm text-gray-800 ml-4">{plan.resumeAssets.summary}</p>
+                  </div>
+                  {plan.resumeAssets.keywordsForAts?.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-sm font-semibold text-gray-800">ATS Keywords:</p>
+                      <p className="text-sm text-gray-800 ml-4">{plan.resumeAssets.keywordsForAts.join(', ')}</p>
+                    </div>
+                  )}
+                  {plan.resumeAssets.targetRoleBullets?.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-sm font-semibold text-gray-800">Achievement Bullets:</p>
+                      <ul className="text-sm text-gray-800 space-y-1">
+                        {plan.resumeAssets.targetRoleBullets.map((b, i) => (
+                          <li key={i} className="ml-4">&#8226; {b.bulletText}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Footer */}
+              <div className="mt-8 pt-4 border-t border-gray-300 text-center">
+                <p className="text-xs text-gray-500">
+                  Generated by TalorMe | talorme.com
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )

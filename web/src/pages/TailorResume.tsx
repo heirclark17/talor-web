@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Target, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, ArrowRight, Download, Trash2, CheckSquare, Square, Briefcase, Link2, Unlink2, Copy, Check, Edit, ChevronDown, ChevronRight, ChevronUp, Mail, FileDown, Printer, PlayCircle, Save, RotateCcw, Bookmark, X, Plus } from 'lucide-react'
 import { api } from '../api/client'
+import { getUserId } from '../utils/userSession'
 import ChangeExplanation from '../components/ChangeExplanation'
 import ResumeAnalysis from '../components/ResumeAnalysis'
 import KeywordPanel from '../components/KeywordPanel'
@@ -1067,27 +1068,16 @@ export default function TailorResume() {
     if (!tailoredResume?.id) return
 
     try {
-      const userId = localStorage.getItem('talor_user_id')
-      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
-
-      const response = await fetch(`${API_BASE_URL}/api/saved-comparisons/save`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId || ''
-        },
-        body: JSON.stringify({
-          tailored_resume_id: tailoredResume.id,
-          title: `${tailoredResume.company} - ${tailoredResume.title}`,
-          // Persist AI analysis data so user sees exact same data when reopening
-          analysis_data: analysis,
-          keywords_data: keywords,
-          match_score_data: matchScore
-        })
+      const result = await api.saveComparison({
+        tailored_resume_id: tailoredResume.id,
+        title: `${tailoredResume.company} - ${tailoredResume.title}`,
+        analysis_data: analysis,
+        keywords_data: keywords,
+        match_score_data: matchScore
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to save comparison')
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save comparison')
       }
 
       alert('Comparison saved successfully! View it in the Saved menu.')
@@ -2211,7 +2201,7 @@ export default function TailorResume() {
           )}
 
           {/* Print-Only Resume View */}
-          <div id="print-resume" className="hidden">
+          <div className="print-content">
             <div className="max-w-4xl mx-auto bg-white p-8">
               {/* Header */}
               <div className="text-center mb-8 border-b-2 border-gray-800 pb-6">

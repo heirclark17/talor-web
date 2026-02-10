@@ -519,24 +519,25 @@ input, button, textarea, select {
 .particle:nth-child(5) { top: 30%; left: 80%; animation-delay: 4s; }
 .particle:nth-child(6) { top: 70%; left: 20%; animation-delay: 5s; }
 
-/* Print styles for resume export */
+/* Print styles for all pages */
 @media print {
   /* Hide everything except print-only content */
   body * {
     visibility: hidden;
   }
 
-  #print-resume,
-  #print-resume * {
+  .print-content,
+  .print-content * {
     visibility: visible;
   }
 
-  #print-resume {
+  .print-content {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
     padding: 0.5in;
+    background: white !important;
   }
 
   /* Remove backgrounds and use black text for print */
@@ -544,19 +545,26 @@ input, button, textarea, select {
   .btn-primary,
   .btn-secondary {
     background: white !important;
-    border: 1px solid #000 !important;
+    border: 1px solid #ccc !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
   }
 
   /* Black text for all print content */
-  h1, h2, h3, h4, h5, h6, p, span, li {
+  .print-content h1, .print-content h2, .print-content h3,
+  .print-content h4, .print-content h5, .print-content h6,
+  .print-content p, .print-content span, .print-content li,
+  .print-content td, .print-content th, .print-content div {
     color: #000 !important;
   }
 
   /* Page breaks */
   .page-break {
     page-break-after: always;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid;
   }
 
   /* Hide print buttons and UI elements */
@@ -569,11 +577,28 @@ input, button, textarea, select {
     margin: 0.5in;
     size: letter;
   }
+
+  /* Print table styling */
+  .print-content table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .print-content th,
+  .print-content td {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    text-align: left;
+    font-size: 11px;
+  }
+  .print-content th {
+    background: #f3f4f6 !important;
+    font-weight: 600;
+  }
 }
 
 /* Screen-only: hide print content */
 @media screen {
-  #print-resume {
+  .print-content {
     display: none;
   }
 }
