@@ -559,19 +559,111 @@ export default function CareerPathDesigner() {
   }
 
   const handleContinueWithAI = async () => {
-    if (jobUrl.trim() && !dreamRole.trim()) {
-      setExtractingJob(true)
-      try {
-        const result = await api.extractJobDetails(jobUrl.trim())
-        if (result.success && result.data) {
-          const title = result.data.job_title || result.data.title || result.data.Title || ''
-          if (title) setDreamRole(title)
+    setExtractingJob(true)
+    try {
+      // Re-apply resume data to any empty fields (guards against localStorage conflicts)
+      if (resumeData) {
+        const data = resumeData
+        let experience = data.experience || []
+        let skills = data.skills || []
+        let education = data.education || []
+
+        if (typeof experience === 'string') {
+          try { experience = JSON.parse(experience) } catch { experience = [] }
         }
-      } catch (err) {
-        console.error('Failed to extract job details:', err)
-      } finally {
-        setExtractingJob(false)
+        if (typeof skills === 'string') {
+          try { skills = JSON.parse(skills) } catch { skills = [] }
+        }
+        if (typeof education === 'string') {
+          try { education = JSON.parse(education) } catch { education = [] }
+        }
+        if (!Array.isArray(experience)) experience = []
+        if (!Array.isArray(skills)) skills = []
+        if (!Array.isArray(education)) education = []
+
+        // Fill current role if empty
+        if (!currentRole.trim() && experience[0]?.title) {
+          setCurrentRole(experience[0].title)
+        }
+
+        // Fill industry if empty
+        if (!currentIndustry.trim() && experience.length > 0) {
+          const latestCompany = experience[0]?.company || ''
+          const latestTitle = experience[0]?.title || ''
+          setCurrentIndustry(inferIndustry(latestCompany, latestTitle, skills))
+        }
+
+        // Fill years if still default
+        if (yearsExperience <= 5) {
+          const years = experience.reduce((total: number, exp: any) => {
+            if (exp.duration_years) return total + exp.duration_years
+            if (exp.start_date && exp.end_date) {
+              const start = new Date(exp.start_date)
+              const end = exp.end_date.toLowerCase?.().includes('present') ? new Date() : new Date(exp.end_date)
+              const diffYears = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365)
+              return total + Math.max(0, diffYears)
+            }
+            return total
+          }, 0)
+          if (years > 0) setYearsExperience(Math.round(years))
+        }
+
+        // Fill tools/skills if empty
+        if (tools.length === 0 && skills.length > 0) {
+          setTools(skills.slice(0, 15))
+        }
+
+        // Fill strengths if empty
+        if (!strengths.some(s => s.trim())) {
+          const inferredStrengths = inferStrengths(experience, skills, data.summary || '')
+          if (inferredStrengths.length > 0) setStrengths(inferredStrengths)
+        }
+
+        // Fill education if still default
+        if (education.length > 0) {
+          const highestDegree = education[0]?.degree?.toLowerCase() || ''
+          if (highestDegree.includes('phd') || highestDegree.includes('doctor')) {
+            setEducationLevel('phd')
+          } else if (highestDegree.includes('master')) {
+            setEducationLevel('masters')
+          } else if (highestDegree.includes('bachelor')) {
+            setEducationLevel('bachelors')
+          } else if (highestDegree.includes('associate')) {
+            setEducationLevel('associates')
+          }
+        }
+
+        // Generate tasks from role if tasks are empty
+        const roleForTasks = currentRole.trim() || experience[0]?.title || ''
+        const industryForTasks = currentIndustry.trim() || (experience.length > 0 ? inferIndustry(experience[0]?.company || '', experience[0]?.title || '', skills) : '')
+        const tasksEmpty = topTasks.filter(t => t.trim()).length === 0
+
+        if (roleForTasks.length > 2 && tasksEmpty) {
+          try {
+            const taskResponse = await api.generateTasksForRole(roleForTasks, industryForTasks || undefined)
+            if (taskResponse.success && taskResponse.data?.tasks) {
+              setTopTasks(taskResponse.data.tasks)
+            }
+          } catch (err) {
+            console.error('Failed to generate tasks:', err)
+          }
+        }
       }
+
+      // Extract job details if URL provided but dream role not yet filled
+      if (jobUrl.trim() && !dreamRole.trim()) {
+        try {
+          const result = await api.extractJobDetails(jobUrl.trim())
+          if (result.success && result.data) {
+            const title = result.data.job_title || result.data.title || result.data.Title || ''
+            if (title) setDreamRole(title)
+          }
+        } catch (err) {
+          console.error('Failed to extract job details:', err)
+        }
+      }
+    } finally {
+      setExtractingJob(false)
     }
     setStep('questions')
   }
