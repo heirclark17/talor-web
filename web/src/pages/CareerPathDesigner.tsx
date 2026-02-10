@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import type { CareerPlan as CareerPlanType } from '../types/career-plan'
 import CareerPlanResults from '../components/CareerPlanResults'
+import AILoadingScreen from '../components/AILoadingScreen'
 import {
   Sparkles, TrendingUp, BookOpen, Award, Briefcase, Calendar,
   FileText, Download, RefreshCw, ArrowLeft, Loader2, Upload,
@@ -2119,93 +2120,19 @@ export default function CareerPathDesigner() {
 
   // Generating Screen
   if (step === 'generating') {
-    // Determine which steps are completed based on job progress
-    const isResearching = jobStatus === 'researching' || jobProgress >= 10
-    const isSynthesizing = jobStatus === 'synthesizing' || jobProgress >= 60
-    const isCompleting = jobProgress >= 90
-
     return (
-      <div className="min-h-screen p-8 flex items-center justify-center">
-        <div className="max-w-2xl w-full glass rounded-3xl p-12">
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6">
-              <Loader2 className="w-12 h-12 text-white animate-spin" />
-            </div>
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Crafting Your Personalized Career Roadmap
-            </h2>
-            <p className="text-lg text-gray-400 mb-2 break-words">
-              {jobMessage || `Our AI is researching ${dreamRole} opportunities with real-world data...`}
-            </p>
-            <p className="text-sm text-gray-500 mb-8">
-              This may take 2-3 minutes for comprehensive research
-            </p>
-
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  {jobProgress >= 10 ? (
-                    <Check className="w-5 h-5 text-green-400" />
-                  ) : (
-                    <Loader2 className="w-5 h-5 text-white animate-spin" />
-                  )}
-                </div>
-                <div className={jobProgress >= 10 ? "text-white" : "text-gray-400"}>
-                  {isResearching ? "Researching certifications, events, and job market data with Perplexity" : "Preparing research..."}
-                </div>
-              </div>
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  {jobProgress >= 60 ? (
-                    isSynthesizing ? (
-                      <Loader2 className="w-5 h-5 text-white animate-spin" />
-                    ) : (
-                      <Check className="w-5 h-5 text-green-400" />
-                    )
-                  ) : (
-                    <div className="w-2 h-2 bg-white/40 rounded-full"></div>
-                  )}
-                </div>
-                <div className={jobProgress >= 60 ? "text-white" : "text-gray-400"}>
-                  {isSynthesizing ? "Generating personalized plan with OpenAI GPT-4.1-mini" : "Analyzing your transferable skills"}
-                </div>
-              </div>
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  {jobProgress >= 80 ? (
-                    <Loader2 className="w-5 h-5 text-white animate-spin" />
-                  ) : (
-                    <div className="w-2 h-2 bg-white/40 rounded-full"></div>
-                  )}
-                </div>
-                <div className={jobProgress >= 80 ? "text-white" : "text-gray-400"}>
-                  {jobProgress >= 80 ? "Creating detailed project roadmaps with tech stacks" : "Finding real networking events in your location"}
-                </div>
-              </div>
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                  {jobProgress >= 90 ? (
-                    <Loader2 className="w-5 h-5 text-white animate-spin" />
-                  ) : (
-                    <div className="w-2 h-2 bg-white/40 rounded-full"></div>
-                  )}
-                </div>
-                <div className={jobProgress >= 90 ? "text-white" : "text-gray-400"}>
-                  {jobProgress >= 90 ? "Finalizing your resume transformation guide" : "Building your resume transformation guide"}
-                </div>
-              </div>
-            </div>
-
-            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
-                style={{ width: `${jobProgress}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-gray-500 mt-4">This typically takes 30-90 seconds (web research takes time)</p>
-          </div>
-        </div>
-      </div>
+      <AILoadingScreen
+        title="Crafting Your Personalized Career Roadmap"
+        subtitle={jobMessage || `Our AI is researching ${dreamRole} opportunities with real-world data...`}
+        footnote="This typically takes 30-90 seconds"
+        steps={[
+          { id: 'research', label: 'Researching certifications, events, and job market data', description: 'Searching with Perplexity AI...' },
+          { id: 'analyze', label: 'Analyzing your transferable skills', description: 'Matching your experience to target roles...' },
+          { id: 'roadmaps', label: 'Creating detailed project roadmaps with tech stacks', description: 'Building personalized learning paths...' },
+          { id: 'finalize', label: 'Finalizing your resume transformation guide', description: 'Generating actionable recommendations...' },
+        ]}
+        progress={{ type: 'polled', progress: jobProgress }}
+      />
     )
   }
 

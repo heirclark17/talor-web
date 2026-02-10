@@ -7,6 +7,7 @@ import ResumeAnalysis from '../components/ResumeAnalysis'
 import KeywordPanel from '../components/KeywordPanel'
 import MatchScore from '../components/MatchScore'
 import ThemeToggle from '../components/ThemeToggle'
+import AILoadingScreen from '../components/AILoadingScreen'
 
 // LocalStorage keys for persisting tailor session
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
@@ -2351,6 +2352,22 @@ export default function TailorResume() {
 
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+      {loading && (
+        <div className="fixed inset-0 z-50">
+          <AILoadingScreen
+            title="Generating Tailored Resume"
+            subtitle="Our AI is customizing your resume for this specific role"
+            footnote="This typically takes 15-30 seconds"
+            steps={[
+              { id: 'analyze', label: 'Analyzing job description', description: 'Extracting key requirements and keywords...' },
+              { id: 'match', label: 'Matching your skills & experience', description: 'Identifying transferable qualifications...' },
+              { id: 'rewrite', label: 'Rewriting resume content', description: 'Tailoring bullets for maximum impact...' },
+              { id: 'finalize', label: 'Finalizing tailored document', description: 'Formatting and polishing your resume...' },
+            ]}
+            progress={{ type: 'estimated', estimatedDurationMs: 25000, isComplete: false }}
+          />
+        </div>
+      )}
       <ThemeToggle />
       <div className="max-w-4xl mx-auto">
         {/* Header */}

@@ -13,6 +13,7 @@ import {
   MessageSquare,
   CheckCircle
 } from 'lucide-react'
+import AILoadingScreen from './AILoadingScreen'
 import { CommonInterviewQuestion, CommonQuestionsData } from '../types/commonQuestions'
 import { api } from '../api/client'
 
@@ -207,13 +208,18 @@ export default function CommonInterviewQuestions({
 
   if (loading && !data) {
     return (
-      <div className="glass p-8 rounded-2xl">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Generating your tailored interview guidance...</p>
-          <p className="text-sm text-gray-500 mt-2">This may take 30-60 seconds</p>
-        </div>
-      </div>
+      <AILoadingScreen
+        title="Generating Interview Guidance"
+        subtitle="Creating tailored questions and sample answers"
+        footnote="This may take 30-60 seconds"
+        fullScreen={false}
+        steps={[
+          { id: 'analyze', label: 'Analyzing role requirements', description: 'Reviewing job description and company context...' },
+          { id: 'generate', label: 'Generating tailored questions', description: 'Creating role-specific interview questions...' },
+          { id: 'answers', label: 'Building sample answers', description: 'Crafting answers using your experience...' },
+        ]}
+        progress={{ type: 'estimated', estimatedDurationMs: 45000, isComplete: false }}
+      />
     )
   }
 

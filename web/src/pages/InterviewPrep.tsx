@@ -41,6 +41,7 @@ import CommonInterviewQuestions from '../components/CommonInterviewQuestions'
 import CertificationRecommendations from '../components/CertificationRecommendations'
 import BehavioralTechnicalQuestions from '../components/BehavioralTechnicalQuestions'
 import ThemeToggle from '../components/ThemeToggle'
+import AILoadingScreen from '../components/AILoadingScreen'
 
 // API base URL - same logic as API client
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
@@ -212,6 +213,8 @@ export default function InterviewPrep() {
   const [certifications, setCertifications] = useState<any>(null)
   const [loadingRealData, setLoadingRealData] = useState(false)
   const [loadingCertifications, setLoadingCertifications] = useState(false)
+  const [generationStages, setGenerationStages] = useState<string[]>([])
+  const isTrackingProgressRef = useRef(false)
 
   // Enhancement states
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>(() => {
@@ -436,10 +439,13 @@ export default function InterviewPrep() {
     try {
       setGenerating(true)
       setError(null)
+      setGenerationStages([])
+      isTrackingProgressRef.current = true
 
       const result = await api.generateInterviewPrep(Number(tailoredResumeId))
 
       if (result.success) {
+        setGenerationStages(prev => [...prev, 'generate'])
         setPrepData(result.data.prep_data)
         setInterviewPrepId(result.data.interview_prep_id)
         // After setting prep data, fetch related resume data and real data
@@ -453,6 +459,7 @@ export default function InterviewPrep() {
       throw err
     } finally {
       setGenerating(false)
+      isTrackingProgressRef.current = false
     }
   }
 
@@ -472,16 +479,26 @@ export default function InterviewPrep() {
 
       console.log('Fetching fresh real data from AI services...')
 
+      const trackStage = (stageId: string) => {
+        if (isTrackingProgressRef.current) {
+          setGenerationStages(prev => prev.includes(stageId) ? prev : [...prev, stageId])
+        }
+      }
+
       // Fetch all four data sources in parallel using centralized API client
       const [researchResult, newsResult, questionsResult, valuesResult] = await Promise.allSettled([
         // Company research
-        api.getCompanyResearch(companyName, industry || undefined, jobTitle || undefined),
+        api.getCompanyResearch(companyName, industry || undefined, jobTitle || undefined)
+          .then(r => { trackStage('research'); return r }),
         // Company news
-        api.getCompanyNews(companyName, industry || undefined, jobTitle || undefined, 90),
+        api.getCompanyNews(companyName, industry || undefined, jobTitle || undefined, 90)
+          .then(r => { trackStage('news'); return r }),
         // Interview questions
-        api.getInterviewQuestions(companyName, jobTitle || undefined, 30),
+        api.getInterviewQuestions(companyName, jobTitle || undefined, 30)
+          .then(r => { trackStage('questions'); return r }),
         // Company values (new endpoint)
-        api.getCompanyValues(companyName),
+        api.getCompanyValues(companyName)
+          .then(r => { trackStage('values'); return r }),
       ])
 
       // Prepare cache object
@@ -689,17 +706,34 @@ export default function InterviewPrep() {
     }
   }
 
-  if (loading || generating) {
+  if (generating) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-16 h-16 text-white animate-spin mx-auto mb-4" />
-          <p className="text-xl text-white font-medium">
-            {generating ? 'Generating Interview Prep with AI...' : 'Loading Interview Prep...'}
-          </p>
-          <p className="text-gray-400 mt-2">This may take 20-30 seconds</p>
-        </div>
-      </div>
+      <AILoadingScreen
+        title="Generating Interview Prep with AI"
+        subtitle="Researching the company and building your personalized prep guide"
+        footnote="This may take 20-30 seconds"
+        steps={[
+          { id: 'generate', label: 'Generate interview prep', description: 'Creating your personalized prep guide...' },
+          { id: 'research', label: 'Research company background', description: 'Analyzing strategic initiatives and culture...' },
+          { id: 'news', label: 'Fetch recent company news', description: 'Finding relevant news from the last 90 days...' },
+          { id: 'questions', label: 'Build tailored interview questions', description: 'Creating role-specific practice questions...' },
+          { id: 'values', label: 'Analyze company values & culture', description: 'Identifying cultural fit talking points...' },
+        ]}
+        progress={{ type: 'multi-stage', completedSteps: generationStages }}
+      />
+    )
+  }
+
+  if (loading) {
+    return (
+      <AILoadingScreen
+        title="Loading Interview Prep"
+        subtitle="Retrieving your saved prep data"
+        steps={[
+          { id: 'load', label: 'Loading saved data' },
+        ]}
+        progress={{ type: 'estimated', estimatedDurationMs: 3000, isComplete: false }}
+      />
     )
   }
 

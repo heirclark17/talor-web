@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import AILoadingScreen from './AILoadingScreen'
 import {
   Loader2,
   AlertCircle,
@@ -349,13 +350,19 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
   // Loading state
   if (loading) {
     return (
-      <div className="bg-white/5 rounded-2xl p-8 text-center">
-        <Loader2 className="w-12 h-12 text-white animate-spin mx-auto mb-4" />
-        <p className="text-white font-medium">Generating Interview Questions...</p>
-        <p className="text-gray-400 text-sm mt-2">
-          Researching {companyName}'s tech stack and creating 20 tailored questions
-        </p>
-      </div>
+      <AILoadingScreen
+        title="Generating Interview Questions"
+        subtitle={`Researching ${companyName}'s tech stack and creating 20 tailored questions`}
+        footnote="This may take 30-45 seconds"
+        fullScreen={false}
+        steps={[
+          { id: 'research', label: 'Researching company tech stack', description: `Analyzing ${companyName}'s technology environment...` },
+          { id: 'behavioral', label: 'Creating behavioral questions', description: 'Generating STAR-format questions from your experience...' },
+          { id: 'technical', label: 'Building technical questions', description: 'Creating role-specific technical scenarios...' },
+          { id: 'finalize', label: 'Finalizing question set', description: 'Organizing and prioritizing questions...' },
+        ]}
+        progress={{ type: 'estimated', estimatedDurationMs: 40000, isComplete: false }}
+      />
     )
   }
 
