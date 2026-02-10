@@ -168,6 +168,9 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
 
       if (!response.ok) {
         const errorData = await response.json()
+        if (response.status === 404) {
+          throw new Error('Interview prep not found. The tailored resume may have been deleted. Please go back and create a new tailored resume.')
+        }
         throw new Error(errorData.detail || 'Failed to generate questions')
       }
 
