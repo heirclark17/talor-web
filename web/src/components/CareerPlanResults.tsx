@@ -540,11 +540,11 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
           {/* Modal Content */}
           <div
-            className="relative w-full max-w-4xl max-h-[90vh] h-full sm:h-auto overflow-y-auto bg-gray-900/95 sm:rounded-3xl border-0 sm:border border-white/10 shadow-2xl"
+            className="relative w-full max-w-4xl max-h-[90vh] h-full sm:h-auto overflow-y-auto bg-black sm:rounded-3xl border-0 sm:border border-white/10 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm p-4 sm:p-6 border-b border-white/10 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-black p-4 sm:p-6 border-b border-white/10 flex items-center justify-between z-10">
               <h2 className="text-xl sm:text-2xl font-bold text-white">
                 {activeModal === 'roles' && 'Target Roles'}
                 {activeModal === 'skills' && 'Skills Analysis'}
