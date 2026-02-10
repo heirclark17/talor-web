@@ -145,8 +145,27 @@ export default function CareerPathDesigner() {
     refreshSavedPlans()
   }, [])
 
-  // Delete a saved career plan
+  // Delete saved career plans
   const [deletingPlanId, setDeletingPlanId] = useState<number | null>(null)
+  const [deletingAll, setDeletingAll] = useState(false)
+
+  const handleDeleteAllPlans = async () => {
+    if (!confirm(`Delete all ${savedPlans.length} saved career plans? This cannot be undone.`)) return
+
+    setDeletingAll(true)
+    try {
+      const result = await api.deleteAllCareerPlans()
+      if (result.success) {
+        setSavedPlans([])
+      } else {
+        setError('Failed to delete all plans')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete all plans')
+    } finally {
+      setDeletingAll(false)
+    }
+  }
 
   const handleDeletePlan = async (e: React.MouseEvent, planId: number) => {
     e.stopPropagation() // Prevent triggering the load action
@@ -800,9 +819,25 @@ export default function CareerPathDesigner() {
               </div>
             ) : savedPlans.length > 0 && (
               <div className="max-w-2xl mx-auto mb-10 px-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <FolderOpen className="w-5 h-5 text-white/60" />
-                  <h3 className="text-lg font-semibold text-white">Your Saved Career Plans</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <FolderOpen className="w-5 h-5 text-white/60" />
+                    <h3 className="text-lg font-semibold text-white">Your Saved Career Plans</h3>
+                  </div>
+                  {savedPlans.length > 1 && (
+                    <button
+                      onClick={handleDeleteAllPlans}
+                      disabled={deletingAll}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
+                    >
+                      {deletingAll ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
+                      Delete All
+                    </button>
+                  )}
                 </div>
                 <div className="glass rounded-2xl p-4 border border-white/10 space-y-3">
                   {savedPlans.slice(0, 5).map((savedPlan: any) => (

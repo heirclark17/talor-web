@@ -1040,6 +1040,34 @@ class ApiClient {
     }
   }
 
+  async deleteAllCareerPlans(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/all`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
   /**
    * Auto-generate typical tasks for a job role using Perplexity AI
    */
