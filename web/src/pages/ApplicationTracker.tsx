@@ -177,11 +177,11 @@ export default function ApplicationTracker() {
         <select
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value as ApplicationStatus | 'all')}
-          className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+          className="px-4 py-3 bg-[#1a1a2e] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
         >
-          <option value="all">All Statuses</option>
+          <option value="all" className="bg-[#1a1a2e] text-white">All Statuses</option>
           {ALL_STATUSES.map(s => (
-            <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
+            <option key={s} value={s} className="bg-[#1a1a2e] text-white">{STATUS_CONFIG[s].label}</option>
           ))}
         </select>
       </div>
@@ -236,10 +236,10 @@ export default function ApplicationTracker() {
                   <select
                     value={app.status}
                     onChange={e => handleStatusChange(app.id, e.target.value as ApplicationStatus)}
-                    className="text-xs bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-gray-300 focus:outline-none"
+                    className="text-xs bg-[#1a1a2e] border border-white/10 rounded-lg px-2 py-1.5 text-gray-300 focus:outline-none"
                   >
                     {ALL_STATUSES.map(s => (
-                      <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
+                      <option key={s} value={s} className="bg-[#1a1a2e] text-white">{STATUS_CONFIG[s].label}</option>
                     ))}
                   </select>
                   <button
@@ -312,8 +312,8 @@ function ApplicationFormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="glass rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/10" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0a0a0f]/95 backdrop-blur-sm" onClick={onClose}>
+      <div className="rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/10 bg-[#141418]" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-white">
             {application ? 'Edit Application' : 'Add Application'}
@@ -339,13 +339,13 @@ function ApplicationFormModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-gray-400 mb-1">Status</label>
-              <select value={status} onChange={e => setStatus(e.target.value as ApplicationStatus)} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30">
-                {ALL_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>)}
+              <select value={status} onChange={e => setStatus(e.target.value as ApplicationStatus)} className="w-full px-4 py-2.5 bg-[#1a1a2e] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30">
+                {ALL_STATUSES.map(s => <option key={s} value={s} className="bg-[#1a1a2e] text-white">{STATUS_CONFIG[s].label}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Applied Date</label>
-              <input type="date" value={appliedDate} onChange={e => setAppliedDate(e.target.value)} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30" />
+              <input type="date" value={appliedDate} onChange={e => setAppliedDate(e.target.value)} className="w-full px-4 py-2.5 bg-[#1a1a2e] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30 [color-scheme:dark]" />
             </div>
           </div>
           <div>
