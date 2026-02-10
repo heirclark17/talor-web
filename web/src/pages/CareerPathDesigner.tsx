@@ -14,6 +14,36 @@ import {
 type WizardStep = 'welcome' | 'upload' | 'questions' | 'generating' | 'results'
 type QuestionStep = 1 | 2 | 3 | 4 | 5
 
+function inferIndustry(company: string, title: string, skills: string[]): string {
+  const all = `${company} ${title} ${skills.join(' ')}`.toLowerCase()
+
+  const patterns: [RegExp, string][] = [
+    [/\b(bank|financ|capital|invest|trading|hedge fund|mortgage|credit|jpmorgan|goldman|citi|wells fargo|fidelity|schwab|merrill|morgan stanley)\b/, 'Financial Services & Banking'],
+    [/\b(hospital|health|medical|pharma|biotech|clinical|patient|hipaa|epic|cerner|unitedhealth|anthem|aetna|humana|cvs health)\b/, 'Healthcare & Life Sciences'],
+    [/\b(defense|military|dod|army|navy|air force|lockheed|raytheon|northrop|boeing|clearance|classified|fedramp|disa)\b/, 'Defense & Aerospace'],
+    [/\b(federal|government|govt|public sector|state agency|gsa|va |usda|fbi|cia|nsa|homeland)\b/, 'Government & Public Sector'],
+    [/\b(school|university|college|education|edtech|academic|campus|student|coursera|udemy)\b/, 'Education & EdTech'],
+    [/\b(retail|ecommerce|e-commerce|shopping|merchant|walmart|amazon|target|costco|shopify)\b/, 'Retail & E-Commerce'],
+    [/\b(energy|oil|gas|petroleum|utility|utilities|solar|wind|renewable|power grid|exxon|chevron|shell|bp)\b/, 'Energy & Utilities'],
+    [/\b(telecom|wireless|5g|spectrum|at&t|verizon|t-mobile|comcast|charter)\b/, 'Telecommunications'],
+    [/\b(insurance|underwriting|actuari|claims|allstate|geico|progressive|state farm|liberty mutual)\b/, 'Insurance'],
+    [/\b(manufactur|automotive|vehicle|factory|assembly|ford|gm|toyota|tesla|caterpillar)\b/, 'Manufacturing & Automotive'],
+    [/\b(real estate|property|mortgage|reit|construction|building|housing)\b/, 'Real Estate & Construction'],
+    [/\b(media|entertainment|streaming|broadcast|publish|news|disney|netflix|warner|spotify)\b/, 'Media & Entertainment'],
+    [/\b(transport|logistics|shipping|freight|supply chain|fedex|ups|maersk|warehouse)\b/, 'Transportation & Logistics'],
+    [/\b(consult|advisory|deloitte|accenture|mckinsey|kpmg|pwc|ernst|ey |bain|bcg)\b/, 'Consulting & Professional Services'],
+    [/\b(saas|software|cloud|platform|devops|api|microsoft|google|apple|meta|oracle|salesforce|adobe|sap|ibm|cisco|intel|nvidia|aws|azure|gcp)\b/, 'Technology & Software'],
+    [/\b(cyber|security|infosec|soc |siem|penetration|vulnerability|threat|firewall|endpoint)\b/, 'Cybersecurity'],
+    [/\b(data|analytics|machine learning|artificial intelligence| ai |ml |deep learning|nlp)\b/, 'Data Science & AI'],
+  ]
+
+  for (const [regex, industry] of patterns) {
+    if (regex.test(all)) return industry
+  }
+
+  return 'Technology'
+}
+
 export default function CareerPathDesigner() {
   const navigate = useNavigate()
   const [step, setStep] = useState<WizardStep>('welcome')
@@ -378,9 +408,14 @@ export default function CareerPathDesigner() {
         if (!Array.isArray(skills)) skills = []
         if (!Array.isArray(education)) education = []
 
-        // Set current role and industry
+        // Set current role from latest position
         if (experience[0]?.title) setCurrentRole(experience[0].title)
-        if (experience[0]?.company) setCurrentIndustry(experience[0].company)
+        // Infer industry from company, title, and skills
+        if (experience.length > 0) {
+          const latestCompany = experience[0]?.company || ''
+          const latestTitle = experience[0]?.title || ''
+          setCurrentIndustry(inferIndustry(latestCompany, latestTitle, skills))
+        }
 
         // Calculate years of experience
         const years = experience.reduce((total: number, exp: any) => {
@@ -520,9 +555,14 @@ export default function CareerPathDesigner() {
         if (!Array.isArray(skills)) skills = []
         if (!Array.isArray(education)) education = []
 
-        // Set current role and industry
+        // Set current role from latest position
         if (experience[0]?.title) setCurrentRole(experience[0].title)
-        if (experience[0]?.company) setCurrentIndustry(experience[0].company)
+        // Infer industry from company, title, and skills
+        if (experience.length > 0) {
+          const latestCompany = experience[0]?.company || ''
+          const latestTitle = experience[0]?.title || ''
+          setCurrentIndustry(inferIndustry(latestCompany, latestTitle, skills))
+        }
 
         // Calculate years of experience
         const years = experience.reduce((total: number, exp: any) => {
