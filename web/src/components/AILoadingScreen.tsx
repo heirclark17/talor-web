@@ -70,7 +70,7 @@ function getStepState(
   }
 }
 
-function ElapsedTimer() {
+function ElapsedTimer({ estimatedDurationMs }: { estimatedDurationMs?: number }) {
   const [elapsed, setElapsed] = useState(0)
   const startRef = useRef(Date.now())
 
@@ -83,10 +83,29 @@ function ElapsedTimer() {
 
   const mins = Math.floor(elapsed / 60)
   const secs = elapsed % 60
+
+  let remaining = ''
+  if (estimatedDurationMs) {
+    const estimatedSecs = Math.floor(estimatedDurationMs / 1000)
+    const left = Math.max(0, estimatedSecs - elapsed)
+    if (left > 0) {
+      const rMins = Math.floor(left / 60)
+      const rSecs = left % 60
+      remaining = rMins > 0 ? `~${rMins}m ${rSecs}s remaining` : `~${rSecs}s remaining`
+    } else {
+      remaining = 'Almost done...'
+    }
+  }
+
   return (
-    <span className="text-gray-500 text-sm tabular-nums">
-      {mins}:{secs.toString().padStart(2, '0')}
-    </span>
+    <div className="flex items-center gap-3">
+      <span className="text-gray-500 text-sm tabular-nums">
+        {mins}:{secs.toString().padStart(2, '0')}
+      </span>
+      {remaining && (
+        <span className="text-gray-600 text-xs">{remaining}</span>
+      )}
+    </div>
   )
 }
 
@@ -193,7 +212,7 @@ export default function AILoadingScreen({
         {/* Footer: elapsed time + footnote */}
         {!error && (
           <div className="flex items-center justify-between">
-            <ElapsedTimer />
+            <ElapsedTimer estimatedDurationMs={mode.type === 'estimated' ? mode.estimatedDurationMs : undefined} />
             {footnote && <span className="text-gray-500 text-sm">{footnote}</span>}
           </div>
         )}

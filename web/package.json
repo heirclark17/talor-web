@@ -13,6 +13,7 @@
     "test:career-path": "playwright test career-path-designer"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.60.0",
     "clsx": "^2.1.1",
     "dompurify": "^3.2.2",
     "lucide-react": "^0.562.0",

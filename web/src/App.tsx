@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings } from 'lucide-react'
+import { UserButton } from '@clerk/clerk-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit } from 'lucide-react'
 import UploadResume from './pages/UploadResume'
 import TailorResume from './pages/TailorResume'
 import InterviewPrep from './pages/InterviewPrep'
@@ -10,9 +11,16 @@ import SavedComparisons from './pages/SavedComparisons'
 import CareerPathDesigner from './pages/CareerPathDesigner'
 import Home from './pages/Home'
 import SettingsPage from './pages/Settings'
+import SignIn from './pages/SignIn'
+import SignUp from './pages/SignUp'
+import ApplicationTracker from './pages/ApplicationTracker'
+import CoverLetterGenerator from './pages/CoverLetterGenerator'
 import OnboardingTour from './components/OnboardingTour'
 import ErrorBoundary from './components/ErrorBoundary'
+import ProtectedRoute from './components/ProtectedRoute'
 import { useScrollAnimation } from './hooks/useScrollAnimation'
+import { useSessionMigration } from './hooks/useSessionMigration'
+import { useClerkUserSync } from './hooks/useClerkUserSync'
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -234,9 +242,16 @@ function Dashboard() {
   )
 }
 
+function SessionMigrationProvider({ children }: { children: React.ReactNode }) {
+  useSessionMigration()
+  useClerkUserSync()
+  return <>{children}</>
+}
+
 function AppContent() {
   const location = useLocation()
   const isLandingPage = location.pathname === '/'
+  const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Close mobile menu on route change
@@ -260,8 +275,10 @@ function AppContent() {
     { to: '/resumes', icon: FileText, label: 'Resumes', tourId: 'resumes' },
     { to: '/upload', icon: Upload, label: 'Upload', tourId: 'upload' },
     { to: '/tailor', icon: Target, label: 'Tailor', tourId: 'tailor' },
+    { to: '/applications', icon: Briefcase, label: 'Applications', tourId: 'applications' },
     { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep', tourId: 'interview-prep' },
     { to: '/star-stories', icon: Sparkles, label: 'STAR Stories', tourId: 'star-stories' },
+    { to: '/cover-letters', icon: FileEdit, label: 'Cover Letters', tourId: 'cover-letters' },
     { to: '/saved-comparisons', icon: Bookmark, label: 'Saved', tourId: 'saved' },
     { to: '/career-path', icon: TrendingUp, label: 'Career Path', tourId: 'career-path' },
     { to: '/settings', icon: Settings, label: 'Settings', tourId: 'settings' },
@@ -269,8 +286,8 @@ function AppContent() {
 
   return (
     <div className="min-h-screen">
-      {/* Top Navigation - Hidden on landing page */}
-      {!isLandingPage && (
+      {/* Top Navigation - Hidden on landing page and auth pages */}
+      {!isLandingPage && !isAuthPage && (
         <nav className="glass sticky top-0 z-50 border-b border-white/10">
           <div className="container mx-auto px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between">
@@ -297,22 +314,38 @@ function AppContent() {
                     <span className="text-sm xl:text-base font-medium">{link.label}</span>
                   </Link>
                 ))}
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: 'w-8 h-8',
+                    },
+                  }}
+                />
               </nav>
 
-              {/* Mobile Hamburger Button - 44px minimum touch target for WCAG compliance */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden min-w-[44px] min-h-[44px] p-2 text-white hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
-                aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-                aria-expanded={mobileMenuOpen}
-                aria-controls="mobile-nav-menu"
-              >
-                {mobileMenuOpen ? (
-                  <X className="w-6 h-6" aria-hidden="true" />
-                ) : (
-                  <Menu className="w-6 h-6" aria-hidden="true" />
-                )}
-              </button>
+              {/* Mobile: UserButton + Hamburger */}
+              <div className="lg:hidden flex items-center gap-3">
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: 'w-8 h-8',
+                    },
+                  }}
+                />
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="min-w-[44px] min-h-[44px] p-2 text-white hover:bg-white/10 rounded-lg transition-colors flex items-center justify-center"
+                  aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                  aria-expanded={mobileMenuOpen}
+                  aria-controls="mobile-nav-menu"
+                >
+                  {mobileMenuOpen ? (
+                    <X className="w-6 h-6" aria-hidden="true" />
+                  ) : (
+                    <Menu className="w-6 h-6" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -374,22 +407,29 @@ function AppContent() {
       <main>
         <ErrorBoundary>
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<Dashboard />} />
-            <Route path="/resumes" element={<Home />} />
-            <Route path="/upload" element={<UploadResume />} />
-            <Route path="/tailor" element={<TailorResume />} />
-            <Route path="/interview-preps" element={<InterviewPrepList />} />
-            <Route path="/interview-prep/:tailoredResumeId" element={<InterviewPrep />} />
-            <Route path="/star-stories" element={<StarStoriesList />} />
-            <Route path="/saved-comparisons" element={<SavedComparisons />} />
-            <Route path="/career-path" element={<CareerPathDesigner />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/sign-in/*" element={<SignIn />} />
+            <Route path="/sign-up/*" element={<SignUp />} />
+
+            {/* Protected routes */}
+            <Route path="/resumes" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/upload" element={<ProtectedRoute><UploadResume /></ProtectedRoute>} />
+            <Route path="/tailor" element={<ProtectedRoute><TailorResume /></ProtectedRoute>} />
+            <Route path="/applications" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
+            <Route path="/interview-preps" element={<ProtectedRoute><InterviewPrepList /></ProtectedRoute>} />
+            <Route path="/interview-prep/:tailoredResumeId" element={<ProtectedRoute><InterviewPrep /></ProtectedRoute>} />
+            <Route path="/star-stories" element={<ProtectedRoute><StarStoriesList /></ProtectedRoute>} />
+            <Route path="/cover-letters" element={<ProtectedRoute><CoverLetterGenerator /></ProtectedRoute>} />
+            <Route path="/saved-comparisons" element={<ProtectedRoute><SavedComparisons /></ProtectedRoute>} />
+            <Route path="/career-path" element={<ProtectedRoute><CareerPathDesigner /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
           </Routes>
         </ErrorBoundary>
       </main>
 
       {/* Onboarding Tour - Shows on first visit */}
-      {!isLandingPage && <OnboardingTour />}
+      {!isLandingPage && !isAuthPage && <OnboardingTour />}
     </div>
   )
 }
@@ -397,7 +437,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <SessionMigrationProvider>
+        <AppContent />
+      </SessionMigrationProvider>
     </BrowserRouter>
   )
 }

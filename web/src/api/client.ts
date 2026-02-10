@@ -1947,6 +1947,282 @@ class ApiClient {
     }
   }
 
+  // =========================================================================
+  // RESUME PARSED DATA UPDATE
+  async updateParsedResumeData(resumeId: number, data: Record<string, any>): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/resumes/${resumeId}/parsed-data`, {
+        method: 'PUT',
+        headers: { ...this.getHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      return { success: response.ok, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // APPLICATION TRACKING METHODS
+  // =========================================================================
+
+  async listApplications(status?: string): Promise<ApiResponse> {
+    try {
+      const url = status
+        ? `${this.baseUrl}/api/applications/?status=${status}`
+        : `${this.baseUrl}/api/applications/`;
+      const response = await fetch(url, { headers: this.getHeaders() });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createApplication(appData: any): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/applications/`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(appData),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateApplication(appId: number, appData: any): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/applications/${appId}`, {
+        method: 'PUT',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(appData),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteApplication(appId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/applications/${appId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getApplicationStats(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/applications/stats`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // COVER LETTER METHODS
+  // =========================================================================
+
+  async listCoverLetters(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/cover-letters/`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async generateCoverLetter(params: {
+    job_title: string;
+    company_name: string;
+    job_description: string;
+    tone?: string;
+    tailored_resume_id?: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/cover-letters/generate`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateCoverLetter(id: number, params: { content?: string; tone?: string }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/cover-letters/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteCoverLetter(id: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/cover-letters/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async exportCoverLetter(id: number, format: 'docx'): Promise<ApiResponse<Blob>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/cover-letters/${id}/export?format=${format}`, {
+        headers: this.getHeaders(),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        return { success: false, error: data.detail || `HTTP ${response.status}` };
+      }
+      const blob = await response.blob();
+      return { success: true, data: blob };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // RESUME VERSION HISTORY METHODS
+  // =========================================================================
+
+  async listResumeVersions(tailoredResumeId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/resumes/${tailoredResumeId}/versions`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async restoreResumeVersion(tailoredResumeId: number, versionId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/resumes/${tailoredResumeId}/versions/restore/${versionId}`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // STAR STORY MATCHING METHODS
+  // =========================================================================
+
+  async matchStarStoriesToQuestions(data: {
+    star_story_ids: number[];
+    questions: string[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/star-stories/match-to-questions`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (!response.ok) return { success: false, error: result.detail || `HTTP ${response.status}` };
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // REMINDER METHODS
+  // =========================================================================
+
+  async createReminder(data: any): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/reminders/`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (!response.ok) return { success: false, error: result.detail || `HTTP ${response.status}` };
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async listReminders(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/reminders/`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteReminder(id: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/reminders/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // TAILORED RESUME METHODS
+  // =========================================================================
+
   /**
    * Update a tailored resume (summary, skills, alignment)
    */

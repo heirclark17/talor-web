@@ -1,33 +1,45 @@
 /**
  * User Session Management
- * Generates and persists a unique user ID for isolating user data
+ * Generates and persists a unique user ID for isolating user data.
+ * With Clerk auth, this serves as a fallback during migration.
  */
 
 const USER_ID_KEY = 'talor_user_id';
+
+// Module-level clerk user ID, set by setClerkUserId()
+let _clerkUserId: string | null = null;
+
+/**
+ * Set the Clerk user ID (called from ClerkProvider context)
+ */
+export function setClerkUserId(id: string | null): void {
+  _clerkUserId = id ? `clerk_${id}` : null;
+}
 
 /**
  * Generate a unique user ID
  */
 function generateUserId(): string {
-  // Generate UUID v4
   return 'user_' + crypto.randomUUID();
 }
 
 /**
- * Get or create user ID
- * Returns existing ID from localStorage or creates a new one
+ * Get user ID — prefers Clerk user, falls back to localStorage
  */
 export function getUserId(): string {
-  // Check localStorage
+  // Prefer Clerk user ID if available
+  if (_clerkUserId) {
+    return _clerkUserId;
+  }
+
+  // Fall back to localStorage (legacy / unauthenticated)
   let userId = localStorage.getItem(USER_ID_KEY);
 
   if (!userId) {
-    // Generate new ID
     userId = generateUserId();
     localStorage.setItem(USER_ID_KEY, userId);
     console.log('Generated new user ID:', userId);
   } else if (!userId.startsWith('user_')) {
-    // Fix old format user IDs (migration)
     console.log('Migrating old user ID format to new format');
     userId = 'user_' + userId;
     localStorage.setItem(USER_ID_KEY, userId);
@@ -38,10 +50,22 @@ export function getUserId(): string {
 }
 
 /**
+ * Get the old localStorage user ID (for migration)
+ */
+export function getOldUserId(): string | null {
+  const stored = localStorage.getItem(USER_ID_KEY);
+  if (stored && stored.startsWith('user_')) {
+    return stored;
+  }
+  return null;
+}
+
+/**
  * Clear user session (for testing/logout)
  */
 export function clearUserSession(): void {
   localStorage.removeItem(USER_ID_KEY);
+  _clerkUserId = null;
   console.log('User session cleared');
 }
 
