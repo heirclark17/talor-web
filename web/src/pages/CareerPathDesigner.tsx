@@ -944,6 +944,48 @@ export default function CareerPathDesigner() {
               </p>
             </div>
 
+            {/* Selected existing resume confirmation */}
+            {selectedExistingResumeId && !resumeFile && (
+              <div className="glass rounded-3xl p-8 mb-6">
+                {uploadProgress < 100 ? (
+                  <div className="text-center">
+                    <Loader2 className="w-12 h-12 text-white mx-auto mb-4 animate-spin" />
+                    <h3 className="text-lg font-semibold text-white mb-2">Loading resume...</h3>
+                    <div className="max-w-md mx-auto">
+                      <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-2">
+                        <div
+                          className="h-full bg-white transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-sm text-gray-400">{uploadProgress}% complete</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="w-14 h-14 rounded-full bg-green-500/20 border-2 border-green-500/50 flex items-center justify-center mx-auto mb-4">
+                      <Check className="w-7 h-7 text-green-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-1">Resume Selected</h3>
+                    <p className="text-gray-400 mb-4">
+                      {existingResumes.find(r => r.id === selectedExistingResumeId)?.filename || `Resume ${selectedExistingResumeId}`}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setSelectedExistingResumeId(null)
+                        setResumeId(null)
+                        setResumeData(null)
+                        setUploadProgress(0)
+                      }}
+                      className="text-white/60 hover:text-white font-medium text-sm transition-colors"
+                    >
+                      Choose a different resume
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Select from existing resumes */}
             {existingResumes.length > 0 && !resumeFile && !selectedExistingResumeId && (
               <div className="glass rounded-3xl p-8 mb-6">
@@ -991,8 +1033,8 @@ export default function CareerPathDesigner() {
               </div>
             )}
 
-            {/* Upload zone */}
-            <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-16 mb-6 sm:mb-8">
+            {/* Upload zone - hidden when existing resume is selected */}
+            {!selectedExistingResumeId && <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-16 mb-6 sm:mb-8">
               <div className="border-2 border-dashed border-white/20 rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 text-center transition-all hover:border-white/40">
                 <input
                   type="file"
@@ -1062,7 +1104,7 @@ export default function CareerPathDesigner() {
                   </div>
                 )}
               </div>
-            </div>
+            </div>}
 
             {error && (
               <div className="mb-8 glass rounded-lg p-4 border-2 border-red-500/50">
