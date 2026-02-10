@@ -1168,13 +1168,8 @@ export default function CareerPathDesigner() {
 
             {/* OR divider */}
             {existingResumes.length > 0 && !resumeFile && !selectedExistingResumeId && (
-              <div className="relative mb-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/20"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 glass rounded-full text-gray-400">OR</span>
-                </div>
+              <div className="flex justify-center mb-6">
+                <span className="px-4 glass rounded-full text-gray-400 text-sm">OR</span>
               </div>
             )}
 
