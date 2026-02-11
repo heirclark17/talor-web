@@ -1,0 +1,121 @@
+  console.error
+    Failed to load saved career plans: Error: Network error
+        at Object.<anonymous> (C:\Users\derri\projects\resume-ai-app\mobile\src\screens\__tests__\CareerPathDesignerScreen.test.tsx:617:45)
+        at Generator.next (<anonymous>)
+        at asyncGeneratorStep (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\@babel\runtime\helpers\asyncToGenerator.js:3:17)
+        at _next (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\@babel\runtime\helpers\asyncToGenerator.js:17:9)
+        at C:\Users\derri\projects\resume-ai-app\mobile\node_modules\@babel\runtime\helpers\asyncToGenerator.js:22:7
+        at new Promise (<anonymous>)
+        at Object.<anonymous> (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\@babel\runtime\helpers\asyncToGenerator.js:14:12)
+        at Promise.then.completed (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\utils.js:231:10)
+        at _callCircusTest (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\run.js:316:40)
+        at _runTest (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\run.js:252:3)
+        at _runTestsForDescribeBlock (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\run.js:126:9)
+        at _runTestsForDescribeBlock (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\run.js:121:9)
+        at _runTestsForDescribeBlock (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\run.js:121:9)
+        at run (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\run.js:71:3)
+        at runAndTransformResultsToJestFormat (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+        at jestAdapter (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+        at runTestInternal (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-runner\build\runTest.js:367:16)
+        at runTest (C:\Users\derri\projects\resume-ai-app\mobile\node_modules\jest-runner\build\runTest.js:444:34)
+
+    [0m [90m 144 |[39m             }
+     [90m 145 |[39m           } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 146 |[39m             console[33m.[39merror([32m'Failed to load saved career plans:'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m                     [31m[1m^[22m[39m
+     [90m 147 |[39m           } [36mfinally[39m {
+     [90m 148 |[39m             setLoadingSavedPlans([36mfalse[39m)[33m;[39m
+     [90m 149 |[39m           }[0m
+
+      at error (src/screens/CareerPathDesignerScreen.tsx:146:21)
+          at Generator.throw (<anonymous>)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _throw (node_modules/@babel/runtime/helpers/asyncToGenerator.js:20:9)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+
+  console.log
+    Async generation not available, falling back to sync...
+
+      at Object.log (src/screens/CareerPathDesignerScreen.tsx:412:17)
+

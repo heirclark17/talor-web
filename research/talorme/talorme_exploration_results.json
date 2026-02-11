@@ -1,0 +1,20 @@
+{
+  "features": [],
+  "api_endpoints": [],
+  "ui_elements": [
+    {
+      "type": "button",
+      "text": "Create My Resume →",
+      "role": null,
+      "aria_label": null
+    },
+    {
+      "type": "button",
+      "text": "Get Started →",
+      "role": null,
+      "aria_label": null
+    }
+  ],
+  "network_calls": [],
+  "errors": []
+}

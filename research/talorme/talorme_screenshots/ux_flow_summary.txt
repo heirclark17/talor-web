@@ -1,0 +1,57 @@
+
+TALORME.COM UX FLOW DOCUMENTATION
+==================================
+
+NAVIGATION STRUCTURE:
+- Talor (logo/home) -> /
+- Upload -> /upload
+- Tailor -> /tailor
+- Interview Prep -> /interview-preps
+- STAR Stories -> /star-stories
+- Saved -> /saved-comparisons
+- Career Path -> /career-path
+
+MAIN USER FLOW:
+
+Step 1: Upload Resume
+-----------------------
+URL: /upload
+- Drag-and-drop or click to select file
+- Supports .docx and .pdf (max 10MB)
+- Alternative: "Use Existing Resume Instead" button
+
+Step 2: Tailor Resume
+-----------------------
+URL: /tailor
+- Select a base resume from uploaded resumes
+- Enter job URL
+- Click "Extract Details" to auto-fill company/title
+- Click "Generate Tailored Resume"
+
+Step 3: View Comparison (NEEDS DATA TO VIEW)
+--------------------------------------------
+Potential URLs: /comparison, /compare, /result, /tailor/compare
+- Side-by-side comparison of original vs tailored resume
+- Option to save comparison
+- Download tailored resume
+
+Step 4: Saved Comparisons
+--------------------------
+URL: /saved-comparisons
+- List of all saved resume comparisons
+- View, download, or delete comparisons
+
+UI COMPONENTS:
+- Glass morphism cards (class="glass")
+- Dark theme with white text
+- Gradient buttons (class="btn-primary")
+- Lucide icons throughout
+- Responsive design for mobile/tablet/desktop
+
+DESIGN SYSTEM:
+- Font: System fonts (likely Inter or similar)
+- Colors: Dark background (#1a1a1a), white text, glass effects
+- Spacing: Consistent padding (p-4, p-6, p-8)
+- Border radius: rounded-xl, rounded-2xl
+- Animations: transition-all, hover effects
+            

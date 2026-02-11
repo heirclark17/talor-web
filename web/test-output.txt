@@ -1,0 +1,109 @@
+
+Running 1 test using 1 worker
+
+
+🚀 Starting Comprehensive E2E Test Suite
+
+Testing: Backend APIs + Frontend Components
+Base URL: http://localhost:3001
+============================================================
+
+📋 TEST 1: Resume Upload & Parsing
+Testing: /api/resumes/upload (POST)
+✅ Resume uploaded successfully
+
+============================================================
+✅ All tests completed successfully!
+  x  1 [chromium] › tests\comprehensive-e2e-test.spec.ts:108:3 › Comprehensive E2E Test Suite › 1. Resume Upload & Backend Parsing (23.1s)
+
+🚀 Starting Comprehensive E2E Test Suite
+
+Testing: Backend APIs + Frontend Components
+Base URL: http://localhost:3001
+============================================================
+
+📋 TEST 1: Resume Upload & Parsing
+Testing: /api/resumes/upload (POST)
+✅ Resume uploaded successfully
+
+============================================================
+✅ All tests completed successfully!
+  x  2 [chromium] › tests\comprehensive-e2e-test.spec.ts:108:3 › Comprehensive E2E Test Suite › 1. Resume Upload & Backend Parsing (retry #1) (22.8s)
+
+
+  1) [chromium] › tests\comprehensive-e2e-test.spec.ts:108:3 › Comprehensive E2E Test Suite › 1. Resume Upload & Backend Parsing 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.resume-card').or(getByTestId('resume-item')).first()
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('.resume-card').or(getByTestId('resume-item')).first()[22m
+
+
+      211 |
+      212 |     const resumeCard = page.locator('.resume-card').or(page.getByTestId('resume-item')).first();
+    > 213 |     await expect(resumeCard).toBeVisible({ timeout: 10000 });
+          |                              ^
+      214 |
+      215 |     console.log('✅ Resume appears in list');
+      216 |     console.log('✅ Backend API /api/resumes/upload working');
+        at C:\Users\derri\projects\resume-ai-app\web\tests\comprehensive-e2e-test.spec.ts:213:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\comprehensive-e2e-test-Com-f6d6b-sume-Upload-Backend-Parsing-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results\comprehensive-e2e-test-Com-f6d6b-sume-Upload-Backend-Parsing-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\comprehensive-e2e-test-Com-f6d6b-sume-Upload-Backend-Parsing-chromium\error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.resume-card').or(getByTestId('resume-item')).first()
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('.resume-card').or(getByTestId('resume-item')).first()[22m
+
+
+      211 |
+      212 |     const resumeCard = page.locator('.resume-card').or(page.getByTestId('resume-item')).first();
+    > 213 |     await expect(resumeCard).toBeVisible({ timeout: 10000 });
+          |                              ^
+      214 |
+      215 |     console.log('✅ Resume appears in list');
+      216 |     console.log('✅ Backend API /api/resumes/upload working');
+        at C:\Users\derri\projects\resume-ai-app\web\tests\comprehensive-e2e-test.spec.ts:213:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\comprehensive-e2e-test-Com-f6d6b-sume-Upload-Backend-Parsing-chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results\comprehensive-e2e-test-Com-f6d6b-sume-Upload-Backend-Parsing-chromium-retry1\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\comprehensive-e2e-test-Com-f6d6b-sume-Upload-Backend-Parsing-chromium-retry1\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\comprehensive-e2e-test-Com-f6d6b-sume-Upload-Backend-Parsing-chromium-retry1\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\comprehensive-e2e-test-Com-f6d6b-sume-Upload-Backend-Parsing-chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\comprehensive-e2e-test.spec.ts:108:3 › Comprehensive E2E Test Suite › 1. Resume Upload & Backend Parsing 

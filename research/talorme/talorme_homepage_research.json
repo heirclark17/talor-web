@@ -1,0 +1,90 @@
+{
+  "homepage": {
+    "title": "Talor - AI Resume Tailoring",
+    "url": "https://talorme.com/"
+  },
+  "links": [],
+  "buttons": [
+    "Create My Resume →",
+    "Get Started →"
+  ],
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "Build a Job-Winning Resume in Minutes with Talor"
+    },
+    {
+      "tag": "H2",
+      "text": "Why Talor Works Better"
+    },
+    {
+      "tag": "H3",
+      "text": "Instant Tailoring"
+    },
+    {
+      "tag": "H3",
+      "text": "ATS-Friendly Format"
+    },
+    {
+      "tag": "H3",
+      "text": "Save Hours Per Application"
+    },
+    {
+      "tag": "H2",
+      "text": "How It Works"
+    },
+    {
+      "tag": "H3",
+      "text": "Upload Your Base Resume"
+    },
+    {
+      "tag": "H3",
+      "text": "Paste Any Job URL"
+    },
+    {
+      "tag": "H3",
+      "text": "Download & Apply"
+    },
+    {
+      "tag": "H2",
+      "text": "Ready to Land Your Next Interview?"
+    }
+  ],
+  "api_calls": [
+    {
+      "url": "https://talorme.com/",
+      "method": "GET",
+      "resource_type": "document"
+    },
+    {
+      "url": "https://talorme.com/assets/index-D9ziv_xS.js",
+      "method": "GET",
+      "resource_type": "script"
+    },
+    {
+      "url": "https://talorme.com/assets/index-CTfde3c6.css",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/urbanist/v18/L0x-DF02iFML4hGCyMqlbS0.woff2",
+      "method": "GET",
+      "resource_type": "font"
+    },
+    {
+      "url": "https://talorme.com/vite.svg",
+      "method": "GET",
+      "resource_type": "other"
+    }
+  ],
+  "interview_references": [
+    "Ready to Land Your Next Interview?\n\nJoin professionals who are getting more interviews with tailored resumes.\n\nGet Started →\n\nTakes less than 2 minutes to get started",
+    "Ready to Land Your Next Interview?",
+    "Join professionals who are getting more interviews with tailored resumes."
+  ]
+}

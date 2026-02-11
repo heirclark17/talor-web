@@ -1,0 +1,257 @@
+{
+  "pages_visited": [
+    {
+      "name": "after_get_started",
+      "url": "https://talorme.com/upload"
+    },
+    {
+      "route": "/interview",
+      "url": "https://talorme.com/interview",
+      "title": "Talor - AI Resume Tailoring"
+    },
+    {
+      "route": "/interview-prep",
+      "url": "https://talorme.com/interview-prep",
+      "title": "Talor - AI Resume Tailoring"
+    },
+    {
+      "route": "/dashboard",
+      "url": "https://talorme.com/dashboard",
+      "title": "Talor - AI Resume Tailoring"
+    },
+    {
+      "route": "/app",
+      "url": "https://talorme.com/app",
+      "title": "Talor - AI Resume Tailoring"
+    },
+    {
+      "route": "/resumes",
+      "url": "https://talorme.com/resumes",
+      "title": "Talor - AI Resume Tailoring"
+    },
+    {
+      "route": "/jobs",
+      "url": "https://talorme.com/jobs",
+      "title": "Talor - AI Resume Tailoring"
+    }
+  ],
+  "api_calls": [
+    {
+      "url": "https://talorme.com/",
+      "method": "GET",
+      "resource_type": "document"
+    },
+    {
+      "url": "https://talorme.com/assets/index-D9ziv_xS.js",
+      "method": "GET",
+      "resource_type": "script"
+    },
+    {
+      "url": "https://talorme.com/assets/index-CTfde3c6.css",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/urbanist/v18/L0x-DF02iFML4hGCyMqlbS0.woff2",
+      "method": "GET",
+      "resource_type": "font"
+    },
+    {
+      "url": "https://talorme.com/vite.svg",
+      "method": "GET",
+      "resource_type": "other"
+    },
+    {
+      "url": "https://talorme.com/vite.svg",
+      "method": "GET",
+      "resource_type": "other"
+    },
+    {
+      "url": "https://talorme.com/interview",
+      "method": "GET",
+      "resource_type": "document"
+    },
+    {
+      "url": "https://talorme.com/assets/index-D9ziv_xS.js",
+      "method": "GET",
+      "resource_type": "script"
+    },
+    {
+      "url": "https://talorme.com/assets/index-CTfde3c6.css",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/urbanist/v18/L0x-DF02iFML4hGCyMqlbS0.woff2",
+      "method": "GET",
+      "resource_type": "font"
+    },
+    {
+      "url": "https://talorme.com/vite.svg",
+      "method": "GET",
+      "resource_type": "other"
+    },
+    {
+      "url": "https://talorme.com/interview-prep",
+      "method": "GET",
+      "resource_type": "document"
+    },
+    {
+      "url": "https://talorme.com/assets/index-D9ziv_xS.js",
+      "method": "GET",
+      "resource_type": "script"
+    },
+    {
+      "url": "https://talorme.com/assets/index-CTfde3c6.css",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/urbanist/v18/L0x-DF02iFML4hGCyMqlbS0.woff2",
+      "method": "GET",
+      "resource_type": "font"
+    },
+    {
+      "url": "https://talorme.com/vite.svg",
+      "method": "GET",
+      "resource_type": "other"
+    },
+    {
+      "url": "https://talorme.com/dashboard",
+      "method": "GET",
+      "resource_type": "document"
+    },
+    {
+      "url": "https://talorme.com/assets/index-D9ziv_xS.js",
+      "method": "GET",
+      "resource_type": "script"
+    },
+    {
+      "url": "https://talorme.com/assets/index-CTfde3c6.css",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/urbanist/v18/L0x-DF02iFML4hGCyMqlbS0.woff2",
+      "method": "GET",
+      "resource_type": "font"
+    },
+    {
+      "url": "https://talorme.com/vite.svg",
+      "method": "GET",
+      "resource_type": "other"
+    },
+    {
+      "url": "https://talorme.com/app",
+      "method": "GET",
+      "resource_type": "document"
+    },
+    {
+      "url": "https://talorme.com/assets/index-D9ziv_xS.js",
+      "method": "GET",
+      "resource_type": "script"
+    },
+    {
+      "url": "https://talorme.com/assets/index-CTfde3c6.css",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/urbanist/v18/L0x-DF02iFML4hGCyMqlbS0.woff2",
+      "method": "GET",
+      "resource_type": "font"
+    },
+    {
+      "url": "https://talorme.com/vite.svg",
+      "method": "GET",
+      "resource_type": "other"
+    },
+    {
+      "url": "https://talorme.com/resumes",
+      "method": "GET",
+      "resource_type": "document"
+    },
+    {
+      "url": "https://talorme.com/assets/index-D9ziv_xS.js",
+      "method": "GET",
+      "resource_type": "script"
+    },
+    {
+      "url": "https://talorme.com/assets/index-CTfde3c6.css",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/urbanist/v18/L0x-DF02iFML4hGCyMqlbS0.woff2",
+      "method": "GET",
+      "resource_type": "font"
+    },
+    {
+      "url": "https://talorme.com/vite.svg",
+      "method": "GET",
+      "resource_type": "other"
+    },
+    {
+      "url": "https://talorme.com/jobs",
+      "method": "GET",
+      "resource_type": "document"
+    },
+    {
+      "url": "https://talorme.com/assets/index-D9ziv_xS.js",
+      "method": "GET",
+      "resource_type": "script"
+    },
+    {
+      "url": "https://talorme.com/assets/index-CTfde3c6.css",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "resource_type": "stylesheet"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/urbanist/v18/L0x-DF02iFML4hGCyMqlbS0.woff2",
+      "method": "GET",
+      "resource_type": "font"
+    },
+    {
+      "url": "https://talorme.com/vite.svg",
+      "method": "GET",
+      "resource_type": "other"
+    }
+  ],
+  "ui_elements": {},
+  "interview_prep": {}
+}

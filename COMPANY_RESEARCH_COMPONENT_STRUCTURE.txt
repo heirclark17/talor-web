@@ -1,0 +1,95 @@
+COMPANY RESEARCH CARD - COMPONENT STRUCTURE
+============================================
+
+CompanyResearchCard
+├── Header Section
+│   ├── Icon (Building2 - Info blue)
+│   └── Title: "Company Research"
+│
+├── Company Overview Section [EXPANDABLE - Default: Expanded]
+│   ├── Header: Info icon + "Company Overview"
+│   └── Content: Full company description text
+│
+├── Recent News Section [EXPANDABLE - Default: Collapsed]
+│   ├── Header: Newspaper icon + "Recent News (X)" + Count badge
+│   └── Content: List of news items
+│       └── Each News Item:
+│           ├── Headline (bold)
+│           ├── Date (small, tertiary)
+│           ├── Summary (regular)
+│           └── Source (tiny, italic)
+│
+├── Key Products & Services [EXPANDABLE - Default: Collapsed]
+│   ├── Header: Package icon + "Key Products & Services"
+│   └── Content: Bulleted list
+│       └── Each Item: Bullet dot + Product/service name
+│
+├── Key Competitors [EXPANDABLE - Default: Collapsed]
+│   ├── Header: TrendingUp icon + "Key Competitors"
+│   └── Content: List of competitor cards
+│       └── Each Competitor:
+│           ├── Company name (bold)
+│           └── Context (optional, secondary text)
+│
+├── Financial Health [INLINE - Always Visible]
+│   ├── Header: DollarSign icon + "Financial Health" + Status Badge
+│   │   └── Badge colors: Green (good) | Yellow (fair) | Red (poor)
+│   └── Content: Summary text
+│
+└── Employee Sentiment [INLINE - Always Visible]
+    ├── Header: ThumbsUp icon + "Employee Sentiment" + Rating + Sentiment Badge
+    │   ├── Star rating (if available)
+    │   └── Badge colors: Green (positive) | Yellow (neutral) | Red (negative)
+    └── Content: Summary text
+
+COLOR CODING SYSTEM
+===================
+
+Icons:
+- Info (Company Overview): Info blue (#0ea5e9)
+- Newspaper (Recent News): Purple (#a855f7)
+- Package (Products/Services): Success green (#10b981)
+- TrendingUp (Competitors): Warning yellow (#f59e0b)
+- DollarSign (Financial): Dynamic based on status
+- ThumbsUp (Sentiment): Dynamic based on sentiment
+
+Status Badges:
+- Good/Positive: Success green (#10b981)
+- Fair/Neutral: Warning yellow (#f59e0b)
+- Poor/Negative: Error red (#ef4444)
+
+INTERACTION PATTERNS
+====================
+
+Expandable Sections (4):
+1. Company Overview - Tap header to toggle
+2. Recent News - Tap header to toggle
+3. Key Products & Services - Tap header to toggle
+4. Key Competitors - Tap header to toggle
+
+Always Visible Sections (2):
+5. Financial Health - No toggle, always shown
+6. Employee Sentiment - No toggle, always shown
+
+Chevron Indicators:
+- ChevronDown: Section collapsed, tap to expand
+- ChevronUp: Section expanded, tap to collapse
+
+RESPONSIVE BEHAVIOR
+===================
+
+- Collapsible sections help manage screen real estate
+- Default state shows Company Overview only
+- Users expand sections as needed
+- All content uses flexible Text components that wrap
+- News items and competitors in cards for clear separation
+- Semantic spacing throughout (SPACING constants)
+
+ACCESSIBILITY
+=============
+
+- All TouchableOpacity have accessibilityRole="button"
+- Icon colors meet WCAG contrast requirements
+- Touch targets minimum 44x44 points
+- Clear visual hierarchy with font sizes and weights
+- Status badges use both color AND text for accessibility
