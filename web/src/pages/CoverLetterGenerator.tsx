@@ -199,12 +199,36 @@ export default function CoverLetterGenerator() {
   }
 
   async function handleGenerate(e: React.FormEvent) {
+    console.log('[CoverLetters] ========================================')
+    console.log('[CoverLetters] handleGenerate called')
+    console.log('[CoverLetters] Form data:', {
+      jobTitle,
+      companyName,
+      jobDescription: jobDescription?.substring(0, 100) + '...',
+      jobUrl,
+      jobInputMethod,
+      tone,
+      resumeSource,
+      selectedResumeId,
+      extractionAttempted,
+      companyExtracted,
+      titleExtracted
+    })
+
     e.preventDefault()
+    console.log('[CoverLetters] preventDefault called')
+
     setGenerating(true)
+    console.log('[CoverLetters] setGenerating(true) called')
+
     setGenerationStage('researching')
+    console.log('[CoverLetters] setGenerationStage("researching") called')
 
     // Switch to "generating" stage after 5 seconds
-    const stageTimer = setTimeout(() => setGenerationStage('generating'), 5000)
+    const stageTimer = setTimeout(() => {
+      console.log('[CoverLetters] Switching to "generating" stage')
+      setGenerationStage('generating')
+    }, 5000)
 
     try {
       const params: Record<string, any> = {
@@ -216,22 +240,31 @@ export default function CoverLetterGenerator() {
       // Send job description or job URL based on input method
       // If URL was extracted and we have the description, send both for efficiency
       if (jobInputMethod === 'url') {
+        console.log('[CoverLetters] Using URL input method')
         params.job_url = jobUrl
         // If we already extracted the description, include it to avoid re-extraction
         if (extractionAttempted && jobDescription) {
+          console.log('[CoverLetters] Including extracted job description')
           params.job_description = jobDescription
+        } else {
+          console.log('[CoverLetters] No extracted description, will extract on backend')
         }
       } else {
+        console.log('[CoverLetters] Using text input method')
         params.job_description = jobDescription
       }
 
       if (resumeSource !== 'none' && selectedResumeId) {
+        console.log('[CoverLetters] Including resume:', selectedResumeId)
         params.base_resume_id = selectedResumeId
       }
 
-      console.log('[CoverLetters] Generating cover letter with params:', params)
+      console.log('[CoverLetters] Final params:', JSON.stringify(params, null, 2))
+      console.log('[CoverLetters] Calling api.generateCoverLetter...')
+
       const res = await api.generateCoverLetter(params)
-      console.log('[CoverLetters] Generation response:', res)
+
+      console.log('[CoverLetters] API response received:', JSON.stringify(res, null, 2))
 
       if (res.success && res.data) {
         console.log('[CoverLetters] Generation successful!')
@@ -711,7 +744,12 @@ export default function CoverLetterGenerator() {
                   ))}
                 </div>
               </div>
-              <button type="submit" disabled={generating || uploading} className="btn-primary w-full py-3 flex items-center justify-center gap-2">
+              <button
+                type="submit"
+                disabled={generating || uploading}
+                onClick={() => console.log('[CoverLetters] Submit button clicked! Disabled:', generating || uploading)}
+                className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+              >
                 {generating ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
