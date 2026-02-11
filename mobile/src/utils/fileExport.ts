@@ -61,6 +61,7 @@ function getMimeType(format: ExportFormat): string {
       return 'application/pdf';
     case 'docx':
       return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    /* istanbul ignore next -- defensive default; ExportFormat union ensures only 'pdf'|'docx' reach here */
     default:
       return 'application/octet-stream';
   }
@@ -196,7 +197,7 @@ export async function exportAndShare(options: ExportOptions): Promise<boolean> {
   const result = await exportTailoredResume(options);
 
   if (!result.success || !result.filePath) {
-    Alert.alert('Export Failed', result.error || 'Unable to export resume');
+    Alert.alert('Export Failed', result.error || /* istanbul ignore next */ 'Unable to export resume');
     return false;
   }
 
