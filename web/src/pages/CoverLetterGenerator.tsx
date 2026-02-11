@@ -90,9 +90,18 @@ export default function CoverLetterGenerator() {
         const newResume = res.data.resume || res.data
         setResumes(prev => [newResume, ...prev])
         setSelectedResumeId(newResume.id)
+        console.log('[CoverLetters] Resume uploaded successfully:', newResume.id)
+      } else {
+        console.error('[CoverLetters] Upload failed:', res)
+        alert('Upload failed. Please try again.')
+        setResumeSource('none')
+        setSelectedResumeId(null)
       }
     } catch (err) {
       console.error('[CoverLetters] Upload error:', err)
+      alert('Upload error. Please try again.')
+      setResumeSource('none')
+      setSelectedResumeId(null)
     } finally {
       setUploading(false)
     }
@@ -393,7 +402,7 @@ export default function CoverLetterGenerator() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleGenerate} className="space-y-4">
+            <form onSubmit={handleGenerate} className="space-y-6">
               {/* Input Method Selection - TOP OF FORM */}
               <div>
                 <label className="block text-sm font-medium text-theme mb-2">How would you like to provide the job details?</label>
@@ -606,7 +615,7 @@ export default function CoverLetterGenerator() {
                       <select
                         value={selectedResumeId ?? ''}
                         onChange={e => setSelectedResumeId(e.target.value ? Number(e.target.value) : null)}
-                        className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted text-sm"
+                        className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted text-sm [&>option]:text-gray-900 [&>option]:bg-white dark:[&>option]:text-gray-100 dark:[&>option]:bg-gray-800"
                       >
                         <option value="">Select a resume...</option>
                         {resumes.map(r => (
@@ -629,21 +638,31 @@ export default function CoverLetterGenerator() {
                       className="hidden"
                       onChange={e => {
                         const file = e.target.files?.[0]
-                        if (file) handleFileUpload(file)
+                        if (file) {
+                          console.log('[CoverLetters] File selected:', file.name, file.size)
+                          handleFileUpload(file)
+                        }
                       }}
                     />
                     {uploading ? (
-                      <div className="flex items-center gap-2 text-sm text-theme-secondary py-2">
-                        <Loader2 className="w-4 h-4 animate-spin" /> Uploading...
+                      <div className="flex items-center justify-center gap-2 text-sm text-theme-secondary py-4">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Uploading resume...</span>
                       </div>
                     ) : selectedResumeId && resumeSource === 'upload' ? (
-                      <div className="flex items-center justify-between bg-theme-glass-5 border border-theme-subtle rounded-xl px-4 py-2.5">
-                        <span className="text-sm text-theme truncate">
-                          {resumes.find(r => r.id === selectedResumeId)?.filename || 'Resume uploaded'}
-                        </span>
+                      <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-2.5">
+                        <div className="flex items-center gap-2">
+                          <div className="text-green-400">✓</div>
+                          <span className="text-sm text-theme truncate">
+                            {resumes.find(r => r.id === selectedResumeId)?.filename || 'Resume uploaded'}
+                          </span>
+                        </div>
                         <button
                           type="button"
-                          onClick={() => { setSelectedResumeId(null); if (fileInputRef.current) fileInputRef.current.value = '' }}
+                          onClick={() => {
+                            setSelectedResumeId(null)
+                            if (fileInputRef.current) fileInputRef.current.value = ''
+                          }}
                           className="text-theme-tertiary hover:text-theme-secondary ml-2"
                         >
                           <X className="w-4 h-4" />
@@ -652,9 +671,13 @@ export default function CoverLetterGenerator() {
                     ) : (
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full px-4 py-2.5 bg-theme-glass-5 border border-dashed border-theme-muted rounded-xl text-sm text-theme-secondary hover:border-theme-muted hover:text-theme transition-all"
+                        onClick={() => {
+                          console.log('[CoverLetters] Upload button clicked')
+                          fileInputRef.current?.click()
+                        }}
+                        className="w-full px-4 py-2.5 bg-theme-glass-5 border border-dashed border-theme-muted rounded-xl text-sm text-theme-secondary hover:border-theme-subtle hover:text-theme transition-all hover:bg-theme-glass-10"
                       >
+                        <Upload className="w-4 h-4 inline mr-2" />
                         Choose .pdf or .docx file (max 10MB)
                       </button>
                     )}
