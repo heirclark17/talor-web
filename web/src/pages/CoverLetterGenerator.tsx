@@ -218,7 +218,7 @@ export default function CoverLetterGenerator() {
       if (jobInputMethod === 'url') {
         params.job_url = jobUrl
         // If we already extracted the description, include it to avoid re-extraction
-        if (extracted && jobDescription) {
+        if (extractionAttempted && jobDescription) {
           params.job_description = jobDescription
         }
       } else {
@@ -229,8 +229,12 @@ export default function CoverLetterGenerator() {
         params.base_resume_id = selectedResumeId
       }
 
+      console.log('[CoverLetters] Generating cover letter with params:', params)
       const res = await api.generateCoverLetter(params)
+      console.log('[CoverLetters] Generation response:', res)
+
       if (res.success && res.data) {
+        console.log('[CoverLetters] Generation successful!')
         loadLetters()
         setShowGenerator(false)
         setJobTitle('')
@@ -248,9 +252,13 @@ export default function CoverLetterGenerator() {
           setSelectedLetter(res.data.cover_letter)
           setEditContent(res.data.cover_letter.content)
         }
+      } else {
+        console.error('[CoverLetters] Generation failed:', res)
+        alert(`Generation failed: ${res.error || 'Unknown error'}. Please try again.`)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[CoverLetters] Generate error:', err)
+      alert(`Error generating cover letter: ${err.message || 'Unknown error'}. Please check the console and try again.`)
     } finally {
       clearTimeout(stageTimer)
       setGenerating(false)
