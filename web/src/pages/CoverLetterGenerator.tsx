@@ -45,8 +45,13 @@ export default function CoverLetterGenerator() {
   const [jobUrl, setJobUrl] = useState('')
   const [jobInputMethod, setJobInputMethod] = useState<'text' | 'url'>('text')
   const [tone, setTone] = useState('professional')
+
+  // URL extraction states (matching TailorResume pattern)
+  const [extractionAttempted, setExtractionAttempted] = useState(false)
+  const [companyExtracted, setCompanyExtracted] = useState(false)
+  const [titleExtracted, setTitleExtracted] = useState(false)
   const [extracting, setExtracting] = useState(false)
-  const [extracted, setExtracted] = useState(false)
+  const [extractionError, setExtractionError] = useState<{company?: string; title?: string}>({})
 
   // Resume picker state
   const [resumes, setResumes] = useState<ResumeItem[]>([])
@@ -108,26 +113,77 @@ export default function CoverLetterGenerator() {
   }
 
   async function handleExtract() {
-    if (!jobUrl) return
+    const trimmedUrl = jobUrl.trim()
+
+    if (!trimmedUrl) {
+      setExtractionError({ company: 'Please enter a job URL first', title: 'Please enter a job URL first' })
+      return
+    }
 
     setExtracting(true)
-    try {
-      // Call backend to extract job info from URL
-      const response = await fetch(`${api.baseUrl || ''}/api/cover-letters/extract-url`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: jobUrl }),
-      })
+    setExtractionAttempted(false)
+    setExtractionError({})
 
-      const data = await response.json()
-      if (data.success && data.data) {
-        if (data.data.job_title) setJobTitle(data.data.job_title)
-        if (data.data.company_name) setCompanyName(data.data.company_name)
-        if (data.data.job_description) setJobDescription(data.data.job_description)
-        setExtracted(true)
+    try {
+      const result = await api.extractJobDetails(trimmedUrl)
+
+      if (!result.success) {
+        // Extraction failed completely
+        setExtractionAttempted(true)
+        setCompanyExtracted(false)
+        setTitleExtracted(false)
+        setExtractionError({
+          company: 'Could not extract company name. Please enter it manually.',
+          title: 'Could not extract job title. Please enter it manually.'
+        })
+        return
       }
-    } catch (err) {
-      console.error('[CoverLetters] Extract error:', err)
+
+      // Check what was extracted
+      const extractedCompany = result.data?.company || result.data?.Company || ''
+      const extractedTitle = result.data?.job_title || result.data?.title || result.data?.Title || ''
+      const extractedDescription = result.data?.description || ''
+
+      setExtractionAttempted(true)
+
+      // Update states based on what was extracted
+      if (extractedCompany) {
+        setCompanyName(extractedCompany)
+        setCompanyExtracted(true)
+      } else {
+        setCompanyExtracted(false)
+        setExtractionError(prev => ({
+          ...prev,
+          company: 'Could not extract company name. Please enter it manually.'
+        }))
+      }
+
+      if (extractedTitle) {
+        setJobTitle(extractedTitle)
+        setTitleExtracted(true)
+      } else {
+        setTitleExtracted(false)
+        setExtractionError(prev => ({
+          ...prev,
+          title: 'Could not extract job title. Please enter it manually.'
+        }))
+      }
+
+      // Always set job description if available
+      if (extractedDescription) {
+        setJobDescription(extractedDescription)
+      }
+
+      console.log('Extraction result:', { company: extractedCompany, title: extractedTitle })
+    } catch (err: any) {
+      console.error('Extraction error:', err)
+      setExtractionAttempted(true)
+      setCompanyExtracted(false)
+      setTitleExtracted(false)
+      setExtractionError({
+        company: 'Extraction failed. Please enter company name manually.',
+        title: 'Extraction failed. Please enter job title manually.'
+      })
     } finally {
       setExtracting(false)
     }
@@ -173,7 +229,10 @@ export default function CoverLetterGenerator() {
         setJobDescription('')
         setJobUrl('')
         setJobInputMethod('text')
-        setExtracted(false)
+        setExtractionAttempted(false)
+        setCompanyExtracted(false)
+        setTitleExtracted(false)
+        setExtractionError({})
         setResumeSource('none')
         setSelectedResumeId(null)
         if (res.data.cover_letter) {
@@ -341,7 +400,13 @@ export default function CoverLetterGenerator() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => { setJobInputMethod('text'); setExtracted(false) }}
+                    onClick={() => {
+                      setJobInputMethod('text')
+                      setExtractionAttempted(false)
+                      setCompanyExtracted(false)
+                      setTitleExtracted(false)
+                      setExtractionError({})
+                    }}
                     className={`p-3 rounded-lg border text-sm font-medium transition-all ${
                       jobInputMethod === 'text'
                         ? 'border-blue-500/50 bg-blue-500/10 text-theme'
@@ -353,7 +418,13 @@ export default function CoverLetterGenerator() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setJobInputMethod('url'); setExtracted(false) }}
+                    onClick={() => {
+                      setJobInputMethod('url')
+                      setExtractionAttempted(false)
+                      setCompanyExtracted(false)
+                      setTitleExtracted(false)
+                      setExtractionError({})
+                    }}
                     className={`p-3 rounded-lg border text-sm font-medium transition-all ${
                       jobInputMethod === 'url'
                         ? 'border-blue-500/50 bg-blue-500/10 text-theme'
@@ -369,46 +440,52 @@ export default function CoverLetterGenerator() {
               {/* URL Input with Extract Button */}
               {jobInputMethod === 'url' && (
                 <div>
-                  <label className="block text-sm text-theme-secondary mb-1">Job URL *</label>
+                  <label className="block text-sm font-medium text-theme mb-2">Job URL *</label>
                   <div className="flex gap-2">
                     <input
                       type="url"
                       required={jobInputMethod === 'url'}
                       value={jobUrl}
-                      onChange={e => { setJobUrl(e.target.value); setExtracted(false) }}
+                      onChange={e => {
+                        setJobUrl(e.target.value)
+                        // Reset extraction state when URL changes
+                        if (extractionAttempted) {
+                          setExtractionAttempted(false)
+                          setCompanyExtracted(false)
+                          setTitleExtracted(false)
+                          setExtractionError({})
+                          setCompanyName('')
+                          setJobTitle('')
+                        }
+                      }}
+                      onBlur={handleExtract}
                       className="flex-1 px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted"
                       placeholder="https://linkedin.com/jobs/view/..."
+                      disabled={extracting}
                     />
                     <button
                       type="button"
                       onClick={handleExtract}
-                      disabled={!jobUrl || extracting}
-                      className="px-4 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-xl text-theme font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                      disabled={!jobUrl.trim() || extracting}
+                      className={`px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all ${
+                        extracting || !jobUrl.trim()
+                          ? 'bg-theme-glass-10 text-theme-tertiary cursor-not-allowed'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
                     >
                       {extracting ? (
-                        <><Loader2 className="w-4 h-4 animate-spin inline mr-1" /> Extracting...</>
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Extracting...
+                        </span>
                       ) : (
-                        <><Search className="w-4 h-4 inline mr-1" /> Extract</>
+                        'Extract Details'
                       )}
                     </button>
                   </div>
-                  <p className="text-xs text-theme-tertiary mt-1">
-                    Paste job URL from LinkedIn, company career pages, or job boards
+                  <p className="text-xs text-theme-secondary mt-2 flex items-center gap-2">
+                    <span>Paste the job URL and click "Extract Details" to automatically extract company name and job title.</span>
                   </p>
-
-                  {/* Extracted Info Preview */}
-                  {extracted && (
-                    <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <div className="flex items-start gap-2">
-                        <div className="text-green-400 mt-0.5">✓</div>
-                        <div className="flex-1 text-sm">
-                          <div className="font-medium text-theme">Extracted Successfully</div>
-                          {jobTitle && <div className="text-theme-secondary mt-1">Title: {jobTitle}</div>}
-                          {companyName && <div className="text-theme-secondary">Company: {companyName}</div>}
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -427,27 +504,62 @@ export default function CoverLetterGenerator() {
                 </div>
               )}
 
-              {/* Manual Job Title and Company (shown for both methods) */}
-              <div>
-                <label className="block text-sm text-theme-secondary mb-1">Job Title *</label>
-                <input
-                  required
-                  value={jobTitle}
-                  onChange={e => setJobTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted"
-                  placeholder={jobInputMethod === 'url' ? 'Auto-filled after extraction' : 'e.g., Senior Software Engineer'}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-theme-secondary mb-1">Company Name *</label>
-                <input
-                  required
-                  value={companyName}
-                  onChange={e => setCompanyName(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted"
-                  placeholder={jobInputMethod === 'url' ? 'Auto-filled after extraction' : 'e.g., Microsoft'}
-                />
-              </div>
+              {/* Success Messages if Extracted (URL method only) */}
+              {jobInputMethod === 'url' && extractionAttempted && (companyExtracted || titleExtracted) && (
+                <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-green-400 text-lg">✓</div>
+                    <div className="flex-1">
+                      <p className="text-sm text-green-300 font-semibold mb-1">Extraction Successful!</p>
+                      <div className="text-sm text-theme-secondary space-y-1">
+                        {companyExtracted && <p>✓ Company: {companyName}</p>}
+                        {titleExtracted && <p>✓ Job Title: {jobTitle}</p>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Manual Fields - Show for text method OR if URL extraction failed */}
+              {(jobInputMethod === 'text' || (jobInputMethod === 'url' && extractionAttempted && !companyExtracted)) && (
+                <div>
+                  <label className="block text-sm text-theme-secondary mb-1">
+                    Company Name * {jobInputMethod === 'url' && <span className="text-red-400 text-xs">(extraction failed)</span>}
+                  </label>
+                  <input
+                    required
+                    value={companyName}
+                    onChange={e => setCompanyName(e.target.value)}
+                    className={`w-full px-4 py-2.5 bg-theme-glass-5 border rounded-xl text-theme focus:outline-none focus:border-theme-muted ${
+                      extractionError.company ? 'border-red-500' : 'border-theme-subtle'
+                    }`}
+                    placeholder="e.g., Microsoft"
+                  />
+                  {extractionError.company && (
+                    <p className="text-sm text-red-400 mt-1">{extractionError.company}</p>
+                  )}
+                </div>
+              )}
+
+              {(jobInputMethod === 'text' || (jobInputMethod === 'url' && extractionAttempted && !titleExtracted)) && (
+                <div>
+                  <label className="block text-sm text-theme-secondary mb-1">
+                    Job Title * {jobInputMethod === 'url' && <span className="text-red-400 text-xs">(extraction failed)</span>}
+                  </label>
+                  <input
+                    required
+                    value={jobTitle}
+                    onChange={e => setJobTitle(e.target.value)}
+                    className={`w-full px-4 py-2.5 bg-theme-glass-5 border rounded-xl text-theme focus:outline-none focus:border-theme-muted ${
+                      extractionError.title ? 'border-red-500' : 'border-theme-subtle'
+                    }`}
+                    placeholder="e.g., Senior Software Engineer"
+                  />
+                  {extractionError.title && (
+                    <p className="text-sm text-red-400 mt-1">{extractionError.title}</p>
+                  )}
+                </div>
+              )}
 
               {/* Resume Picker */}
               <div>
