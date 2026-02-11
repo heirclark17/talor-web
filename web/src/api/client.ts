@@ -42,6 +42,306 @@ export interface ApiResponse<T = any> {
   error?: string;
 }
 
+// Interview Readiness Score interface
+export interface ReadinessScore {
+  confidence_level: number;
+  preparation_level: string;
+  strengths: string[];
+  areas_for_improvement: string[];
+  recommendations: string[];
+}
+
+// Values Alignment interface
+export interface ValuesAlignment {
+  alignment_score: number;
+  matched_values: Array<{
+    value: string;
+    company_context?: string;
+    candidate_evidence?: string;
+  }>;
+  value_gaps: Array<{
+    value: string;
+    company_context?: string;
+    suggestion?: string;
+  }>;
+  cultural_fit_insights: string;
+}
+
+// Company Research interface
+export interface CompanyResearch {
+  company_overview: string;
+  recent_news: Array<{
+    headline: string;
+    date?: string;
+    summary: string;
+    source?: string;
+    url?: string;
+  }>;
+  key_products_services: string[];
+  competitors: Array<{
+    name: string;
+    context?: string;
+  }>;
+  financial_health: {
+    summary: string;
+    status: 'good' | 'fair' | 'poor';
+  };
+  employee_sentiment: {
+    summary: string;
+    rating?: number;
+    sentiment: 'positive' | 'neutral' | 'negative';
+  };
+}
+
+// Strategic News interface
+export interface StrategicNewsItem {
+  headline: string;
+  date: string;
+  source: string;
+  summary: string;
+  relevance_to_interview: string;
+  talking_points: string[];
+}
+
+export interface StrategicNews {
+  news_items: StrategicNewsItem[];
+}
+
+// Competitive Intelligence interface
+export interface CompetitiveIntelligence {
+  market_position: string;
+  competitive_advantages: string[];
+  challenges: string[];
+  differentiation_strategy: string;
+  interview_angles: string[];
+}
+
+// Interview Strategy interface
+export interface InterviewStrategy {
+  recommended_approach: string;
+  key_themes_to_emphasize: string[];
+  stories_to_prepare: Array<{
+    theme: string;
+    description: string;
+  }>;
+  questions_to_ask_interviewer: string[];
+  pre_interview_checklist: string[];
+}
+
+// Executive Insights interface
+export interface ExecutiveInsights {
+  executive_priorities: string[];
+  leadership_style: string;
+  decision_making_factors: string[];
+  strategic_initiatives: string[];
+  c_suite_talking_points: string[];
+}
+
+// Career Trajectory Analysis interface
+export interface CareerTrajectoryAnalysis {
+  current_position_assessment: string;
+  growth_potential: {
+    score: number;
+    factors: string[];
+  };
+  trajectory_path: Array<{
+    role: string;
+    timeline: string;
+    requirements: string[];
+  }>;
+  recommended_next_steps: string[];
+  market_insights: {
+    demand: 'high' | 'medium' | 'low';
+    salary_range: string;
+    top_companies: string[];
+  };
+}
+
+// Skill Gaps Analysis interface
+export interface SkillGapsAnalysis {
+  identified_gaps: Array<{
+    skill: string;
+    importance: 'critical' | 'high' | 'medium' | 'low';
+    current_level: 'none' | 'beginner' | 'intermediate' | 'advanced';
+    target_level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  }>;
+  industry_demand: {
+    trending_skills: string[];
+    market_saturation: Record<string, 'high' | 'medium' | 'low'>;
+  };
+  learning_resources: Array<{
+    skill: string;
+    resources: Array<{
+      type: 'course' | 'book' | 'certification' | 'bootcamp';
+      title: string;
+      provider: string;
+      url?: string;
+      cost?: string;
+      duration?: string;
+    }>;
+  }>;
+  priority_ranking: string[];
+}
+
+// Detailed Career Plan interface
+export interface DetailedCareerPlan {
+  plan_id: number;
+  summary: string;
+  milestones: Array<{
+    title: string;
+    description: string;
+    timeline: string;
+    completion_criteria: string[];
+  }>;
+  action_items: Array<{
+    category: string;
+    task: string;
+    priority: 'high' | 'medium' | 'low';
+    deadline: string;
+    resources: string[];
+  }>;
+  timeline_breakdown: {
+    phase_1: { duration: string; focus: string; goals: string[] };
+    phase_2: { duration: string; focus: string; goals: string[] };
+    phase_3: { duration: string; focus: string; goals: string[] };
+  };
+  skill_development_path: Array<{
+    skill: string;
+    current_proficiency: number;
+    target_proficiency: number;
+    learning_plan: string[];
+  }>;
+}
+
+// STAR Story Analysis interface
+export interface StarStoryAnalysis {
+  overall_score: number;
+  component_scores: {
+    situation: { score: number; feedback: string };
+    task: { score: number; feedback: string };
+    action: { score: number; feedback: string };
+    result: { score: number; feedback: string };
+  };
+  strengths: string[];
+  areas_for_improvement: string[];
+  impact_assessment: {
+    quantifiable_results: boolean;
+    leadership_demonstrated: boolean;
+    problem_solving_shown: boolean;
+  };
+  suggestions: string[];
+}
+
+// Story Suggestions interface
+export interface StorySuggestions {
+  improvement_tips: Array<{
+    component: 'situation' | 'task' | 'action' | 'result';
+    current_text: string;
+    suggestion: string;
+    reasoning: string;
+  }>;
+  alternative_framings: Array<{
+    perspective: string;
+    reframed_story: {
+      situation: string;
+      task: string;
+      action: string;
+      result: string;
+    };
+  }>;
+  impact_enhancements: Array<{
+    type: 'metrics' | 'scope' | 'leadership' | 'innovation';
+    enhancement: string;
+  }>;
+  keyword_recommendations: string[];
+}
+
+// Story Variations interface
+export interface StoryVariations {
+  variations: Array<{
+    context: string;
+    tone: string;
+    story: {
+      situation: string;
+      task: string;
+      action: string;
+      result: string;
+    };
+    optimal_use_case: string;
+  }>;
+  usage_guide: {
+    technical_interviews: string;
+    behavioral_interviews: string;
+    executive_presentations: string;
+    networking_events: string;
+  };
+}
+
+// Practice Response interfaces
+export interface SavePracticeResponseRequest {
+  interviewPrepId: number;
+  questionText: string;
+  questionCategory?: string;
+  starStory?: object;
+  writtenAnswer?: string;
+  practiceDurationSeconds?: number;
+}
+
+export interface SavePracticeResponseResponse {
+  success: boolean;
+  data: {
+    id: number;
+    times_practiced: number;
+    message: string;
+  };
+}
+
+// Practice History interfaces
+export interface PracticeHistoryItem {
+  id: number;
+  question_text: string;
+  question_category?: string;
+  response_text?: string;
+  star_story?: {
+    situation: string;
+    task: string;
+    action: string;
+    result: string;
+  };
+  practiced_at: string;
+  duration_seconds?: number;
+  times_practiced: number;
+}
+
+// Resume Analysis interfaces
+export interface KeywordOptimization {
+  score: number;
+  missing_keywords: string[];
+  suggestions: string;
+}
+
+export interface ATSCompatibility {
+  score: number;
+  issues: string[];
+  recommendations: string;
+}
+
+export interface ImprovementRecommendation {
+  category: string;
+  priority: 'high' | 'medium' | 'low';
+  recommendation: string;
+  example: string;
+}
+
+export interface ResumeAnalysis {
+  overall_score: number;
+  strengths: string[];
+  weaknesses: string[];
+  keyword_optimization: KeywordOptimization;
+  ats_compatibility: ATSCompatibility;
+  improvement_recommendations: ImprovementRecommendation[];
+}
+
 /**
  * Get auth headers for direct fetch calls outside the API client.
  * Includes both X-User-ID and Authorization Bearer token.
@@ -2284,6 +2584,455 @@ class ApiClient {
         success: false,
         error: error.message,
       };
+    }
+  }
+
+  /**
+   * List all tailored resumes
+   */
+  async listTailoredResumes(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/tailor/tailored/list`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Download tailored resume as file
+   */
+  async downloadTailoredResume(tailoredResumeId: number, format: 'docx' | 'pdf' = 'docx'): Promise<ApiResponse<Blob>> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/tailor/tailored/${tailoredResumeId}/download?format=${format}`,
+        { headers: this.getHeaders() }
+      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        return { success: false, error: errorData.detail || errorData.error };
+      }
+      const blob = await response.blob();
+      return { success: true, data: blob };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // INTERVIEW PREP - ENHANCED METHODS
+  // =========================================================================
+
+  /**
+   * Generate 10 common interview questions
+   */
+  async generateCommonQuestions(interviewPrepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/common-questions/generate`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ interview_prep_id: interviewPrepId }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Regenerate a single common question
+   */
+  async regenerateSingleQuestion(params: {
+    interview_prep_id: number;
+    question_id: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/common-questions/regenerate`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get values alignment analysis
+   */
+  async getValuesAlignment(prepId: number): Promise<ApiResponse<ValuesAlignment>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/values-alignment`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Save STAR story for a question
+   */
+  async saveQuestionStarStory(params: {
+    interview_prep_id: number;
+    question_id: string;
+    star_story: {
+      situation: string;
+      task: string;
+      action: string;
+      result: string;
+    };
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/save-question-story`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get interview readiness score
+   */
+  async getInterviewReadinessScore(prepId: number): Promise<ApiResponse<ReadinessScore>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/readiness`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get company research for interview prep
+   */
+  async getCompanyResearchForPrep(prepId: number): Promise<ApiResponse<CompanyResearch>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/company-research`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get strategic news
+   */
+  async getStrategicNews(prepId: number): Promise<ApiResponse<StrategicNews>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/strategic-news`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get competitive intelligence
+   */
+  async getCompetitiveIntelligence(prepId: number): Promise<ApiResponse<CompetitiveIntelligence>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/competitive-intelligence`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get interview strategy
+   */
+  async getInterviewStrategy(prepId: number): Promise<ApiResponse<InterviewStrategy>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/interview-strategy`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get executive insights
+   */
+  async getExecutiveInsights(prepId: number): Promise<ApiResponse<ExecutiveInsights>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/executive-insights`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Calculate readiness score
+   */
+  async calculateReadiness(prepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/calculate-readiness`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get practice history
+   */
+  async getPracticeHistory(prepId: number): Promise<ApiResponse<PracticeHistoryItem[]>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/practice-history`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // RESUME ANALYSIS - ENHANCED METHODS
+  // =========================================================================
+
+  /**
+   * Analyze changes between base and tailored resume
+   */
+  async analyzeChanges(baseResumeId: number, tailoredResumeId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/resumes/analyze-changes?base_id=${baseResumeId}&tailored_id=${tailoredResumeId}`,
+        { headers: this.getHeaders() }
+      );
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Analyze keywords
+   */
+  async analyzeKeywords(resumeContent: string, jobDescription: string): Promise<ApiResponse<KeywordOptimization>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/resumes/analyze-keywords`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ resume_content: resumeContent, job_description: jobDescription }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Calculate match score
+   */
+  async calculateMatchScore(resumeId: number, jobDescription: string): Promise<ApiResponse<{ match_score: number }>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/resumes/${resumeId}/match-score`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ job_description: jobDescription }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // STAR STORIES - ENHANCED METHODS
+  // =========================================================================
+
+  /**
+   * Get individual STAR story
+   */
+  async getStarStory(storyId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/star-stories/${storyId}`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Analyze STAR story with AI
+   */
+  async analyzeStarStory(storyId: number): Promise<ApiResponse<StarStoryAnalysis>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/star-stories/${storyId}/analyze`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get story improvement suggestions
+   */
+  async getStorySuggestions(storyId: number): Promise<ApiResponse<StorySuggestions>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/star-stories/${storyId}/suggestions`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Generate story variations
+   */
+  async generateStoryVariations(params: {
+    story_id: number;
+    contexts: string[];
+  }): Promise<ApiResponse<StoryVariations>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/star-stories/generate-variations`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // CAREER PATH - ENHANCED METHODS
+  // =========================================================================
+
+  /**
+   * Research career path
+   */
+  async researchCareerPath(params: {
+    current_role: string;
+    target_role: string;
+    industry?: string;
+    years_experience?: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/research`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Analyze career trajectory
+   */
+  async analyzeCareerTrajectory(params: {
+    resume_id: number;
+    target_role?: string;
+  }): Promise<ApiResponse<CareerTrajectoryAnalysis>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/analyze-trajectory`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get skill gaps analysis
+   */
+  async getSkillGaps(params: {
+    resume_id: number;
+    target_role: string;
+  }): Promise<ApiResponse<SkillGapsAnalysis>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/skill-gaps`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Generate detailed career plan
+   */
+  async generateDetailedCareerPlan(params: {
+    resume_id: number;
+    target_role: string;
+    timeline: string;
+  }): Promise<ApiResponse<DetailedCareerPlan>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/career-path/detailed-plan`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
     }
   }
 }
