@@ -2083,7 +2083,8 @@ class ApiClient {
   async generateCoverLetter(params: {
     job_title: string;
     company_name: string;
-    job_description: string;
+    job_description?: string;
+    job_url?: string;
     tone?: string;
     tailored_resume_id?: number;
     base_resume_id?: number;

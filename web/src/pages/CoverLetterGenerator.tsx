@@ -42,6 +42,8 @@ export default function CoverLetterGenerator() {
   const [jobTitle, setJobTitle] = useState('')
   const [companyName, setCompanyName] = useState('')
   const [jobDescription, setJobDescription] = useState('')
+  const [jobUrl, setJobUrl] = useState('')
+  const [jobInputMethod, setJobInputMethod] = useState<'text' | 'url'>('text')
   const [tone, setTone] = useState('professional')
 
   // Resume picker state
@@ -115,7 +117,8 @@ export default function CoverLetterGenerator() {
       const params: Record<string, any> = {
         job_title: jobTitle,
         company_name: companyName,
-        job_description: jobDescription,
+        job_description: jobInputMethod === 'text' ? jobDescription : '',
+        job_url: jobInputMethod === 'url' ? jobUrl : '',
         tone,
       }
       if (resumeSource !== 'none' && selectedResumeId) {
@@ -129,6 +132,8 @@ export default function CoverLetterGenerator() {
         setJobTitle('')
         setCompanyName('')
         setJobDescription('')
+        setJobUrl('')
+        setJobInputMethod('text')
         setResumeSource('none')
         setSelectedResumeId(null)
         if (res.data.cover_letter) {
@@ -401,8 +406,62 @@ export default function CoverLetterGenerator() {
               </div>
 
               <div>
-                <label className="block text-sm text-theme-secondary mb-1">Job Description *</label>
-                <textarea required value={jobDescription} onChange={e => setJobDescription(e.target.value)} rows={5} className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted resize-none" placeholder="Paste the job description here..." />
+                <label className="block text-sm text-theme-secondary mb-2">Job Description *</label>
+
+                {/* Tab Buttons */}
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setJobInputMethod('text')}
+                    className={`p-2.5 rounded-lg border text-sm font-medium transition-all ${
+                      jobInputMethod === 'text'
+                        ? 'border-blue-500/50 bg-blue-500/10 text-theme'
+                        : 'border-theme-subtle text-theme-secondary hover:border-theme-muted'
+                    }`}
+                  >
+                    Paste Text
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setJobInputMethod('url')}
+                    className={`p-2.5 rounded-lg border text-sm font-medium transition-all ${
+                      jobInputMethod === 'url'
+                        ? 'border-blue-500/50 bg-blue-500/10 text-theme'
+                        : 'border-theme-subtle text-theme-secondary hover:border-theme-muted'
+                    }`}
+                  >
+                    Enter URL
+                  </button>
+                </div>
+
+                {/* Text Input */}
+                {jobInputMethod === 'text' && (
+                  <textarea
+                    required
+                    value={jobDescription}
+                    onChange={e => setJobDescription(e.target.value)}
+                    rows={5}
+                    className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted resize-none"
+                    placeholder="Paste the job description here..."
+                  />
+                )}
+
+                {/* URL Input */}
+                {jobInputMethod === 'url' && (
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      required
+                      value={jobUrl}
+                      onChange={e => setJobUrl(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted"
+                      placeholder="https://linkedin.com/jobs/view/..."
+                    />
+                    <p className="text-xs text-theme-tertiary">
+                      Paste job URL from LinkedIn, company career pages, or job boards
+                    </p>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm text-theme-secondary mb-2">Tone</label>

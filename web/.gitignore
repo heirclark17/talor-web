@@ -35,4 +35,5 @@ dist-ssr
 test-results/
 playwright-report/
 playwright/.cache/
+.clerk-auth-state.json
 .env*.local
