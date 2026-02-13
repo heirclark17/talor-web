@@ -35,7 +35,7 @@ import {
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ReadinessScore, ValuesAlignment, CompanyResearch, StrategicNewsItem, CompetitiveIntelligence, InterviewStrategy, ExecutiveInsights } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, TAB_BAR_HEIGHT, ALPHA_COLORS } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, TAB_BAR_HEIGHT, ALPHA_COLORS, TYPOGRAPHY } from '../utils/constants';
 import { GlassCard } from '../components/glass/GlassCard';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
@@ -1009,8 +1009,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.md,
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
   },
   header: {
     flexDirection: 'row',
@@ -1026,7 +1025,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
+    ...TYPOGRAPHY.headline,
     fontFamily: FONTS.extralight,
   },
   headerPlaceholder: {
@@ -1063,14 +1062,14 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   actionButtonText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   actionButtonFlex: {
     flex: 1,
   },
   jobCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
@@ -1081,8 +1080,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   sectionLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption1,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
     marginTop: SPACING.lg,
     letterSpacing: 0.5,
@@ -1100,7 +1099,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     paddingVertical: SPACING.xl,
     minHeight: 88,
   },
@@ -1112,7 +1111,7 @@ const styles = StyleSheet.create({
   stackedCardIcon: {
     width: 48,
     height: 48,
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.lg,
@@ -1121,8 +1120,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   stackedCardTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   stackedCardTitleRow: {
     flexDirection: 'row',
@@ -1130,8 +1128,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   stackedCardSubtitle: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginTop: 4,
     lineHeight: 20,
   },
@@ -1146,19 +1143,18 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   aiBadgeText: {
-    fontSize: 10,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption2,
+    fontWeight: '600',
     color: '#FFFFFF',
   },
   // Expanded content styles for inline card expansion
   expandedContent: {
     borderTopWidth: 1,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     paddingVertical: SPACING.lg,
   },
   expandedText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 22,
     marginBottom: SPACING.md,
   },
@@ -1168,21 +1164,20 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   expandedLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginRight: SPACING.sm,
   },
   expandedValue: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     flex: 1,
   },
   expandedSection: {
     marginBottom: SPACING.md,
   },
   expandedSectionTitle: {
-    fontSize: 15,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   bulletItem: {
@@ -1198,8 +1193,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   bulletText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     flex: 1,
   },
@@ -1211,7 +1205,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   chipText: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption1,
     fontFamily: FONTS.medium,
   },
   chipContainer: {
@@ -1239,13 +1233,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   jobCompany: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginBottom: 2,
   },
   jobTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   jobMeta: {
     flexDirection: 'row',
@@ -1258,11 +1250,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   metaText: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   sectionCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     marginBottom: SPACING.md,
     overflow: 'hidden',
@@ -1283,11 +1274,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     flex: 1,
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   sectionContent: {
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     paddingBottom: SPACING.lg,
     paddingTop: SPACING.sm,
   },
@@ -1295,13 +1286,12 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   subsectionTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   overviewText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 22,
     marginTop: SPACING.md,
   },
@@ -1311,13 +1301,12 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   infoLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginRight: SPACING.xs,
   },
   infoValue: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   bulletList: {
     marginTop: SPACING.xs,
@@ -1328,13 +1317,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   valueName: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: 4,
   },
   valueDescription: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
   },
   themeCard: {
@@ -1343,13 +1331,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   themeName: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: 4,
   },
   themeRationale: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
   },
   techCard: {
@@ -1358,14 +1345,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   techName: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     color: COLORS.info,
     marginBottom: 4,
   },
   techDescription: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
     marginBottom: 4,
   },
@@ -1380,13 +1366,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   newsHeadline: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: 4,
   },
   newsDate: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginBottom: 4,
   },
   newsSource: {
@@ -1395,12 +1380,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   newsSummary: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
   },
   newsImpact: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption1,
     fontFamily: FONTS.medium,
     color: COLORS.warning,
     lineHeight: 16,
@@ -1415,8 +1399,7 @@ const styles = StyleSheet.create({
   },
   practiceQuestionText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     marginLeft: SPACING.sm,
   },
@@ -1433,13 +1416,12 @@ const styles = StyleSheet.create({
   },
   storyPromptTitle: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginLeft: SPACING.sm,
   },
   storyPromptDescription: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
   },
   storyPrompt: {
@@ -1451,8 +1433,7 @@ const styles = StyleSheet.create({
   },
   storyPromptText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     marginLeft: SPACING.sm,
   },
@@ -1462,14 +1443,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   keywordLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     color: COLORS.primary,
     marginBottom: 4,
   },
   keywordContext: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
   },
   emptyState: {
@@ -1488,8 +1468,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   emptyText: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     textAlign: 'center',
     marginBottom: SPACING.xl,
   },
@@ -1507,8 +1486,8 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   generateButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   // Readiness Score Styles
   readinessCard: {
@@ -1528,8 +1507,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   readinessTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   readinessLoader: {
     paddingVertical: SPACING.xl,
@@ -1538,8 +1516,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   readinessSectionTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   readinessItem: {
@@ -1550,8 +1528,7 @@ const styles = StyleSheet.create({
   },
   readinessItemText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   confidenceBarContainer: {
@@ -1588,8 +1565,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   preparationBadgeText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   // Values Alignment Styles
   valuesCard: {
@@ -1609,8 +1586,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   valuesTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   valuesLoader: {
     paddingVertical: SPACING.xl,
@@ -1619,8 +1595,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   valuesSectionTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   valuesMatchItem: {
@@ -1636,12 +1612,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   valuesMatchValue: {
-    fontSize: 15,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   valuesMatchContext: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
     marginLeft: 24,
     marginBottom: SPACING.xs,
@@ -1665,12 +1640,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   valuesGapValue: {
-    fontSize: 15,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   valuesGapContext: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
     marginLeft: 24,
     marginBottom: SPACING.sm,
@@ -1688,8 +1662,7 @@ const styles = StyleSheet.create({
   },
   valuesSuggestionText: {
     flex: 1,
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     lineHeight: 16,
   },
   valuesInsightsBox: {
@@ -1701,8 +1674,7 @@ const styles = StyleSheet.create({
   },
   valuesInsightsText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   // Company Research Styles
@@ -1723,8 +1695,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   companyResearchTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   companyResearchLoader: {
     paddingVertical: SPACING.xl,
@@ -1744,8 +1715,8 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   companyResearchSubtitle: {
-    fontSize: 15,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   companyResearchInlineHeader: {
     flexDirection: 'row',
@@ -1753,8 +1724,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   companyResearchText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     marginTop: SPACING.xs,
   },
@@ -1767,18 +1737,16 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
   },
   companyResearchNewsHeadline: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: 4,
   },
   companyResearchNewsDate: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginBottom: 6,
   },
   companyResearchNewsSummary: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
     marginBottom: 4,
   },
@@ -1793,8 +1761,7 @@ const styles = StyleSheet.create({
   },
   companyResearchBulletText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   companyResearchCompetitorItem: {
@@ -1802,13 +1769,12 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
   },
   companyResearchCompetitorName: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: 4,
   },
   companyResearchCompetitorContext: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
   },
   companyResearchStatusBadge: {
@@ -1854,12 +1820,10 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   strategicNewsTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   strategicNewsSubtitle: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     marginBottom: SPACING.lg,
     lineHeight: 18,
   },
@@ -1895,8 +1859,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   strategicNewsHeadline: {
-    fontSize: 15,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     lineHeight: 21,
     marginBottom: SPACING.sm,
   },
@@ -1938,8 +1902,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   strategicNewsSectionText: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 19,
   },
   talkingPointItem: {
@@ -1957,8 +1920,7 @@ const styles = StyleSheet.create({
   },
   talkingPointText: {
     flex: 1,
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 19,
   },
   // Competitive Intelligence Styles
@@ -1979,12 +1941,10 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   competitiveTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   competitiveSubtitle: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     marginBottom: SPACING.lg,
     lineHeight: 18,
   },
@@ -2035,8 +1995,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   competitiveText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   competitiveList: {
@@ -2073,8 +2032,7 @@ const styles = StyleSheet.create({
   },
   competitiveListText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   // Interview Strategy Styles
@@ -2095,12 +2053,10 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   strategyTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   strategySubtitle: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     marginBottom: SPACING.lg,
     lineHeight: 18,
   },
@@ -2128,8 +2084,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   strategyText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   strategyList: {
@@ -2150,8 +2105,7 @@ const styles = StyleSheet.create({
   },
   strategyListText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   strategyStoryItem: {
@@ -2177,14 +2131,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   strategyStoryTheme: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: 4,
     lineHeight: 18,
   },
   strategyStoryDescription: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
   },
   strategyQuestionItem: {
@@ -2238,12 +2191,10 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   executiveTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   executiveSubtitle: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     marginBottom: SPACING.lg,
     lineHeight: 18,
   },
@@ -2271,8 +2222,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   executiveText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   executiveList: {
@@ -2293,8 +2243,7 @@ const styles = StyleSheet.create({
   },
   executiveListText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   executiveFactorItem: {
@@ -2381,12 +2330,11 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   strategyItemTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   strategyItemDesc: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.footnote,
     lineHeight: 18,
     marginLeft: SPACING.md + 8,
   },
@@ -2414,14 +2362,13 @@ const styles = StyleSheet.create({
     paddingLeft: SPACING.xs,
   },
   relevanceLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption1,
+    fontWeight: '600',
     marginRight: 4,
   },
   relevanceText: {
     flex: 1,
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     lineHeight: 16,
   },
   newsHeader: {
@@ -2432,8 +2379,8 @@ const styles = StyleSheet.create({
   },
   newsTitle: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     lineHeight: 20,
   },
   impactContainer: {
@@ -2448,7 +2395,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   impactText: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption1,
     fontFamily: FONTS.medium,
     lineHeight: 16,
   },
@@ -2459,8 +2406,7 @@ const styles = StyleSheet.create({
   },
   // Enhanced Candidate Positioning Styles
   sectionHint: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginBottom: SPACING.md,
     fontStyle: 'italic',
   },
@@ -2483,8 +2429,7 @@ const styles = StyleSheet.create({
   },
   focusAreaText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     paddingTop: 2,
   },
@@ -2542,8 +2487,7 @@ const styles = StyleSheet.create({
   },
   starHintText: {
     flex: 1,
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     lineHeight: 16,
   },
   buildStoriesButton: {
@@ -2556,7 +2500,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   buildStoriesButtonText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
 });
