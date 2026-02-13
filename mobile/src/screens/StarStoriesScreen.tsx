@@ -295,6 +295,9 @@ export default function StarStoriesScreen() {
           setEditingStory(null);
           setShowBuilder(true);
         }}
+        accessibilityRole="button"
+        accessibilityLabel="Create new STAR story"
+        accessibilityHint="Opens the story builder to create a behavioral interview story"
       >
         <Plus color={colors.background} size={20} />
         <Text style={[styles.createButtonText, { color: colors.background }]}>Create Story</Text>
@@ -324,6 +327,9 @@ export default function StarStoriesScreen() {
               setEditingStory(null);
               setShowBuilder(true);
             }}
+            accessibilityRole="button"
+            accessibilityLabel="Add new STAR story"
+            accessibilityHint="Opens the story builder to create a new behavioral interview story"
           >
             <Plus color={COLORS.primary} size={24} />
           </TouchableOpacity>
