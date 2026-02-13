@@ -25,7 +25,7 @@ import {
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -1297,8 +1297,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   headerPlaceholder: {
     width: 44,
@@ -1324,8 +1323,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.semibold,
   },
   introText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   contextBadge: {
@@ -1361,8 +1359,8 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
   },
   stepTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   loadingSection: {
     flexDirection: 'row',
@@ -1372,16 +1370,14 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   loadingText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   emptySection: {
     padding: SPACING.lg,
     alignItems: 'center',
   },
   emptyText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     textAlign: 'center',
   },
   experiencesList: {
@@ -1430,8 +1426,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   experienceBullet: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginBottom: 2,
   },
   experienceMore: {
@@ -1452,8 +1447,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.medium,
   },
   dropdownSubtext: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: 2,
   },
   dropdownList: {
@@ -1470,8 +1464,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.medium,
   },
   dropdownItemSubtext: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: 2,
   },
   generateButton: {
@@ -1481,8 +1474,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   storiesSectionTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
     marginBottom: SPACING.md,
   },
   storyCard: {
@@ -1495,8 +1487,8 @@ const styles = StyleSheet.create({
   },
   storyTitle: {
     flex: 1,
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   storyActions: {
     flexDirection: 'row',
@@ -1522,8 +1514,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   starSectionText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 22,
     paddingLeft: SPACING.md,
   },
@@ -1532,8 +1523,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   themesSectionTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   themesContainer: {
@@ -1554,8 +1545,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   talkingPointsTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   talkingPointItem: {
@@ -1610,8 +1601,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   editButtons: {
@@ -1659,12 +1649,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   guideTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   guideSubtitle: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: 2,
   },
   guideContent: {
@@ -1705,12 +1694,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   guideSectionTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   guideSectionSubtitle: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: 2,
   },
   guideSectionContent: {
@@ -1775,8 +1763,7 @@ const styles = StyleSheet.create({
   },
   // Step subtitle
   stepSubtitle: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: 2,
   },
   // Story prompts / STAR hints
@@ -1784,8 +1771,8 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   starHintTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   starHintContent: {
@@ -1795,8 +1782,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   starHintLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption1,
+    fontWeight: '600',
     marginBottom: 2,
   },
   starHintText: {
@@ -1817,8 +1804,8 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
   },
   storyQuestionsTitle: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption1,
+    fontWeight: '600',
     marginBottom: SPACING.xs,
   },
   storyQuestionItem: {
@@ -1833,8 +1820,7 @@ const styles = StyleSheet.create({
   },
   storyQuestionText: {
     flex: 1,
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     lineHeight: 17,
   },
 });
