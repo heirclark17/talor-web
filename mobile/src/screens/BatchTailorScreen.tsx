@@ -20,7 +20,7 @@ import {
 import { GlassButton } from '../components/glass/GlassButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { useResumeStore } from '../stores/resumeStore';
@@ -522,8 +522,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
   },
   infoText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     flex: 1,
   },
   summaryBanner: {
@@ -561,8 +560,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -604,16 +603,14 @@ const styles = StyleSheet.create({
   },
   selectorOptionSelected: {},
   selectorOptionText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   selectorOptionTextSelected: {
     color: COLORS.primary,
     fontFamily: FONTS.semibold,
   },
   selectorOptionMeta: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: 2,
   },
   urlInputRow: {
@@ -639,8 +636,7 @@ const styles = StyleSheet.create({
   },
   urlInput: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     padding: SPACING.md,
     paddingLeft: SPACING.xs,
   },
@@ -697,8 +693,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   uploadButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   resultCard: {
     borderRadius: RADIUS.md,
@@ -720,21 +716,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   resultCompany: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   resultTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginTop: 2,
   },
   resultUrl: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   resultError: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: SPACING.sm,
     marginLeft: 36,
   },
