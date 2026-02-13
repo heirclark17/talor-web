@@ -38,7 +38,18 @@
     "plugins": [
       "expo-document-picker",
       "expo-system-ui",
-      "expo-font"
+      "expo-font",
+      [
+        "@clerk/clerk-expo/plugin",
+        {
+          "ios": {
+            "bundleIdentifier": "com.talor.app"
+          },
+          "android": {
+            "packageName": "com.talor.app"
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

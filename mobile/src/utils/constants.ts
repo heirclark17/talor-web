@@ -1,5 +1,8 @@
 // API Configuration
-export const API_BASE_URL = 'https://resume-ai-backend-production-3134.up.railway.app';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://resume-ai-backend-production-3134.up.railway.app';
+
+// Clerk Authentication
+export const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
 
 // Storage Keys
 export const STORAGE_KEYS = {

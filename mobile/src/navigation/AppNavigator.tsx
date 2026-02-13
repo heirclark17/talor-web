@@ -11,10 +11,16 @@ import {
   Settings,
   BookmarkCheck,
 } from 'lucide-react-native';
+import { useAuth } from '@clerk/clerk-expo';
 import { COLORS, FONTS } from '../utils/constants';
 import { useTheme } from '../context/ThemeContext';
 import { GlassTabBar } from '../components/glass/GlassTabBar';
 import ErrorBoundary from '../components/ErrorBoundary';
+import { useAuthSync } from '../hooks/useAuthSync';
+
+// Auth Screens
+import SignInScreen from '../screens/SignInScreen';
+import SignUpScreen from '../screens/SignUpScreen';
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';
@@ -32,6 +38,12 @@ import CareerPathDesignerScreen from '../screens/CareerPathDesignerScreen';
 import BatchTailorScreen from '../screens/BatchTailorScreen';
 import CertificationsScreen from '../screens/CertificationsScreen';
 import STARStoryBuilderScreen from '../screens/STARStoryBuilderScreen';
+
+// Auth Stack param list
+export type AuthStackParamList = {
+  SignIn: undefined;
+  SignUp: undefined;
+};
 
 // Stack param lists for each tab
 export type HomeStackParamList = {
@@ -91,7 +103,8 @@ export type MainTabParamList = {
   Settings: undefined;
 };
 
-// Create stack navigators for each tab
+// Create stack navigators
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const TailorStack = createNativeStackNavigator<TailorStackParamList>();
 const InterviewStack = createNativeStackNavigator<InterviewStackParamList>();
@@ -107,6 +120,18 @@ const stackScreenOptions = {
   contentStyle: { backgroundColor: 'transparent' },
   animation: 'slide_from_right' as const,
 };
+
+// Auth Stack Navigator
+function AuthStackNavigator() {
+  return (
+    <ErrorBoundary screenName="Auth">
+      <AuthStack.Navigator screenOptions={stackScreenOptions}>
+        <AuthStack.Screen name="SignIn" component={SignInScreen} />
+        <AuthStack.Screen name="SignUp" component={SignUpScreen} />
+      </AuthStack.Navigator>
+    </ErrorBoundary>
+  );
+}
 
 // Home Stack
 function HomeStackNavigator() {
@@ -201,9 +226,84 @@ function SettingsStackNavigator() {
   );
 }
 
-// Main App Navigator with Tab Bar
+// Main Tab Navigator
+function MainTabNavigator() {
+  const { colors, isDark } = useTheme();
+
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <GlassTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeStackNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <FileText color={color} size={size} />,
+          tabBarLabel: 'Resumes',
+        }}
+      />
+      <Tab.Screen
+        name="Tailor"
+        component={TailorStackNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <Target color={color} size={size} />,
+          tabBarLabel: 'Tailor',
+        }}
+      />
+      <Tab.Screen
+        name="InterviewPreps"
+        component={InterviewStackNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <Briefcase color={color} size={size} />,
+          tabBarLabel: 'Interview',
+        }}
+      />
+      <Tab.Screen
+        name="Stories"
+        component={StoriesStackNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <BookOpen color={color} size={size} />,
+          tabBarLabel: 'Stories',
+        }}
+      />
+      <Tab.Screen
+        name="Career"
+        component={CareerStackNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <Compass color={color} size={size} />,
+          tabBarLabel: 'Career',
+        }}
+      />
+      <Tab.Screen
+        name="Saved"
+        component={SavedStackNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <BookmarkCheck color={color} size={size} />,
+          tabBarLabel: 'Saved',
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsStackNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <Settings color={color} size={size} />,
+          tabBarLabel: 'Settings',
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+// Main App Navigator with Auth Flow
 export default function AppNavigator() {
   const { colors, isDark } = useTheme();
+  const { isSignedIn, isLoaded } = useAuth();
+
+  // Sync Clerk token to SecureStore for API client
+  useAuthSync();
 
   // Create custom theme based on current theme mode
   const navigationTheme = {
@@ -219,71 +319,14 @@ export default function AppNavigator() {
     },
   };
 
+  // Show nothing while Clerk is loading
+  if (!isLoaded) {
+    return null;
+  }
+
   return (
     <NavigationContainer theme={navigationTheme}>
-      <Tab.Navigator
-        tabBar={(props) => <GlassTabBar {...props} />}
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Tab.Screen
-          name="Home"
-          component={HomeStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <FileText color={color} size={size} />,
-            tabBarLabel: 'Resumes',
-          }}
-        />
-        <Tab.Screen
-          name="Tailor"
-          component={TailorStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <Target color={color} size={size} />,
-            tabBarLabel: 'Tailor',
-          }}
-        />
-        <Tab.Screen
-          name="InterviewPreps"
-          component={InterviewStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <Briefcase color={color} size={size} />,
-            tabBarLabel: 'Interview',
-          }}
-        />
-        <Tab.Screen
-          name="Stories"
-          component={StoriesStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <BookOpen color={color} size={size} />,
-            tabBarLabel: 'Stories',
-          }}
-        />
-        <Tab.Screen
-          name="Career"
-          component={CareerStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <Compass color={color} size={size} />,
-            tabBarLabel: 'Career',
-          }}
-        />
-        <Tab.Screen
-          name="Saved"
-          component={SavedStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <BookmarkCheck color={color} size={size} />,
-            tabBarLabel: 'Saved',
-          }}
-        />
-        <Tab.Screen
-          name="Settings"
-          component={SettingsStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <Settings color={color} size={size} />,
-            tabBarLabel: 'Settings',
-          }}
-        />
-      </Tab.Navigator>
+      {isSignedIn ? <MainTabNavigator /> : <AuthStackNavigator />}
     </NavigationContainer>
   );
 }

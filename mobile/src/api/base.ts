@@ -4,8 +4,8 @@
  */
 
 import { API_BASE_URL } from '../utils/constants';
-import { getUserId } from '../utils/userSession';
-import { secureFetch, validateHost, rateLimiter } from '../utils/security';
+import { getAuthToken } from '../utils/userSession';
+import { validateHost, rateLimiter } from '../utils/security';
 
 /**
  * Standard API response wrapper
@@ -113,6 +113,7 @@ function requiresLongTimeout(endpoint: string): boolean {
 /**
  * Base fetch with authentication headers
  * Includes security controls: host validation, rate limiting, timeout
+ * Uses Clerk JWT tokens for authentication
  */
 export async function fetchWithAuth(
   endpoint: string,
@@ -130,12 +131,17 @@ export async function fetchWithAuth(
     throw new Error('Rate limit exceeded. Please wait before making more requests.');
   }
 
-  const userId = await getUserId();
+  // Get Clerk JWT token from secure storage
+  const token = await getAuthToken();
 
   const headers: Record<string, string> = {
-    'X-User-ID': userId,
     ...(options.headers as Record<string, string>),
   };
+
+  // Add Authorization header if token exists
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
   let body: string | FormData | undefined;
 
