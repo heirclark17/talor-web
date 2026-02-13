@@ -7,13 +7,20 @@ import { saveAuthToken, clearAuthTokens } from '../utils/userSession';
  * This ensures the API client can access the JWT token for authenticated requests
  */
 export function useAuthSync() {
-  const { getToken, isSignedIn, userId } = useAuth();
+  const { getToken, isSignedIn, userId, sessionId } = useAuth();
 
   // Consider user authenticated if they have a userId OR isSignedIn
   // Clerk may report isSignedIn=false when session has "pending tasks"
   const isAuthenticated = isSignedIn || !!userId;
 
   useEffect(() => {
+    console.log('[useAuthSync] Auth state:', {
+      isSignedIn,
+      userId,
+      sessionId,
+      isAuthenticated,
+    });
+
     async function syncToken() {
       if (isAuthenticated) {
         try {
@@ -22,7 +29,9 @@ export function useAuthSync() {
           if (token) {
             // Save to secure storage for API client
             await saveAuthToken(token);
-            console.log('[useAuthSync] Token synced to secure storage');
+            console.log('[useAuthSync] Token synced to secure storage (length:', token.length, ')');
+          } else {
+            console.warn('[useAuthSync] No token available despite isAuthenticated=true');
           }
         } catch (error) {
           console.error('[useAuthSync] Error syncing token:', error);
@@ -35,5 +44,5 @@ export function useAuthSync() {
     }
 
     syncToken();
-  }, [isAuthenticated, getToken]);
+  }, [isAuthenticated, isSignedIn, userId, sessionId, getToken]);
 }

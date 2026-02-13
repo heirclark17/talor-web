@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { useSignUp } from '@clerk/clerk-expo';
+import { useSignUp, useAuth } from '@clerk/clerk-expo';
 import { useNavigation } from '@react-navigation/native';
 import { Mail, Lock, Eye, EyeOff, UserPlus, ShieldCheck } from 'lucide-react-native';
 import { COLORS, GLASS, SPACING, RADIUS, FONTS } from '../utils/constants';
@@ -23,6 +23,7 @@ type SignUpNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'SignU
 
 export default function SignUpScreen() {
   const { signUp, setActive, isLoaded } = useSignUp();
+  const { isSignedIn, userId } = useAuth();
   const navigation = useNavigation<SignUpNavigationProp>();
 
   const [email, setEmail] = useState('');
@@ -32,6 +33,15 @@ export default function SignUpScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [pendingVerification, setPendingVerification] = useState(false);
+
+  // Monitor auth state changes after verification attempt
+  useEffect(() => {
+    if ((isSignedIn || userId) && pendingVerification) {
+      console.log('[SignUp] Auth state updated after verification - user is now signed in!');
+      console.log('[SignUp] isSignedIn:', isSignedIn, 'userId:', userId);
+      // Auth state has changed, AppNavigator will handle navigation
+    }
+  }, [isSignedIn, userId, pendingVerification]);
 
   // Step 1: Create account and send verification code
   const handleSignUp = async () => {
@@ -87,19 +97,34 @@ export default function SignUpScreen() {
         code: code.trim(),
       });
 
-      console.log('[SignUp] Verify status:', result.status, 'session:', result.createdSessionId);
+      console.log('[SignUp] Verify result:', {
+        status: result.status,
+        createdSessionId: result.createdSessionId,
+        createdUserId: result.createdUserId,
+        verifications: result.verifications,
+      });
 
-      if (result.status === 'complete' && result.createdSessionId) {
+      if (result.createdSessionId) {
+        console.log('[SignUp] Setting active session:', result.createdSessionId);
+
+        // Activate the session and wait for Clerk state to update
         await setActive({ session: result.createdSessionId });
-        console.log('[SignUp] Session activated - email verified!');
-      } else if (result.createdSessionId) {
-        // Session exists even if status isn't 'complete'
-        await setActive({ session: result.createdSessionId });
-        console.log('[SignUp] Session activated (status:', result.status, ')');
+
+        console.log('[SignUp] Session activated! Waiting for Clerk state update...');
+
+        // Give Clerk a moment to update its internal state
+        // The AppNavigator will re-render when isSignedIn/userId changes
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        console.log('[SignUp] Verification complete - user should navigate to main app');
+
+        // Note: Navigation happens automatically via AppNavigator when isSignedIn becomes true
       } else {
+        console.error('[SignUp] No session ID returned:', result);
         setError('Could not complete verification. Please try again.');
       }
     } catch (err: any) {
+      console.error('[SignUp] Verification error:', err);
       const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || '';
       setError(msg || 'Invalid code. Please try again.');
     } finally {
@@ -129,9 +154,10 @@ export default function SignUpScreen() {
           style={styles.keyboardView}
         >
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={styles.verificationScrollContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            bounces={false}
           >
             <View style={styles.header}>
               <ShieldCheck color={COLORS.primary} size={48} />
@@ -187,20 +213,36 @@ export default function SignUpScreen() {
                   )}
                 </TouchableOpacity>
 
+                {/* Resend link with better visibility */}
                 <View style={styles.footer}>
                   <Text style={styles.footerText}>Didn't get the code?</Text>
-                  <TouchableOpacity onPress={handleResend}>
+                  <TouchableOpacity
+                    onPress={handleResend}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
                     <Text style={styles.footerLink}> Resend</Text>
                   </TouchableOpacity>
                 </View>
 
-                <View style={[styles.footer, { marginTop: SPACING.sm }]}>
-                  <TouchableOpacity onPress={() => { setPendingVerification(false); setCode(''); setError(''); }}>
-                    <Text style={styles.footerLink}>Go Back</Text>
+                {/* Go Back link with better visibility and spacing */}
+                <View style={styles.goBackContainer}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      console.log('[SignUp] User tapped Go Back');
+                      setPendingVerification(false);
+                      setCode('');
+                      setError('');
+                    }}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Text style={styles.footerLink}>← Go Back to Sign Up</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             </BlurView>
+
+            {/* Extra space to ensure buttons are visible above keyboard */}
+            <View style={{ height: 100 }} />
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -310,6 +352,12 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   keyboardView: { flex: 1 },
   scrollContent: { flexGrow: 1, justifyContent: 'center', padding: SPACING.lg },
+  verificationScrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxl, // Extra bottom padding for visibility
+  },
   header: { alignItems: 'center', marginBottom: SPACING.xl },
   title: { fontSize: 32, fontFamily: FONTS.bold, color: COLORS.dark.text, marginBottom: SPACING.xs },
   subtitle: { fontSize: 16, fontFamily: FONTS.regular, color: COLORS.dark.textSecondary, textAlign: 'center', marginTop: SPACING.sm },
@@ -328,4 +376,9 @@ const styles = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.lg },
   footerText: { color: COLORS.dark.textSecondary, fontSize: 14, fontFamily: FONTS.regular },
   footerLink: { color: COLORS.primary, fontSize: 14, fontFamily: FONTS.semibold },
+  goBackContainer: {
+    alignItems: 'center',
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
 });
