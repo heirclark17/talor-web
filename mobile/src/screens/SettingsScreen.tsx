@@ -30,7 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { clearUserSession, getUserId } from '../utils/userSession';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../context/ThemeContext';
 import { GlassCard } from '../components/glass/GlassCard';
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     paddingVertical: SPACING.md,
   },
   title: {
@@ -395,8 +395,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemValue: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     maxWidth: 120,
   },
   themeIndicator: {
@@ -405,8 +404,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   themeLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   appInfo: {
     alignItems: 'center',
@@ -422,12 +420,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   appVersion: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginBottom: SPACING.sm,
   },
   appCopyright: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
 });
