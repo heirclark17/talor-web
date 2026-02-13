@@ -1900,4 +1900,203 @@ export const api = {
       return { success: false, error: error.message };
     }
   },
+
+  // =========================================================================
+  // APPLICATION TRACKER METHODS
+  // =========================================================================
+
+  /**
+   * List all applications for the user
+   */
+  async listApplications(status?: string): Promise<ApiResponse> {
+    try {
+      const url = status ? `/api/applications?status=${status}` : '/api/applications';
+      const response = await fetchWithAuth(url, { method: 'GET' });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: data.applications || [] };
+    } catch (error: any) {
+      console.error('Error listing applications:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Get application statistics
+   */
+  async getApplicationStats(): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/applications/stats', { method: 'GET' });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: data.stats || {} };
+    } catch (error: any) {
+      console.error('Error getting application stats:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Get a single application by ID
+   */
+  async getApplication(applicationId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/applications/${applicationId}`, { method: 'GET' });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error getting application:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Create a new application
+   */
+  async createApplication(applicationData: {
+    jobTitle: string;
+    companyName: string;
+    jobUrl?: string;
+    status?: string;
+    location?: string;
+    salaryMin?: number;
+    salaryMax?: number;
+    appliedDate?: string;
+    nextFollowUp?: string;
+    contactName?: string;
+    contactEmail?: string;
+    notes?: string;
+    tailoredResumeId?: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/applications', {
+        method: 'POST',
+        body: JSON.stringify({
+          job_title: applicationData.jobTitle,
+          company_name: applicationData.companyName,
+          job_url: applicationData.jobUrl,
+          status: applicationData.status || 'saved',
+          location: applicationData.location,
+          salary_min: applicationData.salaryMin,
+          salary_max: applicationData.salaryMax,
+          applied_date: applicationData.appliedDate,
+          next_follow_up: applicationData.nextFollowUp,
+          contact_name: applicationData.contactName,
+          contact_email: applicationData.contactEmail,
+          notes: applicationData.notes,
+          tailored_resume_id: applicationData.tailoredResumeId,
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error creating application:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Update an application
+   */
+  async updateApplication(applicationId: number, updates: {
+    jobTitle?: string;
+    companyName?: string;
+    jobUrl?: string;
+    status?: string;
+    location?: string;
+    salaryMin?: number;
+    salaryMax?: number;
+    appliedDate?: string;
+    nextFollowUp?: string;
+    contactName?: string;
+    contactEmail?: string;
+    notes?: string;
+    tailoredResumeId?: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/applications/${applicationId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          job_title: updates.jobTitle,
+          company_name: updates.companyName,
+          job_url: updates.jobUrl,
+          status: updates.status,
+          location: updates.location,
+          salary_min: updates.salaryMin,
+          salary_max: updates.salaryMax,
+          applied_date: updates.appliedDate,
+          next_follow_up: updates.nextFollowUp,
+          contact_name: updates.contactName,
+          contact_email: updates.contactEmail,
+          notes: updates.notes,
+          tailored_resume_id: updates.tailoredResumeId,
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error updating application:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Delete an application
+   */
+  async deleteApplication(applicationId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/applications/${applicationId}`, { method: 'DELETE' });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error deleting application:', error);
+      return { success: false, error: error.message };
+    }
+  },
 };
