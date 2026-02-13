@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LiquidGlassView, isLiquidGlassSupported } from './LiquidGlassWrapper';
-import * as Haptics from 'expo-haptics';
+import { lightImpact } from '../../utils/haptics';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -88,7 +88,7 @@ export function GlassButton({
 
   const handlePress = useCallback(() => {
     if (haptic) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      lightImpact();
     }
     onPress?.();
   }, [haptic, onPress]);
