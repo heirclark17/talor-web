@@ -183,6 +183,8 @@ export default function HomeScreen() {
           onPress={() => handleAnalyze(item.id, item.filename)}
           disabled={analyzingId === item.id}
           style={styles.actionButton}
+          accessibilityLabel={`Analyze ${item.filename}`}
+          accessibilityHint="Shows detailed analysis of resume strengths and weaknesses"
         />
 
         <GlassButton
@@ -192,6 +194,8 @@ export default function HomeScreen() {
           icon={<Target color={COLORS.primary} size={18} />}
           onPress={() => handleTailor(item.id)}
           style={styles.actionButton}
+          accessibilityLabel={`Tailor ${item.filename} for a job`}
+          accessibilityHint="Opens resume tailoring screen to customize for specific job posting"
         />
 
         <GlassButton
@@ -208,6 +212,8 @@ export default function HomeScreen() {
           onPress={() => handleDelete(item.id)}
           disabled={deletingId === item.id}
           style={styles.actionButton}
+          accessibilityLabel={`Delete ${item.filename}`}
+          accessibilityHint="Permanently removes this resume from your library"
         />
       </View>
     </GlassCard>
@@ -228,6 +234,8 @@ export default function HomeScreen() {
         size="lg"
         icon={<Upload color="#ffffff" size={20} />}
         onPress={() => navigation.navigate('UploadResume')}
+        accessibilityLabel="Upload your first resume"
+        accessibilityHint="Opens file picker to select and upload a resume document"
       />
     </View>
   );
@@ -259,6 +267,8 @@ export default function HomeScreen() {
           icon={<Upload color={colors.text} size={20} />}
           onPress={() => navigation.navigate('UploadResume')}
           style={styles.addButton}
+          accessibilityLabel="Upload new resume"
+          accessibilityHint="Opens file picker to select and upload a resume document"
         />
       </View>
 
@@ -317,7 +327,13 @@ export default function HomeScreen() {
                 </Text>
               </View>
             </View>
-            <TouchableOpacity onPress={closeAnalysisModal} style={styles.closeButton}>
+            <TouchableOpacity
+              onPress={closeAnalysisModal}
+              style={styles.closeButton}
+              accessibilityRole="button"
+              accessibilityLabel="Close analysis"
+              accessibilityHint="Returns to resume list"
+            >
               <X color={colors.textSecondary} size={24} />
             </TouchableOpacity>
           </View>
