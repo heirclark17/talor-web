@@ -300,10 +300,15 @@ function MainTabNavigator() {
 // Main App Navigator with Auth Flow
 export default function AppNavigator() {
   const { colors, isDark } = useTheme();
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, userId } = useAuth();
 
   // Sync Clerk token to SecureStore for API client
   useAuthSync();
+
+  // Treat user as authenticated if they have a userId OR isSignedIn
+  // Clerk may report isSignedIn=false when session has "pending tasks"
+  // but the user still has a valid session with a userId
+  const isAuthenticated = isSignedIn || !!userId;
 
   // Create custom theme based on current theme mode
   const navigationTheme = {
@@ -325,11 +330,11 @@ export default function AppNavigator() {
     return null;
   }
 
-  console.log('[AppNavigator] Clerk ready - isSignedIn:', isSignedIn, '→ showing:', isSignedIn ? 'MAIN APP' : 'AUTH SCREEN');
+  console.log('[AppNavigator] Clerk ready - isSignedIn:', isSignedIn, 'userId:', userId, '→ showing:', isAuthenticated ? 'MAIN APP' : 'AUTH SCREEN');
 
   return (
     <NavigationContainer theme={navigationTheme}>
-      {isSignedIn ? <MainTabNavigator /> : <AuthStackNavigator />}
+      {isAuthenticated ? <MainTabNavigator /> : <AuthStackNavigator />}
     </NavigationContainer>
   );
 }
