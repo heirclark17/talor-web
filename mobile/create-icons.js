@@ -80,7 +80,7 @@ async function createAdaptiveIcon(svgPath, outputPath, size) {
 }
 
 async function main() {
-  const svgSource = path.join(__dirname, 'assets', 'icon-source.svg');
+  const svgSource = path.join(__dirname, 'assets', 'icon-cropped.svg');
   const assetsDir = path.join(__dirname, 'assets');
 
   console.log('='.repeat(70));
@@ -90,7 +90,7 @@ async function main() {
   // Check if SVG exists
   if (!fs.existsSync(svgSource)) {
     console.error(`\n✗ SVG source not found: ${svgSource}`);
-    console.error('Please ensure TalorAppLogo.svg is at assets/icon-source.svg');
+    console.error('Please ensure the cropped icon SVG is at assets/icon-cropped.svg');
     process.exit(1);
   }
 
