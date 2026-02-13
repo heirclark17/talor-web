@@ -5,18 +5,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { X, Upload, FileText, CheckCircle } from 'lucide-react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS } from '../utils/constants';
+import { COLORS, SPACING, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { GlassButton } from '../components/glass/GlassButton';
+import { GlassCard } from '../components/glass/GlassCard';
+import { ScreenContainer } from '../components/layout';
+import { NumberText, RoundedNumeral } from '../components/ui';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -90,7 +91,8 @@ export default function UploadResumeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <ScreenContainer scrollable edges={['top']}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.closeButton}
@@ -101,94 +103,122 @@ export default function UploadResumeScreen() {
         >
           <X color={colors.text} size={24} />
         </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.text }]}>Upload Resume</Text>
+        <Text style={[TYPOGRAPHY.title3, { color: colors.text }]}>Upload Resume</Text>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={[styles.uploadArea, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
-          {uploadSuccess ? (
-            <View style={styles.successState}>
-              <View style={styles.successIcon}>
-                <CheckCircle color={COLORS.success} size={64} />
-              </View>
-              <Text style={styles.successTitle}>Upload Successful!</Text>
-              <Text style={[styles.successText, { color: colors.textSecondary }]}>
-                Your resume has been uploaded and is being processed.
-              </Text>
+      {/* Upload Area */}
+      <GlassCard
+        style={styles.uploadArea}
+        material="thin"
+        borderRadius={SPACING.radiusMD}
+        padding={SPACING.xl}
+      >
+        {uploadSuccess ? (
+          <View style={styles.successState}>
+            <View style={styles.successIcon}>
+              <CheckCircle color={COLORS.success} size={64} />
             </View>
-          ) : selectedFile ? (
-            <View style={styles.filePreview}>
-              <View style={styles.fileIcon}>
-                <FileText color={COLORS.primary} size={48} />
-              </View>
-              <Text style={[styles.fileName, { color: colors.text }]} numberOfLines={2}>
-                {selectedFile.name}
-              </Text>
-              <Text style={[styles.fileSize, { color: colors.textSecondary }]}>
-                {formatFileSize(selectedFile.size)}
-              </Text>
-              <TouchableOpacity
-                style={styles.changeButton}
-                onPress={handleSelectFile}
-                accessibilityRole="button"
-                accessibilityLabel="Change selected file"
-                accessibilityHint="Opens document picker to select a different resume file"
-              >
-                <Text style={styles.changeButtonText}>Change File</Text>
-              </TouchableOpacity>
+            <Text style={[TYPOGRAPHY.title3, { color: COLORS.success, marginBottom: SPACING.sm }]}>
+              Upload Successful!
+            </Text>
+            <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, textAlign: 'center' }]}>
+              Your resume has been uploaded and is being processed.
+            </Text>
+          </View>
+        ) : selectedFile ? (
+          <View style={styles.filePreview}>
+            <View style={styles.fileIcon}>
+              <FileText color={COLORS.primary} size={48} />
             </View>
-          ) : (
+            <Text style={[TYPOGRAPHY.body, { color: colors.text, fontWeight: '600', textAlign: 'center', marginBottom: SPACING.xs }]} numberOfLines={2}>
+              {selectedFile.name}
+            </Text>
+            <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, marginBottom: SPACING.lg }]}>
+              {formatFileSize(selectedFile.size)}
+            </Text>
             <TouchableOpacity
-              style={styles.dropZone}
+              style={styles.changeButton}
               onPress={handleSelectFile}
               accessibilityRole="button"
-              accessibilityLabel="Select resume file"
-              accessibilityHint="Opens document picker to choose a PDF or Word document"
+              accessibilityLabel="Change selected file"
+              accessibilityHint="Opens document picker to select a different resume file"
             >
-              <View style={styles.uploadIcon}>
-                <Upload color={colors.textTertiary} size={48} />
-              </View>
-              <Text style={[styles.dropZoneTitle, { color: colors.text }]}>Select Resume</Text>
-              <Text style={[styles.dropZoneText, { color: colors.textSecondary }]}>
-                Tap to select a PDF or Word document
-              </Text>
-              <Text style={[styles.supportedFormats, { color: colors.textTertiary }]}>
-                Supported formats: PDF, DOC, DOCX
+              <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontWeight: '600' }]}>
+                Change File
               </Text>
             </TouchableOpacity>
-          )}
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.dropZone}
+            onPress={handleSelectFile}
+            accessibilityRole="button"
+            accessibilityLabel="Select resume file"
+            accessibilityHint="Opens document picker to choose a PDF or Word document"
+          >
+            <View style={styles.uploadIcon}>
+              <Upload color={colors.textTertiary} size={48} />
+            </View>
+            <Text style={[TYPOGRAPHY.title3, { color: colors.text, marginBottom: SPACING.sm }]}>
+              Select Resume
+            </Text>
+            <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, textAlign: 'center', marginBottom: SPACING.md }]}>
+              Tap to select a PDF or Word document
+            </Text>
+            <Text style={[TYPOGRAPHY.caption1, { color: colors.textTertiary }]}>
+              Supported formats: PDF, DOC, DOCX
+            </Text>
+          </TouchableOpacity>
+        )}
+      </GlassCard>
+
+      {/* Info Section */}
+      <GlassCard
+        style={styles.infoSection}
+        material="thin"
+        borderRadius={SPACING.radiusMD}
+        padding={SPACING.lg}
+      >
+        <Text style={[TYPOGRAPHY.headline, { color: colors.text, marginBottom: SPACING.lg }]}>
+          What happens next?
+        </Text>
+
+        <View style={styles.infoItem}>
+          <View style={[styles.infoNumber, { backgroundColor: COLORS.primary }]}>
+            <NumberText weight="semiBold" style={[TYPOGRAPHY.caption1, { color: '#ffffff' }]}>
+              1
+            </NumberText>
+          </View>
+          <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, flex: 1 }]}>
+            We'll extract your experience, skills, and education
+          </Text>
         </View>
 
-        <View style={[styles.infoSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
-          <Text style={[styles.infoTitle, { color: colors.text }]}>What happens next?</Text>
-          <View style={styles.infoItem}>
-            <View style={styles.infoNumber}>
-              <Text style={[styles.infoNumberText, { color: colors.text }]}>1</Text>
-            </View>
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              We'll extract your experience, skills, and education
-            </Text>
+        <View style={styles.infoItem}>
+          <View style={[styles.infoNumber, { backgroundColor: COLORS.primary }]}>
+            <NumberText weight="semiBold" style={[TYPOGRAPHY.caption1, { color: '#ffffff' }]}>
+              2
+            </NumberText>
           </View>
-          <View style={styles.infoItem}>
-            <View style={styles.infoNumber}>
-              <Text style={[styles.infoNumberText, { color: colors.text }]}>2</Text>
-            </View>
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              Use AI to tailor your resume for specific job postings
-            </Text>
-          </View>
-          <View style={styles.infoItem}>
-            <View style={styles.infoNumber}>
-              <Text style={[styles.infoNumberText, { color: colors.text }]}>3</Text>
-            </View>
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              Get interview prep materials based on your tailored resume
-            </Text>
-          </View>
+          <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, flex: 1 }]}>
+            Use AI to tailor your resume for specific job postings
+          </Text>
         </View>
-      </ScrollView>
 
+        <View style={styles.infoItem}>
+          <View style={[styles.infoNumber, { backgroundColor: COLORS.primary }]}>
+            <NumberText weight="semiBold" style={[TYPOGRAPHY.caption1, { color: '#ffffff' }]}>
+              3
+            </NumberText>
+          </View>
+          <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, flex: 1 }]}>
+            Get interview prep materials based on your tailored resume
+          </Text>
+        </View>
+      </GlassCard>
+
+      {/* Footer */}
       {selectedFile && !uploadSuccess && (
         <View style={styles.footer}>
           <GlassButton
@@ -203,45 +233,30 @@ export default function UploadResumeScreen() {
           />
         </View>
       )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     paddingVertical: SPACING.md,
   },
   closeButton: {
-    width: 44,
-    height: 44,
+    width: SPACING.touchTarget,
+    height: SPACING.touchTarget,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 18,
-    fontFamily: FONTS.extralight,
-  },
   placeholder: {
-    width: 44,
-  },
-  content: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: SPACING.lg,
+    width: SPACING.touchTarget,
   },
   uploadArea: {
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    padding: SPACING.xl,
-    marginBottom: SPACING.xl,
+    marginHorizontal: SPACING.screenMargin,
+    marginBottom: SPACING.sectionGap,
   },
   dropZone: {
     alignItems: 'center',
@@ -251,21 +266,6 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
     opacity: 0.5,
   },
-  dropZoneTitle: {
-    fontSize: 20,
-    fontFamily: FONTS.semibold,
-    marginBottom: SPACING.sm,
-  },
-  dropZoneText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
-    textAlign: 'center',
-    marginBottom: SPACING.md,
-  },
-  supportedFormats: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
-  },
   filePreview: {
     alignItems: 'center',
     paddingVertical: SPACING.lg,
@@ -273,27 +273,11 @@ const styles = StyleSheet.create({
   fileIcon: {
     marginBottom: SPACING.lg,
   },
-  fileName: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
-    textAlign: 'center',
-    marginBottom: SPACING.xs,
-  },
-  fileSize: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
-    marginBottom: SPACING.lg,
-  },
   changeButton: {
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
-    minHeight: 44,
+    minHeight: SPACING.touchTarget,
     justifyContent: 'center',
-  },
-  changeButtonText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
-    color: COLORS.primary,
   },
   successState: {
     alignItems: 'center',
@@ -302,26 +286,8 @@ const styles = StyleSheet.create({
   successIcon: {
     marginBottom: SPACING.lg,
   },
-  successTitle: {
-    fontSize: 20,
-    fontFamily: FONTS.semibold,
-    color: COLORS.success,
-    marginBottom: SPACING.sm,
-  },
-  successText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
-    textAlign: 'center',
-  },
   infoSection: {
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    padding: SPACING.lg,
-  },
-  infoTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
-    marginBottom: SPACING.lg,
+    marginHorizontal: SPACING.screenMargin,
   },
   infoItem: {
     flexDirection: 'row',
@@ -332,22 +298,12 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
   },
-  infoNumberText: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
-    lineHeight: 20,
-  },
   footer: {
-    padding: SPACING.lg,
+    padding: SPACING.screenMargin,
+    marginTop: SPACING.lg,
   },
 });
