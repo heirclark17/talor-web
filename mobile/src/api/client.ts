@@ -2099,4 +2099,142 @@ export const api = {
       return { success: false, error: error.message };
     }
   },
+
+  // =========================================================================
+  // COVER LETTER METHODS
+  // =========================================================================
+
+  /**
+   * List all cover letters for the user
+   */
+  async listCoverLetters(): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/cover-letters', { method: 'GET' });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: data.cover_letters || [] };
+    } catch (error: any) {
+      console.error('Error listing cover letters:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Generate a new cover letter
+   */
+  async generateCoverLetter(payload: {
+    jobTitle: string;
+    companyName: string;
+    jobDescription?: string;
+    jobUrl?: string;
+    baseResumeId?: number;
+    tone?: 'professional' | 'enthusiastic' | 'strategic' | 'technical';
+    length?: 'concise' | 'standard' | 'detailed';
+    focus?: 'leadership' | 'technical' | 'program_management' | 'cross_functional';
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/cover-letters/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          job_title: payload.jobTitle,
+          company_name: payload.companyName,
+          job_description: payload.jobDescription,
+          job_url: payload.jobUrl,
+          base_resume_id: payload.baseResumeId,
+          tone: payload.tone || 'professional',
+          length: payload.length || 'standard',
+          focus: payload.focus || 'program_management',
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error generating cover letter:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Get a single cover letter by ID
+   */
+  async getCoverLetter(coverLetterId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/cover-letters/${coverLetterId}`, { method: 'GET' });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error getting cover letter:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Download cover letter as .docx
+   */
+  async downloadCoverLetter(coverLetterId: number): Promise<ApiResponse<Blob>> {
+    try {
+      const response = await fetchWithAuth(`/api/cover-letters/${coverLetterId}/download`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return {
+          success: false,
+          error: errorData.detail || errorData.error || `HTTP ${response.status}`,
+        };
+      }
+
+      const blob = await response.blob();
+      return { success: true, data: blob };
+    } catch (error: any) {
+      console.error('Error downloading cover letter:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Delete a cover letter
+   */
+  async deleteCoverLetter(coverLetterId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/cover-letters/${coverLetterId}`, { method: 'DELETE' });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error deleting cover letter:', error);
+      return { success: false, error: error.message };
+    }
+  },
 };
