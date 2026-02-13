@@ -371,6 +371,10 @@ export default function BehavioralTechnicalQuestionsScreen() {
         <TouchableOpacity
           style={[styles.tab, { backgroundColor: colors.glass, borderColor: colors.border }, activeTab === 'behavioral' && styles.activeTab]}
           onPress={() => setActiveTab('behavioral')}
+          accessibilityRole="tab"
+          accessibilityLabel={`Behavioral questions, ${data?.behavioral?.questions?.length || 0} questions`}
+          accessibilityState={{ selected: activeTab === 'behavioral' }}
+          accessibilityHint="View behavioral interview questions"
         >
           <Brain
             color={activeTab === 'behavioral' ? COLORS.primary : colors.textSecondary}
@@ -383,6 +387,10 @@ export default function BehavioralTechnicalQuestionsScreen() {
         <TouchableOpacity
           style={[styles.tab, { backgroundColor: colors.glass, borderColor: colors.border }, activeTab === 'technical' && styles.activeTab]}
           onPress={() => setActiveTab('technical')}
+          accessibilityRole="tab"
+          accessibilityLabel={`Technical questions, ${data?.technical?.questions?.length || 0} questions`}
+          accessibilityState={{ selected: activeTab === 'technical' }}
+          accessibilityHint="View technical interview questions"
         >
           <Code
             color={activeTab === 'technical' ? COLORS.primary : colors.textSecondary}
@@ -445,6 +453,10 @@ export default function BehavioralTechnicalQuestionsScreen() {
                   <TouchableOpacity
                     style={styles.questionHeader}
                     onPress={() => toggleExpanded('behavioral', question.id, question.question)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${question.question}, ${question.difficulty} difficulty, ${question.category.replace(/_/g, ' ')}`}
+                    accessibilityHint={isExpanded ? "Collapse to hide answer details" : "Expand to view answer details and STAR framework"}
+                    accessibilityState={{ expanded: isExpanded }}
                   >
                     <View style={styles.questionMeta}>
                       <View style={[styles.difficultyBadge, { backgroundColor: `${getDifficultyColor(question.difficulty)}20` }]}>
@@ -525,6 +537,9 @@ export default function BehavioralTechnicalQuestionsScreen() {
                             <TouchableOpacity
                               style={styles.actionButton}
                               onPress={() => copyAiStoryToEdit(questionKey)}
+                              accessibilityRole="button"
+                              accessibilityLabel="Edit AI-generated story"
+                              accessibilityHint="Copy AI story to editable fields for customization"
                             >
                               <Edit3 color={COLORS.primary} size={14} />
                               <Text style={styles.actionButtonText}>Edit</Text>
@@ -534,6 +549,10 @@ export default function BehavioralTechnicalQuestionsScreen() {
                             style={[styles.actionButton, { marginLeft: SPACING.xs }]}
                             onPress={() => generateAiStarStory(questionKey, question.question, true)}
                             disabled={isGeneratingAi}
+                            accessibilityRole="button"
+                            accessibilityLabel={isGeneratingAi ? 'Generating AI story' : 'Regenerate AI story'}
+                            accessibilityHint="Generate a new AI STAR story based on your resume"
+                            accessibilityState={{ disabled: isGeneratingAi, busy: isGeneratingAi }}
                           >
                             <RefreshCw color={COLORS.info} size={14} />
                             <Text style={[styles.actionButtonText, { color: COLORS.info }]}>
@@ -599,6 +618,9 @@ export default function BehavioralTechnicalQuestionsScreen() {
                               <TouchableOpacity
                                 style={[styles.cancelButton, { borderColor: colors.border }]}
                                 onPress={() => setEditingQuestionId(null)}
+                                accessibilityRole="button"
+                                accessibilityLabel="Cancel editing"
+                                accessibilityHint="Discard changes and exit edit mode"
                               >
                                 <X color={colors.textSecondary} size={16} />
                                 <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Cancel</Text>
@@ -607,6 +629,10 @@ export default function BehavioralTechnicalQuestionsScreen() {
                                 style={[styles.saveButton, savingStory && styles.saveButtonDisabled]}
                                 onPress={() => saveStarStory(questionKey, question.question, 'behavioral')}
                                 disabled={savingStory}
+                                accessibilityRole="button"
+                                accessibilityLabel={savingStory ? 'Saving story' : 'Save STAR story'}
+                                accessibilityHint="Save your edited STAR story to the backend"
+                                accessibilityState={{ disabled: savingStory, busy: savingStory }}
                               >
                                 {savingStory ? (
                                   <ActivityIndicator size="small" color="#fff" />
@@ -646,6 +672,9 @@ export default function BehavioralTechnicalQuestionsScreen() {
                               <TouchableOpacity
                                 style={styles.editSavedButton}
                                 onPress={() => setEditingQuestionId(questionKey)}
+                                accessibilityRole="button"
+                                accessibilityLabel="Edit saved story"
+                                accessibilityHint="Modify your previously saved STAR story"
                               >
                                 <Edit3 color={COLORS.primary} size={14} />
                               </TouchableOpacity>
@@ -762,6 +791,10 @@ export default function BehavioralTechnicalQuestionsScreen() {
                   <TouchableOpacity
                     style={styles.questionHeader}
                     onPress={() => toggleExpanded('technical', question.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${question.question}, ${question.difficulty} difficulty, ${question.category.replace(/_/g, ' ')}`}
+                    accessibilityHint={isExpanded ? "Collapse to hide answer details" : "Expand to view expected answers and skill leverage"}
+                    accessibilityState={{ expanded: isExpanded }}
                   >
                     <View style={styles.questionMeta}>
                       <View style={[styles.difficultyBadge, { backgroundColor: `${getDifficultyColor(question.difficulty)}20` }]}>
