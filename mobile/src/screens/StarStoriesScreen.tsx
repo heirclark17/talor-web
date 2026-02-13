@@ -16,7 +16,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BookOpen, Trash2, X, Plus, ArrowLeft, BarChart3, Lightbulb, Copy, TrendingUp } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { STARStoryBuilder } from '../components';
@@ -793,14 +793,13 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.md,
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     paddingVertical: SPACING.md,
   },
   title: {
@@ -821,7 +820,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
@@ -844,8 +843,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: 2,
   },
   cardTheme: {
@@ -854,8 +853,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardDate: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   deleteButton: {
     width: 44,
@@ -881,8 +879,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   emptyText: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     textAlign: 'center',
     marginBottom: SPACING.xl,
   },
@@ -896,8 +893,8 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   createButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   modalContainer: {
     flex: 1,
@@ -916,8 +913,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   headerPlaceholder: {
     width: 44,
@@ -941,23 +937,22 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   themeBadgeText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     color: COLORS.primary,
   },
   section: {
     marginBottom: SPACING.lg,
   },
   sectionLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   sectionText: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     lineHeight: 24,
   },
   tagsList: {
@@ -979,21 +974,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   bullet: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     color: COLORS.primary,
     marginRight: SPACING.sm,
     lineHeight: 24,
   },
   bulletText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 24,
   },
   metaText: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginBottom: 4,
   },
   // Story Actions (Features #18, #19, #20)
@@ -1018,7 +1010,7 @@ const styles = StyleSheet.create({
   },
   // Analysis Section (Feature #18)
   analysisSection: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.xl,
@@ -1030,16 +1022,14 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   analysisSectionTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   scoreCard: {
     alignItems: 'center',
     marginBottom: SPACING.lg,
   },
   overallScoreLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginBottom: 4,
   },
   overallScore: {
@@ -1056,8 +1046,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   componentLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     flex: 1,
   },
   componentRight: {
@@ -1077,13 +1067,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   feedbackTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   feedbackText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     marginBottom: 4,
   },
@@ -1097,20 +1086,19 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   impactLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   impactValue: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   // Suggestions Section (Feature #19)
   suggestionsGroup: {
     marginBottom: SPACING.xl,
   },
   suggestionsGroupTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: SPACING.md,
   },
   suggestionCard: {
@@ -1139,19 +1127,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   framingPerspective: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   framingLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption1,
+    fontWeight: '600',
     marginTop: SPACING.xs,
     marginBottom: 2,
   },
   framingText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     marginBottom: SPACING.xs,
   },
@@ -1170,8 +1157,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   enhancementText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   keywordsContainer: {
@@ -1190,7 +1176,7 @@ const styles = StyleSheet.create({
   },
   // Variations Section (Feature #20)
   variationCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
@@ -1217,15 +1203,14 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   variationLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption1,
+    fontWeight: '600',
     marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   variationText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   useCaseBox: {
@@ -1234,8 +1219,8 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   useCaseLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption1,
+    fontWeight: '600',
     marginBottom: 4,
   },
   useCaseText: {
@@ -1244,7 +1229,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   usageGuideCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
@@ -1258,13 +1243,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   guideLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption1,
+    fontWeight: '600',
     marginBottom: 4,
   },
   guideText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
 });
