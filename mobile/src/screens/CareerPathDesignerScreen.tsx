@@ -34,7 +34,7 @@ import {
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { CareerPlanResults, CareerPathCertifications } from '../components';
@@ -1776,8 +1776,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   welcomeBadgeText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   welcomeTitle: {
     fontSize: 32,
@@ -1787,11 +1787,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
   },
   welcomeSubtitle: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     textAlign: 'center',
     marginBottom: SPACING.xxl,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     lineHeight: 24,
   },
   featureGrid: {
@@ -1800,7 +1799,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   featureCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     alignItems: 'center',
@@ -1814,8 +1813,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   featureTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: SPACING.xs,
   },
   featureText: {
@@ -1833,8 +1832,8 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   primaryButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   secondaryButton: {
     backgroundColor: 'transparent',
@@ -1845,8 +1844,7 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   welcomeFooter: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: SPACING.md,
   },
   savedPlansSection: {
@@ -1860,8 +1858,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   savedPlansTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   savedPlanItem: {
     flexDirection: 'row',
@@ -1884,13 +1882,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   savedPlanRole: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: 2,
   },
   savedPlanDate: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   uploadContainer: {
     flex: 1,
@@ -1902,8 +1899,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   screenSubtitle: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     marginBottom: SPACING.xl,
     textAlign: 'center',
   },
@@ -1911,15 +1907,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: SPACING.md,
     textAlign: 'center',
   },
   resumeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
@@ -1929,8 +1925,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   resumeName: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: 4,
   },
   resumeDate: {
@@ -1948,8 +1944,7 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     paddingHorizontal: SPACING.md,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   uploadZone: {
     borderRadius: RADIUS.xl,
@@ -1962,14 +1957,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   uploadTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
     marginTop: SPACING.md,
     textAlign: 'center',
   },
   uploadSubtext: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginTop: SPACING.xs,
     textAlign: 'center',
   },
@@ -1993,8 +1986,7 @@ const styles = StyleSheet.create({
   errorText: {
     flex: 1,
     color: COLORS.danger,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   navigationButtons: {
     flexDirection: 'row',
@@ -2009,8 +2001,8 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
   },
   backButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   questionsContainer: {
     flex: 1,
@@ -2034,8 +2026,8 @@ const styles = StyleSheet.create({
   stepDotCompleted: {
   },
   stepDotText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   stepHeader: {
     alignItems: 'center',
@@ -2044,7 +2036,7 @@ const styles = StyleSheet.create({
   stepIcon: {
     width: 64,
     height: 64,
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
@@ -2055,8 +2047,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   stepSubtitle: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     textAlign: 'center',
   },
   formContainer: {
@@ -2066,15 +2057,14 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   label: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   input: {
     borderWidth: 2,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     minHeight: 48,
   },
   inputMargin: {
@@ -2103,8 +2093,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
   chipText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   chipTextSelected: {
   },
@@ -2123,8 +2113,8 @@ const styles = StyleSheet.create({
   },
   linkText: {
     color: COLORS.primary,
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginTop: SPACING.xs,
   },
   switchRow: {
@@ -2161,8 +2151,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   generatingMessage: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     textAlign: 'center',
     marginBottom: SPACING.xs,
   },
@@ -2188,8 +2177,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
   },
   progressText: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     textAlign: 'center',
   },
   stepsList: {
@@ -2215,8 +2203,7 @@ const styles = StyleSheet.create({
   },
   stepText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   stepTextCompleted: {
   },
@@ -2233,22 +2220,21 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   errorMessage: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     textAlign: 'center',
     marginBottom: SPACING.xl,
   },
   resultsHeaderBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     paddingVertical: SPACING.md,
   },
   resultsContainer: {
     flex: 1,
   },
   resultsHeader: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.xl,
     alignItems: 'center',
@@ -2257,7 +2243,7 @@ const styles = StyleSheet.create({
   resultsIcon: {
     width: 64,
     height: 64,
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
@@ -2269,23 +2255,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   resultsSubtitle: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     textAlign: 'center',
     marginBottom: SPACING.xs,
   },
   resultsDate: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   planContent: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.xl,
   },
   planText: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     textAlign: 'center',
     marginBottom: SPACING.sm,
   },
@@ -2303,18 +2286,17 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   analyzeButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   analysisCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.xl,
     margin: SPACING.lg,
   },
   analysisLoadingText: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     textAlign: 'center',
     marginTop: SPACING.md,
   },
@@ -2331,13 +2313,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   analysisSectionTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
     marginBottom: SPACING.md,
   },
   analysisText: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     lineHeight: 24,
   },
   scoreRow: {
@@ -2347,8 +2327,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   scoreLabel: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
   },
   scoreValue: {
     fontSize: 24,
@@ -2361,15 +2340,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   bullet: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.callout,
     color: COLORS.primary,
     marginTop: 2,
   },
   bulletText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   pathStep: {
@@ -2378,13 +2355,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   pathStepRole: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: 4,
   },
   pathStepTimeline: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginBottom: SPACING.sm,
   },
   pathStepReq: {
@@ -2399,19 +2375,17 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   insightLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   insightValue: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   companiesList: {
     marginTop: SPACING.md,
   },
   companiesLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginBottom: SPACING.sm,
   },
   companiesChips: {
@@ -2425,8 +2399,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
   },
   companyChipText: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   skillGapCard: {
     borderRadius: RADIUS.md,
@@ -2440,8 +2413,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   skillGapName: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     flex: 1,
   },
   importanceBadge: {
@@ -2466,8 +2439,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   trendingLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginBottom: SPACING.sm,
   },
   trendingChips: {
@@ -2484,15 +2456,15 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
   },
   trendingChipText: {
-    fontSize: 12,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.caption1,
+    fontWeight: '600',
   },
   resourceSection: {
     marginBottom: SPACING.lg,
   },
   resourceSkillName: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: SPACING.sm,
   },
   resourceCard: {
@@ -2521,8 +2493,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   resourceMeta: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   priorityRow: {
     flexDirection: 'row',
@@ -2538,12 +2509,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   priorityNumberText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   prioritySkill: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
 });
