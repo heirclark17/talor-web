@@ -197,6 +197,9 @@ export default function BatchTailorScreen() {
           <TouchableOpacity
             style={styles.backButton}
             onPress={handleReset}
+            accessibilityRole="button"
+            accessibilityLabel="Reset and start new batch"
+            accessibilityHint="Returns to batch input screen"
           >
             <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
@@ -277,6 +280,9 @@ export default function BatchTailorScreen() {
                 <TouchableOpacity
                   style={styles.viewButton}
                   onPress={() => handleViewResult(result.tailoredResumeId!)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View tailored resume for ${result.company || 'this job'}`}
+                  accessibilityHint="Opens the tailored resume details"
                 >
                   <Text style={styles.viewButtonText}>View Result</Text>
                 </TouchableOpacity>
@@ -291,6 +297,8 @@ export default function BatchTailorScreen() {
             variant="secondary"
             onPress={handleReset}
             fullWidth
+            accessibilityLabel="Start new batch tailoring"
+            accessibilityHint="Resets the form to create another batch of tailored resumes"
           />
         </View>
       </SafeAreaView>
@@ -305,6 +313,9 @@ export default function BatchTailorScreen() {
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            accessibilityHint="Returns to the previous screen"
           >
             <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
@@ -321,6 +332,9 @@ export default function BatchTailorScreen() {
           <TouchableOpacity
             style={[styles.uploadButton, { backgroundColor: colors.text }]}
             onPress={() => navigation.navigate('UploadResume')}
+            accessibilityRole="button"
+            accessibilityLabel="Upload new resume"
+            accessibilityHint="Navigates to upload screen to select and upload a resume"
           >
             <Text style={[styles.uploadButtonText, { color: colors.background }]}>Upload Resume</Text>
           </TouchableOpacity>
@@ -340,6 +354,9 @@ export default function BatchTailorScreen() {
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            accessibilityHint="Returns to the previous screen"
           >
             <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
@@ -365,6 +382,10 @@ export default function BatchTailorScreen() {
             <TouchableOpacity
               style={[styles.selector, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
               onPress={() => setShowResumeSelector(!showResumeSelector)}
+              accessibilityRole="button"
+              accessibilityLabel={`Selected resume: ${selectedResume?.filename || 'None selected'}`}
+              accessibilityHint={showResumeSelector ? "Collapse resume list" : "Expand to select a resume"}
+              accessibilityState={{ expanded: showResumeSelector }}
             >
               <View style={styles.selectorContent}>
                 <FileText color={COLORS.primary} size={20} />
@@ -392,6 +413,10 @@ export default function BatchTailorScreen() {
                       setSelectedResumeId(resume.id);
                       setShowResumeSelector(false);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${resume.filename}, ${resume.skills_count} skills`}
+                    accessibilityHint="Select this resume for batch tailoring"
+                    accessibilityState={{ selected: selectedResumeId === resume.id }}
                   >
                     <Text
                       style={[
@@ -433,12 +458,17 @@ export default function BatchTailorScreen() {
                     autoCapitalize="none"
                     autoCorrect={false}
                     keyboardType="url"
+                    accessibilityLabel={`Job URL ${index + 1}`}
+                    accessibilityHint="Enter the web address of the job posting"
                   />
                 </View>
                 {jobUrls.length > 1 && (
                   <TouchableOpacity
                     style={styles.removeButton}
                     onPress={() => handleRemoveUrl(index)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remove job URL ${index + 1}`}
+                    accessibilityHint="Removes this job URL from the batch"
                   >
                     <X color={COLORS.danger} size={20} />
                   </TouchableOpacity>
@@ -450,6 +480,9 @@ export default function BatchTailorScreen() {
               <TouchableOpacity
                 style={[styles.addButton, { borderColor: colors.glassBorder }]}
                 onPress={handleAddUrl}
+                accessibilityRole="button"
+                accessibilityLabel="Add another job URL"
+                accessibilityHint={`Adds a new job URL input. ${jobUrls.length} of ${MAX_JOBS} URLs added`}
               >
                 <Plus color={COLORS.primary} size={20} />
                 <Text style={[styles.addButtonText, { color: COLORS.primary }]}>Add Another URL</Text>
@@ -467,6 +500,8 @@ export default function BatchTailorScreen() {
             loading={processing}
             icon={!processing ? <Target color="#fff" size={20} /> : undefined}
             fullWidth
+            accessibilityLabel={processing ? 'Processing batch tailoring' : `Tailor ${validUrlCount} resume${validUrlCount !== 1 ? 's' : ''} for ${validUrlCount} job${validUrlCount !== 1 ? 's' : ''}`}
+            accessibilityHint={validUrlCount === 0 ? "Add at least one job URL to continue" : "Starts batch tailoring process for all entered job URLs"}
           />
         </View>
       </KeyboardAvoidingView>

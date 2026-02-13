@@ -531,7 +531,13 @@ export default function STARStoryBuilderScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          accessibilityHint="Returns to the previous screen"
+        >
           <ArrowLeft color={colors.text} size={24} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>STAR Story Builder</Text>
@@ -589,6 +595,10 @@ export default function STARStoryBuilderScreen() {
                 <TouchableOpacity
                   style={styles.guideSectionHeader}
                   onPress={() => toggleGuideSection('situation')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Situation and Task section"
+                  accessibilityHint={expandedGuideSections.has('situation') ? "Collapse to hide details" : "Expand to view probing and challenge questions"}
+                  accessibilityState={{ expanded: expandedGuideSections.has('situation') }}
                 >
                   <View style={styles.guideSectionLeft}>
                     <View style={[styles.guideLetter, { backgroundColor: STAR_GUIDANCE.situation.color }]}>
@@ -650,6 +660,10 @@ export default function STARStoryBuilderScreen() {
                 <TouchableOpacity
                   style={styles.guideSectionHeader}
                   onPress={() => toggleGuideSection('action')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Action section - most important"
+                  accessibilityHint={expandedGuideSections.has('action') ? "Collapse to hide details" : "Expand to view probing and challenge questions about your specific contributions"}
+                  accessibilityState={{ expanded: expandedGuideSections.has('action') }}
                 >
                   <View style={styles.guideSectionLeft}>
                     <View style={[styles.guideLetter, { backgroundColor: STAR_GUIDANCE.action.color }]}>
@@ -717,6 +731,10 @@ export default function STARStoryBuilderScreen() {
                 <TouchableOpacity
                   style={styles.guideSectionHeader}
                   onPress={() => toggleGuideSection('result')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Results section"
+                  accessibilityHint={expandedGuideSections.has('result') ? "Collapse to hide details" : "Expand to view types of results to include and probing questions"}
+                  accessibilityState={{ expanded: expandedGuideSections.has('result') }}
                 >
                   <View style={styles.guideSectionLeft}>
                     <View style={[styles.guideLetter, { backgroundColor: STAR_GUIDANCE.result.color }]}>
@@ -817,6 +835,10 @@ export default function STARStoryBuilderScreen() {
                       isSelected && styles.experienceCardSelected,
                     ]}
                     onPress={() => toggleExperience(index)}
+                    accessibilityRole="checkbox"
+                    accessibilityLabel={`${getExperienceTitle(exp)}${exp.company ? `, ${exp.company}` : ''}`}
+                    accessibilityHint={isSelected ? "Selected. Tap to deselect this experience" : "Not selected. Tap to select this experience for your story"}
+                    accessibilityState={{ checked: isSelected }}
                   >
                     <View style={styles.experienceCheckbox}>
                       {isSelected ? (
@@ -874,6 +896,10 @@ export default function STARStoryBuilderScreen() {
           <TouchableOpacity
             style={[styles.dropdown, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
             onPress={() => setShowThemeDropdown(!showThemeDropdown)}
+            accessibilityRole="button"
+            accessibilityLabel={`Selected theme: ${selectedTheme || 'None selected'}`}
+            accessibilityHint={showThemeDropdown ? "Collapse theme list" : "Expand to select a story theme"}
+            accessibilityState={{ expanded: showThemeDropdown }}
           >
             <Text style={[styles.dropdownText, { color: selectedTheme ? colors.text : colors.textTertiary }]}>
               {selectedTheme || 'Select a theme...'}
@@ -898,6 +924,10 @@ export default function STARStoryBuilderScreen() {
                     setSelectedTheme(theme);
                     setShowThemeDropdown(false);
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={theme}
+                  accessibilityHint="Select this theme for your story"
+                  accessibilityState={{ selected: selectedTheme === theme }}
                 >
                   <Text style={[styles.dropdownItemText, { color: selectedTheme === theme ? COLORS.primary : colors.text }]}>
                     {theme}
@@ -926,6 +956,10 @@ export default function STARStoryBuilderScreen() {
             <TouchableOpacity
               style={[styles.dropdown, { backgroundColor: colors.glass, borderColor: selectedPrompt ? COLORS.info : colors.glassBorder }]}
               onPress={() => setShowPromptsDropdown(!showPromptsDropdown)}
+              accessibilityRole="button"
+              accessibilityLabel={`Selected prompt: ${selectedPrompt?.title || 'None selected'}`}
+              accessibilityHint={showPromptsDropdown ? "Collapse prompt list" : "Expand to select a pre-built story prompt based on job requirements"}
+              accessibilityState={{ expanded: showPromptsDropdown }}
             >
               <View style={{ flex: 1 }}>
                 <Text style={[styles.dropdownText, { color: selectedPrompt ? colors.text : colors.textTertiary }]}>
@@ -953,6 +987,10 @@ export default function STARStoryBuilderScreen() {
                     setSelectedPrompt(null);
                     setShowPromptsDropdown(false);
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel="No prompt, use custom theme only"
+                  accessibilityHint="Clears the selected prompt"
+                  accessibilityState={{ selected: !selectedPrompt }}
                 >
                   <Text style={[styles.dropdownItemText, { color: !selectedPrompt ? COLORS.info : colors.textTertiary }]}>
                     No prompt (custom theme only)
@@ -972,6 +1010,10 @@ export default function STARStoryBuilderScreen() {
                       setSelectedTheme(prompt.title);
                       setShowPromptsDropdown(false);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${prompt.title}. ${prompt.description}`}
+                    accessibilityHint="Select this pre-built story prompt"
+                    accessibilityState={{ selected: selectedPrompt?.title === prompt.title }}
                   >
                     <Text style={[styles.dropdownItemText, { color: selectedPrompt?.title === prompt.title ? COLORS.info : colors.text }]}>
                       {prompt.title}
@@ -1023,6 +1065,10 @@ export default function STARStoryBuilderScreen() {
           <TouchableOpacity
             style={[styles.dropdown, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
             onPress={() => setShowToneDropdown(!showToneDropdown)}
+            accessibilityRole="button"
+            accessibilityLabel={`Selected tone: ${TONE_OPTIONS.find(t => t.value === selectedTone)?.label || 'None'}`}
+            accessibilityHint={showToneDropdown ? "Collapse tone list" : "Expand to select a tone for your story"}
+            accessibilityState={{ expanded: showToneDropdown }}
           >
             <View>
               <Text style={[styles.dropdownText, { color: colors.text }]}>
@@ -1052,6 +1098,10 @@ export default function STARStoryBuilderScreen() {
                     setSelectedTone(tone.value);
                     setShowToneDropdown(false);
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${tone.label}. ${tone.description}`}
+                  accessibilityHint="Select this tone for your story"
+                  accessibilityState={{ selected: selectedTone === tone.value }}
                 >
                   <Text style={[styles.dropdownItemText, { color: selectedTone === tone.value ? COLORS.purple : colors.text }]}>
                     {tone.label}
@@ -1075,6 +1125,8 @@ export default function STARStoryBuilderScreen() {
           icon={!generating ? <Sparkles color="#fff" size={20} /> : undefined}
           fullWidth
           style={styles.generateButton}
+          accessibilityLabel={generating ? 'Generating STAR story' : `Generate STAR story from ${selectedExperiences.size} selected experience${selectedExperiences.size !== 1 ? 's' : ''}`}
+          accessibilityHint={selectedExperiences.size === 0 ? "Select at least one experience to continue" : "Uses AI to create a behavioral interview story"}
         />
 
         {/* Generated Stories */}
@@ -1104,6 +1156,10 @@ export default function STARStoryBuilderScreen() {
                   <TouchableOpacity
                     style={styles.storyHeader}
                     onPress={() => toggleStoryExpanded(storyId)}
+                    accessibilityRole="button"
+                    accessibilityLabel={story.title}
+                    accessibilityHint={isExpanded ? "Collapse to hide story details" : "Expand to view situation, task, action, and results"}
+                    accessibilityState={{ expanded: isExpanded }}
                   >
                     <Text style={[styles.storyTitle, { color: colors.text }]} numberOfLines={1}>
                       {story.title}
@@ -1135,6 +1191,8 @@ export default function STARStoryBuilderScreen() {
                                 onChangeText={(text) => setEditingStory({ ...editingStory, [section]: text })}
                                 multiline
                                 textAlignVertical="top"
+                                accessibilityLabel={`Edit ${section}`}
+                                accessibilityHint={`Enter your ${section} content for the STAR story`}
                               />
                             </View>
                           ))}
@@ -1142,6 +1200,9 @@ export default function STARStoryBuilderScreen() {
                             <TouchableOpacity
                               style={[styles.editButton, styles.cancelButton]}
                               onPress={cancelEditing}
+                              accessibilityRole="button"
+                              accessibilityLabel="Cancel editing"
+                              accessibilityHint="Discards changes and returns to view mode"
                             >
                               <X color={colors.textSecondary} size={16} />
                               <Text style={[styles.editButtonText, { color: colors.textSecondary }]}>Cancel</Text>
@@ -1150,6 +1211,9 @@ export default function STARStoryBuilderScreen() {
                               style={[styles.editButton, styles.saveButton, { backgroundColor: COLORS.success }]}
                               onPress={saveEditedStory}
                               disabled={savingStory}
+                              accessibilityRole="button"
+                              accessibilityLabel={savingStory ? "Saving changes" : "Save changes"}
+                              accessibilityHint="Saves the edited story content"
                             >
                               {savingStory ? (
                                 <ActivityIndicator size="small" color="#fff" />
@@ -1244,6 +1308,9 @@ export default function STARStoryBuilderScreen() {
                             <TouchableOpacity
                               style={[styles.actionButton, { backgroundColor: ALPHA_COLORS.primary.bg }]}
                               onPress={() => startEditingStory(story)}
+                              accessibilityRole="button"
+                              accessibilityLabel="Edit story"
+                              accessibilityHint="Enables editing of situation, task, action, and results"
                             >
                               <Edit3 color={COLORS.primary} size={16} />
                               <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>Edit</Text>
@@ -1252,6 +1319,9 @@ export default function STARStoryBuilderScreen() {
                               style={[styles.actionButton, { backgroundColor: ALPHA_COLORS.danger.bg }]}
                               onPress={() => deleteStory(storyId)}
                               disabled={isDeleting}
+                              accessibilityRole="button"
+                              accessibilityLabel={isDeleting ? "Deleting story" : "Delete story"}
+                              accessibilityHint="Permanently removes this STAR story"
                             >
                               {isDeleting ? (
                                 <ActivityIndicator size="small" color={COLORS.error} />
