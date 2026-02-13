@@ -192,7 +192,13 @@ export default function CertificationsScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          accessibilityHint="Returns to the previous screen"
+        >
           <ArrowLeft color={colors.text} size={24} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Certifications</Text>
@@ -224,6 +230,9 @@ export default function CertificationsScreen() {
                 selectedLevel === level && { backgroundColor: getLevelColor(level) },
               ]}
               onPress={() => setSelectedLevel(level)}
+              accessibilityRole="button"
+              accessibilityLabel={`Filter by ${level === 'all' ? 'all levels' : level + ' level'}`}
+              accessibilityState={{ selected: selectedLevel === level }}
             >
               <Text
                 style={[
@@ -256,6 +265,10 @@ export default function CertificationsScreen() {
                 <TouchableOpacity
                   style={styles.certHeader}
                   onPress={() => toggleExpanded(cert.name)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${cert.name}, ${cert.level} level certification`}
+                  accessibilityHint={isExpanded ? "Collapse details" : "Expand to view details"}
+                  accessibilityState={{ expanded: isExpanded }}
                 >
                   <View style={styles.certHeaderLeft}>
                     <Text style={[styles.certName, { color: colors.text }]}>{cert.name}</Text>
@@ -284,6 +297,10 @@ export default function CertificationsScreen() {
                         e.stopPropagation();
                         toggleSaveCert(cert.name);
                       }}
+                      accessibilityRole="button"
+                      accessibilityLabel={isSaved ? `Remove ${cert.name} from saved` : `Save ${cert.name}`}
+                      accessibilityHint={isSaved ? "Removes from your saved certifications" : "Adds to your saved certifications"}
+                      accessibilityState={{ selected: isSaved }}
                     >
                       <Bookmark
                         color={isSaved ? '#fff' : colors.textSecondary}
