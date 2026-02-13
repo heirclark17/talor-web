@@ -254,7 +254,12 @@ export default function SettingsScreen() {
               onValueChange={setNotifications}
               trackColor={{ false: colors.border, true: COLORS.primary }}
               thumbColor={colors.text}
-            />
+              accessibilityLabel="Enable notifications"
+              accessibilityHint={notifications ? "Notifications are currently enabled" : "Notifications are currently disabled"}
+              accessibilityRole="switch"
+            />,
+            false,
+            'Toggle push notifications on or off'
           )}
         </GlassCard>
 
