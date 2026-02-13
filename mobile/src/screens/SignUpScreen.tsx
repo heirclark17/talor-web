@@ -33,15 +33,28 @@ export default function SignUpScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [pendingVerification, setPendingVerification] = useState(false);
+  const [verificationSucceeded, setVerificationSucceeded] = useState(false);
 
   // Monitor auth state changes after verification attempt
   useEffect(() => {
     if ((isSignedIn || userId) && pendingVerification) {
       console.log('[SignUp] Auth state updated after verification - user is now signed in!');
       console.log('[SignUp] isSignedIn:', isSignedIn, 'userId:', userId);
+      setVerificationSucceeded(false); // Clear the flag
       // Auth state has changed, AppNavigator will handle navigation
     }
   }, [isSignedIn, userId, pendingVerification]);
+
+  // Show helpful message if verification succeeded but auth state didn't update
+  useEffect(() => {
+    if (verificationSucceeded && !isSignedIn && !userId) {
+      const timer = setTimeout(() => {
+        console.error('[SignUp] Auth state still not updated 2 seconds after verification!');
+        setError('Verification succeeded but authentication is still loading. Please restart the app if you\'re not automatically signed in.');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [verificationSucceeded, isSignedIn, userId]);
 
   // Step 1: Create account and send verification code
   const handleSignUp = async () => {
@@ -112,11 +125,29 @@ export default function SignUpScreen() {
 
         console.log('[SignUp] Session activated! Waiting for Clerk state update...');
 
-        // Give Clerk a moment to update its internal state
-        // The AppNavigator will re-render when isSignedIn/userId changes
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Give Clerk more time to update its internal state
+        // Increased from 100ms to 500ms to ensure state propagates
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        console.log('[SignUp] Verification complete - user should navigate to main app');
+        // Check if auth state updated
+        console.log('[SignUp] After delay - checking auth state...');
+        console.log('[SignUp] Current state: isSignedIn=', isSignedIn, 'userId=', userId);
+
+        if (!isSignedIn && !userId) {
+          console.warn('[SignUp] WARNING: Auth state did not update after verification!');
+          console.warn('[SignUp] Session was activated but Clerk context still shows signed out');
+          console.warn('[SignUp] This may indicate a Clerk state propagation issue');
+          console.warn('[SignUp] AppNavigator should still pick up the change when context updates');
+          console.warn('[SignUp] If stuck on auth screen, try:');
+          console.warn('[SignUp]   1. Pull down to refresh');
+          console.warn('[SignUp]   2. Restart the app');
+          console.warn('[SignUp]   3. Check Clerk Dashboard for session status');
+        } else {
+          console.log('[SignUp] ✓ Verification complete - auth state updated successfully!');
+        }
+
+        // Set flag to trigger timeout warning if auth doesn't update
+        setVerificationSucceeded(true);
 
         // Note: Navigation happens automatically via AppNavigator when isSignedIn becomes true
       } else {
