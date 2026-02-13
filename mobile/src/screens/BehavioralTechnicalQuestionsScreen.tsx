@@ -34,7 +34,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { GlassCard } from '../components/glass/GlassCard';
@@ -945,8 +945,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   headerPlaceholder: {
     width: 44,
@@ -965,14 +964,12 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.lg,
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
     textAlign: 'center',
   },
   loadingSubtext: {
     marginTop: SPACING.sm,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     textAlign: 'center',
   },
   tabContainer: {
@@ -996,8 +993,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
   tabText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   activeTabText: {
     color: COLORS.primary,
@@ -1010,7 +1007,7 @@ const styles = StyleSheet.create({
     paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   summaryCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
@@ -1028,8 +1025,7 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   summaryLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: 4,
   },
   contextCard: {
@@ -1047,24 +1043,23 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   contextTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     color: COLORS.info,
   },
   contextText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   techStackCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
   techStackTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: SPACING.md,
   },
   techSection: {
@@ -1076,7 +1071,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   questionCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     marginBottom: SPACING.md,
     overflow: 'hidden',
@@ -1153,12 +1148,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   sectionText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   starContainer: {
@@ -1219,8 +1213,7 @@ const styles = StyleSheet.create({
   },
   mistakeText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   answerPointItem: {
@@ -1230,8 +1223,7 @@ const styles = StyleSheet.create({
   },
   answerPointText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   leverageBox: {
@@ -1242,8 +1234,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   leverageText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   talkingPointsContainer: {
@@ -1290,8 +1281,7 @@ const styles = StyleSheet.create({
   },
   followUpText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     fontStyle: 'italic',
   },
@@ -1302,20 +1292,19 @@ const styles = StyleSheet.create({
   },
   redFlagText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     color: COLORS.error,
     lineHeight: 20,
   },
   prepStrategyCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginTop: SPACING.md,
   },
   prepStrategyTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: SPACING.md,
   },
   prepSection: {
@@ -1340,8 +1329,7 @@ const styles = StyleSheet.create({
   },
   prepText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   // AI STAR Story styles
@@ -1379,8 +1367,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   aiStarText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   noStoryText: {
@@ -1402,8 +1389,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: RADIUS.md,
     padding: SPACING.sm,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     minHeight: 80,
     textAlignVertical: 'top',
   },
