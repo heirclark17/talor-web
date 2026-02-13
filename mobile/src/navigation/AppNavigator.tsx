@@ -319,6 +319,11 @@ export default function AppNavigator() {
     },
   };
 
+  // Debug: only log state changes, not every render
+  if (!isLoaded) {
+    console.log('[AppNavigator] Clerk loading...');
+  }
+
   // Show nothing while Clerk is loading
   if (!isLoaded) {
     return null;

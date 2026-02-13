@@ -29,6 +29,13 @@ const tokenCache = {
       console.error('SecureStore save error:', err);
     }
   },
+  async clearToken(key: string) {
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch (err) {
+      console.error('SecureStore clear error:', err);
+    }
+  },
 };
 
 // Keep splash screen visible while loading fonts
