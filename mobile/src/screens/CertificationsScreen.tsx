@@ -29,7 +29,7 @@ import {
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { GlassCard } from '../components/glass/GlassCard';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
@@ -508,8 +508,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   headerPlaceholder: {
     width: 44,
@@ -528,8 +527,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.md,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   introCard: {
     marginBottom: SPACING.lg,
@@ -545,8 +543,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.semibold,
   },
   introText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   filterContainer: {
@@ -574,8 +571,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     textAlign: 'center',
   },
   certCard: {
@@ -590,8 +586,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   certName: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: 2,
   },
   certProvider: {
@@ -672,8 +668,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   expandedLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.xs,
   },
   expandedText: {
@@ -724,8 +720,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   examDetailLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   examDetailValue: {
     fontSize: 12,
@@ -759,8 +754,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   roadmapTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   roadmapList: {
     gap: SPACING.sm,
@@ -801,13 +795,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   roadmapStepName: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     flex: 1,
   },
   roadmapStepTimeline: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginLeft: SPACING.sm,
   },
   roadmapStepRationale: {
@@ -825,12 +818,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   adviceTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   adviceText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 22,
   },
 });
