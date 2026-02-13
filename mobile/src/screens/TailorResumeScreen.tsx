@@ -742,6 +742,9 @@ export default function TailorResumeScreen() {
           <TouchableOpacity
             style={[styles.uploadButton, { backgroundColor: colors.text }]}
             onPress={() => navigation.navigate('UploadResume')}
+            accessibilityRole="button"
+            accessibilityLabel="Upload resume"
+            accessibilityHint="Opens file picker to select and upload a resume document"
           >
             <Text style={[styles.uploadButtonText, { color: colors.background }]}>Upload Resume</Text>
           </TouchableOpacity>
@@ -852,6 +855,8 @@ export default function TailorResumeScreen() {
                   autoCapitalize="none"
                   autoCorrect={false}
                   keyboardType="url"
+                  accessibilityLabel="Job posting URL"
+                  accessibilityHint="Enter the web address of the job posting to auto-extract details"
                 />
               </View>
               <GlassButton
@@ -861,6 +866,8 @@ export default function TailorResumeScreen() {
                 loading={extracting}
                 icon={!extracting ? <Sparkles color="#fff" size={20} /> : undefined}
                 style={styles.extractButton}
+                accessibilityLabel={extracting ? "Extracting job details" : "Extract job details"}
+                accessibilityHint="Automatically fills company and job title from the URL"
               />
             </View>
             <Text style={[styles.inputHint, { color: colors.textTertiary }]}>
@@ -885,6 +892,8 @@ export default function TailorResumeScreen() {
                 placeholderTextColor={colors.textTertiary}
                 value={company}
                 onChangeText={setCompany}
+                accessibilityLabel="Company name"
+                accessibilityHint="Enter the name of the company you're applying to"
               />
             </View>
           </View>
@@ -899,6 +908,8 @@ export default function TailorResumeScreen() {
                 placeholderTextColor={colors.textTertiary}
                 value={jobTitle}
                 onChangeText={setJobTitle}
+                accessibilityLabel="Job title"
+                accessibilityHint="Enter the job title you're applying for"
               />
             </View>
           </View>
@@ -913,6 +924,8 @@ export default function TailorResumeScreen() {
             loading={tailoring}
             icon={!tailoring ? <Target color="#fff" size={20} /> : undefined}
             fullWidth
+            accessibilityLabel={tailoring ? "Tailoring resume in progress" : "Tailor resume for job"}
+            accessibilityHint="Customizes your resume to match the job requirements using AI"
           />
         </View>
       </KeyboardAvoidingView>
