@@ -25,7 +25,7 @@ import {
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { GlassCard } from '../components/glass/GlassCard';
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.regular,
   },
   header: {
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     paddingVertical: SPACING.md,
   },
   headerLeft: {
@@ -489,13 +489,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.screenMargin,
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
   },
   bulkActionText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   bulkDeleteButton: {
     flexDirection: 'row',
@@ -518,8 +518,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.extralight,
   },
   headerCount: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   list: {
     padding: SPACING.lg,
@@ -546,8 +545,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     marginBottom: SPACING.xs,
   },
   metaRow: {
@@ -567,8 +566,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   dateText: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   scoreBadge: {
     paddingHorizontal: SPACING.sm,
@@ -635,7 +633,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   tailorButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
 });
