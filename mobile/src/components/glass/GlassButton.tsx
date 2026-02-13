@@ -13,10 +13,12 @@ import {
 import { BlurView } from 'expo-blur';
 import { LiquidGlassView, isLiquidGlassSupported } from './LiquidGlassWrapper';
 import { lightImpact } from '../../utils/haptics';
+import { useReduceMotion } from '../../hooks/useReduceMotion';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
 import { COLORS, FONTS, RADIUS, SPACING, GLASS, ANIMATION, ALPHA_COLORS } from '../../utils/constants';
@@ -64,27 +66,40 @@ export function GlassButton({
   fullWidth = false,
 }: GlassButtonProps) {
   const { isDark, colors } = useTheme();
+  const reduceMotion = useReduceMotion();
   const scale = useSharedValue(1);
   const sizeConfig = SIZE_CONFIG[size];
 
   const handlePressIn = useCallback(() => {
     // Only animate on non-liquid glass (liquid glass handles its own animation)
     if (!isLiquidGlassSupported || Platform.OS !== 'ios') {
-      scale.value = withSpring(0.97, {
-        damping: ANIMATION.spring.damping,
-        stiffness: ANIMATION.spring.stiffness,
-      });
+      if (reduceMotion) {
+        // Instant animation when Reduce Motion is enabled
+        scale.value = withTiming(0.97, { duration: 0 });
+      } else {
+        // Spring animation for normal users
+        scale.value = withSpring(0.97, {
+          damping: ANIMATION.spring.damping,
+          stiffness: ANIMATION.spring.stiffness,
+        });
+      }
     }
-  }, [scale]);
+  }, [scale, reduceMotion]);
 
   const handlePressOut = useCallback(() => {
     if (!isLiquidGlassSupported || Platform.OS !== 'ios') {
-      scale.value = withSpring(1, {
-        damping: ANIMATION.spring.damping,
-        stiffness: ANIMATION.spring.stiffness,
-      });
+      if (reduceMotion) {
+        // Instant animation when Reduce Motion is enabled
+        scale.value = withTiming(1, { duration: 0 });
+      } else {
+        // Spring animation for normal users
+        scale.value = withSpring(1, {
+          damping: ANIMATION.spring.damping,
+          stiffness: ANIMATION.spring.stiffness,
+        });
+      }
     }
-  }, [scale]);
+  }, [scale, reduceMotion]);
 
   const handlePress = useCallback(() => {
     if (haptic) {
