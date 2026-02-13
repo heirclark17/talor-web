@@ -49,6 +49,22 @@ export const COLORS = {
   purple: '#8b5cf6',
   info: '#06b6d4',
   cyan: '#06b6d4',
+
+  // Semantic color variants (from health app design system)
+  semanticColors: {
+    success: '#10b981',
+    successStrong: '#4ADE80',
+    successMuted: '#96CEB4',
+    error: '#ef4444',
+    errorStrong: '#FF3B30',
+    errorMuted: '#FCA5A5',
+    warning: '#f59e0b',
+    warningOrange: '#FB923C',
+    warningMuted: '#FDE68A',
+    info: '#06b6d4',
+    infoStrong: '#22D3EE',
+    infoMuted: '#A5F3FC',
+  },
 };
 
 // Typography - Urbanist font family
@@ -61,16 +77,60 @@ export const FONTS = {
   bold: 'Urbanist_700Bold',
   extrabold: 'Urbanist_800ExtraBold',
   italic: 'Urbanist_400Regular', // Fallback - Urbanist doesn't have separate italic
+
+  // Numeric variants (using Urbanist bold weights for numbers)
+  // In future, can be replaced with SF Pro Rounded for iOS
+  numericUltralight: 'Urbanist_200ExtraLight',
+  numericThin: 'Urbanist_300Light',
+  numericLight: 'Urbanist_300Light',
+  numericRegular: 'Urbanist_400Regular',
+  numericMedium: 'Urbanist_500Medium',
+  numericSemiBold: 'Urbanist_600SemiBold',
+  numericBold: 'Urbanist_700Bold',
+  numericHeavy: 'Urbanist_800ExtraBold',
+  numericBlack: 'Urbanist_800ExtraBold',
+};
+
+// iOS Typography Scale (from Human Interface Guidelines)
+export const TYPOGRAPHY = {
+  largeTitle: { fontFamily: FONTS.bold, fontSize: 34, lineHeight: 41 },
+  title1: { fontFamily: FONTS.bold, fontSize: 28, lineHeight: 34 },
+  title2: { fontFamily: FONTS.semibold, fontSize: 22, lineHeight: 28 },
+  title3: { fontFamily: FONTS.semibold, fontSize: 20, lineHeight: 25 },
+  headline: { fontFamily: FONTS.semibold, fontSize: 17, lineHeight: 22 },
+  body: { fontFamily: FONTS.regular, fontSize: 17, lineHeight: 22 },
+  callout: { fontFamily: FONTS.regular, fontSize: 16, lineHeight: 21 },
+  subhead: { fontFamily: FONTS.regular, fontSize: 15, lineHeight: 20 },
+  footnote: { fontFamily: FONTS.regular, fontSize: 13, lineHeight: 18 },
+  caption1: { fontFamily: FONTS.regular, fontSize: 12, lineHeight: 16 },
+  caption2: { fontFamily: FONTS.regular, fontSize: 11, lineHeight: 13 },
 };
 
 // Spacing
 export const SPACING = {
+  // Base spacing scale
   xs: 4,
   sm: 8,
   md: 16,
   lg: 24,
   xl: 32,
   xxl: 48,
+
+  // Semantic spacing (from health app)
+  screenMargin: 16,
+  screenMarginIPad: 24,
+  cardPadding: 16,
+  cardGap: 16,
+  sectionGap: 24,
+  touchTarget: 44,      // Minimum touch target size (iOS HIG)
+  touchTargetLarge: 48,
+
+  // iOS 26 border radius standards
+  radiusXS: 4,
+  radiusSM: 8,
+  radiusMD: 20,    // Cards (extra round for iOS 26 aesthetic)
+  radiusLG: 24,
+  radiusXL: 32,
 };
 
 // Tab Bar
