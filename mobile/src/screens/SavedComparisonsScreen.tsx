@@ -232,6 +232,10 @@ export default function SavedComparisonsScreen() {
           <TouchableOpacity
             style={styles.selectionCheckbox}
             onPress={() => toggleSelection(item.id)}
+            accessibilityRole="checkbox"
+            accessibilityLabel={`${item.title}`}
+            accessibilityHint={selectedIds.includes(item.id) ? "Selected. Tap to deselect" : "Not selected. Tap to select for bulk actions"}
+            accessibilityState={{ checked: selectedIds.includes(item.id) }}
           >
             {selectedIds.includes(item.id) ? (
               <CheckSquare color={COLORS.primary} size={24} />
@@ -316,6 +320,9 @@ export default function SavedComparisonsScreen() {
       <TouchableOpacity
         style={[styles.tailorButton, { backgroundColor: colors.text }]}
         onPress={() => navigation.navigate('Tailor' as any)}
+        accessibilityRole="button"
+        accessibilityLabel="Tailor a resume"
+        accessibilityHint="Navigates to resume tailoring to create new comparisons"
       >
         <Target color={colors.background} size={20} />
         <Text style={[styles.tailorButtonText, { color: colors.background }]}>Tailor a Resume</Text>
@@ -356,6 +363,10 @@ export default function SavedComparisonsScreen() {
               style={styles.headerButton}
               onPress={() => handleExport('json')}
               disabled={exporting}
+              accessibilityRole="button"
+              accessibilityLabel={exporting ? "Exporting comparisons" : "Export comparisons"}
+              accessibilityHint="Downloads saved comparisons as JSON file"
+              accessibilityState={{ disabled: exporting, busy: exporting }}
             >
               {exporting ? (
                 <ActivityIndicator size="small" color={COLORS.primary} />
@@ -367,6 +378,9 @@ export default function SavedComparisonsScreen() {
             <TouchableOpacity
               style={styles.headerButton}
               onPress={() => setSelectionMode(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Enter selection mode"
+              accessibilityHint="Enables bulk selection and deletion of comparisons"
             >
               <CheckSquare color={COLORS.primary} size={20} />
             </TouchableOpacity>
@@ -378,6 +392,9 @@ export default function SavedComparisonsScreen() {
             <TouchableOpacity
               style={styles.selectionButton}
               onPress={toggleSelectAll}
+              accessibilityRole="button"
+              accessibilityLabel={selectedIds.length === comparisons.length ? 'Deselect all items' : 'Select all items'}
+              accessibilityHint={`Currently ${selectedIds.length} of ${comparisons.length} items selected`}
             >
               <Text style={[styles.selectionButtonText, { color: COLORS.primary }]}>
                 {selectedIds.length === comparisons.length ? 'Deselect All' : 'Select All'}
@@ -387,6 +404,9 @@ export default function SavedComparisonsScreen() {
             <TouchableOpacity
               style={styles.selectionButton}
               onPress={cancelSelectionMode}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel selection mode"
+              accessibilityHint="Exits selection mode and clears selections"
             >
               <XIcon color={colors.textSecondary} size={20} />
             </TouchableOpacity>
@@ -404,6 +424,10 @@ export default function SavedComparisonsScreen() {
             style={[styles.bulkDeleteButton, { backgroundColor: ALPHA_COLORS.danger.bg }]}
             onPress={handleBulkDelete}
             disabled={bulkDeleting}
+            accessibilityRole="button"
+            accessibilityLabel={bulkDeleting ? "Deleting selected items" : `Delete ${selectedIds.length} selected ${selectedIds.length === 1 ? 'item' : 'items'}`}
+            accessibilityHint="Permanently removes all selected comparisons"
+            accessibilityState={{ disabled: bulkDeleting, busy: bulkDeleting }}
           >
             {bulkDeleting ? (
               <ActivityIndicator size="small" color={COLORS.danger} />
