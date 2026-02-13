@@ -23,11 +23,14 @@ import { MatchScore, KeywordPanel, ResumeAnalysis } from '../components';
 import { GlassButton } from '../components/glass/GlassButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { exportAndShare, ExportFormat } from '../utils/fileExport';
 import { useResumeStore } from '../stores/resumeStore';
+import { GlassCard } from '../components/glass/GlassCard';
+import { ScreenContainer } from '../components/layout';
+import { NumberText } from '../components/ui';
 
 interface BaseResumeData {
   id: number;
@@ -949,8 +952,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   title: {
-    fontSize: 32,
-    fontFamily: FONTS.extralight,
+    ...TYPOGRAPHY.largeTitle,
   },
   titleWithBack: {
     fontSize: 24,
@@ -1007,16 +1009,14 @@ const styles = StyleSheet.create({
   selectorOptionSelected: {
   },
   selectorOptionText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   selectorOptionTextSelected: {
     color: COLORS.primary,
     fontFamily: FONTS.semibold,
   },
   selectorOptionMeta: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: 2,
   },
   inputRow: {
@@ -1046,8 +1046,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   inputHint: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginTop: SPACING.xs,
   },
   divider: {
@@ -1060,8 +1059,7 @@ const styles = StyleSheet.create({
     height: 1,
   },
   dividerText: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     marginHorizontal: SPACING.md,
   },
   footer: {
@@ -1096,8 +1094,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   uploadButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.body,
+    fontWeight: '600',
   },
 
   // Comparison View Styles
@@ -1123,8 +1121,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.extralight,
   },
   comparisonSubtitle: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     marginTop: 2,
   },
   successBanner: {
@@ -1233,8 +1230,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   sectionText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 22,
   },
   skillsContainer: {
@@ -1349,8 +1345,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
   },
   keywordHelpText: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
     paddingHorizontal: SPACING.md,
     marginBottom: SPACING.sm,
   },
