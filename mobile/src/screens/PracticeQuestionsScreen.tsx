@@ -26,7 +26,7 @@ import {
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api, PracticeHistoryItem } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { GlassButton } from '../components/glass/GlassButton';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
     paddingBottom: TAB_BAR_HEIGHT + SPACING.md,
   },
   introCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
@@ -836,13 +836,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   introText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     textAlign: 'center',
     lineHeight: 20,
   },
   questionCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     marginBottom: SPACING.md,
     overflow: 'hidden',
@@ -877,8 +876,8 @@ const styles = StyleSheet.create({
     color: COLORS.info,
   },
   questionText: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     lineHeight: 22,
     marginBottom: SPACING.sm,
   },
@@ -890,13 +889,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.xs,
   },
   sectionText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   skillsContainer: {
@@ -921,8 +919,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   generatingText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
   },
   starContainer: {
     borderRadius: RADIUS.md,
@@ -930,8 +927,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   starTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     color: COLORS.primary,
     marginBottom: SPACING.md,
   },
@@ -945,8 +942,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   starText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   practiceSection: {
@@ -976,8 +972,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     borderWidth: 1,
     padding: SPACING.md,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     minHeight: 120,
     textAlignVertical: 'top',
   },
@@ -1037,11 +1032,11 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   statsCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
@@ -1059,30 +1054,27 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
   },
   statLabel: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.caption1,
   },
   emptyState: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.xl,
     alignItems: 'center',
     marginTop: SPACING.xl,
   },
   emptyStateTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
     marginTop: SPACING.md,
     marginBottom: SPACING.xs,
   },
   emptyStateText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     textAlign: 'center',
     lineHeight: 20,
   },
   historyCard: {
-    borderRadius: RADIUS.lg,
+    borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     marginBottom: SPACING.md,
     overflow: 'hidden',
@@ -1125,13 +1117,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   historySectionTitle: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     marginBottom: SPACING.xs,
   },
   historyResponseText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
 });
