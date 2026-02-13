@@ -230,6 +230,8 @@ export default function UploadResumeScreen() {
             disabled={uploading}
             icon={<Upload color="#ffffff" size={20} />}
             onPress={handleUpload}
+            accessibilityLabel={uploading ? "Uploading resume" : "Upload resume"}
+            accessibilityHint="Uploads the selected resume file to your account"
           />
         </View>
       )}
