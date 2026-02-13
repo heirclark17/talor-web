@@ -28,7 +28,7 @@ import {
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
-import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT } from '../utils/constants';
+import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 
@@ -571,8 +571,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
   },
   headerPlaceholder: {
     width: 44,
@@ -591,14 +590,12 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.lg,
-    fontSize: 18,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.headline,
     textAlign: 'center',
   },
   loadingSubtext: {
     marginTop: SPACING.sm,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     textAlign: 'center',
   },
   content: {
@@ -622,8 +619,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   introText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -653,8 +649,8 @@ const styles = StyleSheet.create({
   },
   questionText: {
     flex: 1,
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
     lineHeight: 22,
   },
   answerContent: {
@@ -712,12 +708,11 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   sectionText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 22,
   },
   contentBox: {
@@ -745,8 +740,7 @@ const styles = StyleSheet.create({
   },
   mistakeText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
   },
   // Builder styles
@@ -781,8 +775,7 @@ const styles = StyleSheet.create({
   },
   structureText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     paddingTop: 4,
   },
@@ -801,8 +794,7 @@ const styles = StyleSheet.create({
   },
   checklistText: {
     flex: 1,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 20,
     paddingTop: 2,
   },
@@ -834,8 +826,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   answerLabel: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
   answerMeta: {
     flexDirection: 'row',
@@ -866,8 +858,7 @@ const styles = StyleSheet.create({
     backgroundColor: ALPHA_COLORS.black[5],
   },
   answerText: {
-    fontSize: 14,
-    fontFamily: FONTS.regular,
+    ...TYPOGRAPHY.subhead,
     lineHeight: 22,
   },
   // Placeholders styles
@@ -913,8 +904,8 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   regenerateButtonText: {
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
     color: COLORS.primary,
   },
 });
