@@ -25,7 +25,7 @@ import { COLORS, FONTS, RADIUS, SPACING, GLASS, ANIMATION, ALPHA_COLORS } from '
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'accent' | 'warning';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface GlassButtonProps {
@@ -154,6 +154,22 @@ export function GlassButton({
           text: COLORS.success,
           blurTint: isDark ? 'dark' : 'light',
           tintColor: ALPHA_COLORS.success.bg,
+        };
+      case 'accent':
+        return {
+          bg: ALPHA_COLORS.primary.bg,
+          border: ALPHA_COLORS.primary.border,
+          text: colors.accent,
+          blurTint: isDark ? 'dark' : 'light',
+          tintColor: ALPHA_COLORS.primary.bg,
+        };
+      case 'warning':
+        return {
+          bg: ALPHA_COLORS.warning.bg,
+          border: ALPHA_COLORS.warning.border,
+          text: COLORS.warning,
+          blurTint: isDark ? 'dark' : 'light',
+          tintColor: ALPHA_COLORS.warning.bg,
         };
       default:
         return {

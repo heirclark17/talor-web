@@ -181,6 +181,85 @@ export const TYPOGRAPHY = {
   footnote: { fontFamily: FONTS.regular, fontSize: 13, lineHeight: 18 },
   caption1: { fontFamily: FONTS.regular, fontSize: 12, lineHeight: 16 },
   caption2: { fontFamily: FONTS.regular, fontSize: 11, lineHeight: 13 },
+
+  // Legacy aliases for backward compatibility (from HeirclarkHealthApp)
+  // Headers
+  h1: {
+    fontFamily: FONTS.bold,
+    fontSize: 32,
+  },
+  h2: {
+    fontFamily: FONTS.bold,
+    fontSize: 28,
+  },
+  h3: {
+    fontFamily: FONTS.semibold,
+    fontSize: 24,
+  },
+  h4: {
+    fontFamily: FONTS.semibold,
+    fontSize: 20,
+  },
+  h5: {
+    fontFamily: FONTS.semibold,
+    fontSize: 18,
+  },
+  h6: {
+    fontFamily: FONTS.semibold,
+    fontSize: 16,
+  },
+
+  // Body text variants
+  bodyMedium: {
+    fontFamily: FONTS.medium,
+    fontSize: 17,
+  },
+  bodySemiBold: {
+    fontFamily: FONTS.semibold,
+    fontSize: 17,
+  },
+
+  // Small text
+  small: {
+    fontFamily: FONTS.regular,
+    fontSize: 14,
+  },
+  smallMedium: {
+    fontFamily: FONTS.medium,
+    fontSize: 14,
+  },
+  smallSemiBold: {
+    fontFamily: FONTS.semibold,
+    fontSize: 14,
+  },
+
+  // Caption variants
+  caption: {
+    fontFamily: FONTS.regular,
+    fontSize: 12,
+  },
+  captionMedium: {
+    fontFamily: FONTS.medium,
+    fontSize: 12,
+  },
+  captionSemiBold: {
+    fontFamily: FONTS.semibold,
+    fontSize: 12,
+  },
+
+  // Tiny text
+  tiny: {
+    fontFamily: FONTS.regular,
+    fontSize: 10,
+  },
+  tinyMedium: {
+    fontFamily: FONTS.medium,
+    fontSize: 10,
+  },
+  tinySemiBold: {
+    fontFamily: FONTS.semibold,
+    fontSize: 10,
+  },
 };
 
 // Spacing
@@ -426,14 +505,42 @@ export const SHADOWS = {
   },
 };
 
-// ========== ANIMATION DURATIONS ==========
+// ========== ANIMATION DURATIONS & SPRING CONFIGS ==========
 export const ANIMATION = {
+  // Timing durations (from HeirclarkHealthApp)
   fast: 150,
   normal: 250,
   slow: 400,
+
+  // Legacy single spring config (kept for backward compatibility)
   spring: {
     damping: 15,
     stiffness: 150,
     mass: 1,
+  },
+
+  // Multiple spring configurations (from HeirclarkHealthApp)
+  // GLASS_SPRING - iOS-style smooth spring animation
+  // Used for: Glass card interactions, button presses, tab transitions
+  glassSpring: {
+    damping: 18,
+    stiffness: 380,
+    mass: 0.8,
+  },
+
+  // SMOOTH_SPRING - Gentle spring animation
+  // Used for: Subtle UI transitions, modal appearances
+  smoothSpring: {
+    damping: 20,
+    stiffness: 300,
+    mass: 1,
+  },
+
+  // BOUNCY_SPRING - Playful bounce effect
+  // Used for: Success animations, celebration moments
+  bouncySpring: {
+    damping: 12,
+    stiffness: 400,
+    mass: 0.5,
   },
 };
