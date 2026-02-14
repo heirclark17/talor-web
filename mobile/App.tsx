@@ -4,68 +4,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
-import { ClerkProvider } from '@clerk/clerk-expo';
-import * as SecureStore from 'expo-secure-store';
 import AppNavigator from './src/navigation/AppNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { BackgroundLayer } from './src/components/glass/BackgroundLayer';
-import { CLERK_PUBLISHABLE_KEY } from './src/utils/constants';
-
-// Known Clerk SecureStore keys that may contain stale data
-const CLERK_CACHE_KEYS = [
-  '__clerk_client_jwt',
-  '__clerk_session_id',
-  '__clerk_session',
-  '__clerk_client',
-  'clerk_token',
-  'talor_auth_token',
-  'talor_clerk_token',
-];
-
-// Clear stale Clerk data (call once on key change)
-async function clearStaleClerkData() {
-  const marker = await SecureStore.getItemAsync('__clerk_key_marker');
-  const currentKey = CLERK_PUBLISHABLE_KEY.substring(0, 20); // First 20 chars as marker
-
-  if (marker !== currentKey) {
-    console.log('[App] Clerk key changed, clearing stale session data...');
-    for (const key of CLERK_CACHE_KEYS) {
-      try {
-        await SecureStore.deleteItemAsync(key);
-      } catch (_) {}
-    }
-    await SecureStore.setItemAsync('__clerk_key_marker', currentKey);
-    console.log('[App] Stale data cleared');
-  }
-}
-
-// Token cache for Clerk
-const tokenCache = {
-  async getToken(key: string) {
-    try {
-      const val = await SecureStore.getItemAsync(key);
-      return val;
-    } catch (err) {
-      console.error('SecureStore get error:', err);
-      return null;
-    }
-  },
-  async saveToken(key: string, value: string) {
-    try {
-      await SecureStore.setItemAsync(key, value);
-    } catch (err) {
-      console.error('SecureStore save error:', err);
-    }
-  },
-  async clearToken(key: string) {
-    try {
-      await SecureStore.deleteItemAsync(key);
-    } catch (err) {
-      console.error('SecureStore clear error:', err);
-    }
-  },
-};
+import { SupabaseAuthProvider } from './src/contexts/SupabaseAuthContext';
 
 // Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
@@ -76,9 +19,6 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Clear stale Clerk data from key switch (prod → dev)
-        await clearStaleClerkData();
-
         await Font.loadAsync({
           'Urbanist_200ExtraLight': require('@expo-google-fonts/urbanist/200ExtraLight/Urbanist_200ExtraLight.ttf'),
           'Urbanist_300Light': require('@expo-google-fonts/urbanist/300Light/Urbanist_300Light.ttf'),
@@ -110,7 +50,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} tokenCache={tokenCache}>
+      <SupabaseAuthProvider>
         <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
           <SafeAreaProvider>
             <ThemeProvider>
@@ -118,7 +58,7 @@ export default function App() {
             </ThemeProvider>
           </SafeAreaProvider>
         </GestureHandlerRootView>
-      </ClerkProvider>
+      </SupabaseAuthProvider>
     </ErrorBoundary>
   );
 }

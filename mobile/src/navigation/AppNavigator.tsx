@@ -11,12 +11,11 @@ import {
   Settings,
   BookmarkCheck,
 } from 'lucide-react-native';
-import { useAuth } from '@clerk/clerk-expo';
 import { COLORS, FONTS } from '../utils/constants';
 import { useTheme } from '../context/ThemeContext';
 import { GlassTabBar } from '../components/glass/GlassTabBar';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { useAuthSync } from '../hooks/useAuthSync';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 
 // Auth Screens
 import SignInScreen from '../screens/SignInScreen';
@@ -300,26 +299,16 @@ function MainTabNavigator() {
 // Main App Navigator with Auth Flow
 export default function AppNavigator() {
   const { colors, isDark } = useTheme();
-  const { isSignedIn, isLoaded, userId, sessionId } = useAuth();
-
-  // Sync Clerk token to SecureStore for API client
-  useAuthSync();
-
-  // Treat user as authenticated if they have a userId OR isSignedIn
-  // Clerk may report isSignedIn=false when session has "pending tasks"
-  // but the user still has a valid session with a userId
-  const isAuthenticated = isSignedIn || !!userId;
+  const { user, isLoading, isSignedIn } = useSupabaseAuth();
 
   // Enhanced logging to track auth state changes
   React.useEffect(() => {
     console.log('[AppNavigator] Auth state changed:', {
       isSignedIn,
-      userId,
-      sessionId,
-      isAuthenticated,
-      willShow: isAuthenticated ? 'MAIN APP' : 'AUTH SCREEN',
+      userEmail: user?.email || 'none',
+      willShow: isSignedIn ? 'MAIN APP' : 'AUTH SCREEN',
     });
-  }, [isSignedIn, userId, sessionId, isAuthenticated]);
+  }, [isSignedIn, user]);
 
   // Create custom theme based on current theme mode
   const navigationTheme = {
@@ -335,17 +324,17 @@ export default function AppNavigator() {
     },
   };
 
-  // Show nothing while Clerk is loading
-  if (!isLoaded) {
-    console.log('[AppNavigator] Clerk loading...');
+  // Show nothing while auth is loading
+  if (isLoading) {
+    console.log('[AppNavigator] Supabase auth loading...');
     return null;
   }
 
-  console.log('[AppNavigator] Clerk ready - isSignedIn:', isSignedIn, 'userId:', userId, 'sessionId:', sessionId, '→ showing:', isAuthenticated ? 'MAIN APP' : 'AUTH SCREEN');
+  console.log('[AppNavigator] Supabase ready - isSignedIn:', isSignedIn, 'user:', user?.email || 'none', '→ showing:', isSignedIn ? 'MAIN APP' : 'AUTH SCREEN');
 
   return (
     <NavigationContainer theme={navigationTheme}>
-      {isAuthenticated ? <MainTabNavigator /> : <AuthStackNavigator />}
+      {isSignedIn ? <MainTabNavigator /> : <AuthStackNavigator />}
     </NavigationContainer>
   );
 }

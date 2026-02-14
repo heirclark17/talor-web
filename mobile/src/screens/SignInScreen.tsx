@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { useSignIn, useAuth } from '@clerk/clerk-expo';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react-native';
 import { COLORS, GLASS, SPACING, RADIUS, FONTS } from '../utils/constants';
@@ -22,7 +22,7 @@ import type { AuthStackParamList } from '../navigation/AppNavigator';
 type SignInNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'SignIn'>;
 
 export default function SignInScreen() {
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn } = useSupabaseAuth();
   const navigation = useNavigation<SignInNavigationProp>();
 
   const [email, setEmail] = useState('');
@@ -32,56 +32,36 @@ export default function SignInScreen() {
   const [error, setError] = useState('');
 
   const handleSignIn = async () => {
-    if (!isLoaded) return;
     if (!email.trim() || !password.trim()) {
-      setError('Please enter your email and password.');
+      setError('Please enter your email and password');
       return;
     }
 
     setIsLoading(true);
     setError('');
 
-    try {
-      const result = await signIn.create({
-        identifier: email.trim(),
-        password,
-      });
+    console.log('[SignIn] Signing in:', email.trim());
 
-      console.log('[SignIn] Result status:', result.status);
-      console.log('[SignIn] Session ID:', result.createdSessionId);
-      console.log('[SignIn] First factor:', JSON.stringify(result.firstFactorVerification));
-      console.log('[SignIn] Second factor:', JSON.stringify(result.secondFactorVerification));
+    const { error: signInError } = await signIn(email.trim(), password);
 
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-      } else if (result.createdSessionId) {
-        // Status not 'complete' but session exists - activate it anyway
-        await setActive({ session: result.createdSessionId });
-      } else if (result.status === 'needs_first_factor') {
-        // Password wasn't enough, try submitting password as first factor
-        const factorResult = await signIn.attemptFirstFactor({
-          strategy: 'password',
-          password,
-        });
-        console.log('[SignIn] Factor result:', factorResult.status, factorResult.createdSessionId);
-        if (factorResult.createdSessionId) {
-          await setActive({ session: factorResult.createdSessionId });
-        } else {
-          setError('Sign in could not be completed. Please try again.');
-        }
+    setIsLoading(false);
+
+    if (signInError) {
+      console.error('[SignIn] Error:', signInError.message);
+
+      // Handle specific error cases
+      if (signInError.message.includes('Invalid login credentials')) {
+        setError('Invalid email or password');
+      } else if (signInError.message.includes('Email not confirmed')) {
+        setError('Please verify your email before signing in. Check your inbox for the verification link.');
       } else {
-        setError(`Sign in status: ${result.status}. Please try again.`);
+        setError(signInError.message || 'An error occurred. Please try again.');
       }
-    } catch (err: any) {
-      const clerkError = err?.errors?.[0];
-      if (clerkError) {
-        setError(clerkError.longMessage || clerkError.message);
-      } else {
-        setError('An error occurred. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
+      return;
     }
+
+    console.log('[SignIn] Successfully signed in!');
+    // Navigation happens automatically via AppNavigator when isSignedIn becomes true
   };
 
   return (
@@ -95,27 +75,23 @@ export default function SignInScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue to Talor</Text>
+            <Text style={styles.subtitle}>Sign in to continue with Talor</Text>
           </View>
 
-          {/* Glassmorphic Container */}
           <BlurView
             intensity={GLASS.getBlurIntensity('regular')}
             tint="dark"
             style={styles.glassContainer}
           >
             <View style={styles.innerContainer}>
-              {/* Error Message */}
               {error ? (
                 <View style={styles.errorContainer}>
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               ) : null}
 
-              {/* Email Input */}
               <View style={styles.inputWrapper}>
                 <Mail color={COLORS.dark.textTertiary} size={20} />
                 <TextInput
@@ -132,7 +108,6 @@ export default function SignInScreen() {
                 />
               </View>
 
-              {/* Password Input */}
               <View style={styles.inputWrapper}>
                 <Lock color={COLORS.dark.textTertiary} size={20} />
                 <TextInput
@@ -157,7 +132,6 @@ export default function SignInScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Sign In Button */}
               <TouchableOpacity
                 style={[styles.signInButton, isLoading && styles.signInButtonDisabled]}
                 onPress={handleSignIn}
@@ -174,7 +148,6 @@ export default function SignInScreen() {
                 )}
               </TouchableOpacity>
 
-              {/* Sign Up Link */}
               <View style={styles.footer}>
                 <Text style={styles.footerText}>Don't have an account?</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
@@ -190,105 +163,22 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: SPACING.lg,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: SPACING.xl,
-  },
-  title: {
-    fontSize: 32,
-    fontFamily: FONTS.bold,
-    color: COLORS.dark.text,
-    marginBottom: SPACING.xs,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
-    color: COLORS.dark.textSecondary,
-  },
-  glassContainer: {
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
-    overflow: 'hidden',
-  },
-  innerContainer: {
-    padding: SPACING.xl,
-  },
-  errorContainer: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  errorText: {
-    color: COLORS.danger,
-    fontSize: 14,
-    fontFamily: FONTS.medium,
-    textAlign: 'center',
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderWidth: 1,
-    borderColor: COLORS.dark.glassBorder,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.md,
-    height: 52,
-  },
-  input: {
-    flex: 1,
-    color: COLORS.dark.text,
-    fontSize: 16,
-    fontFamily: FONTS.regular,
-    marginLeft: SPACING.sm,
-    height: '100%',
-  },
-  signInButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.md,
-    height: 52,
-    marginTop: SPACING.sm,
-    gap: SPACING.sm,
-  },
-  signInButtonDisabled: {
-    opacity: 0.6,
-  },
-  signInButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: FONTS.semibold,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: SPACING.lg,
-  },
-  footerText: {
-    color: COLORS.dark.textSecondary,
-    fontSize: 14,
-    fontFamily: FONTS.regular,
-  },
-  footerLink: {
-    color: COLORS.primary,
-    fontSize: 14,
-    fontFamily: FONTS.semibold,
-  },
+  container: { flex: 1 },
+  keyboardView: { flex: 1 },
+  scrollContent: { flexGrow: 1, justifyContent: 'center', padding: SPACING.lg },
+  header: { alignItems: 'center', marginBottom: SPACING.xl },
+  title: { fontSize: 32, fontFamily: FONTS.bold, color: COLORS.dark.text, marginBottom: SPACING.xs },
+  subtitle: { fontSize: 16, fontFamily: FONTS.regular, color: COLORS.dark.textSecondary, textAlign: 'center', marginTop: SPACING.sm },
+  glassContainer: { borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.dark.glassBorder, overflow: 'hidden' },
+  innerContainer: { padding: SPACING.xl },
+  errorContainer: { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)', borderRadius: RADIUS.md, padding: SPACING.md, marginBottom: SPACING.md },
+  errorText: { color: COLORS.danger, fontSize: 14, fontFamily: FONTS.medium, textAlign: 'center' },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.06)', borderWidth: 1, borderColor: COLORS.dark.glassBorder, borderRadius: RADIUS.md, paddingHorizontal: SPACING.md, marginBottom: SPACING.md, height: 52 },
+  input: { flex: 1, color: COLORS.dark.text, fontSize: 16, fontFamily: FONTS.regular, marginLeft: SPACING.sm, height: '100%' },
+  signInButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.primary, borderRadius: RADIUS.md, height: 52, marginTop: SPACING.sm, gap: SPACING.sm },
+  signInButtonDisabled: { opacity: 0.6 },
+  signInButtonText: { color: '#fff', fontSize: 16, fontFamily: FONTS.semibold },
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.lg },
+  footerText: { color: COLORS.dark.textSecondary, fontSize: 14, fontFamily: FONTS.regular },
+  footerLink: { color: COLORS.primary, fontSize: 14, fontFamily: FONTS.semibold },
 });
