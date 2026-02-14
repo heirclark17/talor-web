@@ -4,6 +4,7 @@ import { api } from '../api/client'
 import type { CareerPlan as CareerPlanType } from '../types/career-plan'
 import CareerPlanResults from '../components/CareerPlanResults'
 import AILoadingScreen from '../components/AILoadingScreen'
+import { useResumeStore } from '../stores/resumeStore'
 import {
   Sparkles, TrendingUp, BookOpen, Award, Briefcase, Calendar,
   FileText, Download, RefreshCw, ArrowLeft, Loader2, Upload,
@@ -207,11 +208,15 @@ export default function CareerPathDesigner() {
   const [resumeData, setResumeData] = useState<any>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
 
-  // Existing resumes
-  const [existingResumes, setExistingResumes] = useState<any[]>([])
+  // Existing resumes from Zustand store
+  const {
+    resumes: existingResumes,
+    loading: loadingResumes,
+    deletingId: deletingResumeId,
+    fetchResumes,
+    deleteResume,
+  } = useResumeStore()
   const [selectedExistingResumeId, setSelectedExistingResumeId] = useState<number | null>(null)
-  const [loadingResumes, setLoadingResumes] = useState(false)
-  const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
   const [extractingJob, setExtractingJob] = useState(false)
 
   // Basic Profile (Step 1)
@@ -492,21 +497,9 @@ export default function CareerPathDesigner() {
   // Fetch existing resumes when on upload step
   useEffect(() => {
     if (step === 'upload' && existingResumes.length === 0) {
-      setLoadingResumes(true)
-      api.listResumes()
-        .then(response => {
-          if (response.success && response.data?.resumes) {
-            setExistingResumes(response.data.resumes)
-          }
-        })
-        .catch(err => {
-          console.error('Failed to load resumes:', err)
-        })
-        .finally(() => {
-          setLoadingResumes(false)
-        })
+      fetchResumes()
     }
-  }, [step])
+  }, [step, existingResumes.length, fetchResumes])
 
   // Handle selecting an existing resume
   const handleSelectExistingResume = async (resumeId: number) => {
@@ -588,13 +581,11 @@ export default function CareerPathDesigner() {
     if (!confirm('Are you sure you want to delete this resume? This action cannot be undone.')) return
 
     try {
-      setDeletingResumeId(resumeId)
-      const result = await api.deleteResume(resumeId)
-      if (!result.success) {
-        setError(result.error || 'Failed to delete resume')
+      const success = await deleteResume(resumeId)
+      if (!success) {
+        setError('Failed to delete resume')
         return
       }
-      setExistingResumes(prev => prev.filter(r => r.id !== resumeId))
       if (selectedExistingResumeId === resumeId) {
         setSelectedExistingResumeId(null)
         setResumeId(null)
@@ -603,8 +594,6 @@ export default function CareerPathDesigner() {
       }
     } catch (err: any) {
       setError(err.message || 'Failed to delete resume')
-    } finally {
-      setDeletingResumeId(null)
     }
   }
 
