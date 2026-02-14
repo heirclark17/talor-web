@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { useScrollAnimation } from './hooks/useScrollAnimation'
 import { useSessionMigration } from './hooks/useSessionMigration'
 import { useClerkUserSync } from './hooks/useClerkUserSync'
+import { PostHogProvider } from './contexts/PostHogContext'
 
 // Lazy-loaded page components for code splitting
 const UploadResume = React.lazy(() => import('./pages/UploadResume'))
@@ -460,9 +461,11 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <SessionMigrationProvider>
-        <AppContent />
-      </SessionMigrationProvider>
+      <PostHogProvider>
+        <SessionMigrationProvider>
+          <AppContent />
+        </SessionMigrationProvider>
+      </PostHogProvider>
     </BrowserRouter>
   )
 }
