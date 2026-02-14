@@ -20,6 +20,7 @@ export default function App() {
     async function prepare() {
       try {
         await Font.loadAsync({
+          // Urbanist for text/letters
           'Urbanist_200ExtraLight': require('@expo-google-fonts/urbanist/200ExtraLight/Urbanist_200ExtraLight.ttf'),
           'Urbanist_300Light': require('@expo-google-fonts/urbanist/300Light/Urbanist_300Light.ttf'),
           'Urbanist_400Regular': require('@expo-google-fonts/urbanist/400Regular/Urbanist_400Regular.ttf'),
@@ -27,6 +28,17 @@ export default function App() {
           'Urbanist_600SemiBold': require('@expo-google-fonts/urbanist/600SemiBold/Urbanist_600SemiBold.ttf'),
           'Urbanist_700Bold': require('@expo-google-fonts/urbanist/700Bold/Urbanist_700Bold.ttf'),
           'Urbanist_800ExtraBold': require('@expo-google-fonts/urbanist/800ExtraBold/Urbanist_800ExtraBold.ttf'),
+
+          // SF Pro Rounded for numbers
+          'SFProRounded-Ultralight': require('./assets/fonts/SF-Pro-Rounded-Ultralight.otf'),
+          'SFProRounded-Thin': require('./assets/fonts/SF-Pro-Rounded-Thin.otf'),
+          'SFProRounded-Light': require('./assets/fonts/SF-Pro-Rounded-Light.otf'),
+          'SFProRounded-Regular': require('./assets/fonts/SF-Pro-Rounded-Regular.otf'),
+          'SFProRounded-Medium': require('./assets/fonts/SF-Pro-Rounded-Medium.otf'),
+          'SFProRounded-Semibold': require('./assets/fonts/SF-Pro-Rounded-Semibold.otf'),
+          'SFProRounded-Bold': require('./assets/fonts/SF-Pro-Rounded-Bold.otf'),
+          'SFProRounded-Heavy': require('./assets/fonts/SF-Pro-Rounded-Heavy.otf'),
+          'SFProRounded-Black': require('./assets/fonts/SF-Pro-Rounded-Black.otf'),
         });
       } catch (e) {
         console.warn('Error loading fonts:', e);

@@ -65,6 +65,84 @@ export const COLORS = {
     infoStrong: '#22D3EE',
     infoMuted: '#A5F3FC',
   },
+
+  // Sand Theme Colors - Light Mode (Warm Beige/Cream) - from HeirclarkHealthApp
+  sandLight: {
+    background: '#FAF6F1',
+    backgroundSecondary: '#F5EDE4',
+    backgroundTertiary: '#EDE5DB',
+    text: '#1A1A1A',
+    textSecondary: '#4A4A4A',
+    textTertiary: '#7A7067',
+    border: '#DDD5CA',
+    accent: '#2C2620',
+    glass: 'rgba(250, 246, 241, 0.6)',
+    glassBorder: 'rgba(221, 213, 202, 0.5)',
+  },
+
+  // Sand Theme Colors - Dark Mode (Deep Warm Brown) - from HeirclarkHealthApp
+  sandDark: {
+    background: '#2C2620',
+    backgroundSecondary: '#3D352D',
+    backgroundTertiary: '#4E443A',
+    text: '#FAF6F1',
+    textSecondary: '#C9C0B5',
+    textTertiary: '#9A9088',
+    border: '#5A4F44',
+    accent: '#FAF6F1',
+    glass: 'rgba(44, 38, 32, 0.7)',
+    glassBorder: 'rgba(90, 79, 68, 0.4)',
+  },
+
+  // Midnight Gold Theme (Luxe Leopard Print) - from HeirclarkHealthApp
+  midnightGold: {
+    background: '#0D0D0D',
+    backgroundSecondary: '#0A0805',
+    backgroundTertiary: '#151510',
+    text: '#FFFFFF',
+    textSecondary: 'rgba(255, 255, 255, 0.75)',
+    textTertiary: '#C9A227',
+    border: 'rgba(201, 162, 39, 0.15)',
+    accent: '#C9A227',
+    glass: 'rgba(201, 162, 39, 0.08)',
+    glassBorder: 'rgba(255, 215, 0, 0.20)',
+    // Gold palette
+    goldPrimary: '#C9A227',
+    goldLight: '#FFD700',
+    goldDark: '#8B7320',
+    goldMuted: 'rgba(201, 162, 39, 0.6)',
+  },
+
+  // Macro/Nutrition Colors (from HeirclarkHealthApp)
+  macroColors: {
+    calories: '#E74C3C',      // Red
+    protein: '#F39C12',       // Orange
+    carbs: '#FFB6C1',         // Light pink
+    fat: '#FF69B4',           // Hot pink
+    fatLoss: '#9B59B6',       // Purple
+  },
+
+  // Health Metrics Colors (from HeirclarkHealthApp)
+  healthColors: {
+    activeEnergy: '#CC7722',    // Burnt yellow (active energy/calories burned)
+    restingEnergy: '#4169E1',   // Royal blue (resting/basal energy)
+    stepsColor: '#CC7722',      // Burnt yellow (steps)
+    overTarget: '#FF3B30',      // Apple red for over-target
+    goalAchieved: '#34C759',    // iOS green for goal met/exceeded
+    gaugeFill: '#CC7722',       // Burnt yellow for gauges
+    gaugeBg: '#333333',         // Dark gauge background
+  },
+
+  // Wearable Device Brand Colors (from HeirclarkHealthApp)
+  wearableBrands: {
+    apple_health: '#FF3B30',   // Apple Health red
+    fitbit: '#00B0B9',         // Fitbit teal
+    garmin: '#007CC3',         // Garmin blue
+    oura: '#8B5CF6',           // Oura purple
+    strava: '#FC4C02',         // Strava orange
+    whoop: '#000000',          // Whoop black
+    withings: '#00A9CE',       // Withings cyan
+  },
 };
 
 // Typography - Urbanist font family
@@ -78,17 +156,16 @@ export const FONTS = {
   extrabold: 'Urbanist_800ExtraBold',
   italic: 'Urbanist_400Regular', // Fallback - Urbanist doesn't have separate italic
 
-  // Numeric variants (using Urbanist bold weights for numbers)
-  // In future, can be replaced with SF Pro Rounded for iOS
-  numericUltralight: 'Urbanist_200ExtraLight',
-  numericThin: 'Urbanist_300Light',
-  numericLight: 'Urbanist_300Light',
-  numericRegular: 'Urbanist_400Regular',
-  numericMedium: 'Urbanist_500Medium',
-  numericSemiBold: 'Urbanist_600SemiBold',
-  numericBold: 'Urbanist_700Bold',
-  numericHeavy: 'Urbanist_800ExtraBold',
-  numericBlack: 'Urbanist_800ExtraBold',
+  // Numeric variants - SF Pro Rounded for numbers (matching HeirclarkHealthApp)
+  numericUltralight: 'SFProRounded-Ultralight',
+  numericThin: 'SFProRounded-Thin',
+  numericLight: 'SFProRounded-Light',
+  numericRegular: 'SFProRounded-Regular',
+  numericMedium: 'SFProRounded-Medium',
+  numericSemiBold: 'SFProRounded-Semibold',
+  numericBold: 'SFProRounded-Bold',
+  numericHeavy: 'SFProRounded-Heavy',
+  numericBlack: 'SFProRounded-Black',
 };
 
 // iOS Typography Scale (from Human Interface Guidelines)
@@ -156,9 +233,55 @@ const GLASS_MATERIALS = {
 
 export const GLASS = {
   materials: GLASS_MATERIALS,
+
   // Helper to get blur intensity based on material
   getBlurIntensity: (material: keyof typeof GLASS_MATERIALS): number => {
     return GLASS_MATERIALS[material]?.blur ?? 60;
+  },
+
+  // Theme-aware helpers (from HeirclarkHealthApp LiquidGlass)
+  // Helper to get liquid glass background color based on theme
+  getBg: (isDark: boolean, isSelected: boolean = false, theme: 'default' | 'midnightGold' | 'sandLight' | 'sandDark' = 'default'): string => {
+    if (theme === 'midnightGold') {
+      return isSelected ? 'rgba(201, 162, 39, 0.18)' : 'rgba(201, 162, 39, 0.08)';
+    }
+    if (theme === 'sandLight') {
+      return isSelected ? 'rgba(139, 115, 85, 0.15)' : 'rgba(250, 246, 241, 0.6)';
+    }
+    if (theme === 'sandDark') {
+      return isSelected ? 'rgba(201, 160, 120, 0.18)' : 'rgba(44, 38, 32, 0.7)';
+    }
+    // Default theme (dark or light)
+    if (isSelected) {
+      return isDark ? 'rgba(150, 206, 180, 0.15)' : 'rgba(150, 206, 180, 0.12)';
+    }
+    return isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
+  },
+
+  // Helper to get liquid glass border color based on theme
+  getBorder: (isDark: boolean, isSelected: boolean = false, theme: 'default' | 'midnightGold' | 'sandLight' | 'sandDark' = 'default'): string => {
+    if (theme === 'midnightGold') {
+      return isSelected ? 'rgba(255, 215, 0, 0.40)' : 'rgba(255, 215, 0, 0.20)';
+    }
+    if (theme === 'sandLight') {
+      return isSelected ? 'rgba(139, 115, 85, 0.35)' : 'rgba(221, 213, 202, 0.5)';
+    }
+    if (theme === 'sandDark') {
+      return isSelected ? 'rgba(201, 160, 120, 0.35)' : 'rgba(90, 79, 68, 0.4)';
+    }
+    // Default theme (dark or light)
+    if (isSelected) {
+      return isDark ? 'rgba(150, 206, 180, 0.4)' : 'rgba(150, 206, 180, 0.45)';
+    }
+    return isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)';
+  },
+
+  // Helper to get blur intensity based on theme
+  getBlurIntensityByTheme: (isDark: boolean, theme: 'default' | 'midnightGold' | 'sandLight' | 'sandDark' = 'default'): number => {
+    if (theme === 'midnightGold') return 60; // Higher blur for gold theme (better contrast)
+    if (theme === 'sandLight') return 40;
+    if (theme === 'sandDark') return 25;
+    return isDark ? 20 : 35; // Default theme
   },
 };
 
