@@ -22,6 +22,9 @@ import {
   CheckSquare,
   Square,
   X as XIcon,
+  Pin,
+  Tag,
+  Plus,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
@@ -38,6 +41,8 @@ interface SavedComparison {
   tailored_resume_id: number;
   created_at: string;
   match_score?: number;
+  is_pinned?: boolean;
+  tags?: string[] | null;
 }
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -224,6 +229,76 @@ export default function SavedComparisonsScreen() {
     setSelectedIds([]);
   };
 
+  // Pin/Tag functionality
+  const handleTogglePin = async (comparisonId: number, currentPinned: boolean) => {
+    try {
+      const result = await api.updateComparison(comparisonId, {
+        is_pinned: !currentPinned,
+      });
+
+      if (result.success) {
+        setComparisons(prev => prev.map(c =>
+          c.id === comparisonId ? { ...c, is_pinned: !currentPinned } : c
+        ));
+      } else {
+        Alert.alert('Error', result.error || 'Failed to update pin status');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update pin status');
+    }
+  };
+
+  const handleAddTag = (comparisonId: number) => {
+    Alert.prompt(
+      'Add Tag',
+      'Enter a tag name',
+      async (tagName: string) => {
+        if (!tagName.trim()) return;
+
+        const comparison = comparisons.find(c => c.id === comparisonId);
+        const currentTags = comparison?.tags || [];
+        const newTags = [...currentTags, tagName.trim()];
+
+        try {
+          const result = await api.updateComparison(comparisonId, {
+            tags: newTags,
+          });
+
+          if (result.success) {
+            setComparisons(prev => prev.map(c =>
+              c.id === comparisonId ? { ...c, tags: newTags } : c
+            ));
+          } else {
+            Alert.alert('Error', result.error || 'Failed to add tag');
+          }
+        } catch (error) {
+          Alert.alert('Error', 'Failed to add tag');
+        }
+      }
+    );
+  };
+
+  const handleRemoveTag = async (comparisonId: number, tagToRemove: string) => {
+    const comparison = comparisons.find(c => c.id === comparisonId);
+    const newTags = (comparison?.tags || []).filter(t => t !== tagToRemove);
+
+    try {
+      const result = await api.updateComparison(comparisonId, {
+        tags: newTags.length > 0 ? newTags : null,
+      });
+
+      if (result.success) {
+        setComparisons(prev => prev.map(c =>
+          c.id === comparisonId ? { ...c, tags: newTags.length > 0 ? newTags : null } : c
+        ));
+      } else {
+        Alert.alert('Error', result.error || 'Failed to remove tag');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to remove tag');
+    }
+  };
+
   const renderItem = ({ item }: { item: SavedComparison }) => (
     <GlassCard style={styles.card} material="regular" shadow="subtle">
       <View style={styles.cardContent}>
@@ -249,9 +324,14 @@ export default function SavedComparisonsScreen() {
           <BookmarkCheck color={COLORS.primary} size={24} />
         </View>
         <View style={styles.cardText}>
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
-            {item.title}
-          </Text>
+          <View style={styles.titleRow}>
+            {item.is_pinned && (
+              <Pin color={COLORS.warning} size={16} style={{ marginRight: SPACING.xs }} />
+            )}
+            <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+              {item.title}
+            </Text>
+          </View>
           {item.company && (
             <View style={styles.metaRow}>
               <Building2 color={colors.textTertiary} size={12} />
@@ -274,10 +354,52 @@ export default function SavedComparisonsScreen() {
               </View>
             )}
           </View>
+          {item.tags && item.tags.length > 0 && (
+            <View style={styles.tagsContainer}>
+              {item.tags.map((tag, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[styles.tagPill, { backgroundColor: ALPHA_COLORS.primary.bg, borderColor: ALPHA_COLORS.primary.border }]}
+                  onPress={() => handleRemoveTag(item.id, tag)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove tag ${tag}`}
+                  accessibilityHint="Tap to remove this tag from the comparison"
+                >
+                  <Tag color={COLORS.primary} size={10} />
+                  <Text style={[styles.tagText, { color: COLORS.primary }]}>{tag}</Text>
+                  <XIcon color={COLORS.primary} size={10} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
       </View>
 
       <View style={[styles.cardActions, { borderTopColor: colors.border }]}>
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: item.is_pinned ? ALPHA_COLORS.warning.bg : colors.backgroundTertiary }]}
+          onPress={() => handleTogglePin(item.id, item.is_pinned || false)}
+          accessibilityRole="button"
+          accessibilityLabel={item.is_pinned ? 'Unpin comparison' : 'Pin comparison'}
+          accessibilityHint={item.is_pinned ? 'Removes pin from this comparison' : 'Pins this comparison to the top'}
+        >
+          <Pin color={item.is_pinned ? COLORS.warning : COLORS.primary} size={18} />
+          <Text style={[styles.actionText, item.is_pinned && { color: COLORS.warning }]}>
+            {item.is_pinned ? 'Pinned' : 'Pin'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: colors.backgroundTertiary }]}
+          onPress={() => handleAddTag(item.id)}
+          accessibilityRole="button"
+          accessibilityLabel="Add tag"
+          accessibilityHint="Adds a custom tag to organize this comparison"
+        >
+          <Plus color={COLORS.primary} size={18} />
+          <Text style={styles.actionText}>Tag</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: colors.backgroundTertiary }]}
           onPress={() => handleViewInterviewPrep(item.tailored_resume_id)}
@@ -573,6 +695,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: SPACING.xs,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -600,6 +726,25 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: 12,
     fontFamily: FONTS.semibold,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    marginTop: SPACING.sm,
+  },
+  tagPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+  },
+  tagText: {
+    fontSize: 11,
+    fontFamily: FONTS.medium,
   },
   cardActions: {
     flexDirection: 'row',

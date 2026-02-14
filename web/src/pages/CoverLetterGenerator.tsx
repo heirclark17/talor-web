@@ -26,7 +26,22 @@ type ResumeSource = 'none' | 'existing' | 'upload'
 const TONES = [
   { value: 'professional', label: 'Professional', desc: 'Formal and polished' },
   { value: 'enthusiastic', label: 'Enthusiastic', desc: 'Energetic and passionate' },
+  { value: 'strategic', label: 'Strategic', desc: 'Big-picture and visionary' },
+  { value: 'technical', label: 'Technical', desc: 'Precise and detailed' },
   { value: 'conversational', label: 'Conversational', desc: 'Friendly and approachable' },
+]
+
+const LENGTHS = [
+  { value: 'concise', label: 'Concise', desc: '3 paragraphs' },
+  { value: 'standard', label: 'Standard', desc: '4 paragraphs' },
+  { value: 'detailed', label: 'Detailed', desc: '5 paragraphs' },
+]
+
+const FOCUS_AREAS = [
+  { value: 'leadership', label: 'Leadership', desc: 'Management & team building' },
+  { value: 'technical', label: 'Technical', desc: 'Technical expertise & depth' },
+  { value: 'program_management', label: 'Program Mgmt', desc: 'Delivery & coordination' },
+  { value: 'cross_functional', label: 'Cross-Functional', desc: 'Collaboration & influence' },
 ]
 
 export default function CoverLetterGenerator() {
@@ -45,6 +60,8 @@ export default function CoverLetterGenerator() {
   const [jobUrl, setJobUrl] = useState('')
   const [jobInputMethod, setJobInputMethod] = useState<'text' | 'url'>('text')
   const [tone, setTone] = useState('professional')
+  const [length, setLength] = useState('standard')
+  const [focus, setFocus] = useState('leadership')
 
   // URL extraction states (matching TailorResume pattern)
   const [extractionAttempted, setExtractionAttempted] = useState(false)
@@ -235,6 +252,8 @@ export default function CoverLetterGenerator() {
         job_title: jobTitle,
         company_name: companyName,
         tone,
+        length,
+        focus,
       }
 
       // Send job description or job URL based on input method
@@ -740,6 +759,44 @@ export default function CoverLetterGenerator() {
                     >
                       <div className="font-medium">{t.label}</div>
                       <div className="text-xs mt-0.5 text-theme-tertiary">{t.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-theme-secondary mb-2">Length</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {LENGTHS.map(l => (
+                    <button
+                      key={l.value}
+                      type="button"
+                      onClick={() => setLength(l.value)}
+                      className={`p-3 rounded-xl border text-sm text-center transition-all ${
+                        length === l.value ? 'border-blue-500/50 bg-blue-500/10 text-theme' : 'border-theme-subtle text-theme-secondary hover:border-theme-muted'
+                      }`}
+                    >
+                      <div className="font-medium">{l.label}</div>
+                      <div className="text-xs mt-0.5 text-theme-tertiary">{l.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-theme-secondary mb-2">Focus Area</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {FOCUS_AREAS.map(f => (
+                    <button
+                      key={f.value}
+                      type="button"
+                      onClick={() => setFocus(f.value)}
+                      className={`p-3 rounded-xl border text-sm text-center transition-all ${
+                        focus === f.value ? 'border-blue-500/50 bg-blue-500/10 text-theme' : 'border-theme-subtle text-theme-secondary hover:border-theme-muted'
+                      }`}
+                    >
+                      <div className="font-medium">{f.label}</div>
+                      <div className="text-xs mt-0.5 text-theme-tertiary">{f.desc}</div>
                     </button>
                   ))}
                 </div>

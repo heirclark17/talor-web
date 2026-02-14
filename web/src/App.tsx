@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import { UserButton } from '@clerk/clerk-react'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2 } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -25,6 +25,7 @@ const ApplicationTracker = React.lazy(() => import('./pages/ApplicationTracker')
 const CoverLetterGenerator = React.lazy(() => import('./pages/CoverLetterGenerator'))
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'))
 const TermsOfService = React.lazy(() => import('./pages/TermsOfService'))
+const BatchTailor = React.lazy(() => import('./pages/BatchTailor'))
 const NotFound = React.lazy(() => import('./pages/NotFound'))
 const OnboardingTour = React.lazy(() => import('./components/OnboardingTour'))
 
@@ -281,6 +282,7 @@ function AppContent() {
     { to: '/resumes', icon: FileText, label: 'Resumes', tourId: 'resumes' },
     { to: '/upload', icon: Upload, label: 'Upload', tourId: 'upload' },
     { to: '/tailor', icon: Target, label: 'Tailor', tourId: 'tailor' },
+    { to: '/batch-tailor', icon: Layers, label: 'Batch', tourId: 'batch-tailor' },
     { to: '/applications', icon: Briefcase, label: 'Applications', tourId: 'applications' },
     { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep', tourId: 'interview-prep' },
     { to: '/star-stories', icon: Sparkles, label: 'STAR Stories', tourId: 'star-stories' },
@@ -429,6 +431,7 @@ function AppContent() {
               <Route path="/resumes" element={<ProtectedRoute><Home /></ProtectedRoute>} />
               <Route path="/upload" element={<ProtectedRoute><UploadResume /></ProtectedRoute>} />
               <Route path="/tailor" element={<ProtectedRoute><TailorResume /></ProtectedRoute>} />
+              <Route path="/batch-tailor" element={<ProtectedRoute><BatchTailor /></ProtectedRoute>} />
               <Route path="/applications" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
               <Route path="/interview-preps" element={<ProtectedRoute><InterviewPrepList /></ProtectedRoute>} />
               <Route path="/interview-prep/:tailoredResumeId" element={<ProtectedRoute><InterviewPrep /></ProtectedRoute>} />

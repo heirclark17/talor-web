@@ -30,6 +30,7 @@ const TONE_OPTIONS = [
   { value: 'enthusiastic', label: 'Enthusiastic' },
   { value: 'strategic', label: 'Strategic' },
   { value: 'technical', label: 'Technical' },
+  { value: 'conversational', label: 'Conversational' },
 ];
 
 const LENGTH_OPTIONS = [
