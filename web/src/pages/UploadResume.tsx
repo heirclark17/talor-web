@@ -3,6 +3,7 @@ import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Trash2 } from 'luc
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { showError } from '../utils/toast'
+import { usePostHog } from '../contexts/PostHogContext'
 
 // LocalStorage keys for clearing old tailored resumes
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
@@ -43,6 +44,7 @@ interface ParsedResume {
 
 export default function UploadResume() {
   const navigate = useNavigate()
+  const { capture } = usePostHog()
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -61,6 +63,12 @@ export default function UploadResume() {
       localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
       localStorage.removeItem(TAILOR_SESSION_KEY)
     }
+
+    // Track page view
+    capture('page_viewed', {
+      page_name: 'Upload Resume',
+      page_type: 'core_feature',
+    })
   }, [])
 
   const handleDeleteResume = async (resumeId: number, filename: string) => {
@@ -191,6 +199,13 @@ export default function UploadResume() {
       setParsedResume(mappedData)
       setUploadSuccess(true)
       setUploading(false)
+
+      // Track successful resume upload
+      capture('resume_uploaded', {
+        page_name: 'Upload Resume',
+        file_type: fileExtension,
+        filename: file.name,
+      })
 
       // Reset file input so same file can be uploaded again
       if (fileInputRef.current) {

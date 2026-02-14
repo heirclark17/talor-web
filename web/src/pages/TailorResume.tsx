@@ -10,6 +10,7 @@ import MatchScore from '../components/MatchScore'
 import ThemeToggle from '../components/ThemeToggle'
 import AILoadingScreen from '../components/AILoadingScreen'
 import { useResumeStore } from '../stores/resumeStore'
+import { usePostHog } from '../contexts/PostHogContext'
 
 // LocalStorage keys for persisting tailor session
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
@@ -108,6 +109,7 @@ export default function TailorResume() {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { capture } = usePostHog()
 
   // Resume state from Zustand store
   const { resumes, fetchResumes, deleteResume: deleteResumeFromStore } = useResumeStore()
@@ -191,6 +193,12 @@ export default function TailorResume() {
 
   useEffect(() => {
     fetchResumes()
+
+    // Track page view
+    capture('page_viewed', {
+      page_name: 'Tailor Resume',
+      page_type: 'core_feature',
+    })
   }, [fetchResumes])
 
   useEffect(() => {
@@ -1043,6 +1051,14 @@ export default function TailorResume() {
 
       setSuccess(true)
       setShowComparison(true)
+
+      // Track successful resume tailoring
+      capture('resume_tailored', {
+        page_name: 'Tailor Resume',
+        company: result.data.company || company,
+        job_title: result.data.title || jobTitle,
+        has_job_url: !!trimmedJobUrl,
+      })
 
       // Signal completion so progress bar reaches 100% before unmount
       setLoadingComplete(true)
