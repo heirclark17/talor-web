@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { FileEdit, Plus, Download, Loader2, Wand2, ChevronDown, Trash2, X, Upload, FileText, Search } from 'lucide-react'
 import { api } from '../api/client'
+import { useResumeStore } from '../stores/resumeStore'
 
 interface CoverLetter {
   id: number
@@ -70,8 +71,8 @@ export default function CoverLetterGenerator() {
   const [extracting, setExtracting] = useState(false)
   const [extractionError, setExtractionError] = useState<{company?: string; title?: string}>({})
 
-  // Resume picker state
-  const [resumes, setResumes] = useState<ResumeItem[]>([])
+  // Resume picker state from Zustand store
+  const { resumes, fetchResumes } = useResumeStore()
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
   const [resumeSource, setResumeSource] = useState<ResumeSource>('none')
   const [uploading, setUploading] = useState(false)
@@ -79,19 +80,8 @@ export default function CoverLetterGenerator() {
 
   useEffect(() => {
     loadLetters()
-    loadResumes()
-  }, [])
-
-  async function loadResumes() {
-    try {
-      const res = await api.listResumes()
-      if (res.success && res.data) {
-        setResumes(res.data.resumes || [])
-      }
-    } catch (err) {
-      console.error('[CoverLetters] Load resumes error:', err)
-    }
-  }
+    fetchResumes()
+  }, [fetchResumes])
 
   async function handleFileUpload(file: File) {
     if (!file) return

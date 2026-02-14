@@ -19,6 +19,7 @@ import { api } from '../api/client'
 import { showError } from '../utils/toast'
 import SearchFilter from '../components/SearchFilter'
 import { SkeletonCard } from '../components/SkeletonLoader'
+import { useResumeStore } from '../stores/resumeStore'
 
 interface Resume {
   id: number
@@ -53,13 +54,21 @@ interface ResumeAnalysis {
 
 export default function Home() {
   const navigate = useNavigate()
-  const [resumes, setResumes] = useState<Resume[]>([])
-  const [loading, setLoading] = useState(true)
+
+  // Resume state from Zustand store
+  const {
+    resumes,
+    loading,
+    deletingId,
+    analyzingId,
+    currentAnalysis,
+    fetchResumes,
+    deleteResume,
+    analyzeResume,
+  } = useResumeStore()
+
   const [error, setError] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<number | null>(null)
-  const [analyzingId, setAnalyzingId] = useState<number | null>(null)
   const [analysisModal, setAnalysisModal] = useState(false)
-  const [currentAnalysis, setCurrentAnalysis] = useState<ResumeAnalysis | null>(null)
   const [currentFilename, setCurrentFilename] = useState<string>('')
 
   // Search and filter state
@@ -95,48 +104,18 @@ export default function Home() {
     return result
   }, [resumes, searchQuery, selectedSort])
 
-  const loadResumes = useCallback(async () => {
-    try {
-      setError(null)
-      const result = await api.listResumes()
-      if (result.success) {
-        const resumeList = Array.isArray(result.data) ? result.data : []
-        setResumes(resumeList)
-      } else {
-        console.error('Failed to load resumes:', result.error)
-        setError(result.error || 'Failed to load resumes')
-        setResumes([])
-      }
-    } catch (err) {
-      console.error('Error loading resumes:', err)
-      setError('Failed to load resumes')
-      setResumes([])
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
   useEffect(() => {
-    loadResumes()
-  }, [loadResumes])
+    fetchResumes()
+  }, [fetchResumes])
 
   const handleDelete = async (resumeId: number) => {
     if (!window.confirm('Are you sure you want to delete this resume? This action cannot be undone.')) {
       return
     }
 
-    setDeletingId(resumeId)
-    try {
-      const result = await api.deleteResume(resumeId)
-      if (result.success) {
-        setResumes((prev) => prev.filter((r) => r.id !== resumeId))
-      } else {
-        showError(result.error || 'Failed to delete resume')
-      }
-    } catch (err) {
+    const success = await deleteResume(resumeId)
+    if (!success) {
       showError('Failed to delete resume')
-    } finally {
-      setDeletingId(null)
     }
   }
 
@@ -145,20 +124,12 @@ export default function Home() {
   }
 
   const handleAnalyze = async (resumeId: number, filename: string) => {
-    setAnalyzingId(resumeId)
-    try {
-      const result = await api.analyzeResume(resumeId)
-      if (result.success && result.data) {
-        setCurrentAnalysis(result.data)
-        setCurrentFilename(filename)
-        setAnalysisModal(true)
-      } else {
-        showError(result.error || 'Failed to analyze resume')
-      }
-    } catch (err) {
+    const analysis = await analyzeResume(resumeId)
+    if (analysis) {
+      setCurrentFilename(filename)
+      setAnalysisModal(true)
+    } else {
       showError('Failed to analyze resume')
-    } finally {
-      setAnalyzingId(null)
     }
   }
 
@@ -225,7 +196,7 @@ export default function Home() {
             <h2 className="text-xl font-semibold text-theme mb-2">Failed to Load Resumes</h2>
             <p className="text-theme-secondary mb-6">{error}</p>
             <button
-              onClick={loadResumes}
+              onClick={fetchResumes}
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-colors"
             >
               <RefreshCw className="w-5 h-5" />

@@ -9,6 +9,7 @@ import KeywordPanel from '../components/KeywordPanel'
 import MatchScore from '../components/MatchScore'
 import ThemeToggle from '../components/ThemeToggle'
 import AILoadingScreen from '../components/AILoadingScreen'
+import { useResumeStore } from '../stores/resumeStore'
 
 // LocalStorage keys for persisting tailor session
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
@@ -107,7 +108,10 @@ export default function TailorResume() {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [resumes, setResumes] = useState<BaseResume[]>([])
+
+  // Resume state from Zustand store
+  const { resumes, fetchResumes, deleteResume: deleteResumeFromStore } = useResumeStore()
+
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
   const [selectedResume, setSelectedResume] = useState<BaseResume | null>(null)
   const [tailoredResume, setTailoredResume] = useState<TailoredResume | null>(null)
@@ -186,8 +190,8 @@ export default function TailorResume() {
   }, [location])
 
   useEffect(() => {
-    loadResumes()
-  }, [])
+    fetchResumes()
+  }, [fetchResumes])
 
   useEffect(() => {
     if (selectedResumeId) {
@@ -643,27 +647,12 @@ export default function TailorResume() {
     }
   }
 
-  const loadResumes = async () => {
-    try {
-      setLoadingResumes(true)
-      const result = await api.listResumes()
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to load resumes')
-      }
-
-      setResumes(result.data.resumes || [])
-
-      // Auto-select first resume if available
-      if (result.data.resumes && result.data.resumes.length > 0) {
-        setSelectedResumeId(result.data.resumes[0].id)
-      }
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setLoadingResumes(false)
+  // Auto-select first resume when resumes are loaded
+  useEffect(() => {
+    if (resumes.length > 0 && !selectedResumeId) {
+      setSelectedResumeId(resumes[0].id)
     }
-  }
+  }, [resumes, selectedResumeId])
 
   // Load a tailored resume by ID (for restoring from localStorage)
   const loadTailoredResumeById = async (tailoredId: number) => {
@@ -877,14 +866,13 @@ export default function TailorResume() {
 
     try {
       setDeletingResumeId(resumeId)
-      const result = await api.deleteResume(resumeId)
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to delete resume')
+      // Use store method which handles API call and state update
+      const success = await deleteResumeFromStore(resumeId)
+
+      if (!success) {
+        throw new Error('Failed to delete resume')
       }
-
-      // Remove from local state using functional update
-      setResumes(prevResumes => prevResumes.filter(r => r.id !== resumeId))
 
       // Remove from selected if it was selected
       setSelectedResumeIds(prev => {

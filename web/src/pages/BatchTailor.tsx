@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Target, Loader2, CheckCircle, AlertCircle, Clock, FileText, Plus, X, Layers, ChevronDown } from 'lucide-react'
 import { api } from '../api/client'
 import { showSuccess, showError } from '../utils/toast'
+import { useResumeStore } from '../stores/resumeStore'
 
 interface BatchResult {
   jobUrl: string
@@ -13,21 +14,20 @@ interface BatchResult {
   title?: string
 }
 
-interface ResumeItem {
-  id: number
-  filename: string
-  skills_count: number
-}
-
 const MAX_JOBS = 10
 
 export default function BatchTailor() {
   const navigate = useNavigate()
 
-  // Resume state
-  const [resumes, setResumes] = useState<ResumeItem[]>([])
-  const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
-  const [resumesLoading, setResumesLoading] = useState(true)
+  // Resume state from Zustand store
+  const {
+    resumes,
+    selectedResumeId,
+    loading: resumesLoading,
+    fetchResumes,
+    setSelectedResumeId,
+  } = useResumeStore()
+
   const [showResumeDropdown, setShowResumeDropdown] = useState(false)
 
   // Form state
@@ -39,29 +39,15 @@ export default function BatchTailor() {
   const [showResults, setShowResults] = useState(false)
 
   useEffect(() => {
-    loadResumes()
-  }, [])
+    fetchResumes()
+  }, [fetchResumes])
 
   // Auto-select first resume
   useEffect(() => {
     if (resumes.length > 0 && !selectedResumeId) {
       setSelectedResumeId(resumes[0].id)
     }
-  }, [resumes, selectedResumeId])
-
-  async function loadResumes() {
-    setResumesLoading(true)
-    try {
-      const res = await api.listResumes()
-      if (res.success && res.data) {
-        setResumes(res.data.resumes || [])
-      }
-    } catch (err) {
-      console.error('[BatchTailor] Load resumes error:', err)
-    } finally {
-      setResumesLoading(false)
-    }
-  }
+  }, [resumes, selectedResumeId, setSelectedResumeId])
 
   const handleAddUrl = () => {
     if (jobUrls.length < MAX_JOBS) {
