@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { saveAuthToken, clearAuthTokens, getUserId, saveSessionData } from '../utils/userSession';
 
 interface AuthContextType {
   user: User | null;
@@ -24,16 +25,43 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     console.log('[SupabaseAuth] Initializing auth provider');
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('[SupabaseAuth] Initial session:', session?.user?.email || 'No session');
+
+      // Save JWT token for backend API calls
+      if (session?.access_token) {
+        console.log('[SupabaseAuth] Saving initial JWT token to secure storage');
+        await saveAuthToken(session.access_token);
+        await saveSessionData({
+          userId: session.user.id,
+          email: session.user.email,
+        });
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('[SupabaseAuth] Auth state changed:', _event, 'User:', session?.user?.email || 'No user');
+
+      // Save or clear JWT token for backend API calls
+      if (session?.access_token) {
+        console.log('[SupabaseAuth] Saving JWT token to secure storage');
+        await saveAuthToken(session.access_token);
+
+        // Also save user ID and email for session data
+        await saveSessionData({
+          userId: session.user.id,
+          email: session.user.email,
+        });
+      } else {
+        console.log('[SupabaseAuth] Clearing JWT token from secure storage');
+        await clearAuthTokens();
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
