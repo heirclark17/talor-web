@@ -19,6 +19,7 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { ScreenContainer } from '../components/layout';
 import { NumberText, RoundedNumeral } from '../components/ui';
 import { usePostHog } from '../contexts/PostHogContext';
+import { getAuthToken } from '../utils/userSession';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -49,12 +50,39 @@ export default function UploadResumeScreen() {
         copyToCacheDirectory: true,
       });
 
+      console.log('[UploadResume] Document picker result:', {
+        canceled: result.canceled,
+        assetsCount: result.assets?.length,
+      });
+
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setSelectedFile(result.assets[0]);
+        const file = result.assets[0];
+        console.log('[UploadResume] Selected file:', {
+          name: file.name,
+          uri: file.uri,
+          size: file.size,
+          mimeType: file.mimeType,
+        });
+
+        // Validate file
+        if (!file.uri || !file.name) {
+          Alert.alert('Error', 'Invalid file selected. Please try again.');
+          return;
+        }
+
+        if (!file.mimeType || !['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.mimeType)) {
+          Alert.alert(
+            'Invalid File Type',
+            'Please select a PDF or Word document (.pdf, .doc, .docx)'
+          );
+          return;
+        }
+
+        setSelectedFile(file);
         setUploadSuccess(false);
       }
     } catch (error) {
-      console.error('Error picking document:', error);
+      console.error('[UploadResume] Error picking document:', error);
       Alert.alert('Error', 'Failed to select document');
     }
   };
@@ -68,14 +96,51 @@ export default function UploadResumeScreen() {
     setUploading(true);
 
     try {
+      // Check authentication before uploading
+      console.log('[UploadResume] Checking authentication...');
+      const token = await getAuthToken();
+      if (!token) {
+        console.error('[UploadResume] No authentication token found');
+        Alert.alert(
+          'Authentication Error',
+          'You must be logged in to upload a resume. Please sign in and try again.'
+        );
+        setUploading(false);
+        return;
+      }
+      console.log('[UploadResume] Authentication token present');
+
+      // Validate file before upload
+      if (!selectedFile.uri || !selectedFile.name) {
+        Alert.alert('Error', 'Invalid file. Please select a different file.');
+        setUploading(false);
+        return;
+      }
+
       const formData = new FormData();
+
+      // React Native FormData requires proper file object structure
+      // @ts-ignore - FormData append in React Native accepts this structure
       formData.append('file', {
         uri: selectedFile.uri,
         name: selectedFile.name,
         type: selectedFile.mimeType || 'application/pdf',
-      } as any);
+      });
+
+      console.log('[UploadResume] Uploading file:', {
+        name: selectedFile.name,
+        type: selectedFile.mimeType,
+        size: selectedFile.size,
+        uriPrefix: selectedFile.uri.substring(0, 20),
+      });
 
       const result = await api.uploadResume(formData);
+
+      console.log('[UploadResume] Upload result:', {
+        success: result.success,
+        error: result.error,
+        hasData: !!result.data,
+      });
 
       if (result.success) {
         setUploadSuccess(true);
@@ -89,11 +154,47 @@ export default function UploadResumeScreen() {
           navigation.goBack();
         }, 1500);
       } else {
-        Alert.alert('Error', result.error || 'Failed to upload resume');
+        const errorMessage = result.error || 'Failed to upload resume';
+        console.error('[UploadResume] Upload failed:', errorMessage);
+
+        // Provide user-friendly error messages
+        let userMessage = errorMessage;
+        if (errorMessage.includes('timeout')) {
+          userMessage = 'Upload timed out. Please check your internet connection and try again.';
+        } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+          userMessage = 'Network error. Please check your internet connection and try again.';
+        } else if (errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+          userMessage = 'Authentication failed. Please sign out and sign in again.';
+        } else if (errorMessage.includes('rate limit')) {
+          userMessage = 'Too many upload attempts. Please wait a moment and try again.';
+        }
+
+        Alert.alert('Upload Failed', userMessage);
       }
     } catch (error) {
-      console.error('Error uploading:', error);
-      Alert.alert('Error', 'Failed to upload resume');
+      console.error('[UploadResume] Upload exception:', error);
+
+      // More detailed error handling
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      if (error instanceof Error) {
+        console.error('[UploadResume] Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        });
+
+        if (error.message.includes('timeout')) {
+          errorMessage = 'Upload timed out. Please check your internet connection and try again.';
+        } else if (error.message.includes('Network request failed')) {
+          errorMessage = 'Cannot connect to server. Please check your internet connection.';
+        } else if (error.message.includes('JSON')) {
+          errorMessage = 'Invalid response from server. Please try again later.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      Alert.alert('Upload Error', errorMessage);
     } finally {
       setUploading(false);
     }
