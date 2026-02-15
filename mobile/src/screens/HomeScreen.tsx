@@ -26,12 +26,14 @@ import { useResumeStore, Resume } from '../stores/resumeStore';
 import { NumberText } from '../components/ui';
 import { SectionHeader } from '../components/layout';
 import { CardStyles, BadgeStyles, ModalStyles } from '../constants/SharedStyles';
+import { usePostHog } from '../contexts/PostHogContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors, isDark } = useTheme();
+  const { capture } = usePostHog();
 
   // Zustand store for resume management
   const {
@@ -88,7 +90,12 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchResumes();
-    }, [fetchResumes])
+      capture('screen_viewed', {
+        screen_name: 'Home',
+        screen_type: 'core_feature',
+        resume_count: resumes.length,
+      });
+    }, [fetchResumes, capture, resumes.length])
   );
 
   const handleRefresh = () => {
@@ -124,6 +131,12 @@ export default function HomeScreen() {
     const analysis = await analyzeResume(resumeId);
     if (analysis) {
       setAnalysisModal(true);
+      capture('resume_analyzed', {
+        screen_name: 'Home',
+        resume_id: resumeId,
+        filename: filename,
+        overall_score: analysis.overall_score,
+      });
     } else {
       Alert.alert('Analysis Failed', 'Failed to analyze resume');
     }

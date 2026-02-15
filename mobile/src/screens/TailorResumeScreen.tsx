@@ -31,6 +31,7 @@ import { useResumeStore } from '../stores/resumeStore';
 import { GlassCard } from '../components/glass/GlassCard';
 import { ScreenContainer } from '../components/layout';
 import { NumberText } from '../components/ui';
+import { usePostHog } from '../contexts/PostHogContext';
 
 interface BaseResumeData {
   id: number;
@@ -66,6 +67,7 @@ export default function TailorResumeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<TailorResumeRouteProp>();
   const { colors } = useTheme();
+  const { capture } = usePostHog();
   const initialResumeId = route.params?.resumeId;
 
   // Zustand store for shared resume data
@@ -108,8 +110,13 @@ export default function TailorResumeScreen() {
       // Only fetch if not showing comparison
       if (!showComparison) {
         fetchResumes();
+        capture('screen_viewed', {
+          screen_name: 'Tailor Resume',
+          screen_type: 'core_feature',
+          resume_count: resumes.length,
+        });
       }
-    }, [showComparison, fetchResumes])
+    }, [showComparison, fetchResumes, capture, resumes.length])
   );
 
   const handleExtractJob = async () => {
@@ -177,6 +184,15 @@ export default function TailorResumeScreen() {
           company: result.data.company || company,
           title: result.data.title || jobTitle,
           docx_path: result.data.docx_path || '',
+        });
+
+        // Track successful tailoring
+        capture('resume_tailored', {
+          screen_name: 'Tailor Resume',
+          company: result.data.company || company,
+          job_title: result.data.title || jobTitle,
+          has_job_url: !!jobUrl.trim(),
+          tailored_resume_id: result.data.tailored_resume_id,
         });
 
         // Show the comparison view

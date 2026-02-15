@@ -18,15 +18,25 @@ import { GlassButton } from '../components/glass/GlassButton';
 import { GlassCard } from '../components/glass/GlassCard';
 import { ScreenContainer } from '../components/layout';
 import { NumberText, RoundedNumeral } from '../components/ui';
+import { usePostHog } from '../contexts/PostHogContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function UploadResumeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
+  const { capture } = usePostHog();
   const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  // Track screen view on mount
+  React.useEffect(() => {
+    capture('screen_viewed', {
+      screen_name: 'Upload Resume',
+      screen_type: 'core_feature',
+    });
+  }, [capture]);
 
   const handleSelectFile = async () => {
     try {
@@ -69,6 +79,12 @@ export default function UploadResumeScreen() {
 
       if (result.success) {
         setUploadSuccess(true);
+        capture('resume_uploaded', {
+          screen_name: 'Upload Resume',
+          file_type: selectedFile.mimeType || 'unknown',
+          filename: selectedFile.name,
+          file_size: selectedFile.size,
+        });
         setTimeout(() => {
           navigation.goBack();
         }, 1500);

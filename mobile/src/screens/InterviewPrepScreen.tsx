@@ -39,6 +39,7 @@ import { COLORS, SPACING, RADIUS, FONTS, TAB_BAR_HEIGHT, ALPHA_COLORS, TYPOGRAPH
 import { GlassCard } from '../components/glass/GlassCard';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
+import { usePostHog } from '../contexts/PostHogContext';
 import { useInterviewPrepStore, selectCachedPrep } from '../stores';
 import {
   PrepData,
@@ -143,6 +144,7 @@ export default function InterviewPrepScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<InterviewPrepRouteProp>();
   const { colors } = useTheme();
+  const { capture } = usePostHog();
   const { tailoredResumeId } = route.params;
 
   // Use the interview prep store for caching
@@ -193,6 +195,14 @@ export default function InterviewPrepScreen() {
     console.log('=== InterviewPrepScreen mounted ===');
     console.log('tailoredResumeId:', tailoredResumeId);
     console.log('cachedPrep exists:', !!cachedPrep);
+
+    // Track screen view
+    capture('screen_viewed', {
+      screen_name: 'Interview Prep',
+      screen_type: 'core_feature',
+      tailored_resume_id: tailoredResumeId,
+      has_cached_data: !!cachedPrep,
+    });
 
     // Only fetch if not cached
     if (!cachedPrep) {

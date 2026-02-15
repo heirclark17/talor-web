@@ -39,6 +39,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { CareerPlanResults, CareerPathCertifications } from '../components';
 import { useResumeStore } from '../stores/resumeStore';
+import { usePostHog } from '../contexts/PostHogContext';
 import * as DocumentPicker from 'expo-document-picker';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -55,6 +56,7 @@ interface CareerPlan {
 export default function CareerPathDesignerScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
+  const { capture } = usePostHog();
 
   // Resume store
   const {
@@ -136,6 +138,13 @@ export default function CareerPathDesignerScreen() {
     useCallback(() => {
       const loadSavedPlans = async () => {
         if (step === 'welcome') {
+          // Track screen view
+          capture('screen_viewed', {
+            screen_name: 'Career Path Designer',
+            screen_type: 'core_feature',
+            wizard_step: step,
+          });
+
           setLoadingSavedPlans(true);
           try {
             const result = await api.listCareerPlans();
@@ -150,7 +159,7 @@ export default function CareerPathDesignerScreen() {
         }
       };
       loadSavedPlans();
-    }, [step])
+    }, [step, capture])
   );
 
   // Load a saved career plan
@@ -398,6 +407,18 @@ export default function CareerPathDesignerScreen() {
               networking_events: planData?.networkingEvents || planData?.networking_events || [],
               learning_resources: planData?.learningResources || planData?.learning_resources || [],
             });
+
+            // Track successful career plan generation
+            capture('career_plan_generated', {
+              screen_name: 'Career Path Designer',
+              generation_method: 'async',
+              current_role: currentRole || dreamRole,
+              target_role: dreamRole,
+              timeline: timeline,
+              has_resume: !!resumeId,
+              plan_id: statusResult.data?.planId,
+            });
+
             setStep('results');
             setLoading(false);
           } else if (status === 'failed') {
@@ -447,6 +468,18 @@ export default function CareerPathDesignerScreen() {
           networking_events: planData?.networkingEvents || planData?.networking_events || [],
           learning_resources: planData?.learningResources || planData?.learning_resources || [],
         });
+
+        // Track successful career plan generation
+        capture('career_plan_generated', {
+          screen_name: 'Career Path Designer',
+          generation_method: 'sync',
+          current_role: currentRole || dreamRole,
+          target_role: dreamRole,
+          timeline: timeline,
+          has_resume: !!resumeId,
+          plan_id: result.data?.planId || result.data?.plan_id,
+        });
+
         setStep('results');
         setLoading(false);
       }
