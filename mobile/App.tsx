@@ -9,6 +9,7 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { BackgroundLayer } from './src/components/glass/BackgroundLayer';
 import { SupabaseAuthProvider } from './src/contexts/SupabaseAuthContext';
+import { PostHogProvider } from './src/contexts/PostHogContext';
 
 // Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
@@ -63,13 +64,15 @@ export default function App() {
   return (
     <ErrorBoundary>
       <SupabaseAuthProvider>
-        <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
-          <SafeAreaProvider>
-            <ThemeProvider>
-              <AppContent />
-            </ThemeProvider>
-          </SafeAreaProvider>
-        </GestureHandlerRootView>
+        <PostHogProvider>
+          <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
+            <SafeAreaProvider>
+              <ThemeProvider>
+                <AppContent />
+              </ThemeProvider>
+            </SafeAreaProvider>
+          </GestureHandlerRootView>
+        </PostHogProvider>
       </SupabaseAuthProvider>
     </ErrorBoundary>
   );
