@@ -1,0 +1,27 @@
+# Chrome Extension .gitignore
+
+# Build artifacts
+*.zip
+*.crx
+*.pem
+
+# Development
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Node modules (if using build tools)
+node_modules/
+
+# Distribution
+dist/
+build/

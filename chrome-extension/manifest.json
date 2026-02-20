@@ -1,0 +1,61 @@
+{
+  "manifest_version": 3,
+  "name": "Talor - AI Resume Tailor",
+  "version": "1.0.0",
+  "description": "Instantly tailor your resume to any job posting on LinkedIn and Indeed with one click.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "https://*.indeed.com/*",
+    "https://www.talorme.com/*",
+    "https://talor-web.vercel.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.linkedin.com/jobs/view/*",
+        "https://*.linkedin.com/jobs/collections/*"
+      ],
+      "js": ["content-scripts/linkedin.js"],
+      "css": ["styles/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.indeed.com/viewjob*",
+        "https://*.indeed.com/rc/clk*"
+      ],
+      "js": ["content-scripts/indeed.js"],
+      "css": ["styles/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*.png"],
+      "matches": ["https://*.linkedin.com/*", "https://*.indeed.com/*"]
+    }
+  ]
+}
