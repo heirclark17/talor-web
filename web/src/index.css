@@ -464,6 +464,16 @@ input, button, textarea, select {
   animation: menuPanelIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.menu-glass-panel {
+  background: rgba(18, 18, 22, 0.75);
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
 .menu-item-enter {
   opacity: 0;
   animation: menuItemIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -488,14 +498,16 @@ input, button, textarea, select {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid transparent;
+  background: transparent;
 }
 
 .menu-nav-card:hover {
-  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
-  border-color: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .menu-nav-card:active {
@@ -503,38 +515,48 @@ input, button, textarea, select {
 }
 
 .menu-nav-card.active {
-  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
-  border-color: color-mix(in srgb, var(--accent-color) 20%, transparent);
+  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent-color) 22%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-color) 10%, transparent),
+    0 4px 12px color-mix(in srgb, var(--accent-color) 8%, transparent);
 }
 
 .menu-nav-card .menu-icon-wrap {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
 }
 
 .menu-nav-card:hover .menu-icon-wrap {
-  background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: scale(1.05);
 }
 
 .menu-nav-card.active .menu-icon-wrap {
-  background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+  background: color-mix(in srgb, var(--accent-color) 20%, transparent);
+  border-color: color-mix(in srgb, var(--accent-color) 25%, transparent);
 }
 
 .menu-section-label {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-tertiary);
-  padding: 0 16px;
-  margin-bottom: 6px;
+  padding: 0 16px 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Initial hidden state for elements that will animate */

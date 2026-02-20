@@ -421,8 +421,7 @@ function AppContent() {
 
               {/* Menu Panel */}
               <nav
-                className="relative menu-panel-enter"
-                style={{ backgroundColor: 'var(--bg-secondary)' }}
+                className="relative menu-panel-enter menu-glass-panel"
                 aria-label="Main navigation"
               >
                 <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
@@ -430,7 +429,7 @@ function AppContent() {
                     {menuSections.map((section) => (
                       <div key={section.label}>
                         <div className="menu-section-label">{section.label}</div>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1.5">
                           {section.links.map((link) => (
                             <Link
                               key={link.to}
@@ -470,12 +469,6 @@ function AppContent() {
                     ))}
                   </div>
                 </div>
-
-                {/* Bottom edge fade */}
-                <div
-                  className="h-px"
-                  style={{ background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--text-primary) 8%, transparent), transparent)' }}
-                />
               </nav>
             </div>
           )}
