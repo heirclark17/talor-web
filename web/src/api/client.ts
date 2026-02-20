@@ -597,6 +597,70 @@ class ApiClient {
   }
 
   /**
+   * Get all saved jobs for the current user
+   */
+  async getSavedJobs(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/jobs/saved`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Failed to fetch saved jobs' };
+      }
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Save a job URL for later reuse
+   */
+  async saveJob(jobData: {
+    url: string;
+    company: string;
+    title: string;
+    location?: string;
+    salary?: string;
+    description?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/jobs/save`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(jobData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Failed to save job' };
+      }
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Delete a saved job
+   */
+  async deleteSavedJob(jobId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/jobs/saved/${jobId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Failed to delete job' };
+      }
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Tailor resume for specific job
    *
    * Uses a 3-minute AbortController timeout to prevent infinite spinning when

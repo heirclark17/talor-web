@@ -127,6 +127,12 @@ export default function TailorResume() {
   const [extracting, setExtracting] = useState(false)
   const [extractionError, setExtractionError] = useState<{company?: string; title?: string}>({})
 
+  // Saved jobs state
+  const [savedJobs, setSavedJobs] = useState<Array<{id: number; url: string; company: string; title: string; location: string; salary: string; created_at: string | null}>>([])
+  const [loadingSavedJobs, setLoadingSavedJobs] = useState(false)
+  const [savingJob, setSavingJob] = useState(false)
+  const [deletingJobId, setDeletingJobId] = useState<number | null>(null)
+
   const [loading, setLoading] = useState(false)
   const [loadingComplete, setLoadingComplete] = useState(false)
   const loadingResumes = storeLoadingResumes
@@ -197,6 +203,7 @@ export default function TailorResume() {
 
   useEffect(() => {
     fetchResumes()
+    loadSavedJobs()
 
     // Track page view
     capture('page_viewed', {
@@ -204,6 +211,68 @@ export default function TailorResume() {
       page_type: 'core_feature',
     })
   }, [fetchResumes])
+
+  const loadSavedJobs = async () => {
+    setLoadingSavedJobs(true)
+    try {
+      const result = await api.getSavedJobs()
+      if (result.success && result.data?.jobs) {
+        setSavedJobs(result.data.jobs)
+      }
+    } catch (err) {
+      console.error('Error loading saved jobs:', err)
+    } finally {
+      setLoadingSavedJobs(false)
+    }
+  }
+
+  const handleSaveJob = async () => {
+    const trimmedUrl = jobUrl.trim()
+    if (!trimmedUrl || !company.trim()) return
+
+    setSavingJob(true)
+    try {
+      const result = await api.saveJob({
+        url: trimmedUrl,
+        company: company.trim(),
+        title: jobTitle.trim() || 'Untitled Position',
+      })
+      if (result.success) {
+        showSuccess('Job saved for later use')
+        await loadSavedJobs()
+      } else {
+        showError(result.error || 'Failed to save job')
+      }
+    } catch (err) {
+      console.error('Error saving job:', err)
+    } finally {
+      setSavingJob(false)
+    }
+  }
+
+  const handleDeleteSavedJob = async (jobId: number) => {
+    setDeletingJobId(jobId)
+    try {
+      const result = await api.deleteSavedJob(jobId)
+      if (result.success) {
+        setSavedJobs(prev => prev.filter(j => j.id !== jobId))
+      }
+    } catch (err) {
+      console.error('Error deleting saved job:', err)
+    } finally {
+      setDeletingJobId(null)
+    }
+  }
+
+  const handleSelectSavedJob = (job: typeof savedJobs[0]) => {
+    setJobUrl(job.url)
+    setCompany(job.company)
+    setJobTitle(job.title)
+    setExtractionAttempted(true)
+    setCompanyExtracted(true)
+    setTitleExtracted(true)
+    setExtractionError({})
+  }
 
   useEffect(() => {
     if (selectedResumeId) {
@@ -1158,6 +1227,15 @@ export default function TailorResume() {
         job_title: result.data.title || jobTitle,
         has_job_url: !!trimmedJobUrl,
       })
+
+      // Auto-save the job URL for future reuse (fire-and-forget)
+      if (trimmedJobUrl) {
+        api.saveJob({
+          url: trimmedJobUrl,
+          company: trimmedCompany || result.data.company || '',
+          title: trimmedJobTitle || result.data.title || '',
+        }).then(() => loadSavedJobs()).catch(() => {})
+      }
 
       // Signal completion so progress bar reaches 100% before unmount
       setLoadingComplete(true)
@@ -2959,6 +3037,76 @@ export default function TailorResume() {
                       {titleExtracted && <p>✓ Job Title: {jobTitle}</p>}
                     </div>
                   </div>
+                  {/* Save Job Button */}
+                  {jobUrl.trim() && company.trim() && (
+                    <button
+                      onClick={handleSaveJob}
+                      disabled={savingJob}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-theme-glass-10 hover:bg-theme-glass-20 text-theme-secondary hover:text-theme transition-all"
+                    >
+                      {savingJob ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Bookmark className="w-4 h-4" />
+                      )}
+                      Save Job
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Saved Jobs */}
+            {savedJobs.length > 0 && (
+              <div>
+                <label className="block text-sm sm:text-base font-bold text-theme mb-3 sm:mb-4 flex items-center gap-2">
+                  <Bookmark className="w-4 h-4" />
+                  Saved Jobs
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {savedJobs.map((job) => {
+                    const isSelected = jobUrl.trim() === job.url
+                    return (
+                      <div
+                        key={job.id}
+                        onClick={() => handleSelectSavedJob(job)}
+                        className={`relative group cursor-pointer rounded-xl p-4 border-2 transition-all ${
+                          isSelected
+                            ? 'border-blue-500 bg-blue-500/10'
+                            : 'border-theme-muted bg-theme-glass-5 hover:border-theme-secondary hover:bg-theme-glass-10'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-theme truncate">{job.company}</p>
+                            <p className="text-xs text-theme-secondary truncate mt-0.5">{job.title}</p>
+                            {job.location && (
+                              <p className="text-xs text-theme-tertiary truncate mt-0.5">{job.location}</p>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteSavedJob(job.id)
+                            }}
+                            disabled={deletingJobId === job.id}
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded-lg hover:bg-red-500/20 text-theme-tertiary hover:text-red-400 transition-all"
+                          >
+                            {deletingJobId === job.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <X className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                        {isSelected && (
+                          <div className="absolute top-2 right-2">
+                            <Check className="w-4 h-4 text-blue-400" />
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}
