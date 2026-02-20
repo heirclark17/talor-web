@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import PostHog from 'posthog-react-native';
 import Constants from 'expo-constants';
-import * as Device from 'expo-device';
 
 interface PostHogContextType {
   posthog: PostHog | null;
@@ -57,8 +57,8 @@ export const PostHogProvider: React.FC<PostHogProviderProps> = ({ children }) =>
         await client.register({
           app_name: 'TalorMe Mobile',
           app_version: Constants.expoConfig?.version || '1.0.0',
-          platform: Device.osName || 'unknown',
-          device_model: Device.modelName || 'unknown',
+          platform: Platform.OS,
+          device_model: Constants.deviceName || 'unknown',
         });
 
         setPosthog(client);

@@ -396,7 +396,12 @@ export const api = {
         body: formData,
       });
       const data = await response.json();
-      return { success: response.ok, data };
+      if (!response.ok) {
+        const errorMsg = data?.error || data?.detail || data?.message || `Server error: ${response.status}`;
+        console.error('[UploadResume] Server error:', response.status, data);
+        return { success: false, data, error: errorMsg };
+      }
+      return { success: true, data };
     } catch (error: any) {
       console.error('Error uploading resume:', error);
       return { success: false, error: error.message };

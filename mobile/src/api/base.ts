@@ -4,7 +4,8 @@
  */
 
 import { API_BASE_URL } from '../utils/constants';
-import { getAuthToken } from '../utils/userSession';
+import { getUserId } from '../utils/userSession';
+import { supabase } from '../lib/supabase';
 import { validateHost, rateLimiter } from '../utils/security';
 
 /**
@@ -131,8 +132,14 @@ export async function fetchWithAuth(
     throw new Error('Rate limit exceeded. Please wait before making more requests.');
   }
 
-  // Get Clerk JWT token from secure storage
-  const token = await getAuthToken();
+  // Get JWT token directly from Supabase session (always fresh)
+  let token: string | null = null;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    token = session?.access_token ?? null;
+  } catch (e) {
+    console.warn('[API] Failed to get Supabase session:', e);
+  }
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
@@ -141,6 +148,16 @@ export async function fetchWithAuth(
   // Add Authorization header if token exists
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Always send X-User-ID as fallback auth
+  try {
+    const userId = await getUserId();
+    if (userId) {
+      headers['X-User-ID'] = userId;
+    }
+  } catch (e) {
+    // getUserId failure shouldn't block requests
   }
 
   let body: string | FormData | undefined;
@@ -158,6 +175,11 @@ export async function fetchWithAuth(
   const timeoutMs = requiresLongTimeout(endpoint) ? LONG_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  // Log auth headers for debugging (remove once auth is stable)
+  if (!headers['Authorization']) {
+    console.warn(`[API] No JWT for ${endpoint} — using X-User-ID fallback:`, headers['X-User-ID']?.substring(0, 15));
+  }
 
   try {
     const response = await fetch(url, {
