@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut, CreditCard } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut, CreditCard, PenTool } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -49,6 +49,7 @@ const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy'))
 const TermsOfService = lazyWithRetry(() => import('./pages/TermsOfService'))
 const BatchTailor = lazyWithRetry(() => import('./pages/BatchTailor'))
 const Pricing = lazyWithRetry(() => import('./pages/Pricing'))
+const Templates = lazyWithRetry(() => import('./pages/Templates'))
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'))
 const OnboardingTour = lazyWithRetry(() => import('./components/OnboardingTour'))
 
@@ -374,6 +375,7 @@ function AppContent() {
       label: 'Resume Tools',
       links: [
         { to: '/resumes', icon: FileText, label: 'My Resumes', desc: 'View and manage all resumes', tourId: 'resumes', iconColor: 'text-blue-400' },
+        { to: '/templates', icon: PenTool, label: 'Templates', desc: 'Browse resume templates', tourId: 'templates', iconColor: 'text-purple-400' },
         { to: '/upload', icon: Upload, label: 'Upload', desc: 'Upload a new base resume', tourId: 'upload', iconColor: 'text-emerald-400' },
         { to: '/tailor', icon: Target, label: 'Tailor', desc: 'Customize for a specific job', tourId: 'tailor', iconColor: 'text-rose-400' },
         { to: '/batch-tailor', icon: Layers, label: 'Batch Tailor', desc: 'Tailor for multiple jobs at once', tourId: 'batch-tailor', iconColor: 'text-violet-400' },
@@ -560,6 +562,7 @@ function AppContent() {
 
               {/* Protected routes */}
               <Route path="/resumes" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
               <Route path="/upload" element={<ProtectedRoute><UploadResume /></ProtectedRoute>} />
               <Route path="/tailor" element={<ProtectedRoute><TailorResume /></ProtectedRoute>} />
               <Route path="/batch-tailor" element={<ProtectedRoute><BatchTailor /></ProtectedRoute>} />
