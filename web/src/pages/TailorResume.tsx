@@ -126,6 +126,7 @@ export default function TailorResume() {
   const [titleExtracted, setTitleExtracted] = useState(false)
   const [extracting, setExtracting] = useState(false)
   const [extractionError, setExtractionError] = useState<{company?: string; title?: string}>({})
+  const [salaryData, setSalaryData] = useState<any>(null)
 
   // Saved jobs state
   const [savedJobs, setSavedJobs] = useState<Array<{id: number; url: string; company: string; title: string; location: string; salary: string; created_at: string | null}>>([])
@@ -1126,8 +1127,14 @@ export default function TailorResume() {
       // Check what was extracted
       const extractedCompany = result.data.company || result.data.Company || ''
       const extractedTitle = result.data.job_title || result.data.title || result.data.Title || ''
+      const extractedSalaryData = result.data.salary_data || null
 
       setExtractionAttempted(true)
+
+      // Store Perplexity salary data if available
+      if (extractedSalaryData) {
+        setSalaryData(extractedSalaryData)
+      }
 
       // Update states based on what was extracted
       if (extractedCompany) {
@@ -3113,6 +3120,7 @@ export default function TailorResume() {
               <SalaryInsights
                 jobTitle={jobTitle}
                 location={company}
+                salaryData={salaryData}
                 className="mt-6"
               />
             )}

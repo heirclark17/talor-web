@@ -18,22 +18,33 @@ import {
 interface SalaryInsightsProps {
   jobTitle: string
   location?: string
+  salaryData?: any // Perplexity salary data from job extraction
   className?: string
 }
 
-export default function SalaryInsights({ jobTitle, location, className = '' }: SalaryInsightsProps) {
+export default function SalaryInsights({ jobTitle, location, salaryData: perplexitySalaryData, className = '' }: SalaryInsightsProps) {
   const [salaryData, setSalaryData] = useState<SalaryInsight | null>(null)
   const [negotiationTips, setNegotiationTips] = useState<NegotiationTip[]>([])
   const [loading, setLoading] = useState(true)
   const [showTips, setShowTips] = useState(false)
+  const [showMarketInsights, setShowMarketInsights] = useState(false)
 
   useEffect(() => {
     loadSalaryData()
-  }, [jobTitle, location])
+  }, [jobTitle, location, perplexitySalaryData])
 
   const loadSalaryData = async () => {
     setLoading(true)
     try {
+      // Use Perplexity data if available, otherwise fallback to built-in data
+      if (perplexitySalaryData && perplexitySalaryData.salary_range) {
+        // We have Perplexity data - use it directly
+        setSalaryData(null) // Clear built-in data
+        setLoading(false)
+        return
+      }
+
+      // Fallback to built-in data
       const data = await getSalaryData(jobTitle, location)
       if (data) {
         setSalaryData(data)
@@ -62,6 +73,139 @@ export default function SalaryInsights({ jobTitle, location, className = '' }: S
     )
   }
 
+  // Use Perplexity data if available
+  if (perplexitySalaryData && perplexitySalaryData.salary_range) {
+    return (
+      <div className={`glass rounded-xl border border-theme-subtle p-6 ${className}`}>
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-5 h-5 text-green-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-theme">Salary Insights</h3>
+              <p className="text-sm text-theme-tertiary">Real-time market data for {jobTitle}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" />
+              Powered by Perplexity
+            </span>
+          </div>
+        </div>
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-theme-glass-5 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Briefcase className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-theme-tertiary uppercase tracking-wide">Salary Range</span>
+            </div>
+            <p className="text-xl font-bold text-theme">{perplexitySalaryData.salary_range}</p>
+            <p className="text-xs text-theme-tertiary mt-1">Based on current market data</p>
+          </div>
+
+          {perplexitySalaryData.median_salary && perplexitySalaryData.median_salary !== "Data not available" && (
+            <div className="bg-theme-glass-5 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4 text-green-400" />
+                <span className="text-xs text-theme-tertiary uppercase tracking-wide">Median Salary</span>
+              </div>
+              <p className="text-xl font-bold text-theme">{perplexitySalaryData.median_salary}</p>
+              <p className="text-xs text-theme-tertiary mt-1">Average market rate</p>
+            </div>
+          )}
+        </div>
+
+        {location && (
+          <div className="mb-4 flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-blue-400" />
+            <span className="text-sm text-theme-secondary">{location}</span>
+          </div>
+        )}
+
+        {/* Market Insights */}
+        {perplexitySalaryData.market_insights && (
+          <div className="mb-6">
+            <button
+              onClick={() => setShowMarketInsights(!showMarketInsights)}
+              className="w-full flex items-center justify-between p-4 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors border border-blue-500/20"
+            >
+              <div className="flex items-center gap-2">
+                <Info className="w-5 h-5 text-blue-400" />
+                <span className="font-semibold text-theme">Market Analysis & Trends</span>
+              </div>
+              {showMarketInsights ? (
+                <ChevronUp className="w-5 h-5 text-theme-tertiary" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-theme-tertiary" />
+              )}
+            </button>
+
+            {showMarketInsights && (
+              <div className="mt-4 p-4 bg-theme-glass-5 rounded-lg">
+                <p className="text-sm text-theme-secondary whitespace-pre-wrap leading-relaxed">
+                  {perplexitySalaryData.market_insights}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Sources */}
+        {perplexitySalaryData.sources && perplexitySalaryData.sources.length > 0 && (
+          <div className="mb-6">
+            <button
+              onClick={() => setShowTips(!showTips)}
+              className="w-full flex items-center justify-between p-4 bg-purple-500/10 hover:bg-purple-500/20 rounded-lg transition-colors border border-purple-500/20"
+            >
+              <div className="flex items-center gap-2">
+                <Info className="w-5 h-5 text-purple-400" />
+                <span className="font-semibold text-theme">Data Sources ({perplexitySalaryData.sources.length})</span>
+              </div>
+              {showTips ? (
+                <ChevronUp className="w-5 h-5 text-theme-tertiary" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-theme-tertiary" />
+              )}
+            </button>
+
+            {showTips && (
+              <div className="mt-4 space-y-2">
+                {perplexitySalaryData.sources.map((source: string, index: number) => (
+                  <div
+                    key={index}
+                    className="p-3 bg-theme-glass-5 rounded-lg border-l-4 border-purple-400"
+                  >
+                    <a
+                      href={source}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-400 hover:text-blue-300 hover:underline break-all"
+                    >
+                      {source}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Data Source */}
+        <div className="pt-4 border-t border-theme-subtle">
+          <p className="text-xs text-theme-tertiary text-center">
+            Real-time data from Perplexity AI •
+            Updated {perplexitySalaryData.last_updated ? new Date(perplexitySalaryData.last_updated).toLocaleDateString() : 'recently'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Fallback to built-in data
   if (!salaryData) {
     return null
   }
