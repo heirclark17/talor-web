@@ -146,12 +146,47 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
   // Expanded questions state
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set())
 
-  // Load saved stories from localStorage
+  // Load saved stories from DB first, fallback to localStorage
   useEffect(() => {
-    const saved = localStorage.getItem(`bt-questions-stories-${interviewPrepId}`)
-    if (saved) {
-      setStarStories(JSON.parse(saved))
+    const loadSavedStories = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/interview-prep/practice-responses/${interviewPrepId}`, {
+          headers: getApiHeaders(),
+        })
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success && result.data?.responses?.length > 0) {
+            const dbStories: Record<string, StarStory> = {}
+            for (const r of result.data.responses) {
+              const key = r.question_key || `${r.question_category}_${r.id}`
+              if (r.star_story) {
+                dbStories[key] = {
+                  situation: r.star_story.situation || '',
+                  task: r.star_story.task || '',
+                  action: r.star_story.action || '',
+                  result: r.star_story.result || '',
+                }
+              }
+            }
+            if (Object.keys(dbStories).length > 0) {
+              setStarStories(dbStories)
+              setAiGeneratedStories(dbStories)
+              // Sync to localStorage as cache
+              localStorage.setItem(`bt-questions-stories-${interviewPrepId}`, JSON.stringify(dbStories))
+              return
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load stories from DB, falling back to localStorage:', err)
+      }
+      // Fallback to localStorage
+      const saved = localStorage.getItem(`bt-questions-stories-${interviewPrepId}`)
+      if (saved) {
+        setStarStories(JSON.parse(saved))
+      }
     }
+    loadSavedStories()
   }, [interviewPrepId])
 
   const generateQuestions = async () => {
@@ -213,15 +248,31 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
         const result = await response.json()
         if (result.success && result.data?.star_story) {
           const story = result.data.star_story
+          const storyData: StarStory = {
+            situation: story.situation || '',
+            task: story.task || '',
+            action: story.action || '',
+            result: story.result || '',
+          }
           setAiGeneratedStories(prev => ({
             ...prev,
-            [questionKey]: {
-              situation: story.situation || '',
-              task: story.task || '',
-              action: story.action || '',
-              result: story.result || '',
-            }
+            [questionKey]: storyData,
           }))
+          // Fire-and-forget: persist AI story to DB immediately
+          const questionType = questionKey.startsWith('behavioral_') ? 'behavioral' : 'technical'
+          const questionId = parseInt(questionKey.split('_')[1]) || 0
+          fetch(`${API_BASE_URL}/api/interview-prep/save-question-star-story`, {
+            method: 'POST',
+            headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({
+              interview_prep_id: interviewPrepId,
+              question_id: questionId,
+              question_text: questionText,
+              question_type: questionType,
+              star_story: storyData,
+              question_key: questionKey,
+            }),
+          }).catch(err => console.error('Failed to auto-save AI story to DB:', err))
         }
       }
     } catch (err) {
@@ -237,8 +288,8 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
       newExpanded.delete(questionKey)
     } else {
       newExpanded.add(questionKey)
-      // Auto-generate AI STAR story when expanding a behavioral question
-      if (questionKey.startsWith('behavioral_') && questionText) {
+      // Auto-generate AI STAR story when expanding any question
+      if (questionText) {
         generateAiStarStory(questionKey, questionText)
       }
     }
@@ -267,6 +318,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
           question_text: questionText,
           question_type: questionType,
           star_story: story,
+          question_key: questionKey,
         }),
       })
 
@@ -900,12 +952,16 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
             {questionsData.technical.questions.map((question) => {
               const questionKey = `technical_${question.id}`
               const isExpanded = expandedQuestions.has(questionKey)
+              const isEditing = editingQuestionId === questionKey
+              const story = starStories[questionKey]
+              const aiStory = aiGeneratedStories[questionKey]
+              const isGeneratingAi = aiGeneratingStory[questionKey]
 
               return (
                 <div key={question.id} className="bg-theme-glass-5 rounded-xl overflow-hidden border border-theme-subtle">
                   {/* Question Header */}
                   <button
-                    onClick={() => toggleQuestion(questionKey)}
+                    onClick={() => toggleQuestion(questionKey, question.question)}
                     className="w-full p-4 flex items-start gap-4 hover:bg-theme-glass-5 transition-colors text-left"
                   >
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">
@@ -925,6 +981,12 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                             {tech}
                           </span>
                         ))}
+                        {(starStories[questionKey] || aiGeneratedStories[questionKey]) && (
+                          <span className="text-xs px-2 py-0.5 rounded text-green-400 bg-green-500/20 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {starStories[questionKey] ? 'Story Ready' : 'AI Story Generated'}
+                          </span>
+                        )}
                       </div>
                     </div>
                     {isExpanded ? (
@@ -1023,6 +1085,214 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                       <div>
                         <h5 className="text-theme-secondary text-sm font-medium mb-1">Why This Matters for the Role</h5>
                         <p className="text-blue-300 text-sm">{question.job_alignment}</p>
+                      </div>
+
+                      {/* STAR Story Section for Technical Questions */}
+                      <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h5 className="text-theme font-semibold flex items-center gap-2">
+                            <BookOpen className="w-5 h-5 text-blue-400" />
+                            Your STAR Story
+                            {aiStory && !story && (
+                              <span className="text-xs px-2 py-0.5 rounded bg-blue-500/30 text-blue-300 flex items-center gap-1">
+                                <Sparkles className="w-3 h-3" />
+                                AI Generated
+                              </span>
+                            )}
+                          </h5>
+                          {!isEditing && !isGeneratingAi && (
+                            <div className="flex items-center gap-2">
+                              {aiStory && !story && (
+                                <button
+                                  onClick={() => {
+                                    setAiGeneratedStories(prev => {
+                                      const updated = { ...prev }
+                                      delete updated[questionKey]
+                                      return updated
+                                    })
+                                    generateAiStarStory(questionKey, question.question)
+                                  }}
+                                  className="flex items-center gap-1 text-sm text-theme-secondary hover:text-theme"
+                                >
+                                  <RefreshCw className="w-4 h-4" />
+                                  Regenerate
+                                </button>
+                              )}
+                              <button
+                                onClick={() => {
+                                  if (aiStory && !story) {
+                                    setStarStories(prev => ({
+                                      ...prev,
+                                      [questionKey]: { ...aiStory }
+                                    }))
+                                  }
+                                  setEditingQuestionId(questionKey)
+                                }}
+                                className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300"
+                              >
+                                <Edit className="w-4 h-4" />
+                                {story ? 'Edit' : aiStory ? 'Edit AI Story' : 'Create'} Story
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Loading state for AI generation */}
+                        {isGeneratingAi && (
+                          <div className="text-center py-6">
+                            <Loader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto mb-3" />
+                            <p className="text-theme-secondary text-sm">Generating AI STAR story based on your resume...</p>
+                            <p className="text-theme-tertiary text-xs mt-1">This uses your experience to craft a compelling answer</p>
+                          </div>
+                        )}
+
+                        {!isGeneratingAi && isEditing ? (
+                          <div className="space-y-4">
+                            {/* Hints from candidate_skill_leverage */}
+                            <div className="grid md:grid-cols-2 gap-4 mb-4">
+                              <div className="text-sm">
+                                <span className="text-green-400 font-medium">Situation Hint:</span>
+                                <p className="text-theme-secondary">Think about: {question.candidate_skill_leverage.relevant_experience}</p>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-blue-400 font-medium">Task/Action Hint:</span>
+                                <p className="text-theme-secondary">{question.candidate_skill_leverage.talking_points?.[0] || 'Describe the specific steps you took'}</p>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-cyan-400 font-medium">Action Detail:</span>
+                                <p className="text-theme-secondary">{question.candidate_skill_leverage.skill_bridge || 'Bridge your experience to this technical domain'}</p>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-yellow-400 font-medium">Result Hint:</span>
+                                <p className="text-theme-secondary">Quantify impact related to: {question.job_alignment}</p>
+                              </div>
+                            </div>
+
+                            {/* STAR Story Inputs */}
+                            <div className="space-y-3">
+                              <div>
+                                <label className="block text-green-400 text-sm font-medium mb-1">Situation (15%)</label>
+                                <textarea
+                                  value={story?.situation || ''}
+                                  onChange={(e) => updateStarStory(questionKey, 'situation', e.target.value)}
+                                  placeholder="Set the scene: What was the technical challenge or context?"
+                                  className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme-secondary text-sm min-h-[80px]"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-blue-400 text-sm font-medium mb-1">Task (10%)</label>
+                                <textarea
+                                  value={story?.task || ''}
+                                  onChange={(e) => updateStarStory(questionKey, 'task', e.target.value)}
+                                  placeholder="What technical problem needed to be solved?"
+                                  className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme-secondary text-sm min-h-[60px]"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-cyan-400 text-sm font-medium mb-1">Action (60%) - Most Important!</label>
+                                <textarea
+                                  value={story?.action || ''}
+                                  onChange={(e) => updateStarStory(questionKey, 'action', e.target.value)}
+                                  placeholder="What technical approach did YOU take? Include specific technologies, methods, and decisions."
+                                  className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme-secondary text-sm min-h-[120px]"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-yellow-400 text-sm font-medium mb-1">Result (15%)</label>
+                                <textarea
+                                  value={story?.result || ''}
+                                  onChange={(e) => updateStarStory(questionKey, 'result', e.target.value)}
+                                  placeholder="What was the measurable outcome? Performance gains, cost savings, etc."
+                                  className="w-full bg-theme-glass-5 border border-theme-muted rounded-lg p-3 text-theme-secondary text-sm min-h-[80px]"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Save/Cancel Buttons */}
+                            <div className="flex gap-2 justify-end">
+                              <button
+                                onClick={() => setEditingQuestionId(null)}
+                                className="flex items-center gap-1 px-4 py-2 text-theme-secondary hover:text-theme"
+                              >
+                                <X className="w-4 h-4" />
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => saveStarStory(questionKey, question.question, 'technical')}
+                                disabled={savingStory}
+                                className="flex items-center gap-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg"
+                              >
+                                {savingStory ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Save className="w-4 h-4" />
+                                )}
+                                Save Story
+                              </button>
+                            </div>
+                          </div>
+                        ) : !isGeneratingAi && story ? (
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-green-400 text-xs font-medium">SITUATION</span>
+                              <p className="text-theme-secondary text-sm">{story.situation}</p>
+                            </div>
+                            <div>
+                              <span className="text-blue-400 text-xs font-medium">TASK</span>
+                              <p className="text-theme-secondary text-sm">{story.task}</p>
+                            </div>
+                            <div>
+                              <span className="text-cyan-400 text-xs font-medium">ACTION</span>
+                              <p className="text-theme-secondary text-sm">{story.action}</p>
+                            </div>
+                            <div>
+                              <span className="text-yellow-400 text-xs font-medium">RESULT</span>
+                              <p className="text-theme-secondary text-sm">{story.result}</p>
+                            </div>
+                          </div>
+                        ) : !isGeneratingAi && aiStory ? (
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-green-400 text-xs font-medium">SITUATION</span>
+                              <p className="text-theme-secondary text-sm">{aiStory.situation}</p>
+                            </div>
+                            <div>
+                              <span className="text-blue-400 text-xs font-medium">TASK</span>
+                              <p className="text-theme-secondary text-sm">{aiStory.task}</p>
+                            </div>
+                            <div>
+                              <span className="text-cyan-400 text-xs font-medium">ACTION</span>
+                              <p className="text-theme-secondary text-sm">{aiStory.action}</p>
+                            </div>
+                            <div>
+                              <span className="text-yellow-400 text-xs font-medium">RESULT</span>
+                              <p className="text-theme-secondary text-sm">{aiStory.result}</p>
+                            </div>
+                            <div className="pt-2 text-center">
+                              <p className="text-theme-tertiary text-xs">Click "Edit AI Story" above to customize this response</p>
+                            </div>
+                          </div>
+                        ) : !isGeneratingAi ? (
+                          <div className="text-center py-4">
+                            <p className="text-theme-secondary text-sm mb-2">AI story generation failed</p>
+                            <div className="flex items-center justify-center gap-3">
+                              <button
+                                onClick={() => generateAiStarStory(questionKey, question.question)}
+                                className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                              >
+                                <RefreshCw className="w-4 h-4" />
+                                Try Again
+                              </button>
+                              <button
+                                onClick={() => setEditingQuestionId(questionKey)}
+                                className="text-theme-secondary hover:text-theme text-sm flex items-center gap-1"
+                              >
+                                <Edit className="w-4 h-4" />
+                                Write Manually
+                              </button>
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   )}
