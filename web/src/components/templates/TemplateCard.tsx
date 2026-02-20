@@ -2,7 +2,9 @@ import React, { useMemo } from 'react'
 import { Check, Crown, Star } from 'lucide-react'
 import type { ResumeTemplate } from '../../types/template'
 import { useSubscriptionStore } from '../../stores/subscriptionStore'
+import { useResumeStore } from '../../stores/resumeStore'
 import { generateTemplatePlaceholder } from '../../utils/generateTemplatePlaceholder'
+import ResumePreview from './ResumePreview'
 
 interface TemplateCardProps {
   template: ResumeTemplate
@@ -33,13 +35,39 @@ export default function TemplateCard({
   onPreview,
 }: TemplateCardProps) {
   const { checkFeatureAccess } = useSubscriptionStore()
+  const { latestResume } = useResumeStore()
   const hasAccess = !template.isPremium || checkFeatureAccess('premium_templates')
 
-  // Generate preview image if template doesn't have one
+  // Generate preview image if template doesn't have one (fallback for static images)
   const previewImage = useMemo(() => {
     if (template.preview) return template.preview
     return generateTemplatePlaceholder(template)
   }, [template])
+
+  // Convert resume store data to ResumePreview format
+  const resumeData = useMemo(() => {
+    if (!latestResume) return null
+
+    return {
+      name: latestResume.personalInfo?.name || latestResume.personalInfo?.fullName,
+      email: latestResume.personalInfo?.email,
+      phone: latestResume.personalInfo?.phone,
+      linkedin: latestResume.personalInfo?.linkedin,
+      location: latestResume.personalInfo?.location,
+      summary: latestResume.summary,
+      skills: latestResume.skills,
+      experience: latestResume.experience?.map(exp => ({
+        company: exp.company,
+        title: exp.title,
+        location: exp.location,
+        dates: exp.dates,
+        bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
+        description: exp.description,
+      })),
+      education: latestResume.education,
+      certifications: latestResume.certifications,
+    }
+  }, [latestResume])
 
   const handleClick = () => {
     if (hasAccess) {
@@ -77,11 +105,18 @@ export default function TemplateCard({
     >
       {/* Preview Image */}
       <div className="relative aspect-[8.5/11] bg-theme-glass-5 overflow-hidden">
-        <img
-          src={previewImage}
-          alt={`${template.name} preview`}
-          className="w-full h-full object-cover"
-        />
+        {/* If template has static preview image, use it, otherwise render live preview */}
+        {template.preview ? (
+          <img
+            src={previewImage}
+            alt={`${template.name} preview`}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ResumePreview template={template} resumeData={resumeData} scale={0.33} />
+          </div>
+        )}
 
         {/* Premium Badge */}
         {template.isPremium && (

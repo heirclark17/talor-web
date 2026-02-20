@@ -1,11 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, ArrowRight, Info, Download, Crown } from 'lucide-react'
 import TemplateGallery from '../components/templates/TemplateGallery'
 import type { ResumeTemplate } from '../types/template'
 import { useTemplateStore } from '../stores/templateStore'
 import { useSubscriptionStore } from '../stores/subscriptionStore'
+import { useResumeStore } from '../stores/resumeStore'
 import { showSuccess, showError } from '../utils/toast'
+import ResumePreview from '../components/templates/ResumePreview'
 
 /**
  * Templates Page
@@ -16,7 +18,33 @@ export default function Templates() {
   const navigate = useNavigate()
   const { selectedTemplate, setSelectedTemplate } = useTemplateStore()
   const { checkFeatureAccess } = useSubscriptionStore()
+  const { latestResume } = useResumeStore()
   const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate | null>(null)
+
+  // Convert resume store data to ResumePreview format
+  const resumeData = useMemo(() => {
+    if (!latestResume) return null
+
+    return {
+      name: latestResume.personalInfo?.name || latestResume.personalInfo?.fullName,
+      email: latestResume.personalInfo?.email,
+      phone: latestResume.personalInfo?.phone,
+      linkedin: latestResume.personalInfo?.linkedin,
+      location: latestResume.personalInfo?.location,
+      summary: latestResume.summary,
+      skills: latestResume.skills,
+      experience: latestResume.experience?.map(exp => ({
+        company: exp.company,
+        title: exp.title,
+        location: exp.location,
+        dates: exp.dates,
+        bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
+        description: exp.description,
+      })),
+      education: latestResume.education,
+      certifications: latestResume.certifications,
+    }
+  }, [latestResume])
 
   const handleSelectTemplate = (template: ResumeTemplate) => {
     if (template.isPremium && !checkFeatureAccess('premium_templates')) {
@@ -154,11 +182,10 @@ export default function Templates() {
               <p className="text-theme-secondary">{previewTemplate.description}</p>
             </div>
 
-            {/* Preview content placeholder */}
-            <div className="aspect-[8.5/11] bg-theme-glass-5 rounded-lg mb-6 flex items-center justify-center">
-              <div className="text-center">
-                <FileText className="w-16 h-16 text-theme-tertiary mx-auto mb-4" />
-                <p className="text-theme-secondary">Template preview coming soon</p>
+            {/* Live Resume Preview */}
+            <div className="aspect-[8.5/11] bg-theme-glass-5 rounded-lg mb-6 flex items-center justify-center overflow-auto">
+              <div className="w-full h-full flex items-center justify-center p-4">
+                <ResumePreview template={previewTemplate} resumeData={resumeData} scale={0.65} />
               </div>
             </div>
 
