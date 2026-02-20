@@ -359,6 +359,7 @@ export default function UploadResume() {
           onCancel={() => setUploadMethod('resume')}
         />
       )}
+      </div>
 
       {/* Parsed Resume Display */}
       {parsedResume && (

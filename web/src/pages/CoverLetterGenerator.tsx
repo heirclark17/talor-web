@@ -201,19 +201,6 @@ export default function CoverLetterGenerator() {
   }
 
   async function handleGenerate(e: React.FormEvent) {
-      jobTitle,
-      companyName,
-      jobDescription: jobDescription?.substring(0, 100) + '...',
-      jobUrl,
-      jobInputMethod,
-      tone,
-      resumeSource,
-      selectedResumeId,
-      extractionAttempted,
-      companyExtracted,
-      titleExtracted
-    })
-
     e.preventDefault()
 
     setGenerating(true)
