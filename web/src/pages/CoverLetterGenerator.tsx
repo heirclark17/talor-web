@@ -665,7 +665,7 @@ export default function CoverLetterGenerator() {
                       <select
                         value={selectedResumeId ?? ''}
                         onChange={e => setSelectedResumeId(e.target.value ? Number(e.target.value) : null)}
-                        className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted text-sm [&>option]:text-gray-900 [&>option]:bg-white dark:[&>option]:text-gray-100 dark:[&>option]:bg-gray-800"
+                        className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted text-sm [&>option]:text-gray-100 [&>option]:bg-gray-800"
                       >
                         <option value="">Select a resume...</option>
                         {resumes.map(r => (

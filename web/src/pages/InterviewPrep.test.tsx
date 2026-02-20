@@ -53,10 +53,6 @@ vi.mock('../components/BehavioralTechnicalQuestions', () => ({
   default: () => <div data-testid="behavioral-technical">Behavioral/Technical</div>
 }))
 
-vi.mock('../components/ThemeToggle', () => ({
-  default: () => <div data-testid="theme-toggle">Theme Toggle</div>
-}))
-
 vi.mock('../components/AILoadingScreen', () => ({
   default: ({ stages }: any) => <div data-testid="ai-loading">AI Loading: {stages?.join(', ')}</div>
 }))

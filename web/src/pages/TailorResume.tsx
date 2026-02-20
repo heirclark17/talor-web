@@ -7,7 +7,6 @@ import ChangeExplanation from '../components/ChangeExplanation'
 import ResumeAnalysis from '../components/ResumeAnalysis'
 import KeywordPanel from '../components/KeywordPanel'
 import MatchScore from '../components/MatchScore'
-import ThemeToggle from '../components/ThemeToggle'
 import AILoadingScreen from '../components/AILoadingScreen'
 import { useResumeStore } from '../stores/resumeStore'
 import { usePostHog } from '../contexts/PostHogContext'
@@ -1141,7 +1140,6 @@ export default function TailorResume() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <ThemeToggle />
               <button
                 onClick={saveComparison}
                 className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-medium transition-all min-h-[44px] flex-1 sm:flex-none"
@@ -2366,7 +2364,6 @@ export default function TailorResume() {
           />
         </div>
       )}
-      <ThemeToggle />
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12 sm:mb-16 lg:mb-24">

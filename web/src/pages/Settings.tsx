@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom'
 import {
   Settings as SettingsIcon,
   User,
-  Moon,
-  Sun,
-  Monitor,
   Shield,
   HelpCircle,
   Mail,
@@ -19,11 +16,9 @@ import {
   Check,
 } from 'lucide-react'
 import { getUserId, clearUserSession } from '../utils/userSession'
-import { useTheme } from '../contexts/ThemeContext'
 import { showSuccess } from '../utils/toast'
 
 export default function Settings() {
-  const { theme, toggleTheme } = useTheme()
   const [userId, setUserId] = useState<string>('')
   const [copied, setCopied] = useState(false)
 
@@ -59,18 +54,6 @@ export default function Settings() {
 
   const handleHelp = () => {
     window.open('mailto:support@talorme.com?subject=Help Request', '_blank')
-  }
-
-  const getThemeLabel = () => {
-    return theme === 'dark' ? 'Dark' : 'Light'
-  }
-
-  const getThemeIcon = () => {
-    return theme === 'dark' ? (
-      <Moon className="w-5 h-5 text-theme-secondary" />
-    ) : (
-      <Sun className="w-5 h-5 text-theme-secondary" />
-    )
   }
 
   return (
@@ -154,30 +137,6 @@ export default function Settings() {
               </div>
               <ChevronRight className="w-5 h-5 text-theme-tertiary" />
             </Link>
-          </div>
-        </section>
-
-        {/* Appearance Section */}
-        <section className="mb-8">
-          <h2 className="text-xs font-semibold text-theme-tertiary uppercase tracking-wide mb-3">
-            Appearance
-          </h2>
-          <div className="glass rounded-xl border border-theme-subtle overflow-hidden">
-            <button
-              onClick={toggleTheme}
-              className="w-full px-4 py-4 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-theme-glass-5 rounded-lg flex items-center justify-center">
-                  {getThemeIcon()}
-                </div>
-                <span className="text-theme font-medium">Theme</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-theme-secondary">{getThemeLabel()}</span>
-                <ChevronRight className="w-5 h-5 text-theme-tertiary" />
-              </div>
-            </button>
           </div>
         </section>
 

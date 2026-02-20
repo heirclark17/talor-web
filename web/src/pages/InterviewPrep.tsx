@@ -40,7 +40,6 @@ import STARStoryBuilder from '../components/STARStoryBuilder'
 import CommonInterviewQuestions from '../components/CommonInterviewQuestions'
 import CertificationRecommendations from '../components/CertificationRecommendations'
 import BehavioralTechnicalQuestions from '../components/BehavioralTechnicalQuestions'
-import ThemeToggle from '../components/ThemeToggle'
 import AILoadingScreen from '../components/AILoadingScreen'
 
 // API base URL - same logic as API client
@@ -778,7 +777,6 @@ export default function InterviewPrep() {
 
   return (
     <div className="min-h-screen bg-theme">
-      <ThemeToggle />
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">

@@ -3,15 +3,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import Settings from './Settings'
 
-// Mock ThemeContext
-const mockToggleTheme = vi.fn()
-vi.mock('../contexts/ThemeContext', () => ({
-  useTheme: () => ({
-    theme: 'dark',
-    toggleTheme: mockToggleTheme
-  })
-}))
-
 // Mock user session
 const mockGetUserId = vi.fn()
 const mockClearUserSession = vi.fn()
@@ -125,30 +116,6 @@ describe('Settings Page', () => {
       const careerLink = screen.getByRole('link', { name: /career path designer/i })
       expect(careerLink).toBeInTheDocument()
       expect(careerLink).toHaveAttribute('href', '/career-path')
-    })
-  })
-
-  describe('Appearance Section', () => {
-    it('should render appearance section heading', () => {
-      renderSettings()
-      expect(screen.getByText(/Appearance/i)).toBeInTheDocument()
-    })
-
-    it('should show theme toggle button', () => {
-      renderSettings()
-      expect(screen.getByRole('button', { name: /theme/i })).toBeInTheDocument()
-    })
-
-    it('should display current theme', () => {
-      renderSettings()
-      expect(screen.getByText(/Dark/i)).toBeInTheDocument()
-    })
-
-    it('should toggle theme when button clicked', () => {
-      renderSettings()
-      const themeButton = screen.getByRole('button', { name: /theme/i })
-      fireEvent.click(themeButton)
-      expect(mockToggleTheme).toHaveBeenCalled()
     })
   })
 

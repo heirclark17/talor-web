@@ -8,22 +8,8 @@
 
 /* Tailwind v4 includes preflight (CSS reset) - no need for additional universal reset */
 
-/* Theme Variables - Enhanced for Readability */
-:root.light {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #f1f5f9;
-  --bg-tertiary: #e2e8f0;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #64748b;
-  --border-color: #cbd5e1;
-  --accent-color: #3b82f6;
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(148, 163, 184, 0.3);
-  --shadow-color: rgba(15, 23, 42, 0.05);
-}
-
-:root.dark {
+/* Theme Variables - Dark Mode */
+:root {
   --bg-primary: #0a0a0a;
   --bg-secondary: #1a1a1a;
   --bg-tertiary: #2a2a2a;
@@ -67,8 +53,7 @@ input, button, textarea, select {
 /* ============================================
    Theme-Aware Tailwind v4 @utility Directives
    ============================================
-   These utilities use CSS variables so they adapt
-   automatically when :root.dark / :root.light toggles.
+   These utilities use CSS variables for consistent theming.
 */
 
 /* Text utilities */
@@ -127,32 +112,18 @@ input, button, textarea, select {
   height: 8px;
 }
 
-:root.dark ::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
 }
 
-:root.dark ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
 }
 
-:root.dark ::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
-}
-
-:root.light ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-}
-
-:root.light ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-:root.light ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
 }
 
 /* Button styles - Professional & Adaptive */
@@ -480,25 +451,13 @@ input, button, textarea, select {
   animation: pulse 4s ease-in-out infinite;
 }
 
-:root.dark .animate-gradient {
+.animate-gradient {
   background: linear-gradient(
     -45deg,
     rgba(255, 255, 255, 0.02),
     rgba(255, 255, 255, 0.05),
     rgba(255, 255, 255, 0.03),
     rgba(255, 255, 255, 0.01)
-  );
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-}
-
-:root.light .animate-gradient {
-  background: linear-gradient(
-    -45deg,
-    rgba(0, 0, 0, 0.02),
-    rgba(0, 0, 0, 0.04),
-    rgba(0, 0, 0, 0.02),
-    rgba(0, 0, 0, 0.01)
   );
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
@@ -561,8 +520,7 @@ input, button, textarea, select {
   animation: float 8s ease-in-out infinite;
 }
 
-:root.dark .particle { background: rgba(255, 255, 255, 0.3); }
-:root.light .particle { background: rgba(0, 0, 0, 0.15); }
+.particle { background: rgba(255, 255, 255, 0.3); }
 
 .particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
 .particle:nth-child(2) { top: 40%; left: 30%; animation-delay: 1s; }
