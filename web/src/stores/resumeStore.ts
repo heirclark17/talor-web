@@ -46,7 +46,7 @@ const initialState = {
   resumes: [],
   selectedResumeId: null,
   currentAnalysis: null,
-  loading: true,
+  loading: false,
   refreshing: false,
   deletingId: null,
   analyzingId: null,
