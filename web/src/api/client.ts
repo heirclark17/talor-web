@@ -2021,6 +2021,7 @@ class ApiClient {
     result?: string;
     key_themes?: string[];
     talking_points?: string[];
+    video_recording_url?: string;
   }): Promise<ApiResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/api/star-stories/${storyId}`, {
@@ -3132,6 +3133,68 @@ class ApiClient {
       });
       const data = await response.json();
       return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =========================================================================
+  // RECORDINGS - Video/Audio practice recordings via S3
+  // =========================================================================
+
+  /**
+   * Get a presigned URL for uploading a recording to S3
+   */
+  async getRecordingUploadUrl(data: {
+    file_name: string;
+    content_type: string;
+    question_context: string;
+  }): Promise<ApiResponse<{ upload_url: string; s3_key: string }>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/recordings/presigned-upload-url`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      return { success: response.ok, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get a presigned URL for downloading/playing a recording from S3
+   */
+  async getRecordingDownloadUrl(s3Key: string): Promise<ApiResponse<{ download_url: string }>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/recordings/presigned-download-url`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ s3_key: s3Key }),
+      });
+      const result = await response.json();
+      return { success: response.ok, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Delete a recording from S3 and clear DB reference
+   */
+  async deleteRecording(data: {
+    s3_key: string;
+    question_context: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/recordings/delete`, {
+        method: 'DELETE',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      return { success: response.ok, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }

@@ -16,6 +16,7 @@ import {
 import AILoadingScreen from './AILoadingScreen'
 import { CommonInterviewQuestion, CommonQuestionsData } from '../types/commonQuestions'
 import { api, getApiHeaders } from '../api/client'
+import PracticeRecorder from './PracticeRecorder'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
@@ -43,6 +44,29 @@ export default function CommonInterviewQuestions({
   const [copiedAnswers, setCopiedAnswers] = useState<Set<string>>(new Set())
   const [regenerating, setRegenerating] = useState<Set<string>>(new Set())
   const [editingAnswers, setEditingAnswers] = useState<Record<string, string>>({})
+  const [recordingUrls, setRecordingUrls] = useState<Record<string, string | null>>({})
+
+  // Load existing practice responses with recording URLs
+  useEffect(() => {
+    const loadRecordings = async () => {
+      try {
+        const res = await api.getPracticeResponses(interviewPrepId)
+        if (res.success && res.data) {
+          const responses = Array.isArray(res.data) ? res.data : res.data?.responses || []
+          const urls: Record<string, string | null> = {}
+          for (const r of responses) {
+            if (r.video_recording_url || r.videoRecordingUrl) {
+              urls[r.question_id || r.questionId] = r.video_recording_url || r.videoRecordingUrl
+            }
+          }
+          setRecordingUrls(urls)
+        }
+      } catch (e) {
+        // Silent fail - recordings are optional
+      }
+    }
+    loadRecordings()
+  }, [interviewPrepId])
 
   // Load cached data from DB on mount
   useEffect(() => {
@@ -580,6 +604,17 @@ export default function CommonInterviewQuestions({
                             </div>
                           </div>
                         )}
+
+                        {/* Practice Recording */}
+                        <div className="mt-6 pt-6 border-t border-theme-subtle">
+                          <PracticeRecorder
+                            questionContext={`common_${question.id}`}
+                            interviewPrepId={interviewPrepId}
+                            questionText={question.question}
+                            existingRecordingUrl={recordingUrls[`common_${question.id}`]}
+                            onRecordingChange={(url) => setRecordingUrls(prev => ({ ...prev, [`common_${question.id}`]: url }))}
+                          />
+                        </div>
                       </div>
                     )}
                   </div>

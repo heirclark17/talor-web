@@ -3,6 +3,7 @@ import { Loader2, Sparkles, Save, Trash2, Edit, Check, X, Plus, ChevronDown, Che
 import { api, getApiHeaders } from '../api/client'
 import { showSuccess, showError } from '../utils/toast'
 import PracticeSession from './PracticeSession'
+import PracticeRecorder from './PracticeRecorder'
 
 // API base URL - same logic as API client
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
@@ -33,6 +34,7 @@ interface STARStory {
   result: string
   key_themes: string[]
   talking_points: string[]
+  video_recording_url?: string | null
 }
 
 interface Props {
@@ -80,6 +82,7 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
               result: s.result,
               key_themes: s.key_themes || [],
               talking_points: s.talking_points || [],
+              video_recording_url: s.video_recording_url || null,
             }))
             setStories(loadedStories)
           }
@@ -594,6 +597,20 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
                               </li>
                             ))}
                           </ul>
+                        </div>
+                      )}
+
+                      {/* Practice Recording */}
+                      {story.id && (
+                        <div className="mt-4 pt-4 border-t border-theme-subtle">
+                          <PracticeRecorder
+                            questionContext={`star_story_${story.id}`}
+                            starStoryId={parseInt(String(story.id))}
+                            existingRecordingUrl={story.video_recording_url}
+                            onRecordingChange={(url) => setStories(prev => prev.map(s =>
+                              s.id === story.id ? { ...s, video_recording_url: url } : s
+                            ))}
+                          />
                         </div>
                       )}
                     </>

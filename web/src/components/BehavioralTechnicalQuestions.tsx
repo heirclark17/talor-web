@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { getApiHeaders } from '../api/client'
+import { api, getApiHeaders } from '../api/client'
 import AILoadingScreen from './AILoadingScreen'
+import PracticeRecorder from './PracticeRecorder'
 import {
   Loader2,
   AlertCircle,
@@ -147,6 +148,9 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
   // Expanded questions state
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set())
 
+  // Recording URLs - keyed by questionKey (e.g. "behavioral_3")
+  const [recordingUrls, setRecordingUrls] = useState<Record<string, string | null>>({})
+
   // Load cached questions data from DB on mount
   useEffect(() => {
     if (cachedQuestionsData && !questionsData) {
@@ -196,6 +200,28 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
       }
     }
     loadSavedStories()
+  }, [interviewPrepId])
+
+  // Load existing practice responses with recording URLs
+  useEffect(() => {
+    const loadRecordings = async () => {
+      try {
+        const res = await api.getPracticeResponses(interviewPrepId)
+        if (res.success && res.data) {
+          const responses = Array.isArray(res.data) ? res.data : res.data?.responses || []
+          const urls: Record<string, string | null> = {}
+          for (const r of responses) {
+            if (r.video_recording_url || r.videoRecordingUrl) {
+              urls[r.question_id || r.questionId] = r.video_recording_url || r.videoRecordingUrl
+            }
+          }
+          setRecordingUrls(urls)
+        }
+      } catch (e) {
+        // Silent fail - recordings are optional
+      }
+    }
+    loadRecordings()
   }, [interviewPrepId])
 
   const generateQuestions = async () => {
@@ -830,6 +856,17 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                         ) : null}
                       </div>
                     </div>
+
+                    {/* Practice Recording */}
+                    <div className="mt-4 pt-4 border-t border-theme-subtle">
+                      <PracticeRecorder
+                        questionContext={questionKey}
+                        interviewPrepId={interviewPrepId}
+                        questionText={question.question}
+                        existingRecordingUrl={recordingUrls[questionKey]}
+                        onRecordingChange={(url) => setRecordingUrls(prev => ({ ...prev, [questionKey]: url }))}
+                      />
+                    </div>
                   )}
                 </div>
               )
@@ -1310,6 +1347,16 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                             </div>
                           </div>
                         ) : null}
+
+                      {/* Practice Recording */}
+                      <div className="mt-4 pt-4 border-t border-theme-subtle">
+                        <PracticeRecorder
+                          questionContext={questionKey}
+                          interviewPrepId={interviewPrepId}
+                          questionText={question.question}
+                          existingRecordingUrl={recordingUrls[questionKey]}
+                          onRecordingChange={(url) => setRecordingUrls(prev => ({ ...prev, [questionKey]: url }))}
+                        />
                       </div>
                     </div>
                   )}
