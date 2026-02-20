@@ -306,7 +306,7 @@ function AppContent() {
     <div className="min-h-screen">
       {/* Top Navigation - Hidden on landing page and auth pages */}
       {!isLandingPage && !isAuthPage && (
-        <nav className="sticky top-0 z-50 border-b border-theme-subtle" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <nav className="sticky top-0 z-50" style={{ backgroundColor: 'var(--bg-primary)' }}>
           <div className="container mx-auto px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between">
               <Link to="/" className="flex items-center gap-2">
