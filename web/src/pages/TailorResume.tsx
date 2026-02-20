@@ -156,6 +156,8 @@ export default function TailorResume() {
   const [editedExperience, setEditedExperience] = useState<any[] | null>(null)
   const [newSkill, setNewSkill] = useState('')
   const [savingSection, setSavingSection] = useState<string | null>(null)
+  const [titleOptionsOpen, setTitleOptionsOpen] = useState<number | null>(null)
+  const [customTitleEdit, setCustomTitleEdit] = useState<{ index: number; value: string } | null>(null)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
@@ -559,6 +561,40 @@ export default function TailorResume() {
       const bullets = [...(updated[expIndex].bullets || []), '']
       updated[expIndex] = { ...updated[expIndex], bullets }
       setEditedExperience(updated)
+    }
+  }
+
+  // Title option selection - updates the header with the chosen title and saves immediately
+  const selectTitleOption = async (expIndex: number, selectedTitle: string) => {
+    if (!tailoredResume) return
+
+    const updatedExperience = JSON.parse(JSON.stringify(tailoredResume.tailored_experience))
+    const exp = updatedExperience[expIndex]
+
+    // Extract company/location/dates from the existing header (after the " – " separator)
+    const currentHeader = exp.header || ''
+    const dashIndex = currentHeader.indexOf(' – ')
+    const suffix = dashIndex !== -1 ? currentHeader.substring(dashIndex) : ''
+
+    // Build new header with selected title
+    exp.header = selectedTitle + suffix
+
+    // Update local state immediately
+    setTailoredResume((prev: any) => prev ? { ...prev, tailored_experience: updatedExperience } : prev)
+    setTitleOptionsOpen(null)
+    setCustomTitleEdit(null)
+
+    // Save to backend
+    try {
+      await api.updateTailoredResume(tailoredResume.id, { experience: updatedExperience })
+    } catch (err) {
+      console.error('[TailorResume] Failed to save title selection:', err)
+    }
+  }
+
+  const saveCustomTitle = (expIndex: number) => {
+    if (customTitleEdit && customTitleEdit.value.trim()) {
+      selectTitleOption(expIndex, customTitleEdit.value.trim())
     }
   }
 
@@ -2007,11 +2043,119 @@ export default function TailorResume() {
                             ) : (
                               /* View Mode */
                               <>
-                                <h4 className="font-bold text-theme text-base mb-1">{exp.header || exp.title}</h4>
-                                {exp.location && (
+                                {/* Job Title with options selector */}
+                                <div className="mb-1">
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="font-bold text-theme text-base">
+                                      {/* Extract just the title part before " – " */}
+                                      {(() => {
+                                        const header = exp.header || exp.title || ''
+                                        const dashIdx = header.indexOf(' – ')
+                                        return dashIdx !== -1 ? header.substring(0, dashIdx) : header
+                                      })()}
+                                    </h4>
+                                    {exp.title_options && exp.title_options.length > 1 && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setTitleOptionsOpen(titleOptionsOpen === idx ? null : idx)
+                                          setCustomTitleEdit(null)
+                                        }}
+                                        className="flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors border border-blue-500/20"
+                                        title="Choose from 5 AI-generated title options"
+                                      >
+                                        <Sparkles size={10} />
+                                        {titleOptionsOpen === idx ? 'Close' : '5 Options'}
+                                      </button>
+                                    )}
+                                  </div>
+                                  {/* Company suffix from header */}
+                                  {(() => {
+                                    const header = exp.header || ''
+                                    const dashIdx = header.indexOf(' – ')
+                                    if (dashIdx !== -1) {
+                                      return <p className="text-theme-secondary text-sm">{header.substring(dashIdx)}</p>
+                                    }
+                                    return null
+                                  })()}
+                                </div>
+
+                                {/* Title Options Dropdown */}
+                                {titleOptionsOpen === idx && exp.title_options && (
+                                  <div className="mb-3 mt-2 p-3 rounded-xl bg-theme-glass-5 border border-theme-muted space-y-1.5" onClick={(e) => e.stopPropagation()}>
+                                    <p className="text-xs text-theme-tertiary uppercase tracking-wide mb-2 font-medium">Select a title or write your own</p>
+                                    {exp.title_options.map((option: string, optIdx: number) => {
+                                      const currentHeader = exp.header || ''
+                                      const dashIdx = currentHeader.indexOf(' – ')
+                                      const currentTitle = dashIdx !== -1 ? currentHeader.substring(0, dashIdx) : currentHeader
+                                      const isSelected = option.trim() === currentTitle.trim()
+                                      return (
+                                        <button
+                                          key={optIdx}
+                                          onClick={() => selectTitleOption(idx, option)}
+                                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center gap-2 ${
+                                            isSelected
+                                              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 font-medium'
+                                              : 'hover:bg-theme-glass-10 text-theme-secondary hover:text-theme border border-transparent'
+                                          }`}
+                                        >
+                                          {isSelected ? (
+                                            <CheckCircle2 size={14} className="text-blue-400 flex-shrink-0" />
+                                          ) : (
+                                            <span className="w-3.5 h-3.5 rounded-full border border-theme-muted flex-shrink-0" />
+                                          )}
+                                          <span>{option}</span>
+                                        </button>
+                                      )
+                                    })}
+                                    {/* Custom title input */}
+                                    <div className="pt-2 mt-1 border-t border-theme-muted">
+                                      {customTitleEdit?.index === idx ? (
+                                        <div className="flex gap-2">
+                                          <input
+                                            type="text"
+                                            value={customTitleEdit.value}
+                                            onChange={(e) => setCustomTitleEdit({ index: idx, value: e.target.value })}
+                                            onKeyDown={(e) => e.key === 'Enter' && saveCustomTitle(idx)}
+                                            className="flex-1 bg-theme-glass-5 border border-theme-muted rounded-lg px-3 py-2 text-theme text-sm focus:outline-none focus:border-blue-500"
+                                            placeholder="Type your own title..."
+                                            autoFocus
+                                          />
+                                          <button
+                                            onClick={() => saveCustomTitle(idx)}
+                                            className="px-3 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30 transition-colors"
+                                          >
+                                            Save
+                                          </button>
+                                          <button
+                                            onClick={() => setCustomTitleEdit(null)}
+                                            className="px-2 py-2 text-theme-tertiary hover:text-theme-secondary rounded-lg text-sm transition-colors"
+                                          >
+                                            <X size={16} />
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <button
+                                          onClick={() => {
+                                            const currentHeader = exp.header || ''
+                                            const dashIdx = currentHeader.indexOf(' – ')
+                                            const currentTitle = dashIdx !== -1 ? currentHeader.substring(0, dashIdx) : currentHeader
+                                            setCustomTitleEdit({ index: idx, value: currentTitle })
+                                          }}
+                                          className="w-full text-left px-3 py-2 rounded-lg text-sm text-theme-tertiary hover:text-theme-secondary hover:bg-theme-glass-10 transition-all flex items-center gap-2"
+                                        >
+                                          <Edit size={14} className="flex-shrink-0" />
+                                          <span>Write a custom title...</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {exp.location && !exp.header?.includes(exp.location) && (
                                   <p className="text-theme-secondary text-sm mb-1">{exp.location}</p>
                                 )}
-                                {exp.dates && (
+                                {exp.dates && !exp.header?.includes(exp.dates) && (
                                   <p className="text-theme-secondary text-sm mb-3">{exp.dates}</p>
                                 )}
                                 {exp.bullets && exp.bullets.length > 0 && (
