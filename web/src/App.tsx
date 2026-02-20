@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut, CreditCard, PenTool } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut, CreditCard, PenTool, Sun, Moon } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -11,7 +11,7 @@ import { useSessionMigration } from './hooks/useSessionMigration'
 import { useAuthUserSync } from './hooks/useAuthUserSync'
 import { useAuth } from './contexts/AuthContext'
 import { PostHogProvider } from './contexts/PostHogContext'
-import { initializeTheme } from './stores/themeStore'
+import { initializeTheme, useThemeStore } from './stores/themeStore'
 
 // Auto-reload wrapper for lazy imports - handles stale chunks after deploys
 function lazyWithRetry(importFn: () => Promise<any>) {
@@ -405,11 +405,13 @@ function SessionMigrationProvider({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const location = useLocation()
   const { signOut, user } = useAuth()
+  const { theme, toggleTheme } = useThemeStore()
   const isLandingPage = location.pathname === '/'
   const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = React.useRef<HTMLDivElement>(null)
+  const isDark = theme === 'dark'
 
   // Close mobile menu and user menu on route change
   useEffect(() => {
@@ -492,8 +494,31 @@ function AppContent() {
                 <span className="text-xl sm:text-2xl font-bold text-theme tracking-tight">Talor</span>
               </Link>
 
-              {/* Menu Button + User Avatar */}
+              {/* Theme Toggle + Menu Button + User Avatar */}
               <div className="flex items-center gap-3">
+                {/* Theme Toggle */}
+                <button
+                  onClick={toggleTheme}
+                  className="group relative inline-flex items-center justify-center rounded-lg p-2.5 transition-all duration-200 hover:bg-theme-glass-10 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-theme min-w-[44px] min-h-[44px]"
+                  aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+                  title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+                >
+                  <Sun
+                    className={`h-5 w-5 transition-all duration-300 ${
+                      isDark
+                        ? 'rotate-0 scale-100 text-theme-secondary group-hover:text-theme'
+                        : 'rotate-90 scale-0 absolute'
+                    }`}
+                  />
+                  <Moon
+                    className={`h-5 w-5 transition-all duration-300 ${
+                      !isDark
+                        ? 'rotate-0 scale-100 text-theme-secondary group-hover:text-theme'
+                        : '-rotate-90 scale-0 absolute'
+                    }`}
+                  />
+                </button>
+
                 {user && (
                   <div className="relative" ref={userMenuRef}>
                     <button
