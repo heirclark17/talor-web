@@ -133,6 +133,9 @@ export default function TailorResume() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [showComparison, setShowComparison] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
+  const [showSaveWarning, setShowSaveWarning] = useState(false)
+  const [savingFromWarning, setSavingFromWarning] = useState(false)
   const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
   const [selectedResumeIds, setSelectedResumeIds] = useState<Set<number>>(new Set())
   const [deletingBulk, setDeletingBulk] = useState(false)
@@ -324,6 +327,7 @@ export default function TailorResume() {
 
           setShowComparison(true)
           setSuccess(true)
+          setIsSaved(true)
         } catch (err: any) {
           console.error('Error loading saved comparison:', err)
           setError('Failed to load saved comparison')
@@ -1185,9 +1189,42 @@ export default function TailorResume() {
       }
 
       showSuccess('Comparison saved! View it in the Saved menu.')
+      setIsSaved(true)
     } catch (err: any) {
       console.error('Error saving comparison:', err)
       showError('Failed to save comparison')
+    }
+  }
+
+  const handleSaveAndContinue = async () => {
+    setSavingFromWarning(true)
+    try {
+      if (!tailoredResume?.id) throw new Error('No resume to save')
+      const result = await api.saveComparison({
+        tailored_resume_id: tailoredResume.id,
+        title: `${tailoredResume.company} - ${tailoredResume.title}`,
+        analysis_data: analysis,
+        keywords_data: keywords,
+        match_score_data: matchScore
+      })
+      if (!result.success) throw new Error(result.error || 'Failed to save')
+      setIsSaved(true)
+      showSuccess('Comparison saved!')
+      setShowSaveWarning(false)
+      navigate(`/interview-prep/${tailoredResume.id}`)
+    } catch (err: any) {
+      console.error('Error saving from warning:', err)
+      showError('Failed to save. You can try again or continue without saving.')
+    } finally {
+      setSavingFromWarning(false)
+    }
+  }
+
+  const handleInterviewPrepClick = () => {
+    if (isSaved) {
+      navigate(`/interview-prep/${tailoredResume!.id}`)
+    } else {
+      setShowSaveWarning(true)
     }
   }
 
@@ -1203,6 +1240,7 @@ export default function TailorResume() {
     setAnalysis(null)
     setKeywords(null)
     setMatchScore(null)
+    setIsSaved(false)
 
     // Clear persisted session data
     clearSession()
@@ -1238,13 +1276,18 @@ export default function TailorResume() {
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <button
-                onClick={saveComparison}
-                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-medium transition-all min-h-[44px] flex-1 sm:flex-none"
-                title="Save this comparison for later"
+                onClick={isSaved ? undefined : saveComparison}
+                disabled={isSaved}
+                className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all min-h-[44px] flex-1 sm:flex-none ${
+                  isSaved
+                    ? 'bg-green-600/20 text-green-400 border border-green-500/30 cursor-default'
+                    : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white'
+                }`}
+                title={isSaved ? 'Comparison saved' : 'Save this comparison for later'}
               >
-                <Bookmark className="w-5 h-5" />
-                <span className="hidden sm:inline">Save Comparison</span>
-                <span className="sm:hidden">Save</span>
+                {isSaved ? <CheckCircle2 className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
+                <span className="hidden sm:inline">{isSaved ? 'Saved' : 'Save Comparison'}</span>
+                <span className="sm:hidden">{isSaved ? 'Saved' : 'Save'}</span>
               </button>
               <button
                 onClick={resetForm}
@@ -2524,7 +2567,7 @@ export default function TailorResume() {
           {/* Action Buttons */}
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <button
-              onClick={() => navigate(`/interview-prep/${tailoredResume.id}`)}
+              onClick={handleInterviewPrepClick}
               className="btn-primary flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg bg-purple-600 hover:bg-purple-700 min-h-[48px] w-full sm:w-auto"
             >
               <Briefcase className="w-5 h-5" />
@@ -2546,6 +2589,49 @@ export default function TailorResume() {
               Create Another
             </button>
           </div>
+
+          {/* Save Warning Modal */}
+          {showSaveWarning && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSaveWarning(false)} />
+              <div className="relative glass rounded-2xl p-6 sm:p-8 max-w-md w-full border border-theme-glass-10 shadow-2xl">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="p-3 bg-amber-500/20 rounded-xl">
+                    <Bookmark className="w-8 h-8 text-amber-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-theme">Save Your Comparison?</h3>
+                  <p className="text-theme-secondary text-sm leading-relaxed">
+                    You haven't saved this comparison yet. Saving lets you revisit it from the Saved menu anytime.
+                  </p>
+                  <div className="flex flex-col w-full gap-2 mt-2">
+                    <button
+                      onClick={handleSaveAndContinue}
+                      disabled={savingFromWarning}
+                      className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-medium transition-all disabled:opacity-50"
+                    >
+                      {savingFromWarning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Bookmark className="w-5 h-5" />}
+                      {savingFromWarning ? 'Saving...' : 'Save & Continue'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowSaveWarning(false)
+                        navigate(`/interview-prep/${tailoredResume.id}`)
+                      }}
+                      className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-theme-glass-10 hover:bg-theme-glass-20 text-theme-secondary rounded-xl font-medium transition-all"
+                    >
+                      Continue Without Saving
+                    </button>
+                    <button
+                      onClick={() => setShowSaveWarning(false)}
+                      className="text-sm text-theme-secondary/60 hover:text-theme-secondary transition-colors mt-1"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )
