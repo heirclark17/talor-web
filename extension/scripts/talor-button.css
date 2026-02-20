@@ -1,0 +1,101 @@
+/**
+ * Talor Extension Button Styles
+ *
+ * Shared styles for "Tailor with Talor" button across all job boards
+ */
+
+.talor-button-container {
+  margin: 12px 0;
+  z-index: 9999;
+}
+
+.talor-extension-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+
+  /* Glassmorphism aesthetic matching Talor web app */
+  background: rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+
+  /* Typography */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3b82f6;
+
+  /* Interaction */
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  /* Reset default button styles */
+  outline: none;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.talor-extension-button:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  transform: translateY(-1px);
+}
+
+.talor-extension-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.talor-extension-button svg {
+  flex-shrink: 0;
+  color: #3b82f6;
+}
+
+.talor-extension-button span {
+  white-space: nowrap;
+}
+
+/* Dark mode support for job boards that have dark themes */
+@media (prefers-color-scheme: dark) {
+  .talor-extension-button {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
+  }
+
+  .talor-extension-button:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+
+  .talor-extension-button svg {
+    color: #60a5fa;
+  }
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .talor-extension-button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .talor-extension-button svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Ensure button is visible on top of job board content */
+.talor-button-container {
+  position: relative;
+  z-index: 10000;
+}
+
+/* Override any conflicting styles from job boards */
+.talor-extension-button * {
+  box-sizing: border-box;
+}

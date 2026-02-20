@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talor - Resume Tailoring</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 360px;
+      min-height: 480px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+      color: #e5e7eb;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .header-text h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f9fafb;
+    }
+
+    .header-text p {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .stats {
+      background: rgba(59, 130, 246, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stats h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #9ca3af;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #d1d5db;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+
+    .recent-jobs {
+      margin-top: 20px;
+    }
+
+    .recent-jobs h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #9ca3af;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .job-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .job-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .job-company {
+      font-size: 13px;
+      font-weight: 600;
+      color: #60a5fa;
+      margin-bottom: 4px;
+    }
+
+    .job-title {
+      font-size: 12px;
+      color: #d1d5db;
+      margin-bottom: 4px;
+    }
+
+    .job-meta {
+      display: flex;
+      gap: 8px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      color: #4b5563;
+      margin-bottom: 16px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .footer-links a {
+      font-size: 12px;
+      color: #9ca3af;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: #60a5fa;
+    }
+
+    .footer-version {
+      font-size: 11px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">T</div>
+    <div class="header-text">
+      <h1>Talor</h1>
+      <p>One-Click Resume Tailoring</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <h2>Your Stats</h2>
+    <div class="stat-row">
+      <span class="stat-label">Total Tailorings</span>
+      <span class="stat-value" id="total-clicks">0</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">This Week</span>
+      <span class="stat-value" id="week-clicks">0</span>
+    </div>
+  </div>
+
+  <div class="recent-jobs">
+    <h2>Recent Jobs</h2>
+    <div id="jobs-container">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <p>No jobs tailored yet</p>
+        <p style="font-size: 12px; margin-top: 8px;">Click "Tailor with Talor" on any job posting to get started!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-links">
+      <a href="https://www.talorme.com" target="_blank">Open Talor</a>
+      <a href="https://www.talorme.com/help" target="_blank">Help</a>
+      <a href="https://www.talorme.com/settings" target="_blank">Settings</a>
+    </div>
+    <div class="footer-version">v1.0.0</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

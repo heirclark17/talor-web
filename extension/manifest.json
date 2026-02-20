@@ -1,0 +1,74 @@
+{
+  "manifest_version": 3,
+  "name": "Talor - One-Click Resume Tailoring",
+  "version": "1.0.0",
+  "description": "Tailor your resume for any job posting with one click. Works on LinkedIn, Indeed, and 40+ job boards.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "https://*.indeed.com/*",
+    "https://*.glassdoor.com/*",
+    "https://*.dice.com/*",
+    "https://*.monster.com/*",
+    "https://*.ziprecruiter.com/*",
+    "https://*.simplyhired.com/*",
+    "https://*.careerbuilder.com/*",
+    "https://*.talorme.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.linkedin.com/jobs/*",
+        "https://*.linkedin.com/job/*"
+      ],
+      "js": ["scripts/linkedin.js"],
+      "css": ["scripts/talor-button.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.indeed.com/viewjob*",
+        "https://*.indeed.com/rc/clk*"
+      ],
+      "js": ["scripts/indeed.js"],
+      "css": ["scripts/talor-button.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.glassdoor.com/job-listing/*",
+        "https://*.glassdoor.com/Job/*"
+      ],
+      "js": ["scripts/glassdoor.js"],
+      "css": ["scripts/talor-button.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
