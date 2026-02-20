@@ -292,10 +292,22 @@ export default function PracticeRecorder({
   };
 
   const handleDelete = async () => {
-    if (!s3Key) return;
+    if (!s3Key) {
+      console.warn('No s3Key found, cannot delete');
+      return;
+    }
 
     try {
-      await api.deleteRecording({ s3_key: s3Key, question_context: questionContext });
+      const result = await api.deleteRecording({ s3_key: s3Key, question_context: questionContext });
+
+      if (!result.success) {
+        console.error('Delete API call failed:', result.error);
+        setError(`Failed to delete recording: ${result.error || 'Unknown error'}`);
+        setShowDeleteConfirm(false);
+        return;
+      }
+
+      // Success - clear all state
       setS3Key(null);
       setPlaybackUrl(null);
       blobRef.current = null;
@@ -306,8 +318,10 @@ export default function PracticeRecorder({
       setExpanded(false);
       setShowDeleteConfirm(false);
       onRecordingChange?.(null);
-    } catch (e) {
+    } catch (e: any) {
       console.error('Delete failed:', e);
+      setError(`Delete failed: ${e.message || 'Unknown error'}`);
+      setShowDeleteConfirm(false);
     }
   };
 
