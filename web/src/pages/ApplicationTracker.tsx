@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Briefcase, Plus, Search, Filter, ChevronDown, Calendar, MapPin, DollarSign, ExternalLink, MoreHorizontal, X } from 'lucide-react'
+import { Briefcase, Plus, Search, Filter, ChevronDown, Calendar, MapPin, DollarSign, ExternalLink, MoreHorizontal, X, Bookmark, Check } from 'lucide-react'
 import { api } from '../api/client'
+
+interface SavedJob {
+  id: number
+  url: string
+  company: string
+  title: string
+  location: string
+  salary: string
+  created_at: string | null
+}
 
 type ApplicationStatus = 'saved' | 'applied' | 'screening' | 'interviewing' | 'offer' | 'accepted' | 'rejected' | 'withdrawn' | 'no_response'
 
@@ -45,11 +55,25 @@ export default function ApplicationTracker() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingApp, setEditingApp] = useState<Application | null>(null)
   const [stats, setStats] = useState<Record<string, number>>({})
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([])
+  const [prefilledJob, setPrefilledJob] = useState<SavedJob | null>(null)
 
   useEffect(() => {
     loadApplications()
     loadStats()
+    loadSavedJobs()
   }, [])
+
+  async function loadSavedJobs() {
+    try {
+      const res = await api.getSavedJobs()
+      if (res.success && res.data?.jobs) {
+        setSavedJobs(res.data.jobs)
+      }
+    } catch (err) {
+      console.error('[ApplicationTracker] Saved jobs error:', err)
+    }
+  }
 
   async function loadApplications() {
     setLoading(true)
@@ -162,6 +186,29 @@ export default function ApplicationTracker() {
         ))}
       </div>
 
+      {/* Saved Jobs Quick-Add */}
+      {savedJobs.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-theme-secondary mb-3 flex items-center gap-2">
+            <Bookmark className="w-4 h-4" />
+            Quick Add from Saved Jobs
+          </h3>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {savedJobs.map(job => (
+              <button
+                key={job.id}
+                onClick={() => { setPrefilledJob(job); setEditingApp(null); setShowAddModal(true) }}
+                className="flex-shrink-0 text-left rounded-xl p-3 border border-theme-subtle bg-theme-glass-5 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all min-w-[200px] max-w-[260px]"
+              >
+                <p className="text-sm font-semibold text-theme truncate">{job.company}</p>
+                <p className="text-xs text-theme-secondary truncate mt-0.5">{job.title}</p>
+                {job.location && <p className="text-xs text-theme-tertiary truncate mt-0.5">{job.location}</p>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Search + Filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
@@ -262,8 +309,10 @@ export default function ApplicationTracker() {
       {showAddModal && (
         <ApplicationFormModal
           application={editingApp}
+          savedJobs={savedJobs}
+          prefilledJob={prefilledJob}
           onSave={handleSave}
-          onClose={() => { setShowAddModal(false); setEditingApp(null) }}
+          onClose={() => { setShowAddModal(false); setEditingApp(null); setPrefilledJob(null) }}
           onDelete={editingApp ? () => { handleDelete(editingApp.id); setShowAddModal(false); setEditingApp(null) } : undefined}
         />
       )}
@@ -273,26 +322,39 @@ export default function ApplicationTracker() {
 
 function ApplicationFormModal({
   application,
+  savedJobs,
+  prefilledJob,
   onSave,
   onClose,
   onDelete,
 }: {
   application: Application | null
+  savedJobs: SavedJob[]
+  prefilledJob: SavedJob | null
   onSave: (data: any) => void
   onClose: () => void
   onDelete?: () => void
 }) {
-  const [jobTitle, setJobTitle] = useState(application?.jobTitle || '')
-  const [companyName, setCompanyName] = useState(application?.companyName || '')
-  const [jobUrl, setJobUrl] = useState(application?.jobUrl || '')
+  const [jobTitle, setJobTitle] = useState(application?.jobTitle || prefilledJob?.title || '')
+  const [companyName, setCompanyName] = useState(application?.companyName || prefilledJob?.company || '')
+  const [jobUrl, setJobUrl] = useState(application?.jobUrl || prefilledJob?.url || '')
   const [status, setStatus] = useState<ApplicationStatus>(application?.status || 'saved')
-  const [location, setLocation] = useState(application?.location || '')
+  const [location, setLocation] = useState(application?.location || prefilledJob?.location || '')
   const [salaryMin, setSalaryMin] = useState(application?.salaryMin?.toString() || '')
   const [salaryMax, setSalaryMax] = useState(application?.salaryMax?.toString() || '')
   const [notes, setNotes] = useState(application?.notes || '')
   const [appliedDate, setAppliedDate] = useState(application?.appliedDate?.split('T')[0] || '')
   const [contactName, setContactName] = useState(application?.contactName || '')
   const [contactEmail, setContactEmail] = useState(application?.contactEmail || '')
+  const [selectedSavedJobId, setSelectedSavedJobId] = useState<number | null>(prefilledJob?.id || null)
+
+  function handleSelectSavedJob(job: SavedJob) {
+    setSelectedSavedJobId(job.id)
+    setJobTitle(job.title)
+    setCompanyName(job.company)
+    setJobUrl(job.url)
+    if (job.location) setLocation(job.location)
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -324,6 +386,36 @@ function ApplicationFormModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Saved Jobs Selector - only show when adding new, not editing */}
+          {!application && savedJobs.length > 0 && (
+            <div>
+              <label className="block text-sm text-theme-secondary mb-2 flex items-center gap-1.5">
+                <Bookmark className="w-3.5 h-3.5" />
+                Fill from saved job
+              </label>
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {savedJobs.map(job => (
+                  <button
+                    key={job.id}
+                    type="button"
+                    onClick={() => handleSelectSavedJob(job)}
+                    className={`flex-shrink-0 text-left rounded-lg px-3 py-2 border transition-all text-xs min-w-[150px] max-w-[200px] ${
+                      selectedSavedJobId === job.id
+                        ? 'border-blue-500 bg-blue-500/10'
+                        : 'border-theme-subtle bg-theme-glass-5 hover:border-theme-muted'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {selectedSavedJobId === job.id && <Check className="w-3 h-3 text-blue-400 flex-shrink-0" />}
+                      <span className="font-medium text-theme truncate">{job.company}</span>
+                    </div>
+                    <p className="text-theme-tertiary truncate mt-0.5">{job.title}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm text-theme-secondary mb-1">Job Title *</label>
             <input required value={jobTitle} onChange={e => setJobTitle(e.target.value)} className="w-full px-4 py-2.5 bg-theme-glass-5 border border-theme-subtle rounded-xl text-theme focus:outline-none focus:border-theme-muted" />
