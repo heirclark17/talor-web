@@ -254,12 +254,16 @@ export default function TailorResume() {
       const comparisonId = searchParams.get('comparison')
       if (comparisonId && !tailoredResume && !loading) {
         console.log('Loading saved comparison:', comparisonId)
+        const controller = new AbortController()
+        const tid = setTimeout(() => controller.abort(), 30_000)
         try {
           const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
           const response = await fetch(`${API_BASE_URL}/api/saved-comparisons/${comparisonId}`, {
             headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+            signal: controller.signal,
           })
+          clearTimeout(tid)
 
           if (!response.ok) {
             throw new Error('Failed to load saved comparison')
@@ -663,17 +667,19 @@ export default function TailorResume() {
 
   // Load a tailored resume by ID (for restoring from localStorage)
   const loadTailoredResumeById = async (tailoredId: number) => {
-    try {
-      setLoading(true)
+    // Race the entire restore operation against a 30-second deadline.
+    // This covers both the tailored-resume fetch AND the loadFullResume fetch.
+    const TIMEOUT_MS = 30_000
+
+    const doRestore = async (signal: AbortSignal) => {
       const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
-      // Fetch the tailored resume
       const response = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredId}`, {
         headers: getApiHeaders(),
+        signal,
       })
 
       if (!response.ok) {
-        // If tailored resume not found, clear localStorage
         if (response.status === 404) {
           localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
           throw new Error('Saved resume no longer exists')
@@ -681,46 +687,63 @@ export default function TailorResume() {
         throw new Error('Failed to load saved resume')
       }
 
-      const data = await response.json()
+      // Safe JSON parsing
+      let data: any
+      try {
+        const text = await response.text()
+        data = JSON.parse(text)
+      } catch {
+        throw new Error('Server returned an invalid response. Please try again.')
+      }
 
-      // Load the base resume
+      // Load the base resume (also bounded by the same abort signal deadline)
       await loadFullResume(data.base_resume_id)
       setSelectedResumeId(data.base_resume_id)
 
-      // Set the tailored resume
+      // Backend GET /tailored/{id} returns: summary, competencies, experience
       setTailoredResume({
         id: data.id,
-        tailored_summary: data.tailored_summary,
-        tailored_skills: data.tailored_skills || [],
-        tailored_experience: data.tailored_experience || [],
-        tailored_education: data.tailored_education || '',
-        tailored_certifications: data.tailored_certifications || '',
+        tailored_summary: data.summary || data.tailored_summary || '',
+        tailored_skills: data.competencies || data.tailored_skills || [],
+        tailored_experience: data.experience || data.tailored_experience || [],
+        tailored_education: data.education || data.tailored_education || '',
+        tailored_certifications: data.certifications || data.tailored_certifications || '',
         alignment_statement: data.alignment_statement || '',
         quality_score: data.quality_score || 95,
         docx_path: data.docx_path,
-        company: data.job?.company || 'Unknown Company',
-        title: data.job?.title || 'Unknown Position'
+        company: data.company || data.job?.company || 'Unknown Company',
+        title: data.title || data.job?.title || 'Unknown Position'
       })
 
-      // Set job details for the form
-      setCompany(data.job?.company || '')
-      setJobTitle(data.job?.title || '')
-      setJobUrl(data.job?.url || '')
+      setCompany(data.company || data.job?.company || '')
+      setJobTitle(data.title || data.job?.title || '')
+      setJobUrl(data.url || data.job?.url || '')
 
       setShowComparison(true)
       setSuccess(true)
-
       console.log('Successfully restored tailored resume:', tailoredId)
 
       // Signal completion so progress bar reaches 100% before unmount
       setLoadingComplete(true)
       await new Promise(r => setTimeout(r, 600))
       setLoadingComplete(false)
-      setLoading(false)
+    }
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
+
+    try {
+      setLoading(true)
+      await doRestore(controller.signal)
     } catch (err: any) {
       console.error('Error loading tailored resume:', err)
-      setError(err.message)
+      const message = err.name === 'AbortError'
+        ? 'Loading saved resume timed out. Please try again.'
+        : err.message
+      setError(message)
       localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
+    } finally {
+      clearTimeout(timeoutId)
       setLoading(false)
     }
   }
@@ -1022,6 +1045,13 @@ export default function TailorResume() {
       // in the backend (saves 10-20 seconds and avoids duplicate scraping costs).
       const shouldSendJobUrl = trimmedJobUrl && (!companyExtracted || !titleExtracted)
 
+      console.log('[handleTailor] Calling api.tailorResume...', {
+        baseResumeId: selectedResumeId,
+        jobUrl: shouldSendJobUrl ? trimmedJobUrl : undefined,
+        company: trimmedCompany,
+        jobTitle: trimmedJobTitle,
+      })
+
       const result = await api.tailorResume({
         baseResumeId: selectedResumeId,
         jobUrl: shouldSendJobUrl ? trimmedJobUrl : undefined,
@@ -1029,12 +1059,15 @@ export default function TailorResume() {
         jobTitle: trimmedJobTitle || undefined,
       })
 
+      console.log('[handleTailor] API response received:', { success: result.success, error: result.error, hasData: !!result.data })
+
       if (!result.success) {
         throw new Error(result.error || 'Failed to tailor resume')
       }
 
       // Set tailored resume data
       const tailoredId = result.data.tailored_resume_id
+      console.log('[handleTailor] Setting tailored resume, id:', tailoredId)
       setTailoredResume({
         id: tailoredId,
         tailored_summary: result.data.summary,
@@ -1070,6 +1103,7 @@ export default function TailorResume() {
       setLoadingComplete(false)
       setLoading(false)
     } catch (err: any) {
+      console.error('[handleTailor] Error caught:', err.message, err)
       setError(err.message)
       setLoading(false)
     }
@@ -2358,14 +2392,14 @@ export default function TailorResume() {
           <AILoadingScreen
             title="Generating Tailored Resume"
             subtitle="Our AI is customizing your resume for this specific role"
-            footnote="This typically takes 30-60 seconds"
+            footnote="This typically takes 60-90 seconds"
             steps={[
               { id: 'analyze', label: 'Researching company & role', description: 'Gathering company insights and job requirements...' },
               { id: 'match', label: 'Matching your skills & experience', description: 'Identifying transferable qualifications...' },
               { id: 'rewrite', label: 'Rewriting resume content', description: 'Tailoring bullets for maximum impact...' },
               { id: 'finalize', label: 'Finalizing tailored document', description: 'Formatting and generating DOCX file...' },
             ]}
-            progress={{ type: 'estimated', estimatedDurationMs: 55000, isComplete: loadingComplete }}
+            progress={{ type: 'estimated', estimatedDurationMs: 120000, isComplete: loadingComplete }}
             onCancel={() => {
               setLoading(false)
               setError('Resume generation was cancelled.')

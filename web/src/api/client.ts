@@ -626,6 +626,9 @@ class ApiClient {
         job_description: tailorData.jobDescription,
       };
 
+      console.log('[tailorResume] Sending POST to /api/tailor/tailor', backendData);
+      const fetchStart = Date.now();
+
       const response = await fetch(`${this.baseUrl}/api/tailor/tailor`, {
         method: 'POST',
         headers: this.getHeaders({ 'Content-Type': 'application/json' }),
@@ -634,8 +637,20 @@ class ApiClient {
       });
 
       clearTimeout(timeoutId);
+      console.log(`[tailorResume] Response received in ${Date.now() - fetchStart}ms, status: ${response.status}`);
 
-      const data = await response.json();
+      let data: any;
+      try {
+        const text = await response.text();
+        console.log(`[tailorResume] Response body (first 500): ${text.substring(0, 500)}`);
+        data = JSON.parse(text);
+      } catch (parseError: any) {
+        console.error('[tailorResume] JSON parse error:', parseError.message);
+        return {
+          success: false,
+          error: `Server returned invalid response (HTTP ${response.status}). The AI service may be overloaded — please try again.`,
+        };
+      }
 
       if (!response.ok) {
         return {
@@ -651,6 +666,7 @@ class ApiClient {
       };
     } catch (error: any) {
       clearTimeout(timeoutId);
+      console.error(`[tailorResume] Fetch error: ${error.name}: ${error.message}`);
       if (error.name === 'AbortError') {
         return {
           success: false,

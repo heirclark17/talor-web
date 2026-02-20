@@ -16,6 +16,9 @@ export default defineConfig({
         target: 'https://resume-ai-backend-production-3134.up.railway.app',
         changeOrigin: true,
         secure: true,
+        // 5-minute timeout for long-running AI operations (Firecrawl + Perplexity + OpenAI)
+        timeout: 300_000,
+        proxyTimeout: 300_000,
       },
     },
   },
