@@ -250,6 +250,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
           method: 'PATCH',
           headers: getApiHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ behavioral_technical_questions: result.data }),
+        })
 
         // Signal completion so progress bar reaches 100% before unmount
         setLoadingComplete(true)
@@ -312,6 +313,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
               star_story: storyData,
               question_key: questionKey,
             }),
+          })
         }
       }
     } catch (err) {

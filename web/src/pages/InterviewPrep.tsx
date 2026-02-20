@@ -292,6 +292,7 @@ export default function InterviewPrep() {
         method: 'PATCH',
         headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ user_data: { [field]: value } }),
+      })
     }, 500)
   }, [])
 

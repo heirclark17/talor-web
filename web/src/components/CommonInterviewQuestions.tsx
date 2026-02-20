@@ -119,6 +119,7 @@ export default function CommonInterviewQuestions({
         method: 'PATCH',
         headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ common_questions: result.data }),
+      })
 
       // Signal completion so progress bar reaches 100% before unmount
       setLoadingComplete(true)
@@ -166,6 +167,7 @@ export default function CommonInterviewQuestions({
           method: 'PATCH',
           headers: getApiHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ common_questions: updatedData }),
+        })
       }
     } catch (err: any) {
       setError(`Failed to regenerate: ${err.message}`)
