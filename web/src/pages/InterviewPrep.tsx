@@ -695,7 +695,7 @@ export default function InterviewPrep() {
       <AILoadingScreen
         title="Generating Interview Prep with AI"
         subtitle="Researching the company and building your personalized prep guide"
-        footnote="This typically takes 10-15 seconds"
+        footnote="This typically takes 45-90 seconds"
         steps={[
           { id: 'generate', label: 'Generate interview prep', description: 'Creating your personalized prep guide...' },
           { id: 'research', label: 'Research company background', description: 'Analyzing strategic initiatives and culture...' },

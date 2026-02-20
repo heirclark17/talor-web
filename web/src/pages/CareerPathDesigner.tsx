@@ -1186,7 +1186,7 @@ export default function CareerPathDesigner() {
                 Reset Saved Data
               </button>
             </div>
-            <p className="text-xs sm:text-sm text-theme-tertiary mt-4">Takes 1-2 minutes for comprehensive assessment</p>
+            <p className="text-xs sm:text-sm text-theme-tertiary mt-4">Takes 1-3 minutes for comprehensive assessment</p>
           </div>
         </div>
       </div>
@@ -2225,7 +2225,7 @@ export default function CareerPathDesigner() {
       <AILoadingScreen
         title="Crafting Your Personalized Career Roadmap"
         subtitle={jobMessage || `Our AI is researching ${dreamRole} opportunities with real-world data...`}
-        footnote="This typically takes 15-30 seconds"
+        footnote="This typically takes 1-3 minutes"
         steps={[
           { id: 'research', label: 'Researching certifications, events, and job market data', description: 'Searching with Perplexity AI...' },
           { id: 'analyze', label: 'Analyzing your transferable skills', description: 'Matching your experience to target roles...' },
