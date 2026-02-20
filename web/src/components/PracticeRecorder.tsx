@@ -62,6 +62,7 @@ export default function PracticeRecorder({
 
   // S3 key for the current recording
   const [s3Key, setS3Key] = useState<string | null>(existingRecordingUrl || null);
+  const [audioLevel, setAudioLevel] = useState<number>(0); // 0-100 for speaking animation
 
   // Refs
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
@@ -72,6 +73,9 @@ export default function PracticeRecorder({
   const blobRef = useRef<Blob | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const seekBarRef = useRef<HTMLDivElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   // Load playback URL when we have an existing recording
   useEffect(() => {
@@ -138,6 +142,53 @@ export default function PracticeRecorder({
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
+    // Stop audio analysis
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+      analyserRef.current = null;
+    }
+    setAudioLevel(0);
+  };
+
+  const startAudioAnalysis = (stream: MediaStream) => {
+    try {
+      // Create audio context and analyser
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+
+      analyser.fftSize = 256;
+      microphone.connect(analyser);
+
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      // Animate audio levels
+      const updateAudioLevel = () => {
+        if (!analyserRef.current) return;
+
+        analyserRef.current.getByteFrequencyData(dataArray);
+
+        // Calculate average volume
+        const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+        const normalizedLevel = Math.min(100, (average / 255) * 100);
+
+        setAudioLevel(normalizedLevel);
+        animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
+      };
+
+      updateAudioLevel();
+      console.log('[PracticeRecorder] Audio analysis started');
+    } catch (e) {
+      console.error('[PracticeRecorder] Failed to start audio analysis:', e);
+    }
   };
 
   const startPreview = async () => {
@@ -163,6 +214,9 @@ export default function PracticeRecorder({
       console.log('[PracticeRecorder] Audio tracks:', stream.getAudioTracks().length);
 
       streamRef.current = stream;
+
+      // Start audio level analysis for speaking animation
+      startAudioAnalysis(stream);
 
       if (mode === 'video' && videoPreviewRef.current) {
         console.log('[PracticeRecorder] Setting video preview srcObject');
@@ -515,6 +569,55 @@ export default function PracticeRecorder({
               <span className="text-xs text-white font-medium">{formatTime(recordingTime)}</span>
             </div>
           )}
+          {/* Speaking indicator - Audio level bars */}
+          {state === 'recording' && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-end gap-1 px-3 py-2 bg-black/50 backdrop-blur-sm rounded-full">
+              {[0, 1, 2, 3, 4].map((i) => {
+                const barHeight = Math.max(4, (audioLevel / 100) * 24 * (1 - Math.abs(i - 2) * 0.2));
+                return (
+                  <div
+                    key={i}
+                    className="w-1 bg-gradient-to-t from-green-400 to-green-300 rounded-full transition-all duration-75"
+                    style={{
+                      height: `${barHeight}px`,
+                      opacity: audioLevel > 5 ? 1 : 0.3,
+                    }}
+                  />
+                );
+              })}
+              <span className="ml-2 text-xs text-white/80 font-medium">
+                {audioLevel > 10 ? 'Speaking...' : 'Listening...'}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Audio-only mode with waveform indicator */}
+      {(state === 'previewing' || state === 'recording') && mode === 'audio' && (
+        <div className="p-6 bg-gradient-to-br from-theme-glass-10 to-theme-glass-5 rounded-xl border border-theme-glass-10">
+          <div className="flex flex-col items-center gap-4">
+            <Mic className={`w-12 h-12 ${audioLevel > 10 ? 'text-green-500' : 'text-theme-secondary'} transition-colors`} />
+            {/* Audio level bars */}
+            <div className="flex items-end gap-1.5 h-16">
+              {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+                const barHeight = Math.max(8, (audioLevel / 100) * 64 * (1 - Math.abs(i - 3) * 0.15));
+                return (
+                  <div
+                    key={i}
+                    className="w-2 bg-gradient-to-t from-green-500 to-green-400 rounded-full transition-all duration-75"
+                    style={{
+                      height: `${barHeight}px`,
+                      opacity: audioLevel > 5 ? 1 : 0.4,
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <p className="text-sm text-theme-secondary">
+              {state === 'recording' ? (audioLevel > 10 ? '🎤 Speaking...' : '👂 Listening...') : 'Ready to record'}
+            </p>
+          </div>
         </div>
       )}
 
