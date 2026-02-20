@@ -2688,12 +2688,12 @@ export default function TailorResume() {
                         setSelectedResumeId(resume.id)
                         toggleResumeSelection(resume.id)
                       }}
-                      className="mt-1 flex-shrink-0"
+                      className="mt-0.5 flex-shrink-0 p-1.5 rounded-lg transition-all duration-200 hover:bg-theme-glass-10"
                     >
                       {selectedResumeId === resume.id ? (
-                        <CheckSquare className="w-6 h-6 text-emerald-400" />
+                        <CheckSquare className="w-8 h-8 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]" />
                       ) : (
-                        <Square className="w-6 h-6 text-theme-secondary hover:text-theme transition-colors" />
+                        <Square className="w-8 h-8 text-theme-tertiary hover:text-theme-secondary transition-colors" />
                       )}
                     </button>
 
