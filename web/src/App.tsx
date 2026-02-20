@@ -32,6 +32,7 @@ const OnboardingTour = React.lazy(() => import('./components/OnboardingTour'))
 
 function Dashboard() {
   const navigate = useNavigate()
+  const { isSignedIn } = useAuth()
   const heroAnimation = useScrollAnimation(0.1)
   const socialProofAnimation = useScrollAnimation(0.1)
   const featuresAnimation = useScrollAnimation(0.1)
@@ -52,6 +53,43 @@ function Dashboard() {
         <div className="particle"></div>
         <div className="particle"></div>
       </div>
+
+      {/* Landing Page Navbar */}
+      <nav className="sticky top-0 z-50 landing-nav-glass">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2">
+              <FileText className="w-7 h-7 sm:w-8 sm:h-8 text-theme" />
+              <span className="text-xl sm:text-2xl font-bold text-theme tracking-tight">Talor</span>
+            </Link>
+            <div className="flex items-center gap-3">
+              {isSignedIn ? (
+                <button
+                  onClick={() => navigate('/resumes')}
+                  className="btn-primary inline-flex items-center gap-2 text-sm px-5 py-2 text-white font-semibold"
+                >
+                  Dashboard
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => navigate('/sign-in')}
+                    className="text-sm font-medium text-theme-secondary hover:text-theme transition-colors px-3 py-2"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    onClick={() => navigate('/sign-up')}
+                    className="btn-primary inline-flex items-center gap-2 text-sm px-5 py-2 text-white font-semibold"
+                  >
+                    Get Started
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Hero Section */}

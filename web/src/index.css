@@ -485,6 +485,16 @@ input, button, textarea, select {
   animation: userMenuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.landing-nav-glass {
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
 @keyframes userMenuIn {
   from {
     opacity: 0;
