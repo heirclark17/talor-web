@@ -30,7 +30,6 @@ export const PostHogProvider: React.FC<PostHogProviderProps> = ({ children }) =>
     const host = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com';
 
     if (!apiKey) {
-      console.warn('[PostHog] API key not configured - analytics disabled');
       setIsReady(true);
       return;
     }
@@ -51,52 +50,41 @@ export const PostHogProvider: React.FC<PostHogProviderProps> = ({ children }) =>
       });
 
       setIsReady(true);
-      console.log('[PostHog] ✅ Initialized successfully');
     } catch (error) {
-      console.error('[PostHog] Initialization error:', error);
       setIsReady(true);
     }
   }, []);
 
   const capture = (event: string, properties?: Record<string, any>) => {
     if (!posthog.__loaded) {
-      console.warn('[PostHog] Not initialized - event skipped:', event);
       return;
     }
 
     try {
       posthog.capture(event, properties);
-      console.log('[PostHog] Event captured:', event, properties);
     } catch (error) {
-      console.error('[PostHog] Capture error:', error);
     }
   };
 
   const identify = (userId: string, properties?: Record<string, any>) => {
     if (!posthog.__loaded) {
-      console.warn('[PostHog] Not initialized - identify skipped');
       return;
     }
 
     try {
       posthog.identify(userId, properties);
-      console.log('[PostHog] User identified:', userId);
     } catch (error) {
-      console.error('[PostHog] Identify error:', error);
     }
   };
 
   const reset = () => {
     if (!posthog.__loaded) {
-      console.warn('[PostHog] Not initialized - reset skipped');
       return;
     }
 
     try {
       posthog.reset();
-      console.log('[PostHog] Session reset');
     } catch (error) {
-      console.error('[PostHog] Reset error:', error);
     }
   };
 

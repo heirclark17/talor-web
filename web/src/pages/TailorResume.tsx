@@ -74,9 +74,7 @@ const saveSessionToLocalStorage = (
       timestamp: Date.now()
     }
     localStorage.setItem(TAILOR_SESSION_KEY, JSON.stringify(sessionData))
-    console.log('Saved session to localStorage with AI analysis data')
   } catch (err) {
-    console.error('Error saving session:', err)
   }
 }
 
@@ -86,10 +84,8 @@ const loadSessionFromLocalStorage = () => {
     if (!sessionData) return null
 
     const parsed = JSON.parse(sessionData)
-    console.log('Loaded session from localStorage')
     return parsed
   } catch (err) {
-    console.error('Error loading session:', err)
     return null
   }
 }
@@ -98,9 +94,7 @@ const clearSession = () => {
   try {
     localStorage.removeItem(TAILOR_SESSION_KEY)
     localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
-    console.log('Cleared session from localStorage')
   } catch (err) {
-    console.error('Error clearing session:', err)
   }
 }
 
@@ -220,7 +214,6 @@ export default function TailorResume() {
         setSavedJobs(result.data.jobs)
       }
     } catch (err) {
-      console.error('Error loading saved jobs:', err)
     } finally {
       setLoadingSavedJobs(false)
     }
@@ -244,7 +237,6 @@ export default function TailorResume() {
         showError(result.error || 'Failed to save job')
       }
     } catch (err) {
-      console.error('Error saving job:', err)
     } finally {
       setSavingJob(false)
     }
@@ -258,7 +250,6 @@ export default function TailorResume() {
         setSavedJobs(prev => prev.filter(j => j.id !== jobId))
       }
     } catch (err) {
-      console.error('Error deleting saved job:', err)
     } finally {
       setDeletingJobId(null)
     }
@@ -327,7 +318,6 @@ export default function TailorResume() {
     const loadSavedComparison = async () => {
       const comparisonId = searchParams.get('comparison')
       if (comparisonId && !tailoredResume && !loading) {
-        console.log('Loading saved comparison:', comparisonId)
         const controller = new AbortController()
         const tid = setTimeout(() => controller.abort(), 30_000)
         try {
@@ -344,7 +334,6 @@ export default function TailorResume() {
           }
 
           const data = await response.json()
-          console.log('Loaded saved comparison data:', data)
 
           // Set base resume data
           setSelectedResume({
@@ -381,16 +370,13 @@ export default function TailorResume() {
 
           // Restore persisted AI analysis data
           if (data.analysis) {
-            console.log('Restoring persisted AI analysis')
             setAnalysis(data.analysis)
             setAnalysisLoaded(true)
           }
           if (data.keywords) {
-            console.log('Restoring persisted keyword analysis')
             setKeywords(data.keywords)
           }
           if (data.match_score) {
-            console.log('Restoring persisted match score')
             setMatchScore(data.match_score)
           }
 
@@ -398,7 +384,6 @@ export default function TailorResume() {
           setSuccess(true)
           setIsSaved(true)
         } catch (err: any) {
-          console.error('Error loading saved comparison:', err)
           setError('Failed to load saved comparison')
         }
       }
@@ -410,7 +395,6 @@ export default function TailorResume() {
   useEffect(() => {
     const resumeId = searchParams.get('resumeId')
     if (resumeId && !tailoredResume && !loading) {
-      console.log('Loading tailored resume from URL param:', resumeId)
       loadTailoredResumeById(parseInt(resumeId))
     }
   }, [searchParams])
@@ -422,13 +406,11 @@ export default function TailorResume() {
       const comparisonId = searchParams.get('comparison')
       const resumeId = searchParams.get('resumeId')
       if (comparisonId || resumeId) {
-        console.log('Skipping session restore - loading from URL parameter')
         return
       }
 
       const session = loadSessionFromLocalStorage()
       if (session && session.tailoredResume && session.selectedResume) {
-        console.log('Restoring session from localStorage')
         setSelectedResume(session.selectedResume)
         setTailoredResume(session.tailoredResume)
         setJobUrl(session.jobUrl || '')
@@ -437,16 +419,13 @@ export default function TailorResume() {
 
         // Restore AI analysis data if available
         if (session.analysis) {
-          console.log('Restoring AI analysis from localStorage')
           setAnalysis(session.analysis)
           setAnalysisLoaded(true)
         }
         if (session.keywords) {
-          console.log('Restoring keywords from localStorage')
           setKeywords(session.keywords)
         }
         if (session.matchScore) {
-          console.log('Restoring match score from localStorage')
           setMatchScore(session.matchScore)
         }
 
@@ -470,7 +449,6 @@ export default function TailorResume() {
 
       // Only load from API if no session data exists
       if (savedId && !tailoredResume && !loading && !session) {
-        console.log('Restoring last viewed tailored resume:', savedId)
         await loadTailoredResumeById(parseInt(savedId))
       }
     }
@@ -661,7 +639,6 @@ export default function TailorResume() {
     try {
       await api.updateTailoredResume(tailoredResume.id, { experience: updatedExperience })
     } catch (err) {
-      console.error('[TailorResume] Failed to save title selection:', err)
     }
   }
 
@@ -733,7 +710,6 @@ export default function TailorResume() {
 
       setEditMode(prev => ({ ...prev, [section]: false }))
     } catch (error) {
-      console.error('Failed to save edit:', error)
       // Still toggle edit mode on error so user isn't stuck
       setEditMode(prev => ({ ...prev, [section]: false }))
     } finally {
@@ -775,7 +751,6 @@ export default function TailorResume() {
         setSelectedResume(result.data)
       }
     } catch (err: any) {
-      console.error('Failed to load full resume:', err)
       // Fallback to partial data from list
       const resume = resumes.find(r => r.id === resumeId)
       setSelectedResume(resume || null)
@@ -845,7 +820,6 @@ export default function TailorResume() {
 
       setShowComparison(true)
       setSuccess(true)
-      console.log('Successfully restored tailored resume:', tailoredId)
 
       // Signal completion so progress bar reaches 100% before unmount
       setLoadingComplete(true)
@@ -860,7 +834,6 @@ export default function TailorResume() {
       setLoading(true)
       await doRestore(controller.signal)
     } catch (err: any) {
-      console.error('Error loading tailored resume:', err)
       const message = err.name === 'AbortError'
         ? 'Loading saved resume timed out. Please try again.'
         : err.message
@@ -910,7 +883,6 @@ export default function TailorResume() {
 
       setAnalysisEstimate(0)
     } catch (error) {
-      console.error('Error loading analysis:', error)
       setAnalysisProgress('Error loading analysis')
     } finally {
       setLoadingAnalysis(false)
@@ -924,7 +896,6 @@ export default function TailorResume() {
     }
 
     try {
-      console.log(`Downloading resume ${tailoredResume.id} as ${format}...`)
       const result = await api.exportResumeAnalysis(tailoredResume.id, format)
 
       if (result.success && result.data) {
@@ -941,13 +912,10 @@ export default function TailorResume() {
         a.click()
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
-        console.log(`Resume downloaded successfully: ${filename}`)
       } else {
-        console.error('Export failed:', result.error)
         showError(result.error || 'Error downloading resume')
       }
     } catch (error) {
-      console.error('Error downloading resume:', error)
       showError('Error downloading resume')
     }
   }
@@ -1009,9 +977,7 @@ export default function TailorResume() {
         setSelectedResume(null)
       }
 
-      console.log(`Successfully deleted ${count} resume(s)`)
     } catch (err: any) {
-      console.error('Bulk delete error:', err)
       setError(err.message)
     } finally {
       setDeletingBulk(false)
@@ -1049,9 +1015,7 @@ export default function TailorResume() {
       }
 
       // Show success message
-      console.log('Resume deleted successfully:', resumeId)
     } catch (err: any) {
-      console.error('Delete error:', err)
       setError(err.message)
     } finally {
       setDeletingResumeId(null)
@@ -1115,9 +1079,7 @@ export default function TailorResume() {
         }))
       }
 
-      console.log('Extraction result:', { company: extractedCompany, title: extractedTitle })
     } catch (err: any) {
-      console.error('Extraction error:', err)
       setExtractionAttempted(true)
       setCompanyExtracted(false)
       setTitleExtracted(false)
@@ -1176,7 +1138,6 @@ export default function TailorResume() {
       // in the backend (saves 10-20 seconds and avoids duplicate scraping costs).
       const shouldSendJobUrl = trimmedJobUrl && (!companyExtracted || !titleExtracted)
 
-      console.log('[handleTailor] Calling api.tailorResume...', {
         baseResumeId: selectedResumeId,
         jobUrl: shouldSendJobUrl ? trimmedJobUrl : undefined,
         company: trimmedCompany,
@@ -1190,7 +1151,6 @@ export default function TailorResume() {
         jobTitle: trimmedJobTitle || undefined,
       })
 
-      console.log('[handleTailor] API response received:', { success: result.success, error: result.error, hasData: !!result.data })
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to tailor resume')
@@ -1198,7 +1158,6 @@ export default function TailorResume() {
 
       // Set tailored resume data
       const tailoredId = result.data.tailored_resume_id
-      console.log('[handleTailor] Setting tailored resume, id:', tailoredId)
       setTailoredResume({
         id: tailoredId,
         tailored_summary: result.data.summary,
@@ -1215,7 +1174,6 @@ export default function TailorResume() {
 
       // Save to localStorage for persistence
       localStorage.setItem(LAST_TAILORED_RESUME_KEY, tailoredId.toString())
-      console.log('Saved tailored resume to localStorage:', tailoredId)
 
       setSuccess(true)
       setShowComparison(true)
@@ -1242,7 +1200,6 @@ export default function TailorResume() {
       await new Promise(r => setTimeout(r, 600))
       setLoadingComplete(false)
     } catch (err: any) {
-      console.error('[handleTailor] Error caught:', err.message, err)
       setError(err.message)
     } finally {
       setLoading(false)
@@ -1269,7 +1226,6 @@ export default function TailorResume() {
       showSuccess('Comparison saved! View it in the Saved menu.')
       setIsSaved(true)
     } catch (err: any) {
-      console.error('Error saving comparison:', err)
       showError('Failed to save comparison')
     }
   }
@@ -1291,7 +1247,6 @@ export default function TailorResume() {
       setShowSaveWarning(false)
       navigate(`/interview-prep/${tailoredResume.id}`)
     } catch (err: any) {
-      console.error('Error saving from warning:', err)
       showError('Failed to save. You can try again or continue without saving.')
     } finally {
       setSavingFromWarning(false)

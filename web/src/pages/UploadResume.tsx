@@ -59,7 +59,6 @@ export default function UploadResume() {
     const sessionData = localStorage.getItem(TAILOR_SESSION_KEY)
 
     if (savedResumeId || sessionData) {
-      console.log('Clearing old session data from localStorage')
       localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
       localStorage.removeItem(TAILOR_SESSION_KEY)
     }
@@ -90,7 +89,6 @@ export default function UploadResume() {
         showError(`Failed to delete resume: ${result.error}`)
       }
     } catch (err: any) {
-      console.error('Error deleting resume:', err)
       showError(`Error deleting resume: ${err.message}`)
     } finally {
       setDeletingId(null)
@@ -132,20 +130,10 @@ export default function UploadResume() {
         throw new Error(uploadResult.error || 'Upload failed')
       }
 
-      console.log('Upload successful:', uploadResult.data)
-      console.log('Full response structure:', JSON.stringify(uploadResult.data, null, 2))
 
       // Log the raw parsed_data to see what backend is sending
-      console.log('=== RAW BACKEND PARSED_DATA ===')
-      console.log('parsed_data object:', uploadResult.data.parsed_data)
-      console.log('Available top-level fields:', Object.keys(uploadResult.data).join(', '))
       if (uploadResult.data.parsed_data) {
-        console.log('Available parsed_data fields:', Object.keys(uploadResult.data.parsed_data).join(', '))
-        console.log('candidate_name:', uploadResult.data.parsed_data.candidate_name)
-        console.log('candidate_email:', uploadResult.data.parsed_data.candidate_email)
-        console.log('candidate_phone:', uploadResult.data.parsed_data.candidate_phone)
       }
-      console.log('===============================')
 
       // Success - map backend response to our interface
       const backendData = uploadResult.data.parsed_data || uploadResult.data
@@ -171,31 +159,11 @@ export default function UploadResume() {
         }
       }
 
-      console.log('=== CONTACT INFORMATION DEBUG ===')
-      console.log('Name:', mappedData.parsed_data.name)
-      console.log('Email:', mappedData.parsed_data.email)
-      console.log('Phone:', mappedData.parsed_data.phone)
-      console.log('LinkedIn:', mappedData.parsed_data.linkedin)
-      console.log('Location:', mappedData.parsed_data.location)
-      console.log('==================================')
 
-      console.log('Mapped data:', mappedData)
 
       // Log each experience entry individually for better debugging
-      console.log('=== EXPERIENCE ENTRIES DEBUG ===')
       mappedData.parsed_data.experience.forEach((exp: any, idx: number) => {
-        console.log(`Experience ${idx + 1}:`)
-        console.log(`  Available fields: ${Object.keys(exp).join(', ')}`)
-        console.log(`  header: "${exp.header}"`)
-        console.log(`  title: "${exp.title}"`)
-        console.log(`  position: "${exp.position}"`)
-        console.log(`  role: "${exp.role}"`)
-        console.log(`  job_title: "${exp.job_title}"`)
-        console.log(`  company: "${exp.company}"`)
-        console.log(`  location: "${exp.location}"`)
-        console.log(`  dates: "${exp.dates}"`)
       })
-      console.log('=================================')
       setParsedResume(mappedData)
       setUploadSuccess(true)
       setUploading(false)
@@ -212,7 +180,6 @@ export default function UploadResume() {
         fileInputRef.current.value = ''
       }
     } catch (err: any) {
-      console.error('Upload error:', err)
       setError(err.message || 'Failed to upload resume')
       setUploading(false)
       setUploadSuccess(false)

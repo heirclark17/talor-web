@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { FileEdit, Plus, Download, Loader2, Wand2, ChevronDown, Trash2, X, Upload, FileText, Search } from 'lucide-react'
 import { api } from '../api/client'
 import { useResumeStore } from '../stores/resumeStore'
+import { showError } from '../utils/toast'
 
 interface CoverLetter {
   id: number
@@ -87,7 +88,7 @@ export default function CoverLetterGenerator() {
     if (!file) return
     const maxSize = 10 * 1024 * 1024
     if (file.size > maxSize) {
-      alert('File must be under 10MB')
+      showError('File must be under 10MB')
       return
     }
     setUploading(true)
@@ -97,16 +98,13 @@ export default function CoverLetterGenerator() {
         const newResume = res.data.resume || res.data
         setResumes(prev => [newResume, ...prev])
         setSelectedResumeId(newResume.id)
-        console.log('[CoverLetters] Resume uploaded successfully:', newResume.id)
       } else {
-        console.error('[CoverLetters] Upload failed:', res)
-        alert('Upload failed. Please try again.')
+        showError('Upload failed. Please try again.')
         setResumeSource('none')
         setSelectedResumeId(null)
       }
     } catch (err) {
-      console.error('[CoverLetters] Upload error:', err)
-      alert('Upload error. Please try again.')
+      showError('Upload error. Please try again.')
       setResumeSource('none')
       setSelectedResumeId(null)
     } finally {
@@ -122,7 +120,6 @@ export default function CoverLetterGenerator() {
         setLetters(res.data.cover_letters || [])
       }
     } catch (err) {
-      console.error('[CoverLetters] Load error:', err)
     } finally {
       setLoading(false)
     }
@@ -190,9 +187,7 @@ export default function CoverLetterGenerator() {
         setJobDescription(extractedDescription)
       }
 
-      console.log('Extraction result:', { company: extractedCompany, title: extractedTitle })
     } catch (err: any) {
-      console.error('Extraction error:', err)
       setExtractionAttempted(true)
       setCompanyExtracted(false)
       setTitleExtracted(false)
@@ -206,9 +201,6 @@ export default function CoverLetterGenerator() {
   }
 
   async function handleGenerate(e: React.FormEvent) {
-    console.log('[CoverLetters] ========================================')
-    console.log('[CoverLetters] handleGenerate called')
-    console.log('[CoverLetters] Form data:', {
       jobTitle,
       companyName,
       jobDescription: jobDescription?.substring(0, 100) + '...',
@@ -223,17 +215,13 @@ export default function CoverLetterGenerator() {
     })
 
     e.preventDefault()
-    console.log('[CoverLetters] preventDefault called')
 
     setGenerating(true)
-    console.log('[CoverLetters] setGenerating(true) called')
 
     setGenerationStage('researching')
-    console.log('[CoverLetters] setGenerationStage("researching") called')
 
     // Switch to "generating" stage after 5 seconds
     const stageTimer = setTimeout(() => {
-      console.log('[CoverLetters] Switching to "generating" stage')
       setGenerationStage('generating')
     }, 5000)
 
@@ -249,34 +237,25 @@ export default function CoverLetterGenerator() {
       // Send job description or job URL based on input method
       // If URL was extracted and we have the description, send both for efficiency
       if (jobInputMethod === 'url') {
-        console.log('[CoverLetters] Using URL input method')
         params.job_url = jobUrl
         // If we already extracted the description, include it to avoid re-extraction
         if (extractionAttempted && jobDescription) {
-          console.log('[CoverLetters] Including extracted job description')
           params.job_description = jobDescription
         } else {
-          console.log('[CoverLetters] No extracted description, will extract on backend')
         }
       } else {
-        console.log('[CoverLetters] Using text input method')
         params.job_description = jobDescription
       }
 
       if (resumeSource !== 'none' && selectedResumeId) {
-        console.log('[CoverLetters] Including resume:', selectedResumeId)
         params.base_resume_id = selectedResumeId
       }
 
-      console.log('[CoverLetters] Final params:', JSON.stringify(params, null, 2))
-      console.log('[CoverLetters] Calling api.generateCoverLetter...')
 
       const res = await api.generateCoverLetter(params)
 
-      console.log('[CoverLetters] API response received:', JSON.stringify(res, null, 2))
 
       if (res.success && res.data) {
-        console.log('[CoverLetters] Generation successful!')
         loadLetters()
         setShowGenerator(false)
         setJobTitle('')
@@ -295,12 +274,10 @@ export default function CoverLetterGenerator() {
           setEditContent(res.data.cover_letter.content)
         }
       } else {
-        console.error('[CoverLetters] Generation failed:', res)
-        alert(`Generation failed: ${res.error || 'Unknown error'}. Please try again.`)
+        showError(`Generation failed: ${res.error || 'Unknown error'}. Please try again.`)
       }
     } catch (err: any) {
-      console.error('[CoverLetters] Generate error:', err)
-      alert(`Error generating cover letter: ${err.message || 'Unknown error'}. Please check the console and try again.`)
+      showError(`Error generating cover letter: ${err.message || 'Unknown error'}. Please try again.`)
     } finally {
       clearTimeout(stageTimer)
       setGenerating(false)
@@ -341,7 +318,6 @@ export default function CoverLetterGenerator() {
         URL.revokeObjectURL(url)
       }
     } catch (err) {
-      console.error('[CoverLetters] Export error:', err)
     }
   }
 
@@ -689,7 +665,6 @@ export default function CoverLetterGenerator() {
                       onChange={e => {
                         const file = e.target.files?.[0]
                         if (file) {
-                          console.log('[CoverLetters] File selected:', file.name, file.size)
                           handleFileUpload(file)
                         }
                       }}
@@ -722,7 +697,6 @@ export default function CoverLetterGenerator() {
                       <button
                         type="button"
                         onClick={() => {
-                          console.log('[CoverLetters] Upload button clicked')
                           fileInputRef.current?.click()
                         }}
                         className="w-full px-4 py-2.5 bg-theme-glass-5 border border-dashed border-theme-muted rounded-xl text-sm text-theme-secondary hover:border-theme-subtle hover:text-theme transition-all hover:bg-theme-glass-10"
@@ -794,7 +768,6 @@ export default function CoverLetterGenerator() {
               <button
                 type="submit"
                 disabled={generating || uploading}
-                onClick={() => console.log('[CoverLetters] Submit button clicked! Disabled:', generating || uploading)}
                 className="btn-primary w-full py-3 flex items-center justify-center gap-2"
               >
                 {generating ? (

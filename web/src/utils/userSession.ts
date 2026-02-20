@@ -6,18 +6,21 @@
 
 const USER_ID_KEY = 'talor_user_id';
 
-// Module-level auth user ID, set by setClerkUserId()
-let _clerkUserId: string | null = null;
+// Module-level auth user ID, set by setAuthUserId()
+let _authUserId: string | null = null;
 
 // Module-level cached auth token for API requests
 let _cachedAuthToken: string | null = null;
 
 /**
- * Set the auth user ID (called from auth context)
+ * Set the auth user ID (called from auth sync hook)
  */
-export function setClerkUserId(id: string | null): void {
-  _clerkUserId = id ? `supa_${id}` : null;
+export function setAuthUserId(id: string | null): void {
+  _authUserId = id ? `supa_${id}` : null;
 }
+
+/** @deprecated Use setAuthUserId instead */
+export const setClerkUserId = setAuthUserId;
 
 /**
  * Generate a unique user ID
@@ -30,9 +33,9 @@ function generateUserId(): string {
  * Get user ID — prefers Supabase user, falls back to localStorage
  */
 export function getUserId(): string {
-  // Prefer Clerk user ID if available
-  if (_clerkUserId) {
-    return _clerkUserId;
+  // Prefer authenticated user ID if available
+  if (_authUserId) {
+    return _authUserId;
   }
 
   // Fallback: read Supabase user ID directly from localStorage
@@ -43,7 +46,7 @@ export function getUserId(): string {
       const uid = parsed?.user?.id;
       if (uid) {
         const supaId = `supa_${uid}`;
-        _clerkUserId = supaId;  // cache for next call
+        _authUserId = supaId;  // cache for next call
         return supaId;
       }
     }
@@ -57,12 +60,9 @@ export function getUserId(): string {
   if (!userId) {
     userId = generateUserId();
     localStorage.setItem(USER_ID_KEY, userId);
-    console.log('Generated new user ID:', userId);
   } else if (!userId.startsWith('user_')) {
-    console.log('Migrating old user ID format to new format');
     userId = 'user_' + userId;
     localStorage.setItem(USER_ID_KEY, userId);
-    console.log('Migrated user ID:', userId);
   }
 
   return userId;
@@ -84,8 +84,7 @@ export function getOldUserId(): string | null {
  */
 export function clearUserSession(): void {
   localStorage.removeItem(USER_ID_KEY);
-  _clerkUserId = null;
-  console.log('User session cleared');
+  _authUserId = null;
 }
 
 /**
@@ -96,7 +95,7 @@ export function hasExistingSession(): boolean {
 }
 
 /**
- * Set cached auth token (called from Clerk sync hook)
+ * Set cached auth token (called from auth sync hook)
  */
 export function setAuthToken(token: string | null): void {
   _cachedAuthToken = token;
@@ -104,7 +103,7 @@ export function setAuthToken(token: string | null): void {
 
 /**
  * Get auth token for API requests.
- * Prefers the cached token set by useClerkUserSync, but falls back to
+ * Prefers the cached token set by useAuthUserSync, but falls back to
  * reading directly from Supabase's localStorage entry so that the very
  * first API call after page load (before the React effect fires) still
  * includes a valid Bearer token.

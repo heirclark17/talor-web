@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Video, Mic, Square, Play, Pause, Download, Trash2, Camera, MicOff, VideoOff } from 'lucide-react'
+import { showError } from '../utils/toast'
 
 interface Recording {
   id: string
@@ -61,8 +62,7 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
       setHasPermission(true)
       return stream
     } catch (error) {
-      console.error('Error accessing media devices:', error)
-      alert('Unable to access camera/microphone. Please check permissions.')
+      showError('Unable to access camera/microphone. Please check permissions.')
       return null
     }
   }

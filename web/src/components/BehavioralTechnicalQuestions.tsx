@@ -154,7 +154,6 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
   // Load cached questions data from DB on mount
   useEffect(() => {
     if (cachedQuestionsData && !questionsData) {
-      console.log('✓ BT Questions: Restoring from cached DB data')
       setQuestionsData(cachedQuestionsData)
     }
   }, [cachedQuestionsData])
@@ -191,7 +190,6 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
           }
         }
       } catch (err) {
-        console.error('Failed to load stories from DB, falling back to localStorage:', err)
       }
       // Fallback to localStorage
       const saved = localStorage.getItem(`bt-questions-stories-${interviewPrepId}`)
@@ -252,7 +250,6 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
           method: 'PATCH',
           headers: getApiHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ behavioral_technical_questions: result.data }),
-        }).catch(err => console.warn('Failed to cache BT questions:', err))
 
         // Signal completion so progress bar reaches 100% before unmount
         setLoadingComplete(true)
@@ -315,11 +312,9 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
               star_story: storyData,
               question_key: questionKey,
             }),
-          }).catch(err => console.error('Failed to auto-save AI story to DB:', err))
         }
       }
     } catch (err) {
-      console.error('Failed to generate AI STAR story:', err)
     } finally {
       setAiGeneratingStory(prev => ({ ...prev, [questionKey]: false }))
     }
@@ -369,7 +364,6 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
         setEditingQuestionId(null)
       }
     } catch (err) {
-      console.error('Failed to save STAR story:', err)
     } finally {
       setSavingStory(false)
     }

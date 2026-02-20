@@ -54,7 +54,7 @@ export default function PrivacyPolicy() {
           <p>We do not sell your personal information. We share your data only with:</p>
           <ul className="list-disc pl-6 space-y-2 mt-2">
             <li>AI service providers (for resume processing)</li>
-            <li>Authentication providers (Clerk)</li>
+            <li>Authentication providers (Supabase)</li>
             <li>Cloud hosting providers (for data storage)</li>
           </ul>
         </section>

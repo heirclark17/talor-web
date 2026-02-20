@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../api/client'
+import { showError } from '../utils/toast'
 import {
   Loader2,
   PlayCircle,
@@ -104,10 +105,10 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
       if (result.success && result.data) {
         setQuestions(result.data)
       } else {
-        alert(`Error: ${result.error}`)
+        showError(result.error || 'Failed to generate questions')
       }
     } catch (error: any) {
-      alert(`Error generating questions: ${error.message}`)
+      showError(`Error generating questions: ${error.message}`)
     } finally {
       setGenerating(false)
     }
@@ -126,10 +127,10 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
       if (result.success && result.data) {
         setStarStories(prev => ({ ...prev, [questionIndex]: result.data }))
       } else {
-        alert(`Error: ${result.error}`)
+        showError(result.error || 'Failed to generate STAR story')
       }
     } catch (error: any) {
-      alert(`Error generating STAR story: ${error.message}`)
+      showError(`Error generating STAR story: ${error.message}`)
     } finally {
       setGeneratingStory(prev => ({ ...prev, [questionIndex]: false }))
     }
@@ -163,7 +164,7 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
       setRecording(prev => ({ ...prev, [questionIndex]: type }))
       setRecordingStartTime(prev => ({ ...prev, [questionIndex]: Date.now() }))
     } catch (error: any) {
-      alert(`Error starting recording: ${error.message}`)
+      showError(`Error starting recording: ${error.message}`)
     }
   }
 
@@ -246,10 +247,10 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
         }, 3000)
         await loadSavedResponses()
       } else {
-        alert(`Error saving response: ${result.error}`)
+        showError(result.error || 'Failed to save response')
       }
     } catch (error: any) {
-      alert(`Error saving response: ${error.message}`)
+      showError(`Error saving response: ${error.message}`)
     } finally {
       setSaving(prev => ({ ...prev, [questionIndex]: false }))
     }

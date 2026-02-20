@@ -53,7 +53,6 @@ export default function CertificationRecommendations({ certifications, loading, 
   // Load saved certifications from DB prop first, then localStorage fallback
   useEffect(() => {
     if (savedCertsProp && savedCertsProp.length > 0) {
-      console.log('✓ Certifications: Restoring bookmarks from DB')
       setSavedCerts(new Set(savedCertsProp))
       return
     }
@@ -63,7 +62,6 @@ export default function CertificationRecommendations({ certifications, loading, 
         const parsed = JSON.parse(saved)
         setSavedCerts(new Set(parsed))
       } catch (e) {
-        console.error('Error loading saved certifications:', e)
       }
     }
   }, [savedCertsProp])

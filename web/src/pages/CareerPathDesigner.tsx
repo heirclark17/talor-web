@@ -301,7 +301,6 @@ export default function CareerPathDesigner() {
         setSpecificTechnologiesInterest(data.specificTechnologiesInterest || [])
         setCertificationAreasInterest(data.certificationAreasInterest || [])
       } catch (err) {
-        console.error('Failed to load saved data:', err)
       }
     }
   }, [])
@@ -315,7 +314,6 @@ export default function CareerPathDesigner() {
         setSavedPlans(result.data)
       }
     } catch (err) {
-      console.error('Failed to load saved career plans:', err)
     } finally {
       setLoadingSavedPlans(false)
     }
@@ -454,15 +452,12 @@ export default function CareerPathDesigner() {
       api.generateTasksForRole(currentRole, currentIndustry || undefined, bullets)
         .then(response => {
           if (response.success && response.data?.tasks) {
-            console.log('✓ Auto-generated tasks:', response.data.tasks, response.data.source)
             setTopTasks(response.data.tasks)
           } else {
-            console.warn('✗ Task generation failed:', response.error)
             // Keep default empty tasks
           }
         })
         .catch(err => {
-          console.error('✗ Task generation error:', err)
           // Keep default empty tasks
         })
         .finally(() => {
@@ -623,7 +618,6 @@ export default function CareerPathDesigner() {
         }
       }
     } catch (err) {
-      console.error('Failed to extract job details:', err)
     } finally {
       setExtractingJob(false)
     }
@@ -699,7 +693,6 @@ export default function CareerPathDesigner() {
               setTopTasks(taskResponse.data.tasks)
             }
           } catch (err) {
-            console.error('Failed to generate tasks:', err)
           }
         }
       }
@@ -713,7 +706,6 @@ export default function CareerPathDesigner() {
             if (title) setDreamRole(title)
           }
         } catch (err) {
-          console.error('Failed to extract job details:', err)
         }
       }
     } finally {
@@ -906,17 +898,13 @@ export default function CareerPathDesigner() {
         certification_areas_interest: certificationAreasInterest
       }
 
-      console.log('🚀 Starting async career plan generation with intake:', intake)
 
       // Step 1: Create async job
       const createJobResult = await api.generateCareerPlanAsync(intake)
 
-      console.log('Create job result:', createJobResult)
 
       if (!createJobResult.success || !createJobResult.data?.job_id) {
         const errorMsg = createJobResult.error || 'Failed to start career plan generation'
-        console.error('❌ Job creation failed:', errorMsg)
-        console.error('Full result:', JSON.stringify(createJobResult, null, 2))
         setError(`Generation failed: ${errorMsg}`)
         setStep('questions')
         setLoading(false)
@@ -925,7 +913,6 @@ export default function CareerPathDesigner() {
 
       const currentJobId = createJobResult.data.job_id
       setJobId(currentJobId)
-      console.log('✅ Job created:', currentJobId)
 
       // Step 2: Poll for job status
       let attempts = 0
@@ -945,14 +932,12 @@ export default function CareerPathDesigner() {
         const statusResult = await api.getCareerPlanJobStatus(currentJobId)
 
         if (!statusResult.success) {
-          console.error('❌ Failed to get job status:', statusResult.error)
           // Continue polling on status check errors
           setTimeout(poll, pollInterval)
           return
         }
 
         const jobData = statusResult.data
-        console.log(`📊 Job status [${attempts}]:`, jobData.status, `${jobData.progress}%`, jobData.message)
 
         // Update UI
         setJobStatus(jobData.status)
@@ -960,7 +945,6 @@ export default function CareerPathDesigner() {
         setJobMessage(jobData.message || 'Processing...')
 
         if (jobData.status === 'completed' && jobData.plan) {
-          console.log('✅ Career plan generation completed!')
           setPlan(jobData.plan)
           setPlanId(jobData.planId || jobData.plan_id)
           setStep('results')
@@ -969,7 +953,6 @@ export default function CareerPathDesigner() {
           refreshSavedPlans()
         } else if (jobData.status === 'failed') {
           const errorMsg = jobData.error || 'Career plan generation failed'
-          console.error('❌ Job failed:', errorMsg)
           setError(errorMsg)
           setStep('questions')
           setLoading(false)
@@ -983,7 +966,6 @@ export default function CareerPathDesigner() {
       poll()
 
     } catch (err: any) {
-      console.error('❌ Unexpected error:', err)
       setError(err.message || 'An unexpected error occurred')
       setStep('questions')
       setLoading(false)

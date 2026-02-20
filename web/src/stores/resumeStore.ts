@@ -75,12 +75,10 @@ export const useResumeStore = create<ResumeState>()(
               : []
             set({ resumes: resumeList })
           } else {
-            console.error('[ResumeStore] Failed to load resumes:', result.error)
             set({ resumes: [] })
           }
         } catch (error) {
           clearTimeout(timeoutId)
-          console.error('[ResumeStore] Error loading resumes:', error)
           set({ resumes: [] })
         } finally {
           clearTimeout(timeoutId)
@@ -99,7 +97,6 @@ export const useResumeStore = create<ResumeState>()(
             set({ resumes: resumeList })
           }
         } catch (error) {
-          console.error('[ResumeStore] Error refreshing resumes:', error)
         } finally {
           set({ refreshing: false })
         }
@@ -120,7 +117,6 @@ export const useResumeStore = create<ResumeState>()(
           }
           return false
         } catch (error) {
-          console.error('[ResumeStore] Error deleting resume:', error)
           return false
         } finally {
           set({ deletingId: null })
@@ -137,7 +133,6 @@ export const useResumeStore = create<ResumeState>()(
           }
           return null
         } catch (error) {
-          console.error('[ResumeStore] Error analyzing resume:', error)
           return null
         } finally {
           set({ analyzingId: null })

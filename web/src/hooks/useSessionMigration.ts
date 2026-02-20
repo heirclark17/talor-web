@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useClerkUser } from './useClerkUser'
+import { useAuthUser } from './useAuthUser'
 
 const MIGRATION_DONE_KEY = 'talor_migration_done'
 const OLD_USER_ID_KEY = 'talor_user_id'
@@ -9,7 +9,7 @@ const OLD_USER_ID_KEY = 'talor_user_id'
  * Runs once on first sign-in. Calls backend to reassign all records.
  */
 export function useSessionMigration() {
-  const { userId, isLoaded, isSignedIn } = useClerkUser()
+  const { userId, isLoaded, isSignedIn } = useAuthUser()
   const migrationAttempted = useRef(false)
 
   useEffect(() => {
@@ -39,13 +39,12 @@ export function useSessionMigration() {
       }),
     })
       .then(res => res.json())
-      .then(data => {
-        console.log('[Migration] Session data migrated:', data)
+      .then(() => {
         localStorage.setItem(MIGRATION_DONE_KEY, 'true')
         localStorage.removeItem(OLD_USER_ID_KEY)
       })
-      .catch(err => {
-        console.error('[Migration] Failed to migrate session:', err)
+      .catch(() => {
+        // Migration failed silently - will retry on next sign-in
       })
   }, [isLoaded, isSignedIn, userId])
 }

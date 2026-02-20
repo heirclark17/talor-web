@@ -292,7 +292,6 @@ export default function InterviewPrep() {
         method: 'PATCH',
         headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ user_data: { [field]: value } }),
-      }).catch(err => console.warn(`Failed to save ${field} to DB:`, err))
     }, 500)
   }, [])
 
@@ -340,7 +339,6 @@ export default function InterviewPrep() {
 
       if (!result.success) {
         // No existing interview prep (404) - auto-generate instead of showing empty state
-        console.log('No existing interview prep found, auto-generating...')
         setLoading(false)
         await generateInterviewPrep()
         return
@@ -358,7 +356,6 @@ export default function InterviewPrep() {
       )
 
       if (hasCachedData) {
-        console.log('✓ Using permanently cached data from database')
         if (cachedData.company_research) setCompanyResearch(cachedData.company_research)
         if (cachedData.strategic_news) setCompanyNews(cachedData.strategic_news)
         if (cachedData.values_alignment) setCompanyValues(cachedData.values_alignment)
@@ -368,21 +365,17 @@ export default function InterviewPrep() {
       // Hydrate cached AI-generated child component data
       if (cachedData?.behavioral_technical_questions) {
         setCachedBehavioralTechnical(cachedData.behavioral_technical_questions)
-        console.log('✓ Restored cached behavioral/technical questions from DB')
       }
       if (cachedData?.common_questions) {
         setCachedCommonQuestions(cachedData.common_questions)
-        console.log('✓ Restored cached common questions from DB')
       }
       if (cachedData?.certification_recommendations) {
         setCachedCertificationRecs(cachedData.certification_recommendations)
-        console.log('✓ Restored cached certification recommendations from DB')
       }
 
       // Hydrate user interaction state from DB (overrides localStorage defaults)
       if (cachedData?.user_data) {
         const ud = cachedData.user_data
-        console.log('✓ Restoring user data from DB:', Object.keys(ud))
         if (ud.checklist_checks) setCheckedItems(ud.checklist_checks)
         if (ud.notes) setNotes(ud.notes)
         if (ud.custom_questions) setCustomQuestions(ud.custom_questions)
@@ -398,7 +391,6 @@ export default function InterviewPrep() {
       if (!tailoredResponse.ok) {
         if (tailoredResponse.status === 404) {
           const errorData = await tailoredResponse.json()
-          console.warn('Tailored resume not found:', errorData)
           // Interview prep exists but tailored resume is deleted - show warning
           setWarning(`The original resume for this interview prep has been deleted. Some features like STAR Story Builder may not work.`)
           // Only fetch real data if not already cached
@@ -437,7 +429,6 @@ export default function InterviewPrep() {
       setLoadingComplete(false)
       setLoading(false)
     } catch (err: any) {
-      console.error('Error loading interview prep:', err)
       setError(err.message || 'Failed to load interview prep')
       setLoading(false)
     }
@@ -471,7 +462,6 @@ export default function InterviewPrep() {
         await fetchRealData(interviewPrepData, false, prepId)
       }
     } catch (err) {
-      console.error('Error fetching related data:', err)
     }
   }
 
@@ -513,11 +503,9 @@ export default function InterviewPrep() {
       const currentPrepId = prepId || interviewPrepId
 
       if (!companyName) {
-        console.log('No company name found, skipping real data fetch')
         return
       }
 
-      console.log('Fetching fresh real data from AI services...')
 
       const trackStage = (stageId: string) => {
         if (isTrackingProgressRef.current) {
@@ -548,36 +536,28 @@ export default function InterviewPrep() {
       if (researchResult.status === 'fulfilled' && researchResult.value?.success) {
         setCompanyResearch(researchResult.value.data)
         cacheData.companyResearch = researchResult.value.data
-        console.log('✓ Company research loaded:', researchResult.value.data.strategic_initiatives?.length, 'initiatives')
       } else {
-        console.error('Failed to load company research:', researchResult)
       }
 
       // Handle news result
       if (newsResult.status === 'fulfilled' && newsResult.value?.success) {
         setCompanyNews(newsResult.value.data)
         cacheData.companyNews = newsResult.value.data
-        console.log('✓ Company news loaded:', newsResult.value.data.news_articles?.length, 'articles')
       } else {
-        console.error('Failed to load company news:', newsResult)
       }
 
       // Handle interview questions result
       if (questionsResult.status === 'fulfilled' && questionsResult.value?.success) {
         setInterviewQuestions(questionsResult.value.data)
         cacheData.interviewQuestions = questionsResult.value.data
-        console.log('✓ Interview questions loaded:', questionsResult.value.data.questions?.length, 'questions')
       } else {
-        console.error('Failed to load interview questions:', questionsResult)
       }
 
       // Handle company values result - merge with prep data if available
       if (valuesResult.status === 'fulfilled' && valuesResult.value?.success) {
         setCompanyValues(valuesResult.value.data)
         cacheData.companyValues = valuesResult.value.data
-        console.log('✓ Company values loaded:', valuesResult.value.data.values?.length, 'values')
       } else {
-        console.error('Failed to load company values:', valuesResult)
       }
 
       // Save to database for permanent caching (instead of just localStorage)
@@ -595,16 +575,12 @@ export default function InterviewPrep() {
           })
 
           if (saveResponse.ok) {
-            console.log('✓ Real data permanently saved to database')
           } else {
-            console.warn('Failed to save to database, data will be refetched on next visit')
           }
         } catch (saveErr) {
-          console.warn('Failed to save real data to database:', saveErr)
         }
       }
     } catch (err: any) {
-      console.error('Error fetching real data:', err)
     } finally {
       setLoadingRealData(false)
     }
@@ -682,33 +658,26 @@ export default function InterviewPrep() {
   // Load certifications using centralized API client (or from cache)
   const loadCertifications = async () => {
     if (!interviewPrepId) {
-      console.log('No interview prep ID, cannot load certifications')
       return
     }
 
     // Use cached certification recommendations if available
     if (cachedCertificationRecs?.certifications) {
-      console.log('✓ Using cached certification recommendations from DB')
       setCertifications(cachedCertificationRecs.certifications)
       return
     }
 
-    console.log('Loading certifications for interview prep ID:', interviewPrepId)
     setLoadingCertifications(true)
 
     try {
       const result = await api.getCertificationRecommendations(interviewPrepId)
 
-      console.log('Certifications API result:', result)
 
       if (result.success && result.data) {
-        console.log('Setting certifications to:', result.data)
         setCertifications(result.data)
       } else {
-        console.error('Certifications API error:', result.error)
       }
     } catch (error) {
-      console.error('Error loading certifications:', error)
     } finally {
       setLoadingCertifications(false)
     }

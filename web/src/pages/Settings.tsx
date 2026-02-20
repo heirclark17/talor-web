@@ -14,6 +14,7 @@ import {
   FileText,
   Copy,
   Check,
+  AlertTriangle,
 } from 'lucide-react'
 import { getUserId, clearUserSession } from '../utils/userSession'
 import { showSuccess } from '../utils/toast'
@@ -21,21 +22,21 @@ import { showSuccess } from '../utils/toast'
 export default function Settings() {
   const [userId, setUserId] = useState<string>('')
   const [copied, setCopied] = useState(false)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
 
   useEffect(() => {
     setUserId(getUserId())
   }, [])
 
   const handleClearData = () => {
-    if (!window.confirm(
-      'This will clear all your local data including your user session. Your resumes and data stored on the server will not be affected. Are you sure?'
-    )) {
-      return
-    }
+    setShowClearConfirm(true)
+  }
 
+  const confirmClearData = () => {
     clearUserSession()
     showSuccess('Local data cleared. A new session will be created.')
     setUserId(getUserId())
+    setShowClearConfirm(false)
   }
 
   const handleCopyUserId = async () => {
@@ -43,8 +44,8 @@ export default function Settings() {
       await navigator.clipboard.writeText(userId)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy user ID:', err)
+    } catch {
+      // clipboard write can fail silently
     }
   }
 
@@ -239,6 +240,45 @@ export default function Settings() {
           </p>
         </div>
       </div>
+
+      {/* Clear Data Confirmation Modal */}
+      {showClearConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirm clear data"
+        >
+          <div
+            className="absolute inset-0 bg-[#0a0a0f]/95 backdrop-blur-sm"
+            onClick={() => setShowClearConfirm(false)}
+            aria-hidden="true"
+          />
+          <div className="relative w-full max-w-sm rounded-2xl border border-theme-subtle bg-theme p-6 text-center">
+            <div className="w-14 h-14 bg-yellow-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="w-7 h-7 text-yellow-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-theme mb-2">Clear Local Data?</h3>
+            <p className="text-theme-secondary text-sm mb-6">
+              This will clear your local session data. Your resumes and server data will not be affected.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="flex-1 px-4 py-2.5 bg-theme-glass-10 hover:bg-theme-glass-20 text-theme rounded-xl transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmClearData}
+                className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors font-medium"
+              >
+                Clear Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

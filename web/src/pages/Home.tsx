@@ -65,6 +65,7 @@ export default function Home() {
     fetchResumes,
     deleteResume,
     analyzeResume,
+    clearAnalysis,
   } = useResumeStore()
 
   const [error, setError] = useState<string | null>(null)
@@ -75,6 +76,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({})
   const [selectedSort, setSelectedSort] = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
 
   // Filter resumes based on search and sort
   const filteredResumes = useMemo(() => {
@@ -108,15 +110,17 @@ export default function Home() {
     fetchResumes()
   }, [fetchResumes])
 
-  const handleDelete = async (resumeId: number) => {
-    if (!window.confirm('Are you sure you want to delete this resume? This action cannot be undone.')) {
-      return
-    }
+  const handleDelete = (resumeId: number) => {
+    setConfirmDeleteId(resumeId)
+  }
 
-    const success = await deleteResume(resumeId)
+  const confirmDelete = async () => {
+    if (confirmDeleteId === null) return
+    const success = await deleteResume(confirmDeleteId)
     if (!success) {
       showError('Failed to delete resume')
     }
+    setConfirmDeleteId(null)
   }
 
   const handleTailor = (resumeId: number) => {
@@ -135,7 +139,7 @@ export default function Home() {
 
   const closeAnalysisModal = () => {
     setAnalysisModal(false)
-    setCurrentAnalysis(null)
+    clearAnalysis()
     setCurrentFilename('')
   }
 
@@ -343,6 +347,46 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {confirmDeleteId !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirm delete"
+        >
+          <div
+            className="absolute inset-0 bg-[#0a0a0f]/95 backdrop-blur-sm"
+            onClick={() => setConfirmDeleteId(null)}
+            aria-hidden="true"
+          />
+          <div className="relative w-full max-w-sm rounded-2xl border border-theme-subtle bg-theme p-6 text-center">
+            <div className="w-14 h-14 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-7 h-7 text-red-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-theme mb-2">Delete Resume?</h3>
+            <p className="text-theme-secondary text-sm mb-6">
+              This action cannot be undone. The resume and all associated data will be permanently removed.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex-1 px-4 py-2.5 bg-theme-glass-10 hover:bg-theme-glass-20 text-theme rounded-xl transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deletingId !== null}
+                className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors font-medium disabled:opacity-50"
+              >
+                {deletingId !== null ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Analysis Modal */}
       {analysisModal && currentAnalysis && (

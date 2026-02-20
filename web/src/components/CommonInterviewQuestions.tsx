@@ -71,7 +71,6 @@ export default function CommonInterviewQuestions({
   // Load cached data from DB on mount
   useEffect(() => {
     if (cachedData && !data) {
-      console.log('✓ Common Questions: Restoring from cached DB data')
       setData(cachedData)
       // Auto-expand first question and set default tabs
       if (cachedData.questions?.length > 0) {
@@ -120,7 +119,6 @@ export default function CommonInterviewQuestions({
         method: 'PATCH',
         headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ common_questions: result.data }),
-      }).catch(err => console.warn('Failed to cache common questions:', err))
 
       // Signal completion so progress bar reaches 100% before unmount
       setLoadingComplete(true)
@@ -168,7 +166,6 @@ export default function CommonInterviewQuestions({
           method: 'PATCH',
           headers: getApiHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ common_questions: updatedData }),
-        }).catch(err => console.warn('Failed to cache updated common questions:', err))
       }
     } catch (err: any) {
       setError(`Failed to regenerate: ${err.message}`)
@@ -205,7 +202,6 @@ export default function CommonInterviewQuestions({
         })
       }, 2000)
     } catch (err) {
-      console.error('Failed to copy:', err)
     }
   }
 

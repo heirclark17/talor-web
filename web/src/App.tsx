@@ -8,7 +8,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useScrollAnimation } from './hooks/useScrollAnimation'
 import { useSessionMigration } from './hooks/useSessionMigration'
-import { useClerkUserSync } from './hooks/useClerkUserSync'
+import { useAuthUserSync } from './hooks/useAuthUserSync'
 import { useAuth } from './contexts/AuthContext'
 import { PostHogProvider } from './contexts/PostHogContext'
 
@@ -310,7 +310,7 @@ function Dashboard() {
 
 function SessionMigrationProvider({ children }: { children: React.ReactNode }) {
   useSessionMigration()
-  useClerkUserSync()
+  useAuthUserSync()
   return <>{children}</>
 }
 

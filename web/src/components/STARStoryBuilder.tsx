@@ -46,9 +46,6 @@ interface Props {
 
 export default function STARStoryBuilder({ tailoredResumeId, experiences, companyContext, storyThemes }: Props) {
   // Debug: Log experiences to see what's being passed
-  console.log('[STARStoryBuilder] Received experiences:', experiences)
-  console.log('[STARStoryBuilder] Experiences length:', Array.isArray(experiences) ? experiences.length : 'NOT AN ARRAY')
-  console.log('[STARStoryBuilder] tailoredResumeId:', tailoredResumeId)
 
   const [selectedExperiences, setSelectedExperiences] = useState<Set<number>>(new Set())
   const [selectedTheme, setSelectedTheme] = useState<string>(storyThemes[0] || '')
@@ -88,7 +85,6 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
           }
         }
       } catch (error) {
-        console.error('Error loading existing stories:', error)
       } finally {
         setLoadingStories(false)
       }
@@ -120,25 +116,18 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
   }
 
   const generateStory = async () => {
-    console.log('[STARStoryBuilder] generateStory called')
-    console.log('[STARStoryBuilder] selectedExperiences:', selectedExperiences)
-    console.log('[STARStoryBuilder] selectedExperiences.size:', selectedExperiences.size)
-    console.log('[STARStoryBuilder] selectedTheme:', selectedTheme)
 
     if (selectedExperiences.size === 0) {
-      console.log('[STARStoryBuilder] No experiences selected, showing alert')
       showError('Please select at least one experience')
       return
     }
 
     if (!selectedTheme) {
-      console.log('[STARStoryBuilder] No theme selected, showing alert')
       showError('Please select a story theme')
       return
     }
 
     try {
-      console.log('[STARStoryBuilder] Starting story generation...')
       setGenerating(true)
 
       const response = await fetch(`${API_BASE_URL}/api/interview-prep/generate-star-story`, {
@@ -214,7 +203,6 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         showError('Failed to generate story: ' + (data.error || 'Unknown error'))
       }
     } catch (error: any) {
-      console.error('Error generating story:', error)
       showError('Failed to generate story: ' + error.message)
     } finally {
       setGenerating(false)
@@ -246,7 +234,6 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         throw new Error('Failed to delete story')
       }
     } catch (error: any) {
-      console.error('Error deleting story:', error)
       showError('Failed to delete story: ' + error.message)
     }
   }
@@ -289,7 +276,6 @@ export default function STARStoryBuilder({ tailoredResumeId, experiences, compan
         throw new Error('Failed to update story')
       }
     } catch (error: any) {
-      console.error('Error updating story:', error)
       showError('Failed to update story: ' + error.message)
     }
   }
