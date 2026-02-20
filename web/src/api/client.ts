@@ -670,7 +670,7 @@ class ApiClient {
       if (error.name === 'AbortError') {
         return {
           success: false,
-          error: 'Resume generation timed out after 3 minutes. Please try again — the AI service may be under heavy load.',
+          error: 'Resume generation timed out. Please try again — the AI service may be under heavy load.',
         };
       }
       return {

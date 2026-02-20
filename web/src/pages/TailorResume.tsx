@@ -250,7 +250,7 @@ export default function TailorResume() {
   }, [tailoredResume])
 
   // Don't auto-load analysis - wait for user to click tabs (lazy loading)
-  // This makes the page load instantly instead of waiting 3-5 minutes
+  // This makes the page load instantly instead of waiting for analysis
   // Analysis will load when user clicks the Analysis or Insights tabs
 
   // Load saved comparison from URL parameter
@@ -1448,7 +1448,7 @@ export default function TailorResume() {
                     <div className="h-full bg-blue-500 rounded-full animate-pulse" style={{ width: '70%' }} />
                   </div>
                   <p className="text-xs text-theme-secondary mt-2">
-                    Powered by GPT-4.1-mini • This may take 3-5 minutes total
+                    Powered by GPT-4.1-mini • This may take 30-60 seconds
                   </p>
                 </div>
               </div>
@@ -2644,14 +2644,14 @@ export default function TailorResume() {
           <AILoadingScreen
             title="Generating Tailored Resume"
             subtitle="Our AI is customizing your resume for this specific role"
-            footnote="This typically takes 60-90 seconds"
+            footnote="This typically takes 15-30 seconds"
             steps={[
               { id: 'analyze', label: 'Researching company & role', description: 'Gathering company insights and job requirements...' },
               { id: 'match', label: 'Matching your skills & experience', description: 'Identifying transferable qualifications...' },
               { id: 'rewrite', label: 'Rewriting resume content', description: 'Tailoring bullets for maximum impact...' },
               { id: 'finalize', label: 'Finalizing tailored document', description: 'Formatting and generating DOCX file...' },
             ]}
-            progress={{ type: 'estimated', estimatedDurationMs: 120000, isComplete: loadingComplete }}
+            progress={{ type: 'estimated', estimatedDurationMs: 30000, isComplete: loadingComplete }}
             onCancel={() => {
               setLoading(false)
               setError('Resume generation was cancelled.')
