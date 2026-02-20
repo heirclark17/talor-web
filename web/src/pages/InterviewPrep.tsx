@@ -927,193 +927,235 @@ export default function InterviewPrep() {
           </div>
         </div>
 
-        {/* Grid Layout - Section Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          {/* Company Profile Card */}
-          <button
-            onClick={() => openModal('companyProfile')}
-            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-blue-500/20">
-                <Building2 className="w-6 h-6 text-blue-400" />
-              </div>
-              <h3 className="text-lg font-bold text-theme">Company Profile</h3>
-            </div>
-            <p className="text-theme-secondary text-sm line-clamp-2">{prepData.company_profile.name} - {prepData.company_profile.industry}</p>
-            <div className="mt-3 text-blue-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-              View Details <ChevronRight className="w-4 h-4" />
-            </div>
-          </button>
+        {/* Sectioned Card Layout */}
+        <div className="space-y-6 sm:space-y-8 mb-6 sm:mb-8">
 
-          {/* Role Analysis Card */}
-          <button
-            onClick={() => openModal('roleAnalysis')}
-            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-green-500/20">
-                <Target className="w-6 h-6 text-green-400" />
-              </div>
-              <h3 className="text-lg font-bold text-theme">Role Analysis</h3>
+          {/* Section 1: Company Research */}
+          <div>
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <Building2 className="w-4 h-4 text-blue-400" />
+              <h2 className="text-sm font-semibold text-theme-secondary uppercase tracking-wider">Company Research</h2>
+              <div className="flex-1 h-px bg-theme-glass-10" />
             </div>
-            <p className="text-theme-secondary text-sm line-clamp-2">{prepData.role_analysis.job_title} - {prepData.role_analysis.seniority_level}</p>
-            <div className="mt-3 text-green-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-              View Details <ChevronRight className="w-4 h-4" />
-            </div>
-          </button>
-
-          {/* Values & Culture Card */}
-          {prepData.values_and_culture.stated_values.length > 0 && (
-            <button
-              onClick={() => openModal('valuesAndCulture')}
-              className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-lg bg-yellow-500/20">
-                  <Star className="w-6 h-6 text-yellow-400" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* Company Profile Card */}
+              <button
+                onClick={() => openModal('companyProfile')}
+                className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-blue-500/20">
+                    <Building2 className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-theme">Company Profile</h3>
                 </div>
-                <h3 className="text-lg font-bold text-theme">Values & Culture</h3>
-              </div>
-              <p className="text-theme-secondary text-sm line-clamp-2">{prepData.values_and_culture.stated_values.length} core values identified</p>
-              <div className="mt-3 text-yellow-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-                View Details <ChevronRight className="w-4 h-4" />
-              </div>
-            </button>
-          )}
-
-          {/* Strategy & News Card */}
-          {(prepData.strategy_and_news.recent_events.length > 0 || prepData.strategy_and_news.strategic_themes.length > 0) && (
-            <button
-              onClick={() => openModal('strategy')}
-              className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-lg bg-purple-500/20">
-                  <TrendingUp className="w-6 h-6 text-purple-400" />
+                <p className="text-theme-secondary text-sm line-clamp-2">{prepData.company_profile.name} - {prepData.company_profile.industry}</p>
+                <div className="mt-3 text-blue-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                  View Details <ChevronRight className="w-4 h-4" />
                 </div>
-                <h3 className="text-lg font-bold text-theme">Strategy & News</h3>
-              </div>
-              <p className="text-theme-secondary text-sm line-clamp-2">
-                {companyNews?.news_articles?.length || prepData.strategy_and_news.recent_events.length} recent updates
-              </p>
-              <div className="mt-3 text-purple-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-                View Details <ChevronRight className="w-4 h-4" />
-              </div>
-            </button>
-          )}
+              </button>
 
-          {/* Interview Preparation Card */}
-          <button
-            onClick={() => openModal('preparation')}
-            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-cyan-500/20">
-                <CheckCircle2 className="w-6 h-6 text-cyan-400" />
-              </div>
-              <h3 className="text-lg font-bold text-theme">Preparation Checklist</h3>
-            </div>
-            <p className="text-theme-secondary text-sm line-clamp-2">
-              {progressStats.researchCompleted}/{progressStats.researchTotal} tasks completed
-            </p>
-            <div className="mt-3 text-cyan-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-              View Details <ChevronRight className="w-4 h-4" />
-            </div>
-          </button>
+              {/* Values & Culture Card */}
+              {prepData.values_and_culture.stated_values.length > 0 && (
+                <button
+                  onClick={() => openModal('valuesAndCulture')}
+                  className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-yellow-500/20">
+                      <Star className="w-6 h-6 text-yellow-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-theme">Values & Culture</h3>
+                  </div>
+                  <p className="text-theme-secondary text-sm line-clamp-2">{prepData.values_and_culture.stated_values.length} core values identified</p>
+                  <div className="mt-3 text-yellow-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                    View Details <ChevronRight className="w-4 h-4" />
+                  </div>
+                </button>
+              )}
 
-          {/* Questions to Ask Card */}
-          <button
-            onClick={() => openModal('questions')}
-            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-orange-500/20">
-                <MessageSquare className="w-6 h-6 text-orange-400" />
-              </div>
-              <h3 className="text-lg font-bold text-theme">Questions to Ask</h3>
+              {/* Strategy & News Card */}
+              {(prepData.strategy_and_news.recent_events.length > 0 || prepData.strategy_and_news.strategic_themes.length > 0) && (
+                <button
+                  onClick={() => openModal('strategy')}
+                  className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-purple-500/20">
+                      <TrendingUp className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-theme">Strategy & News</h3>
+                  </div>
+                  <p className="text-theme-secondary text-sm line-clamp-2">
+                    {companyNews?.news_articles?.length || prepData.strategy_and_news.recent_events.length} recent updates
+                  </p>
+                  <div className="mt-3 text-purple-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                    View Details <ChevronRight className="w-4 h-4" />
+                  </div>
+                </button>
+              )}
             </div>
-            <p className="text-theme-secondary text-sm line-clamp-2">
-              {Object.values(prepData.questions_to_ask_interviewer).flat().length + customQuestions.length} questions prepared
-            </p>
-            <div className="mt-3 text-orange-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-              View Details <ChevronRight className="w-4 h-4" />
-            </div>
-          </button>
+          </div>
 
-          {/* Behavioral & Technical Card */}
-          {interviewPrepId && (
-            <button
-              onClick={() => openModal('behavioralTechnical')}
-              className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20">
-                  <Target className="w-6 h-6 text-purple-400" />
+          {/* Section 2: Role & Positioning */}
+          <div>
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <Target className="w-4 h-4 text-green-400" />
+              <h2 className="text-sm font-semibold text-theme-secondary uppercase tracking-wider">Role & Positioning</h2>
+              <div className="flex-1 h-px bg-theme-glass-10" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {/* Role Analysis Card */}
+              <button
+                onClick={() => openModal('roleAnalysis')}
+                className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-green-500/20">
+                    <Target className="w-6 h-6 text-green-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-theme">Role Analysis</h3>
                 </div>
-                <h3 className="text-lg font-bold text-theme">Behavioral & Technical</h3>
-                <span className="text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white px-2 py-0.5 rounded">AI</span>
-              </div>
-              <p className="text-theme-secondary text-sm line-clamp-2">Practice questions with STAR story builder</p>
-              <div className="mt-3 text-purple-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-                View Details <ChevronRight className="w-4 h-4" />
-              </div>
-            </button>
-          )}
-
-          {/* Common Questions Card */}
-          {interviewPrepId && (
-            <button
-              onClick={() => openModal('commonQuestions')}
-              className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-lg bg-pink-500/20">
-                  <MessageSquare className="w-6 h-6 text-pink-400" />
+                <p className="text-theme-secondary text-sm line-clamp-2">{prepData.role_analysis.job_title} - {prepData.role_analysis.seniority_level}</p>
+                <div className="mt-3 text-green-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                  View Details <ChevronRight className="w-4 h-4" />
                 </div>
-                <h3 className="text-lg font-bold text-theme">Common Questions</h3>
-              </div>
-              <p className="text-theme-secondary text-sm line-clamp-2">Questions people commonly struggle with</p>
-              <div className="mt-3 text-pink-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-                View Details <ChevronRight className="w-4 h-4" />
-              </div>
-            </button>
-          )}
+              </button>
 
-          {/* Certifications Card */}
-          <button
-            onClick={() => openModal('certifications')}
-            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-blue-500/20">
-                <Award className="w-6 h-6 text-blue-400" />
-              </div>
-              <h3 className="text-lg font-bold text-theme">Certifications</h3>
+              {/* Candidate Positioning Card */}
+              <button
+                onClick={() => openModal('positioning')}
+                className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-emerald-500/20">
+                    <Award className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-theme">Candidate Positioning</h3>
+                  <span className="text-xs bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded">STAR Builder</span>
+                </div>
+                <p className="text-theme-secondary text-sm line-clamp-2">Resume focus areas & keyword mapping</p>
+                <div className="mt-3 text-emerald-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                  View Details <ChevronRight className="w-4 h-4" />
+                </div>
+              </button>
             </div>
-            <p className="text-theme-secondary text-sm line-clamp-2">Recommended certifications for this role</p>
-            <div className="mt-3 text-blue-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-              View Details <ChevronRight className="w-4 h-4" />
-            </div>
-          </button>
+          </div>
 
-          {/* Candidate Positioning Card */}
-          <button
-            onClick={() => openModal('positioning')}
-            className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-emerald-500/20">
-                <Award className="w-6 h-6 text-emerald-400" />
-              </div>
-              <h3 className="text-lg font-bold text-theme">Candidate Positioning</h3>
-              <span className="text-xs bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded">STAR Builder</span>
+          {/* Section 3: Practice Questions */}
+          <div>
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <MessageSquare className="w-4 h-4 text-purple-400" />
+              <h2 className="text-sm font-semibold text-theme-secondary uppercase tracking-wider">Practice Questions</h2>
+              <div className="flex-1 h-px bg-theme-glass-10" />
             </div>
-            <p className="text-theme-secondary text-sm line-clamp-2">Resume focus areas & keyword mapping</p>
-            <div className="mt-3 text-emerald-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-              View Details <ChevronRight className="w-4 h-4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* Behavioral & Technical Card */}
+              {interviewPrepId && (
+                <button
+                  onClick={() => openModal('behavioralTechnical')}
+                  className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20">
+                      <Target className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-theme">Behavioral & Technical</h3>
+                    <span className="text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white px-2 py-0.5 rounded">AI</span>
+                  </div>
+                  <p className="text-theme-secondary text-sm line-clamp-2">Practice questions with STAR story builder</p>
+                  <div className="mt-3 text-purple-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                    View Details <ChevronRight className="w-4 h-4" />
+                  </div>
+                </button>
+              )}
+
+              {/* Common Questions Card */}
+              {interviewPrepId && (
+                <button
+                  onClick={() => openModal('commonQuestions')}
+                  className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-pink-500/20">
+                      <MessageSquare className="w-6 h-6 text-pink-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-theme">Common Questions</h3>
+                  </div>
+                  <p className="text-theme-secondary text-sm line-clamp-2">Questions people commonly struggle with</p>
+                  <div className="mt-3 text-pink-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                    View Details <ChevronRight className="w-4 h-4" />
+                  </div>
+                </button>
+              )}
+
+              {/* Questions to Ask Card */}
+              <button
+                onClick={() => openModal('questions')}
+                className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-orange-500/20">
+                    <MessageSquare className="w-6 h-6 text-orange-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-theme">Questions to Ask</h3>
+                </div>
+                <p className="text-theme-secondary text-sm line-clamp-2">
+                  {Object.values(prepData.questions_to_ask_interviewer).flat().length + customQuestions.length} questions prepared
+                </p>
+                <div className="mt-3 text-orange-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                  View Details <ChevronRight className="w-4 h-4" />
+                </div>
+              </button>
             </div>
-          </button>
+          </div>
+
+          {/* Section 4: Preparation & Growth */}
+          <div>
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+              <h2 className="text-sm font-semibold text-theme-secondary uppercase tracking-wider">Preparation & Growth</h2>
+              <div className="flex-1 h-px bg-theme-glass-10" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {/* Interview Preparation Card */}
+              <button
+                onClick={() => openModal('preparation')}
+                className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-cyan-500/20">
+                    <CheckCircle2 className="w-6 h-6 text-cyan-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-theme">Preparation Checklist</h3>
+                </div>
+                <p className="text-theme-secondary text-sm line-clamp-2">
+                  {progressStats.researchCompleted}/{progressStats.researchTotal} tasks completed
+                </p>
+                <div className="mt-3 text-cyan-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                  View Details <ChevronRight className="w-4 h-4" />
+                </div>
+              </button>
+
+              {/* Certifications Card */}
+              <button
+                onClick={() => openModal('certifications')}
+                className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-blue-500/20">
+                    <Award className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-theme">Certifications</h3>
+                </div>
+                <p className="text-theme-secondary text-sm line-clamp-2">Recommended certifications for this role</p>
+                <div className="mt-3 text-blue-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                  View Details <ChevronRight className="w-4 h-4" />
+                </div>
+              </button>
+            </div>
+          </div>
+
         </div>
 
         {/* Modal Backdrop & Content */}
