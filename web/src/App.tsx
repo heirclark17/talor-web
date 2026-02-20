@@ -267,10 +267,18 @@ function AppContent() {
     setMobileMenuOpen(false)
   }, [location.pathname])
 
-  // Prevent body scroll when mobile menu is open
+  // Prevent body scroll when menu is open + close on Escape
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden'
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setMobileMenuOpen(false)
+      }
+      document.addEventListener('keydown', handleEscape)
+      return () => {
+        document.body.style.overflow = ''
+        document.removeEventListener('keydown', handleEscape)
+      }
     } else {
       document.body.style.overflow = ''
     }
@@ -305,35 +313,8 @@ function AppContent() {
                 <span className="text-xl sm:text-2xl font-bold text-theme tracking-tight">Talor</span>
               </Link>
 
-              {/* Desktop Navigation */}
-              <nav className="hidden lg:flex items-center gap-6 xl:gap-8" aria-label="Main navigation">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    data-tour={link.tourId}
-                    className={`flex items-center gap-2 py-2 px-1 min-h-[44px] transition-colors ${
-                      location.pathname === link.to
-                        ? 'text-theme'
-                        : 'text-theme-secondary hover:text-theme'
-                    }`}
-                    aria-current={location.pathname === link.to ? 'page' : undefined}
-                  >
-                    <link.icon className="w-5 h-5" aria-hidden="true" />
-                    <span className="text-sm xl:text-base font-medium">{link.label}</span>
-                  </Link>
-                ))}
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: 'w-8 h-8',
-                    },
-                  }}
-                />
-              </nav>
-
-              {/* Mobile: UserButton + Hamburger */}
-              <div className="lg:hidden flex items-center gap-3">
+              {/* Menu Button + UserButton */}
+              <div className="flex items-center gap-3">
                 <UserButton
                   appearance={{
                     elements: {
@@ -343,33 +324,34 @@ function AppContent() {
                 />
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="min-w-[44px] min-h-[44px] p-2 text-theme hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center justify-center"
+                  className="min-w-[44px] min-h-[44px] p-2 text-theme hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center justify-center gap-2"
                   aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
                   aria-expanded={mobileMenuOpen}
-                  aria-controls="mobile-nav-menu"
+                  aria-controls="nav-menu"
                 >
                   {mobileMenuOpen ? (
                     <X className="w-6 h-6" aria-hidden="true" />
                   ) : (
                     <Menu className="w-6 h-6" aria-hidden="true" />
                   )}
+                  <span className="text-sm font-medium hidden sm:inline">Menu</span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Mobile Navigation Drawer */}
+          {/* Navigation Dropdown Panel */}
           {mobileMenuOpen && (
             <div
-              id="mobile-nav-menu"
-              className="lg:hidden fixed inset-0 top-[65px] z-40 animate-fade-in"
+              id="nav-menu"
+              className="fixed inset-0 top-[65px] z-40 animate-fade-in"
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"
             >
               {/* Backdrop - clickable to close */}
               <div
-                className="absolute inset-0 bg-theme/95 backdrop-blur-sm transition-opacity duration-200"
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
                 onClick={() => setMobileMenuOpen(false)}
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') {
@@ -381,22 +363,23 @@ function AppContent() {
 
               {/* Menu Panel */}
               <nav
-                className="relative border-t border-theme-subtle bg-theme animate-slide-down"
-                aria-label="Mobile navigation"
+                className="relative border-t border-theme-subtle animate-slide-down"
+                style={{ backgroundColor: 'var(--bg-primary)' }}
+                aria-label="Main navigation"
               >
-                <div className="container mx-auto px-4 py-4">
-                  <div className="flex flex-col gap-2" role="menu">
+                <div className="container mx-auto px-4 sm:px-6 py-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2" role="menu">
                     {navLinks.map((link) => (
                       <Link
                         key={link.to}
                         to={link.to}
-                        data-tour={`mobile-${link.tourId}`}
+                        data-tour={link.tourId}
                         onClick={() => setMobileMenuOpen(false)}
                         role="menuitem"
                         className={`flex items-center gap-3 p-3 min-h-[44px] rounded-xl transition-all duration-200 ${
                           location.pathname === link.to
                             ? 'bg-theme-glass-10 text-theme'
-                            : 'text-theme-secondary hover:bg-theme-glass-5 hover:text-theme active:scale-95'
+                            : 'text-theme-secondary hover:bg-theme-glass-5 hover:text-theme active:scale-[0.98]'
                         }`}
                         aria-current={location.pathname === link.to ? 'page' : undefined}
                       >
