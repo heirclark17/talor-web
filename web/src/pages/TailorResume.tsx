@@ -331,13 +331,23 @@ export default function TailorResume() {
     loadSavedComparison()
   }, [searchParams])
 
+  // Load tailored resume from URL parameter (from BatchTailor "View Result" button)
+  useEffect(() => {
+    const resumeId = searchParams.get('resumeId')
+    if (resumeId && !tailoredResume && !loading) {
+      console.log('Loading tailored resume from URL param:', resumeId)
+      loadTailoredResumeById(parseInt(resumeId))
+    }
+  }, [searchParams])
+
   // Restore session from localStorage on mount (takes priority over API calls)
   useEffect(() => {
     const restoreSession = () => {
-      // Don't restore if loading from URL comparison parameter
+      // Don't restore if loading from URL comparison or resumeId parameter
       const comparisonId = searchParams.get('comparison')
-      if (comparisonId) {
-        console.log('Skipping session restore - loading from URL comparison')
+      const resumeId = searchParams.get('resumeId')
+      if (comparisonId || resumeId) {
+        console.log('Skipping session restore - loading from URL parameter')
         return
       }
 
@@ -375,6 +385,11 @@ export default function TailorResume() {
   // Restore last viewed tailored resume on mount (fallback if no session data)
   useEffect(() => {
     const restoreLastViewed = async () => {
+      // Don't restore if loading from URL parameter
+      const comparisonId = searchParams.get('comparison')
+      const resumeId = searchParams.get('resumeId')
+      if (comparisonId || resumeId) return
+
       const savedId = localStorage.getItem(LAST_TAILORED_RESUME_KEY)
       const session = loadSessionFromLocalStorage()
 
