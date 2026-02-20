@@ -307,27 +307,27 @@ function AppContent() {
     {
       label: 'Resume Tools',
       links: [
-        { to: '/resumes', icon: FileText, label: 'My Resumes', desc: 'View and manage all resumes', tourId: 'resumes' },
-        { to: '/upload', icon: Upload, label: 'Upload', desc: 'Upload a new base resume', tourId: 'upload' },
-        { to: '/tailor', icon: Target, label: 'Tailor', desc: 'Customize for a specific job', tourId: 'tailor' },
-        { to: '/batch-tailor', icon: Layers, label: 'Batch Tailor', desc: 'Tailor for multiple jobs at once', tourId: 'batch-tailor' },
+        { to: '/resumes', icon: FileText, label: 'My Resumes', desc: 'View and manage all resumes', tourId: 'resumes', iconColor: 'text-blue-400' },
+        { to: '/upload', icon: Upload, label: 'Upload', desc: 'Upload a new base resume', tourId: 'upload', iconColor: 'text-emerald-400' },
+        { to: '/tailor', icon: Target, label: 'Tailor', desc: 'Customize for a specific job', tourId: 'tailor', iconColor: 'text-rose-400' },
+        { to: '/batch-tailor', icon: Layers, label: 'Batch Tailor', desc: 'Tailor for multiple jobs at once', tourId: 'batch-tailor', iconColor: 'text-violet-400' },
       ],
     },
     {
       label: 'Career Prep',
       links: [
-        { to: '/applications', icon: Briefcase, label: 'Applications', desc: 'Track your job applications', tourId: 'applications' },
-        { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep', desc: 'Practice for upcoming interviews', tourId: 'interview-prep' },
-        { to: '/star-stories', icon: Sparkles, label: 'STAR Stories', desc: 'Build behavioral interview answers', tourId: 'star-stories' },
-        { to: '/cover-letters', icon: FileEdit, label: 'Cover Letters', desc: 'Generate tailored cover letters', tourId: 'cover-letters' },
+        { to: '/applications', icon: Briefcase, label: 'Applications', desc: 'Track your job applications', tourId: 'applications', iconColor: 'text-amber-400' },
+        { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep', desc: 'Practice for upcoming interviews', tourId: 'interview-prep', iconColor: 'text-cyan-400' },
+        { to: '/star-stories', icon: Sparkles, label: 'STAR Stories', desc: 'Build behavioral interview answers', tourId: 'star-stories', iconColor: 'text-yellow-400' },
+        { to: '/cover-letters', icon: FileEdit, label: 'Cover Letters', desc: 'Generate tailored cover letters', tourId: 'cover-letters', iconColor: 'text-indigo-400' },
       ],
     },
     {
       label: 'Growth',
       links: [
-        { to: '/saved-comparisons', icon: Bookmark, label: 'Saved', desc: 'Bookmarked comparisons', tourId: 'saved' },
-        { to: '/career-path', icon: TrendingUp, label: 'Career Path', desc: 'Plan your career trajectory', tourId: 'career-path' },
-        { to: '/settings', icon: Settings, label: 'Settings', desc: 'Preferences and account', tourId: 'settings' },
+        { to: '/saved-comparisons', icon: Bookmark, label: 'Saved', desc: 'Bookmarked comparisons', tourId: 'saved', iconColor: 'text-orange-400' },
+        { to: '/career-path', icon: TrendingUp, label: 'Career Path', desc: 'Plan your career trajectory', tourId: 'career-path', iconColor: 'text-green-400' },
+        { to: '/settings', icon: Settings, label: 'Settings', desc: 'Preferences and account', tourId: 'settings', iconColor: 'text-slate-400' },
       ],
     },
   ]
@@ -448,7 +448,7 @@ function AppContent() {
                                   className={`w-[18px] h-[18px] ${
                                     location.pathname === link.to
                                       ? 'text-accent'
-                                      : 'text-theme-secondary'
+                                      : link.iconColor
                                   }`}
                                   aria-hidden="true"
                                 />
