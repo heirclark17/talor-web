@@ -7,6 +7,7 @@ import { useTemplateStore } from '../../stores/templateStore'
 interface TemplateGalleryProps {
   onSelect: (template: ResumeTemplate) => void
   onPreview?: (template: ResumeTemplate) => void
+  resumeData?: any // Resume data to preview in all templates
 }
 
 /**
@@ -22,7 +23,7 @@ interface TemplateGalleryProps {
  * />
  * ```
  */
-export default function TemplateGallery({ onSelect, onPreview }: TemplateGalleryProps) {
+export default function TemplateGallery({ onSelect, onPreview, resumeData }: TemplateGalleryProps) {
   const { selectedTemplate, filterTemplates } = useTemplateStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<TemplateCategory | 'all'>('all')
@@ -168,6 +169,7 @@ export default function TemplateGallery({ onSelect, onPreview }: TemplateGallery
               isSelected={selectedTemplate?.id === template.id}
               onSelect={onSelect}
               onPreview={onPreview}
+              resumeData={resumeData}
             />
           ))}
         </div>

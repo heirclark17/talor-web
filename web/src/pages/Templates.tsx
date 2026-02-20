@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, ArrowRight, Info, Download, Crown } from 'lucide-react'
 import TemplateGallery from '../components/templates/TemplateGallery'
+import ResumeSelector from '../components/templates/ResumeSelector'
 import type { ResumeTemplate } from '../types/template'
 import { useTemplateStore } from '../stores/templateStore'
 import { useSubscriptionStore } from '../stores/subscriptionStore'
@@ -18,22 +19,31 @@ export default function Templates() {
   const navigate = useNavigate()
   const { selectedTemplate, setSelectedTemplate } = useTemplateStore()
   const { checkFeatureAccess } = useSubscriptionStore()
-  const { latestResume } = useResumeStore()
+  const { latestResume, resumes } = useResumeStore()
   const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate | null>(null)
+  const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null)
+
+  // Get the selected resume or default to latest
+  const activeResume = useMemo(() => {
+    if (selectedResumeId) {
+      return resumes?.find(r => r.id === selectedResumeId) || null
+    }
+    return latestResume
+  }, [selectedResumeId, resumes, latestResume])
 
   // Convert resume store data to ResumePreview format
   const resumeData = useMemo(() => {
-    if (!latestResume) return null
+    if (!activeResume) return null
 
     return {
-      name: latestResume.personalInfo?.name || latestResume.personalInfo?.fullName,
-      email: latestResume.personalInfo?.email,
-      phone: latestResume.personalInfo?.phone,
-      linkedin: latestResume.personalInfo?.linkedin,
-      location: latestResume.personalInfo?.location,
-      summary: latestResume.summary,
-      skills: latestResume.skills,
-      experience: latestResume.experience?.map(exp => ({
+      name: activeResume.personalInfo?.name || activeResume.personalInfo?.fullName,
+      email: activeResume.personalInfo?.email,
+      phone: activeResume.personalInfo?.phone,
+      linkedin: activeResume.personalInfo?.linkedin,
+      location: activeResume.personalInfo?.location,
+      summary: activeResume.summary,
+      skills: activeResume.skills,
+      experience: activeResume.experience?.map(exp => ({
         company: exp.company,
         title: exp.title,
         location: exp.location,
@@ -41,10 +51,10 @@ export default function Templates() {
         bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
         description: exp.description,
       })),
-      education: latestResume.education,
-      certifications: latestResume.certifications,
+      education: activeResume.education,
+      certifications: activeResume.certifications,
     }
-  }, [latestResume])
+  }, [activeResume])
 
   const handleSelectTemplate = (template: ResumeTemplate) => {
     if (template.isPremium && !checkFeatureAccess('premium_templates')) {
@@ -85,6 +95,14 @@ export default function Templates() {
         </p>
       </div>
 
+      {/* Resume Selector */}
+      <div className="max-w-7xl mx-auto mb-12">
+        <ResumeSelector
+          selectedResumeId={selectedResumeId}
+          onResumeSelect={setSelectedResumeId}
+        />
+      </div>
+
       {/* Info Banner */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="glass rounded-xl border border-theme-subtle p-6 flex items-start gap-4">
@@ -118,7 +136,11 @@ export default function Templates() {
 
       {/* Template Gallery */}
       <div className="max-w-7xl mx-auto mb-8">
-        <TemplateGallery onSelect={handleSelectTemplate} onPreview={handlePreviewTemplate} />
+        <TemplateGallery
+          onSelect={handleSelectTemplate}
+          onPreview={handlePreviewTemplate}
+          resumeData={resumeData}
+        />
       </div>
 
       {/* Selected Template Footer */}

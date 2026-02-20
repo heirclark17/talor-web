@@ -11,6 +11,7 @@ interface TemplateCardProps {
   isSelected?: boolean
   onSelect: (template: ResumeTemplate) => void
   onPreview?: (template: ResumeTemplate) => void
+  resumeData?: any // Optional resume data to preview (overrides store data)
 }
 
 /**
@@ -33,6 +34,7 @@ export default function TemplateCard({
   isSelected = false,
   onSelect,
   onPreview,
+  resumeData: propResumeData,
 }: TemplateCardProps) {
   const { checkFeatureAccess } = useSubscriptionStore()
   const { latestResume } = useResumeStore()
@@ -44,8 +46,12 @@ export default function TemplateCard({
     return generateTemplatePlaceholder(template)
   }, [template])
 
-  // Convert resume store data to ResumePreview format
+  // Use provided resume data or convert from store
   const resumeData = useMemo(() => {
+    // If resume data is provided as prop, use it
+    if (propResumeData) return propResumeData
+
+    // Otherwise convert from store
     if (!latestResume) return null
 
     return {
@@ -67,7 +73,7 @@ export default function TemplateCard({
       education: latestResume.education,
       certifications: latestResume.certifications,
     }
-  }, [latestResume])
+  }, [propResumeData, latestResume])
 
   const handleClick = () => {
     if (hasAccess) {
