@@ -474,6 +474,28 @@ input, button, textarea, select {
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+.user-menu-glass {
+  background: rgba(18, 18, 22, 0.75);
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  animation: userMenuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes userMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .menu-item-enter {
   opacity: 0;
   animation: menuItemIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;

@@ -360,11 +360,10 @@ function AppContent() {
 
                     {userMenuOpen && (
                       <div
-                        className="absolute right-0 mt-2 w-64 rounded-xl overflow-hidden shadow-lg border border-white/10"
-                        style={{ backgroundColor: 'var(--bg-secondary)' }}
+                        className="absolute right-0 mt-2 w-64 rounded-xl overflow-hidden user-menu-glass"
                         role="menu"
                       >
-                        <div className="px-4 py-3 border-b border-white/10">
+                        <div className="px-4 py-3 border-b border-white/8">
                           {user.user_metadata?.full_name && (
                             <p className="text-sm font-semibold text-theme truncate">{user.user_metadata.full_name}</p>
                           )}
@@ -376,7 +375,7 @@ function AppContent() {
                             signOut()
                           }}
                           role="menuitem"
-                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-secondary hover:text-theme hover:bg-white/5 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-secondary hover:text-theme hover:bg-white/8 transition-all duration-200"
                         >
                           <LogOut className="w-4 h-4" />
                           Sign out
