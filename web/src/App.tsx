@@ -155,12 +155,12 @@ function Dashboard() {
         >
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 text-center">
             <div className={`animate-on-scroll ${socialProofAnimation.isVisible ? 'animate-scale-in delay-100' : ''}`}>
-              <div className="text-4xl sm:text-5xl font-bold text-theme mb-2 sm:mb-3">10x</div>
-              <div className="text-sm sm:text-base text-theme-secondary">Faster Applications</div>
+              <div className="text-4xl sm:text-5xl font-bold text-theme mb-2 sm:mb-3">100%</div>
+              <div className="text-sm sm:text-base text-theme-secondary">ATS Compatible</div>
             </div>
             <div className={`animate-on-scroll ${socialProofAnimation.isVisible ? 'animate-scale-in delay-300' : ''}`}>
-              <div className="text-4xl sm:text-5xl font-bold text-theme mb-2 sm:mb-3">ATS</div>
-              <div className="text-sm sm:text-base text-theme-secondary">Optimized Format</div>
+              <div className="text-4xl sm:text-5xl font-bold text-theme mb-2 sm:mb-3">15+</div>
+              <div className="text-sm sm:text-base text-theme-secondary">Professional Templates</div>
             </div>
             <div className={`animate-on-scroll ${socialProofAnimation.isVisible ? 'animate-scale-in delay-500' : ''}`}>
               <div className="text-4xl sm:text-5xl font-bold text-theme mb-2 sm:mb-3">AI</div>
@@ -223,6 +223,83 @@ function Dashboard() {
               <p className="text-sm sm:text-base text-theme-secondary leading-relaxed">
                 Stop manually rewriting your resume for every job. Create tailored versions in seconds instead of hours.
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Testimonials Section */}
+        <div className="max-w-5xl mx-auto py-16 sm:py-20 lg:py-24">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-theme text-center mb-12 sm:mb-16">
+            What Our Users Say
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Testimonial 1 */}
+            <div className="glass rounded-xl border border-theme-subtle p-6">
+              <div className="flex items-start gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="text-theme-secondary text-sm mb-4 leading-relaxed">
+                "Talor helped me tailor my resume for 15 different roles in one afternoon. The AI really understood how to highlight my relevant experience for each position."
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-semibold">
+                  S
+                </div>
+                <div>
+                  <p className="font-semibold text-theme text-sm">Sarah M.</p>
+                  <p className="text-theme-tertiary text-xs">Product Manager</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="glass rounded-xl border border-theme-subtle p-6">
+              <div className="flex items-start gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="text-theme-secondary text-sm mb-4 leading-relaxed">
+                "The interview prep feature is phenomenal. Getting company-specific questions and STAR story suggestions saved me hours of research before my interviews."
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center text-green-400 font-semibold">
+                  J
+                </div>
+                <div>
+                  <p className="font-semibold text-theme text-sm">James K.</p>
+                  <p className="text-theme-tertiary text-xs">Software Engineer</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="glass rounded-xl border border-theme-subtle p-6">
+              <div className="flex items-start gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="text-theme-secondary text-sm mb-4 leading-relaxed">
+                "Finally, a resume tool that actually understands the job description. The keyword matching and ATS optimization gave me confidence my applications would get seen."
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 font-semibold">
+                  M
+                </div>
+                <div>
+                  <p className="font-semibold text-theme text-sm">Maria L.</p>
+                  <p className="text-theme-tertiary text-xs">Marketing Director</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
