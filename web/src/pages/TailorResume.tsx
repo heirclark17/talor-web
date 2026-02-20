@@ -2674,9 +2674,9 @@ export default function TailorResume() {
               {resumes.map((resume) => (
                 <div
                   key={resume.id}
-                  className={`block p-6 border-2 rounded-xl transition-all ${
+                  className={`block p-6 border-2 rounded-xl transition-all duration-300 ${
                     selectedResumeId === resume.id
-                      ? 'border-theme-muted bg-theme-glass-10'
+                      ? 'border-emerald-500/60 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.12)] animate-[resumeSelected_0.5s_ease-out]'
                       : 'border-theme-muted hover:border-theme-muted hover:bg-theme-glass-5'
                   }`}
                 >
@@ -2729,8 +2729,8 @@ export default function TailorResume() {
                     {/* Action buttons */}
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {selectedResumeId === resume.id && (
-                        <div className="p-2 bg-theme-glass-10 rounded-full">
-                          <CheckCircle2 className="w-6 h-6 text-theme" />
+                        <div className="p-2 bg-emerald-500/15 rounded-full">
+                          <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                         </div>
                       )}
                       <button

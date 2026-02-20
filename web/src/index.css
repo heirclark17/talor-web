@@ -412,6 +412,22 @@ input, button, textarea, select {
   }
 }
 
+/* Resume Selected Pulse Animation */
+@keyframes resumeSelected {
+  0% {
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0), 0 0 20px rgba(16, 185, 129, 0.12);
+    transform: scale(1);
+  }
+  40% {
+    box-shadow: 0 0 24px rgba(16, 185, 129, 0.25), 0 0 48px rgba(16, 185, 129, 0.1);
+    transform: scale(1.015);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0), 0 0 20px rgba(16, 185, 129, 0.12);
+    transform: scale(1);
+  }
+}
+
 /* Premium Menu Dropdown */
 @keyframes menuPanelIn {
   from {
