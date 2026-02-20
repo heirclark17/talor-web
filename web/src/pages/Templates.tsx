@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FileText, ArrowRight, Info, Download, Crown } from 'lucide-react'
 import TemplateGallery from '../components/templates/TemplateGallery'
 import ResumeSelector from '../components/templates/ResumeSelector'
+import ExportButtons from '../components/templates/ExportButtons'
 import type { ResumeTemplate } from '../types/template'
 import { useTemplateStore } from '../stores/templateStore'
 import { useSubscriptionStore } from '../stores/subscriptionStore'
@@ -147,7 +148,7 @@ export default function Templates() {
       {selectedTemplate && (
         <div className="fixed bottom-0 left-0 right-0 glass border-t border-theme-subtle backdrop-blur-xl z-40">
           <div className="container mx-auto px-4 sm:px-6 py-4">
-            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-16 bg-theme-glass-10 rounded-lg flex items-center justify-center">
                   <FileText className="w-6 h-6 text-theme-secondary" />
@@ -165,7 +166,19 @@ export default function Templates() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Export Buttons */}
+                {resumeData && (
+                  <div className="hidden md:block">
+                    <ExportButtons
+                      template={selectedTemplate}
+                      resumeData={resumeData}
+                      previewElementId="resume-preview-export"
+                      variant="inline"
+                    />
+                  </div>
+                )}
+
                 <button
                   onClick={() => setSelectedTemplate(null)}
                   className="px-4 py-2 bg-theme-glass-10 hover:bg-theme-glass-20 text-theme rounded-lg font-medium transition-colors"
@@ -206,12 +219,28 @@ export default function Templates() {
 
             {/* Live Resume Preview */}
             <div className="aspect-[8.5/11] bg-theme-glass-5 rounded-lg mb-6 flex items-center justify-center overflow-auto">
-              <div className="w-full h-full flex items-center justify-center p-4">
+              <div id="resume-preview-export" className="w-full h-full flex items-center justify-center p-4">
                 <ResumePreview template={previewTemplate} resumeData={resumeData} scale={0.65} />
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* Export Buttons */}
+            {resumeData && (
+              <div className="mb-6">
+                <div className="text-center mb-3">
+                  <p className="text-sm text-theme-secondary">Download your resume</p>
+                </div>
+                <ExportButtons
+                  template={previewTemplate}
+                  resumeData={resumeData}
+                  previewElementId="resume-preview-export"
+                  variant="inline"
+                />
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-between gap-3">
               <button
                 onClick={() => setPreviewTemplate(null)}
                 className="px-6 py-2 bg-theme-glass-10 hover:bg-theme-glass-20 text-theme rounded-lg font-medium transition-colors"

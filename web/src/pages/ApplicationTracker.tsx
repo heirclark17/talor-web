@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Briefcase, Plus, Search, Filter, ChevronDown, Calendar, MapPin, DollarSign, ExternalLink, MoreHorizontal, X, Bookmark, Check } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { Briefcase, Plus, Search, Filter, ChevronDown, Calendar, MapPin, DollarSign, ExternalLink, MoreHorizontal, X, Bookmark, Check, Layers } from 'lucide-react'
 import { api } from '../api/client'
 
 interface SavedJob {
@@ -48,6 +49,7 @@ const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string; b
 const ALL_STATUSES: ApplicationStatus[] = ['saved', 'applied', 'screening', 'interviewing', 'offer', 'accepted', 'rejected', 'withdrawn', 'no_response']
 
 export default function ApplicationTracker() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -57,6 +59,9 @@ export default function ApplicationTracker() {
   const [stats, setStats] = useState<Record<string, number>>({})
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([])
   const [prefilledJob, setPrefilledJob] = useState<SavedJob | null>(null)
+
+  // Check for batch filter from URL
+  const batchResumeIds = searchParams.get('batch')?.split(',').filter(Boolean).map(Number) || null
 
   useEffect(() => {
     loadApplications()

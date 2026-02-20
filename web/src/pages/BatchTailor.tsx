@@ -145,6 +145,18 @@ export default function BatchTailor() {
     navigate(`/tailor?resumeId=${tailoredResumeId}`)
   }
 
+  const handleViewAllResults = () => {
+    // Get all successful tailored resume IDs
+    const successfulResumeIds = results
+      .filter(r => r.status === 'success' && r.tailoredResumeId)
+      .map(r => r.tailoredResumeId)
+      .join(',')
+
+    if (successfulResumeIds) {
+      navigate(`/applications?batch=${successfulResumeIds}`)
+    }
+  }
+
   const selectedResume = resumes.find(r => r.id === selectedResumeId)
   const validUrlCount = jobUrls.filter(url => url.trim().length > 0).length
   const successCount = results.filter(r => r.status === 'success').length
@@ -178,20 +190,32 @@ export default function BatchTailor() {
         </div>
 
         {/* Summary Banner */}
-        <div className="glass rounded-xl p-4 border border-theme-subtle mb-6 flex items-center gap-3">
-          {processing ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
-              <span className="text-theme font-medium">Processing {validUrlCount} jobs...</span>
-            </>
-          ) : (
-            <>
-              <Layers className="w-5 h-5 text-blue-400" />
-              <span className="text-theme font-medium">
-                {successCount} succeeded, {errorCount} failed
-              </span>
-            </>
-          )}
+        <div className="glass rounded-xl p-4 border border-theme-subtle mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {processing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+                  <span className="text-theme font-medium">Processing {validUrlCount} jobs...</span>
+                </>
+              ) : (
+                <>
+                  <Layers className="w-5 h-5 text-blue-400" />
+                  <span className="text-theme font-medium">
+                    {successCount} succeeded, {errorCount} failed
+                  </span>
+                </>
+              )}
+            </div>
+            {!processing && successCount > 0 && (
+              <button
+                onClick={handleViewAllResults}
+                className="btn-primary text-sm px-4 py-2 whitespace-nowrap"
+              >
+                View All in Tracker
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Results List */}
