@@ -111,7 +111,7 @@ export default function TailorResume() {
   const { capture } = usePostHog()
 
   // Resume state from Zustand store
-  const { resumes, fetchResumes, deleteResume: deleteResumeFromStore } = useResumeStore()
+  const { resumes, fetchResumes, deleteResume: deleteResumeFromStore, loading: storeLoadingResumes } = useResumeStore()
 
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
   const [selectedResume, setSelectedResume] = useState<BaseResume | null>(null)
@@ -129,7 +129,7 @@ export default function TailorResume() {
 
   const [loading, setLoading] = useState(false)
   const [loadingComplete, setLoadingComplete] = useState(false)
-  const [loadingResumes, setLoadingResumes] = useState(true)
+  const loadingResumes = storeLoadingResumes
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [showComparison, setShowComparison] = useState(false)
