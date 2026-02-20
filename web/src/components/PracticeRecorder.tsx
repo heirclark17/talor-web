@@ -142,25 +142,54 @@ export default function PracticeRecorder({
 
   const startPreview = async () => {
     setError(null);
+    console.log(`[PracticeRecorder] Starting preview, mode: ${mode}`);
+
     try {
+      // Check if getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Your browser does not support camera/microphone access. Please use a modern browser like Chrome, Firefox, or Edge.');
+      }
+
       const constraints: MediaStreamConstraints =
         mode === 'video'
           ? { video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true }
           : { audio: true };
 
+      console.log('[PracticeRecorder] Requesting media with constraints:', constraints);
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      console.log('[PracticeRecorder] Got stream:', stream.id);
+      console.log('[PracticeRecorder] Video tracks:', stream.getVideoTracks().length);
+      console.log('[PracticeRecorder] Audio tracks:', stream.getAudioTracks().length);
+
       streamRef.current = stream;
 
       if (mode === 'video' && videoPreviewRef.current) {
+        console.log('[PracticeRecorder] Setting video preview srcObject');
         videoPreviewRef.current.srcObject = stream;
-        videoPreviewRef.current.play();
+
+        // Ensure video plays
+        try {
+          await videoPreviewRef.current.play();
+          console.log('[PracticeRecorder] Video preview playing');
+        } catch (playError: any) {
+          console.error('[PracticeRecorder] Video play error:', playError);
+          setError(`Video preview failed: ${playError.message}`);
+        }
+      } else if (mode === 'audio') {
+        console.log('[PracticeRecorder] Audio-only mode, no preview needed');
       }
 
       setState('previewing');
       setExpanded(true);
     } catch (e: any) {
+      console.error('[PracticeRecorder] getUserMedia error:', e);
       if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
         setError('Camera/microphone permission denied. Please allow access and try again.');
+      } else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
+        setError('No camera or microphone found. Please connect a device and try again.');
+      } else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
+        setError('Camera/microphone is already in use by another application.');
       } else {
         setError(`Could not access ${mode === 'video' ? 'camera' : 'microphone'}: ${e.message}`);
       }
@@ -474,6 +503,7 @@ export default function PracticeRecorder({
         <div className="relative aspect-video max-h-[200px] bg-black">
           <video
             ref={videoPreviewRef}
+            autoPlay
             muted
             playsInline
             className="w-full h-full object-cover"
