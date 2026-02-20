@@ -2681,18 +2681,19 @@ export default function TailorResume() {
                   }`}
                 >
                   <div className="flex items-start gap-4">
-                    {/* Checkbox for bulk selection */}
+                    {/* Checkbox for selection */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
+                        setSelectedResumeId(resume.id)
                         toggleResumeSelection(resume.id)
                       }}
                       className="mt-1 flex-shrink-0"
                     >
-                      {selectedResumeIds.has(resume.id) ? (
-                        <CheckSquare className="w-5 h-5 text-theme" />
+                      {selectedResumeId === resume.id ? (
+                        <CheckSquare className="w-6 h-6 text-emerald-400" />
                       ) : (
-                        <Square className="w-5 h-5 text-theme-secondary hover:text-theme transition-colors" />
+                        <Square className="w-6 h-6 text-theme-secondary hover:text-theme transition-colors" />
                       )}
                     </button>
 
@@ -2728,11 +2729,6 @@ export default function TailorResume() {
 
                     {/* Action buttons */}
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      {selectedResumeId === resume.id && (
-                        <div className="p-2 bg-emerald-500/15 rounded-full">
-                          <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-                        </div>
-                      )}
                       <button
                         onClick={(e) => handleDeleteResume(resume.id, e)}
                         disabled={deletingResumeId === resume.id}
