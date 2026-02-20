@@ -352,13 +352,13 @@ export default function UploadResume() {
             {uploading ? 'Uploading...' : uploadSuccess ? 'Upload Another Resume' : 'Select File'}
           </button>
         </div>
+        </div>
       ) : (
         <LinkedInImport
           onImportComplete={handleLinkedInImport}
           onCancel={() => setUploadMethod('resume')}
         />
       )}
-      </div>
 
       {/* Parsed Resume Display */}
       {parsedResume && (
