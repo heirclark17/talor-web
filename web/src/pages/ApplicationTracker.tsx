@@ -144,12 +144,24 @@ export default function ApplicationTracker() {
   }
 
   const filtered = applications.filter(a => {
+    // Filter by batch resume IDs if present
+    if (batchResumeIds && batchResumeIds.length > 0) {
+      if (!a.tailoredResumeId || !batchResumeIds.includes(a.tailoredResumeId)) {
+        return false
+      }
+    }
+
+    // Filter by search query
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       return a.jobTitle.toLowerCase().includes(q) || a.companyName.toLowerCase().includes(q)
     }
     return true
   })
+
+  const handleClearBatchFilter = () => {
+    setSearchParams({})
+  }
 
   const totalActive = (stats['applied'] || 0) + (stats['screening'] || 0) + (stats['interviewing'] || 0)
 
@@ -190,6 +202,29 @@ export default function ApplicationTracker() {
           </div>
         ))}
       </div>
+
+      {/* Batch Filter Banner */}
+      {batchResumeIds && batchResumeIds.length > 0 && (
+        <div className="glass rounded-xl p-4 border border-blue-500/30 bg-blue-500/5 mb-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Layers className="w-5 h-5 text-blue-400 flex-shrink-0" />
+              <div>
+                <p className="text-theme font-medium">Showing Batch Results</p>
+                <p className="text-sm text-theme-secondary">
+                  Displaying {filtered.length} application{filtered.length !== 1 ? 's' : ''} from batch tailoring
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleClearBatchFilter}
+              className="px-4 py-2 rounded-lg bg-theme-glass-10 hover:bg-theme-glass-20 text-theme-secondary hover:text-theme transition-colors text-sm font-medium whitespace-nowrap"
+            >
+              Clear Filter
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Saved Jobs Quick-Add */}
       {savedJobs.length > 0 && (
