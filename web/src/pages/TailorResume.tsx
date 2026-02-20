@@ -8,6 +8,7 @@ import ResumeAnalysis from '../components/ResumeAnalysis'
 import KeywordPanel from '../components/KeywordPanel'
 import MatchScore from '../components/MatchScore'
 import AILoadingScreen from '../components/AILoadingScreen'
+import SalaryInsights from '../components/SalaryInsights'
 import { useResumeStore } from '../stores/resumeStore'
 import { usePostHog } from '../contexts/PostHogContext'
 
@@ -3009,6 +3010,15 @@ export default function TailorResume() {
                   )}
                 </div>
               </div>
+            )}
+
+            {/* Salary Insights - Show when job details extracted */}
+            {jobTitle && (
+              <SalaryInsights
+                jobTitle={jobTitle}
+                location={company}
+                className="mt-6"
+              />
             )}
 
             {/* Saved Jobs */}
