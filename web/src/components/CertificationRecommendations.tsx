@@ -315,7 +315,7 @@ export default function CertificationRecommendations({ certifications, loading }
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="px-4 pb-4 space-y-4 border-t border-theme-subtle">
+                  <div className="px-4 pb-4 space-y-4">
                     {/* Why Recommended */}
                     <div className="pt-4">
                       <h5 className="text-sm font-semibold text-theme mb-2">Why Recommended</h5>

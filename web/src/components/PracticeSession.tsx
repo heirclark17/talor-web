@@ -202,7 +202,7 @@ export default function PracticeSession({ story, onClose }: Props) {
         className="rounded-2xl border border-theme-subtle max-w-4xl w-full max-h-[90vh] overflow-y-auto bg-theme"
       >
         {/* Header */}
-        <div className="sticky top-0 border-b border-theme-subtle p-6 flex items-center justify-between bg-theme rounded-t-2xl">
+        <div className="sticky top-0 p-6 flex items-center justify-between bg-theme rounded-t-2xl">
           <div>
             <h2 id="practice-session-title" className="text-2xl font-bold text-theme mb-1">Practice Session</h2>
             <p className="text-theme-secondary">{story.title}</p>

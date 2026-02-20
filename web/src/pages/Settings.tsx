@@ -100,7 +100,7 @@ export default function Settings() {
           <h2 className="text-xs font-semibold text-theme-tertiary uppercase tracking-wide mb-3">
             Features
           </h2>
-          <div className="glass rounded-xl border border-theme-subtle overflow-hidden divide-y divide-theme-subtle">
+          <div className="glass rounded-xl border border-theme-subtle overflow-hidden">
             <Link
               to="/resumes"
               className="px-4 py-4 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"
@@ -145,7 +145,7 @@ export default function Settings() {
           <h2 className="text-xs font-semibold text-theme-tertiary uppercase tracking-wide mb-3">
             Support
           </h2>
-          <div className="glass rounded-xl border border-theme-subtle overflow-hidden divide-y divide-theme-subtle">
+          <div className="glass rounded-xl border border-theme-subtle overflow-hidden">
             <button
               onClick={handleHelp}
               className="w-full px-4 py-4 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"
@@ -178,7 +178,7 @@ export default function Settings() {
           <h2 className="text-xs font-semibold text-theme-tertiary uppercase tracking-wide mb-3">
             Legal
           </h2>
-          <div className="glass rounded-xl border border-theme-subtle overflow-hidden divide-y divide-theme-subtle">
+          <div className="glass rounded-xl border border-theme-subtle overflow-hidden">
             <Link
               to="/privacy"
               className="px-4 py-4 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"

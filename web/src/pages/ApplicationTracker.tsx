@@ -251,7 +251,7 @@ export default function ApplicationTracker() {
                 </div>
               </div>
               {app.notes && (
-                <p className="text-theme-tertiary text-sm mt-3 border-t border-theme-subtle pt-3">{app.notes}</p>
+                <p className="text-theme-tertiary text-sm mt-3 pt-3">{app.notes}</p>
               )}
             </div>
           ))}

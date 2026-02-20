@@ -286,7 +286,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="px-4 pb-4 space-y-4 border-t border-theme-subtle">
+                  <div className="px-4 pb-4 space-y-4">
                     {/* What It Unlocks (Full) */}
                     <div className="pt-4">
                       <h5 className="text-sm font-semibold text-theme mb-2">What This Certification Unlocks</h5>

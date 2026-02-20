@@ -362,7 +362,7 @@ export default function Home() {
           {/* Modal Content */}
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-theme-subtle bg-theme">
             {/* Header */}
-            <div className="sticky top-0 z-10 border-b border-theme-subtle px-6 py-4 flex items-center justify-between bg-theme">
+            <div className="sticky top-0 z-10 px-6 py-4 flex items-center justify-between bg-theme">
               <div className="flex items-center gap-3">
                 <FileSearch className="w-6 h-6 text-theme" />
                 <div>

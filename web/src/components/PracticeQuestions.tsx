@@ -359,7 +359,7 @@ export default function PracticeQuestions({ interviewPrepId }: PracticeQuestions
 
                 {/* Expanded Content */}
                 {isExpanded && (
-                  <div className="px-5 pb-5 space-y-4 border-t border-theme-subtle pt-4">
+                  <div className="px-5 pb-5 space-y-4 pt-4">
                     {/* Why Asked & Skills */}
                     <div className="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
                       <div className="text-xs font-semibold text-blue-300 mb-2">

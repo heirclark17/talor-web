@@ -1514,7 +1514,7 @@ export default function TailorResume() {
                   aria-labelledby={isMobile ? "original-tab" : undefined}
                   className={`glass rounded-2xl overflow-hidden border border-theme-muted ${isMobile ? 'mb-6' : ''}`}
                 >
-              <div className="glass p-6 border-b border-theme-subtle">
+              <div className="glass p-6">
                 <div className="flex items-center gap-3 mb-2">
                   <FileText className="w-6 h-6 text-theme" />
                   <h2 className="text-2xl font-bold text-theme">Original Resume</h2>
@@ -1529,7 +1529,7 @@ export default function TailorResume() {
               >
                 {/* Summary */}
                 <div id="section-summary" className="mb-10">
-                  <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-subtle">
+                  <div className="flex items-center justify-between mb-4 pb-2">
                     <button
                       onClick={() => toggleSection('summary')}
                       className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -1564,7 +1564,7 @@ export default function TailorResume() {
                 {/* Skills */}
                 {selectedResume.skills && selectedResume.skills.length > 0 && (
                   <div id="section-skills" className="mb-10">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-subtle">
+                    <div className="flex items-center justify-between mb-4 pb-2">
                       <button
                         onClick={() => toggleSection('skills')}
                         className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -1606,7 +1606,7 @@ export default function TailorResume() {
                 {/* Experience */}
                 {selectedResume.experience && selectedResume.experience.length > 0 && (
                   <div id="section-experience" className="mb-10">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-subtle">
+                    <div className="flex items-center justify-between mb-4 pb-2">
                       <button
                         onClick={() => toggleSection('experience')}
                         className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -1665,7 +1665,7 @@ export default function TailorResume() {
                 {/* Education */}
                 {selectedResume.education && (
                   <div id="section-education" className="mb-10">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-subtle">
+                    <div className="flex items-center justify-between mb-4 pb-2">
                       <button
                         onClick={() => toggleSection('education')}
                         className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -1701,7 +1701,7 @@ export default function TailorResume() {
                 {/* Certifications */}
                 {selectedResume.certifications && (
                   <div id="section-certifications">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-subtle">
+                    <div className="flex items-center justify-between mb-4 pb-2">
                       <button
                         onClick={() => toggleSection('certifications')}
                         className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -1745,7 +1745,7 @@ export default function TailorResume() {
                 aria-labelledby={isMobile ? "tailored-tab" : undefined}
                 className={`glass rounded-2xl overflow-hidden border border-theme-muted ${isMobile ? '' : ''}`}
               >
-              <div className="glass p-6 border-b border-theme-muted">
+              <div className="glass p-6">
                 <div className="flex items-center gap-3 mb-2">
                   <Sparkles className="w-6 h-6 text-theme" />
                   <h2 className="text-2xl font-bold text-theme">Tailored Resume</h2>
@@ -1760,7 +1760,7 @@ export default function TailorResume() {
               >
                 {/* Tailored Summary */}
                 <div className="mb-10">
-                  <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-muted">
+                  <div className="flex items-center justify-between mb-4 pb-2">
                     <button
                       onClick={() => toggleSection('summary')}
                       className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -1827,7 +1827,7 @@ export default function TailorResume() {
                 {/* Tailored Competencies */}
                 {tailoredResume.tailored_skills && tailoredResume.tailored_skills.length > 0 && (
                   <div className="mb-10">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-muted">
+                    <div className="flex items-center justify-between mb-4 pb-2">
                       <button
                         onClick={() => toggleSection('skills')}
                         className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -1935,7 +1935,7 @@ export default function TailorResume() {
                 {/* Tailored Experience */}
                 {tailoredResume.tailored_experience && tailoredResume.tailored_experience.length > 0 && (
                   <div className="mb-10">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-muted">
+                    <div className="flex items-center justify-between mb-4 pb-2">
                       <button
                         onClick={() => toggleSection('experience')}
                         className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -2109,7 +2109,7 @@ export default function TailorResume() {
                                       )
                                     })}
                                     {/* Custom title input */}
-                                    <div className="pt-2 mt-1 border-t border-theme-muted">
+                                    <div className="pt-2 mt-1">
                                       {customTitleEdit?.index === idx ? (
                                         <div className="flex gap-2">
                                           <input
@@ -2180,7 +2180,7 @@ export default function TailorResume() {
                 {/* Education */}
                 {tailoredResume.tailored_education && (
                   <div className="mb-10">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-muted">
+                    <div className="flex items-center justify-between mb-4 pb-2">
                       <button
                         onClick={() => toggleSection('education')}
                         className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -2238,7 +2238,7 @@ export default function TailorResume() {
                 {/* Certifications */}
                 {tailoredResume.tailored_certifications && (
                   <div className="mb-10">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-muted">
+                    <div className="flex items-center justify-between mb-4 pb-2">
                       <button
                         onClick={() => toggleSection('certifications')}
                         className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -2296,7 +2296,7 @@ export default function TailorResume() {
                 {/* Alignment Statement */}
                 {tailoredResume.alignment_statement && (
                   <div className="mb-10">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-theme-muted">
+                    <div className="flex items-center justify-between mb-4 pb-2">
                       <button
                         onClick={() => toggleSection('alignment')}
                         className="flex items-center gap-2 text-lg font-bold text-theme hover:text-theme-secondary transition-colors"
@@ -2415,7 +2415,7 @@ export default function TailorResume() {
           <div className="print-content">
             <div className="max-w-4xl mx-auto bg-white p-8">
               {/* Header */}
-              <div className="text-center mb-8 border-b-2 border-gray-800 pb-6">
+              <div className="text-center mb-8 pb-6">
                 <h1 className="text-4xl font-bold text-gray-900 mb-2">
                   {tailoredResume.company ? `Resume for ${tailoredResume.company}` : 'Tailored Resume'}
                 </h1>
@@ -2426,7 +2426,7 @@ export default function TailorResume() {
 
               {/* Professional Summary */}
               <div className="mb-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 pb-2">
                   PROFESSIONAL SUMMARY
                 </h3>
                 <p className="text-gray-800 leading-relaxed">
@@ -2437,7 +2437,7 @@ export default function TailorResume() {
               {/* Core Competencies */}
               {tailoredResume.tailored_skills && tailoredResume.tailored_skills.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 pb-2">
                     CORE COMPETENCIES
                   </h3>
                   <div className="grid grid-cols-3 gap-2">
@@ -2453,7 +2453,7 @@ export default function TailorResume() {
               {/* Professional Experience */}
               {tailoredResume.tailored_experience && tailoredResume.tailored_experience.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 pb-2">
                     PROFESSIONAL EXPERIENCE
                   </h3>
                   <div className="space-y-4">
@@ -2486,7 +2486,7 @@ export default function TailorResume() {
               {/* Education */}
               {tailoredResume.tailored_education && (
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 pb-2">
                     EDUCATION
                   </h3>
                   <p className="text-gray-800">
@@ -2498,7 +2498,7 @@ export default function TailorResume() {
               {/* Certifications */}
               {tailoredResume.tailored_certifications && (
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 pb-2">
                     CERTIFICATIONS & TRAINING
                   </h3>
                   <p className="text-gray-800 whitespace-pre-line">
@@ -2510,7 +2510,7 @@ export default function TailorResume() {
               {/* Alignment Statement */}
               {tailoredResume.alignment_statement && (
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-400 pb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 pb-2">
                     COMPANY ALIGNMENT
                   </h3>
                   <p className="text-gray-800">
@@ -2613,7 +2613,7 @@ export default function TailorResume() {
           {/* Bulk Actions */}
           <div className="max-w-3xl mx-auto">
           {resumes.length > 0 && (
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-theme-subtle">
+            <div className="flex items-center justify-between mb-6 pb-4">
               <div className="flex items-center gap-4">
                 <button
                   onClick={toggleSelectAll}

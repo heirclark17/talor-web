@@ -186,7 +186,7 @@ export default function ResumeAnalysis({ analysis, loading }: ResumeAnalysisProp
 
                       {/* Expanded Change Details */}
                       {isChangeExpanded && (
-                        <div className="mt-4 space-y-4 border-t border-gray-700 pt-4" data-testid="change-explanation">
+                        <div className="mt-4 space-y-4 pt-4" data-testid="change-explanation">
                           {/* Original vs New Text */}
                           {change.original_text && (
                             <div className="space-y-2">

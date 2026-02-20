@@ -320,9 +320,9 @@ export default function CommonInterviewQuestions({
 
               {/* Expanded Content */}
               {isExpanded && (
-                <div className="border-t border-theme-subtle">
+                <div>
                   {/* Tabs */}
-                  <div className="flex border-b border-theme-subtle overflow-x-auto">
+                  <div className="flex overflow-x-auto">
                     <button
                       onClick={() => setActiveTab({ ...activeTab, [question.id]: 'why-hard' })}
                       className={`px-6 py-3 text-sm font-medium transition-colors flex-shrink-0 ${

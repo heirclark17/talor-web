@@ -193,7 +193,7 @@ export default function ParsedResumeValidator({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-between mt-8 pt-6 border-t border-theme-subtle">
+      <div className="flex items-center justify-between mt-8 pt-6">
         {getConfidence(data.summary) === 'low' && (
           <div className="flex items-center gap-2 text-yellow-400 text-sm">
             <AlertTriangle className="w-4 h-4" />

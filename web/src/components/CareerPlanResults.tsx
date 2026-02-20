@@ -138,7 +138,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
     <div className="space-y-4 break-words">
       {/* ===== QUICK START SECTION ===== */}
       <div className="glass rounded-xl border-2 border-blue-500/30 overflow-hidden bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10">
-        <div className="px-6 py-4 border-b border-theme-subtle flex items-center gap-3">
+        <div className="px-6 py-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
             <Play className="w-5 h-5 text-blue-400" />
           </div>
@@ -544,7 +544,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="sticky top-0 bg-theme p-4 sm:p-6 border-b border-theme-subtle flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-theme p-4 sm:p-6 flex items-center justify-between z-10">
               <h2 className="text-xl sm:text-2xl font-bold text-theme">
                 {activeModal === 'roles' && 'Target Roles'}
                 {activeModal === 'skills' && 'Skills Analysis'}
@@ -619,7 +619,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                       )}
 
                       {role.sourceCitations && role.sourceCitations.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-theme-subtle">
+                        <div className="mt-4 pt-4">
                           <span className="text-xs text-theme-tertiary font-semibold mb-2 block">Research Sources:</span>
                           <div className="space-y-1">
                             {role.sourceCitations.map((url, urlIdx) => (
@@ -927,7 +927,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
                       {/* Project Details */}
                       {expandedProject === idx && (
-                        <div className="px-6 pb-6 space-y-6 border-t border-theme-subtle">
+                        <div className="px-6 pb-6 space-y-6">
                           {/* Skills Demonstrated */}
                           {project.skillsDemonstrated && project.skillsDemonstrated.length > 0 && (
                             <div>
@@ -1109,7 +1109,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
                       {/* Event Details */}
                       {expandedEvent === idx && (
-                        <div className="px-6 pb-6 space-y-4 border-t border-theme-subtle">
+                        <div className="px-6 pb-6 space-y-4">
                           {/* Target Audience */}
                           {event.targetAudience && (
                             <div className="bg-theme-glass-5 rounded-lg p-3">
@@ -1374,7 +1374,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
                             {/* Bullet Details */}
                             {expandedBullet === idx && (
-                              <div className="px-4 pb-4 space-y-3 border-t border-theme-subtle pt-3">
+                              <div className="px-4 pb-4 space-y-3 pt-3">
                                 {bullet.whyThisWorks && (
                                   <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
                                     <h5 className="text-green-300 font-semibold text-sm mb-1">Why This Works</h5>

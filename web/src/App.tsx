@@ -163,7 +163,7 @@ function Dashboard() {
         {/* How It Works */}
         <div
           ref={howItWorksAnimation.ref}
-          className="max-w-4xl mx-auto py-16 sm:py-20 lg:py-24 border-t border-theme-subtle"
+          className="max-w-4xl mx-auto py-16 sm:py-20 lg:py-24"
         >
           <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold text-theme text-center mb-12 sm:mb-16 lg:mb-20 animate-on-scroll ${
             howItWorksAnimation.isVisible ? 'animate-fade-in-up' : ''

@@ -59,7 +59,7 @@ export default function ChangeExplanation({ sectionName, changes, originalText, 
   }
 
   return (
-    <div className="mt-4 border-t border-theme-subtle pt-4">
+    <div className="mt-4 pt-4">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-2 text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors w-full"
@@ -77,7 +77,7 @@ export default function ChangeExplanation({ sectionName, changes, originalText, 
               <div className="text-xs font-semibold text-theme-secondary mb-2">ORIGINAL</div>
               <p className="text-sm text-theme-secondary leading-relaxed">{originalText}</p>
             </div>
-            <div className="border-t border-theme-subtle pt-3">
+            <div className="pt-3">
               <div className="text-xs font-semibold text-theme-secondary mb-2">TAILORED</div>
               <p className="text-sm text-theme leading-relaxed">{tailoredText}</p>
             </div>
@@ -126,7 +126,7 @@ export default function ChangeExplanation({ sectionName, changes, originalText, 
                       </div>
                     )}
 
-                    <div className="pt-2 border-t border-theme-subtle">
+                    <div className="pt-2">
                       <div className="flex items-start gap-2">
                         <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                         <p className="text-sm text-theme-secondary">{change.reason}</p>

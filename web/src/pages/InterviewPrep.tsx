@@ -1140,7 +1140,7 @@ export default function InterviewPrep() {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="sticky top-0 bg-theme p-4 sm:p-6 border-b border-theme-subtle flex items-center justify-between z-10">
+              <div className="sticky top-0 bg-theme p-4 sm:p-6 flex items-center justify-between z-10">
                 <h2 className="text-xl sm:text-2xl font-bold text-theme">
                   {activeModal === 'companyProfile' && 'Company Profile'}
                   {activeModal === 'roleAnalysis' && 'Role Analysis'}
@@ -1190,7 +1190,7 @@ export default function InterviewPrep() {
                     </div>
 
                     {/* Notes Section */}
-                    <div className="mt-6 pt-6 border-t border-theme-subtle">
+                    <div className="mt-6 pt-6">
                       <button
                         onClick={() => setShowNotesFor(showNotesFor === 'companyProfile' ? null : 'companyProfile')}
                         className="flex items-center gap-2 text-sm text-theme-secondary hover:text-theme transition-colors"
@@ -1267,7 +1267,7 @@ export default function InterviewPrep() {
                     )}
 
                     {/* Notes Section */}
-                    <div className="mt-6 pt-6 border-t border-theme-subtle">
+                    <div className="mt-6 pt-6">
                       <button
                         onClick={() => setShowNotesFor(showNotesFor === 'roleAnalysis' ? null : 'roleAnalysis')}
                         className="flex items-center gap-2 text-sm text-theme-secondary hover:text-theme transition-colors"
@@ -1398,7 +1398,7 @@ export default function InterviewPrep() {
                     )}
 
                     {/* Notes Section */}
-                    <div className="mt-6 pt-6 border-t border-theme-subtle">
+                    <div className="mt-6 pt-6">
                       <button
                         onClick={() => setShowNotesFor(showNotesFor === 'valuesAndCulture' ? null : 'valuesAndCulture')}
                         className="flex items-center gap-2 text-sm text-theme-secondary hover:text-theme transition-colors"
@@ -1648,7 +1648,7 @@ export default function InterviewPrep() {
                     )}
 
                     {/* Notes Section */}
-                    <div className="mt-6 pt-6 border-t border-theme-subtle">
+                    <div className="mt-6 pt-6">
                       <button
                         onClick={() => setShowNotesFor(showNotesFor === 'strategy' ? null : 'strategy')}
                         className="flex items-center gap-2 text-sm text-theme-secondary hover:text-theme transition-colors"
@@ -1936,7 +1936,7 @@ export default function InterviewPrep() {
           <div className="print-content">
             <div className="max-w-4xl mx-auto bg-white p-8">
               {/* Header */}
-              <div className="text-center mb-8 border-b-2 border-gray-800 pb-6">
+              <div className="text-center mb-8 pb-6">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
                   Interview Preparation Guide
                 </h1>
@@ -1950,7 +1950,7 @@ export default function InterviewPrep() {
 
               {/* Company Overview */}
               <div className="mb-6 print-avoid-break">
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1">
                   COMPANY OVERVIEW
                 </h3>
                 <p className="text-gray-800 text-sm leading-relaxed">
@@ -1960,7 +1960,7 @@ export default function InterviewPrep() {
 
               {/* Role Analysis */}
               <div className="mb-6 print-avoid-break">
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1">
                   ROLE ANALYSIS
                 </h3>
                 <p className="text-gray-700 text-sm mb-2">
@@ -1997,7 +1997,7 @@ export default function InterviewPrep() {
               {/* Values & Culture */}
               {prepData.values_and_culture?.stated_values?.length > 0 && (
                 <div className="mb-6 print-avoid-break">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1">
                     VALUES & CULTURE
                   </h3>
                   {prepData.values_and_culture.stated_values.map((v, i) => (
@@ -2023,7 +2023,7 @@ export default function InterviewPrep() {
               {/* Strategy & News */}
               {prepData.strategy_and_news?.strategic_themes?.length > 0 && (
                 <div className="mb-6 print-avoid-break">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1">
                     STRATEGIC THEMES
                   </h3>
                   {prepData.strategy_and_news.strategic_themes.map((t, i) => (
@@ -2038,7 +2038,7 @@ export default function InterviewPrep() {
 
               {/* Practice Questions */}
               <div className="mb-6 page-break">
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1">
                   PRACTICE QUESTIONS
                 </h3>
                 <ol className="text-sm text-gray-800 space-y-2">
@@ -2050,7 +2050,7 @@ export default function InterviewPrep() {
 
               {/* Questions to Ask Interviewer */}
               <div className="mb-6 print-avoid-break">
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1">
                   QUESTIONS TO ASK INTERVIEWER
                 </h3>
                 {Object.entries(prepData.questions_to_ask_interviewer).map(([category, questions]) => (
@@ -2067,7 +2067,7 @@ export default function InterviewPrep() {
 
               {/* Research Tasks */}
               <div className="mb-6 print-avoid-break">
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1">
                   RESEARCH TASKS
                 </h3>
                 <ul className="text-sm text-gray-800 space-y-1">
@@ -2081,7 +2081,7 @@ export default function InterviewPrep() {
 
               {/* Day-of Checklist */}
               <div className="mb-6 print-avoid-break">
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1">
                   DAY-OF CHECKLIST
                 </h3>
                 <ul className="text-sm text-gray-800 space-y-1">
@@ -2096,7 +2096,7 @@ export default function InterviewPrep() {
               {/* Keyword Mapping */}
               {prepData.candidate_positioning?.keyword_map?.length > 0 && (
                 <div className="mb-6 print-avoid-break">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1">
                     KEYWORD MAPPING
                   </h3>
                   <table>
@@ -2121,7 +2121,7 @@ export default function InterviewPrep() {
               )}
 
               {/* Footer */}
-              <div className="mt-8 pt-4 border-t border-gray-300 text-center">
+              <div className="mt-8 pt-4 text-center">
                 <p className="text-xs text-gray-500">
                   Generated by TalorMe | talorme.com
                 </p>

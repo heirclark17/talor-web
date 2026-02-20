@@ -92,7 +92,7 @@ export function SkeletonListItem({ className = '' }: { className?: string }) {
  */
 export function SkeletonTableRow({ columns = 4 }: { columns?: number }) {
   return (
-    <tr className="border-b border-theme-subtle">
+    <tr>
       {Array.from({ length: columns }).map((_, i) => (
         <td key={i} className="py-4 px-4">
           <Skeleton variant="text" width={i === 0 ? '80%' : '60%'} />

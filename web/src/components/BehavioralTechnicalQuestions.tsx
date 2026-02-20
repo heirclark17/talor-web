@@ -499,7 +499,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
 
                   {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="p-4 pt-0 space-y-4 border-t border-theme-subtle">
+                    <div className="p-4 pt-0 space-y-4">
                       {/* Why Asked */}
                       <div>
                         <h5 className="text-theme-secondary text-sm font-medium mb-1 flex items-center gap-1">
@@ -936,7 +936,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
 
                   {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="p-4 pt-0 space-y-4 border-t border-theme-subtle">
+                    <div className="p-4 pt-0 space-y-4">
                       {/* Expected Answer Points */}
                       <div>
                         <h5 className="text-theme text-sm font-medium mb-2 flex items-center gap-1">
