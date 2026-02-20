@@ -288,18 +288,33 @@ function AppContent() {
     }
   }, [mobileMenuOpen])
 
-  const navLinks = [
-    { to: '/resumes', icon: FileText, label: 'Resumes', tourId: 'resumes' },
-    { to: '/upload', icon: Upload, label: 'Upload', tourId: 'upload' },
-    { to: '/tailor', icon: Target, label: 'Tailor', tourId: 'tailor' },
-    { to: '/batch-tailor', icon: Layers, label: 'Batch', tourId: 'batch-tailor' },
-    { to: '/applications', icon: Briefcase, label: 'Applications', tourId: 'applications' },
-    { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep', tourId: 'interview-prep' },
-    { to: '/star-stories', icon: Sparkles, label: 'STAR Stories', tourId: 'star-stories' },
-    { to: '/cover-letters', icon: FileEdit, label: 'Cover Letters', tourId: 'cover-letters' },
-    { to: '/saved-comparisons', icon: Bookmark, label: 'Saved', tourId: 'saved' },
-    { to: '/career-path', icon: TrendingUp, label: 'Career Path', tourId: 'career-path' },
-    { to: '/settings', icon: Settings, label: 'Settings', tourId: 'settings' },
+  const menuSections = [
+    {
+      label: 'Resume Tools',
+      links: [
+        { to: '/resumes', icon: FileText, label: 'My Resumes', desc: 'View and manage all resumes', tourId: 'resumes' },
+        { to: '/upload', icon: Upload, label: 'Upload', desc: 'Upload a new base resume', tourId: 'upload' },
+        { to: '/tailor', icon: Target, label: 'Tailor', desc: 'Customize for a specific job', tourId: 'tailor' },
+        { to: '/batch-tailor', icon: Layers, label: 'Batch Tailor', desc: 'Tailor for multiple jobs at once', tourId: 'batch-tailor' },
+      ],
+    },
+    {
+      label: 'Career Prep',
+      links: [
+        { to: '/applications', icon: Briefcase, label: 'Applications', desc: 'Track your job applications', tourId: 'applications' },
+        { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep', desc: 'Practice for upcoming interviews', tourId: 'interview-prep' },
+        { to: '/star-stories', icon: Sparkles, label: 'STAR Stories', desc: 'Build behavioral interview answers', tourId: 'star-stories' },
+        { to: '/cover-letters', icon: FileEdit, label: 'Cover Letters', desc: 'Generate tailored cover letters', tourId: 'cover-letters' },
+      ],
+    },
+    {
+      label: 'Growth',
+      links: [
+        { to: '/saved-comparisons', icon: Bookmark, label: 'Saved', desc: 'Bookmarked comparisons', tourId: 'saved' },
+        { to: '/career-path', icon: TrendingUp, label: 'Career Path', desc: 'Plan your career trajectory', tourId: 'career-path' },
+        { to: '/settings', icon: Settings, label: 'Settings', desc: 'Preferences and account', tourId: 'settings' },
+      ],
+    },
   ]
 
   return (
@@ -350,51 +365,75 @@ function AppContent() {
           {mobileMenuOpen && (
             <div
               id="nav-menu"
-              className="fixed inset-0 top-[65px] z-40 animate-fade-in"
+              className="fixed inset-0 top-[65px] z-40"
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"
             >
-              {/* Backdrop - clickable to close */}
+              {/* Backdrop */}
               <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
+                className="absolute inset-0 bg-black/50 backdrop-blur-md menu-backdrop-enter"
                 onClick={() => setMobileMenuOpen(false)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    setMobileMenuOpen(false)
-                  }
-                }}
                 aria-hidden="true"
               />
 
               {/* Menu Panel */}
               <nav
-                className="relative border-t border-theme-subtle animate-slide-down"
-                style={{ backgroundColor: 'var(--bg-primary)' }}
+                className="relative menu-panel-enter"
+                style={{ backgroundColor: 'var(--bg-secondary)' }}
                 aria-label="Main navigation"
               >
-                <div className="container mx-auto px-4 sm:px-6 py-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2" role="menu">
-                    {navLinks.map((link) => (
-                      <Link
-                        key={link.to}
-                        to={link.to}
-                        data-tour={link.tourId}
-                        onClick={() => setMobileMenuOpen(false)}
-                        role="menuitem"
-                        className={`flex items-center gap-3 p-3 min-h-[44px] rounded-xl transition-all duration-200 ${
-                          location.pathname === link.to
-                            ? 'bg-theme-glass-10 text-theme'
-                            : 'text-theme-secondary hover:bg-theme-glass-5 hover:text-theme active:scale-[0.98]'
-                        }`}
-                        aria-current={location.pathname === link.to ? 'page' : undefined}
-                      >
-                        <link.icon className="w-5 h-5" aria-hidden="true" />
-                        <span className="text-base font-medium">{link.label}</span>
-                      </Link>
+                <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" role="menu">
+                    {menuSections.map((section) => (
+                      <div key={section.label}>
+                        <div className="menu-section-label">{section.label}</div>
+                        <div className="flex flex-col gap-1">
+                          {section.links.map((link) => (
+                            <Link
+                              key={link.to}
+                              to={link.to}
+                              data-tour={link.tourId}
+                              onClick={() => setMobileMenuOpen(false)}
+                              role="menuitem"
+                              className={`menu-nav-card menu-item-enter ${
+                                location.pathname === link.to ? 'active' : ''
+                              }`}
+                              aria-current={location.pathname === link.to ? 'page' : undefined}
+                            >
+                              <div className="menu-icon-wrap">
+                                <link.icon
+                                  className={`w-[18px] h-[18px] ${
+                                    location.pathname === link.to
+                                      ? 'text-accent'
+                                      : 'text-theme-secondary'
+                                  }`}
+                                  aria-hidden="true"
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <div className={`text-[15px] font-semibold leading-tight ${
+                                  location.pathname === link.to ? 'text-theme' : 'text-theme'
+                                }`}>
+                                  {link.label}
+                                </div>
+                                <div className="text-[13px] text-theme-tertiary leading-snug mt-0.5">
+                                  {link.desc}
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
+
+                {/* Bottom edge fade */}
+                <div
+                  className="h-px"
+                  style={{ background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--text-primary) 8%, transparent), transparent)' }}
+                />
               </nav>
             </div>
           )}
