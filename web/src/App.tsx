@@ -52,6 +52,7 @@ const Pricing = lazyWithRetry(() => import('./pages/Pricing'))
 const Templates = lazyWithRetry(() => import('./pages/Templates'))
 const MockInterview = lazyWithRetry(() => import('./pages/MockInterview'))
 const ResumeBuilder = lazyWithRetry(() => import('./pages/ResumeBuilder'))
+const JobSearch = lazyWithRetry(() => import('./pages/JobSearch'))
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'))
 const OnboardingTour = lazyWithRetry(() => import('./components/OnboardingTour'))
 
@@ -465,6 +466,7 @@ function AppContent() {
     {
       label: 'Career Prep',
       links: [
+        { to: '/job-search', icon: Search, label: 'Job Search', desc: 'Find and tailor for jobs', tourId: 'job-search', iconColor: 'text-emerald-400' },
         { to: '/applications', icon: Briefcase, label: 'Applications', desc: 'Track your job applications', tourId: 'applications', iconColor: 'text-amber-400' },
         { to: '/interview-preps', icon: BookOpen, label: 'Interview Prep', desc: 'Practice for upcoming interviews', tourId: 'interview-prep', iconColor: 'text-cyan-400' },
         { to: '/star-stories', icon: Sparkles, label: 'STAR Stories', desc: 'Build behavioral interview answers', tourId: 'star-stories', iconColor: 'text-yellow-400' },
@@ -675,6 +677,7 @@ function AppContent() {
               <Route path="/interview-prep/:tailoredResumeId" element={<ProtectedRoute><InterviewPrep /></ProtectedRoute>} />
               <Route path="/mock-interview" element={<ProtectedRoute><MockInterview /></ProtectedRoute>} />
               <Route path="/resume-builder" element={<ProtectedRoute><ResumeBuilder /></ProtectedRoute>} />
+              <Route path="/job-search" element={<ProtectedRoute><JobSearch /></ProtectedRoute>} />
               <Route path="/star-stories" element={<ProtectedRoute><StarStoriesList /></ProtectedRoute>} />
               <Route path="/cover-letters" element={<ProtectedRoute><CoverLetterGenerator /></ProtectedRoute>} />
               <Route path="/saved-comparisons" element={<ProtectedRoute><SavedComparisons /></ProtectedRoute>} />
