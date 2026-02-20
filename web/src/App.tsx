@@ -12,23 +12,43 @@ import { useClerkUserSync } from './hooks/useClerkUserSync'
 import { useAuth } from './contexts/AuthContext'
 import { PostHogProvider } from './contexts/PostHogContext'
 
-// Lazy-loaded page components for code splitting
-const UploadResume = React.lazy(() => import('./pages/UploadResume'))
-const TailorResume = React.lazy(() => import('./pages/TailorResume'))
-const InterviewPrep = React.lazy(() => import('./pages/InterviewPrep'))
-const InterviewPrepList = React.lazy(() => import('./pages/InterviewPrepList'))
-const StarStoriesList = React.lazy(() => import('./pages/StarStoriesList'))
-const SavedComparisons = React.lazy(() => import('./pages/SavedComparisons'))
-const CareerPathDesigner = React.lazy(() => import('./pages/CareerPathDesigner'))
-const Home = React.lazy(() => import('./pages/Home'))
-const SettingsPage = React.lazy(() => import('./pages/Settings'))
-const ApplicationTracker = React.lazy(() => import('./pages/ApplicationTracker'))
-const CoverLetterGenerator = React.lazy(() => import('./pages/CoverLetterGenerator'))
-const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'))
-const TermsOfService = React.lazy(() => import('./pages/TermsOfService'))
-const BatchTailor = React.lazy(() => import('./pages/BatchTailor'))
-const NotFound = React.lazy(() => import('./pages/NotFound'))
-const OnboardingTour = React.lazy(() => import('./components/OnboardingTour'))
+// Auto-reload wrapper for lazy imports - handles stale chunks after deploys
+function lazyWithRetry(importFn: () => Promise<any>) {
+  return React.lazy(() =>
+    importFn().catch((err: Error) => {
+      // If the chunk 404'd due to a new deployment, reload once
+      const isChunkError =
+        err.message.includes('Failed to fetch dynamically imported module') ||
+        err.message.includes('Loading chunk') ||
+        err.message.includes('Loading CSS chunk')
+      if (isChunkError && !sessionStorage.getItem('chunk_reload')) {
+        sessionStorage.setItem('chunk_reload', '1')
+        window.location.reload()
+        return { default: () => null } as any // won't render, page is reloading
+      }
+      sessionStorage.removeItem('chunk_reload')
+      throw err
+    })
+  )
+}
+
+// Lazy-loaded page components for code splitting (with auto-retry on stale chunks)
+const UploadResume = lazyWithRetry(() => import('./pages/UploadResume'))
+const TailorResume = lazyWithRetry(() => import('./pages/TailorResume'))
+const InterviewPrep = lazyWithRetry(() => import('./pages/InterviewPrep'))
+const InterviewPrepList = lazyWithRetry(() => import('./pages/InterviewPrepList'))
+const StarStoriesList = lazyWithRetry(() => import('./pages/StarStoriesList'))
+const SavedComparisons = lazyWithRetry(() => import('./pages/SavedComparisons'))
+const CareerPathDesigner = lazyWithRetry(() => import('./pages/CareerPathDesigner'))
+const Home = lazyWithRetry(() => import('./pages/Home'))
+const SettingsPage = lazyWithRetry(() => import('./pages/Settings'))
+const ApplicationTracker = lazyWithRetry(() => import('./pages/ApplicationTracker'))
+const CoverLetterGenerator = lazyWithRetry(() => import('./pages/CoverLetterGenerator'))
+const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy'))
+const TermsOfService = lazyWithRetry(() => import('./pages/TermsOfService'))
+const BatchTailor = lazyWithRetry(() => import('./pages/BatchTailor'))
+const NotFound = lazyWithRetry(() => import('./pages/NotFound'))
+const OnboardingTour = lazyWithRetry(() => import('./components/OnboardingTour'))
 
 function Dashboard() {
   const navigate = useNavigate()

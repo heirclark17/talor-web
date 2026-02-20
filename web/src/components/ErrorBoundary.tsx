@@ -31,6 +31,18 @@ export default class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo)
 
+    // Auto-reload on stale chunk errors (happens after new deployments)
+    const isChunkError =
+      error.message.includes('Failed to fetch dynamically imported module') ||
+      error.message.includes('Loading chunk') ||
+      error.message.includes('Loading CSS chunk')
+    if (isChunkError && !sessionStorage.getItem('chunk_reload')) {
+      sessionStorage.setItem('chunk_reload', '1')
+      window.location.reload()
+      return
+    }
+    sessionStorage.removeItem('chunk_reload')
+
     // Store error info for dev display
     this.setState({ errorInfo })
 
