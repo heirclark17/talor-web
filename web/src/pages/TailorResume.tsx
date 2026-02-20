@@ -757,6 +757,13 @@ export default function TailorResume() {
         : err.message
       setError(message)
       localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
+      // Clear stale ?resumeId= from URL so user doesn't keep hitting this error
+      const params = new URLSearchParams(window.location.search)
+      if (params.has('resumeId')) {
+        params.delete('resumeId')
+        const newUrl = params.toString() ? `${window.location.pathname}?${params}` : window.location.pathname
+        window.history.replaceState({}, '', newUrl)
+      }
     } finally {
       clearTimeout(timeoutId)
       setLoading(false)
@@ -1116,10 +1123,10 @@ export default function TailorResume() {
       setLoadingComplete(true)
       await new Promise(r => setTimeout(r, 600))
       setLoadingComplete(false)
-      setLoading(false)
     } catch (err: any) {
       console.error('[handleTailor] Error caught:', err.message, err)
       setError(err.message)
+    } finally {
       setLoading(false)
     }
   }

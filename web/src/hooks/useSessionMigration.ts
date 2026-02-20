@@ -28,7 +28,7 @@ export function useSessionMigration() {
     // Don't migrate if old and new are somehow the same
     if (oldUserId === userId) return
 
-    const API_BASE_URL = import.meta.env.VITE_API_URL || ''
+    const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
 
     fetch(`${API_BASE_URL}/api/auth/migrate-session`, {
       method: 'POST',
