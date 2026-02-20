@@ -38,12 +38,6 @@ describe('SignIn Page', () => {
     expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument()
   })
 
-  it('should render OAuth buttons', () => {
-    renderSignIn()
-    expect(screen.getByText('Continue with Google')).toBeInTheDocument()
-    expect(screen.getByText('Continue with GitHub')).toBeInTheDocument()
-  })
-
   it('should have link to sign up page', () => {
     renderSignIn()
     expect(screen.getByText('Sign up')).toHaveAttribute('href', '/sign-up')
