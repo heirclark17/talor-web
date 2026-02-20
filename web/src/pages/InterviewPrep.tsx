@@ -310,92 +310,83 @@ export default function InterviewPrep() {
       // Try to get existing interview prep
       const result = await api.getInterviewPrep(Number(tailoredResumeId))
 
-      if (result.success) {
-        setPrepData(result.data.prep_data)
-        setInterviewPrepId(result.data.interview_prep_id)
+      if (!result.success) {
+        // No existing interview prep (404) - auto-generate instead of showing empty state
+        console.log('No existing interview prep found, auto-generating...')
+        setLoading(false)
+        await generateInterviewPrep()
+        return
+      }
 
-        // Check for cached data from database (permanent storage)
-        const cachedData = result.data.cached_data
-        const hasCachedData = cachedData && (
-          cachedData.company_research ||
-          cachedData.strategic_news ||
-          cachedData.values_alignment
-        )
+      setPrepData(result.data.prep_data)
+      setInterviewPrepId(result.data.interview_prep_id)
 
-        if (hasCachedData) {
-          console.log('✓ Using permanently cached data from database')
-          if (cachedData.company_research) setCompanyResearch(cachedData.company_research)
-          if (cachedData.strategic_news) setCompanyNews(cachedData.strategic_news)
-          if (cachedData.values_alignment) setCompanyValues(cachedData.values_alignment)
-          if (cachedData.competitive_intelligence) setInterviewQuestions(cachedData.competitive_intelligence)
-        }
+      // Check for cached data from database (permanent storage)
+      const cachedData = result.data.cached_data
+      const hasCachedData = cachedData && (
+        cachedData.company_research ||
+        cachedData.strategic_news ||
+        cachedData.values_alignment
+      )
 
-        // Also fetch the tailored resume to get base resume ID
-        const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
-          headers: getApiHeaders(),
-        })
+      if (hasCachedData) {
+        console.log('✓ Using permanently cached data from database')
+        if (cachedData.company_research) setCompanyResearch(cachedData.company_research)
+        if (cachedData.strategic_news) setCompanyNews(cachedData.strategic_news)
+        if (cachedData.values_alignment) setCompanyValues(cachedData.values_alignment)
+        if (cachedData.competitive_intelligence) setInterviewQuestions(cachedData.competitive_intelligence)
+      }
 
-        if (!tailoredResponse.ok) {
-          if (tailoredResponse.status === 404) {
-            const errorData = await tailoredResponse.json()
-            console.warn('Tailored resume not found:', errorData)
-            // Interview prep exists but tailored resume is deleted - show warning
-            setWarning(`The original resume for this interview prep has been deleted. Some features like STAR Story Builder may not work.`)
-            // Only fetch real data if not already cached
-            if (!hasCachedData) {
-              await fetchRealData(result.data.prep_data, false, result.data.interview_prep_id)
-            }
-          } else {
-            throw new Error(`Failed to fetch tailored resume: ${tailoredResponse.status}`)
-          }
-        } else {
-          const tailoredData = await tailoredResponse.json()
-          setTailoredResumeData(tailoredData)
+      // Also fetch the tailored resume to get base resume ID
+      const tailoredResponse = await fetch(`${API_BASE_URL}/api/tailor/tailored/${tailoredResumeId}`, {
+        headers: getApiHeaders(),
+      })
 
-          // Fetch base resume to get experiences
-          const baseResponse = await fetch(`${API_BASE_URL}/api/resumes/${tailoredData.base_resume_id}`, {
-            headers: getApiHeaders(),
-          })
-
-          if (baseResponse.ok) {
-            const baseData = await baseResponse.json()
-            const experiences = typeof baseData.experience === 'string'
-              ? JSON.parse(baseData.experience)
-              : baseData.experience
-            setBaseResumeExperiences(experiences || [])
-          }
-
-          // Only fetch real data from AI if not already cached in database
+      if (!tailoredResponse.ok) {
+        if (tailoredResponse.status === 404) {
+          const errorData = await tailoredResponse.json()
+          console.warn('Tailored resume not found:', errorData)
+          // Interview prep exists but tailored resume is deleted - show warning
+          setWarning(`The original resume for this interview prep has been deleted. Some features like STAR Story Builder may not work.`)
+          // Only fetch real data if not already cached
           if (!hasCachedData) {
             await fetchRealData(result.data.prep_data, false, result.data.interview_prep_id)
           }
-        }
-      }
-    } catch (err: any) {
-      console.error('Error loading interview prep:', err)
-      // If not found, try to generate automatically
-      if (err.message?.includes('not found') || err.message?.includes('404')) {
-        console.log('Interview prep not found, generating new one...')
-        setLoading(false)
-        try {
-          await generateInterviewPrep()
-          // Generation success - related data is already fetched in generateInterviewPrep
-        } catch (genErr: any) {
-          console.error('Auto-generation failed:', genErr)
-          setError(`Failed to generate interview prep. ${genErr.message}`)
+        } else {
+          throw new Error(`Failed to fetch tailored resume: ${tailoredResponse.status}`)
         }
       } else {
-        setError(err.message || 'Failed to load interview prep')
-        setLoading(false)
+        const tailoredData = await tailoredResponse.json()
+        setTailoredResumeData(tailoredData)
+
+        // Fetch base resume to get experiences
+        const baseResponse = await fetch(`${API_BASE_URL}/api/resumes/${tailoredData.base_resume_id}`, {
+          headers: getApiHeaders(),
+        })
+
+        if (baseResponse.ok) {
+          const baseData = await baseResponse.json()
+          const experiences = typeof baseData.experience === 'string'
+            ? JSON.parse(baseData.experience)
+            : baseData.experience
+          setBaseResumeExperiences(experiences || [])
+        }
+
+        // Only fetch real data from AI if not already cached in database
+        if (!hasCachedData) {
+          await fetchRealData(result.data.prep_data, false, result.data.interview_prep_id)
+        }
       }
-    } finally {
-      if (!error && !generating) {
-        // Signal completion so progress bar reaches 100% before unmount
-        setLoadingComplete(true)
-        await new Promise(r => setTimeout(r, 600))
-        setLoadingComplete(false)
-        setLoading(false)
-      }
+
+      // Signal completion so progress bar reaches 100% before unmount
+      setLoadingComplete(true)
+      await new Promise(r => setTimeout(r, 600))
+      setLoadingComplete(false)
+      setLoading(false)
+    } catch (err: any) {
+      console.error('Error loading interview prep:', err)
+      setError(err.message || 'Failed to load interview prep')
+      setLoading(false)
     }
   }
 

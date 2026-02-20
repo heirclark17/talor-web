@@ -206,16 +206,17 @@ describe('InterviewPrep Page', () => {
   })
 
   describe('Error State', () => {
-    it('should show error when API fails', async () => {
+    it('should auto-generate when no existing prep found', async () => {
       mockGetInterviewPrep.mockResolvedValue({
         success: false,
-        error: 'Network error'
+        error: 'Not found'
       })
+      mockGenerateInterviewPrep.mockImplementation(() => new Promise(() => {}))
 
       renderInterviewPrep()
 
       await waitFor(() => {
-        expect(screen.getByText(/No Interview Prep Available/i)).toBeInTheDocument()
+        expect(mockGenerateInterviewPrep).toHaveBeenCalled()
       }, { timeout: 3000 })
     })
   })
