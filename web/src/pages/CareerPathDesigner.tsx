@@ -209,13 +209,19 @@ export default function CareerPathDesigner() {
   const [uploadProgress, setUploadProgress] = useState(0)
 
   // Existing resumes from Zustand store
+  // We use a local loading state instead of the shared store's `loading` flag.
+  // The shared `loading` flag is also set by other pages (Home.tsx, BatchTailor,
+  // CoverLetterGenerator) that call fetchResumes() on their own mount. If the user
+  // navigated here from one of those pages while their API call was still in-flight,
+  // the shared flag would be `true` and this section would show an infinite spinner
+  // even though CareerPathDesigner never triggered the load itself.
   const {
     resumes: existingResumes,
-    loading: loadingResumes,
     deletingId: deletingResumeId,
     fetchResumes,
     deleteResume,
   } = useResumeStore()
+  const [loadingResumes, setLoadingResumes] = useState(false)
   const [selectedExistingResumeId, setSelectedExistingResumeId] = useState<number | null>(null)
   const [extractingJob, setExtractingJob] = useState(false)
 
@@ -494,12 +500,18 @@ export default function CareerPathDesigner() {
     setCertificationAreasInterest([])
   }
 
-  // Fetch existing resumes when on upload step
+  // Fetch existing resumes when on upload step.
+  // Uses a local loading flag (not the shared Zustand store's `loading`) so that
+  // in-flight requests triggered by *other* pages never bleed into this spinner.
   useEffect(() => {
-    if (step === 'upload' && existingResumes.length === 0) {
-      fetchResumes()
+    if (step !== 'upload') return
+    // Always refresh the list when landing on the upload step.
+    // Only show a spinner if there are no cached resumes to display yet.
+    if (existingResumes.length === 0) {
+      setLoadingResumes(true)
     }
-  }, [step, existingResumes.length, fetchResumes])
+    fetchResumes().finally(() => setLoadingResumes(false))
+  }, [step, fetchResumes]) // Removed existingResumes.length to prevent re-triggers mid-fetch
 
   // Handle selecting an existing resume
   const handleSelectExistingResume = async (resumeId: number) => {

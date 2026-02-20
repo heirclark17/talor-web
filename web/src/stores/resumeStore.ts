@@ -59,8 +59,16 @@ export const useResumeStore = create<ResumeState>()(
 
       fetchResumes: async () => {
         set({ loading: true })
+        // Guard against the backend hanging indefinitely: if the API does not
+        // respond within 15 seconds we clear the loading flag so callers that
+        // rely on it (e.g. a local spinner) are unblocked. Preserve existing resumes.
+        const timeoutId = setTimeout(() => {
+          console.error('[ResumeStore] fetchResumes timed out after 15 s')
+          set({ loading: false })
+        }, 15_000)
         try {
           const result = await api.listResumes()
+          clearTimeout(timeoutId)
           if (result.success && result.data) {
             const resumeList = Array.isArray(result.data.resumes)
               ? result.data.resumes
@@ -71,9 +79,11 @@ export const useResumeStore = create<ResumeState>()(
             set({ resumes: [] })
           }
         } catch (error) {
+          clearTimeout(timeoutId)
           console.error('[ResumeStore] Error loading resumes:', error)
           set({ resumes: [] })
         } finally {
+          clearTimeout(timeoutId)
           set({ loading: false })
         }
       },

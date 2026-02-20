@@ -855,17 +855,17 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                           </div>
                         ) : null}
                       </div>
-                    </div>
 
-                    {/* Practice Recording */}
-                    <div className="mt-4 pt-4 border-t border-theme-subtle">
-                      <PracticeRecorder
-                        questionContext={questionKey}
-                        interviewPrepId={interviewPrepId}
-                        questionText={question.question}
-                        existingRecordingUrl={recordingUrls[questionKey]}
-                        onRecordingChange={(url) => setRecordingUrls(prev => ({ ...prev, [questionKey]: url }))}
-                      />
+                      {/* Practice Recording */}
+                      <div className="mt-4 pt-4 border-t border-theme-subtle">
+                        <PracticeRecorder
+                          questionContext={questionKey}
+                          interviewPrepId={interviewPrepId}
+                          questionText={question.question}
+                          existingRecordingUrl={recordingUrls[questionKey]}
+                          onRecordingChange={(url) => setRecordingUrls(prev => ({ ...prev, [questionKey]: url }))}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
