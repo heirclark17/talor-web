@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { UserButton } from '@clerk/clerk-react'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -10,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { useScrollAnimation } from './hooks/useScrollAnimation'
 import { useSessionMigration } from './hooks/useSessionMigration'
 import { useClerkUserSync } from './hooks/useClerkUserSync'
+import { useAuth } from './contexts/AuthContext'
 import { PostHogProvider } from './contexts/PostHogContext'
 
 // Lazy-loaded page components for code splitting
@@ -258,6 +258,7 @@ function SessionMigrationProvider({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const location = useLocation()
+  const { signOut, user } = useAuth()
   const isLandingPage = location.pathname === '/'
   const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -313,15 +314,20 @@ function AppContent() {
                 <span className="text-xl sm:text-2xl font-bold text-theme tracking-tight">Talor</span>
               </Link>
 
-              {/* Menu Button + UserButton */}
+              {/* Menu Button + User Avatar */}
               <div className="flex items-center gap-3">
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: 'w-8 h-8',
-                    },
-                  }}
-                />
+                {user && (
+                  <button
+                    onClick={() => signOut()}
+                    className="flex items-center gap-2 px-3 py-1.5 text-theme-secondary hover:text-theme hover:bg-theme-glass-10 rounded-lg transition-colors text-sm"
+                    title="Sign out"
+                  >
+                    <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-semibold text-sm">
+                      {(user.user_metadata?.full_name?.[0] || user.email?.[0] || '?').toUpperCase()}
+                    </div>
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="min-w-[44px] min-h-[44px] p-2 text-theme hover:bg-theme-glass-10 rounded-lg transition-colors flex items-center justify-center gap-2"

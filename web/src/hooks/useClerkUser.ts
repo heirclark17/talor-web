@@ -1,14 +1,14 @@
-import { useUser } from '@clerk/clerk-react'
+import { useAuth } from '../contexts/AuthContext'
 
 export function useClerkUser() {
-  const { user, isLoaded, isSignedIn } = useUser()
+  const { user, isLoaded, isSignedIn } = useAuth()
 
   return {
-    userId: user ? `clerk_${user.id}` : '',
+    userId: user ? `supa_${user.id}` : '',
     clerkId: user?.id ?? '',
-    email: user?.primaryEmailAddress?.emailAddress ?? '',
-    fullName: user?.fullName ?? '',
+    email: user?.email ?? '',
+    fullName: user?.user_metadata?.full_name ?? '',
     isLoaded,
-    isSignedIn: isSignedIn ?? false,
+    isSignedIn,
   }
 }

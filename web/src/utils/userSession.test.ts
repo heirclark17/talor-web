@@ -18,17 +18,17 @@ describe('UserSession Utils', () => {
   })
 
   describe('setClerkUserId and getUserId', () => {
-    it('should prefer Clerk user ID when set', () => {
-      setClerkUserId('clerk123')
-      expect(getUserId()).toBe('clerk_clerk123')
-    })
-
-    it('should prefix Clerk ID with clerk_', () => {
+    it('should prefer auth user ID when set', () => {
       setClerkUserId('abc123')
-      expect(getUserId()).toBe('clerk_abc123')
+      expect(getUserId()).toBe('supa_abc123')
     })
 
-    it('should clear Clerk ID when set to null', () => {
+    it('should prefix ID with supa_', () => {
+      setClerkUserId('xyz789')
+      expect(getUserId()).toBe('supa_xyz789')
+    })
+
+    it('should clear auth ID when set to null', () => {
       setClerkUserId('test')
       setClerkUserId(null)
 
@@ -93,12 +93,12 @@ describe('UserSession Utils', () => {
       expect(localStorage.getItem('talor_user_id')).toBeNull()
     })
 
-    it('should clear Clerk user ID', () => {
+    it('should clear auth user ID', () => {
       setClerkUserId('test')
       clearUserSession()
 
       const userId = getUserId()
-      expect(userId).not.toContain('clerk_')
+      expect(userId).not.toContain('supa_')
     })
   })
 
@@ -134,16 +134,16 @@ describe('UserSession Utils', () => {
   })
 
   describe('Integration', () => {
-    it('should prioritize Clerk ID over localStorage ID', () => {
+    it('should prioritize auth ID over localStorage ID', () => {
       localStorage.setItem('talor_user_id', 'user_local123')
-      setClerkUserId('clerk456')
+      setClerkUserId('supa456')
 
-      expect(getUserId()).toBe('clerk_clerk456')
+      expect(getUserId()).toBe('supa_supa456')
     })
 
-    it('should fall back to localStorage after clearing Clerk ID', () => {
+    it('should fall back to localStorage after clearing auth ID', () => {
       localStorage.setItem('talor_user_id', 'user_local123')
-      setClerkUserId('clerk456')
+      setClerkUserId('supa456')
       setClerkUserId(null)
 
       expect(getUserId()).toBe('user_local123')

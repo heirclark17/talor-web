@@ -5,8 +5,8 @@ const MIGRATION_DONE_KEY = 'talor_migration_done'
 const OLD_USER_ID_KEY = 'talor_user_id'
 
 /**
- * Migrates data from old localStorage-based user ID to Clerk user ID.
- * Runs once on first Clerk sign-in. Calls backend to reassign all records.
+ * Migrates data from old localStorage-based user ID to Supabase user ID.
+ * Runs once on first sign-in. Calls backend to reassign all records.
  */
 export function useSessionMigration() {
   const { userId, isLoaded, isSignedIn } = useClerkUser()

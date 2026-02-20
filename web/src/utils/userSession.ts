@@ -1,22 +1,22 @@
 /**
  * User Session Management
  * Generates and persists a unique user ID for isolating user data.
- * With Clerk auth, this serves as a fallback during migration.
+ * With Supabase auth, this serves as a fallback during migration.
  */
 
 const USER_ID_KEY = 'talor_user_id';
 
-// Module-level clerk user ID, set by setClerkUserId()
+// Module-level auth user ID, set by setClerkUserId()
 let _clerkUserId: string | null = null;
 
 // Module-level cached auth token for API requests
 let _cachedAuthToken: string | null = null;
 
 /**
- * Set the Clerk user ID (called from ClerkProvider context)
+ * Set the auth user ID (called from auth context)
  */
 export function setClerkUserId(id: string | null): void {
-  _clerkUserId = id ? `clerk_${id}` : null;
+  _clerkUserId = id ? `supa_${id}` : null;
 }
 
 /**
@@ -27,7 +27,7 @@ function generateUserId(): string {
 }
 
 /**
- * Get user ID — prefers Clerk user, falls back to localStorage
+ * Get user ID — prefers Supabase user, falls back to localStorage
  */
 export function getUserId(): string {
   // Prefer Clerk user ID if available

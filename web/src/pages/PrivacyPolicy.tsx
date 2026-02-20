@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
           <h2 className="text-xl font-semibold text-theme mb-3">1. Information We Collect</h2>
           <p>When you use TalorMe ("the Service"), we collect the following information:</p>
           <ul className="list-disc pl-6 space-y-2 mt-2">
-            <li><strong className="text-theme">Account Information:</strong> Email address and authentication data provided through our authentication provider (Clerk).</li>
+            <li><strong className="text-theme">Account Information:</strong> Email address and authentication data provided through our authentication provider (Supabase).</li>
             <li><strong className="text-theme">Resume Data:</strong> Resume files you upload, including personal information contained within them (name, contact information, work history, education, skills).</li>
             <li><strong className="text-theme">Usage Data:</strong> Job URLs you provide for tailoring, cover letter content, interview preparation data, and application tracking information.</li>
             <li><strong className="text-theme">Technical Data:</strong> Browser type, device information, and general usage patterns to improve the Service.</li>

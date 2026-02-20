@@ -2,15 +2,15 @@ import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useClerkUser } from './useClerkUser'
 
-// Mock @clerk/clerk-react
-const mockUseUser = vi.fn()
-vi.mock('@clerk/clerk-react', () => ({
-  useUser: () => mockUseUser()
+// Mock AuthContext
+const mockUseAuth = vi.fn()
+vi.mock('../contexts/AuthContext', () => ({
+  useAuth: () => mockUseAuth()
 }))
 
 describe('useClerkUser', () => {
   it('should return default values when no user', () => {
-    mockUseUser.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       user: null,
       isLoaded: true,
       isSignedIn: false
@@ -27,13 +27,11 @@ describe('useClerkUser', () => {
   })
 
   it('should format user data when user is signed in', () => {
-    mockUseUser.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       user: {
-        id: 'clerk_abc123',
-        fullName: 'Test User',
-        primaryEmailAddress: {
-          emailAddress: 'test@example.com'
-        }
+        id: 'abc123',
+        email: 'test@example.com',
+        user_metadata: { full_name: 'Test User' }
       },
       isLoaded: true,
       isSignedIn: true
@@ -41,8 +39,8 @@ describe('useClerkUser', () => {
 
     const { result } = renderHook(() => useClerkUser())
 
-    expect(result.current.userId).toBe('clerk_clerk_abc123')
-    expect(result.current.clerkId).toBe('clerk_abc123')
+    expect(result.current.userId).toBe('supa_abc123')
+    expect(result.current.clerkId).toBe('abc123')
     expect(result.current.email).toBe('test@example.com')
     expect(result.current.fullName).toBe('Test User')
     expect(result.current.isLoaded).toBe(true)
@@ -50,11 +48,11 @@ describe('useClerkUser', () => {
   })
 
   it('should handle missing email address', () => {
-    mockUseUser.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       user: {
-        id: 'clerk_xyz789',
-        fullName: 'No Email User',
-        primaryEmailAddress: null
+        id: 'xyz789',
+        email: undefined,
+        user_metadata: { full_name: 'No Email User' }
       },
       isLoaded: true,
       isSignedIn: true
@@ -62,12 +60,12 @@ describe('useClerkUser', () => {
 
     const { result } = renderHook(() => useClerkUser())
 
-    expect(result.current.userId).toBe('clerk_clerk_xyz789')
+    expect(result.current.userId).toBe('supa_xyz789')
     expect(result.current.email).toBe('')
   })
 
   it('should handle loading state', () => {
-    mockUseUser.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       user: null,
       isLoaded: false,
       isSignedIn: false

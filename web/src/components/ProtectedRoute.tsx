@@ -1,6 +1,6 @@
-import { useAuth } from '@clerk/clerk-react'
 import { Navigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth()

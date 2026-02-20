@@ -1,69 +1,62 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import SignIn from './SignIn'
 
-// Mock Clerk SignIn component
-vi.mock('@clerk/clerk-react', () => ({
-  SignIn: ({ appearance, routing, path, signUpUrl, forceRedirectUrl }: any) => (
-    <div data-testid="clerk-signin">
-      <div data-testid="clerk-appearance">{JSON.stringify(appearance)}</div>
-      <div data-testid="clerk-routing">{routing}</div>
-      <div data-testid="clerk-path">{path}</div>
-      <div data-testid="clerk-signup-url">{signUpUrl}</div>
-      <div data-testid="clerk-redirect-url">{forceRedirectUrl}</div>
-    </div>
-  )
+// Mock Supabase
+vi.mock('../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      signInWithPassword: vi.fn(),
+      signInWithOAuth: vi.fn(),
+    },
+  },
 }))
+
+function renderSignIn() {
+  return render(
+    <BrowserRouter>
+      <SignIn />
+    </BrowserRouter>
+  )
+}
 
 describe('SignIn Page', () => {
   it('should render without crashing', () => {
-    render(<SignIn />)
-    expect(screen.getByTestId('clerk-signin')).toBeInTheDocument()
+    renderSignIn()
+    expect(screen.getByText('Welcome back')).toBeInTheDocument()
   })
 
-  it('should render Clerk SignIn component', () => {
-    render(<SignIn />)
-    expect(screen.getByTestId('clerk-signin')).toBeInTheDocument()
+  it('should render email and password fields', () => {
+    renderSignIn()
+    expect(screen.getByLabelText('Email')).toBeInTheDocument()
+    expect(screen.getByLabelText('Password')).toBeInTheDocument()
   })
 
-  it('should configure routing as path', () => {
-    render(<SignIn />)
-    expect(screen.getByTestId('clerk-routing')).toHaveTextContent('path')
+  it('should render sign in button', () => {
+    renderSignIn()
+    expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument()
   })
 
-  it('should set sign-in path', () => {
-    render(<SignIn />)
-    expect(screen.getByTestId('clerk-path')).toHaveTextContent('/sign-in')
+  it('should render OAuth buttons', () => {
+    renderSignIn()
+    expect(screen.getByText('Continue with Google')).toBeInTheDocument()
+    expect(screen.getByText('Continue with GitHub')).toBeInTheDocument()
   })
 
-  it('should set sign-up URL', () => {
-    render(<SignIn />)
-    expect(screen.getByTestId('clerk-signup-url')).toHaveTextContent('/sign-up')
-  })
-
-  it('should set redirect URL to resumes', () => {
-    render(<SignIn />)
-    expect(screen.getByTestId('clerk-redirect-url')).toHaveTextContent('/resumes')
-  })
-
-  it('should pass appearance customization', () => {
-    render(<SignIn />)
-    const appearanceElement = screen.getByTestId('clerk-appearance')
-    const appearance = JSON.parse(appearanceElement.textContent || '{}')
-
-    expect(appearance.elements).toBeDefined()
-    expect(appearance.elements.rootBox).toBeDefined()
-    expect(appearance.elements.card).toBeDefined()
+  it('should have link to sign up page', () => {
+    renderSignIn()
+    expect(screen.getByText('Sign up')).toHaveAttribute('href', '/sign-up')
   })
 
   it('should have glass container styling', () => {
-    const { container } = render(<SignIn />)
+    const { container } = renderSignIn()
     const glassDiv = container.querySelector('.glass')
     expect(glassDiv).toBeInTheDocument()
   })
 
   it('should center content on screen', () => {
-    const { container } = render(<SignIn />)
+    const { container } = renderSignIn()
     const centerDiv = container.querySelector('.min-h-screen')
     expect(centerDiv).toBeInTheDocument()
     expect(centerDiv).toHaveClass('flex', 'items-center', 'justify-center')

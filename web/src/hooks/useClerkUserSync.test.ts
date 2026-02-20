@@ -2,13 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useClerkUserSync } from './useClerkUserSync'
 
-// Mock @clerk/clerk-react
-const mockGetToken = vi.fn()
-const mockUseUser = vi.fn()
+// Mock AuthContext
 const mockUseAuth = vi.fn()
-
-vi.mock('@clerk/clerk-react', () => ({
-  useUser: () => mockUseUser(),
+vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => mockUseAuth()
 }))
 
@@ -24,13 +20,12 @@ vi.mock('../utils/userSession', () => ({
 describe('useClerkUserSync', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseAuth.mockReturnValue({ getToken: mockGetToken })
-    mockGetToken.mockResolvedValue('test-token-123')
   })
 
   it('should not sync when not loaded', () => {
-    mockUseUser.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       user: null,
+      session: null,
       isLoaded: false,
       isSignedIn: false
     })
@@ -41,22 +36,24 @@ describe('useClerkUserSync', () => {
     expect(mockSetAuthToken).not.toHaveBeenCalled()
   })
 
-  it('should set user ID when signed in', () => {
-    mockUseUser.mockReturnValue({
-      user: { id: 'clerk_abc123' },
+  it('should set user ID and token when signed in', () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: 'abc123' },
+      session: { access_token: 'test-token-123' },
       isLoaded: true,
       isSignedIn: true
     })
 
     renderHook(() => useClerkUserSync())
 
-    expect(mockSetClerkUserId).toHaveBeenCalledWith('clerk_abc123')
-    expect(mockGetToken).toHaveBeenCalled()
+    expect(mockSetClerkUserId).toHaveBeenCalledWith('abc123')
+    expect(mockSetAuthToken).toHaveBeenCalledWith('test-token-123')
   })
 
   it('should clear user ID and token when signed out', () => {
-    mockUseUser.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       user: null,
+      session: null,
       isLoaded: true,
       isSignedIn: false
     })

@@ -1,15 +1,29 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
+
+// Mock Supabase before any imports that use it
+vi.mock('./lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+      onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
+      signOut: vi.fn(),
+    },
+  },
+}))
+
 import App from './App'
 
-// Mock Clerk
-vi.mock('@clerk/clerk-react', () => ({
-  ClerkProvider: ({ children }: any) => children,
-  SignedIn: ({ children }: any) => children,
-  SignedOut: () => null,
-  UserButton: () => <div>UserButton</div>,
-  useUser: () => ({ user: null, isLoaded: true, isSignedIn: false }),
-  useAuth: () => ({ getToken: vi.fn() })
+// Mock AuthContext
+vi.mock('./contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: any) => children,
+  useAuth: () => ({
+    user: null,
+    session: null,
+    isLoaded: true,
+    isSignedIn: false,
+    signOut: vi.fn(),
+  }),
 }))
 
 // Mock hooks
