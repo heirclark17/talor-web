@@ -125,9 +125,10 @@ interface Props {
   interviewPrepId: number
   companyName: string
   jobTitle: string
+  cachedQuestionsData?: any
 }
 
-export default function BehavioralTechnicalQuestions({ interviewPrepId, companyName, jobTitle }: Props) {
+export default function BehavioralTechnicalQuestions({ interviewPrepId, companyName, jobTitle, cachedQuestionsData }: Props) {
   const [loading, setLoading] = useState(false)
   const [loadingComplete, setLoadingComplete] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -145,6 +146,14 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
 
   // Expanded questions state
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set())
+
+  // Load cached questions data from DB on mount
+  useEffect(() => {
+    if (cachedQuestionsData && !questionsData) {
+      console.log('✓ BT Questions: Restoring from cached DB data')
+      setQuestionsData(cachedQuestionsData)
+    }
+  }, [cachedQuestionsData])
 
   // Load saved stories from DB first, fallback to localStorage
   useEffect(() => {
@@ -211,6 +220,14 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
       const result = await response.json()
       if (result.success) {
         setQuestionsData(result.data)
+
+        // Fire-and-forget: save generated questions to DB for persistence
+        fetch(`${API_BASE_URL}/api/interview-prep/${interviewPrepId}/cache`, {
+          method: 'PATCH',
+          headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ behavioral_technical_questions: result.data }),
+        }).catch(err => console.warn('Failed to cache BT questions:', err))
+
         // Signal completion so progress bar reaches 100% before unmount
         setLoadingComplete(true)
         await new Promise(r => setTimeout(r, 600))

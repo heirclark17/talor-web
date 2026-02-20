@@ -785,6 +785,48 @@ input, button, textarea, select {
   }
 }
 
+/* Per-modal print mode */
+@media print {
+  body.printing-modal .print-content {
+    display: none !important;
+  }
+
+  body.printing-modal .modal-print-target,
+  body.printing-modal .modal-print-target * {
+    visibility: visible !important;
+  }
+
+  body.printing-modal .modal-print-target {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0.5in;
+    background: white !important;
+    color: black !important;
+  }
+
+  body.printing-modal .modal-print-target h1,
+  body.printing-modal .modal-print-target h2,
+  body.printing-modal .modal-print-target h3,
+  body.printing-modal .modal-print-target h4,
+  body.printing-modal .modal-print-target h5,
+  body.printing-modal .modal-print-target h6,
+  body.printing-modal .modal-print-target p,
+  body.printing-modal .modal-print-target span,
+  body.printing-modal .modal-print-target li,
+  body.printing-modal .modal-print-target td,
+  body.printing-modal .modal-print-target th,
+  body.printing-modal .modal-print-target div {
+    color: #000 !important;
+  }
+
+  /* Hide print buttons themselves */
+  .no-print {
+    display: none !important;
+  }
+}
+
 /* Screen-only: hide print content */
 @media screen {
   .print-content {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   Loader2,
@@ -268,6 +268,34 @@ export default function InterviewPrep() {
 
   const [showExportMenu, setShowExportMenu] = useState(false)
 
+  // Cached data from DB for child components
+  const [cachedBehavioralTechnical, setCachedBehavioralTechnical] = useState<any>(null)
+  const [cachedCommonQuestions, setCachedCommonQuestions] = useState<any>(null)
+  const [cachedCertificationRecs, setCachedCertificationRecs] = useState<any>(null)
+
+  // Debounced save to DB - fire-and-forget
+  const saveTimerRef = useRef<Record<string, NodeJS.Timeout>>({})
+  const interviewPrepIdRef = useRef<number | null>(null)
+  useEffect(() => { interviewPrepIdRef.current = interviewPrepId }, [interviewPrepId])
+
+  const debouncedSaveUserData = useCallback((field: string, value: any) => {
+    const prepId = interviewPrepIdRef.current
+    if (!prepId) return
+
+    // Clear any existing timer for this field
+    if (saveTimerRef.current[field]) {
+      clearTimeout(saveTimerRef.current[field])
+    }
+
+    saveTimerRef.current[field] = setTimeout(() => {
+      fetch(`${API_BASE_URL}/api/interview-prep/${prepId}/cache`, {
+        method: 'PATCH',
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ user_data: { [field]: value } }),
+      }).catch(err => console.warn(`Failed to save ${field} to DB:`, err))
+    }, 500)
+  }, [])
+
   // Modal state for grid card view
   const [activeModal, setActiveModal] = useState<string | null>(null)
 
@@ -335,6 +363,31 @@ export default function InterviewPrep() {
         if (cachedData.strategic_news) setCompanyNews(cachedData.strategic_news)
         if (cachedData.values_alignment) setCompanyValues(cachedData.values_alignment)
         if (cachedData.competitive_intelligence) setInterviewQuestions(cachedData.competitive_intelligence)
+      }
+
+      // Hydrate cached AI-generated child component data
+      if (cachedData?.behavioral_technical_questions) {
+        setCachedBehavioralTechnical(cachedData.behavioral_technical_questions)
+        console.log('✓ Restored cached behavioral/technical questions from DB')
+      }
+      if (cachedData?.common_questions) {
+        setCachedCommonQuestions(cachedData.common_questions)
+        console.log('✓ Restored cached common questions from DB')
+      }
+      if (cachedData?.certification_recommendations) {
+        setCachedCertificationRecs(cachedData.certification_recommendations)
+        console.log('✓ Restored cached certification recommendations from DB')
+      }
+
+      // Hydrate user interaction state from DB (overrides localStorage defaults)
+      if (cachedData?.user_data) {
+        const ud = cachedData.user_data
+        console.log('✓ Restoring user data from DB:', Object.keys(ud))
+        if (ud.checklist_checks) setCheckedItems(ud.checklist_checks)
+        if (ud.notes) setNotes(ud.notes)
+        if (ud.custom_questions) setCustomQuestions(ud.custom_questions)
+        if (ud.star_story_drafts) setStarStories(ud.star_story_drafts)
+        if (ud.interview_date) setInterviewDate(ud.interview_date)
       }
 
       // Also fetch the tailored resume to get base resume ID
@@ -562,6 +615,7 @@ export default function InterviewPrep() {
     const newState = { ...checkedItems, [itemId]: !checkedItems[itemId] }
     setCheckedItems(newState)
     localStorage.setItem(`interview-prep-checks-${tailoredResumeId}`, JSON.stringify(newState))
+    debouncedSaveUserData('checklist_checks', newState)
   }
 
   const toggleSection = (sectionId: string) => {
@@ -586,6 +640,7 @@ export default function InterviewPrep() {
     const newNotes = { ...notes, [sectionId]: content }
     setNotes(newNotes)
     localStorage.setItem(`interview-prep-notes-${tailoredResumeId}`, JSON.stringify(newNotes))
+    debouncedSaveUserData('notes', newNotes)
   }
 
   const addCustomQuestion = () => {
@@ -600,6 +655,7 @@ export default function InterviewPrep() {
     const updated = [...customQuestions, question]
     setCustomQuestions(updated)
     localStorage.setItem(`interview-prep-custom-questions-${tailoredResumeId}`, JSON.stringify(updated))
+    debouncedSaveUserData('custom_questions', updated)
 
     setNewQuestion('')
     setShowAddQuestion(false)
@@ -609,6 +665,7 @@ export default function InterviewPrep() {
     const updated = customQuestions.filter(q => q.id !== id)
     setCustomQuestions(updated)
     localStorage.setItem(`interview-prep-custom-questions-${tailoredResumeId}`, JSON.stringify(updated))
+    debouncedSaveUserData('custom_questions', updated)
   }
 
   const updateStarStory = (storyId: string, field: string, value: string) => {
@@ -619,12 +676,20 @@ export default function InterviewPrep() {
     }
     setStarStories(updated)
     localStorage.setItem(`interview-prep-star-stories-${tailoredResumeId}`, JSON.stringify(updated))
+    debouncedSaveUserData('star_story_drafts', updated)
   }
 
-  // Load certifications using centralized API client
+  // Load certifications using centralized API client (or from cache)
   const loadCertifications = async () => {
     if (!interviewPrepId) {
       console.log('No interview prep ID, cannot load certifications')
+      return
+    }
+
+    // Use cached certification recommendations if available
+    if (cachedCertificationRecs?.certifications) {
+      console.log('✓ Using cached certification recommendations from DB')
+      setCertifications(cachedCertificationRecs.certifications)
       return
     }
 
@@ -637,7 +702,6 @@ export default function InterviewPrep() {
       console.log('Certifications API result:', result)
 
       if (result.success && result.data) {
-        // result.data already contains the certifications structure (certifications_by_level, recommended_path, etc.)
         console.log('Setting certifications to:', result.data)
         setCertifications(result.data)
       } else {
@@ -653,6 +717,7 @@ export default function InterviewPrep() {
   const saveInterviewDate = (date: string) => {
     setInterviewDate(date)
     localStorage.setItem(`interview-date-${tailoredResumeId}`, date)
+    debouncedSaveUserData('interview_date', date)
   }
 
   const getDaysUntilInterview = () => {
@@ -666,6 +731,16 @@ export default function InterviewPrep() {
   const exportToPDF = () => {
     window.print()
   }
+
+  const handlePrintModal = () => {
+    document.body.classList.add('printing-modal')
+    window.print()
+    setTimeout(() => document.body.classList.remove('printing-modal'), 500)
+  }
+
+  const handleSaveBookmarkedCerts = useCallback((certs: string[]) => {
+    debouncedSaveUserData('bookmarked_certifications', certs)
+  }, [debouncedSaveUserData])
 
   const sendEmail = () => {
     const subject = encodeURIComponent(`Interview Prep for ${prepData?.role_analysis.job_title} at ${prepData?.company_profile.name}`)
@@ -1186,16 +1261,25 @@ export default function InterviewPrep() {
                   {activeModal === 'certifications' && 'Recommended Certifications'}
                   {activeModal === 'positioning' && 'Candidate Positioning'}
                 </h2>
-                <button
-                  onClick={closeModal}
-                  className="p-2 rounded-lg hover:bg-theme-glass-10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                >
-                  <X className="w-6 h-6 text-theme-secondary" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePrintModal}
+                    className="no-print p-2 rounded-lg hover:bg-theme-glass-10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    title="Print this section"
+                  >
+                    <Printer className="w-5 h-5 text-theme-secondary" />
+                  </button>
+                  <button
+                    onClick={closeModal}
+                    className="p-2 rounded-lg hover:bg-theme-glass-10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  >
+                    <X className="w-6 h-6 text-theme-secondary" />
+                  </button>
+                </div>
               </div>
 
               {/* Modal Body */}
-              <div className="p-4 sm:p-6">
+              <div className="p-4 sm:p-6 modal-print-target">
                 {/* Company Profile Modal Content */}
                 {activeModal === 'companyProfile' && (
                   <div className="space-y-4">
@@ -1873,6 +1957,7 @@ export default function InterviewPrep() {
                       interviewPrepId={interviewPrepId}
                       companyName={prepData.company_profile.name}
                       jobTitle={prepData.role_analysis.job_title}
+                      cachedQuestionsData={cachedBehavioralTechnical}
                     />
                   </div>
                 )}
@@ -1884,6 +1969,7 @@ export default function InterviewPrep() {
                       interviewPrepId={interviewPrepId}
                       companyName={prepData?.company_profile.name || ''}
                       jobTitle={prepData?.role_analysis.job_title || ''}
+                      cachedData={cachedCommonQuestions}
                     />
                   </div>
                 )}
@@ -1894,6 +1980,8 @@ export default function InterviewPrep() {
                     <CertificationRecommendations
                       certifications={certifications}
                       loading={loadingCertifications}
+                      savedCerts={cachedCertificationRecs?.bookmarked_certifications}
+                      onSaveCerts={handleSaveBookmarkedCerts}
                     />
                   </div>
                 )}

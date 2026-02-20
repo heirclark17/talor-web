@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   ChevronDown,
   ChevronUp,
@@ -17,10 +17,13 @@ import AILoadingScreen from './AILoadingScreen'
 import { CommonInterviewQuestion, CommonQuestionsData } from '../types/commonQuestions'
 import { api, getApiHeaders } from '../api/client'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
+
 interface CommonInterviewQuestionsProps {
   interviewPrepId: number
   companyName: string
   jobTitle: string
+  cachedData?: any
 }
 
 type ActiveTab = 'why-hard' | 'mistakes' | 'builder' | 'answer'
@@ -28,7 +31,8 @@ type ActiveTab = 'why-hard' | 'mistakes' | 'builder' | 'answer'
 export default function CommonInterviewQuestions({
   interviewPrepId,
   companyName,
-  jobTitle
+  jobTitle,
+  cachedData
 }: CommonInterviewQuestionsProps) {
   const [loading, setLoading] = useState(false)
   const [loadingComplete, setLoadingComplete] = useState(false)
@@ -39,6 +43,23 @@ export default function CommonInterviewQuestions({
   const [copiedAnswers, setCopiedAnswers] = useState<Set<string>>(new Set())
   const [regenerating, setRegenerating] = useState<Set<string>>(new Set())
   const [editingAnswers, setEditingAnswers] = useState<Record<string, string>>({})
+
+  // Load cached data from DB on mount
+  useEffect(() => {
+    if (cachedData && !data) {
+      console.log('✓ Common Questions: Restoring from cached DB data')
+      setData(cachedData)
+      // Auto-expand first question and set default tabs
+      if (cachedData.questions?.length > 0) {
+        setExpandedQuestions(new Set(['q1']))
+        const defaultTabs: Record<string, ActiveTab> = {}
+        cachedData.questions.forEach((q: CommonInterviewQuestion) => {
+          defaultTabs[q.id] = 'why-hard'
+        })
+        setActiveTab(defaultTabs)
+      }
+    }
+  }, [cachedData])
 
   // Generate all 10 questions
   const handleGenerate = async () => {
@@ -69,6 +90,13 @@ export default function CommonInterviewQuestions({
         defaultTabs[q.id] = 'why-hard'
       })
       setActiveTab(defaultTabs)
+
+      // Fire-and-forget save to DB
+      fetch(`${API_BASE_URL}/api/interview-prep/${interviewPrepId}/cache`, {
+        method: 'PATCH',
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ common_questions: result.data }),
+      }).catch(err => console.warn('Failed to cache common questions:', err))
 
       // Signal completion so progress bar reaches 100% before unmount
       setLoadingComplete(true)
@@ -108,7 +136,15 @@ export default function CommonInterviewQuestions({
         const updatedQuestions = data.questions.map(q =>
           q.id === questionId ? result.data : q
         )
-        setData({ ...data, questions: updatedQuestions })
+        const updatedData = { ...data, questions: updatedQuestions }
+        setData(updatedData)
+
+        // Fire-and-forget save updated data to DB
+        fetch(`${API_BASE_URL}/api/interview-prep/${interviewPrepId}/cache`, {
+          method: 'PATCH',
+          headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ common_questions: updatedData }),
+        }).catch(err => console.warn('Failed to cache updated common questions:', err))
       }
     } catch (err: any) {
       setError(`Failed to regenerate: ${err.message}`)

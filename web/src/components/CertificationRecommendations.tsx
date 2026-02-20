@@ -41,15 +41,22 @@ interface CertificationData {
 interface CertificationRecommendationsProps {
   certifications: CertificationData | null
   loading: boolean
+  savedCerts?: string[]
+  onSaveCerts?: (certs: string[]) => void
 }
 
-export default function CertificationRecommendations({ certifications, loading }: CertificationRecommendationsProps) {
+export default function CertificationRecommendations({ certifications, loading, savedCerts: savedCertsProp, onSaveCerts }: CertificationRecommendationsProps) {
   const [selectedLevel, setSelectedLevel] = useState<'entry' | 'mid' | 'advanced' | 'all'>('all')
   const [expandedCerts, setExpandedCerts] = useState<Set<string>>(new Set())
   const [savedCerts, setSavedCerts] = useState<Set<string>>(new Set())
 
-  // Load saved certifications from localStorage
+  // Load saved certifications from DB prop first, then localStorage fallback
   useEffect(() => {
+    if (savedCertsProp && savedCertsProp.length > 0) {
+      console.log('✓ Certifications: Restoring bookmarks from DB')
+      setSavedCerts(new Set(savedCertsProp))
+      return
+    }
     const saved = localStorage.getItem('saved_certifications')
     if (saved) {
       try {
@@ -59,7 +66,7 @@ export default function CertificationRecommendations({ certifications, loading }
         console.error('Error loading saved certifications:', e)
       }
     }
-  }, [])
+  }, [savedCertsProp])
 
   const toggleExpanded = (certName: string) => {
     const newExpanded = new Set(expandedCerts)
@@ -81,7 +88,13 @@ export default function CertificationRecommendations({ certifications, loading }
     setSavedCerts(newSaved)
 
     // Save to localStorage
-    localStorage.setItem('saved_certifications', JSON.stringify(Array.from(newSaved)))
+    const certsArray = Array.from(newSaved)
+    localStorage.setItem('saved_certifications', JSON.stringify(certsArray))
+
+    // Save to DB via parent callback
+    if (onSaveCerts) {
+      onSaveCerts(certsArray)
+    }
   }
 
   const getPriorityColor = (priority: string) => {
