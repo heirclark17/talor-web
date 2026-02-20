@@ -27,7 +27,11 @@ export default function SignUp() {
     })
 
     if (error) {
-      setError(error.message)
+      if (error.message.toLowerCase().includes('rate limit')) {
+        setError('Too many sign-up attempts. Please wait a few minutes and try again, or check your email for an existing confirmation link.')
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
     } else if (data.user && !data.session) {
       // Email confirmation required
