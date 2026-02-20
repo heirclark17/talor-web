@@ -1017,9 +1017,14 @@ export default function TailorResume() {
     setShowComparison(false)
 
     try {
+      // Only include jobUrl when company/jobTitle weren't already extracted.
+      // If both are known, omit the URL to skip redundant Firecrawl re-extraction
+      // in the backend (saves 10-20 seconds and avoids duplicate scraping costs).
+      const shouldSendJobUrl = trimmedJobUrl && (!companyExtracted || !titleExtracted)
+
       const result = await api.tailorResume({
         baseResumeId: selectedResumeId,
-        jobUrl: trimmedJobUrl || undefined,
+        jobUrl: shouldSendJobUrl ? trimmedJobUrl : undefined,
         company: trimmedCompany || undefined,
         jobTitle: trimmedJobTitle || undefined,
       })
@@ -2353,14 +2358,18 @@ export default function TailorResume() {
           <AILoadingScreen
             title="Generating Tailored Resume"
             subtitle="Our AI is customizing your resume for this specific role"
-            footnote="This typically takes 15-30 seconds"
+            footnote="This typically takes 30-60 seconds"
             steps={[
-              { id: 'analyze', label: 'Analyzing job description', description: 'Extracting key requirements and keywords...' },
+              { id: 'analyze', label: 'Researching company & role', description: 'Gathering company insights and job requirements...' },
               { id: 'match', label: 'Matching your skills & experience', description: 'Identifying transferable qualifications...' },
               { id: 'rewrite', label: 'Rewriting resume content', description: 'Tailoring bullets for maximum impact...' },
-              { id: 'finalize', label: 'Finalizing tailored document', description: 'Formatting and polishing your resume...' },
+              { id: 'finalize', label: 'Finalizing tailored document', description: 'Formatting and generating DOCX file...' },
             ]}
-            progress={{ type: 'estimated', estimatedDurationMs: 25000, isComplete: loadingComplete }}
+            progress={{ type: 'estimated', estimatedDurationMs: 55000, isComplete: loadingComplete }}
+            onCancel={() => {
+              setLoading(false)
+              setError('Resume generation was cancelled.')
+            }}
           />
         </div>
       )}

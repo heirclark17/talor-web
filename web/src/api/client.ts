@@ -598,6 +598,11 @@ class ApiClient {
 
   /**
    * Tailor resume for specific job
+   *
+   * Uses a 3-minute AbortController timeout to prevent infinite spinning when
+   * Railway/the backend is unresponsive. The backend AI pipeline (Firecrawl +
+   * Perplexity + OpenAI) typically takes 30-60 seconds; 180 seconds is a safe
+   * upper bound before we surface an actionable error to the user.
    */
   async tailorResume(tailorData: {
     baseResumeId: number;
@@ -606,6 +611,11 @@ class ApiClient {
     jobTitle?: string;
     jobDescription?: string;
   }): Promise<ApiResponse> {
+    // 3-minute hard timeout – prevents the spinner from running forever
+    const TIMEOUT_MS = 3 * 60 * 1000;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
     try {
       // Convert camelCase to snake_case for backend
       const backendData = {
@@ -620,14 +630,18 @@ class ApiClient {
         method: 'POST',
         headers: this.getHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(backendData),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
       if (!response.ok) {
         return {
           success: false,
-          error: data.error || `HTTP ${response.status}: ${response.statusText}`,
+          // Backend raises HTTPException with 'detail', not 'error'
+          error: data.detail || data.error || `HTTP ${response.status}: ${response.statusText}`,
         };
       }
 
@@ -636,6 +650,13 @@ class ApiClient {
         data,
       };
     } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        return {
+          success: false,
+          error: 'Resume generation timed out after 3 minutes. Please try again — the AI service may be under heavy load.',
+        };
+      }
       return {
         success: false,
         error: error.message,

@@ -216,6 +216,18 @@ export default function AILoadingScreen({
             {footnote && <span className="text-theme-tertiary text-sm">{footnote}</span>}
           </div>
         )}
+
+        {/* Cancel button – visible during loading so user can abort a hung request */}
+        {!error && onCancel && (
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 bg-theme-glass-10 text-theme-secondary rounded-lg text-sm hover:bg-theme-glass-20 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
