@@ -35,6 +35,22 @@ export function getUserId(): string {
     return _clerkUserId;
   }
 
+  // Fallback: read Supabase user ID directly from localStorage
+  try {
+    const raw = localStorage.getItem('sb-yokyxytijxmkdbrezzzb-auth-token');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const uid = parsed?.user?.id;
+      if (uid) {
+        const supaId = `supa_${uid}`;
+        _clerkUserId = supaId;  // cache for next call
+        return supaId;
+      }
+    }
+  } catch {
+    // ignore parse errors
+  }
+
   // Fall back to localStorage (legacy / unauthenticated)
   let userId = localStorage.getItem(USER_ID_KEY);
 
@@ -87,8 +103,29 @@ export function setAuthToken(token: string | null): void {
 }
 
 /**
- * Get cached auth token for API requests
+ * Get auth token for API requests.
+ * Prefers the cached token set by useClerkUserSync, but falls back to
+ * reading directly from Supabase's localStorage entry so that the very
+ * first API call after page load (before the React effect fires) still
+ * includes a valid Bearer token.
  */
 export function getAuthToken(): string | null {
-  return _cachedAuthToken;
+  if (_cachedAuthToken) return _cachedAuthToken;
+
+  // Fallback: read token directly from Supabase localStorage
+  try {
+    const raw = localStorage.getItem('sb-yokyxytijxmkdbrezzzb-auth-token');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const token = parsed?.access_token;
+      if (token) {
+        _cachedAuthToken = token;  // cache it for next call
+        return token;
+      }
+    }
+  } catch {
+    // ignore parse errors
+  }
+
+  return null;
 }
