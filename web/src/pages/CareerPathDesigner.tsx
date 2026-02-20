@@ -1070,26 +1070,20 @@ export default function CareerPathDesigner() {
             </p>
 
             {/* Feature highlights */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 max-w-4xl mx-auto mb-10 sm:mb-16">
-              <div className="glass rounded-lg p-6 sm:p-8 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-theme-glass-10 flex items-center justify-center mb-3 sm:mb-4 mx-auto">
-                  <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-theme" />
-                </div>
-                <h3 className="font-semibold text-theme mb-2 text-base sm:text-lg">Upload Resume</h3>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 max-w-4xl mx-auto mb-10 sm:mb-16">
+              <div className="flex flex-col items-center text-center">
+                <Upload className="w-7 h-7 sm:w-8 sm:h-8 text-blue-400 mb-2" />
+                <h3 className="font-semibold text-theme text-base sm:text-lg">Upload Resume</h3>
                 <p className="text-xs sm:text-sm text-theme-secondary">We analyze your experience automatically</p>
               </div>
-              <div className="glass rounded-lg p-6 sm:p-8 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-theme-glass-10 flex items-center justify-center mb-3 sm:mb-4 mx-auto">
-                  <Target className="w-6 h-6 sm:w-8 sm:h-8 text-theme" />
-                </div>
-                <h3 className="font-semibold text-theme mb-2 text-base sm:text-lg">Detailed Assessment</h3>
+              <div className="flex flex-col items-center text-center">
+                <Target className="w-7 h-7 sm:w-8 sm:h-8 text-purple-400 mb-2" />
+                <h3 className="font-semibold text-theme text-base sm:text-lg">Detailed Assessment</h3>
                 <p className="text-xs sm:text-sm text-theme-secondary">Comprehensive questionnaire for best fit</p>
               </div>
-              <div className="glass rounded-lg p-6 sm:p-8 text-center sm:col-span-2 lg:col-span-1">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-theme-glass-10 flex items-center justify-center mb-3 sm:mb-4 mx-auto">
-                  <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-theme" />
-                </div>
-                <h3 className="font-semibold text-theme mb-2 text-base sm:text-lg">Actionable Plan</h3>
+              <div className="flex flex-col items-center text-center">
+                <TrendingUp className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-400 mb-2" />
+                <h3 className="font-semibold text-theme text-base sm:text-lg">Actionable Plan</h3>
                 <p className="text-xs sm:text-sm text-theme-secondary">Real certifications, events, and resources</p>
               </div>
             </div>
