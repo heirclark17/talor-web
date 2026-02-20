@@ -8,7 +8,7 @@
 
 /* Tailwind v4 includes preflight (CSS reset) - no need for additional universal reset */
 
-/* Theme Variables - Dark Mode */
+/* Theme Variables - Dark Mode (Default) */
 :root {
   --bg-primary: #0a0a0a;
   --bg-secondary: #1a1a1a;
@@ -22,6 +22,34 @@
   --glass-bg: rgba(255, 255, 255, 0.12);
   --glass-border: rgba(255, 255, 255, 0.15);
   --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Theme Variables - Light Mode */
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #0a0a0a;
+  --text-secondary: #4b5563;
+  --text-tertiary: #9ca3af;
+  --border-color: #e5e7eb;
+  --accent-color: #3b82f6;
+  /* Light mode glass effect - darker semi-transparent overlay */
+  --glass-bg: rgba(0, 0, 0, 0.05);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Smooth theme transitions */
+:root,
+[data-theme="light"] {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
 }
 
 /* Apply Urbanist font to all elements */

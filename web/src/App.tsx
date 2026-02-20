@@ -11,6 +11,7 @@ import { useSessionMigration } from './hooks/useSessionMigration'
 import { useAuthUserSync } from './hooks/useAuthUserSync'
 import { useAuth } from './contexts/AuthContext'
 import { PostHogProvider } from './contexts/PostHogContext'
+import { initializeTheme } from './stores/themeStore'
 
 // Auto-reload wrapper for lazy imports - handles stale chunks after deploys
 function lazyWithRetry(importFn: () => Promise<any>) {
@@ -588,6 +589,11 @@ function AppContent() {
 }
 
 function App() {
+  // Initialize theme on app load
+  useEffect(() => {
+    initializeTheme()
+  }, [])
+
   return (
     <BrowserRouter>
       <PostHogProvider>

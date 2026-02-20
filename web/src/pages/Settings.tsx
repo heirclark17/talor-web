@@ -15,9 +15,11 @@ import {
   Copy,
   Check,
   AlertTriangle,
+  Palette,
 } from 'lucide-react'
 import { getUserId, clearUserSession } from '../utils/userSession'
 import { showSuccess } from '../utils/toast'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function Settings() {
   const [userId, setUserId] = useState<string>('')
@@ -92,6 +94,27 @@ export default function Settings() {
                   <Copy className="w-5 h-5 text-theme-secondary" />
                 )}
               </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Appearance Section */}
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-theme-tertiary uppercase tracking-wide mb-3">
+            Appearance
+          </h2>
+          <div className="glass rounded-xl border border-theme-subtle overflow-hidden">
+            <div className="px-4 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-theme-glass-5 rounded-lg flex items-center justify-center">
+                  <Palette className="w-5 h-5 text-theme-secondary" />
+                </div>
+                <div>
+                  <p className="text-theme font-medium">Theme</p>
+                  <p className="text-theme-tertiary text-sm">Choose your preferred color scheme</p>
+                </div>
+              </div>
+              <ThemeToggle variant="switch" />
             </div>
           </div>
         </section>
