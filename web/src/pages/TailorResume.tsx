@@ -11,6 +11,9 @@ import AILoadingScreen from '../components/AILoadingScreen'
 import SalaryInsights from '../components/SalaryInsights'
 import { useResumeStore } from '../stores/resumeStore'
 import { usePostHog } from '../contexts/PostHogContext'
+import { useTemplateStore } from '../stores/templateStore'
+import { exportResumeToPDF, type ResumeData } from '../lib/pdfExport'
+import { defaultTemplates } from '../data/templates'
 
 // LocalStorage keys for persisting tailor session
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
@@ -921,6 +924,73 @@ export default function TailorResume() {
     }
   }
 
+  const handleExportWithTemplate = async () => {
+    if (!tailoredResume || !selectedResume) {
+      showError('Please tailor a resume first')
+      return
+    }
+
+    const { selectedTemplate } = useTemplateStore.getState()
+    const template = selectedTemplate || defaultTemplates[0] // Use first template as default
+
+    try {
+      // Convert tailored resume data to PDF format
+      const resumeData: ResumeData = {
+        personalInfo: {
+          name: selectedResume.name || 'Your Name',
+          email: selectedResume.email || '',
+          phone: selectedResume.phone || '',
+          location: selectedResume.location || '',
+          linkedin: selectedResume.linkedin,
+        },
+        summary: tailoredResume.tailored_summary || selectedResume.summary,
+        experience: tailoredResume.tailored_experience || selectedResume.experience || [],
+        education: parseEducation(tailoredResume.tailored_education || selectedResume.education),
+        skills: tailoredResume.tailored_skills || selectedResume.skills || [],
+        certifications: parseCertifications(tailoredResume.tailored_certifications || selectedResume.certifications),
+      }
+
+      const companyName = tailoredResume.company?.replace(/[^a-zA-Z0-9]/g, '_') || 'Tailored'
+
+      await exportResumeToPDF(resumeData, {
+        template,
+        fileName: `${companyName}_Resume_${template.name.replace(/\s+/g, '_')}.pdf`,
+      })
+
+      showSuccess('Resume exported as PDF with template')
+
+      capture('resume_pdf_export', {
+        template: template.name,
+        company: tailoredResume.company,
+      })
+    } catch (error) {
+      console.error('Error exporting PDF:', error)
+      showError('Error exporting PDF with template')
+    }
+  }
+
+  // Helper: Parse education string to array
+  const parseEducation = (educationStr: string) => {
+    if (!educationStr) return []
+    const lines = educationStr.split('\n').filter(Boolean)
+    return lines.map((line) => ({
+      degree: line,
+      school: '',
+      year: '',
+    }))
+  }
+
+  // Helper: Parse certifications string to array
+  const parseCertifications = (certsStr: string) => {
+    if (!certsStr) return undefined
+    const lines = certsStr.split('\n').filter(Boolean)
+    return lines.map((line) => ({
+      name: line,
+      issuer: '',
+      date: '',
+    }))
+  }
+
   const toggleResumeSelection = (resumeId: number) => {
     setSelectedResumeIds(prev => {
       const newSet = new Set(prev)
@@ -1417,6 +1487,21 @@ export default function TailorResume() {
                     >
                       <FileDown size={16} />
                       PDF Document (.pdf)
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleExportWithTemplate()
+                        setShowExportMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-theme hover:bg-theme-glass-10 transition-colors flex items-center gap-3"
+                    >
+                      <FileText size={16} />
+                      <div className="flex-1">
+                        <div className="text-theme">PDF with Template</div>
+                        <div className="text-xs text-theme-tertiary">
+                          {useTemplateStore.getState().selectedTemplate?.name || defaultTemplates[0].name}
+                        </div>
+                      </div>
                     </button>
                     <button
                       onClick={() => {
