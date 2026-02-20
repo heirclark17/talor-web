@@ -262,11 +262,26 @@ function AppContent() {
   const isLandingPage = location.pathname === '/'
   const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = React.useRef<HTMLDivElement>(null)
 
-  // Close mobile menu on route change
+  // Close mobile menu and user menu on route change
   useEffect(() => {
     setMobileMenuOpen(false)
+    setUserMenuOpen(false)
   }, [location.pathname])
+
+  // Close user menu on click outside
+  useEffect(() => {
+    if (!userMenuOpen) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [userMenuOpen])
 
   // Prevent body scroll when menu is open + close on Escape
   useEffect(() => {
@@ -332,16 +347,43 @@ function AppContent() {
               {/* Menu Button + User Avatar */}
               <div className="flex items-center gap-3">
                 {user && (
-                  <button
-                    onClick={() => signOut()}
-                    className="flex items-center gap-2 px-3 py-1.5 text-theme-secondary hover:text-theme hover:bg-theme-glass-10 rounded-lg transition-colors text-sm"
-                    title="Sign out"
-                  >
-                    <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-semibold text-sm">
+                  <div className="relative" ref={userMenuRef}>
+                    <button
+                      onClick={() => setUserMenuOpen(!userMenuOpen)}
+                      className="w-9 h-9 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-semibold text-sm hover:bg-blue-500/30 transition-colors"
+                      aria-label="User menu"
+                      aria-expanded={userMenuOpen}
+                      aria-haspopup="true"
+                    >
                       {(user.user_metadata?.full_name?.[0] || user.email?.[0] || '?').toUpperCase()}
-                    </div>
-                    <LogOut className="w-4 h-4" />
-                  </button>
+                    </button>
+
+                    {userMenuOpen && (
+                      <div
+                        className="absolute right-0 mt-2 w-64 rounded-xl overflow-hidden shadow-lg border border-white/10"
+                        style={{ backgroundColor: 'var(--bg-secondary)' }}
+                        role="menu"
+                      >
+                        <div className="px-4 py-3 border-b border-white/10">
+                          {user.user_metadata?.full_name && (
+                            <p className="text-sm font-semibold text-theme truncate">{user.user_metadata.full_name}</p>
+                          )}
+                          <p className="text-xs text-theme-tertiary truncate">{user.email}</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setUserMenuOpen(false)
+                            signOut()
+                          }}
+                          role="menuitem"
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-secondary hover:text-theme hover:bg-white/5 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Sign out
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
