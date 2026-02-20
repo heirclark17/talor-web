@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut, CreditCard, PenTool, Sun, Moon } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut, CreditCard, PenTool, Sun, Moon, Plus, Search } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -457,6 +457,7 @@ function AppContent() {
       label: 'Resume Tools',
       links: [
         { to: '/resumes', icon: FileText, label: 'My Resumes', desc: 'View and manage all resumes', tourId: 'resumes', iconColor: 'text-blue-400' },
+        { to: '/resume-builder', icon: Plus, label: 'Build Resume', desc: 'Start from scratch', tourId: 'resume-builder', iconColor: 'text-green-400' },
         { to: '/templates', icon: PenTool, label: 'Templates', desc: 'Browse resume templates', tourId: 'templates', iconColor: 'text-purple-400' },
         { to: '/upload', icon: Upload, label: 'Upload', desc: 'Upload a new base resume', tourId: 'upload', iconColor: 'text-emerald-400' },
         { to: '/tailor', icon: Target, label: 'Tailor', desc: 'Customize for a specific job', tourId: 'tailor', iconColor: 'text-rose-400' },
