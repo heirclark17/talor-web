@@ -3270,6 +3270,33 @@ class ApiClient {
       return { success: false, error: error.message };
     }
   }
+
+  // =========================================================================
+  // MOCK INTERVIEWS
+  // =========================================================================
+
+  /**
+   * Generate AI mock interview response
+   */
+  async generateMockInterview(data: {
+    systemPrompt: string;
+    messages: Array<{ role: string; content: string }>;
+    company: string;
+    jobTitle: string;
+    interviewType: 'behavioral' | 'technical' | 'company-specific';
+  }): Promise<ApiResponse<{ message: string }>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/mock-interview`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      return { success: response.ok, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 // Export singleton instance

@@ -50,6 +50,7 @@ const TermsOfService = lazyWithRetry(() => import('./pages/TermsOfService'))
 const BatchTailor = lazyWithRetry(() => import('./pages/BatchTailor'))
 const Pricing = lazyWithRetry(() => import('./pages/Pricing'))
 const Templates = lazyWithRetry(() => import('./pages/Templates'))
+const MockInterview = lazyWithRetry(() => import('./pages/MockInterview'))
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'))
 const OnboardingTour = lazyWithRetry(() => import('./components/OnboardingTour'))
 
@@ -646,6 +647,7 @@ function AppContent() {
               <Route path="/applications" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
               <Route path="/interview-preps" element={<ProtectedRoute><InterviewPrepList /></ProtectedRoute>} />
               <Route path="/interview-prep/:tailoredResumeId" element={<ProtectedRoute><InterviewPrep /></ProtectedRoute>} />
+              <Route path="/mock-interview" element={<ProtectedRoute><MockInterview /></ProtectedRoute>} />
               <Route path="/star-stories" element={<ProtectedRoute><StarStoriesList /></ProtectedRoute>} />
               <Route path="/cover-letters" element={<ProtectedRoute><CoverLetterGenerator /></ProtectedRoute>} />
               <Route path="/saved-comparisons" element={<ProtectedRoute><SavedComparisons /></ProtectedRoute>} />
