@@ -1,13 +1,12 @@
 /**
  * LinkedIn Profile Import Component
  *
- * Allows users to import their LinkedIn profile by uploading
- * a LinkedIn PDF export.
+ * Allows users to import their LinkedIn profile by pasting
+ * their profile URL.
  */
 
-import { useState, useRef } from 'react';
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Linkedin } from 'lucide-react';
-import { parseLinkedInPDF, linkedInToResumeData } from '../lib/linkedinParser';
+import { useState } from 'react';
+import { Link2, CheckCircle, AlertCircle, Loader2, Linkedin } from 'lucide-react';
 
 interface LinkedInImportProps {
   onImportComplete: (resumeData: any) => void;
@@ -15,74 +14,87 @@ interface LinkedInImportProps {
 }
 
 export default function LinkedInImport({ onImportComplete, onCancel }: LinkedInImportProps) {
-  const [file, setFile] = useState<File | null>(null);
+  const [profileUrl, setProfileUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
+  const validateLinkedInUrl = (url: string): boolean => {
+    // Accept various LinkedIn URL formats
+    const patterns = [
+      /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+\/?$/,
+      /^linkedin\.com\/in\/[\w-]+\/?$/,
+      /^www\.linkedin\.com\/in\/[\w-]+\/?$/,
+    ];
+    return patterns.some(pattern => pattern.test(url.trim()));
+  };
 
-    // Validate file type
-    if (selectedFile.type !== 'application/pdf') {
-      setError('Please upload a PDF file');
-      return;
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setProfileUrl(url);
+    if (url && !validateLinkedInUrl(url)) {
+      setError('Please enter a valid LinkedIn profile URL (e.g., https://linkedin.com/in/yourname)');
+    } else {
+      setError(null);
     }
-
-    // Validate file size (max 10MB)
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      setError('File size must be less than 10MB');
-      return;
-    }
-
-    setFile(selectedFile);
-    setError(null);
   };
 
   const handleImport = async () => {
-    if (!file) return;
+    if (!profileUrl) return;
+
+    // Validate URL format
+    if (!validateLinkedInUrl(profileUrl)) {
+      setError('Please enter a valid LinkedIn profile URL');
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
-      // Parse LinkedIn PDF
-      const profile = await parseLinkedInPDF(file);
+      // Normalize URL to include https://
+      let normalizedUrl = profileUrl.trim();
+      if (!normalizedUrl.startsWith('http')) {
+        normalizedUrl = 'https://' + normalizedUrl;
+      }
 
-      // Convert to resume data format
-      const resumeData = linkedInToResumeData(profile);
+      // Note: LinkedIn actively blocks automated scraping
+      // This will likely fail due to LinkedIn's anti-bot protection
+      // The user should use the PDF export method instead
+
+      // Try to scrape the LinkedIn profile
+      const response = await fetch('/api/linkedin/import', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ profile_url: normalizedUrl }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to import LinkedIn profile');
+      }
+
+      const resumeData = await response.json();
 
       // Show success
       setSuccess(true);
 
-      // Call completion handler after short delay
+      // Call completion handler
       setTimeout(() => {
         onImportComplete(resumeData);
       }, 1000);
+
     } catch (err) {
       console.error('LinkedIn import error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to parse LinkedIn profile');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to import LinkedIn profile';
+
+      // Provide helpful fallback message
+      setError(
+        `${errorMessage}\n\nLinkedIn blocks automated profile access. Please use the "Upload Resume" tab and upload a PDF of your LinkedIn profile instead. To export: Go to your LinkedIn profile → More → Save to PDF`
+      );
       setLoading(false);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type === 'application/pdf') {
-      setFile(droppedFile);
-      setError(null);
-    } else {
-      setError('Please drop a PDF file');
     }
   };
 
@@ -104,75 +116,54 @@ export default function LinkedInImport({ onImportComplete, onCancel }: LinkedInI
       {/* Instructions */}
       <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
         <h3 className="font-semibold text-theme mb-2 flex items-center gap-2">
-          <FileText className="w-4 h-4" />
-          How to export from LinkedIn:
+          <Link2 className="w-4 h-4" />
+          How to find your LinkedIn URL:
         </h3>
         <ol className="text-sm text-theme-secondary space-y-1 list-decimal list-inside">
-          <li>Go to your LinkedIn profile</li>
-          <li>Click "More" → "Save to PDF"</li>
-          <li>Download the PDF file</li>
-          <li>Upload it here</li>
+          <li>Go to your LinkedIn profile page</li>
+          <li>Copy the URL from your browser address bar</li>
+          <li>It should look like: linkedin.com/in/yourname</li>
+          <li>Paste it below</li>
         </ol>
       </div>
 
-      {/* Upload Area */}
-      <div
-        className={`
-          border-2 border-dashed rounded-xl p-8 text-center transition-colors
-          ${file ? 'border-blue-500 bg-blue-500/5' : 'border-border hover:border-blue-500/50'}
-          ${loading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
-        `}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onClick={() => !loading && fileInputRef.current?.click()}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
+      {/* URL Input Area */}
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="linkedin-url" className="block text-sm font-medium text-theme mb-2">
+            LinkedIn Profile URL
+          </label>
+          <div className="relative">
+            <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-secondary" />
+            <input
+              id="linkedin-url"
+              type="url"
+              value={profileUrl}
+              onChange={handleUrlChange}
+              placeholder="https://linkedin.com/in/yourname"
+              disabled={loading || success}
+              className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-lg text-theme placeholder:text-theme-tertiary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            />
+          </div>
+          <p className="text-xs text-theme-tertiary mt-2">
+            Example: https://linkedin.com/in/johndoe or linkedin.com/in/johndoe
+          </p>
+        </div>
 
-        {success ? (
-          <div className="flex flex-col items-center gap-3">
-            <CheckCircle className="w-12 h-12 text-green-500" />
+        {success && (
+          <div className="flex items-center gap-2 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
             <p className="font-medium text-green-500">Profile imported successfully!</p>
           </div>
-        ) : loading ? (
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-            <p className="font-medium text-theme">Parsing LinkedIn profile...</p>
-            <p className="text-sm text-theme-secondary">This may take a few seconds</p>
-          </div>
-        ) : file ? (
-          <div className="flex flex-col items-center gap-3">
-            <FileText className="w-12 h-12 text-blue-500" />
+        )}
+
+        {loading && (
+          <div className="flex items-center gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <Loader2 className="w-5 h-5 text-blue-500 animate-spin flex-shrink-0" />
             <div>
-              <p className="font-medium text-theme">{file.name}</p>
-              <p className="text-sm text-theme-secondary">
-                {(file.size / 1024 / 1024).toFixed(2)} MB
-              </p>
+              <p className="font-medium text-theme">Importing LinkedIn profile...</p>
+              <p className="text-sm text-theme-secondary">This may take a few seconds</p>
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setFile(null);
-                setError(null);
-              }}
-              className="text-sm text-blue-500 hover:text-blue-600"
-            >
-              Choose different file
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-3">
-            <Upload className="w-12 h-12 text-theme-secondary" />
-            <div>
-              <p className="font-medium text-theme">Drop your LinkedIn PDF here</p>
-              <p className="text-sm text-theme-secondary">or click to browse</p>
-            </div>
-            <p className="text-xs text-theme-tertiary">Max file size: 10MB</p>
           </div>
         )}
       </div>
@@ -201,7 +192,7 @@ export default function LinkedInImport({ onImportComplete, onCancel }: LinkedInI
         )}
         <button
           onClick={handleImport}
-          disabled={!file || loading || success}
+          disabled={!profileUrl || loading || success || !!error}
           className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {loading ? (
@@ -216,7 +207,7 @@ export default function LinkedInImport({ onImportComplete, onCancel }: LinkedInI
             </>
           ) : (
             <>
-              <Upload className="w-4 h-4" />
+              <Linkedin className="w-4 h-4" />
               Import Profile
             </>
           )}
@@ -225,8 +216,8 @@ export default function LinkedInImport({ onImportComplete, onCancel }: LinkedInI
 
       {/* Privacy Notice */}
       <p className="text-xs text-theme-tertiary text-center">
-        Your LinkedIn data is processed locally and never stored on our servers.
-        We only extract publicly visible information from your profile.
+        We'll extract publicly visible information from your LinkedIn profile.
+        Your data is never stored on our servers without your consent.
       </p>
     </div>
   );

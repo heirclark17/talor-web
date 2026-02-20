@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Trash2, Linkedin } from 'lucide-react'
+import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { showError, showSuccess } from '../utils/toast'
 import { usePostHog } from '../contexts/PostHogContext'
-import LinkedInImport from '../components/LinkedInImport'
 
 // LocalStorage keys for clearing old tailored resumes
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
@@ -51,8 +50,6 @@ export default function UploadResume() {
   const [error, setError] = useState<string | null>(null)
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
-  const [uploadMethod, setUploadMethod] = useState<'resume' | 'linkedin'>('resume')
-  const [showLinkedInImport, setShowLinkedInImport] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Clear old tailored resume data when user navigates to upload page
@@ -97,61 +94,6 @@ export default function UploadResume() {
       setDeletingId(null)
     }
   }
-
-  const handleLinkedInImport = async (linkedInData: any) => {
-    try {
-      setError(null)
-      setUploading(true)
-
-      // Create a resume from LinkedIn data by uploading to backend
-      // We'll create a JSON blob and upload it similar to a resume file
-      const dataStr = JSON.stringify(linkedInData);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const file = new File([blob], 'linkedin-import.json', { type: 'application/json' });
-
-      const uploadResult = await api.uploadResume(file, { isLinkedInImport: true });
-
-      if (!uploadResult.success) {
-        throw new Error(uploadResult.error || 'Failed to create resume from LinkedIn data');
-      }
-
-      const backendData = uploadResult.data.parsed_data || uploadResult.data;
-
-      const mappedData = {
-        resume_id: uploadResult.data.resume_id || uploadResult.data.id,
-        filename: uploadResult.data.filename || 'LinkedIn Import',
-        parsed_data: {
-          name: linkedInData.personalInfo?.name || backendData.name || '',
-          email: linkedInData.personalInfo?.email || backendData.email || '',
-          phone: linkedInData.personalInfo?.phone || backendData.phone || '',
-          linkedin: linkedInData.personalInfo?.linkedin || backendData.linkedin || '',
-          location: linkedInData.personalInfo?.location || backendData.location || '',
-          summary: linkedInData.summary || backendData.summary || '',
-          skills: linkedInData.skills || backendData.skills || [],
-          experience: linkedInData.experience || backendData.experience || [],
-          education: linkedInData.education || backendData.education || '',
-          certifications: linkedInData.certifications || backendData.certifications || '',
-        }
-      };
-
-      setParsedResume(mappedData);
-      setUploadSuccess(true);
-      setUploading(false);
-      setShowLinkedInImport(false);
-
-      showSuccess('LinkedIn profile imported successfully!');
-
-      // Track successful LinkedIn import
-      capture('linkedin_import_completed', {
-        page_name: 'Upload Resume',
-      });
-    } catch (err: any) {
-      setError(err.message || 'Failed to import LinkedIn profile');
-      setUploading(false);
-      setUploadSuccess(false);
-      showError(err.message || 'Failed to import LinkedIn profile');
-    }
-  };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -266,36 +208,8 @@ export default function UploadResume() {
           </button>
         </div>
 
-      {/* Upload Method Tabs */}
-      <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-16 mb-12 sm:mb-16 lg:mb-24">
-        <div className="flex gap-2 mb-8 border-b border-border pb-4">
-          <button
-            onClick={() => setUploadMethod('resume')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
-              uploadMethod === 'resume'
-                ? 'bg-blue-500 text-white'
-                : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
-            }`}
-          >
-            <Upload className="w-5 h-5" />
-            Upload Resume
-          </button>
-          <button
-            onClick={() => setUploadMethod('linkedin')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
-              uploadMethod === 'linkedin'
-                ? 'bg-blue-500 text-white'
-                : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
-            }`}
-          >
-            <Linkedin className="w-5 h-5" />
-            Import from LinkedIn
-          </button>
-        </div>
-
       {/* Upload Area */}
-      {uploadMethod === 'resume' ? (
-        <div>
+      <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-16 mb-12 sm:mb-16 lg:mb-24">
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 text-center transition-all cursor-pointer ${
@@ -352,13 +266,6 @@ export default function UploadResume() {
             {uploading ? 'Uploading...' : uploadSuccess ? 'Upload Another Resume' : 'Select File'}
           </button>
         </div>
-        </div>
-      ) : (
-        <LinkedInImport
-          onImportComplete={handleLinkedInImport}
-          onCancel={() => setUploadMethod('resume')}
-        />
-      )}
       </div>
 
       {/* Parsed Resume Display */}
