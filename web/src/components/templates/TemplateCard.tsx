@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Check, Crown, Star } from 'lucide-react'
 import type { ResumeTemplate } from '../../types/template'
 import { useSubscriptionStore } from '../../stores/subscriptionStore'
+import { generateTemplatePlaceholder } from '../../utils/generateTemplatePlaceholder'
 
 interface TemplateCardProps {
   template: ResumeTemplate
@@ -33,6 +34,12 @@ export default function TemplateCard({
 }: TemplateCardProps) {
   const { checkFeatureAccess } = useSubscriptionStore()
   const hasAccess = !template.isPremium || checkFeatureAccess('premium_templates')
+
+  // Generate preview image if template doesn't have one
+  const previewImage = useMemo(() => {
+    if (template.preview) return template.preview
+    return generateTemplatePlaceholder(template)
+  }, [template])
 
   const handleClick = () => {
     if (hasAccess) {
@@ -70,23 +77,11 @@ export default function TemplateCard({
     >
       {/* Preview Image */}
       <div className="relative aspect-[8.5/11] bg-theme-glass-5 overflow-hidden">
-        {template.preview ? (
-          <img
-            src={template.preview}
-            alt={`${template.name} preview`}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 rounded-lg bg-theme-glass-10 mx-auto mb-3 flex items-center justify-center">
-                <Star className="w-8 h-8 text-theme-tertiary" />
-              </div>
-              <p className="text-sm text-theme-secondary font-medium">{template.name}</p>
-              <p className="text-xs text-theme-tertiary mt-1">{template.category}</p>
-            </div>
-          </div>
-        )}
+        <img
+          src={previewImage}
+          alt={`${template.name} preview`}
+          className="w-full h-full object-cover"
+        />
 
         {/* Premium Badge */}
         {template.isPremium && (
