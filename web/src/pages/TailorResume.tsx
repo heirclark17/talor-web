@@ -1211,12 +1211,6 @@ export default function TailorResume() {
       // in the backend (saves 10-20 seconds and avoids duplicate scraping costs).
       const shouldSendJobUrl = trimmedJobUrl && (!companyExtracted || !titleExtracted)
 
-        baseResumeId: selectedResumeId,
-        jobUrl: shouldSendJobUrl ? trimmedJobUrl : undefined,
-        company: trimmedCompany,
-        jobTitle: trimmedJobTitle,
-      })
-
       const result = await api.tailorResume({
         baseResumeId: selectedResumeId,
         jobUrl: shouldSendJobUrl ? trimmedJobUrl : undefined,
