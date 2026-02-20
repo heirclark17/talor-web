@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut, CreditCard } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -47,6 +47,7 @@ const CoverLetterGenerator = lazyWithRetry(() => import('./pages/CoverLetterGene
 const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy'))
 const TermsOfService = lazyWithRetry(() => import('./pages/TermsOfService'))
 const BatchTailor = lazyWithRetry(() => import('./pages/BatchTailor'))
+const Pricing = lazyWithRetry(() => import('./pages/Pricing'))
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'))
 const OnboardingTour = lazyWithRetry(() => import('./components/OnboardingTour'))
 
@@ -82,7 +83,13 @@ function Dashboard() {
               <FileText className="w-7 h-7 sm:w-8 sm:h-8 text-theme" />
               <span className="text-xl sm:text-2xl font-bold text-theme tracking-tight">Talor</span>
             </Link>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 sm:gap-6">
+              <Link
+                to="/pricing"
+                className="text-sm font-medium text-theme-secondary hover:text-theme transition-colors px-3 py-2"
+              >
+                Pricing
+              </Link>
               {isSignedIn ? (
                 <button
                   onClick={() => navigate('/resumes')}
@@ -385,6 +392,7 @@ function AppContent() {
       links: [
         { to: '/saved-comparisons', icon: Bookmark, label: 'Saved', desc: 'Bookmarked comparisons', tourId: 'saved', iconColor: 'text-orange-400' },
         { to: '/career-path', icon: TrendingUp, label: 'Career Path', desc: 'Plan your career trajectory', tourId: 'career-path', iconColor: 'text-green-400' },
+        { to: '/pricing', icon: CreditCard, label: 'Pricing', desc: 'View plans and upgrade', tourId: 'pricing', iconColor: 'text-purple-400' },
         { to: '/settings', icon: Settings, label: 'Settings', desc: 'Preferences and account', tourId: 'settings', iconColor: 'text-slate-400' },
       ],
     },
@@ -545,6 +553,7 @@ function AppContent() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/sign-in/*" element={<SignIn />} />
               <Route path="/sign-up/*" element={<SignUp />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
 

@@ -3199,6 +3199,77 @@ class ApiClient {
       return { success: false, error: error.message };
     }
   }
+
+  // =========================================================================
+  // SUBSCRIPTION & BILLING
+  // =========================================================================
+
+  /**
+   * Get current user's subscription
+   */
+  async getSubscription(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/subscription`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Create Stripe Checkout session for subscription purchase
+   */
+  async createCheckoutSession(
+    plan: string,
+    interval: 'monthly' | 'yearly'
+  ): Promise<ApiResponse<{ url: string }>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/subscription/checkout`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ plan, interval }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Create Stripe Customer Portal session for subscription management
+   */
+  async createPortalSession(): Promise<ApiResponse<{ url: string }>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/subscription/portal`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Cancel current subscription
+   */
+  async cancelSubscription(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/subscription/cancel`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 // Export singleton instance
