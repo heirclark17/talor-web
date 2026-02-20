@@ -16,15 +16,18 @@ import {
   Check,
   AlertTriangle,
   Palette,
+  Bell,
 } from 'lucide-react'
 import { getUserId, clearUserSession } from '../utils/userSession'
 import { showSuccess } from '../utils/toast'
 import ThemeToggle from '../components/ThemeToggle'
+import NotificationPreferences from '../components/settings/NotificationPreferences'
 
 export default function Settings() {
   const [userId, setUserId] = useState<string>('')
   const [copied, setCopied] = useState(false)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
 
   useEffect(() => {
     setUserId(getUserId())
@@ -117,6 +120,37 @@ export default function Settings() {
               <ThemeToggle variant="switch" />
             </div>
           </div>
+        </section>
+
+        {/* Notifications Section */}
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-theme-tertiary uppercase tracking-wide mb-3">
+            Notifications
+          </h2>
+          <div className="glass rounded-xl border border-theme-subtle overflow-hidden">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="w-full px-4 py-4 flex items-center justify-between hover:bg-theme-glass-5 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-theme-glass-5 rounded-lg flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-theme-secondary" />
+                </div>
+                <div className="text-left">
+                  <p className="text-theme font-medium">Email & In-App Notifications</p>
+                  <p className="text-theme-tertiary text-sm">Manage your notification preferences</p>
+                </div>
+              </div>
+              <ChevronRight className={`w-5 h-5 text-theme-tertiary transition-transform ${showNotifications ? 'rotate-90' : ''}`} />
+            </button>
+          </div>
+
+          {/* Notification Preferences Panel */}
+          {showNotifications && (
+            <div className="mt-4">
+              <NotificationPreferences />
+            </div>
+          )}
         </section>
 
         {/* Features Section */}

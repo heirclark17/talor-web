@@ -14,6 +14,8 @@ import { usePostHog } from '../contexts/PostHogContext'
 import { useTemplateStore } from '../stores/templateStore'
 import { exportResumeToPDF, type ResumeData } from '../lib/pdfExport'
 import { defaultTemplates } from '../data/templates'
+import { sendNotification } from '../lib/notificationService'
+import { getUserId } from '../utils/userSession'
 
 // LocalStorage keys for persisting tailor session
 const LAST_TAILORED_RESUME_KEY = 'tailor_last_viewed_resume'
@@ -1255,6 +1257,21 @@ export default function TailorResume() {
         company: result.data.company || company,
         job_title: result.data.title || jobTitle,
         has_job_url: !!trimmedJobUrl,
+      })
+
+      // Send notification
+      const companyName = result.data.company || company || 'the position'
+      sendNotification({
+        type: 'resume_ready',
+        userId: getUserId(),
+        data: {
+          title: 'Resume Ready!',
+          message: `Your tailored resume for ${companyName} is ready to download.`,
+          actionUrl: '/tailor',
+          actionText: 'View Resume',
+          company: companyName,
+          jobTitle: result.data.title || jobTitle,
+        },
       })
 
       // Auto-save the job URL for future reuse (fire-and-forget)
