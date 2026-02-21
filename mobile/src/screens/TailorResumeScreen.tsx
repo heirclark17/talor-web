@@ -17,7 +17,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   Target, Link, FileText, ChevronDown, Sparkles, Building2, ArrowLeft,
   Check, Download, RefreshCw, Bookmark, Briefcase, ChevronRight, BarChart3,
-  Key, Share2
+  Key, Share2, BookOpen, ClipboardCheck
 } from 'lucide-react-native';
 import { MatchScore, KeywordPanel, ResumeAnalysis } from '../components';
 import { GlassButton } from '../components/glass/GlassButton';
@@ -725,6 +725,24 @@ export default function TailorResumeScreen() {
               <Briefcase color="#fff" size={18} />
               <Text style={styles.interviewPrepButtonText}>Prep</Text>
               <ChevronRight color="#fff" size={18} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.actionButtonsRow}>
+            <TouchableOpacity
+              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              onPress={() => navigation.navigate('Saved' as any, { screen: 'Applications' })}
+            >
+              <ClipboardCheck color={COLORS.primary} size={18} />
+              <Text style={styles.secondaryButtonText}>Track App</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              onPress={() => navigation.navigate('Career' as any, { screen: 'CoverLetters' })}
+            >
+              <BookOpen color={COLORS.primary} size={18} />
+              <Text style={styles.secondaryButtonText}>Cover Letter</Text>
             </TouchableOpacity>
           </View>
 

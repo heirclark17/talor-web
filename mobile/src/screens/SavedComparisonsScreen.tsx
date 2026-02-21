@@ -483,6 +483,16 @@ export default function SavedComparisonsScreen() {
           <View style={styles.headerActions}>
             <TouchableOpacity
               style={styles.headerButton}
+              onPress={() => navigation.navigate('Applications')}
+              accessibilityRole="button"
+              accessibilityLabel="Track Applications"
+              accessibilityHint="Navigate to application tracker"
+            >
+              <Briefcase color={COLORS.primary} size={20} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.headerButton}
               onPress={() => handleExport('json')}
               disabled={exporting}
               accessibilityRole="button"

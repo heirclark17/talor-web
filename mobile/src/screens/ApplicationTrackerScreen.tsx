@@ -12,7 +12,9 @@ import {
 import { BlurView } from 'expo-blur';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../api/client';
-import { Colors, Typography, Spacing, GLASS } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../utils/constants';
+import { ApplicationFormModal } from '../components/ApplicationFormModal';
 
 interface Application {
   id: number;
@@ -39,15 +41,15 @@ interface Stats {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  saved: Colors.warning,
-  applied: Colors.info,
-  screening: Colors.primary,
-  interviewing: Colors.accent,
-  offer: Colors.success,
-  accepted: Colors.success,
-  rejected: Colors.error,
-  withdrawn: Colors.textSecondary,
-  no_response: Colors.textTertiary,
+  saved: COLORS.warning,
+  applied: COLORS.info,
+  screening: COLORS.primary,
+  interviewing: COLORS.cyan,
+  offer: COLORS.success,
+  accepted: COLORS.success,
+  rejected: COLORS.error,
+  withdrawn: '#9ca3af',
+  no_response: '#6b7280',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -64,11 +66,16 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function ApplicationTrackerScreen() {
   const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
   const [applications, setApplications] = useState<Application[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+
+  // Modal state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -120,7 +127,8 @@ export default function ApplicationTrackerScreen() {
       <TouchableOpacity
         style={styles.card}
         onPress={() => {
-          // TODO: Navigate to application detail
+          setSelectedApplication(item);
+          setModalVisible(true);
         }}
         activeOpacity={0.7}
       >
@@ -222,7 +230,7 @@ export default function ApplicationTrackerScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       </SafeAreaView>
     );
@@ -235,7 +243,8 @@ export default function ApplicationTrackerScreen() {
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
-            // TODO: Navigate to add application modal
+            setSelectedApplication(null);
+            setModalVisible(true);
           }}
         >
           <Text style={styles.addButtonText}>+ Add</Text>
@@ -248,7 +257,7 @@ export default function ApplicationTrackerScreen() {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
         }
         ListHeaderComponent={
           <>
@@ -265,6 +274,21 @@ export default function ApplicationTrackerScreen() {
           </View>
         }
       />
+
+      <ApplicationFormModal
+        visible={modalVisible}
+        application={selectedApplication}
+        onClose={() => {
+          setModalVisible(false);
+          setSelectedApplication(null);
+        }}
+        onSave={() => {
+          loadData();
+        }}
+        onDelete={() => {
+          loadData();
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -272,7 +296,7 @@ export default function ApplicationTrackerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -283,41 +307,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     borderBottomWidth: GLASS.getBorderWidth(),
     borderBottomColor: GLASS.getBorderColor(),
   },
   headerTitle: {
-    ...Typography.heading1,
-    color: Colors.textPrimary,
+    ...TYPOGRAPHY.heading1,
+    color: colors.text,
   },
   addButton: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderRadius: GLASS.getCornerRadius('small'),
     ...GLASS.getShadow('medium'),
   },
   addButtonText: {
-    ...Typography.bodyBold,
-    color: Colors.white,
+    ...TYPOGRAPHY.bodyBold,
+    color: '#ffffff',
   },
   listContainer: {
-    padding: Spacing.md,
+    padding: SPACING.md,
   },
   statsBlur: {
     borderRadius: GLASS.getCornerRadius('medium'),
     overflow: 'hidden',
-    marginBottom: Spacing.lg,
+    marginBottom: SPACING.lg,
   },
   statsContainer: {
-    padding: Spacing.lg,
+    padding: SPACING.lg,
   },
   statsTitle: {
-    ...Typography.heading3,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.md,
+    ...TYPOGRAPHY.heading3,
+    color: colors.text,
+    marginBottom: SPACING.md,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -327,48 +351,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    ...Typography.heading2,
-    color: Colors.primary,
+    ...TYPOGRAPHY.heading2,
+    color: COLORS.primary,
   },
   statLabel: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-    marginTop: Spacing.xs,
+    ...TYPOGRAPHY.caption,
+    color: colors.textSecondary,
+    marginTop: SPACING.xs,
   },
   filterContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
+    gap: SPACING.sm,
+    marginBottom: SPACING.lg,
   },
   filterChip: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderRadius: GLASS.getCornerRadius('full'),
-    backgroundColor: Colors.surface + '40',
+    backgroundColor: colors.backgroundSecondary + '40',
     borderWidth: GLASS.getBorderWidth(),
     borderColor: GLASS.getBorderColor(),
   },
   filterChipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   filterChipText: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
+    ...TYPOGRAPHY.caption,
+    color: colors.textSecondary,
   },
   filterChipTextActive: {
-    color: Colors.white,
+    color: '#ffffff',
     fontWeight: '600',
   },
   cardBlur: {
     borderRadius: GLASS.getCornerRadius('large'),
     overflow: 'hidden',
-    marginBottom: Spacing.md,
+    marginBottom: SPACING.md,
     ...GLASS.getShadow('medium'),
   },
   card: {
-    padding: Spacing.lg,
+    padding: SPACING.lg,
     borderWidth: GLASS.getBorderWidth(),
     borderColor: GLASS.getBorderColor(),
   },
@@ -376,60 +400,60 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: Spacing.sm,
+    marginBottom: SPACING.sm,
   },
   cardHeaderLeft: {
     flex: 1,
-    marginRight: Spacing.md,
+    marginRight: SPACING.md,
   },
   jobTitle: {
-    ...Typography.heading3,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
+    ...TYPOGRAPHY.heading3,
+    color: colors.text,
+    marginBottom: SPACING.xs,
   },
   companyName: {
-    ...Typography.body,
-    color: Colors.textSecondary,
+    ...TYPOGRAPHY.body,
+    color: colors.textSecondary,
   },
   statusBadge: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
     borderRadius: GLASS.getCornerRadius('small'),
   },
   statusText: {
-    ...Typography.caption,
+    ...TYPOGRAPHY.caption,
     fontWeight: '600',
   },
   cardDetails: {
-    marginBottom: Spacing.sm,
+    marginBottom: SPACING.sm,
   },
   detailText: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
+    ...TYPOGRAPHY.body,
+    color: colors.textSecondary,
+    marginBottom: SPACING.xs,
   },
   cardFooter: {
     borderTopWidth: GLASS.getBorderWidth(),
     borderTopColor: GLASS.getBorderColor(),
-    paddingTop: Spacing.sm,
+    paddingTop: SPACING.sm,
   },
   dateText: {
-    ...Typography.caption,
-    color: Colors.textTertiary,
+    ...TYPOGRAPHY.caption,
+    color: colors.textTertiary,
   },
   emptyContainer: {
     alignItems: 'center',
-    paddingVertical: Spacing.xl * 2,
+    paddingVertical: SPACING.xl * 2,
   },
   emptyTitle: {
-    ...Typography.heading2,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
+    ...TYPOGRAPHY.heading2,
+    color: colors.textSecondary,
+    marginBottom: SPACING.sm,
   },
   emptyText: {
-    ...Typography.body,
-    color: Colors.textTertiary,
+    ...TYPOGRAPHY.body,
+    color: colors.textTertiary,
     textAlign: 'center',
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: SPACING.xl,
   },
 });

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FileText, Upload, Trash2, Target, FileSearch, X, CheckCircle, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react-native';
+import { FileText, Upload, Trash2, Target, FileSearch, X, CheckCircle, AlertCircle, TrendingUp, TrendingDown, BookOpen, Briefcase } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -283,6 +283,25 @@ export default function HomeScreen() {
           accessibilityLabel="Upload new resume"
           accessibilityHint="Opens file picker to select and upload a resume document"
         />
+      </View>
+
+      {/* Quick Actions */}
+      <View style={styles.quickActions}>
+        <TouchableOpacity
+          style={[styles.quickActionButton, { backgroundColor: colors.backgroundSecondary }]}
+          onPress={() => navigation.navigate('Career' as any, { screen: 'CoverLetters' })}
+        >
+          <BookOpen color={COLORS.primary} size={24} />
+          <Text style={[styles.quickActionText, { color: colors.text }]}>Cover Letters</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.quickActionButton, { backgroundColor: colors.backgroundSecondary }]}
+          onPress={() => navigation.navigate('Saved' as any, { screen: 'Applications' })}
+        >
+          <Briefcase color={COLORS.primary} size={24} />
+          <Text style={[styles.quickActionText, { color: colors.text }]}>Track Applications</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Search and Filter */}
@@ -556,6 +575,24 @@ const styles = StyleSheet.create({
   addButton: {
     width: SPACING.touchTarget,
     height: SPACING.touchTarget,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.screenMargin,
+    paddingBottom: SPACING.md,
+  },
+  quickActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    borderRadius: SPACING.radiusMD,
+  },
+  quickActionText: {
+    ...TYPOGRAPHY.bodyBold,
   },
   searchContainer: {
     paddingHorizontal: SPACING.screenMargin,

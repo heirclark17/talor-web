@@ -15,7 +15,9 @@ import {
 import { BlurView } from 'expo-blur';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../api/client';
-import { Colors, Typography, Spacing, GLASS } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../utils/constants';
+import { CoverLetterDetailModal } from '../components/CoverLetterDetailModal';
 
 interface CoverLetter {
   id: number;
@@ -48,6 +50,7 @@ const FOCUS_OPTIONS = [
 
 export default function CoverLetterGeneratorScreen() {
   const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
 
@@ -60,6 +63,10 @@ export default function CoverLetterGeneratorScreen() {
   const [tone, setTone] = useState<string>('professional');
   const [length, setLength] = useState<string>('standard');
   const [focus, setFocus] = useState<string>('program_management');
+
+  // Modal state
+  const [selectedCoverLetter, setSelectedCoverLetter] = useState<CoverLetter | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     loadCoverLetters();
@@ -163,7 +170,8 @@ export default function CoverLetterGeneratorScreen() {
       <TouchableOpacity
         style={styles.card}
         onPress={() => {
-          // TODO: Navigate to cover letter detail
+          setSelectedCoverLetter(item);
+          setModalVisible(true);
         }}
       >
         <Text style={styles.cardTitle}>{item.jobTitle}</Text>
@@ -226,7 +234,7 @@ export default function CoverLetterGeneratorScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="e.g., Senior Product Manager"
-                  placeholderTextColor={Colors.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={jobTitle}
                   onChangeText={setJobTitle}
                 />
@@ -237,7 +245,7 @@ export default function CoverLetterGeneratorScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="e.g., Apple"
-                  placeholderTextColor={Colors.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={companyName}
                   onChangeText={setCompanyName}
                 />
@@ -249,7 +257,7 @@ export default function CoverLetterGeneratorScreen() {
                   <TextInput
                     style={styles.input}
                     placeholder="https://..."
-                    placeholderTextColor={Colors.textTertiary}
+                    placeholderTextColor={colors.textTertiary}
                     value={jobUrl}
                     onChangeText={setJobUrl}
                     autoCapitalize="none"
@@ -262,7 +270,7 @@ export default function CoverLetterGeneratorScreen() {
                   <TextInput
                     style={[styles.input, styles.textArea]}
                     placeholder="Paste the job description here..."
-                    placeholderTextColor={Colors.textTertiary}
+                    placeholderTextColor={colors.textTertiary}
                     value={jobDescription}
                     onChangeText={setJobDescription}
                     multiline
@@ -295,7 +303,7 @@ export default function CoverLetterGeneratorScreen() {
                 disabled={loading}
               >
                 {loading ? (
-                  <ActivityIndicator color={Colors.white} />
+                  <ActivityIndicator color={'#ffffff'} />
                 ) : (
                   <Text style={styles.generateButtonText}>Generate Cover Letter</Text>
                 )}
@@ -312,6 +320,21 @@ export default function CoverLetterGeneratorScreen() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <CoverLetterDetailModal
+        visible={modalVisible}
+        coverLetter={selectedCoverLetter}
+        onClose={() => {
+          setModalVisible(false);
+          setSelectedCoverLetter(null);
+        }}
+        onDelete={() => {
+          loadCoverLetters();
+        }}
+        onUpdate={() => {
+          loadCoverLetters();
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -319,10 +342,10 @@ export default function CoverLetterGeneratorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    padding: Spacing.md,
+    padding: SPACING.md,
   },
   formBlur: {
     borderRadius: GLASS.getCornerRadius('large'),
@@ -330,131 +353,131 @@ const styles = StyleSheet.create({
     ...GLASS.getShadow('medium'),
   },
   formContainer: {
-    padding: Spacing.lg,
+    padding: SPACING.lg,
   },
   sectionTitle: {
-    ...Typography.heading2,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.lg,
+    ...TYPOGRAPHY.heading2,
+    color: colors.text,
+    marginBottom: SPACING.lg,
   },
   toggleContainer: {
     flexDirection: 'row',
-    marginBottom: Spacing.lg,
-    backgroundColor: Colors.surface + '40',
+    marginBottom: SPACING.lg,
+    backgroundColor: colors.backgroundSecondary + '40',
     borderRadius: GLASS.getCornerRadius('medium'),
-    padding: Spacing.xs,
+    padding: SPACING.xs,
   },
   toggleButton: {
     flex: 1,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
     borderRadius: GLASS.getCornerRadius('small'),
     alignItems: 'center',
   },
   toggleButtonActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: COLORS.primary,
   },
   toggleButtonText: {
-    ...Typography.body,
-    color: Colors.textSecondary,
+    ...TYPOGRAPHY.body,
+    color: colors.textSecondary,
   },
   toggleButtonTextActive: {
-    color: Colors.white,
+    color: '#ffffff',
     fontWeight: '600',
   },
   inputGroup: {
-    marginBottom: Spacing.lg,
+    marginBottom: SPACING.lg,
   },
   inputLabel: {
-    ...Typography.bodyBold,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.sm,
+    ...TYPOGRAPHY.bodyBold,
+    color: colors.text,
+    marginBottom: SPACING.sm,
   },
   input: {
-    ...Typography.body,
-    color: Colors.textPrimary,
-    backgroundColor: Colors.white + '80',
+    ...TYPOGRAPHY.body,
+    color: colors.text,
+    backgroundColor: '#ffffff' + '80',
     borderRadius: GLASS.getCornerRadius('medium'),
     borderWidth: GLASS.getBorderWidth(),
     borderColor: GLASS.getBorderColor(),
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
   },
   textArea: {
     minHeight: 120,
-    paddingTop: Spacing.md,
+    paddingTop: SPACING.md,
   },
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.sm,
+    gap: SPACING.sm,
   },
   optionButton: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderRadius: GLASS.getCornerRadius('medium'),
-    backgroundColor: Colors.surface + '40',
+    backgroundColor: colors.backgroundSecondary + '40',
     borderWidth: GLASS.getBorderWidth(),
     borderColor: GLASS.getBorderColor(),
   },
   optionButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   optionButtonText: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
+    ...TYPOGRAPHY.caption,
+    color: colors.textSecondary,
   },
   optionButtonTextActive: {
-    color: Colors.white,
+    color: '#ffffff',
     fontWeight: '600',
   },
   generateButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: COLORS.primary,
     borderRadius: GLASS.getCornerRadius('medium'),
-    paddingVertical: Spacing.md,
+    paddingVertical: SPACING.md,
     alignItems: 'center',
     ...GLASS.getShadow('medium'),
-    marginTop: Spacing.md,
+    marginTop: SPACING.md,
   },
   generateButtonDisabled: {
     opacity: 0.6,
   },
   generateButtonText: {
-    ...Typography.heading3,
-    color: Colors.white,
+    ...TYPOGRAPHY.heading3,
+    color: '#ffffff',
   },
   historySection: {
-    marginTop: Spacing.xl,
+    marginTop: SPACING.xl,
   },
   historySectionTitle: {
-    ...Typography.heading2,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.md,
+    ...TYPOGRAPHY.heading2,
+    color: colors.text,
+    marginBottom: SPACING.md,
   },
   cardBlur: {
     borderRadius: GLASS.getCornerRadius('large'),
     overflow: 'hidden',
-    marginBottom: Spacing.md,
+    marginBottom: SPACING.md,
     ...GLASS.getShadow('medium'),
   },
   card: {
-    padding: Spacing.lg,
+    padding: SPACING.lg,
     borderWidth: GLASS.getBorderWidth(),
     borderColor: GLASS.getBorderColor(),
   },
   cardTitle: {
-    ...Typography.heading3,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
+    ...TYPOGRAPHY.heading3,
+    color: colors.text,
+    marginBottom: SPACING.xs,
   },
   cardSubtitle: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
+    ...TYPOGRAPHY.body,
+    color: colors.textSecondary,
+    marginBottom: SPACING.xs,
   },
   cardDate: {
-    ...Typography.caption,
-    color: Colors.textTertiary,
+    ...TYPOGRAPHY.caption,
+    color: colors.textTertiary,
   },
 });

@@ -38,6 +38,10 @@ import CareerPathDesignerScreen from '../screens/CareerPathDesignerScreen';
 import BatchTailorScreen from '../screens/BatchTailorScreen';
 import CertificationsScreen from '../screens/CertificationsScreen';
 import STARStoryBuilderScreen from '../screens/STARStoryBuilderScreen';
+import CoverLetterGeneratorScreen from '../screens/CoverLetterGeneratorScreen';
+import ApplicationTrackerScreen from '../screens/ApplicationTrackerScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import TermsOfServiceScreen from '../screens/TermsOfServiceScreen';
 
 // New Screens
 import JobSearchScreen from '../screens/JobSearchScreen';
@@ -84,15 +88,19 @@ export type StoriesStackParamList = {
 
 export type CareerStackParamList = {
   CareerMain: undefined;
+  CoverLetters: undefined;
 };
 
 export type SavedStackParamList = {
   SavedMain: undefined;
+  Applications: undefined;
 };
 
 export type SettingsStackParamList = {
   SettingsMain: undefined;
   Pricing: undefined;
+  Privacy: undefined;
+  Terms: undefined;
 };
 
 export type JobsStackParamList = {
@@ -234,6 +242,7 @@ function CareerStackNavigator() {
     <ErrorBoundary screenName="Career">
       <CareerStack.Navigator screenOptions={stackScreenOptions}>
         <CareerStack.Screen name="CareerMain" component={CareerPathDesignerScreen} />
+        <CareerStack.Screen name="CoverLetters" component={CoverLetterGeneratorScreen} />
       </CareerStack.Navigator>
     </ErrorBoundary>
   );
@@ -245,6 +254,7 @@ function SavedStackNavigator() {
     <ErrorBoundary screenName="Saved">
       <SavedStack.Navigator screenOptions={stackScreenOptions}>
         <SavedStack.Screen name="SavedMain" component={SavedComparisonsScreen} />
+        <SavedStack.Screen name="Applications" component={ApplicationTrackerScreen} />
       </SavedStack.Navigator>
     </ErrorBoundary>
   );
@@ -257,6 +267,8 @@ function SettingsStackNavigator() {
       <SettingsStack.Navigator screenOptions={stackScreenOptions}>
         <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
         <SettingsStack.Screen name="Pricing" component={PricingScreen} />
+        <SettingsStack.Screen name="Privacy" component={PrivacyPolicyScreen} />
+        <SettingsStack.Screen name="Terms" component={TermsOfServiceScreen} />
       </SettingsStack.Navigator>
     </ErrorBoundary>
   );

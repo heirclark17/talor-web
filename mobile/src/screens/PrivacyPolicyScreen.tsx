@@ -1,77 +1,80 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Colors, Typography, Spacing, GLASS } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { SPACING, TYPOGRAPHY, GLASS } from '../utils/constants';
 
 export default function PrivacyPolicyScreen() {
+  const { colors } = useTheme();
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <BlurView intensity={GLASS.getBlurIntensity('regular')} tint="light" style={styles.contentBlur}>
           <View style={styles.contentContainer}>
-            <Text style={styles.title}>Privacy Policy</Text>
-            <Text style={styles.lastUpdated}>Last Updated: January 2026</Text>
+            <Text style={[styles.title, { color: colors.text }]}>Privacy Policy</Text>
+            <Text style={[styles.lastUpdated, { color: colors.textTertiary }]}>Last Updated: January 2026</Text>
 
-            <Text style={styles.sectionTitle}>1. Information We Collect</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>1. Information We Collect</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               We collect information you provide directly to us, including:
             </Text>
-            <Text style={styles.bulletPoint}>• Account information (name, email address)</Text>
-            <Text style={styles.bulletPoint}>• Resume and career information</Text>
-            <Text style={styles.bulletPoint}>• Job application tracking data</Text>
-            <Text style={styles.bulletPoint}>• Cover letters and related documents</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Account information (name, email address)</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Resume and career information</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Job application tracking data</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Cover letters and related documents</Text>
 
-            <Text style={styles.sectionTitle}>2. How We Use Your Information</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>2. How We Use Your Information</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               We use the information we collect to:
             </Text>
-            <Text style={styles.bulletPoint}>• Provide, maintain, and improve our services</Text>
-            <Text style={styles.bulletPoint}>• Generate tailored resumes and cover letters</Text>
-            <Text style={styles.bulletPoint}>• Track your job applications</Text>
-            <Text style={styles.bulletPoint}>• Communicate with you about our services</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Provide, maintain, and improve our services</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Generate tailored resumes and cover letters</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Track your job applications</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Communicate with you about our services</Text>
 
-            <Text style={styles.sectionTitle}>3. Information Sharing</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>3. Information Sharing</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               We do not sell your personal information. We may share your information with:
             </Text>
-            <Text style={styles.bulletPoint}>• Service providers who assist in our operations</Text>
-            <Text style={styles.bulletPoint}>• Third-party AI services (OpenAI) for resume generation</Text>
-            <Text style={styles.bulletPoint}>• Law enforcement when required by law</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Service providers who assist in our operations</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Third-party AI services (OpenAI) for resume generation</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Law enforcement when required by law</Text>
 
-            <Text style={styles.sectionTitle}>4. Data Security</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>4. Data Security</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               We implement appropriate security measures to protect your personal information from unauthorized access, alteration, or destruction.
             </Text>
 
-            <Text style={styles.sectionTitle}>5. Your Rights</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>5. Your Rights</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               You have the right to:
             </Text>
-            <Text style={styles.bulletPoint}>• Access your personal information</Text>
-            <Text style={styles.bulletPoint}>• Request correction of your data</Text>
-            <Text style={styles.bulletPoint}>• Request deletion of your account</Text>
-            <Text style={styles.bulletPoint}>• Opt-out of marketing communications</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Access your personal information</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Request correction of your data</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Request deletion of your account</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Opt-out of marketing communications</Text>
 
-            <Text style={styles.sectionTitle}>6. Cookies and Tracking</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>6. Cookies and Tracking</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               We use cookies and similar technologies to enhance your experience and analyze usage patterns.
             </Text>
 
-            <Text style={styles.sectionTitle}>7. Children's Privacy</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>7. Children's Privacy</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               Our service is not intended for users under 18 years of age. We do not knowingly collect information from children.
             </Text>
 
-            <Text style={styles.sectionTitle}>8. Changes to This Policy</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>8. Changes to This Policy</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page.
             </Text>
 
-            <Text style={styles.sectionTitle}>9. Contact Us</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>9. Contact Us</Text>
+            <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               If you have questions about this Privacy Policy, please contact us at:
             </Text>
-            <Text style={styles.bulletPoint}>• Email: privacy@talor-ai.com</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Email: privacy@talor-ai.com</Text>
           </View>
         </BlurView>
       </ScrollView>
@@ -82,10 +85,9 @@ export default function PrivacyPolicyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: Spacing.md,
+    padding: SPACING.md,
   },
   contentBlur: {
     borderRadius: GLASS.getCornerRadius('large'),
@@ -93,35 +95,30 @@ const styles = StyleSheet.create({
     ...GLASS.getShadow('medium'),
   },
   contentContainer: {
-    padding: Spacing.lg,
+    padding: SPACING.lg,
   },
   title: {
-    ...Typography.heading1,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.sm,
+    ...TYPOGRAPHY.heading1,
+    marginBottom: SPACING.sm,
   },
   lastUpdated: {
-    ...Typography.caption,
-    color: Colors.textTertiary,
-    marginBottom: Spacing.xl,
+    ...TYPOGRAPHY.caption,
+    marginBottom: SPACING.xl,
   },
   sectionTitle: {
-    ...Typography.heading3,
-    color: Colors.textPrimary,
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.sm,
+    ...TYPOGRAPHY.heading3,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
   },
   paragraph: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.md,
+    ...TYPOGRAPHY.body,
+    marginBottom: SPACING.md,
     lineHeight: 24,
   },
   bulletPoint: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-    paddingLeft: Spacing.md,
+    ...TYPOGRAPHY.body,
+    marginBottom: SPACING.xs,
+    paddingLeft: SPACING.md,
     lineHeight: 24,
   },
 });

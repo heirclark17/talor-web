@@ -110,11 +110,11 @@ export default function SettingsScreen() {
   };
 
   const handlePrivacy = () => {
-    Linking.openURL('https://talor.app/privacy');
+    navigation.navigate('Privacy');
   };
 
   const handleTerms = () => {
-    Linking.openURL('https://talor.app/terms');
+    navigation.navigate('Terms');
   };
 
   // Get current background name

@@ -82,6 +82,20 @@ export const api = {
   getReadinessScore: interviewApi.getReadinessScore,
   getInterviewStrategy: interviewApi.getInterviewStrategy,
   getCompetitiveIntelligence: interviewApi.getCompetitiveIntelligence,
+
+  // Cover letter endpoints
+  listCoverLetters: coverLetterApi.list,
+  generateCoverLetter: coverLetterApi.generate,
+  downloadCoverLetter: coverLetterApi.export,
+  updateCoverLetter: coverLetterApi.update,
+  deleteCoverLetter: coverLetterApi.delete,
+
+  // Application tracker endpoints
+  listApplications: applicationApi.list,
+  createApplication: applicationApi.create,
+  updateApplication: applicationApi.update,
+  deleteApplication: applicationApi.delete,
+  getApplicationStats: applicationApi.getStats,
 };
 
 export default api;

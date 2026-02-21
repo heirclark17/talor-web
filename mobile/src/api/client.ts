@@ -2255,6 +2255,38 @@ export const api = {
   },
 
   /**
+   * Update a cover letter
+   */
+  async updateCoverLetter(
+    coverLetterId: number,
+    updates: {
+      content?: string;
+      jobTitle?: string;
+      companyName?: string;
+    }
+  ): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/cover-letters/${coverLetterId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error updating cover letter:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
    * Delete a cover letter
    */
   async deleteCoverLetter(coverLetterId: number): Promise<ApiResponse> {
