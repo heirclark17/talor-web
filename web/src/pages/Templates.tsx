@@ -216,14 +216,14 @@ export default function Templates() {
             onClick={() => setPreviewTemplate(null)}
             aria-hidden="true"
           />
-          <div className="relative w-full max-w-4xl rounded-2xl border border-theme-subtle bg-theme p-6">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-theme-subtle bg-theme p-6">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-theme mb-2">{previewTemplate.name}</h2>
               <p className="text-theme-secondary">{previewTemplate.description}</p>
             </div>
 
             {/* Live Resume Preview */}
-            <div className="aspect-[8.5/11] bg-theme-glass-5 rounded-lg mb-6 flex items-center justify-center overflow-auto">
+            <div className="h-[500px] bg-theme-glass-5 rounded-lg mb-6 flex items-center justify-center overflow-auto">
               <div id="resume-preview-export" className="w-full h-full flex items-center justify-center p-4">
                 <ResumePreview template={previewTemplate} resumeData={resumeData} scale={0.65} />
               </div>

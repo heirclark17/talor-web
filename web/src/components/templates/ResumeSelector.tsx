@@ -241,10 +241,11 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 16px;
           padding: 0.5rem;
-          z-index: 50;
+          z-index: 100;
           max-height: 320px;
           overflow-y: auto;
           animation: dropdownSlide 0.3s ease-out;
+          pointer-events: auto;
         }
 
         @keyframes dropdownSlide {
