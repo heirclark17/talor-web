@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-export type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark' | 'sand-tan'
 
 interface ThemeState {
   theme: Theme
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
+  cycleTheme: () => void
 }
 
 /**
@@ -44,6 +45,17 @@ export const useThemeStore = create<ThemeState>()(
           return { theme: newTheme }
         })
       },
+
+      cycleTheme: () => {
+        set((state) => {
+          const themes: Theme[] = ['dark', 'light', 'sand-tan']
+          const currentIndex = themes.indexOf(state.theme)
+          const nextIndex = (currentIndex + 1) % themes.length
+          const newTheme = themes[nextIndex]
+          applyThemeToDocument(newTheme)
+          return { theme: newTheme }
+        })
+      },
     }),
     {
       name: 'theme-storage',
@@ -66,6 +78,8 @@ function applyThemeToDocument(theme: Theme) {
   if (typeof document !== 'undefined') {
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light')
+    } else if (theme === 'sand-tan') {
+      document.documentElement.setAttribute('data-theme', 'sand-tan')
     } else {
       document.documentElement.removeAttribute('data-theme')
     }
@@ -104,3 +118,4 @@ export function initializeTheme() {
 // Export selector for common use cases
 export const selectIsDarkMode = (state: ThemeState) => state.theme === 'dark'
 export const selectIsLightMode = (state: ThemeState) => state.theme === 'light'
+export const selectIsSandTanMode = (state: ThemeState) => state.theme === 'sand-tan'

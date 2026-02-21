@@ -40,6 +40,22 @@
   --shadow-color: rgba(0, 0, 0, 0.08);
 }
 
+/* Theme Variables - Sand Tan Mode (Warm Earthy Tones) */
+[data-theme="sand-tan"] {
+  --bg-primary: #F5E6D3;
+  --bg-secondary: #E8D5BC;
+  --bg-tertiary: #DCC4A5;
+  --text-primary: #2C1810;
+  --text-secondary: #5C4033;
+  --text-tertiary: #8B6F47;
+  --border-color: #C4A882;
+  --accent-color: #B8860B;
+  /* Sand tan glass effect - subtle warm overlay */
+  --glass-bg: rgba(139, 111, 71, 0.08);
+  --glass-border: rgba(139, 111, 71, 0.12);
+  --shadow-color: rgba(44, 24, 16, 0.1);
+}
+
 /* Smooth theme transitions */
 :root,
 [data-theme="light"] {
