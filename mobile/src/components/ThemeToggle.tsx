@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
-import { Sun, Moon } from 'lucide-react-native';
+import { Sun, Moon, Palette } from 'lucide-react-native';
 import { useTheme } from '../hooks/useTheme';
 import { COLORS, SPACING, RADIUS, ALPHA_COLORS } from '../utils/constants';
 
@@ -8,14 +8,28 @@ export default function ThemeToggle() {
   const { isDark, themeMode, setThemeMode } = useTheme();
 
   const handleToggle = () => {
-    // Cycle through: light -> dark -> system
+    // Cycle through: light -> dark -> sand-tan -> system
     if (themeMode === 'light') {
       setThemeMode('dark');
     } else if (themeMode === 'dark') {
+      setThemeMode('sand-tan');
+    } else if (themeMode === 'sand-tan') {
       setThemeMode('system');
     } else {
       setThemeMode('light');
     }
+  };
+
+  // Determine icon based on theme mode
+  const getIcon = () => {
+    if (themeMode === 'sand-tan') {
+      return <Palette color="#B8860B" size={20} />;
+    }
+    return isDark ? (
+      <Sun color={COLORS.warning} size={20} />
+    ) : (
+      <Moon color={COLORS.info} size={20} />
+    );
   };
 
   return (
@@ -27,13 +41,9 @@ export default function ThemeToggle() {
       ]}
       accessibilityRole="button"
       accessibilityLabel={`Switch theme. Current: ${themeMode}`}
-      accessibilityHint="Cycles between light, dark, and system theme"
+      accessibilityHint="Cycles between light, dark, sand-tan, and system theme"
     >
-      {isDark ? (
-        <Sun color={COLORS.warning} size={20} />
-      ) : (
-        <Moon color={COLORS.info} size={20} />
-      )}
+      {getIcon()}
     </TouchableOpacity>
   );
 }

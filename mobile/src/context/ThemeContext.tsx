@@ -17,7 +17,7 @@ const BACKGROUND_STORAGE_KEY = 'talor_background';
 const CUSTOM_BG_STORAGE_KEY = 'talor_custom_bg';
 
 // Theme mode options
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = 'light' | 'dark' | 'sand-tan' | 'system';
 
 // Theme context type
 interface ThemeContextType {
@@ -81,13 +81,17 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     if (themeMode === 'system') {
       return systemColorScheme === 'dark';
     }
-    return themeMode === 'dark';
+    // Treat sand-tan as dark mode for glass effects
+    return themeMode === 'dark' || themeMode === 'sand-tan';
   }, [themeMode, systemColorScheme]);
 
   // Get colors based on theme
   const colors = useMemo(() => {
+    if (themeMode === 'sand-tan') {
+      return COLORS.sandDark;
+    }
     return isDark ? COLORS.dark : COLORS.light;
-  }, [isDark]);
+  }, [isDark, themeMode]);
 
   // Load saved preferences
   useEffect(() => {
@@ -99,7 +103,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
           AsyncStorage.getItem(CUSTOM_BG_STORAGE_KEY),
         ]);
 
-        if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
+        if (savedTheme && ['light', 'dark', 'sand-tan', 'system'].includes(savedTheme)) {
           setThemeModeState(savedTheme as ThemeMode);
         }
 
