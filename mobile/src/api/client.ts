@@ -604,7 +604,40 @@ export const api = {
   async listInterviewPreps(): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/interview-prep/list');
+
+      // Check content type before parsing
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('[API] Non-JSON response from interview-prep/list:', {
+          status: response.status,
+          contentType,
+          preview: text.substring(0, 200),
+        });
+
+        // Extract error message from HTML/text if possible
+        const errorMatch = text.match(/<title>(.*?)<\/title>/i) ||
+                          text.match(/error[:\s]+([^<\n]+)/i) ||
+                          text.match(/Internal Server Error/i);
+        const errorMessage = errorMatch ? errorMatch[1] || errorMatch[0] : 'Server returned non-JSON response';
+
+        return {
+          success: false,
+          data: [],
+          error: `Backend error (${response.status}): ${errorMessage}. The interview prep endpoint may not be available.`
+        };
+      }
+
       const json = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          data: [],
+          error: json.error || json.detail || `Server error: ${response.status}`,
+        };
+      }
+
       // Backend returns { success, count, interview_preps: [...] }
       const preps = json.interview_preps || [];
       return { success: true, data: preps };
