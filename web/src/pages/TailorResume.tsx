@@ -144,8 +144,6 @@ export default function TailorResume() {
   const [showSaveWarning, setShowSaveWarning] = useState(false)
   const [savingFromWarning, setSavingFromWarning] = useState(false)
   const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
-  const [selectedResumeIds, setSelectedResumeIds] = useState<Set<number>>(new Set())
-  const [deletingBulk, setDeletingBulk] = useState(false)
 
   // Enhancement states
   const [showChanges, setShowChanges] = useState(true)
@@ -992,70 +990,6 @@ export default function TailorResume() {
       issuer: '',
       date: '',
     }))
-  }
-
-  const toggleResumeSelection = (resumeId: number) => {
-    setSelectedResumeIds(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(resumeId)) {
-        newSet.delete(resumeId)
-      } else {
-        newSet.add(resumeId)
-      }
-      return newSet
-    })
-  }
-
-  const toggleSelectAll = () => {
-    if (selectedResumeIds.size === resumes.length) {
-      setSelectedResumeIds(new Set())
-    } else {
-      setSelectedResumeIds(new Set(resumes.map(r => r.id)))
-    }
-  }
-
-  const handleDeleteSelected = async () => {
-    if (selectedResumeIds.size === 0) {
-      setError('Please select at least one resume to delete')
-      return
-    }
-
-    const count = selectedResumeIds.size
-    if (!confirm(`Are you sure you want to delete ${count} resume(s)? This action cannot be undone.`)) {
-      return
-    }
-
-    try {
-      setDeletingBulk(true)
-      setError(null)
-
-      // Delete all selected resumes
-      const deletePromises = Array.from(selectedResumeIds).map(id => api.deleteResume(id))
-      const results = await Promise.all(deletePromises)
-
-      // Check for failures
-      const failures = results.filter(r => !r.success)
-      if (failures.length > 0) {
-        throw new Error(`Failed to delete ${failures.length} resume(s)`)
-      }
-
-      // Remove from local state
-      setResumes(prevResumes => prevResumes.filter(r => !selectedResumeIds.has(r.id)))
-
-      // Clear selections
-      setSelectedResumeIds(new Set())
-
-      // If currently selected resume was deleted, clear it
-      if (selectedResumeId && selectedResumeIds.has(selectedResumeId)) {
-        setSelectedResumeId(null)
-        setSelectedResume(null)
-      }
-
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setDeletingBulk(false)
-    }
   }
 
   const handleDeleteResume = async (resumeId: number, e: React.MouseEvent) => {
@@ -2833,143 +2767,50 @@ export default function TailorResume() {
             <h2 className="text-xl sm:text-2xl text-theme">Select Base Resume</h2>
           </div>
 
-          {/* Bulk Actions */}
           <div className="max-w-3xl mx-auto">
-          {resumes.length > 0 && (
-            <div className="flex items-center justify-between mb-6 pb-4">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={toggleSelectAll}
-                  className="flex items-center gap-2 text-theme hover:text-theme-secondary transition-colors"
-                >
-                  {selectedResumeIds.size === resumes.length ? (
-                    <CheckSquare className="w-5 h-5" />
-                  ) : (
-                    <Square className="w-5 h-5" />
-                  )}
-                  <span className="text-sm font-medium">
-                    {selectedResumeIds.size === resumes.length ? 'Deselect All' : 'Select All'}
-                  </span>
-                </button>
-                {selectedResumeIds.size > 0 && (
-                  <span className="text-sm text-theme-secondary">
-                    {selectedResumeIds.size} selected
-                  </span>
-                )}
+            {loadingResumes ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-theme" />
+                <span className="ml-3 text-theme-secondary text-lg">Loading resumes...</span>
               </div>
-              {selectedResumeIds.size > 0 && (
-                <button
-                  onClick={handleDeleteSelected}
-                  disabled={deletingBulk}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors disabled:opacity-50"
+            ) : resumes.length === 0 ? (
+              <div className="text-center py-12 bg-theme-glass-5 rounded-xl">
+                <FileText className="w-16 h-16 text-theme-tertiary mx-auto mb-4" />
+                <p className="text-theme-secondary mb-6 text-lg">No resumes uploaded yet</p>
+                <a href="/upload" className="inline-flex items-center gap-2 px-6 py-3 bg-theme-glass-10 hover:bg-theme-glass-20 border border-theme-muted hover:border-theme-muted rounded-xl text-theme font-semibold text-lg transition-all">
+                  Upload a resume to get started →
+                </a>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm sm:text-base font-bold text-theme mb-3 sm:mb-4">
+                  Choose Resume <span className="text-red-400">*</span>
+                </label>
+                <select
+                  value={selectedResumeId || ''}
+                  onChange={(e) => setSelectedResumeId(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-theme-glass-5 border-2 border-theme-muted rounded-xl focus:ring-4 focus:ring-theme-glass-20 focus:border-theme-muted transition-all text-[16px] sm:text-lg text-theme min-h-[48px] appearance-none cursor-pointer"
                 >
-                  {deletingBulk ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm font-medium">Deleting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="w-4 h-4" />
-                      <span className="text-sm font-medium">Delete Selected ({selectedResumeIds.size})</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          )}
-
-          {loadingResumes ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-theme" />
-              <span className="ml-3 text-theme-secondary text-lg">Loading resumes...</span>
-            </div>
-          ) : resumes.length === 0 ? (
-            <div className="text-center py-12 bg-theme-glass-5 rounded-xl">
-              <FileText className="w-16 h-16 text-theme-tertiary mx-auto mb-4" />
-              <p className="text-theme-secondary mb-6 text-lg">No resumes uploaded yet</p>
-              <a href="/upload" className="inline-flex items-center gap-2 px-6 py-3 bg-theme-glass-10 hover:bg-theme-glass-20 border border-theme-muted hover:border-theme-muted rounded-xl text-theme font-semibold text-lg transition-all">
-                Upload a resume to get started →
-              </a>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {resumes.map((resume) => (
-                <div
-                  key={resume.id}
-                  className={`block p-6 border-2 rounded-xl transition-all duration-300 ${
-                    selectedResumeId === resume.id
-                      ? 'border-emerald-500/60 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.12)] animate-[resumeSelected_0.5s_ease-out]'
-                      : 'border-theme-muted hover:border-theme-muted hover:bg-theme-glass-5'
-                  }`}
-                >
-                  <div className="flex items-start gap-4">
-                    {/* Checkbox for selection */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setSelectedResumeId(resume.id)
-                        toggleResumeSelection(resume.id)
-                      }}
-                      className="mt-0.5 flex-shrink-0 p-1.5 rounded-lg transition-all duration-200 hover:bg-theme-glass-10"
-                    >
-                      {selectedResumeId === resume.id ? (
-                        <CheckSquare className="w-8 h-8 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]" />
-                      ) : (
-                        <Square className="w-8 h-8 text-theme-tertiary hover:text-theme-secondary transition-colors" />
-                      )}
-                    </button>
-
-                    {/* Resume content - clickable to select */}
-                    <label className="flex-1 min-w-0 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="resume"
+                  <option value="" className="bg-gray-800">Select a resume...</option>
+                  {resumes.map((resume) => {
+                    const uploadDate = new Date(resume.uploaded_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })
+                    return (
+                      <option
+                        key={resume.id}
                         value={resume.id}
-                        checked={selectedResumeId === resume.id}
-                        onChange={() => setSelectedResumeId(resume.id)}
-                        className="sr-only"
-                      />
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-theme text-lg mb-2 break-words">{resume.filename}</p>
-                          {resume.summary && (
-                            <p className="text-theme-secondary line-clamp-2 mb-3">
-                              {resume.summary}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-4 text-sm text-theme-tertiary">
-                            <span className="flex items-center gap-1">
-                              <Sparkles className="w-4 h-4" />
-                              {resume.skills_count} skills
-                            </span>
-                            <span>•</span>
-                            <span>Uploaded {new Date(resume.uploaded_at).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </label>
-
-                    {/* Action buttons */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <button
-                        onClick={(e) => handleDeleteResume(resume.id, e)}
-                        disabled={deletingResumeId === resume.id}
-                        className="p-2 hover:bg-red-500/20 rounded-full transition-colors disabled:opacity-50"
-                        title="Delete resume"
+                        className="bg-gray-800"
                       >
-                        {deletingResumeId === resume.id ? (
-                          <Loader2 className="w-5 h-5 text-red-400 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-5 h-5 text-red-400 hover:text-red-300" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                        {resume.filename} • {uploadDate} • File #{resume.id}
+                      </option>
+                    )
+                  })}
+                </select>
+              </div>
+            )}
           </div>
         </div>
 
