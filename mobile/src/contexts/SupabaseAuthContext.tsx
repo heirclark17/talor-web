@@ -82,21 +82,36 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         password,
         options: {
           emailRedirectTo: 'talor://auth/callback',
+          // Fallback to web URL if deep link fails
+          data: {
+            email_confirm_redirect: 'https://talorme.com/auth/confirm',
+          }
         },
       });
 
       if (error) {
         console.error('[SupabaseAuth] Sign up error:', error.message);
+        console.error('[SupabaseAuth] Error details:', JSON.stringify(error, null, 2));
         return { error };
       }
 
       console.log('[SupabaseAuth] Sign up successful!');
       console.log('[SupabaseAuth] User created:', data.user?.email);
+      console.log('[SupabaseAuth] User ID:', data.user?.id);
+      console.log('[SupabaseAuth] Email confirmed:', data.user?.email_confirmed_at || 'NOT CONFIRMED');
       console.log('[SupabaseAuth] Confirmation required:', !data.user?.email_confirmed_at);
+
+      // Check if user was auto-confirmed (means email confirmations are disabled)
+      if (data.user?.email_confirmed_at) {
+        console.warn('[SupabaseAuth] ⚠️ User auto-confirmed - email verification is DISABLED in Supabase dashboard');
+      } else {
+        console.log('[SupabaseAuth] ✉️ Verification email should be sent to:', email);
+      }
 
       return { error: null, data };
     } catch (error: any) {
       console.error('[SupabaseAuth] Sign up exception:', error);
+      console.error('[SupabaseAuth] Exception details:', error?.message || error);
       return { error };
     }
   };

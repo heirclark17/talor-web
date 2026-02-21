@@ -38,6 +38,14 @@ import BatchTailorScreen from '../screens/BatchTailorScreen';
 import CertificationsScreen from '../screens/CertificationsScreen';
 import STARStoryBuilderScreen from '../screens/STARStoryBuilderScreen';
 
+// New Screens
+import JobSearchScreen from '../screens/JobSearchScreen';
+import MockInterviewScreen from '../screens/MockInterviewScreen';
+import ResumeBuilderScreen from '../screens/ResumeBuilderScreen';
+import TemplatesScreen from '../screens/TemplatesScreen';
+import PricingScreen from '../screens/PricingScreen';
+import NotFoundScreen from '../screens/NotFoundScreen';
+
 // Auth Stack param list
 export type AuthStackParamList = {
   SignIn: undefined;
@@ -48,6 +56,8 @@ export type AuthStackParamList = {
 export type HomeStackParamList = {
   HomeMain: undefined;
   UploadResume: undefined;
+  ResumeBuilder: { templateId?: string };
+  Templates: undefined;
 };
 
 export type TailorStackParamList = {
@@ -64,6 +74,7 @@ export type InterviewStackParamList = {
   BehavioralTechnicalQuestions: { interviewPrepId: number };
   Certifications: { interviewPrepId: number };
   STARStoryBuilder: { interviewPrepId: number; tailoredResumeId: number };
+  MockInterview: undefined;
 };
 
 export type StoriesStackParamList = {
@@ -80,6 +91,11 @@ export type SavedStackParamList = {
 
 export type SettingsStackParamList = {
   SettingsMain: undefined;
+  Pricing: undefined;
+};
+
+export type JobsStackParamList = {
+  JobSearch: undefined;
 };
 
 // Combined navigation types for useNavigation
@@ -90,10 +106,13 @@ export type RootStackParamList =
   & StoriesStackParamList
   & CareerStackParamList
   & SavedStackParamList
-  & SettingsStackParamList;
+  & SettingsStackParamList
+  & JobsStackParamList
+  & { NotFound: undefined };
 
 export type MainTabParamList = {
   Home: undefined;
+  Jobs: undefined;
   Tailor: undefined;
   InterviewPreps: undefined;
   Stories: undefined;
@@ -105,6 +124,7 @@ export type MainTabParamList = {
 // Create stack navigators
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
+const JobsStack = createNativeStackNavigator<JobsStackParamList>();
 const TailorStack = createNativeStackNavigator<TailorStackParamList>();
 const InterviewStack = createNativeStackNavigator<InterviewStackParamList>();
 const StoriesStack = createNativeStackNavigator<StoriesStackParamList>();
