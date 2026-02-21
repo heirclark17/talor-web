@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Briefcase, Plus, Search, Filter, ChevronDown, Calendar, MapPin, DollarSign, ExternalLink, MoreHorizontal, X, Bookmark, Check, Layers } from 'lucide-react'
 import { api } from '../api/client'
+import SalaryInsights from '../components/SalaryInsights'
 
 interface SavedJob {
   id: number
@@ -32,6 +33,13 @@ interface Application {
   nextFollowUp: string | null
   createdAt: string
   updatedAt: string
+  salaryInsights?: {
+    salary_range: string
+    median_salary: string
+    market_insights: string
+    sources: string[]
+    last_updated: string | null
+  }
 }
 
 const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string; bg: string }> = {
@@ -338,7 +346,16 @@ export default function ApplicationTracker() {
                 </div>
               </div>
               {app.notes && (
-                <p className="text-theme-tertiary text-sm mt-3 pt-3">{app.notes}</p>
+                <p className="text-theme-tertiary text-sm mt-3 pt-3 border-t border-theme-subtle">{app.notes}</p>
+              )}
+              {app.salaryInsights && app.salaryInsights.salary_range && (
+                <div className="mt-4 pt-4 border-t border-theme-subtle">
+                  <SalaryInsights
+                    jobTitle={app.jobTitle}
+                    location={app.location || app.companyName}
+                    salaryData={app.salaryInsights}
+                  />
+                </div>
               )}
             </div>
           ))}
