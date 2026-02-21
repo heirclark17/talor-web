@@ -99,7 +99,39 @@ export interface PracticeResponse {
 export async function getInterviewPreps(): Promise<ApiResponse<InterviewPrep[]>> {
   try {
     const response = await fetchWithAuth('/api/interview-prep/list');
+
+    // Check content type before parsing
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('[InterviewAPI] Non-JSON response:', {
+        status: response.status,
+        contentType,
+        url: '/api/interview-prep/list',
+        preview: text.substring(0, 300),
+      });
+
+      // Extract meaningful error from HTML if possible
+      const errorMatch = text.match(/<title>(.*?)<\/title>/i) || text.match(/error[:\s]+([^<\n]+)/i);
+      const errorMessage = errorMatch ? errorMatch[1] : 'Server error';
+
+      return {
+        success: false,
+        data: [],
+        error: `Backend error (${response.status}): ${errorMessage}. The interview prep endpoint may not be available.`,
+      };
+    }
+
     const json = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        data: [],
+        error: json.error || json.detail || `Server error: ${response.status}`,
+      };
+    }
+
     const data = json.interview_preps || json || [];
     return { success: true, data: snakeToCamel<InterviewPrep[]>(data) };
   } catch (error) {
