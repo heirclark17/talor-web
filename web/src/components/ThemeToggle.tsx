@@ -1,5 +1,5 @@
 import React from 'react'
-import { Sun, Moon } from 'lucide-react'
+import { Sun, Moon, Palette } from 'lucide-react'
 import { useThemeStore } from '../stores/themeStore'
 
 interface ThemeToggleProps {
@@ -11,7 +11,7 @@ interface ThemeToggleProps {
 /**
  * Theme Toggle Component
  *
- * Allows users to switch between light and dark mode.
+ * Allows users to cycle between dark, light, and sand-tan themes.
  * Supports two variants:
  * - 'button': Icon button with hover effects (default)
  * - 'switch': iOS-style toggle switch
@@ -33,36 +33,43 @@ export default function ThemeToggle({
   className = '',
   showLabel = false,
 }: ThemeToggleProps) {
-  const { theme, toggleTheme } = useThemeStore()
+  const { theme, cycleTheme } = useThemeStore()
   const isDark = theme === 'dark'
+  const isLight = theme === 'light'
+  const isSandTan = theme === 'sand-tan'
 
   if (variant === 'switch') {
+    const themeLabel = isDark ? 'Dark' : isLight ? 'Light' : 'Sand Tan'
+    const themeColor = isDark ? '#3b82f6' : isLight ? '#d1d5db' : '#B8860B'
+
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         {showLabel && (
           <span className="text-sm font-medium text-theme-secondary">
-            {isDark ? 'Dark Mode' : 'Light Mode'}
+            {themeLabel} Mode
           </span>
         )}
         <button
-          onClick={toggleTheme}
-          className="relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-theme"
+          onClick={cycleTheme}
+          className="relative inline-flex h-8 w-20 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-theme"
           style={{
-            backgroundColor: isDark ? '#3b82f6' : '#d1d5db',
+            backgroundColor: themeColor,
           }}
-          aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+          aria-label={`Cycle theme (currently ${themeLabel})`}
           role="switch"
           aria-checked={isDark}
         >
           <span
             className={`inline-flex h-6 w-6 transform items-center justify-center rounded-full bg-white shadow-lg transition-transform ${
-              isDark ? 'translate-x-7' : 'translate-x-1'
+              isDark ? 'translate-x-1' : isLight ? 'translate-x-7' : 'translate-x-[3.25rem]'
             }`}
           >
             {isDark ? (
               <Moon className="h-4 w-4 text-blue-600" />
-            ) : (
+            ) : isLight ? (
               <Sun className="h-4 w-4 text-amber-500" />
+            ) : (
+              <Palette className="h-4 w-4 text-amber-700" />
             )}
           </span>
         </button>
@@ -71,32 +78,43 @@ export default function ThemeToggle({
   }
 
   // Button variant (default)
+  const themeLabel = isDark ? 'Dark' : isLight ? 'Light' : 'Sand Tan'
+  const nextTheme = isDark ? 'Light' : isLight ? 'Sand Tan' : 'Dark'
+
   return (
     <button
-      onClick={toggleTheme}
+      onClick={cycleTheme}
       className={`group relative inline-flex items-center justify-center rounded-lg p-2.5 transition-all duration-200 hover:bg-theme-glass-10 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-theme ${className}`}
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-      title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      aria-label={`Switch to ${nextTheme} mode`}
+      title={`Switch to ${nextTheme} mode (currently ${themeLabel})`}
     >
-      {/* Sun icon for dark mode (clicking switches to light) */}
-      <Sun
+      {/* Moon icon - shown in dark mode */}
+      <Moon
         className={`h-5 w-5 transition-all duration-300 ${
           isDark
             ? 'rotate-0 scale-100 text-theme-secondary group-hover:text-theme'
             : 'rotate-90 scale-0 absolute'
         }`}
       />
-      {/* Moon icon for light mode (clicking switches to dark) */}
-      <Moon
+      {/* Sun icon - shown in light mode */}
+      <Sun
         className={`h-5 w-5 transition-all duration-300 ${
-          !isDark
+          isLight
             ? 'rotate-0 scale-100 text-theme-secondary group-hover:text-theme'
             : '-rotate-90 scale-0 absolute'
         }`}
       />
+      {/* Palette icon - shown in sand-tan mode */}
+      <Palette
+        className={`h-5 w-5 transition-all duration-300 ${
+          isSandTan
+            ? 'rotate-0 scale-100 text-theme-secondary group-hover:text-theme'
+            : 'rotate-180 scale-0 absolute'
+        }`}
+      />
       {showLabel && (
         <span className="ml-2 text-sm font-medium text-theme-secondary group-hover:text-theme">
-          {isDark ? 'Light' : 'Dark'}
+          {themeLabel}
         </span>
       )}
     </button>
