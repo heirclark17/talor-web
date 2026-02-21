@@ -10,6 +10,7 @@ import {
   Compass,
   Settings,
   BookmarkCheck,
+  Search,
 } from 'lucide-react-native';
 import { COLORS, FONTS } from '../utils/constants';
 import { useTheme } from '../context/ThemeContext';
@@ -122,6 +123,7 @@ export type MainTabParamList = {
 };
 
 // Create stack navigators
+const RootStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const JobsStack = createNativeStackNavigator<JobsStackParamList>();
@@ -166,7 +168,20 @@ function HomeStackNavigator() {
             animation: 'slide_from_bottom',
           }}
         />
+        <HomeStack.Screen name="Templates" component={TemplatesScreen} />
+        <HomeStack.Screen name="ResumeBuilder" component={ResumeBuilderScreen} />
       </HomeStack.Navigator>
+    </ErrorBoundary>
+  );
+}
+
+// Jobs Stack
+function JobsStackNavigator() {
+  return (
+    <ErrorBoundary screenName="Jobs">
+      <JobsStack.Navigator screenOptions={stackScreenOptions}>
+        <JobsStack.Screen name="JobSearch" component={JobSearchScreen} />
+      </JobsStack.Navigator>
     </ErrorBoundary>
   );
 }
@@ -196,6 +211,7 @@ function InterviewStackNavigator() {
         <InterviewStack.Screen name="BehavioralTechnicalQuestions" component={BehavioralTechnicalQuestionsScreen} />
         <InterviewStack.Screen name="Certifications" component={CertificationsScreen} />
         <InterviewStack.Screen name="STARStoryBuilder" component={STARStoryBuilderScreen} />
+        <InterviewStack.Screen name="MockInterview" component={MockInterviewScreen} />
       </InterviewStack.Navigator>
     </ErrorBoundary>
   );
@@ -240,6 +256,7 @@ function SettingsStackNavigator() {
     <ErrorBoundary screenName="Settings">
       <SettingsStack.Navigator screenOptions={stackScreenOptions}>
         <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
+        <SettingsStack.Screen name="Pricing" component={PricingScreen} />
       </SettingsStack.Navigator>
     </ErrorBoundary>
   );
@@ -262,6 +279,14 @@ function MainTabNavigator() {
         options={{
           tabBarIcon: ({ color, size }) => <FileText color={color} size={size} />,
           tabBarLabel: 'Resumes',
+        }}
+      />
+      <Tab.Screen
+        name="Jobs"
+        component={JobsStackNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
+          tabBarLabel: 'Jobs',
         }}
       />
       <Tab.Screen
@@ -354,7 +379,19 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer theme={navigationTheme}>
-      {isSignedIn ? <MainTabNavigator /> : <AuthStackNavigator />}
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+        <RootStack.Screen name="Main">
+          {() => (isSignedIn ? <MainTabNavigator /> : <AuthStackNavigator />)}
+        </RootStack.Screen>
+        <RootStack.Screen
+          name="NotFound"
+          component={NotFoundScreen}
+          options={{
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
+          }}
+        />
+      </RootStack.Navigator>
     </NavigationContainer>
   );
 }
