@@ -2816,34 +2816,35 @@ export default function TailorResume() {
                   if (!selectedResume) return null
 
                   return (
-                    <div className="mt-6 p-4 sm:p-6 bg-theme-glass-5 border border-theme-muted rounded-xl overflow-hidden">
+                    <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-theme-glass-5 border border-theme-muted rounded-xl overflow-hidden">
                       <div className="flex items-start justify-between gap-3 sm:gap-4">
                         <div className="flex-1 min-w-0 overflow-hidden">
                           <div className="flex items-center gap-2 mb-2 overflow-hidden">
-                            <FileText className="w-5 h-5 text-theme flex-shrink-0" />
-                            <p className="font-bold text-theme text-base sm:text-lg truncate flex-1 min-w-0">
+                            <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-theme flex-shrink-0" />
+                            <p className="font-bold text-theme text-sm sm:text-base lg:text-lg truncate flex-1 min-w-0">
                               {selectedResume.filename}
                             </p>
                           </div>
                           {selectedResume.summary && (
-                            <p className="text-theme-secondary text-sm mb-3 line-clamp-2 break-words">
+                            <p className="text-theme-secondary text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2 break-words">
                               {selectedResume.summary}
                             </p>
                           )}
                           <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-theme-tertiary">
                             <span className="flex items-center gap-1 flex-shrink-0">
-                              <Sparkles className="w-4 h-4 flex-shrink-0" />
+                              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                               <span className="whitespace-nowrap">{selectedResume.skills_count} skills</span>
                             </span>
                             <span className="hidden sm:inline">•</span>
-                            <span className="truncate">Uploaded {new Date(selectedResume.uploaded_at).toLocaleDateString()}</span>
+                            <span className="truncate block sm:inline">Uploaded {new Date(selectedResume.uploaded_at).toLocaleDateString()}</span>
                           </div>
                         </div>
                         <button
                           onClick={(e) => handleDeleteResume(selectedResume.id, e)}
                           disabled={deletingResumeId === selectedResume.id}
-                          className="flex-shrink-0 p-2 hover:bg-red-500/20 rounded-lg transition-colors disabled:opacity-50 group"
+                          className="flex-shrink-0 flex items-center justify-center p-2 sm:p-2.5 hover:bg-red-500/20 rounded-lg transition-colors disabled:opacity-50 group min-w-[44px] min-h-[44px]"
                           title="Delete this resume"
+                          aria-label="Delete resume"
                         >
                           {deletingResumeId === selectedResume.id ? (
                             <Loader2 className="w-5 h-5 text-red-400 animate-spin" />

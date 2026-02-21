@@ -190,21 +190,21 @@ export default function Home() {
   // Error state
   if (error && resumes.length === 0) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-semibold text-theme">My Resumes</h1>
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-theme">My Resumes</h1>
           </div>
-          <div className="glass rounded-2xl p-8 text-center">
-            <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-theme mb-2">Failed to Load Resumes</h2>
-            <p className="text-theme-secondary mb-6">{error}</p>
+          <div className="glass rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center">
+            <AlertTriangle className="w-12 h-12 sm:w-16 sm:h-16 text-red-400 mx-auto mb-3 sm:mb-4" />
+            <h2 className="text-lg sm:text-xl font-semibold text-theme mb-2">Failed to Load Resumes</h2>
+            <p className="text-theme-secondary text-sm sm:text-base mb-4 sm:mb-6 px-4">{error}</p>
             <button
               onClick={fetchResumes}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-colors min-h-[44px] w-full sm:w-auto"
             >
-              <RefreshCw className="w-5 h-5" />
-              Try Again
+              <RefreshCw className="w-5 h-5 flex-shrink-0" />
+              <span>Try Again</span>
             </button>
           </div>
         </div>
@@ -215,25 +215,25 @@ export default function Home() {
   // Empty state
   if (resumes.length === 0) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-semibold text-theme">My Resumes</h1>
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-theme">My Resumes</h1>
           </div>
-          <div className="glass rounded-2xl p-12 text-center">
-            <div className="w-20 h-20 bg-theme-glass-5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <FileText className="w-10 h-10 text-theme-secondary" />
+          <div className="glass rounded-xl sm:rounded-2xl p-8 sm:p-12 text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-theme-glass-5 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-theme-secondary" />
             </div>
-            <h2 className="text-2xl font-semibold text-theme mb-3">No Resumes Yet</h2>
-            <p className="text-theme-secondary mb-8 max-w-md mx-auto">
+            <h2 className="text-xl sm:text-2xl font-semibold text-theme mb-2 sm:mb-3">No Resumes Yet</h2>
+            <p className="text-theme-secondary text-sm sm:text-base mb-6 sm:mb-8 max-w-md mx-auto px-4">
               Upload your first resume to get started with tailoring for specific jobs.
             </p>
             <button
               onClick={() => navigate('/upload')}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors min-h-[48px] w-full sm:w-auto"
             >
-              <Upload className="w-5 h-5" />
-              Upload Resume
+              <Upload className="w-5 h-5 flex-shrink-0" />
+              <span>Upload Resume</span>
             </button>
           </div>
         </div>
@@ -242,17 +242,17 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8">
+    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <h1 className="text-3xl font-semibold text-theme">My Resumes</h1>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-theme">My Resumes</h1>
           <button
             onClick={() => navigate('/upload')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-theme-glass-10 hover:bg-theme-glass-20 text-theme font-medium rounded-xl transition-colors min-h-[44px]"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-theme-glass-10 hover:bg-theme-glass-20 text-theme font-medium rounded-xl transition-colors min-h-[44px]"
           >
-            <Upload className="w-5 h-5" />
-            Upload
+            <Upload className="w-5 h-5 flex-shrink-0" />
+            <span>Upload Resume</span>
           </button>
         </div>
 
@@ -276,35 +276,35 @@ export default function Home() {
         </div>
 
         {/* Resume List */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {filteredResumes.map((resume) => (
             <div
               key={resume.id}
-              className="glass rounded-xl p-6 border border-theme-subtle hover:border-theme-muted transition-colors overflow-hidden"
+              className="glass rounded-xl p-4 sm:p-6 border border-theme-subtle hover:border-theme-muted transition-colors overflow-hidden"
             >
-              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
                 {/* Icon and Info */}
-                <div className="flex items-start gap-4 flex-1 min-w-0 overflow-hidden">
-                  <div className="w-12 h-12 bg-theme-glass-5 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-6 h-6 text-theme flex-shrink-0" />
+                <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0 overflow-hidden">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-theme-glass-5 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-theme flex-shrink-0" />
                   </div>
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <h3 className="text-lg font-semibold text-theme truncate">{resume.filename}</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-theme truncate mb-0.5 sm:mb-1">{resume.filename}</h3>
                     {resume.name && (
-                      <p className="text-theme-secondary text-sm truncate">{resume.name}</p>
+                      <p className="text-theme-secondary text-xs sm:text-sm truncate mb-1">{resume.name}</p>
                     )}
-                    <p className="text-theme-tertiary text-sm mt-1 truncate">
-                      <span className="whitespace-nowrap">{resume.skills_count} skills</span> &bull; <span className="whitespace-nowrap">{formatDate(resume.uploaded_at)}</span>
+                    <p className="text-theme-tertiary text-xs sm:text-sm truncate">
+                      <span className="whitespace-nowrap">{resume.skills_count} skills</span> <span className="hidden sm:inline">&bull;</span> <span className="whitespace-nowrap sm:inline block mt-0.5 sm:mt-0">{formatDate(resume.uploaded_at)}</span>
                     </p>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-wrap gap-2 sm:flex-nowrap flex-shrink-0">
+                <div className="flex gap-2 w-full sm:w-auto flex-shrink-0">
                   <button
                     onClick={() => handleAnalyze(resume.id, resume.filename)}
                     disabled={analyzingId === resume.id}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-theme-glass-5 hover:bg-theme-glass-10 text-theme-secondary hover:text-theme rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 bg-theme-glass-5 hover:bg-theme-glass-10 text-theme-secondary hover:text-theme rounded-lg transition-colors min-h-[44px] min-w-[80px] sm:min-w-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Analyze resume"
                   >
                     {analyzingId === resume.id ? (
@@ -312,20 +312,20 @@ export default function Home() {
                     ) : (
                       <FileSearch className="w-4 h-4 flex-shrink-0" />
                     )}
-                    <span className="text-sm whitespace-nowrap">Analyze</span>
+                    <span className="text-xs sm:text-sm whitespace-nowrap">Analyze</span>
                   </button>
                   <button
                     onClick={() => handleTailor(resume.id)}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 rounded-lg transition-colors min-h-[44px]"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 rounded-lg transition-colors min-h-[44px] min-w-[80px] sm:min-w-0"
                     aria-label="Tailor resume"
                   >
                     <Target className="w-4 h-4 flex-shrink-0" />
-                    <span className="text-sm whitespace-nowrap">Tailor</span>
+                    <span className="text-xs sm:text-sm whitespace-nowrap">Tailor</span>
                   </button>
                   <button
                     onClick={() => handleDelete(resume.id)}
                     disabled={deletingId === resume.id}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                    className="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-lg transition-colors min-h-[44px] min-w-[44px] disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                     aria-label="Delete resume"
                   >
                     {deletingId === resume.id ? (
