@@ -22,6 +22,10 @@
 export * from './resumeApi';
 export * from './tailorApi';
 export * from './interviewApi';
+export * from './applicationApi';
+export * from './careerPathApi';
+export * from './coverLetterApi';
+export * from './starStoryApi';
 
 // Base utilities (for advanced usage)
 export type { ApiResponse, RequestOptions } from './base';
@@ -31,9 +35,13 @@ export { fetchWithAuth, snakeToCamel, camelToSnake, get, post, put, del } from '
 import { resumeApi } from './resumeApi';
 import { tailorApi } from './tailorApi';
 import { interviewApi } from './interviewApi';
+import { applicationApi } from './applicationApi';
+import { careerPathApi } from './careerPathApi';
+import { coverLetterApi } from './coverLetterApi';
+import { starStoryApi } from './starStoryApi';
 
 // Re-export domain APIs
-export { resumeApi, tailorApi, interviewApi };
+export { resumeApi, tailorApi, interviewApi, applicationApi, careerPathApi, coverLetterApi, starStoryApi };
 
 /**
  * Combined API object for backwards compatibility
