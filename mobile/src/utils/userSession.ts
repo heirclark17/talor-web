@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 import { STORAGE_KEYS } from './constants';
+import { supabase } from '../lib/supabase';
 
 /**
  * Secure storage keys - these are stored encrypted
@@ -50,51 +51,56 @@ const isSecureStoreAvailable = async (): Promise<boolean> => {
 };
 
 /**
- * Get or create user ID using secure storage
- * Falls back to AsyncStorage if SecureStore is unavailable
+ * Get user ID from Supabase session
+ * This ensures the user ID matches the backend database
  */
 export const getUserId = async (): Promise<string> => {
   try {
+    // First, try to get user ID from Supabase session (primary source of truth)
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user?.id) {
+      return session.user.id;
+    }
+
+    // Fallback: Try secure storage (for offline scenarios)
     const secureAvailable = await isSecureStoreAvailable();
 
     if (secureAvailable) {
-      // Try to get from secure storage first
-      let userId = await SecureStore.getItemAsync(SECURE_KEYS.USER_ID);
-
-      if (!userId) {
-        // Check if there's an old ID in AsyncStorage to migrate
-        const legacyId = await AsyncStorage.getItem(STORAGE_KEYS.USER_ID);
-        if (legacyId) {
-          // Migrate to secure storage
-          await SecureStore.setItemAsync(SECURE_KEYS.USER_ID, legacyId);
-          await AsyncStorage.removeItem(STORAGE_KEYS.USER_ID);
-          userId = legacyId;
-          console.log('Migrated user ID to secure storage');
-        } else {
-          // Generate new secure ID
-          userId = await generateUserId();
-          await SecureStore.setItemAsync(SECURE_KEYS.USER_ID, userId);
-          console.log('Generated new secure user ID');
-        }
+      const userId = await SecureStore.getItemAsync(SECURE_KEYS.USER_ID);
+      if (userId) {
+        return userId;
       }
-
-      return userId;
     } else {
       // Fallback to AsyncStorage if SecureStore unavailable
-      let userId = await AsyncStorage.getItem(STORAGE_KEYS.USER_ID);
-
-      if (!userId) {
-        userId = await generateUserId();
-        await AsyncStorage.setItem(STORAGE_KEYS.USER_ID, userId);
-        console.log('Generated new user ID (AsyncStorage fallback)');
+      const userId = await AsyncStorage.getItem(STORAGE_KEYS.USER_ID);
+      if (userId) {
+        return userId;
       }
-
-      return userId;
     }
+
+    // If no session and no stored ID, throw error
+    // Don't generate random IDs - they won't work with backend
+    throw new Error('No user session - please sign in');
   } catch (error) {
     console.error('Error getting user ID:', error);
-    // Generate a temporary ID as last resort
-    return await generateUserId();
+    throw error; // Don't silently fail - force authentication
+  }
+};
+
+/**
+ * Save user ID to secure storage (called after successful sign-in)
+ */
+export const saveUserId = async (userId: string): Promise<void> => {
+  try {
+    const secureAvailable = await isSecureStoreAvailable();
+    if (secureAvailable) {
+      await SecureStore.setItemAsync(SECURE_KEYS.USER_ID, userId);
+    } else {
+      await AsyncStorage.setItem(STORAGE_KEYS.USER_ID, userId);
+    }
+    console.log('[UserSession] User ID saved:', userId.substring(0, 15) + '...');
+  } catch (error) {
+    console.error('Error saving user ID:', error);
   }
 };
 
@@ -230,13 +236,14 @@ export const getRefreshToken = async (): Promise<string | null> => {
 };
 
 /**
- * Clear all authentication tokens
+ * Clear all authentication tokens and user ID
  */
 export const clearAuthTokens = async (): Promise<void> => {
   try {
     const secureAvailable = await isSecureStoreAvailable();
     if (secureAvailable) {
       await Promise.all([
+        SecureStore.deleteItemAsync(SECURE_KEYS.USER_ID),
         SecureStore.deleteItemAsync(SECURE_KEYS.AUTH_TOKEN),
         SecureStore.deleteItemAsync(SECURE_KEYS.REFRESH_TOKEN),
       ]);

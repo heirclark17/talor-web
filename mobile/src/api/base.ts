@@ -91,9 +91,10 @@ const DEFAULT_TIMEOUT_MS = 30000;
 const LONG_TIMEOUT_MS = 420000;
 
 /**
- * Endpoints that require longer timeouts (AI processing)
+ * Endpoints that require longer timeouts (AI processing and file uploads)
  */
 const LONG_TIMEOUT_ENDPOINTS = [
+  '/api/resumes/upload', // File upload
   '/api/tailor/',
   '/api/resumes/analyze',
   '/api/interview-prep/',

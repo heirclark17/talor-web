@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { saveAuthToken, clearAuthTokens, getUserId, saveSessionData } from '../utils/userSession';
+import { saveAuthToken, clearAuthTokens, getUserId, saveSessionData, saveUserId } from '../utils/userSession';
 
 interface AuthContextType {
   user: User | null;
@@ -28,10 +28,11 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('[SupabaseAuth] Initial session:', session?.user?.email || 'No session');
 
-      // Save JWT token for backend API calls
+      // Save JWT token and user ID for backend API calls
       if (session?.access_token) {
-        console.log('[SupabaseAuth] Saving initial JWT token to secure storage');
+        console.log('[SupabaseAuth] Saving initial JWT token and user ID to secure storage');
         await saveAuthToken(session.access_token);
+        await saveUserId(session.user.id); // Save user ID for API headers
         await saveSessionData({
           userId: session.user.id,
           email: session.user.email,
@@ -47,10 +48,11 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('[SupabaseAuth] Auth state changed:', _event, 'User:', session?.user?.email || 'No user');
 
-      // Save or clear JWT token for backend API calls
+      // Save or clear JWT token and user ID for backend API calls
       if (session?.access_token) {
-        console.log('[SupabaseAuth] Saving JWT token to secure storage');
+        console.log('[SupabaseAuth] Saving JWT token and user ID to secure storage');
         await saveAuthToken(session.access_token);
+        await saveUserId(session.user.id); // Save user ID for API headers
 
         // Also save user ID and email for session data
         await saveSessionData({
