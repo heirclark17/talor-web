@@ -280,27 +280,27 @@ export default function Home() {
           {filteredResumes.map((resume) => (
             <div
               key={resume.id}
-              className="glass rounded-xl p-6 border border-theme-subtle hover:border-theme-muted transition-colors"
+              className="glass rounded-xl p-6 border border-theme-subtle hover:border-theme-muted transition-colors overflow-hidden"
             >
               <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                 {/* Icon and Info */}
-                <div className="flex items-start gap-4 flex-1">
+                <div className="flex items-start gap-4 flex-1 min-w-0 overflow-hidden">
                   <div className="w-12 h-12 bg-theme-glass-5 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-6 h-6 text-theme" />
+                    <FileText className="w-6 h-6 text-theme flex-shrink-0" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <h3 className="text-lg font-semibold text-theme truncate">{resume.filename}</h3>
                     {resume.name && (
                       <p className="text-theme-secondary text-sm truncate">{resume.name}</p>
                     )}
-                    <p className="text-theme-tertiary text-sm mt-1">
-                      {resume.skills_count} skills &bull; {formatDate(resume.uploaded_at)}
+                    <p className="text-theme-tertiary text-sm mt-1 truncate">
+                      <span className="whitespace-nowrap">{resume.skills_count} skills</span> &bull; <span className="whitespace-nowrap">{formatDate(resume.uploaded_at)}</span>
                     </p>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-wrap gap-2 sm:flex-nowrap">
+                <div className="flex flex-wrap gap-2 sm:flex-nowrap flex-shrink-0">
                   <button
                     onClick={() => handleAnalyze(resume.id, resume.filename)}
                     disabled={analyzingId === resume.id}
@@ -308,30 +308,30 @@ export default function Home() {
                     aria-label="Analyze resume"
                   >
                     {analyzingId === resume.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
                     ) : (
-                      <FileSearch className="w-4 h-4" />
+                      <FileSearch className="w-4 h-4 flex-shrink-0" />
                     )}
-                    <span className="text-sm">Analyze</span>
+                    <span className="text-sm whitespace-nowrap">Analyze</span>
                   </button>
                   <button
                     onClick={() => handleTailor(resume.id)}
                     className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 rounded-lg transition-colors min-h-[44px]"
                     aria-label="Tailor resume"
                   >
-                    <Target className="w-4 h-4" />
-                    <span className="text-sm">Tailor</span>
+                    <Target className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm whitespace-nowrap">Tailor</span>
                   </button>
                   <button
                     onClick={() => handleDelete(resume.id)}
                     disabled={deletingId === resume.id}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                     aria-label="Delete resume"
                   >
                     {deletingId === resume.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
                     ) : (
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4 flex-shrink-0" />
                     )}
                   </button>
                 </div>
