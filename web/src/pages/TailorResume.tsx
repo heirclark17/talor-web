@@ -2809,6 +2809,52 @@ export default function TailorResume() {
                     )
                   })}
                 </select>
+
+                {/* Selected Resume Details with Delete Option */}
+                {selectedResumeId && (() => {
+                  const selectedResume = resumes.find(r => r.id === selectedResumeId)
+                  if (!selectedResume) return null
+
+                  return (
+                    <div className="mt-6 p-4 sm:p-6 bg-theme-glass-5 border border-theme-muted rounded-xl">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileText className="w-5 h-5 text-theme flex-shrink-0" />
+                            <p className="font-bold text-theme text-base sm:text-lg truncate">
+                              {selectedResume.filename}
+                            </p>
+                          </div>
+                          {selectedResume.summary && (
+                            <p className="text-theme-secondary text-sm mb-3 line-clamp-2">
+                              {selectedResume.summary}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-4 text-xs sm:text-sm text-theme-tertiary">
+                            <span className="flex items-center gap-1">
+                              <Sparkles className="w-4 h-4" />
+                              {selectedResume.skills_count} skills
+                            </span>
+                            <span>•</span>
+                            <span>Uploaded {new Date(selectedResume.uploaded_at).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => handleDeleteResume(selectedResume.id, e)}
+                          disabled={deletingResumeId === selectedResume.id}
+                          className="flex-shrink-0 p-2 hover:bg-red-500/20 rounded-lg transition-colors disabled:opacity-50 group"
+                          title="Delete this resume"
+                        >
+                          {deletingResumeId === selectedResume.id ? (
+                            <Loader2 className="w-5 h-5 text-red-400 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-5 h-5 text-red-400 group-hover:text-red-300" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             )}
           </div>
