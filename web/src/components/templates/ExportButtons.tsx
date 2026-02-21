@@ -94,7 +94,7 @@ export default function ExportButtons({
           gap: 0.5rem;
           padding: 0.75rem 1.5rem;
           border-radius: 12px;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 0.875rem;
           font-weight: 600;
           cursor: pointer;

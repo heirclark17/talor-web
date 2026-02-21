@@ -37,7 +37,7 @@ export default function TemplateCard({
   resumeData: propResumeData,
 }: TemplateCardProps) {
   const { checkFeatureAccess } = useSubscriptionStore()
-  const { latestResume } = useResumeStore()
+  const { resumes } = useResumeStore()
   const hasAccess = !template.isPremium || checkFeatureAccess('premium_templates')
 
   // Generate preview image if template doesn't have one (fallback for static images)
@@ -47,33 +47,37 @@ export default function TemplateCard({
   }, [template])
 
   // Use provided resume data or convert from store
+  // The resumeStore.Resume uses a flat shape (not nested personalInfo)
   const resumeData = useMemo(() => {
     // If resume data is provided as prop, use it
     if (propResumeData) return propResumeData
 
-    // Otherwise convert from store
+    // Otherwise derive from the most recently uploaded resume (index 0)
+    const latestResume = resumes && resumes.length > 0 ? resumes[0] : null
     if (!latestResume) return null
 
     return {
-      name: latestResume.personalInfo?.name || latestResume.personalInfo?.fullName,
-      email: latestResume.personalInfo?.email,
-      phone: latestResume.personalInfo?.phone,
-      linkedin: latestResume.personalInfo?.linkedin,
-      location: latestResume.personalInfo?.location,
+      name: latestResume.name,
+      email: latestResume.email,
+      phone: latestResume.phone,
+      linkedin: latestResume.linkedin,
+      location: latestResume.location,
       summary: latestResume.summary,
       skills: latestResume.skills,
-      experience: latestResume.experience?.map(exp => ({
-        company: exp.company,
-        title: exp.title,
-        location: exp.location,
-        dates: exp.dates,
-        bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
-        description: exp.description,
-      })),
+      experience: Array.isArray(latestResume.experience)
+        ? latestResume.experience.map((exp: any) => ({
+            company: exp.company,
+            title: exp.title,
+            location: exp.location,
+            dates: exp.dates,
+            bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
+            description: exp.description,
+          }))
+        : undefined,
       education: latestResume.education,
       certifications: latestResume.certifications,
     }
-  }, [propResumeData, latestResume])
+  }, [propResumeData, resumes])
 
   const handleClick = () => {
     if (hasAccess) {

@@ -18,40 +18,45 @@ import ResumePreview from '../components/templates/ResumePreview'
  */
 export default function Templates() {
   const navigate = useNavigate()
-  const { selectedTemplate, setSelectedTemplate } = useTemplateStore()
+  const { selectedTemplate, setSelectedTemplate, clearSelectedTemplate } = useTemplateStore()
   const { checkFeatureAccess } = useSubscriptionStore()
-  const { latestResume, resumes } = useResumeStore()
+  const { resumes } = useResumeStore()
   const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate | null>(null)
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null)
 
-  // Get the selected resume or default to latest
+  // Get the selected resume or default to the most recently uploaded (index 0)
   const activeResume = useMemo(() => {
+    const availableResumes = resumes || []
     if (selectedResumeId) {
-      return resumes?.find(r => r.id === selectedResumeId) || null
+      return availableResumes.find(r => String(r.id) === selectedResumeId) || availableResumes[0] || null
     }
-    return latestResume
-  }, [selectedResumeId, resumes, latestResume])
+    return availableResumes[0] || null
+  }, [selectedResumeId, resumes])
 
   // Convert resume store data to ResumePreview format
+  // The resumeStore.Resume uses a flat shape: name, email, phone, linkedin, location,
+  // summary, skills[], experience[], education, certifications, uploaded_at
   const resumeData = useMemo(() => {
     if (!activeResume) return null
 
     return {
-      name: activeResume.personalInfo?.name || activeResume.personalInfo?.fullName,
-      email: activeResume.personalInfo?.email,
-      phone: activeResume.personalInfo?.phone,
-      linkedin: activeResume.personalInfo?.linkedin,
-      location: activeResume.personalInfo?.location,
+      name: activeResume.name,
+      email: activeResume.email,
+      phone: activeResume.phone,
+      linkedin: activeResume.linkedin,
+      location: activeResume.location,
       summary: activeResume.summary,
       skills: activeResume.skills,
-      experience: activeResume.experience?.map(exp => ({
-        company: exp.company,
-        title: exp.title,
-        location: exp.location,
-        dates: exp.dates,
-        bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
-        description: exp.description,
-      })),
+      experience: Array.isArray(activeResume.experience)
+        ? activeResume.experience.map((exp: any) => ({
+            company: exp.company,
+            title: exp.title,
+            location: exp.location,
+            dates: exp.dates,
+            bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
+            description: exp.description,
+          }))
+        : undefined,
       education: activeResume.education,
       certifications: activeResume.certifications,
     }
@@ -180,7 +185,7 @@ export default function Templates() {
                 )}
 
                 <button
-                  onClick={() => setSelectedTemplate(null)}
+                  onClick={() => clearSelectedTemplate()}
                   className="px-4 py-2 bg-theme-glass-10 hover:bg-theme-glass-20 text-theme rounded-lg font-medium transition-colors"
                 >
                   Change

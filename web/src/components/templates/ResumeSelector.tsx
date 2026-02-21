@@ -5,23 +5,11 @@
  * Features custom dropdown, drag-and-drop upload, and live metadata display
  */
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { Upload, ChevronDown, FileText, Briefcase, Award, Calendar, Check } from 'lucide-react'
 import { useResumeStore } from '../../stores/resumeStore'
+import type { Resume } from '../../stores/resumeStore'
 import { useNavigate } from 'react-router-dom'
-
-interface Resume {
-  id: string
-  personalInfo?: {
-    name?: string
-    fullName?: string
-    email?: string
-  }
-  skills?: string[]
-  experience?: Array<{ company?: string; title?: string }>
-  createdAt?: string
-  updatedAt?: string
-}
 
 interface ResumeSelectorProps {
   selectedResumeId?: string | null
@@ -30,19 +18,45 @@ interface ResumeSelectorProps {
 
 export default function ResumeSelector({ selectedResumeId, onResumeSelect }: ResumeSelectorProps) {
   const navigate = useNavigate()
-  const { resumes, latestResume } = useResumeStore()
+  const { resumes, fetchResumes } = useResumeStore()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Get all available resumes
+  // Fetch resumes on mount if not already loaded
+  useEffect(() => {
+    if (!resumes || resumes.length === 0) {
+      fetchResumes()
+    }
+  }, [])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isDropdownOpen])
+
+  // Get all available resumes - store uses numeric IDs
   const availableResumes = resumes || []
-  const selectedResume = selectedResumeId
-    ? availableResumes.find(r => r.id === selectedResumeId)
+
+  // Derive the active resume: prefer the one matching selectedResumeId, otherwise the most recent
+  const latestResume = availableResumes.length > 0 ? availableResumes[0] : null
+  const selectedResume = selectedResumeId !== null && selectedResumeId !== undefined
+    ? availableResumes.find(r => String(r.id) === String(selectedResumeId)) || latestResume
     : latestResume
 
-  const handleResumeSelect = (resumeId: string) => {
-    onResumeSelect(resumeId)
+  const handleResumeSelect = (resumeId: number) => {
+    onResumeSelect(String(resumeId))
     setIsDropdownOpen(false)
   }
 
@@ -76,20 +90,20 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
   }, [navigate])
 
   const getResumeName = (resume: Resume) => {
-    return resume.personalInfo?.name || resume.personalInfo?.fullName || 'Untitled Resume'
+    // The flat Resume shape from resumeStore uses top-level name/email fields
+    return resume.name || resume.filename || 'Untitled Resume'
   }
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'Recently'
     const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return 'Recently'
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   }
 
   return (
     <div className="resume-selector">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
-
         .resume-selector {
           margin-bottom: 3rem;
           animation: fadeInUp 0.6s ease-out;
@@ -113,7 +127,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .selector-title {
-          font-family: 'Crimson Pro', serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 2.5rem;
           font-weight: 700;
           background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.7) 100%);
@@ -125,7 +139,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .selector-subtitle {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 1rem;
           color: rgba(255, 255, 255, 0.6);
           font-weight: 400;
@@ -185,7 +199,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .dropdown-label {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 0.75rem;
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -203,8 +217,8 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .dropdown-value-text {
-          font-family: 'Crimson Pro', serif;
-          font-size: 1.5rem;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          font-size: 1.25rem;
           font-weight: 600;
           color: #fff;
         }
@@ -269,7 +283,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .dropdown-item-name {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 1rem;
           font-weight: 500;
           color: #fff;
@@ -277,7 +291,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .dropdown-item-meta {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 0.75rem;
           color: rgba(255, 255, 255, 0.5);
         }
@@ -342,7 +356,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .upload-title {
-          font-family: 'Crimson Pro', serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 1.25rem;
           font-weight: 600;
           color: #fff;
@@ -350,7 +364,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .upload-subtitle {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 0.875rem;
           color: rgba(255, 255, 255, 0.5);
         }
@@ -384,7 +398,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .resume-card-title {
-          font-family: 'Crimson Pro', serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 1.75rem;
           font-weight: 700;
           color: #fff;
@@ -392,7 +406,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .resume-card-subtitle {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 0.875rem;
           color: rgba(255, 255, 255, 0.6);
         }
@@ -405,7 +419,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
           background: rgba(34, 197, 94, 0.15);
           border: 1px solid rgba(34, 197, 94, 0.3);
           border-radius: 100px;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 0.75rem;
           font-weight: 600;
           color: #22c55e;
@@ -445,7 +459,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .metadata-label {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 0.7rem;
           text-transform: uppercase;
           letter-spacing: 0.08em;
@@ -455,7 +469,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .metadata-value {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 1rem;
           font-weight: 600;
           color: #fff;
@@ -475,7 +489,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .empty-state-title {
-          font-family: 'Crimson Pro', serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 1.5rem;
           font-weight: 600;
           color: rgba(255, 255, 255, 0.7);
@@ -483,7 +497,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         }
 
         .empty-state-subtitle {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 1rem;
           color: rgba(255, 255, 255, 0.5);
           max-width: 400px;
@@ -500,7 +514,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
       {/* Selection Grid */}
       <div className="selection-grid">
         {/* Dropdown Selector */}
-        <div className="dropdown-container">
+        <div className="dropdown-container" ref={dropdownRef}>
           <div
             className="dropdown-trigger"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -530,7 +544,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
                     <div className="dropdown-item-content">
                       <div className="dropdown-item-name">{getResumeName(resume)}</div>
                       <div className="dropdown-item-meta">
-                        Updated {formatDate(resume.updatedAt || resume.createdAt)}
+                        Uploaded {formatDate(resume.uploaded_at)}
                       </div>
                     </div>
                     {selectedResume?.id === resume.id && (
@@ -539,7 +553,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
                   </div>
                 ))
               ) : (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)' }}>
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)', fontFamily: "'Urbanist', sans-serif" }}>
                   No resumes found. Upload one to get started.
                 </div>
               )}
@@ -571,7 +585,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
             <div>
               <h3 className="resume-card-title">{getResumeName(selectedResume)}</h3>
               <p className="resume-card-subtitle">
-                {selectedResume.personalInfo?.email || 'No email provided'}
+                {selectedResume.email || 'No email provided'}
               </p>
             </div>
             <div className="selected-badge">
@@ -586,7 +600,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
               <div className="metadata-content">
                 <div className="metadata-label">Experience</div>
                 <div className="metadata-value">
-                  {selectedResume.experience?.length || 0} roles
+                  {Array.isArray(selectedResume.experience) ? selectedResume.experience.length : 0} roles
                 </div>
               </div>
             </div>
@@ -596,7 +610,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
               <div className="metadata-content">
                 <div className="metadata-label">Skills</div>
                 <div className="metadata-value">
-                  {selectedResume.skills?.length || 0} listed
+                  {selectedResume.skills_count || selectedResume.skills?.length || 0} listed
                 </div>
               </div>
             </div>
@@ -604,9 +618,9 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
             <div className="metadata-item">
               <Calendar className="metadata-icon" />
               <div className="metadata-content">
-                <div className="metadata-label">Last Updated</div>
+                <div className="metadata-label">Uploaded</div>
                 <div className="metadata-value">
-                  {formatDate(selectedResume.updatedAt || selectedResume.createdAt)}
+                  {formatDate(selectedResume.uploaded_at)}
                 </div>
               </div>
             </div>
