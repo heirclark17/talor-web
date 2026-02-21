@@ -61,7 +61,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
   }
 
   const handleUploadClick = () => {
-    navigate('/upload-resume')
+    navigate('/upload')
   }
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -86,7 +86,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
     e.stopPropagation()
     setIsDragging(false)
     // Navigate to upload page with file
-    navigate('/upload-resume')
+    navigate('/upload')
   }, [navigate])
 
   const getResumeName = (resume: Resume) => {

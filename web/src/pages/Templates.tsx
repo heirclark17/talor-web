@@ -80,7 +80,7 @@ export default function Templates() {
     }
 
     // Navigate to resume upload or builder with selected template
-    navigate('/tailor-resume')
+    navigate('/tailor')
   }
 
   const handlePreviewTemplate = (template: ResumeTemplate) => {
