@@ -2816,27 +2816,27 @@ export default function TailorResume() {
                   if (!selectedResume) return null
 
                   return (
-                    <div className="mt-6 p-4 sm:p-6 bg-theme-glass-5 border border-theme-muted rounded-xl">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
+                    <div className="mt-6 p-4 sm:p-6 bg-theme-glass-5 border border-theme-muted rounded-xl overflow-hidden">
+                      <div className="flex items-start justify-between gap-3 sm:gap-4">
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex items-center gap-2 mb-2 overflow-hidden">
                             <FileText className="w-5 h-5 text-theme flex-shrink-0" />
-                            <p className="font-bold text-theme text-base sm:text-lg truncate">
+                            <p className="font-bold text-theme text-base sm:text-lg truncate flex-1 min-w-0">
                               {selectedResume.filename}
                             </p>
                           </div>
                           {selectedResume.summary && (
-                            <p className="text-theme-secondary text-sm mb-3 line-clamp-2">
+                            <p className="text-theme-secondary text-sm mb-3 line-clamp-2 break-words">
                               {selectedResume.summary}
                             </p>
                           )}
-                          <div className="flex items-center gap-4 text-xs sm:text-sm text-theme-tertiary">
-                            <span className="flex items-center gap-1">
-                              <Sparkles className="w-4 h-4" />
-                              {selectedResume.skills_count} skills
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-theme-tertiary">
+                            <span className="flex items-center gap-1 flex-shrink-0">
+                              <Sparkles className="w-4 h-4 flex-shrink-0" />
+                              <span className="whitespace-nowrap">{selectedResume.skills_count} skills</span>
                             </span>
-                            <span>•</span>
-                            <span>Uploaded {new Date(selectedResume.uploaded_at).toLocaleDateString()}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="truncate">Uploaded {new Date(selectedResume.uploaded_at).toLocaleDateString()}</span>
                           </div>
                         </div>
                         <button
