@@ -28,7 +28,7 @@ const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'accent' | 'warning';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
-interface GlassButtonProps {
+export interface GlassButtonProps {
   children?: ReactNode;
   label?: string;
   variant?: ButtonVariant;
@@ -42,6 +42,8 @@ interface GlassButtonProps {
   textStyle?: StyleProp<TextStyle>;
   haptic?: boolean;
   fullWidth?: boolean;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 // Standardized button sizes (matches web design system)
@@ -65,6 +67,8 @@ export function GlassButton({
   textStyle,
   haptic = true,
   fullWidth = false,
+  accessibilityLabel,
+  accessibilityHint,
 }: GlassButtonProps) {
   const { isDark, colors } = useTheme();
   const reduceMotion = useReduceMotion();

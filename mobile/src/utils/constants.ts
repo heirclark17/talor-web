@@ -182,6 +182,12 @@ export const TYPOGRAPHY = {
   caption1: { fontFamily: FONTS.regular, fontSize: 12, lineHeight: 16 },
   caption2: { fontFamily: FONTS.regular, fontSize: 11, lineHeight: 13 },
 
+  // Semantic aliases used by screens
+  heading1: { fontFamily: FONTS.bold, fontSize: 28, lineHeight: 34 },
+  heading2: { fontFamily: FONTS.semibold, fontSize: 22, lineHeight: 28 },
+  heading3: { fontFamily: FONTS.semibold, fontSize: 18, lineHeight: 24 },
+  bodyBold: { fontFamily: FONTS.semibold, fontSize: 17, lineHeight: 22 },
+
   // Legacy aliases for backward compatibility (from HeirclarkHealthApp)
   // Headers
   h1: {
@@ -321,6 +327,8 @@ const GLASS_MATERIALS = {
   regular: { blur: 60, opacity: 0.35 },
   thick: { blur: 80, opacity: 0.50 },
   chrome: { blur: 70, opacity: 0.40 },
+  subtle: { blur: 25, opacity: 0.18 },
+  strong: { blur: 90, opacity: 0.55 },
 } as const;
 
 export const GLASS = {
@@ -388,7 +396,7 @@ export const GLASS = {
   },
 
   // Helper to get corner radius based on size
-  getCornerRadius: (size: 'small' | 'medium' | 'large' = 'medium'): number => {
+  getCornerRadius: (size: 'small' | 'medium' | 'large' | 'full' = 'medium'): number => {
     switch (size) {
       case 'small':
         return 8;
@@ -396,6 +404,8 @@ export const GLASS = {
         return 12;
       case 'large':
         return 16;
+      case 'full':
+        return 9999;
       default:
         return 12;
     }

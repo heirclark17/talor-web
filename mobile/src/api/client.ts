@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '../utils/constants';
 import { getUserId } from '../utils/userSession';
 import { fetchWithAuth as secureFetchWithAuth, snakeToCamel as baseSnakeToCamel } from './base';
+import { supabase } from '../lib/supabase';
 
 /**
  * Convert snake_case keys to camelCase recursively
@@ -391,24 +392,67 @@ export const api = {
 
   async uploadResume(formData: FormData): Promise<ApiResponse> {
     try {
-      console.log('[UploadResume] Starting upload request...');
-      const response = await fetchWithAuth('/api/resumes/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      console.log('[UploadResume] Response status:', response.status);
-      const data = await response.json();
-      if (!response.ok) {
-        const errorMsg = data?.error || data?.detail || data?.message || `Server error: ${response.status}`;
-        console.error('[UploadResume] Server error:', {
-          status: response.status,
-          statusText: response.statusText,
-          data,
-          headers: Object.fromEntries(response.headers.entries()),
+      console.log('[UploadResume] Starting upload with XMLHttpRequest...');
+
+      // Use XMLHttpRequest for FormData uploads (better header support in React Native)
+      return new Promise(async (resolve) => {
+        const xhr = new XMLHttpRequest();
+
+        // Get auth headers
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        const userId = await getUserId();
+
+        console.log('[UploadResume] Auth headers:', {
+          hasToken: !!token,
+          hasUserId: !!userId,
+          tokenPrefix: token?.substring(0, 20),
         });
-        return { success: false, data, error: errorMsg };
-      }
-      return { success: true, data };
+
+        xhr.onload = () => {
+          console.log('[UploadResume] XHR Response:', xhr.status);
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve({ success: true, data });
+            } else {
+              const errorMsg = data?.error || data?.detail || data?.message || `Server error: ${xhr.status}`;
+              console.error('[UploadResume] Server error:', { status: xhr.status, data });
+              resolve({ success: false, data, error: errorMsg });
+            }
+          } catch (error) {
+            console.error('[UploadResume] Parse error:', error);
+            resolve({ success: false, error: 'Invalid server response' });
+          }
+        };
+
+        xhr.onerror = () => {
+          console.error('[UploadResume] Network error');
+          resolve({ success: false, error: 'Network error' });
+        };
+
+        xhr.ontimeout = () => {
+          console.error('[UploadResume] Timeout');
+          resolve({ success: false, error: 'Request timeout' });
+        };
+
+        const url = `${API_BASE_URL}/api/resumes/upload`;
+        xhr.open('POST', url);
+        xhr.timeout = 420000; // 7 minutes
+
+        // Set headers AFTER open() - critical for React Native
+        if (token) {
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+          console.log('[UploadResume] ✓ Authorization header set');
+        }
+        if (userId) {
+          xhr.setRequestHeader('X-User-ID', userId);
+          console.log('[UploadResume] ✓ X-User-ID header set');
+        }
+
+        console.log('[UploadResume] Sending request...');
+        xhr.send(formData);
+      });
     } catch (error: any) {
       console.error('[UploadResume] Upload failed:', error);
       return { success: false, error: error.message };
