@@ -953,6 +953,7 @@ export default function TailorResumeScreen() {
           <GlassButton
             label={tailoring ? 'Tailoring...' : 'Tailor Resume'}
             variant="primary"
+            size="lg"
             onPress={handleTailor}
             disabled={tailoring}
             loading={tailoring}

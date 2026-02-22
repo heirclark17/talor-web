@@ -1321,10 +1321,10 @@ export default function TailorResume() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 sm:mb-8">
             <div className="flex items-center gap-3">
               <div className="p-2 sm:p-3 bg-theme-glass-10 rounded-xl">
-                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-theme" />
+                <Sparkles className="w-6 h-6 text-theme" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-theme">
+                <h1 className="text-3xl font-bold text-theme">
                   Resume Comparison
                 </h1>
                 <p className="text-sm sm:text-base text-theme-secondary mt-1">Original vs. Tailored for {tailoredResume.company}</p>
@@ -1361,24 +1361,24 @@ export default function TailorResume() {
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               <button
                 onClick={() => setSyncScroll(!syncScroll)}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all min-h-[44px] ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all min-h-[44px] ${
                   syncScroll ? 'bg-theme-glass-20 text-theme' : 'bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10'
                 }`}
                 title="Ctrl/Cmd + S"
               >
                 {syncScroll ? <Link2 size={18} /> : <Unlink2 size={18} />}
-                <span className="text-sm font-medium hidden sm:inline">Sync Scroll</span>
+                <span className="text-sm font-medium">Sync Scroll</span>
               </button>
 
               <button
                 onClick={() => setShowChanges(!showChanges)}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all min-h-[44px] ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all min-h-[44px] ${
                   showChanges ? 'bg-green-500/20 text-green-400' : 'bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10'
                 }`}
                 title="Ctrl/Cmd + C"
               >
                 <Sparkles size={18} />
-                <span className="text-sm font-medium hidden sm:inline">Show Changes</span>
+                <span className="text-sm font-medium">Show Changes</span>
               </button>
 
               <div className="hidden sm:block h-6 w-px bg-theme-glass-10"></div>
@@ -1392,7 +1392,7 @@ export default function TailorResume() {
                 className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
               >
                 {Object.values(expandedSections).every(v => v) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                <span className="text-sm font-medium hidden sm:inline">
+                <span className="text-sm font-medium">
                   {Object.values(expandedSections).every(v => v) ? 'Collapse All' : 'Expand All'}
                 </span>
               </button>
@@ -1404,7 +1404,7 @@ export default function TailorResume() {
                 className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
               >
                 <Printer size={18} />
-                <span className="text-sm font-medium hidden sm:inline">Print</span>
+                <span className="text-sm font-medium">Print</span>
               </button>
 
               <div className="relative">
@@ -1414,7 +1414,7 @@ export default function TailorResume() {
                   title="Ctrl/Cmd + D"
                 >
                   <FileDown size={18} />
-                  <span className="text-sm font-medium hidden sm:inline">Export</span>
+                  <span className="text-sm font-medium">Export</span>
                   <ChevronDown size={16} />
                 </button>
 
@@ -2490,7 +2490,7 @@ export default function TailorResume() {
                   title="Refresh AI analysis (clears cache)"
                 >
                   <RotateCcw className={`w-4 h-4 ${loadingAnalysis ? 'animate-spin' : ''}`} />
-                  <span className="text-sm font-medium hidden sm:inline">
+                  <span className="text-sm font-medium">
                     {loadingAnalysis ? 'Refreshing...' : 'Refresh'}
                   </span>
                 </button>
@@ -2515,7 +2515,7 @@ export default function TailorResume() {
                   title="Refresh AI analysis (clears cache)"
                 >
                   <RotateCcw className={`w-4 h-4 ${loadingAnalysis ? 'animate-spin' : ''}`} />
-                  <span className="text-sm font-medium hidden sm:inline">
+                  <span className="text-sm font-medium">
                     {loadingAnalysis ? 'Refreshing...' : 'Refresh'}
                   </span>
                 </button>
@@ -2789,7 +2789,7 @@ export default function TailorResume() {
                 <select
                   value={selectedResumeId || ''}
                   onChange={(e) => setSelectedResumeId(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-theme-glass-5 border-2 border-theme-muted rounded-xl focus:ring-4 focus:ring-theme-glass-20 focus:border-theme-muted transition-all text-[16px] sm:text-lg text-theme min-h-[48px] appearance-none cursor-pointer"
+                  className="w-full px-4 py-3 bg-theme-glass-5 border-2 border-theme-muted rounded-xl focus:ring-4 focus:ring-theme-glass-20 focus:border-theme-muted transition-all text-base text-theme min-h-[48px] appearance-none cursor-pointer"
                 >
                   <option value="" className="bg-gray-800">Select a resume...</option>
                   {resumes.map((resume) => {
@@ -2891,13 +2891,13 @@ export default function TailorResume() {
                   }}
                   onBlur={handleExtractJobDetails}
                   placeholder="Paste job URL here..."
-                  className="flex-1 px-4 sm:px-5 py-3 sm:py-4 bg-theme-glass-5 border-2 border-theme-muted rounded-xl focus:ring-4 focus:ring-theme-glass-20 focus:border-theme-muted transition-all text-[16px] sm:text-lg text-theme placeholder-gray-500 min-h-[48px]"
+                  className="flex-1 px-4 py-3 bg-theme-glass-5 border-2 border-theme-muted rounded-xl focus:ring-4 focus:ring-theme-glass-20 focus:border-theme-muted transition-all text-base text-theme placeholder-gray-500 min-h-[48px]"
                   disabled={extracting}
                 />
                 <button
                   onClick={handleExtractJobDetails}
                   disabled={extracting || !jobUrl.trim()}
-                  className={`px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-semibold whitespace-nowrap transition-all w-full sm:w-auto min-h-[48px] ${
+                  className={`px-5 py-3 rounded-xl font-semibold whitespace-nowrap transition-all w-full sm:w-auto min-h-[48px] ${
                     extracting || !jobUrl.trim()
                       ? 'bg-theme-glass-10 text-theme-tertiary cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -2933,7 +2933,7 @@ export default function TailorResume() {
                       value={company}
                       onChange={(e) => setCompany(e.target.value)}
                       placeholder="JPMorgan Chase"
-                      className={`w-full px-4 sm:px-5 py-3 sm:py-4 bg-theme-glass-5 border-2 rounded-xl focus:ring-4 focus:ring-theme-glass-20 focus:border-theme-muted transition-all text-[16px] sm:text-lg text-theme placeholder-gray-500 min-h-[48px] ${
+                      className={`w-full px-4 py-3 bg-theme-glass-5 border-2 rounded-xl focus:ring-4 focus:ring-theme-glass-20 focus:border-theme-muted transition-all text-base text-theme placeholder-gray-500 min-h-[48px] ${
                         extractionError.company ? 'border-red-500' : 'border-theme-muted'
                       }`}
                     />
@@ -2957,7 +2957,7 @@ export default function TailorResume() {
                       value={jobTitle}
                       onChange={(e) => setJobTitle(e.target.value)}
                       placeholder="Lead Technical Program Manager"
-                      className={`w-full px-4 sm:px-5 py-3 sm:py-4 bg-theme-glass-5 border-2 rounded-xl focus:ring-4 focus:ring-theme-glass-20 focus:border-theme-muted transition-all text-[16px] sm:text-lg text-theme placeholder-gray-500 min-h-[48px] ${
+                      className={`w-full px-4 py-3 bg-theme-glass-5 border-2 rounded-xl focus:ring-4 focus:ring-theme-glass-20 focus:border-theme-muted transition-all text-base text-theme placeholder-gray-500 min-h-[48px] ${
                         extractionError.title ? 'border-red-500' : 'border-theme-muted'
                       }`}
                     />
@@ -3075,7 +3075,7 @@ export default function TailorResume() {
         <button
           onClick={handleTailor}
           disabled={loading || !selectedResumeId}
-          className={`w-full py-4 sm:py-6 rounded-2xl font-bold text-lg sm:text-xl transition-all min-h-[56px] ${
+          className={`w-full py-6 rounded-2xl font-bold text-xl transition-all min-h-[56px] ${
             loading || !selectedResumeId
               ? 'bg-theme-glass-10 text-theme-tertiary cursor-not-allowed'
               : 'btn-primary'
@@ -3083,14 +3083,14 @@ export default function TailorResume() {
         >
           {loading ? (
             <span className="flex items-center justify-center gap-3">
-              <Loader2 className="w-6 h-6 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
               Generating tailored resume with AI...
             </span>
           ) : (
             <span className="flex items-center justify-center gap-3">
-              <Sparkles className="w-6 h-6" />
+              <Sparkles className="w-5 h-5" />
               Generate Tailored Resume
-              <ArrowRight className="w-6 h-6" />
+              <ArrowRight className="w-5 h-5" />
             </span>
           )}
         </button>
