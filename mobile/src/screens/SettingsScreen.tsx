@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: SPACING.screenMargin,
-    paddingTop: 60,
+    paddingTop: 75,
     paddingBottom: SPACING.md,
   },
   title: {
