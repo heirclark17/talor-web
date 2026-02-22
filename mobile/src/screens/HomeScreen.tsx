@@ -190,7 +190,7 @@ export default function HomeScreen() {
             analyzingId === item.id ? (
               <ActivityIndicator size="small" color={COLORS.info} />
             ) : (
-              <FileSearch color={COLORS.info} size={18} />
+              <FileSearch color={COLORS.info} size={20} />
             )
           }
           onPress={() => handleAnalyze(item.id, item.filename)}
@@ -204,7 +204,7 @@ export default function HomeScreen() {
           label="Tailor"
           variant="secondary"
           size="sm"
-          icon={<Target color={COLORS.primary} size={18} />}
+          icon={<Target color={COLORS.primary} size={20} />}
           onPress={() => handleTailor(item.id)}
           style={styles.actionButton}
           accessibilityLabel={`Tailor ${item.filename} for a job`}
@@ -219,7 +219,7 @@ export default function HomeScreen() {
             deletingId === item.id ? (
               <ActivityIndicator size="small" color={COLORS.danger} />
             ) : (
-              <Trash2 color={COLORS.danger} size={18} />
+              <Trash2 color={COLORS.danger} size={20} />
             )
           }
           onPress={() => handleDelete(item.id)}

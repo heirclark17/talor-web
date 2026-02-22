@@ -14,6 +14,8 @@ import {
   AlertTriangle,
   RefreshCw,
   Loader2,
+  BookOpen,
+  Briefcase,
 } from 'lucide-react'
 import { api } from '../api/client'
 import { showError } from '../utils/toast'
@@ -256,6 +258,24 @@ export default function Home() {
           </button>
         </div>
 
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={() => navigate('/cover-letters')}
+            className="flex items-center gap-3 p-4 bg-theme-glass-5 hover:bg-theme-glass-10 rounded-xl transition-colors"
+          >
+            <BookOpen className="w-6 h-6 text-blue-400" />
+            <span className="text-theme font-medium">Cover Letters</span>
+          </button>
+          <button
+            onClick={() => navigate('/applications')}
+            className="flex items-center gap-3 p-4 bg-theme-glass-5 hover:bg-theme-glass-10 rounded-xl transition-colors"
+          >
+            <Briefcase className="w-6 h-6 text-blue-400" />
+            <span className="text-theme font-medium">Track Applications</span>
+          </button>
+        </div>
+
         {/* Search and Filter */}
         <div className="mb-6">
           <SearchFilter
@@ -280,16 +300,16 @@ export default function Home() {
           {filteredResumes.map((resume) => (
             <div
               key={resume.id}
-              className="glass rounded-xl p-4 sm:p-6 border border-theme-subtle hover:border-theme-muted transition-colors overflow-hidden"
+              className="glass rounded-xl p-6 border border-theme-subtle hover:border-theme-muted transition-colors overflow-hidden"
             >
               <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
                 {/* Icon and Info */}
                 <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0 overflow-hidden">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-theme-glass-5 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-theme flex-shrink-0" />
+                  <div className="w-12 h-12 bg-theme-glass-5 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-6 h-6 text-theme flex-shrink-0" />
                   </div>
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <h3 className="text-base sm:text-lg font-semibold text-theme truncate mb-0.5 sm:mb-1">{resume.filename}</h3>
+                    <h3 className="text-base font-semibold text-theme truncate mb-0.5 sm:mb-1">{resume.filename}</h3>
                     {resume.name && (
                       <p className="text-theme-secondary text-xs sm:text-sm truncate mb-1">{resume.name}</p>
                     )}
@@ -304,34 +324,34 @@ export default function Home() {
                   <button
                     onClick={() => handleAnalyze(resume.id, resume.filename)}
                     disabled={analyzingId === resume.id}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 bg-theme-glass-5 hover:bg-theme-glass-10 text-theme-secondary hover:text-theme rounded-lg transition-colors min-h-[44px] min-w-[80px] sm:min-w-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 bg-theme-glass-5 hover:bg-theme-glass-10 text-theme-secondary hover:text-theme rounded-lg transition-colors min-h-[40px] min-w-[80px] sm:min-w-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Analyze resume"
                   >
                     {analyzingId === resume.id ? (
                       <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
                     ) : (
-                      <FileSearch className="w-4 h-4 flex-shrink-0" />
+                      <FileSearch className="w-5 h-5 flex-shrink-0" />
                     )}
                     <span className="text-xs sm:text-sm whitespace-nowrap">Analyze</span>
                   </button>
                   <button
                     onClick={() => handleTailor(resume.id)}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 rounded-lg transition-colors min-h-[44px] min-w-[80px] sm:min-w-0"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 rounded-lg transition-colors min-h-[40px] min-w-[80px] sm:min-w-0"
                     aria-label="Tailor resume"
                   >
-                    <Target className="w-4 h-4 flex-shrink-0" />
+                    <Target className="w-5 h-5 flex-shrink-0" />
                     <span className="text-xs sm:text-sm whitespace-nowrap">Tailor</span>
                   </button>
                   <button
                     onClick={() => handleDelete(resume.id)}
                     disabled={deletingId === resume.id}
-                    className="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-lg transition-colors min-h-[44px] min-w-[44px] disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                    className="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-lg transition-colors min-h-[40px] min-w-[44px] disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                     aria-label="Delete resume"
                   >
                     {deletingId === resume.id ? (
                       <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
                     ) : (
-                      <Trash2 className="w-4 h-4 flex-shrink-0" />
+                      <Trash2 className="w-5 h-5 flex-shrink-0" />
                     )}
                   </button>
                 </div>
