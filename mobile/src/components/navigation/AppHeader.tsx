@@ -95,11 +95,7 @@ export function AppHeader() {
 
   const handleNavigate = (link: MenuItem) => {
     setMenuOpen(false);
-    if (link.stack) {
-      (navigation as any).navigate(link.stack, { screen: link.screen });
-    } else {
-      (navigation as any).navigate(link.screen);
-    }
+    (navigation as any).navigate(link.screen);
   };
 
   const isActive = (link: MenuItem) => {
