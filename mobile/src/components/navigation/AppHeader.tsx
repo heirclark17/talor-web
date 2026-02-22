@@ -56,7 +56,8 @@ interface MenuSection {
 export function AppHeader() {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const route = useRoute();
-  const { colors, isDark, toggleTheme } = useTheme();
+  const { colors, isDark, setThemeMode } = useTheme();
+  const toggleTheme = () => setThemeMode(isDark ? 'light' : 'dark');
   const { user, signOut } = useSupabaseAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);

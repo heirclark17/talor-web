@@ -92,7 +92,7 @@ export default function TemplatesScreen() {
 
   const handleUseTemplate = () => {
     if (selectedTemplate) {
-      navigation.navigate('ResumeBuilder' as never, { templateId: selectedTemplate } as never);
+      (navigation as any).navigate('ResumeBuilder', { templateId: selectedTemplate });
     }
   };
 

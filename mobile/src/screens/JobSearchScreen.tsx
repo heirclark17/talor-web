@@ -95,11 +95,11 @@ export default function JobSearchScreen() {
   };
 
   const handleTailorResume = (job: JobPosting) => {
-    navigation.navigate('TailorResume' as never, {
+    (navigation as any).navigate('TailorResume', {
       jobUrl: job.url,
       company: job.company,
       title: job.title,
-    } as never);
+    });
   };
 
   const handleViewJob = async (job: JobPosting) => {

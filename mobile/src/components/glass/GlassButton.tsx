@@ -229,6 +229,8 @@ export function GlassButton({
     </>
   );
 
+  const a11yProps = { accessibilityLabel, accessibilityHint };
+
   // For ghost variant, don't use glass effect
   if (variant === 'ghost') {
     return (
@@ -239,6 +241,7 @@ export function GlassButton({
         onPressOut={handlePressOut}
         disabled={isDisabled}
         activeOpacity={0.7}
+        {...a11yProps}
       >
         {content}
       </AnimatedTouchable>
@@ -255,6 +258,7 @@ export function GlassButton({
         onPressOut={handlePressOut}
         disabled={isDisabled}
         activeOpacity={0.8}
+        {...a11yProps}
       >
         {content}
       </AnimatedTouchable>
@@ -269,6 +273,7 @@ export function GlassButton({
         disabled={isDisabled}
         activeOpacity={1}
         style={[fullWidth && { width: '100%' }, style]}
+        {...a11yProps}
       >
         <LiquidGlassView
           style={[
@@ -300,6 +305,7 @@ export function GlassButton({
       onPressOut={handlePressOut}
       disabled={isDisabled}
       activeOpacity={0.8}
+      {...a11yProps}
     >
       {Platform.OS === 'ios' ? (
         <BlurView

@@ -1,48 +1,10 @@
-import { useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-expo';
-import { saveAuthToken, clearAuthTokens } from '../utils/userSession';
-
 /**
- * Hook to sync Clerk authentication token to secure storage
- * This ensures the API client can access the JWT token for authenticated requests
+ * Hook to sync authentication token to secure storage
+ *
+ * NOTE: This was originally built for Clerk auth but the app now uses Supabase.
+ * Auth token sync is handled by the Supabase client directly.
+ * Kept as a no-op for backwards compatibility.
  */
 export function useAuthSync() {
-  const { getToken, isSignedIn, userId, sessionId } = useAuth();
-
-  // Consider user authenticated if they have a userId OR isSignedIn
-  // Clerk may report isSignedIn=false when session has "pending tasks"
-  const isAuthenticated = isSignedIn || !!userId;
-
-  useEffect(() => {
-    console.log('[useAuthSync] Auth state:', {
-      isSignedIn,
-      userId,
-      sessionId,
-      isAuthenticated,
-    });
-
-    async function syncToken() {
-      if (isAuthenticated) {
-        try {
-          // Get JWT token from Clerk
-          const token = await getToken();
-          if (token) {
-            // Save to secure storage for API client
-            await saveAuthToken(token);
-            console.log('[useAuthSync] Token synced to secure storage (length:', token.length, ')');
-          } else {
-            console.warn('[useAuthSync] No token available despite isAuthenticated=true');
-          }
-        } catch (error) {
-          console.error('[useAuthSync] Error syncing token:', error);
-        }
-      } else {
-        // Clear tokens if not signed in
-        await clearAuthTokens();
-        console.log('[useAuthSync] Tokens cleared (user signed out)');
-      }
-    }
-
-    syncToken();
-  }, [isAuthenticated, isSignedIn, userId, sessionId, getToken]);
+  // No-op: Supabase handles token management internally
 }

@@ -8,5 +8,5 @@ export const coverLetterApi = {
   generate: (params: { jobTitle: string; companyName: string; jobDescription: string; tone?: 'professional' | 'enthusiastic' | 'strategic' | 'technical'; tailoredResumeId?: number }) => api.generateCoverLetter(params),
   update: (id: number, params: { content?: string; tone?: string }) => api.updateCoverLetter(id, params),
   delete: (id: number) => api.deleteCoverLetter(id),
-  export: (id: number, format: 'docx') => api.exportCoverLetter(id, format),
+  export: (id: number, format: 'docx' = 'docx') => api.exportCoverLetter(id, format),
 }

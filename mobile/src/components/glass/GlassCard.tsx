@@ -1,5 +1,5 @@
 import React, { ReactNode, useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, ViewStyle, StyleProp, Platform, InteractionManager } from 'react-native';
+import { StyleSheet, View, ViewStyle, StyleProp, Platform, InteractionManager, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { LiquidGlassView, isLiquidGlassSupported } from './LiquidGlassWrapper';
@@ -17,7 +17,7 @@ interface VariantDefaults {
   padding: number;
 }
 
-interface GlassCardProps {
+export interface GlassCardProps {
   children: ReactNode;
   /** Preset variant with automatic defaults (from HeirclarkHealthApp) */
   variant?: GlassCardVariant;
@@ -34,6 +34,8 @@ interface GlassCardProps {
   interactive?: boolean;
   /** Tint color for liquid glass effect */
   tintColor?: string;
+  /** Press handler — wraps card in TouchableOpacity */
+  onPress?: () => void;
 }
 
 /**
@@ -85,6 +87,7 @@ export function GlassCard({
   bordered = true,
   interactive = false,
   tintColor,
+  onPress,
 }: GlassCardProps) {
   // Apply variant defaults if variant is specified, otherwise use individual props or defaults
   const variantDefaults = variant ? getVariantDefaults(variant) : null;

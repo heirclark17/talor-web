@@ -284,7 +284,7 @@ export default function SavedComparisonsScreen() {
 
     try {
       const result = await api.updateComparison(comparisonId, {
-        tags: newTags.length > 0 ? newTags : null,
+        tags: newTags.length > 0 ? newTags : undefined,
       });
 
       if (result.success) {

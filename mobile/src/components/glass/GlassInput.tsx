@@ -8,6 +8,7 @@ import {
   Animated,
   StyleProp,
   ViewStyle,
+  TextStyle,
 } from 'react-native';
 import { GlassCard } from './GlassCard';
 import { useTheme } from '../../context/ThemeContext';
@@ -46,7 +47,7 @@ interface GlassInputProps extends Omit<TextInputProps, 'style'> {
   /**
    * Input style
    */
-  inputStyle?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<TextStyle>;
 
   /**
    * Icon element to display on the left side of input
@@ -142,8 +143,8 @@ export const GlassInput: React.FC<GlassInputProps> = ({
             style={[
               InputStyles.input,
               { color: colors.text },
-              leftIcon && { paddingLeft: SPACING.xl + SPACING.sm },
-              rightIcon && { paddingRight: SPACING.xl + SPACING.sm },
+              leftIcon ? { paddingLeft: SPACING.xl + SPACING.sm } : undefined,
+              rightIcon ? { paddingRight: SPACING.xl + SPACING.sm } : undefined,
               inputStyle,
             ]}
             placeholderTextColor={colors.textTertiary}
