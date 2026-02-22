@@ -195,8 +195,8 @@ export default function UploadResume() {
     <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-4xl mx-auto">
         <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-theme mb-4 sm:mb-6">Upload Resume</h1>
-          <p className="text-base sm:text-lg lg:text-xl text-theme-secondary mb-6 sm:mb-8 px-2">Upload a new resume to start tailoring for your next job</p>
+          <h1 className="text-3xl font-bold text-theme mb-4 sm:mb-6">Upload Resume</h1>
+          <p className="text-base text-theme-secondary mb-6 sm:mb-8 px-2">Upload a new resume to start tailoring for your next job</p>
 
           {/* Button to use existing resume */}
           <button
@@ -209,10 +209,10 @@ export default function UploadResume() {
         </div>
 
       {/* Upload Area */}
-      <div className="glass rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-16 mb-12 sm:mb-16 lg:mb-24">
+      <div className="glass rounded-2xl p-8 mb-12">
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 text-center transition-all cursor-pointer ${
+          className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
             uploading
               ? 'border-theme-muted bg-theme-glass-5 cursor-wait'
               : uploadSuccess
@@ -224,26 +224,26 @@ export default function UploadResume() {
         >
           {uploading ? (
             <>
-              <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-theme mb-3 sm:mb-4 animate-spin" />
-              <p className="text-base sm:text-lg text-theme mb-2 font-semibold">Uploading and parsing resume...</p>
+              <Loader2 className="w-12 h-12 mx-auto text-theme mb-4 animate-spin" />
+              <p className="text-base text-theme mb-2 font-semibold">Uploading and parsing resume...</p>
             </>
           ) : uploadSuccess ? (
             <>
-              <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-green-500 mb-3 sm:mb-4" />
-              <p className="text-base sm:text-lg text-theme mb-2 font-semibold">Resume uploaded successfully!</p>
-              <p className="text-xs sm:text-sm text-theme-secondary mb-3 sm:mb-4">Parsed {parsedResume?.filename}</p>
+              <CheckCircle className="w-16 h-16 mx-auto text-green-500 mb-4" />
+              <p className="text-base text-theme mb-2 font-semibold">Resume uploaded successfully!</p>
+              <p className="text-sm text-theme-secondary mb-4">Parsed {parsedResume?.filename}</p>
             </>
           ) : error ? (
             <>
-              <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-red-500 mb-3 sm:mb-4" />
-              <p className="text-base sm:text-lg text-red-400 mb-2 font-semibold">Upload failed</p>
-              <p className="text-xs sm:text-sm text-red-400 mb-3 sm:mb-4">{error}</p>
+              <AlertCircle className="w-12 h-12 mx-auto text-red-500 mb-4" />
+              <p className="text-base text-red-400 mb-2 font-semibold">Upload failed</p>
+              <p className="text-sm text-red-400 mb-4">{error}</p>
             </>
           ) : (
             <>
-              <Upload className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-theme mb-3 sm:mb-4" />
-              <p className="text-base sm:text-lg text-theme mb-2 font-semibold">Click to select your resume</p>
-              <p className="text-xs sm:text-sm text-theme-secondary mb-3 sm:mb-4">Supports .docx and .pdf files (max 10MB)</p>
+              <Upload className="w-12 h-12 mx-auto text-theme mb-4" />
+              <p className="text-base text-theme mb-2 font-semibold">Click to select your resume</p>
+              <p className="text-sm text-theme-secondary mb-4">Supports .docx and .pdf files (max 10MB)</p>
             </>
           )}
 
@@ -265,6 +265,40 @@ export default function UploadResume() {
           >
             {uploading ? 'Uploading...' : uploadSuccess ? 'Upload Another Resume' : 'Select File'}
           </button>
+        </div>
+      </div>
+
+      {/* What happens next? Info Section */}
+      <div className="glass rounded-2xl p-6 mb-12">
+        <h3 className="text-xl font-semibold text-theme mb-6">What happens next?</h3>
+
+        <div className="space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-sm font-semibold">1</span>
+            </div>
+            <p className="text-theme-secondary">
+              We'll extract your experience, skills, and education
+            </p>
+          </div>
+
+          <div className="flex items-start gap-4">
+            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-sm font-semibold">2</span>
+            </div>
+            <p className="text-theme-secondary">
+              Use AI to tailor your resume for specific job postings
+            </p>
+          </div>
+
+          <div className="flex items-start gap-4">
+            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-sm font-semibold">3</span>
+            </div>
+            <p className="text-theme-secondary">
+              Get interview prep materials based on your tailored resume
+            </p>
+          </div>
         </div>
       </div>
 

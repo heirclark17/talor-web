@@ -228,7 +228,7 @@ export default function UploadResumeScreen() {
       <GlassCard
         style={styles.uploadArea}
         material="thin"
-        borderRadius={SPACING.radiusMD}
+        borderRadius={SPACING.radiusLG}
         padding={SPACING.xl}
       >
         {uploadSuccess ? (
@@ -341,11 +341,11 @@ export default function UploadResumeScreen() {
           <GlassButton
             label="Upload Resume"
             variant="primary"
-            size="lg"
+            size="md"
             fullWidth
             loading={uploading}
             disabled={uploading}
-            icon={<Upload color="#ffffff" size={20} />}
+            icon={<Upload color="#ffffff" size={24} />}
             onPress={handleUpload}
             accessibilityLabel={uploading ? "Uploading resume" : "Upload resume"}
             accessibilityHint="Uploads the selected resume file to your account"
