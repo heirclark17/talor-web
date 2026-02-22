@@ -659,6 +659,7 @@ export const api = {
       const response = await fetchWithAuth(`/api/interview-prep/${interviewPrepId}`, {
         method: 'DELETE',
       });
+      if (response.status === 204) return { success: true, data: null };
       const data = await response.json();
       return { success: response.ok, data };
     } catch (error: any) {
@@ -946,6 +947,7 @@ export const api = {
       const response = await fetchWithAuth(`/api/saved-comparisons/${comparisonId}`, {
         method: 'DELETE',
       });
+      if (response.status === 204) return { success: true, data: null };
       const data = await response.json();
       return { success: response.ok, data };
     } catch (error: any) {
@@ -1134,10 +1136,51 @@ export const api = {
       const response = await fetchWithAuth(`/api/star-stories/${storyId}`, {
         method: 'DELETE',
       });
+      if (response.status === 204) return { success: true, data: null };
       const data = await response.json();
       return { success: response.ok, data };
     } catch (error: any) {
       console.error('Error deleting STAR story:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Generate STAR story from experience bullet points
+  async generateStarStoryFromExperience(params: {
+    experienceText: string;
+    jobTitle?: string;
+    companyName?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/star-stories/generate-from-experience', {
+        method: 'POST',
+        body: JSON.stringify({
+          experience_text: params.experienceText,
+          job_title: params.jobTitle,
+          company_name: params.companyName,
+        }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error generating STAR story from experience:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Match STAR stories to interview questions
+  async matchStarStoriesToQuestions(params: {
+    questions: string[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/star-stories/match-to-questions', {
+        method: 'POST',
+        body: JSON.stringify({ questions: params.questions }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error matching STAR stories to questions:', error);
       return { success: false, error: error.message };
     }
   },
@@ -1298,10 +1341,31 @@ export const api = {
       const response = await fetchWithAuth(`/api/career-path/${planId}`, {
         method: 'DELETE',
       });
+      // Handle 204 No Content
+      if (response.status === 204) {
+        return { success: true, data: null };
+      }
       const data = await response.json();
       return { success: response.ok, data };
     } catch (error: any) {
       console.error('Error deleting career plan:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async deleteAllCareerPlans(): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/career-path/', {
+        method: 'DELETE',
+      });
+      // Handle 204 No Content
+      if (response.status === 204) {
+        return { success: true, data: null };
+      }
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error deleting all career plans:', error);
       return { success: false, error: error.message };
     }
   },
@@ -1805,13 +1869,14 @@ export const api = {
   /**
    * Auto-generate typical tasks for a job role using Perplexity AI
    */
-  async generateTasksForRole(roleTitle: string, industry?: string): Promise<ApiResponse> {
+  async generateTasksForRole(roleTitle: string, industry?: string, bullets?: string[]): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/career-path/generate-tasks', {
         method: 'POST',
         body: JSON.stringify({
           role_title: roleTitle,
           industry: industry || '',
+          bullets: bullets || [],
         }),
       });
       const result = await response.json();
@@ -1842,6 +1907,7 @@ export const api = {
       const response = await fetchWithAuth(`/api/resume-analysis/cache/${tailoredResumeId}`, {
         method: 'DELETE',
       });
+      if (response.status === 204) return { success: true, data: null };
       const data = await response.json();
 
       if (!response.ok) {
@@ -2129,6 +2195,7 @@ export const api = {
   async deleteApplication(applicationId: number): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth(`/api/applications/${applicationId}`, { method: 'DELETE' });
+      if (response.status === 204) return { success: true, data: null };
       const data = await response.json();
 
       if (!response.ok) {
@@ -2294,11 +2361,38 @@ export const api = {
   },
 
   /**
+   * Export a cover letter in a given format (e.g. docx)
+   */
+  async exportCoverLetter(coverLetterId: number, format: string): Promise<ApiResponse<Blob>> {
+    try {
+      const response = await fetchWithAuth(`/api/cover-letters/${coverLetterId}/export`, {
+        method: 'POST',
+        body: JSON.stringify({ format }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return {
+          success: false,
+          error: errorData.detail || errorData.error || `HTTP ${response.status}`,
+        };
+      }
+
+      const blob = await response.blob();
+      return { success: true, data: blob };
+    } catch (error: any) {
+      console.error('Error exporting cover letter:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
    * Delete a cover letter
    */
   async deleteCoverLetter(coverLetterId: number): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth(`/api/cover-letters/${coverLetterId}`, { method: 'DELETE' });
+      if (response.status === 204) return { success: true, data: null };
       const data = await response.json();
 
       if (!response.ok) {

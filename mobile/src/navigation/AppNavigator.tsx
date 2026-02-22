@@ -130,8 +130,15 @@ function AuthStackNavigator() {
 function MainStackNavigator() {
   return (
     <ErrorBoundary screenName="Main">
-      <AppHeader />
-      <MainStack.Navigator screenOptions={stackScreenOptions}>
+      <MainStack.Navigator
+        screenOptions={stackScreenOptions}
+        screenLayout={({ children }) => (
+          <>
+            <AppHeader />
+            {children}
+          </>
+        )}
+      >
         {/* Home / Resumes */}
         <MainStack.Screen name="HomeMain" component={HomeScreen} />
         <MainStack.Screen

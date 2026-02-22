@@ -103,6 +103,8 @@ const LONG_TIMEOUT_ENDPOINTS = [
   '/api/star-stories/',
   '/api/certifications/',
   '/api/resume-analysis/',
+  '/api/cover-letters/generate',
+  '/api/batch-tailor',
 ];
 
 /**
@@ -306,6 +308,12 @@ export async function del<T>(endpoint: string): Promise<ApiResponse<T>> {
     const response = await fetchWithAuth(endpoint, {
       method: 'DELETE',
     });
+
+    // Handle 204 No Content — no body to parse
+    if (response.status === 204) {
+      return { success: true, data: null as T };
+    }
+
     const data = await response.json();
 
     if (!response.ok) {
