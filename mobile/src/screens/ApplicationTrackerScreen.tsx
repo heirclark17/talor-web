@@ -134,10 +134,10 @@ export default function ApplicationTrackerScreen() {
       >
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
-            <Text style={styles.jobTitle} numberOfLines={1}>
+            <Text style={[styles.jobTitle, { color: colors.text }]} numberOfLines={1}>
               {item.jobTitle}
             </Text>
-            <Text style={styles.companyName} numberOfLines={1}>
+            <Text style={[styles.companyName, { color: colors.textSecondary }]} numberOfLines={1}>
               {item.companyName}
             </Text>
           </View>
@@ -151,16 +151,16 @@ export default function ApplicationTrackerScreen() {
         {(item.location || item.salaryMin || item.salaryMax) && (
           <View style={styles.cardDetails}>
             {item.location && (
-              <Text style={styles.detailText}>📍 {item.location}</Text>
+              <Text style={[styles.detailText, { color: colors.textSecondary }]}>📍 {item.location}</Text>
             )}
             {formatSalary(item.salaryMin, item.salaryMax) && (
-              <Text style={styles.detailText}>💰 {formatSalary(item.salaryMin, item.salaryMax)}</Text>
+              <Text style={[styles.detailText, { color: colors.textSecondary }]}>💰 {formatSalary(item.salaryMin, item.salaryMax)}</Text>
             )}
           </View>
         )}
 
         <View style={styles.cardFooter}>
-          <Text style={styles.dateText}>
+          <Text style={[styles.dateText, { color: colors.textTertiary }]}>
             {item.appliedDate ? `Applied ${formatDate(item.appliedDate)}` : `Saved ${formatDate(item.createdAt)}`}
           </Text>
         </View>
@@ -178,23 +178,23 @@ export default function ApplicationTrackerScreen() {
     return (
       <BlurView intensity={GLASS.getBlurIntensity('regular')} tint="light" style={styles.statsBlur}>
         <View style={styles.statsContainer}>
-          <Text style={styles.statsTitle}>Application Summary</Text>
+          <Text style={[styles.statsTitle, { color: colors.text }]}>Application Summary</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{totalActive}</Text>
-              <Text style={styles.statLabel}>Active</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Active</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{stats.applied || 0}</Text>
-              <Text style={styles.statLabel}>Applied</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Applied</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{stats.interviewing || 0}</Text>
-              <Text style={styles.statLabel}>Interviews</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Interviews</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{stats.offer || 0}</Text>
-              <Text style={styles.statLabel}>Offers</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Offers</Text>
             </View>
           </View>
         </View>
@@ -205,20 +205,20 @@ export default function ApplicationTrackerScreen() {
   const renderFilterChips = () => (
     <View style={styles.filterContainer}>
       <TouchableOpacity
-        style={[styles.filterChip, !selectedStatus && styles.filterChipActive]}
+        style={[styles.filterChip, { backgroundColor: colors.backgroundSecondary + '40' }, !selectedStatus && styles.filterChipActive]}
         onPress={() => setSelectedStatus(null)}
       >
-        <Text style={[styles.filterChipText, !selectedStatus && styles.filterChipTextActive]}>
+        <Text style={[styles.filterChipText, { color: colors.textSecondary }, !selectedStatus && styles.filterChipTextActive]}>
           All
         </Text>
       </TouchableOpacity>
       {Object.entries(STATUS_LABELS).map(([key, label]) => (
         <TouchableOpacity
           key={key}
-          style={[styles.filterChip, selectedStatus === key && styles.filterChipActive]}
+          style={[styles.filterChip, { backgroundColor: colors.backgroundSecondary + '40' }, selectedStatus === key && styles.filterChipActive]}
           onPress={() => setSelectedStatus(key)}
         >
-          <Text style={[styles.filterChipText, selectedStatus === key && styles.filterChipTextActive]}>
+          <Text style={[styles.filterChipText, { color: colors.textSecondary }, selectedStatus === key && styles.filterChipTextActive]}>
             {label}
           </Text>
         </TouchableOpacity>
@@ -228,7 +228,7 @@ export default function ApplicationTrackerScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
@@ -237,9 +237,9 @@ export default function ApplicationTrackerScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Application Tracker</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Application Tracker</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
@@ -267,8 +267,8 @@ export default function ApplicationTrackerScreen() {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>No applications yet</Text>
-            <Text style={styles.emptyText}>
+            <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>No applications yet</Text>
+            <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
               Start tracking your job applications by tapping the Add button above
             </Text>
           </View>
@@ -296,7 +296,6 @@ export default function ApplicationTrackerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -314,7 +313,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...TYPOGRAPHY.heading1,
-    color: colors.text,
   },
   addButton: {
     backgroundColor: COLORS.primary,
@@ -340,7 +338,6 @@ const styles = StyleSheet.create({
   },
   statsTitle: {
     ...TYPOGRAPHY.heading3,
-    color: colors.text,
     marginBottom: SPACING.md,
   },
   statsGrid: {
@@ -356,7 +353,6 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     ...TYPOGRAPHY.caption,
-    color: colors.textSecondary,
     marginTop: SPACING.xs,
   },
   filterContainer: {
@@ -369,7 +365,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: GLASS.getCornerRadius('full'),
-    backgroundColor: colors.backgroundSecondary + '40',
     borderWidth: GLASS.getBorderWidth(),
     borderColor: GLASS.getBorderColor(),
   },
@@ -379,7 +374,6 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     ...TYPOGRAPHY.caption,
-    color: colors.textSecondary,
   },
   filterChipTextActive: {
     color: '#ffffff',
@@ -408,12 +402,10 @@ const styles = StyleSheet.create({
   },
   jobTitle: {
     ...TYPOGRAPHY.heading3,
-    color: colors.text,
     marginBottom: SPACING.xs,
   },
   companyName: {
     ...TYPOGRAPHY.body,
-    color: colors.textSecondary,
   },
   statusBadge: {
     paddingHorizontal: SPACING.sm,
@@ -429,7 +421,6 @@ const styles = StyleSheet.create({
   },
   detailText: {
     ...TYPOGRAPHY.body,
-    color: colors.textSecondary,
     marginBottom: SPACING.xs,
   },
   cardFooter: {
@@ -439,7 +430,6 @@ const styles = StyleSheet.create({
   },
   dateText: {
     ...TYPOGRAPHY.caption,
-    color: colors.textTertiary,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -447,12 +437,10 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...TYPOGRAPHY.heading2,
-    color: colors.textSecondary,
     marginBottom: SPACING.sm,
   },
   emptyText: {
     ...TYPOGRAPHY.body,
-    color: colors.textTertiary,
     textAlign: 'center',
     paddingHorizontal: SPACING.xl,
   },

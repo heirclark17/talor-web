@@ -143,6 +143,7 @@ export default function CoverLetterGeneratorScreen() {
           key={option.value}
           style={[
             styles.optionButton,
+            { backgroundColor: colors.backgroundSecondary + '40' },
             selectedValue === option.value && styles.optionButtonActive,
           ]}
           onPress={() => onSelect(option.value)}
@@ -150,6 +151,7 @@ export default function CoverLetterGeneratorScreen() {
           <Text
             style={[
               styles.optionButtonText,
+              { color: colors.textSecondary },
               selectedValue === option.value && styles.optionButtonTextActive,
             ]}
           >
@@ -174,9 +176,9 @@ export default function CoverLetterGeneratorScreen() {
           setModalVisible(true);
         }}
       >
-        <Text style={styles.cardTitle}>{item.jobTitle}</Text>
-        <Text style={styles.cardSubtitle}>{item.companyName}</Text>
-        <Text style={styles.cardDate}>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>{item.jobTitle}</Text>
+        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{item.companyName}</Text>
+        <Text style={[styles.cardDate, { color: colors.textTertiary }]}>
           {new Date(item.createdAt).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
@@ -188,7 +190,7 @@ export default function CoverLetterGeneratorScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -196,10 +198,10 @@ export default function CoverLetterGeneratorScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <BlurView intensity={GLASS.getBlurIntensity('regular')} tint="light" style={styles.formBlur}>
             <View style={styles.formContainer}>
-              <Text style={styles.sectionTitle}>Generate Cover Letter</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Generate Cover Letter</Text>
 
               {/* Input Method Toggle */}
-              <View style={styles.toggleContainer}>
+              <View style={[styles.toggleContainer, { backgroundColor: colors.backgroundSecondary + '40' }]}>
                 <TouchableOpacity
                   style={[styles.toggleButton, inputMethod === 'url' && styles.toggleButtonActive]}
                   onPress={() => setInputMethod('url')}
@@ -207,6 +209,7 @@ export default function CoverLetterGeneratorScreen() {
                   <Text
                     style={[
                       styles.toggleButtonText,
+                      { color: colors.textSecondary },
                       inputMethod === 'url' && styles.toggleButtonTextActive,
                     ]}
                   >
@@ -220,6 +223,7 @@ export default function CoverLetterGeneratorScreen() {
                   <Text
                     style={[
                       styles.toggleButtonText,
+                      { color: colors.textSecondary },
                       inputMethod === 'manual' && styles.toggleButtonTextActive,
                     ]}
                   >
@@ -230,9 +234,9 @@ export default function CoverLetterGeneratorScreen() {
 
               {/* Job Details */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Job Title *</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>Job Title *</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="e.g., Senior Product Manager"
                   placeholderTextColor={colors.textTertiary}
                   value={jobTitle}
@@ -241,9 +245,9 @@ export default function CoverLetterGeneratorScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Company Name *</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>Company Name *</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="e.g., Apple"
                   placeholderTextColor={colors.textTertiary}
                   value={companyName}
@@ -253,9 +257,9 @@ export default function CoverLetterGeneratorScreen() {
 
               {inputMethod === 'url' ? (
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Job URL *</Text>
+                  <Text style={[styles.inputLabel, { color: colors.text }]}>Job URL *</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: colors.text }]}
                     placeholder="https://..."
                     placeholderTextColor={colors.textTertiary}
                     value={jobUrl}
@@ -266,9 +270,9 @@ export default function CoverLetterGeneratorScreen() {
                 </View>
               ) : (
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Job Description *</Text>
+                  <Text style={[styles.inputLabel, { color: colors.text }]}>Job Description *</Text>
                   <TextInput
-                    style={[styles.input, styles.textArea]}
+                    style={[styles.input, styles.textArea, { color: colors.text }]}
                     placeholder="Paste the job description here..."
                     placeholderTextColor={colors.textTertiary}
                     value={jobDescription}
@@ -282,17 +286,17 @@ export default function CoverLetterGeneratorScreen() {
 
               {/* Customization Options */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Tone</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>Tone</Text>
                 {renderOptionButtons(TONE_OPTIONS, tone, setTone)}
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Length</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>Length</Text>
                 {renderOptionButtons(LENGTH_OPTIONS, length, setLength)}
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Focus</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>Focus</Text>
                 {renderOptionButtons(FOCUS_OPTIONS, focus, setFocus)}
               </View>
 
@@ -314,7 +318,7 @@ export default function CoverLetterGeneratorScreen() {
           {/* Previous Cover Letters */}
           {coverLetters.length > 0 && (
             <View style={styles.historySection}>
-              <Text style={styles.historySectionTitle}>Previous Cover Letters</Text>
+              <Text style={[styles.historySectionTitle, { color: colors.text }]}>Previous Cover Letters</Text>
               {coverLetters.map(renderCoverLetterCard)}
             </View>
           )}
@@ -342,7 +346,6 @@ export default function CoverLetterGeneratorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scrollContent: {
     padding: SPACING.md,
@@ -357,13 +360,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.heading2,
-    color: colors.text,
     marginBottom: SPACING.lg,
   },
   toggleContainer: {
     flexDirection: 'row',
     marginBottom: SPACING.lg,
-    backgroundColor: colors.backgroundSecondary + '40',
     borderRadius: GLASS.getCornerRadius('medium'),
     padding: SPACING.xs,
   },
@@ -379,7 +380,6 @@ const styles = StyleSheet.create({
   },
   toggleButtonText: {
     ...TYPOGRAPHY.body,
-    color: colors.textSecondary,
   },
   toggleButtonTextActive: {
     color: '#ffffff',
@@ -390,13 +390,11 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     ...TYPOGRAPHY.bodyBold,
-    color: colors.text,
     marginBottom: SPACING.sm,
   },
   input: {
     ...TYPOGRAPHY.body,
-    color: colors.text,
-    backgroundColor: '#ffffff' + '80',
+    backgroundColor: '#ffffff80',
     borderRadius: GLASS.getCornerRadius('medium'),
     borderWidth: GLASS.getBorderWidth(),
     borderColor: GLASS.getBorderColor(),
@@ -416,7 +414,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: GLASS.getCornerRadius('medium'),
-    backgroundColor: colors.backgroundSecondary + '40',
     borderWidth: GLASS.getBorderWidth(),
     borderColor: GLASS.getBorderColor(),
   },
@@ -426,7 +423,6 @@ const styles = StyleSheet.create({
   },
   optionButtonText: {
     ...TYPOGRAPHY.caption,
-    color: colors.textSecondary,
   },
   optionButtonTextActive: {
     color: '#ffffff',
@@ -452,7 +448,6 @@ const styles = StyleSheet.create({
   },
   historySectionTitle: {
     ...TYPOGRAPHY.heading2,
-    color: colors.text,
     marginBottom: SPACING.md,
   },
   cardBlur: {
@@ -468,16 +463,13 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     ...TYPOGRAPHY.heading3,
-    color: colors.text,
     marginBottom: SPACING.xs,
   },
   cardSubtitle: {
     ...TYPOGRAPHY.body,
-    color: colors.textSecondary,
     marginBottom: SPACING.xs,
   },
   cardDate: {
     ...TYPOGRAPHY.caption,
-    color: colors.textTertiary,
   },
 });

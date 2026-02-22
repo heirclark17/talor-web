@@ -84,7 +84,10 @@ function AppContent() {
 
   return (
     <BackgroundLayer>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar
+        style={isDark ? 'light' : 'dark'}
+        translucent={false}
+      />
       <AppNavigator />
     </BackgroundLayer>
   );

@@ -16,7 +16,13 @@ import { X, Edit2, Save, Trash2, Download, Share2 } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../utils/constants';
 import { api } from '../api';
-import * as Sharing from 'expo-sharing';
+// Lazy-load expo-sharing to avoid crash when native module isn't built
+let Sharing: any = null;
+try {
+  Sharing = require('expo-sharing');
+} catch (e) {
+  // expo-sharing native module not available
+}
 
 interface CoverLetter {
   id: number;
@@ -122,7 +128,9 @@ export function CoverLetterDetailModal({
 
       if (result.success && result.data) {
         // Create blob URL and share
-        const canShare = await Sharing.isAvailableAsync();
+        const canShare = Sharing && typeof Sharing.isAvailableAsync === 'function'
+          ? await Sharing.isAvailableAsync()
+          : false;
         if (canShare) {
           // In a real implementation, you'd save the blob to a file first
           // then share the file URI

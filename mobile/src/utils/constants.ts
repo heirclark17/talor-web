@@ -400,6 +400,44 @@ export const GLASS = {
         return 12;
     }
   },
+
+  // Helper to get shadow based on size (iOS 26 Liquid Glass compliant)
+  getShadow: (size: 'small' | 'medium' | 'large' = 'medium') => {
+    switch (size) {
+      case 'small':
+        return {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 4,
+          elevation: 2,
+        };
+      case 'medium':
+        return {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
+          elevation: 6,
+        };
+      case 'large':
+        return {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.20,
+          shadowRadius: 24,
+          elevation: 10,
+        };
+      default:
+        return {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
+          elevation: 6,
+        };
+    }
+  },
 };
 
 // ========== ALPHA COLORS (for badges/overlays/semantic) ==========
