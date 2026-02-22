@@ -375,6 +375,31 @@ export const GLASS = {
     if (theme === 'sandDark') return 25;
     return isDark ? 20 : 35; // Default theme
   },
+
+  // Helper to get standard border width for glass components
+  getBorderWidth: (): number => {
+    return 1; // Standard 1px border for glass components
+  },
+
+  // Helper to get border color for glass components (default theme)
+  getBorderColor: (): string => {
+    // Using default dark theme border color (most common use case)
+    return 'rgba(255, 255, 255, 0.06)';
+  },
+
+  // Helper to get corner radius based on size
+  getCornerRadius: (size: 'small' | 'medium' | 'large' = 'medium'): number => {
+    switch (size) {
+      case 'small':
+        return 8;
+      case 'medium':
+        return 12;
+      case 'large':
+        return 16;
+      default:
+        return 12;
+    }
+  },
 };
 
 // ========== ALPHA COLORS (for badges/overlays/semantic) ==========
