@@ -180,6 +180,13 @@ export async function fetchWithAuth(
   // Log auth headers for debugging (remove once auth is stable)
   if (!headers['Authorization']) {
     console.warn(`[API] No JWT for ${endpoint} — using X-User-ID fallback:`, headers['X-User-ID']?.substring(0, 15));
+  } else {
+    console.log(`[API] Request to ${endpoint}:`, {
+      hasAuth: !!headers['Authorization'],
+      hasUserId: !!headers['X-User-ID'],
+      authPrefix: headers['Authorization']?.substring(0, 20),
+      method: options.method || 'GET',
+    });
   }
 
   try {

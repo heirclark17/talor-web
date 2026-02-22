@@ -391,19 +391,26 @@ export const api = {
 
   async uploadResume(formData: FormData): Promise<ApiResponse> {
     try {
+      console.log('[UploadResume] Starting upload request...');
       const response = await fetchWithAuth('/api/resumes/upload', {
         method: 'POST',
         body: formData,
       });
+      console.log('[UploadResume] Response status:', response.status);
       const data = await response.json();
       if (!response.ok) {
         const errorMsg = data?.error || data?.detail || data?.message || `Server error: ${response.status}`;
-        console.error('[UploadResume] Server error:', response.status, data);
+        console.error('[UploadResume] Server error:', {
+          status: response.status,
+          statusText: response.statusText,
+          data,
+          headers: Object.fromEntries(response.headers.entries()),
+        });
         return { success: false, data, error: errorMsg };
       }
       return { success: true, data };
     } catch (error: any) {
-      console.error('Error uploading resume:', error);
+      console.error('[UploadResume] Upload failed:', error);
       return { success: false, error: error.message };
     }
   },
