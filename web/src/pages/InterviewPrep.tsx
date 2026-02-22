@@ -769,7 +769,7 @@ export default function InterviewPrep() {
   if (error) {
     return (
       <div className="min-h-screen bg-theme flex items-center justify-center p-6">
-        <div className="glass rounded-3xl p-8 max-w-md w-full text-center">
+        <div className="glass rounded-2xl p-6 max-w-md w-full text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-theme mb-2">Error Loading Interview Prep</h2>
           <p className="text-theme-secondary mb-6">{error}</p>
@@ -796,7 +796,7 @@ export default function InterviewPrep() {
   if (!prepData) {
     return (
       <div className="min-h-screen bg-theme flex items-center justify-center p-6">
-        <div className="glass rounded-3xl p-8 max-w-md w-full text-center">
+        <div className="glass rounded-2xl p-6 max-w-md w-full text-center">
           <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-theme mb-2">No Interview Prep Available</h2>
           <p className="text-theme-secondary mb-6">Generate interview prep to get started.</p>
@@ -818,7 +818,7 @@ export default function InterviewPrep() {
         <div className="mb-6 sm:mb-8">
           <button
             onClick={() => navigate('/tailor')}
-            className="flex items-center gap-2 text-theme-secondary hover:text-theme mb-4 transition-colors min-h-[44px]"
+            className="flex items-center gap-2 text-theme-secondary hover:text-theme mb-4 transition-colors min-h-[48px]"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Resume
@@ -843,8 +843,8 @@ export default function InterviewPrep() {
 
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-theme mb-2">Interview Preparation</h1>
-              <p className="text-sm sm:text-base text-theme-secondary">
+              <h1 className="text-3xl font-bold text-theme mb-2">Interview Preparation</h1>
+              <p className="text-base text-theme-secondary">
                 AI-generated interview prep for {prepData.role_analysis.job_title} at{' '}
                 {prepData.company_profile.name}
               </p>
@@ -854,33 +854,33 @@ export default function InterviewPrep() {
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               <button
                 onClick={expandAll}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[48px]"
               >
                 <ChevronDown size={18} />
-                <span className="text-sm font-medium hidden sm:inline">Expand All</span>
+                <span className="text-sm font-medium">Expand All</span>
               </button>
               <button
                 onClick={collapseAll}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[48px]"
               >
                 <ChevronUp size={18} />
-                <span className="text-sm font-medium hidden sm:inline">Collapse All</span>
+                <span className="text-sm font-medium">Collapse All</span>
               </button>
               <button
                 onClick={exportToPDF}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[48px]"
               >
                 <Printer size={18} />
-                <span className="text-sm font-medium hidden sm:inline">Print</span>
+                <span className="text-sm font-medium">Print</span>
               </button>
 
               <div className="relative">
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[44px]"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10 transition-all min-h-[48px]"
                 >
                   <FileDown size={18} />
-                  <span className="text-sm font-medium hidden sm:inline">Export</span>
+                  <span className="text-sm font-medium">Export</span>
                   <ChevronDown size={16} />
                 </button>
 
@@ -916,10 +916,10 @@ export default function InterviewPrep() {
         {/* Interview Date & Progress Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Interview Date Countdown */}
-          <div className="glass rounded-2xl p-4 sm:p-6">
+          <div className="glass rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-theme" strokeWidth={2} />
-              <h3 className="text-lg sm:text-xl font-bold text-theme">Interview Date</h3>
+              <Calendar className="w-6 h-6 text-theme" strokeWidth={2} />
+              <h3 className="text-xl font-bold text-theme">Interview Date</h3>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <input
@@ -941,8 +941,8 @@ export default function InterviewPrep() {
           </div>
 
           {/* Progress Dashboard */}
-          <div className="glass rounded-2xl p-4 sm:p-6">
-            <h3 className="text-lg sm:text-xl font-bold text-theme mb-4">Preparation Progress</h3>
+          <div className="glass rounded-2xl p-6">
+            <h3 className="text-xl font-bold text-theme mb-4">Preparation Progress</h3>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm mb-1">

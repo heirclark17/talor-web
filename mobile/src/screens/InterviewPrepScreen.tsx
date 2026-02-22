@@ -321,7 +321,7 @@ export default function InterviewPrepScreen() {
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         {/* Job Info Card - Header in Frosted Glass */}
-        <GlassCard material="thin" borderRadius={RADIUS.xl} style={styles.jobCardGlass}>
+        <GlassCard material="thin" borderRadius={RADIUS.lg} style={styles.jobCardGlass}>
           <View style={styles.jobCardHeader}>
             <View style={[styles.jobIcon, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
               <Building2 color={COLORS.primary} size={28} />
@@ -359,7 +359,7 @@ export default function InterviewPrepScreen() {
           <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>COMPANY INSIGHTS</Text>
 
           {/* Company Profile Card + Expandable */}
-          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
               onPress={() => handleSectionPress('companyProfile')}
@@ -404,7 +404,7 @@ export default function InterviewPrepScreen() {
           </GlassCard>
 
           {/* Values & Culture Card + Expandable */}
-          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
               onPress={() => handleSectionPress('valuesCulture')}
@@ -456,7 +456,7 @@ export default function InterviewPrepScreen() {
           </GlassCard>
 
           {/* Strategy & News Card + Expandable */}
-          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
               onPress={() => handleSectionPress('strategyNews')}
@@ -564,7 +564,7 @@ export default function InterviewPrepScreen() {
           <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>ROLE & PREPARATION</Text>
 
           {/* Role Analysis Card + Expandable */}
-          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
               onPress={() => handleSectionPress('roleAnalysis')}
@@ -620,7 +620,7 @@ export default function InterviewPrepScreen() {
           </GlassCard>
 
           {/* Preparation Checklist Card + Expandable */}
-          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
               onPress={() => handleSectionPress('preparation')}
@@ -672,7 +672,7 @@ export default function InterviewPrepScreen() {
           </GlassCard>
 
           {/* Questions to Ask Card + Expandable */}
-          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
               onPress={() => handleSectionPress('questions')}
@@ -721,7 +721,7 @@ export default function InterviewPrepScreen() {
           </GlassCard>
 
           {/* Candidate Positioning Card + Expandable */}
-          <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+          <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
             <TouchableOpacity
               style={styles.stackedCardItem}
               onPress={() => handleSectionPress('positioning')}
@@ -847,7 +847,7 @@ export default function InterviewPrepScreen() {
             <>
               <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>AI PRACTICE</Text>
 
-              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
                 <TouchableOpacity
                   style={styles.stackedCardItem}
                   onPress={() => {
@@ -876,7 +876,7 @@ export default function InterviewPrepScreen() {
                 </TouchableOpacity>
               </GlassCard>
 
-              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
                 <TouchableOpacity
                   style={styles.stackedCardItem}
                   onPress={() => {
@@ -905,7 +905,7 @@ export default function InterviewPrepScreen() {
                 </TouchableOpacity>
               </GlassCard>
 
-              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
                 <TouchableOpacity
                   style={styles.stackedCardItem}
                   onPress={() => {
@@ -934,7 +934,7 @@ export default function InterviewPrepScreen() {
                 </TouchableOpacity>
               </GlassCard>
 
-              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
                 <TouchableOpacity
                   style={styles.stackedCardItem}
                   onPress={() => {
@@ -963,7 +963,7 @@ export default function InterviewPrepScreen() {
                 </TouchableOpacity>
               </GlassCard>
 
-              <GlassCard padding={0} material="thin" borderRadius={RADIUS.xl} style={styles.individualCard}>
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
                 <TouchableOpacity
                   style={styles.stackedCardItem}
                   onPress={() => {
@@ -1102,7 +1102,7 @@ const styles = StyleSheet.create({
   },
   individualCard: {
     marginBottom: SPACING.md,
-    borderRadius: RADIUS.xl, // More rounded edges
+    borderRadius: RADIUS.lg, // Standardized to 16px
     overflow: 'hidden',
   },
   stackedCardItem: {
