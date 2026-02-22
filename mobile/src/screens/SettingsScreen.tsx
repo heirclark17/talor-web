@@ -25,6 +25,7 @@ import {
   TrendingUp,
   Palette,
   Image as ImageIcon,
+  LogOut,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -33,6 +34,7 @@ import { clearUserSession, getUserId } from '../utils/userSession';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../context/ThemeContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { GlassCard } from '../components/glass/GlassCard';
 import { BackgroundSelector } from '../components/glass/BackgroundSelector';
 import { getBackgroundById } from '../constants/backgrounds';
@@ -42,6 +44,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { isDark, themeMode, setThemeMode, colors, backgroundId, customBackgroundUri } = useTheme();
+  const { user, signOut } = useSupabaseAuth();
   const [userId, setUserId] = useState<string>('');
   const [notifications, setNotifications] = useState(true);
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
@@ -57,6 +60,29 @@ export default function SettingsScreen() {
     } catch (error) {
       console.error('Error loading settings:', error);
     }
+  };
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+              console.log('[Settings] User signed out successfully');
+            } catch (error) {
+              console.error('[Settings] Sign out error:', error);
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleClearData = () => {
@@ -183,6 +209,14 @@ export default function SettingsScreen() {
             <Text style={[styles.itemValue, { color: colors.textSecondary }]} numberOfLines={1}>
               {userId.slice(0, 16)}...
             </Text>
+          )}
+          {renderItem(
+            <LogOut color={COLORS.danger} size={20} />,
+            'Sign Out',
+            handleSignOut,
+            undefined,
+            true,
+            'Sign out of your account'
           )}
         </GlassCard>
 

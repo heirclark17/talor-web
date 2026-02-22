@@ -177,6 +177,17 @@ export function AppHeader() {
             style={styles.userDropdown}
           >
             <View style={[styles.userDropdownContent, { borderColor: colors.glassBorder }]}>
+              {/* Close Button Header */}
+              <View style={styles.userDropdownCloseRow}>
+                <TouchableOpacity
+                  style={styles.userDropdownCloseButton}
+                  onPress={() => setUserMenuOpen(false)}
+                  activeOpacity={0.7}
+                >
+                  <X color={colors.textSecondary} size={20} />
+                </TouchableOpacity>
+              </View>
+
               <View style={[styles.userDropdownHeader, { borderBottomColor: colors.glassBorder }]}>
                 {user?.user_metadata?.full_name && (
                   <Text style={[styles.userName, { color: colors.text }]} numberOfLines={1}>
@@ -364,6 +375,19 @@ const styles = StyleSheet.create({
   },
   userDropdownContent: {
     borderWidth: GLASS.getBorderWidth(),
+  },
+  userDropdownCloseRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: SPACING.sm,
+    paddingTop: SPACING.sm,
+  },
+  userDropdownCloseButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: GLASS.getCornerRadius('small'),
   },
   userDropdownHeader: {
     paddingHorizontal: SPACING.md,
