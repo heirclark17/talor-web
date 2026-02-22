@@ -44,10 +44,11 @@ interface GlassButtonProps {
   fullWidth?: boolean;
 }
 
+// Standardized button sizes (matches web design system)
 const SIZE_CONFIG: Record<ButtonSize, { height: number; paddingHorizontal: number; fontSize: number; iconSize: number }> = {
-  sm: { height: 36, paddingHorizontal: SPACING.md, fontSize: 14, iconSize: 16 },
-  md: { height: 44, paddingHorizontal: SPACING.lg, fontSize: 16, iconSize: 20 },
-  lg: { height: 52, paddingHorizontal: SPACING.xl, fontSize: 18, iconSize: 24 },
+  sm: { height: 40, paddingHorizontal: 16, fontSize: 14, iconSize: 20 },  // Small: 40px
+  md: { height: 48, paddingHorizontal: 24, fontSize: 16, iconSize: 24 },  // Standard: 48px (iOS touch target)
+  lg: { height: 56, paddingHorizontal: 32, fontSize: 18, iconSize: 28 },  // Large: 56px
 };
 
 export function GlassButton({

@@ -292,13 +292,26 @@ export const SPACING = {
 // Tab Bar
 export const TAB_BAR_HEIGHT = 100; // Height of tab bar (65px) + safe area padding (~35px)
 
-// Border Radius
+// Border Radius (Standardized across mobile & web)
 export const RADIUS = {
-  sm: 10,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  full: 9999,
+  sm: 8,       // Small elements, chips
+  md: 12,      // Buttons, inputs (STANDARD)
+  lg: 16,      // Cards, containers (STANDARD)
+  xl: 20,      // Large cards, modals
+  xxl: 24,     // Hero sections
+  full: 9999,  // Pills, circles
+};
+
+// Input Heights (Standardized - matches web)
+export const INPUT_HEIGHT = 48; // Standard input field height
+
+// Icon Sizes (Standardized across mobile & web)
+export const ICON_SIZES = {
+  xs: 16,  // Inline with small text, badges
+  sm: 20,  // Inline with body text
+  md: 24,  // Standard UI icons (MOST COMMON)
+  lg: 28,  // Section headers
+  xl: 32,  // Hero sections, primary actions
 };
 
 // ========== GLASS MATERIALS (iOS 26 Liquid Glass) ==========

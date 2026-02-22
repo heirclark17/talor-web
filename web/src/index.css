@@ -170,19 +170,19 @@ input, button, textarea, select {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Button styles - Professional & Adaptive */
+/* Button styles - Standardized with mobile design system */
 .btn-primary {
   background: var(--text-primary);
   color: var(--bg-primary);
   font-weight: 600;
   font-size: 16px;
-  padding: 14px 32px;
-  border-radius: 8px;
+  padding: 14px 24px;  /* Updated: 24px horizontal padding (was 32px) */
+  border-radius: 12px;  /* Updated: 12px (was 8px) - matches mobile */
   transition: all 0.2s ease;
   border: 2px solid var(--text-primary);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  min-height: 48px;
+  min-height: 48px;  /* Standard button height */
 }
 
 .btn-primary:hover {
@@ -201,13 +201,13 @@ input, button, textarea, select {
   color: var(--text-primary);
   font-weight: 600;
   font-size: 16px;
-  padding: 14px 32px;
-  border-radius: 8px;
+  padding: 14px 24px;  /* Updated: 24px horizontal padding (was 32px) */
+  border-radius: 12px;  /* Updated: 12px (was 8px) - matches mobile */
   border: 2px solid var(--glass-border);
   transition: all 0.2s ease;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  min-height: 48px;
+  min-height: 48px;  /* Standard button height */
 }
 
 .btn-secondary:hover {
@@ -225,13 +225,13 @@ input, button, textarea, select {
   color: #ef4444;
   font-weight: 600;
   font-size: 16px;
-  padding: 14px 32px;
-  border-radius: 8px;
+  padding: 14px 24px;  /* Updated: 24px horizontal padding (was 32px) */
+  border-radius: 12px;  /* Updated: 12px (was 8px) - matches mobile */
   border: 2px solid rgba(239, 68, 68, 0.3);
   transition: all 0.2s ease;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  min-height: 48px;
+  min-height: 48px;  /* Standard button height */
 }
 
 .btn-danger:hover {
@@ -242,6 +242,23 @@ input, button, textarea, select {
 
 .btn-danger:active {
   transform: translateY(0);
+}
+
+/* Button Size Variants - Standardized with mobile */
+.btn-sm {
+  min-height: 40px;
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.btn-lg {
+  min-height: 56px;
+  padding: 18px 32px;
+  font-size: 18px;
+  border-radius: 12px;
+  font-weight: 600;
 }
 
 /* Mobile optimizations */
