@@ -11,6 +11,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { X, Upload, FileText, CheckCircle } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { api } from '../api/client';
+import { supabase } from '../lib/supabase';
 import { COLORS, SPACING, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
@@ -19,7 +20,6 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { ScreenContainer } from '../components/layout';
 import { NumberText, RoundedNumeral } from '../components/ui';
 import { usePostHog } from '../contexts/PostHogContext';
-import { getAuthToken } from '../utils/userSession';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -96,19 +96,22 @@ export default function UploadResumeScreen() {
     setUploading(true);
 
     try {
-      // Check authentication before uploading
+      // Check authentication before uploading - use Supabase session directly
       console.log('[UploadResume] Checking authentication...');
-      const token = await getAuthToken();
-      if (!token) {
-        console.error('[UploadResume] No authentication token found');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        console.error('[UploadResume] No valid Supabase session found');
         Alert.alert(
-          'Authentication Error',
-          'You must be logged in to upload a resume. Please sign in and try again.'
+          'Session Expired',
+          'Your session has expired. Please sign out and sign back in to continue.',
+          [
+            { text: 'OK', style: 'default' }
+          ]
         );
         setUploading(false);
         return;
       }
-      console.log('[UploadResume] Authentication token present');
+      console.log('[UploadResume] Valid Supabase session found');
 
       // Validate file before upload
       if (!selectedFile.uri || !selectedFile.name) {
