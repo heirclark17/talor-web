@@ -222,6 +222,18 @@ export function AppHeader() {
             tint={isDark ? 'dark' : 'light'}
             style={styles.menuPanel}
           >
+            {/* Menu Header with Close Button */}
+            <View style={styles.menuHeader}>
+              <Text style={[styles.menuTitle, { color: colors.text }]}>Menu</Text>
+              <TouchableOpacity
+                style={styles.menuCloseButton}
+                onPress={() => setMenuOpen(false)}
+                activeOpacity={0.7}
+              >
+                <X color={colors.textSecondary} size={24} />
+              </TouchableOpacity>
+            </View>
+
             <ScrollView
               style={styles.menuScroll}
               contentContainerStyle={styles.menuContent}
@@ -390,6 +402,25 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: GLASS.getCornerRadius('large'),
     borderTopRightRadius: GLASS.getCornerRadius('large'),
     overflow: 'hidden',
+  },
+  menuHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+  },
+  menuTitle: {
+    ...TYPOGRAPHY.heading2,
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  menuCloseButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: GLASS.getCornerRadius('medium'),
   },
   menuScroll: {
     flex: 1,
