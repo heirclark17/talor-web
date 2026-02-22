@@ -285,7 +285,7 @@ export function AppHeader() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: SPACING.md,
+    paddingTop: 60,
     paddingBottom: SPACING.md,
     borderBottomWidth: GLASS.getBorderWidth(),
   },
