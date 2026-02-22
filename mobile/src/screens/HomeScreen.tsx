@@ -123,7 +123,7 @@ export default function HomeScreen() {
   };
 
   const handleTailor = (resumeId: number) => {
-    navigation.navigate('Tailor' as any, { screen: 'TailorResume', params: { resumeId } });
+    navigation.navigate('TailorResume' as any, { resumeId });
   };
 
   const handleAnalyze = async (resumeId: number, filename: string) => {
@@ -289,7 +289,7 @@ export default function HomeScreen() {
       <View style={styles.quickActions}>
         <TouchableOpacity
           style={[styles.quickActionButton, { backgroundColor: colors.backgroundSecondary }]}
-          onPress={() => navigation.navigate('Career' as any, { screen: 'CoverLetters' })}
+          onPress={() => navigation.navigate('CoverLetters' as any)}
         >
           <BookOpen color={COLORS.primary} size={24} />
           <Text style={[styles.quickActionText, { color: colors.text }]}>Cover Letters</Text>
@@ -297,7 +297,7 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={[styles.quickActionButton, { backgroundColor: colors.backgroundSecondary }]}
-          onPress={() => navigation.navigate('Saved' as any, { screen: 'Applications' })}
+          onPress={() => navigation.navigate('Applications' as any)}
         >
           <Briefcase color={COLORS.primary} size={24} />
           <Text style={[styles.quickActionText, { color: colors.text }]}>Track Applications</Text>

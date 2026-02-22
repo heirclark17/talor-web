@@ -123,7 +123,7 @@ export default function SavedComparisonsScreen() {
   };
 
   const handleViewInterviewPrep = (tailoredResumeId: number) => {
-    navigation.navigate('InterviewPreps' as any, { screen: 'InterviewPrep', params: { tailoredResumeId } });
+    navigation.navigate('InterviewPrep' as any, { tailoredResumeId });
   };
 
   const formatDate = (dateString: string) => {
@@ -441,7 +441,7 @@ export default function SavedComparisonsScreen() {
       </Text>
       <TouchableOpacity
         style={[styles.tailorButton, { backgroundColor: colors.text }]}
-        onPress={() => navigation.navigate('Tailor' as any)}
+        onPress={() => navigation.navigate('TailorMain' as any)}
         accessibilityRole="button"
         accessibilityLabel="Tailor a resume"
         accessibilityHint="Navigates to resume tailoring to create new comparisons"

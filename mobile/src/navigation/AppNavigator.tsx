@@ -1,22 +1,11 @@
 import React from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import {
-  FileText,
-  Target,
-  Briefcase,
-  BookOpen,
-  Compass,
-  Settings,
-  BookmarkCheck,
-  Search,
-} from 'lucide-react-native';
-import { COLORS, FONTS } from '../utils/constants';
+import { COLORS } from '../utils/constants';
 import { useTheme } from '../context/ThemeContext';
-import { GlassTabBar } from '../components/glass/GlassTabBar';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
+import { AppHeader } from '../components/navigation/AppHeader';
 
 // Auth Screens
 import SignInScreen from '../screens/SignInScreen';
@@ -42,8 +31,6 @@ import CoverLetterGeneratorScreen from '../screens/CoverLetterGeneratorScreen';
 import ApplicationTrackerScreen from '../screens/ApplicationTrackerScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import TermsOfServiceScreen from '../screens/TermsOfServiceScreen';
-
-// New Screens
 import JobSearchScreen from '../screens/JobSearchScreen';
 import MockInterviewScreen from '../screens/MockInterviewScreen';
 import ResumeBuilderScreen from '../screens/ResumeBuilderScreen';
@@ -57,21 +44,20 @@ export type AuthStackParamList = {
   SignUp: undefined;
 };
 
-// Stack param lists for each tab
-export type HomeStackParamList = {
+// Main Stack param list - all screens in one stack
+export type MainStackParamList = {
+  // Home / Resumes
   HomeMain: undefined;
   UploadResume: undefined;
   ResumeBuilder: { templateId?: string };
   Templates: undefined;
-};
 
-export type TailorStackParamList = {
+  // Tailor
   TailorMain: undefined;
   TailorResume: { resumeId?: number };
   BatchTailor: undefined;
-};
 
-export type InterviewStackParamList = {
+  // Interview
   InterviewList: undefined;
   InterviewPrep: { tailoredResumeId: number };
   CommonQuestions: { interviewPrepId: number };
@@ -80,68 +66,46 @@ export type InterviewStackParamList = {
   Certifications: { interviewPrepId: number };
   STARStoryBuilder: { interviewPrepId: number; tailoredResumeId: number };
   MockInterview: undefined;
-};
 
-export type StoriesStackParamList = {
+  // Stories
   StoriesMain: undefined;
-};
 
-export type CareerStackParamList = {
+  // Career
   CareerMain: undefined;
   CoverLetters: undefined;
-};
 
-export type SavedStackParamList = {
+  // Saved
   SavedMain: undefined;
   Applications: undefined;
-};
 
-export type SettingsStackParamList = {
+  // Jobs
+  JobSearch: undefined;
+
+  // Settings
   SettingsMain: undefined;
   Pricing: undefined;
   Privacy: undefined;
   Terms: undefined;
+
+  // Not Found
+  NotFound: undefined;
 };
 
-export type JobsStackParamList = {
-  JobSearch: undefined;
-};
-
-// Combined navigation types for useNavigation
-export type RootStackParamList =
-  & HomeStackParamList
-  & TailorStackParamList
-  & InterviewStackParamList
-  & StoriesStackParamList
-  & CareerStackParamList
-  & SavedStackParamList
-  & SettingsStackParamList
-  & JobsStackParamList
-  & { NotFound: undefined };
-
-export type MainTabParamList = {
-  Home: undefined;
-  Jobs: undefined;
-  Tailor: undefined;
-  InterviewPreps: undefined;
-  Stories: undefined;
-  Career: undefined;
-  Saved: undefined;
-  Settings: undefined;
-};
+// Legacy type exports for backwards compatibility
+export type HomeStackParamList = Pick<MainStackParamList, 'HomeMain' | 'UploadResume' | 'ResumeBuilder' | 'Templates'>;
+export type TailorStackParamList = Pick<MainStackParamList, 'TailorMain' | 'TailorResume' | 'BatchTailor'>;
+export type InterviewStackParamList = Pick<MainStackParamList, 'InterviewList' | 'InterviewPrep' | 'CommonQuestions' | 'PracticeQuestions' | 'BehavioralTechnicalQuestions' | 'Certifications' | 'STARStoryBuilder' | 'MockInterview'>;
+export type StoriesStackParamList = Pick<MainStackParamList, 'StoriesMain'>;
+export type CareerStackParamList = Pick<MainStackParamList, 'CareerMain' | 'CoverLetters'>;
+export type SavedStackParamList = Pick<MainStackParamList, 'SavedMain' | 'Applications'>;
+export type JobsStackParamList = Pick<MainStackParamList, 'JobSearch'>;
+export type SettingsStackParamList = Pick<MainStackParamList, 'SettingsMain' | 'Pricing' | 'Privacy' | 'Terms'>;
+export type RootStackParamList = MainStackParamList;
 
 // Create stack navigators
 const RootStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
-const HomeStack = createNativeStackNavigator<HomeStackParamList>();
-const JobsStack = createNativeStackNavigator<JobsStackParamList>();
-const TailorStack = createNativeStackNavigator<TailorStackParamList>();
-const InterviewStack = createNativeStackNavigator<InterviewStackParamList>();
-const StoriesStack = createNativeStackNavigator<StoriesStackParamList>();
-const CareerStack = createNativeStackNavigator<CareerStackParamList>();
-const SavedStack = createNativeStackNavigator<SavedStackParamList>();
-const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
-const Tab = createBottomTabNavigator<MainTabParamList>();
+const MainStack = createNativeStackNavigator<MainStackParamList>();
 
 // Stack screen options
 const stackScreenOptions = {
@@ -162,13 +126,15 @@ function AuthStackNavigator() {
   );
 }
 
-// Home Stack
-function HomeStackNavigator() {
+// Main Stack Navigator with AppHeader
+function MainStackNavigator() {
   return (
-    <ErrorBoundary screenName="Home">
-      <HomeStack.Navigator screenOptions={stackScreenOptions}>
-        <HomeStack.Screen name="HomeMain" component={HomeScreen} />
-        <HomeStack.Screen
+    <ErrorBoundary screenName="Main">
+      <AppHeader />
+      <MainStack.Navigator screenOptions={stackScreenOptions}>
+        {/* Home / Resumes */}
+        <MainStack.Screen name="HomeMain" component={HomeScreen} />
+        <MainStack.Screen
           name="UploadResume"
           component={UploadResumeScreen}
           options={{
@@ -176,180 +142,55 @@ function HomeStackNavigator() {
             animation: 'slide_from_bottom',
           }}
         />
-        <HomeStack.Screen name="Templates" component={TemplatesScreen} />
-        <HomeStack.Screen name="ResumeBuilder" component={ResumeBuilderScreen} />
-      </HomeStack.Navigator>
+        <MainStack.Screen name="Templates" component={TemplatesScreen} />
+        <MainStack.Screen name="ResumeBuilder" component={ResumeBuilderScreen} />
+
+        {/* Jobs */}
+        <MainStack.Screen name="JobSearch" component={JobSearchScreen} />
+
+        {/* Tailor */}
+        <MainStack.Screen name="TailorMain" component={TailorResumeScreen} />
+        <MainStack.Screen name="TailorResume" component={TailorResumeScreen} />
+        <MainStack.Screen name="BatchTailor" component={BatchTailorScreen} />
+
+        {/* Interview */}
+        <MainStack.Screen name="InterviewList" component={InterviewPrepListScreen} />
+        <MainStack.Screen name="InterviewPrep" component={InterviewPrepScreen} />
+        <MainStack.Screen name="CommonQuestions" component={CommonQuestionsScreen} />
+        <MainStack.Screen name="PracticeQuestions" component={PracticeQuestionsScreen} />
+        <MainStack.Screen name="BehavioralTechnicalQuestions" component={BehavioralTechnicalQuestionsScreen} />
+        <MainStack.Screen name="Certifications" component={CertificationsScreen} />
+        <MainStack.Screen name="STARStoryBuilder" component={STARStoryBuilderScreen} />
+        <MainStack.Screen name="MockInterview" component={MockInterviewScreen} />
+
+        {/* Stories */}
+        <MainStack.Screen name="StoriesMain" component={StarStoriesScreen} />
+
+        {/* Career */}
+        <MainStack.Screen name="CareerMain" component={CareerPathDesignerScreen} />
+        <MainStack.Screen name="CoverLetters" component={CoverLetterGeneratorScreen} />
+
+        {/* Saved */}
+        <MainStack.Screen name="SavedMain" component={SavedComparisonsScreen} />
+        <MainStack.Screen name="Applications" component={ApplicationTrackerScreen} />
+
+        {/* Settings */}
+        <MainStack.Screen name="SettingsMain" component={SettingsScreen} />
+        <MainStack.Screen name="Pricing" component={PricingScreen} />
+        <MainStack.Screen name="Privacy" component={PrivacyPolicyScreen} />
+        <MainStack.Screen name="Terms" component={TermsOfServiceScreen} />
+
+        {/* 404 */}
+        <MainStack.Screen
+          name="NotFound"
+          component={NotFoundScreen}
+          options={{
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
+          }}
+        />
+      </MainStack.Navigator>
     </ErrorBoundary>
-  );
-}
-
-// Jobs Stack
-function JobsStackNavigator() {
-  return (
-    <ErrorBoundary screenName="Jobs">
-      <JobsStack.Navigator screenOptions={stackScreenOptions}>
-        <JobsStack.Screen name="JobSearch" component={JobSearchScreen} />
-      </JobsStack.Navigator>
-    </ErrorBoundary>
-  );
-}
-
-// Tailor Stack
-function TailorStackNavigator() {
-  return (
-    <ErrorBoundary screenName="Tailor">
-      <TailorStack.Navigator screenOptions={stackScreenOptions}>
-        <TailorStack.Screen name="TailorMain" component={TailorResumeScreen} />
-        <TailorStack.Screen name="TailorResume" component={TailorResumeScreen} />
-        <TailorStack.Screen name="BatchTailor" component={BatchTailorScreen} />
-      </TailorStack.Navigator>
-    </ErrorBoundary>
-  );
-}
-
-// Interview Stack - contains all interview-related screens
-function InterviewStackNavigator() {
-  return (
-    <ErrorBoundary screenName="Interview">
-      <InterviewStack.Navigator screenOptions={stackScreenOptions}>
-        <InterviewStack.Screen name="InterviewList" component={InterviewPrepListScreen} />
-        <InterviewStack.Screen name="InterviewPrep" component={InterviewPrepScreen} />
-        <InterviewStack.Screen name="CommonQuestions" component={CommonQuestionsScreen} />
-        <InterviewStack.Screen name="PracticeQuestions" component={PracticeQuestionsScreen} />
-        <InterviewStack.Screen name="BehavioralTechnicalQuestions" component={BehavioralTechnicalQuestionsScreen} />
-        <InterviewStack.Screen name="Certifications" component={CertificationsScreen} />
-        <InterviewStack.Screen name="STARStoryBuilder" component={STARStoryBuilderScreen} />
-        <InterviewStack.Screen name="MockInterview" component={MockInterviewScreen} />
-      </InterviewStack.Navigator>
-    </ErrorBoundary>
-  );
-}
-
-// Stories Stack
-function StoriesStackNavigator() {
-  return (
-    <ErrorBoundary screenName="Stories">
-      <StoriesStack.Navigator screenOptions={stackScreenOptions}>
-        <StoriesStack.Screen name="StoriesMain" component={StarStoriesScreen} />
-      </StoriesStack.Navigator>
-    </ErrorBoundary>
-  );
-}
-
-// Career Stack
-function CareerStackNavigator() {
-  return (
-    <ErrorBoundary screenName="Career">
-      <CareerStack.Navigator screenOptions={stackScreenOptions}>
-        <CareerStack.Screen name="CareerMain" component={CareerPathDesignerScreen} />
-        <CareerStack.Screen name="CoverLetters" component={CoverLetterGeneratorScreen} />
-      </CareerStack.Navigator>
-    </ErrorBoundary>
-  );
-}
-
-// Saved Stack
-function SavedStackNavigator() {
-  return (
-    <ErrorBoundary screenName="Saved">
-      <SavedStack.Navigator screenOptions={stackScreenOptions}>
-        <SavedStack.Screen name="SavedMain" component={SavedComparisonsScreen} />
-        <SavedStack.Screen name="Applications" component={ApplicationTrackerScreen} />
-      </SavedStack.Navigator>
-    </ErrorBoundary>
-  );
-}
-
-// Settings Stack
-function SettingsStackNavigator() {
-  return (
-    <ErrorBoundary screenName="Settings">
-      <SettingsStack.Navigator screenOptions={stackScreenOptions}>
-        <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
-        <SettingsStack.Screen name="Pricing" component={PricingScreen} />
-        <SettingsStack.Screen name="Privacy" component={PrivacyPolicyScreen} />
-        <SettingsStack.Screen name="Terms" component={TermsOfServiceScreen} />
-      </SettingsStack.Navigator>
-    </ErrorBoundary>
-  );
-}
-
-// Main Tab Navigator
-function MainTabNavigator() {
-  const { colors, isDark } = useTheme();
-
-  return (
-    <Tab.Navigator
-      tabBar={(props) => <GlassTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Tab.Screen
-        name="Home"
-        component={HomeStackNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => <FileText color={color} size={size} />,
-          tabBarLabel: 'Resumes',
-        }}
-      />
-      <Tab.Screen
-        name="Jobs"
-        component={JobsStackNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
-          tabBarLabel: 'Jobs',
-        }}
-      />
-      <Tab.Screen
-        name="Tailor"
-        component={TailorStackNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => <Target color={color} size={size} />,
-          tabBarLabel: 'Tailor',
-        }}
-      />
-      <Tab.Screen
-        name="InterviewPreps"
-        component={InterviewStackNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => <Briefcase color={color} size={size} />,
-          tabBarLabel: 'Interview',
-        }}
-      />
-      <Tab.Screen
-        name="Stories"
-        component={StoriesStackNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => <BookOpen color={color} size={size} />,
-          tabBarLabel: 'Stories',
-        }}
-      />
-      <Tab.Screen
-        name="Career"
-        component={CareerStackNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => <Compass color={color} size={size} />,
-          tabBarLabel: 'Career',
-        }}
-      />
-      <Tab.Screen
-        name="Saved"
-        component={SavedStackNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => <BookmarkCheck color={color} size={size} />,
-          tabBarLabel: 'Saved',
-        }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsStackNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => <Settings color={color} size={size} />,
-          tabBarLabel: 'Settings',
-        }}
-      />
-    </Tab.Navigator>
   );
 }
 
@@ -393,16 +234,8 @@ export default function AppNavigator() {
     <NavigationContainer theme={navigationTheme}>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         <RootStack.Screen name="Main">
-          {() => (isSignedIn ? <MainTabNavigator /> : <AuthStackNavigator />)}
+          {() => (isSignedIn ? <MainStackNavigator /> : <AuthStackNavigator />)}
         </RootStack.Screen>
-        <RootStack.Screen
-          name="NotFound"
-          component={NotFoundScreen}
-          options={{
-            presentation: 'modal',
-            animation: 'slide_from_bottom',
-          }}
-        />
       </RootStack.Navigator>
     </NavigationContainer>
   );

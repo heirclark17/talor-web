@@ -192,7 +192,7 @@ export default function SettingsScreen() {
           {renderItem(
             <BookOpen color={colors.textSecondary} size={20} />,
             'STAR Stories',
-            () => navigation.navigate('Stories' as any),
+            () => navigation.navigate('StoriesMain' as any),
             undefined,
             false,
             'Manage your behavioral interview stories'
@@ -200,7 +200,7 @@ export default function SettingsScreen() {
           {renderItem(
             <TrendingUp color={colors.textSecondary} size={20} />,
             'Career Path Designer',
-            () => navigation.navigate('Career' as any),
+            () => navigation.navigate('CareerMain' as any),
             undefined,
             false,
             'Plan your career progression with AI guidance'

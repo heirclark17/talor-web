@@ -335,7 +335,7 @@ export default function TailorResumeScreen() {
 
   const handleViewInterviewPrep = () => {
     if (tailoredResumeData) {
-      navigation.navigate('InterviewPreps' as any, { screen: 'InterviewPrep', params: { tailoredResumeId: tailoredResumeData.id } });
+      navigation.navigate('InterviewPrep' as any, { tailoredResumeId: tailoredResumeData.id });
     }
   };
 
@@ -731,7 +731,7 @@ export default function TailorResumeScreen() {
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity
               style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
-              onPress={() => navigation.navigate('Saved' as any, { screen: 'Applications' })}
+              onPress={() => navigation.navigate('Applications' as any)}
             >
               <ClipboardCheck color={COLORS.primary} size={18} />
               <Text style={styles.secondaryButtonText}>Track App</Text>
@@ -739,7 +739,7 @@ export default function TailorResumeScreen() {
 
             <TouchableOpacity
               style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
-              onPress={() => navigation.navigate('Career' as any, { screen: 'CoverLetters' })}
+              onPress={() => navigation.navigate('CoverLetters' as any)}
             >
               <BookOpen color={COLORS.primary} size={18} />
               <Text style={styles.secondaryButtonText}>Cover Letter</Text>
