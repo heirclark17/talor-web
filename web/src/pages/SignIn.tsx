@@ -33,13 +33,13 @@ export default function SignIn() {
           <span className="text-2xl font-bold text-theme tracking-tight">Talor</span>
         </div>
 
-        <h1 className="text-xl font-semibold text-theme text-center mb-2">Welcome back</h1>
-        <p className="text-theme-secondary text-sm text-center mb-6">Sign in to your account</p>
+        <h1 className="text-3xl font-bold text-theme text-center mb-2">Welcome Back</h1>
+        <p className="text-theme-secondary text-base text-center mb-6">Sign in to your account</p>
 
         {/* Email/password form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
               {error}
             </div>
           )}
@@ -47,14 +47,14 @@ export default function SignIn() {
           <div>
             <label htmlFor="email" className="block text-theme-secondary text-sm mb-1.5">Email</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-tertiary" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-tertiary" />
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-2.5 bg-theme-glass-10 border border-theme-muted text-theme rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                className="w-full pl-10 pr-4 h-[52px] bg-theme-glass-10 border border-theme-muted text-theme rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
                 placeholder="you@example.com"
               />
             </div>
@@ -63,14 +63,14 @@ export default function SignIn() {
           <div>
             <label htmlFor="password" className="block text-theme-secondary text-sm mb-1.5">Password</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-tertiary" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-tertiary" />
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-2.5 bg-theme-glass-10 border border-theme-muted text-theme rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                className="w-full pl-10 pr-4 h-[52px] bg-theme-glass-10 border border-theme-muted text-theme rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
                 placeholder="Your password"
               />
             </div>
@@ -79,9 +79,9 @@ export default function SignIn() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="w-full h-[52px] bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
           >
-            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {loading && <Loader2 className="w-5 h-5 animate-spin" />}
             Sign In
           </button>
         </form>
