@@ -196,12 +196,16 @@ export async function fetchWithAuth(
   }
 
   try {
-    const response = await fetch(url, {
-      ...options,
+    // Build fetch options explicitly to avoid conflicts with FormData headers
+    const fetchOptions: RequestInit = {
+      method: options.method || 'GET',
       headers,
       body,
       signal: controller.signal,
-    });
+      // Don't spread ...options to avoid header conflicts with FormData
+    };
+
+    const response = await fetch(url, fetchOptions);
     clearTimeout(timeoutId);
     return response;
   } catch (error) {
