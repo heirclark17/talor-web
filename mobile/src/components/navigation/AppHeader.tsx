@@ -32,10 +32,11 @@ import {
   User,
   LogOut,
 } from 'lucide-react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../../utils/constants';
+import { MainStackParamList } from '../../navigation/AppNavigator';
 
 interface MenuItem {
   to: string;
@@ -53,7 +54,7 @@ interface MenuSection {
 }
 
 export function AppHeader() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const route = useRoute();
   const { colors, isDark, toggleTheme } = useTheme();
   const { user, signOut } = useSupabaseAuth();
@@ -95,7 +96,7 @@ export function AppHeader() {
 
   const handleNavigate = (link: MenuItem) => {
     setMenuOpen(false);
-    (navigation as any).navigate(link.screen);
+    navigation.navigate(link.screen as any);
   };
 
   const isActive = (link: MenuItem) => {
