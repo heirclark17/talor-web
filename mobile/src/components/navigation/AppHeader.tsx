@@ -124,10 +124,14 @@ export function AppHeader() {
       <View style={[styles.header, { backgroundColor: colors.background }]}>
         <View style={styles.headerContent}>
           {/* Logo */}
-          <View style={styles.logo}>
+          <TouchableOpacity
+            style={styles.logo}
+            onPress={() => navigation.navigate('UploadResume' as any)}
+            activeOpacity={0.7}
+          >
             <FileText color={COLORS.primary} size={28} />
             <Text style={[styles.logoText, { color: colors.text }]}>Talor</Text>
-          </View>
+          </TouchableOpacity>
 
           {/* Right actions */}
           <View style={styles.actions}>
