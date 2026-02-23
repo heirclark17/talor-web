@@ -312,6 +312,8 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 75,
     paddingBottom: SPACING.md,
+    overflow: 'visible',
+    zIndex: 100,
   },
   headerContent: {
     flexDirection: 'row',
@@ -372,6 +374,8 @@ const styles = StyleSheet.create({
     width: 240,
     borderRadius: GLASS.getCornerRadius('large'),
     overflow: 'hidden',
+    zIndex: 200,
+    elevation: 20,
     ...GLASS.getShadow('large'),
   },
   userDropdownContent: {
