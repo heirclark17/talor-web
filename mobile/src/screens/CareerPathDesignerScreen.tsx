@@ -1881,12 +1881,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   secondaryButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
+    minHeight: 48,
+    borderWidth: 1.5,
   },
   secondaryButtonText: {
-    color: COLORS.primary,
+    ...TYPOGRAPHY.callout,
+    fontWeight: '600',
   },
   welcomeFooter: {
     ...TYPOGRAPHY.caption1,
