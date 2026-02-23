@@ -715,14 +715,6 @@ export default function CareerPathDesignerScreen() {
               <ChevronRight color={colors.background} size={20} />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.secondaryButton, { borderColor: colors.glassBorder, marginTop: SPACING.md }]}
-              onPress={() => navigation.navigate('CoverLetters')}
-            >
-              <BookOpen color={colors.text} size={20} />
-              <Text style={[styles.secondaryButtonText, { color: colors.text }]}>Generate Cover Letters</Text>
-            </TouchableOpacity>
-
             <Text style={[styles.welcomeFooter, { color: colors.textTertiary }]}>Takes 10-15 minutes for comprehensive assessment</Text>
           </View>
         </ScrollView>
