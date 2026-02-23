@@ -121,7 +121,7 @@ export function AppHeader() {
 
   return (
     <>
-      <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.glassBorder }]}>
+      <View style={[styles.header, { backgroundColor: colors.background }]}>
         <View style={styles.headerContent}>
           {/* Logo */}
           <View style={styles.logo}>
@@ -312,7 +312,6 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 75,
     paddingBottom: SPACING.md,
-    borderBottomWidth: GLASS.getBorderWidth(),
   },
   headerContent: {
     flexDirection: 'row',
