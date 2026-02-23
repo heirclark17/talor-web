@@ -646,25 +646,25 @@ export default function CareerPathDesignerScreen() {
             </Text>
 
             <View style={styles.featureGrid}>
-              <View style={[styles.featureCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+              <View style={styles.featureItem}>
                 <View style={styles.featureIcon}>
-                  <Upload color={COLORS.primary} size={32} />
+                  <Upload color="#10B981" size={32} />
                 </View>
                 <Text style={[styles.featureTitle, { color: colors.text }]}>Upload Resume</Text>
                 <Text style={[styles.featureText, { color: colors.textSecondary }]}>We analyze your experience automatically</Text>
               </View>
 
-              <View style={[styles.featureCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+              <View style={styles.featureItem}>
                 <View style={styles.featureIcon}>
-                  <Target color={COLORS.primary} size={32} />
+                  <Target color="#F59E0B" size={32} />
                 </View>
                 <Text style={[styles.featureTitle, { color: colors.text }]}>Detailed Assessment</Text>
                 <Text style={[styles.featureText, { color: colors.textSecondary }]}>Comprehensive questionnaire for best fit</Text>
               </View>
 
-              <View style={[styles.featureCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+              <View style={styles.featureItem}>
                 <View style={styles.featureIcon}>
-                  <TrendingUp color={COLORS.primary} size={32} />
+                  <TrendingUp color="#8B5CF6" size={32} />
                 </View>
                 <Text style={[styles.featureTitle, { color: colors.text }]}>Actionable Plan</Text>
                 <Text style={[styles.featureText, { color: colors.textSecondary }]}>Real certifications, events, and resources</Text>
@@ -1843,6 +1843,10 @@ const styles = StyleSheet.create({
     borderRadius: SPACING.radiusMD,
     borderWidth: 1,
     padding: SPACING.lg,
+    alignItems: 'center',
+  },
+  featureItem: {
+    padding: SPACING.md,
     alignItems: 'center',
   },
   featureIcon: {
