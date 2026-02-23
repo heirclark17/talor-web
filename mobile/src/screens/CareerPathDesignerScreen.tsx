@@ -716,7 +716,7 @@ export default function CareerPathDesignerScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.secondaryButton, { borderColor: colors.glassBorder }]}
+              style={[styles.secondaryButton, { borderColor: colors.glassBorder, marginTop: SPACING.md }]}
               onPress={() => navigation.navigate('CoverLetters')}
             >
               <BookOpen color={colors.text} size={20} />
