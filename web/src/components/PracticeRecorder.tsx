@@ -261,11 +261,13 @@ export default function PracticeRecorder({
     chunksRef.current = [];
     setRecordingTime(0);
 
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
-      ? 'video/webm;codecs=vp8,opus'
-      : MediaRecorder.isTypeSupported('video/webm')
-        ? 'video/webm'
-        : 'video/mp4';
+    const mimeType = mode === 'video'
+      ? (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+          ? 'video/webm;codecs=vp8,opus'
+          : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4')
+      : (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+          ? 'audio/webm;codecs=opus'
+          : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4');
 
     const recorder = new MediaRecorder(streamRef.current, { mimeType });
 
@@ -343,14 +345,14 @@ export default function PracticeRecorder({
       const { upload_url, s3_key } = uploadRes.data;
       setUploadProgress(20);
 
-      // 2. Upload directly to S3
+      // 2. Upload directly to storage
       const uploadResp = await fetch(upload_url, {
         method: 'PUT',
         headers: { 'Content-Type': contentType },
         body: blobRef.current,
       });
 
-      if (!uploadResp.ok) throw new Error('S3 upload failed');
+      if (!uploadResp.ok) throw new Error('Storage upload failed');
       setUploadProgress(70);
 
       // 3. Save s3_key reference in DB
@@ -659,10 +661,6 @@ export default function PracticeRecorder({
                 <span className="text-sm font-mono text-theme-secondary">{formatTime(currentTime)}</span>
               </div>
             </div>
-          )}
-          {/* Hidden audio source for audio-only mode */}
-          {mode === 'audio' && (
-            <video ref={videoPlaybackRef} src={playbackUrl} className="hidden" />
           )}
 
           {/* Playback controls */}

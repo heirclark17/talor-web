@@ -77,8 +77,9 @@ export default function VideoRecorder({ questions, onRecordingComplete }: Props)
       ? 'video/webm;codecs=vp8,opus'
       : 'audio/webm;codecs=opus'
 
+    const fallback = recordingType === 'video' ? 'video/webm' : 'audio/webm'
     const mediaRecorder = new MediaRecorder(stream, {
-      mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'video/webm'
+      mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : fallback
     })
 
     mediaRecorder.ondataavailable = (event) => {
