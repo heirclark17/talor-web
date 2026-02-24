@@ -1236,6 +1236,11 @@ export default function TailorResume() {
         title: result.data.title || jobTitle
       })
 
+      // Update salary data from tailor response (SalaryCache hit or fresh Perplexity data)
+      if (result.data.salary_data) {
+        setSalaryData(result.data.salary_data)
+      }
+
       // Save to localStorage for persistence
       localStorage.setItem(LAST_TAILORED_RESUME_KEY, tailoredId.toString())
 

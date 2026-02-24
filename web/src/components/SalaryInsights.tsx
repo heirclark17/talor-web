@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { DollarSign, TrendingUp, MapPin, Briefcase, Info, ChevronDown, ChevronUp } from 'lucide-react'
+import { DollarSign, TrendingUp, MapPin, Briefcase, Info, ChevronDown, ChevronUp, Clock } from 'lucide-react'
 import {
   getSalaryData,
   getNegotiationTips,
@@ -18,8 +18,21 @@ import {
 interface SalaryInsightsProps {
   jobTitle: string
   location?: string
-  salaryData?: any // Perplexity salary data from job extraction
+  salaryData?: any // Perplexity salary data from job or SalaryCache
   className?: string
+}
+
+/**
+ * Return a human-readable age string for the salary cache entry.
+ * Examples: "today", "1 day ago", "5 days ago", "3 weeks ago".
+ */
+function formatCacheAge(daysOld: number): string {
+  if (daysOld === 0) return 'today'
+  if (daysOld === 1) return '1 day ago'
+  if (daysOld < 7) return `${daysOld} days ago`
+  const weeks = Math.floor(daysOld / 7)
+  if (weeks === 1) return '1 week ago'
+  return `${weeks} weeks ago`
 }
 
 export default function SalaryInsights({ jobTitle, location, salaryData: perplexitySalaryData, className = '' }: SalaryInsightsProps) {
@@ -85,14 +98,25 @@ export default function SalaryInsights({ jobTitle, location, salaryData: perplex
             </div>
             <div>
               <h3 className="text-lg font-semibold text-theme">Salary Insights</h3>
-              <p className="text-sm text-theme-tertiary">Real-time market data for {jobTitle}</p>
+              <p className="text-sm text-theme-tertiary">
+                {perplexitySalaryData.from_cache
+                  ? `Cached market data for ${jobTitle}`
+                  : `Real-time market data for ${jobTitle}`}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" />
-              Powered by Perplexity
-            </span>
+            {perplexitySalaryData.from_cache ? (
+              <span className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-400 flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                Cached
+              </span>
+            ) : (
+              <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" />
+                Live Perplexity
+              </span>
+            )}
           </div>
         </div>
 
@@ -197,8 +221,13 @@ export default function SalaryInsights({ jobTitle, location, salaryData: perplex
         {/* Data Source */}
         <div className="pt-4 border-t border-theme-subtle">
           <p className="text-xs text-theme-tertiary text-center">
-            Real-time data from Perplexity AI •
-            Updated {perplexitySalaryData.last_updated ? new Date(perplexitySalaryData.last_updated).toLocaleDateString() : 'recently'}
+            {perplexitySalaryData.from_cache ? 'Cached data via Perplexity AI' : 'Live data from Perplexity AI'} •
+            {' '}Last updated{' '}
+            {typeof perplexitySalaryData.days_old === 'number'
+              ? formatCacheAge(perplexitySalaryData.days_old)
+              : perplexitySalaryData.last_updated
+                ? new Date(perplexitySalaryData.last_updated).toLocaleDateString()
+                : 'recently'}
           </p>
         </div>
       </div>
