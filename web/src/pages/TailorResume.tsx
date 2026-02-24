@@ -354,6 +354,8 @@ export default function TailorResume() {
           })
 
           // Set tailored resume data
+          // The backend now returns tailored_resume.id so export, refresh, and
+          // analysis loading all work correctly on saved comparisons.
           setTailoredResume({
             id: data.tailored_resume.id || 0,
             tailored_summary: data.tailored_resume.summary,
@@ -373,17 +375,15 @@ export default function TailorResume() {
           setJobTitle(data.job.title)
           setJobUrl(data.job.url || '')
 
-          // Restore persisted AI analysis data
-          if (data.analysis) {
-            setAnalysis(data.analysis)
-            setAnalysisLoaded(true)
-          }
-          if (data.keywords) {
-            setKeywords(data.keywords)
-          }
-          if (data.match_score) {
-            setMatchScore(data.match_score)
-          }
+          // Restore persisted AI analysis data.
+          // Only mark analysisLoaded=true when all three datasets are present so
+          // the lazy loader still fires if any are missing (e.g. the comparison
+          // was saved before analysis was run).
+          const hasAllAnalysis = !!(data.analysis && data.keywords && data.match_score)
+          if (data.analysis) setAnalysis(data.analysis)
+          if (data.keywords) setKeywords(data.keywords)
+          if (data.match_score) setMatchScore(data.match_score)
+          if (hasAllAnalysis) setAnalysisLoaded(true)
 
           setShowComparison(true)
           setSuccess(true)
@@ -424,17 +424,14 @@ export default function TailorResume() {
         setCompany(session.company || '')
         setJobTitle(session.jobTitle || '')
 
-        // Restore AI analysis data if available
-        if (session.analysis) {
-          setAnalysis(session.analysis)
-          setAnalysisLoaded(true)
-        }
-        if (session.keywords) {
-          setKeywords(session.keywords)
-        }
-        if (session.matchScore) {
-          setMatchScore(session.matchScore)
-        }
+        // Restore AI analysis data if available.
+        // Only mark analysisLoaded=true when all three datasets are present so the
+        // lazy loader still fires when any piece is missing.
+        const hasAllAnalysis = !!(session.analysis && session.keywords && session.matchScore)
+        if (session.analysis) setAnalysis(session.analysis)
+        if (session.keywords) setKeywords(session.keywords)
+        if (session.matchScore) setMatchScore(session.matchScore)
+        if (hasAllAnalysis) setAnalysisLoaded(true)
 
         setShowComparison(true)
         setSuccess(true)
@@ -839,6 +836,12 @@ export default function TailorResume() {
       setShowComparison(true)
       setSuccess(true)
 
+      // Pre-fetch cached analysis in the background so it is ready when the
+      // user clicks the Analysis or Insights tabs.  Uses force_refresh=false so
+      // it returns instantly when already cached.  loadAllAnalysis sets
+      // analysisLoaded=true on success, preventing a redundant call on tab click.
+      loadAllAnalysis(data.id)
+
       // Signal completion so progress bar reaches 100% before unmount
       setLoadingComplete(true)
       await new Promise(r => setTimeout(r, 600))
@@ -902,6 +905,10 @@ export default function TailorResume() {
         if (data.analysis) setAnalysis(data.analysis)
         if (data.keywords) setKeywords(data.keywords)
         if (data.match_score) setMatchScore(data.match_score)
+
+        // Mark analysis as loaded so the lazy-load guard in handleTabChange
+        // does not fire again (avoids a redundant network call on tab click).
+        setAnalysisLoaded(true)
 
         // Show cache status
         if (data.cached) {
