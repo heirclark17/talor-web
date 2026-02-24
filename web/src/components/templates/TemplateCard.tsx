@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Check, Crown, Star } from 'lucide-react'
 import type { ResumeTemplate } from '../../types/template'
 import { useSubscriptionStore } from '../../stores/subscriptionStore'
@@ -40,11 +40,13 @@ export default function TemplateCard({
   const { resumes } = useResumeStore()
   const hasAccess = !template.isPremium || checkFeatureAccess('premium_templates')
 
-  // Generate preview image if template doesn't have one (fallback for static images)
+  const [imgError, setImgError] = useState(false)
+
+  // Use AI-generated preview if available
   const previewImage = useMemo(() => {
-    if (template.preview) return template.preview
-    return generateTemplatePlaceholder(template)
-  }, [template])
+    if (template.preview && !imgError) return template.preview
+    return ''
+  }, [template.preview, imgError])
 
   // Use provided resume data or convert from store
   // The resumeStore.Resume uses a flat shape (not nested personalInfo)
@@ -115,12 +117,14 @@ export default function TemplateCard({
     >
       {/* Preview Image */}
       <div className="relative aspect-[8.5/11] overflow-hidden bg-neutral-100">
-        {/* If template has static preview image, use it, otherwise render live preview */}
-        {template.preview ? (
+        {/* If AI-generated preview image exists, use it. Otherwise render live preview */}
+        {previewImage ? (
           <img
             src={previewImage}
             alt={`${template.name} preview`}
             className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
+            loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex items-start justify-center pt-0 overflow-hidden">

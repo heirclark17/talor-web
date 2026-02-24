@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Search, Filter, X } from 'lucide-react'
 import type { TemplateCategory, ResumeTemplate, TemplateFilter } from '../../types/template'
 import TemplateCard from './TemplateCard'
@@ -24,7 +24,12 @@ interface TemplateGalleryProps {
  * ```
  */
 export default function TemplateGallery({ onSelect, onPreview, resumeData }: TemplateGalleryProps) {
-  const { selectedTemplate, filterTemplates } = useTemplateStore()
+  const { selectedTemplate, filterTemplates, fetchPreviewUrls } = useTemplateStore()
+
+  // Fetch AI-generated preview URLs on mount
+  useEffect(() => {
+    fetchPreviewUrls()
+  }, [])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<TemplateCategory | 'all'>('all')
   const [minAtsScore, setMinAtsScore] = useState(0)
