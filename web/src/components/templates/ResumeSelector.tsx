@@ -1,16 +1,17 @@
 /**
  * Resume Selector Component
  *
- * Refined editorial interface for selecting and uploading resumes
- * Features custom dropdown, drag-and-drop upload, and live metadata display
+ * Modal-based interface for selecting and managing resumes
+ * Features resume selection, deletion, and drag-and-drop upload
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react'
-import { Upload, ChevronDown, FileText, Briefcase, Award, Calendar, Check } from 'lucide-react'
+import React, { useState, useCallback, useEffect } from 'react'
+import { Upload, FileText, Briefcase, Award, Calendar, Check, Trash2, X } from 'lucide-react'
 import { useResumeStore } from '../../stores/resumeStore'
 import type { Resume } from '../../stores/resumeStore'
 import { useNavigate } from 'react-router-dom'
 import { formatLocalDateTime } from '../../utils/dateUtils'
+import { showSuccess, showError } from '../../utils/toast'
 
 interface ResumeSelectorProps {
   selectedResumeId?: string | null
@@ -19,36 +20,20 @@ interface ResumeSelectorProps {
 
 export default function ResumeSelector({ selectedResumeId, onResumeSelect }: ResumeSelectorProps) {
   const navigate = useNavigate()
-  const { resumes, fetchResumes } = useResumeStore()
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const { resumes, fetchResumes, deleteResume } = useResumeStore()
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
 
-  // Always fetch fresh resume data on mount (stale localStorage may have incomplete fields)
+  // Always fetch fresh resume data on mount
   useEffect(() => {
     fetchResumes()
   }, [])
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false)
-      }
-    }
-    if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isDropdownOpen])
-
-  // Get all available resumes - store uses numeric IDs
+  // Get all available resumes
   const availableResumes = resumes || []
 
-  // Derive the active resume: prefer the one matching selectedResumeId, otherwise the most recent
+  // Derive the active resume
   const latestResume = availableResumes.length > 0 ? availableResumes[0] : null
   const selectedResume = selectedResumeId !== null && selectedResumeId !== undefined
     ? availableResumes.find(r => String(r.id) === String(selectedResumeId)) || latestResume
@@ -56,7 +41,33 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
 
   const handleResumeSelect = (resumeId: number) => {
     onResumeSelect(String(resumeId))
-    setIsDropdownOpen(false)
+    setIsModalOpen(false)
+  }
+
+  const handleDeleteResume = async (resumeId: number, resumeName: string) => {
+    if (!window.confirm(`Are you sure you want to delete "${resumeName}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      setDeletingId(resumeId)
+      const success = await deleteResume(resumeId)
+
+      if (success) {
+        showSuccess('Resume deleted successfully')
+        // If deleted resume was selected, clear selection
+        if (selectedResumeId && String(resumeId) === String(selectedResumeId)) {
+          onResumeSelect(null)
+        }
+      } else {
+        showError('Failed to delete resume')
+      }
+    } catch (error) {
+      console.error('Error deleting resume:', error)
+      showError('Failed to delete resume')
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   const handleUploadClick = () => {
@@ -84,12 +95,10 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(false)
-    // Navigate to upload page with file
     navigate('/upload')
   }, [navigate])
 
   const getResumeName = (resume: Resume) => {
-    // The flat Resume shape from resumeStore uses top-level name/email fields
     return resume.name || resume.filename || 'Untitled Resume'
   }
 
@@ -151,11 +160,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
           }
         }
 
-        .dropdown-container {
-          position: relative;
-        }
-
-        .dropdown-trigger {
+        .select-button {
           width: 100%;
           background: rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(20px);
@@ -168,7 +173,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
           overflow: hidden;
         }
 
-        .dropdown-trigger::before {
+        .select-button::before {
           content: '';
           position: absolute;
           top: 0;
@@ -180,17 +185,17 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
           transition: opacity 0.3s ease;
         }
 
-        .dropdown-trigger:hover::before {
+        .select-button:hover::before {
           opacity: 1;
         }
 
-        .dropdown-trigger:hover {
+        .select-button:hover {
           border-color: rgba(59, 130, 246, 0.3);
           transform: translateY(-2px);
           box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
         }
 
-        .dropdown-label {
+        .select-label {
           font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 0.75rem;
           text-transform: uppercase;
@@ -200,93 +205,13 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
           font-weight: 600;
         }
 
-        .dropdown-value {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          position: relative;
-          z-index: 1;
-        }
-
-        .dropdown-value-text {
+        .select-value {
           font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 1.25rem;
           font-weight: 600;
           color: #fff;
-        }
-
-        .dropdown-icon {
-          transition: transform 0.3s ease;
-        }
-
-        .dropdown-icon.open {
-          transform: rotate(180deg);
-        }
-
-        .dropdown-menu {
-          position: absolute;
-          top: calc(100% + 0.5rem);
-          left: 0;
-          right: 0;
-          background: rgba(15, 15, 25, 0.95);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 16px;
-          padding: 0.5rem;
-          z-index: 1000;
-          max-height: 320px;
-          overflow-y: auto;
-          animation: dropdownSlide 0.3s ease-out;
-          pointer-events: auto;
-        }
-
-        @keyframes dropdownSlide {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .dropdown-item {
-          padding: 1rem;
-          border-radius: 12px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          margin-bottom: 0.25rem;
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-
-        .dropdown-item:hover {
-          background: rgba(59, 130, 246, 0.1);
-        }
-
-        .dropdown-item.selected {
-          background: rgba(59, 130, 246, 0.15);
-          border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        .dropdown-item-content {
-          flex: 1;
-        }
-
-        .dropdown-item-name {
-          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          font-size: 1rem;
-          font-weight: 500;
-          color: #fff;
-          margin-bottom: 0.25rem;
-        }
-
-        .dropdown-item-meta {
-          font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          font-size: 0.75rem;
-          color: rgba(255, 255, 255, 0.5);
+          position: relative;
+          z-index: 1;
         }
 
         .upload-zone {
@@ -506,53 +431,16 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
 
       {/* Selection Grid */}
       <div className="selection-grid">
-        {/* Dropdown Selector */}
-        <div className="dropdown-container" ref={dropdownRef}>
-          <div
-            className="dropdown-trigger"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          >
-            <div className="dropdown-label">Stored Resumes</div>
-            <div className="dropdown-value">
-              <span className="dropdown-value-text">
-                {selectedResume ? getResumeName(selectedResume) : 'Select a resume'}
-              </span>
-              <ChevronDown
-                className={`dropdown-icon ${isDropdownOpen ? 'open' : ''}`}
-                size={24}
-              />
-            </div>
+        {/* Select Resume Button */}
+        <button
+          className="select-button"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <div className="select-label">Stored Resumes</div>
+          <div className="select-value">
+            {selectedResume ? getResumeName(selectedResume) : 'Select a resume'}
           </div>
-
-          {isDropdownOpen && (
-            <div className="dropdown-menu">
-              {availableResumes.length > 0 ? (
-                availableResumes.map((resume) => (
-                  <div
-                    key={resume.id}
-                    className={`dropdown-item ${selectedResume?.id === resume.id ? 'selected' : ''}`}
-                    onClick={() => handleResumeSelect(resume.id)}
-                  >
-                    <FileText size={20} style={{ color: 'rgba(59, 130, 246, 0.7)' }} />
-                    <div className="dropdown-item-content">
-                      <div className="dropdown-item-name">{getResumeName(resume)}</div>
-                      <div className="dropdown-item-meta">
-                        Uploaded {formatLocalDateTime(resume.uploaded_at)}
-                      </div>
-                    </div>
-                    {selectedResume?.id === resume.id && (
-                      <Check size={20} style={{ color: '#22c55e' }} />
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)', fontFamily: "'Urbanist', sans-serif" }}>
-                  No resumes found. Upload one to get started.
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        </button>
 
         {/* Upload Zone */}
         <div
@@ -626,6 +514,110 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
           <p className="empty-state-subtitle">
             Choose a resume from your library or upload a new one to see template previews
           </p>
+        </div>
+      )}
+
+      {/* Resume Selection Modal */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="relative bg-theme-card rounded-2xl border border-theme-subtle w-full max-w-2xl max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-theme-card border-b border-theme-subtle p-6 flex items-center justify-between z-10">
+              <div>
+                <h3 className="text-2xl font-bold text-theme">Select Resume</h3>
+                <p className="text-sm text-theme-secondary mt-1">
+                  Choose a resume to use with templates
+                </p>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-2 hover:bg-theme-glass-10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-theme-secondary" />
+              </button>
+            </div>
+
+            {/* Resume List */}
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
+              {availableResumes.length > 0 ? (
+                <div className="space-y-3">
+                  {availableResumes.map((resume) => (
+                    <div
+                      key={resume.id}
+                      className={`group p-4 rounded-xl border transition-all ${
+                        selectedResume?.id === resume.id
+                          ? 'bg-accent/10 border-accent/30'
+                          : 'bg-theme-glass-5 border-theme-subtle hover:bg-theme-glass-10 hover:border-theme-tertiary'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <FileText
+                          className={`w-5 h-5 shrink-0 mt-1 ${
+                            selectedResume?.id === resume.id ? 'text-accent' : 'text-theme-secondary'
+                          }`}
+                        />
+
+                        <div className="flex-1 min-w-0">
+                          <button
+                            onClick={() => handleResumeSelect(resume.id)}
+                            className="w-full text-left"
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold text-theme truncate">
+                                {getResumeName(resume)}
+                              </h4>
+                              {selectedResume?.id === resume.id && (
+                                <Check className="w-4 h-4 text-accent shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-sm text-theme-secondary">
+                              Uploaded {formatLocalDateTime(resume.uploaded_at)}
+                            </p>
+                          </button>
+                        </div>
+
+                        <button
+                          onClick={() => handleDeleteResume(resume.id, getResumeName(resume))}
+                          disabled={deletingId === resume.id}
+                          className="p-2 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                          title="Delete resume"
+                        >
+                          {deletingId === resume.id ? (
+                            <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Trash2 className="w-5 h-5 text-red-400 hover:text-red-300" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-theme-faint mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-theme mb-2">No Resumes Found</h4>
+                  <p className="text-sm text-theme-secondary mb-4">
+                    Upload your first resume to get started
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIsModalOpen(false)
+                      navigate('/upload')
+                    }}
+                    className="px-6 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Upload Resume
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
