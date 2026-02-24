@@ -12,6 +12,8 @@ import { useAuthUserSync } from './hooks/useAuthUserSync'
 import { useAuth } from './contexts/AuthContext'
 import { PostHogProvider } from './contexts/PostHogContext'
 import { initializeTheme, useThemeStore } from './stores/themeStore'
+import { useOnboardingStore } from './stores/onboardingStore'
+import SampleDataBanner from './components/guidance/SampleDataBanner'
 
 // Auto-reload wrapper for lazy imports - handles stale chunks after deploys
 function lazyWithRetry(importFn: () => Promise<any>) {
@@ -406,8 +408,10 @@ function SessionMigrationProvider({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const location = useLocation()
+  const navigate = useNavigate()
   const { signOut, user } = useAuth()
   const { theme, toggleTheme } = useThemeStore()
+  const { sampleDataMode, toggleSampleMode } = useOnboardingStore()
   const isLandingPage = location.pathname === '/'
   const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -648,6 +652,14 @@ function AppContent() {
             </div>
           )}
         </nav>
+      )}
+
+      {/* Sample Data Banner */}
+      {!isLandingPage && !isAuthPage && sampleDataMode && (
+        <SampleDataBanner
+          onClear={toggleSampleMode}
+          onUploadReal={() => navigate('/upload')}
+        />
       )}
 
       {/* Main Content */}

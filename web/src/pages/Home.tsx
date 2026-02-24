@@ -27,6 +27,7 @@ import { useResumeStore } from '../stores/resumeStore'
 import { useOnboardingStore } from '../stores/onboardingStore'
 import ActivationChecklist from '../components/guidance/ActivationChecklist'
 import EmptyState from '../components/guidance/EmptyState'
+import SuccessCelebration from '../components/guidance/SuccessCelebration'
 
 interface Resume {
   id: number
@@ -895,6 +896,20 @@ export default function Home() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Success Celebration - First Resume Upload */}
+      {resumes.length > 0 && !isEventCelebrated('first_resume_upload') && (
+        <SuccessCelebration
+          eventId="first_resume_upload"
+          title="Resume Uploaded Successfully!"
+          message="Your resume has been analyzed and is ready to be tailored for specific jobs."
+          nextStep={{
+            label: 'Pick a Template',
+            href: '/templates',
+          }}
+          metric="You're ahead of 80% of job seekers who don't optimize their resumes"
+        />
       )}
     </div>
   )
