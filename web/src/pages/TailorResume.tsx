@@ -1152,14 +1152,12 @@ export default function TailorResume() {
     setShowComparison(false)
 
     try {
-      // Only include jobUrl when company/jobTitle weren't already extracted.
-      // If both are known, omit the URL to skip redundant Firecrawl re-extraction
-      // in the backend (saves 10-20 seconds and avoids duplicate scraping costs).
-      const shouldSendJobUrl = trimmedJobUrl && (!companyExtracted || !titleExtracted)
-
+      // Always send the job URL so the backend can store/lookup the real URL.
+      // When company and title are already extracted, also send them so the
+      // backend can skip redundant Firecrawl re-extraction.
       const result = await api.tailorResume({
         baseResumeId: selectedResumeId,
-        jobUrl: shouldSendJobUrl ? trimmedJobUrl : undefined,
+        jobUrl: trimmedJobUrl || undefined,
         company: trimmedCompany || undefined,
         jobTitle: trimmedJobTitle || undefined,
       })
