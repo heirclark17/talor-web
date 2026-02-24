@@ -50,29 +50,58 @@ export function parseExperienceItem(exp: any) {
 
   let title = exp.title || ''
   let company = exp.company || ''
-  const location = exp.location || ''
-  const dates = exp.dates || ''
+  let location = exp.location || ''
+  let dates = exp.dates || ''
   const bullets = exp.bullets || (exp.description ? [exp.description] : [])
 
-  // If title is missing but header exists, parse it
-  if (!title && exp.header) {
+  // If any fields missing and header exists, parse it
+  if ((!title || !company || !location || !dates) && exp.header) {
     const h = exp.header as string
-    // Try "Title – Company" or "Title - Company" (em-dash / en-dash / hyphen with spaces)
+
+    // Try AI format: "Title – Company | Location | Dates"
     const dashMatch = h.match(/^(.+?)\s+[–—-]\s+(.+)$/)
     if (dashMatch) {
-      title = dashMatch[1].trim()
-      if (!company) company = dashMatch[2].trim()
+      if (!title) title = dashMatch[1].trim()
+
+      // Split the part after the dash by pipes
+      const afterDash = dashMatch[2].trim()
+      const parts = afterDash.split('|').map(p => p.trim())
+
+      if (parts.length >= 3) {
+        // Format: "Company | Location | Dates"
+        if (!company) company = parts[0]
+        if (!location) location = parts[1]
+        if (!dates) dates = parts[2]
+      } else if (parts.length === 2) {
+        // Format: "Company | Location" or "Company | Dates"
+        if (!company) company = parts[0]
+        // Heuristic: if second part has numbers/hyphen, it's dates; otherwise location
+        const secondPart = parts[1]
+        if (/\d{4}|\d{1,2}\/\d{1,2}|\d{1,2}-\d{1,2}/.test(secondPart)) {
+          if (!dates) dates = secondPart
+        } else {
+          if (!location) location = secondPart
+        }
+      } else {
+        // Format: "Company" (no pipes)
+        if (!company) company = afterDash
+      }
     } else {
-      // Try "Title, Company" (split on last comma)
+      // Fallback: Try comma split for "Title, Company" format
       const lastComma = h.lastIndexOf(',')
       if (lastComma > 0) {
-        title = h.substring(0, lastComma).trim()
+        if (!title) title = h.substring(0, lastComma).trim()
         if (!company) company = h.substring(lastComma + 1).trim()
       } else {
         // Use whole header as title
-        title = h.trim()
+        if (!title) title = h.trim()
       }
     }
+  }
+
+  // Fallback to title_options[0] if still no title but options exist
+  if (!title && exp.title_options && exp.title_options.length > 0) {
+    title = exp.title_options[0]
   }
 
   return { title, company, location, dates, bullets }

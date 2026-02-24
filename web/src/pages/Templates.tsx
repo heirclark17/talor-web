@@ -88,6 +88,15 @@ export default function Templates() {
       if (tailoredData.experience && tailoredData.experience.length > 0) {
         base.experience = tailoredData.experience.map(parseExperienceItem)
       }
+      // Map education and certifications from tailored response
+      if (tailoredData.education) base.education = tailoredData.education
+      if (tailoredData.certifications) base.certifications = tailoredData.certifications
+      // Map contact info from tailored response (includes base resume data)
+      if (tailoredData.name) base.name = tailoredData.name
+      if (tailoredData.email) base.email = tailoredData.email
+      if (tailoredData.phone) base.phone = tailoredData.phone
+      if (tailoredData.linkedin) base.linkedin = tailoredData.linkedin
+      if (tailoredData.location) base.location = tailoredData.location
     }
 
     return base

@@ -252,7 +252,9 @@ function SingleColumnLayout({ data, style, layout, wrapper, container, templateI
         {/* Experience */}
         {data.experience && data.experience.length > 0 && (
           <Section title="PROFESSIONAL EXPERIENCE" style={style} layout={layout} isTech={isTech} isCorporate={isCorporate}>
-            {data.experience.map((exp, idx) => (
+            {data.experience
+              .filter(exp => exp.title || exp.company || (exp.bullets && exp.bullets.length > 0))
+              .map((exp, idx) => (
               <div
                 key={idx}
                 style={{
@@ -431,7 +433,9 @@ function AccentBarLayout({ data, style, layout, wrapper, container }: LayoutProp
               >
                 EXPERIENCE
               </div>
-              {data.experience.map((exp, i) => (
+              {data.experience
+                .filter(exp => exp.title || exp.company || (exp.bullets && exp.bullets.length > 0))
+                .map((exp, i) => (
                 <div key={i} style={{ marginBottom: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div style={{ fontWeight: '600', fontSize: style.fonts.headingSize.job, color: style.colors.heading }}>{exp.title}</div>
@@ -634,7 +638,9 @@ function SidebarLayout({ data, style, layout, wrapper, container }: LayoutProps)
               <div style={{ fontSize: '13px', fontWeight: 'bold', color: style.colors.primary, textTransform: 'uppercase' as const, letterSpacing: '1px', marginBottom: '12px' }}>
                 Experience
               </div>
-              {data.experience.map((exp, i) => (
+              {data.experience
+                .filter(exp => exp.title || exp.company || (exp.bullets && exp.bullets.length > 0))
+                .map((exp, i) => (
                 <div key={i} style={{ marginBottom: '14px' }}>
                   <div style={{ fontWeight: '600', fontSize: '12px', color: style.colors.heading }}>{exp.title}</div>
                   <div style={{ fontSize: '10px', color: style.colors.secondary }}>
@@ -805,7 +811,9 @@ function TwoColumnLayout({ data, style, layout, wrapper, container, templateId }
               >
                 Experience
               </div>
-              {data.experience.map((exp, i) => (
+              {data.experience
+                .filter(exp => exp.title || exp.company || (exp.bullets && exp.bullets.length > 0))
+                .map((exp, i) => (
                 <div key={i} style={{ marginBottom: '14px' }}>
                   <div style={{ fontWeight: '600', fontSize: style.fonts.headingSize.job, color: style.colors.heading }}>{exp.title}</div>
                   <div style={{ fontSize: '10px', color: style.colors.secondary }}>
@@ -880,7 +888,9 @@ function ElegantMinimalLayout({ data, style, wrapper, container }: LayoutProps) 
             >
               Experience
             </div>
-            {data.experience.map((exp, i) => (
+            {data.experience
+              .filter(exp => exp.title || exp.company || (exp.bullets && exp.bullets.length > 0))
+              .map((exp, i) => (
               <div key={i} style={{ marginBottom: '18px' }}>
                 <div style={{ fontWeight: '500', fontSize: '12px', color: style.colors.heading }}>{exp.title}</div>
                 <div style={{ fontSize: '10px', color: style.colors.subtle, marginBottom: '4px' }}>
@@ -960,7 +970,9 @@ function ExecutiveClassicLayout({ data, style, wrapper, container }: LayoutProps
         {/* Professional Experience */}
         {data.experience && (
           <ExecSection title="PROFESSIONAL EXPERIENCE" style={style}>
-            {data.experience.map((exp, i) => (
+            {data.experience
+              .filter(exp => exp.title || exp.company || (exp.bullets && exp.bullets.length > 0))
+              .map((exp, i) => (
               <div
                 key={i}
                 style={{
@@ -1089,7 +1101,9 @@ function ExecutiveModernLayout({ data, style, wrapper, container }: LayoutProps)
             >
               CAREER HISTORY
             </div>
-            {data.experience.map((exp, i) => (
+            {data.experience
+              .filter(exp => exp.title || exp.company || (exp.bullets && exp.bullets.length > 0))
+              .map((exp, i) => (
               <div key={i} style={{ marginBottom: '14px', paddingBottom: '10px', borderBottom: i < data.experience!.length - 1 ? `1px dashed ${style.colors.border}` : 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <div style={{ fontFamily: style.fonts.heading, fontWeight: '600', fontSize: '12px' }}>{exp.title}</div>
@@ -1193,7 +1207,9 @@ function CreativePortfolioLayout({ data, style, wrapper, container }: LayoutProp
               <div style={{ fontSize: '14px', fontFamily: style.fonts.heading, fontWeight: 'bold', color: style.colors.primary, marginBottom: '12px' }}>
                 Experience
               </div>
-              {data.experience.map((exp, i) => (
+              {data.experience
+                .filter(exp => exp.title || exp.company || (exp.bullets && exp.bullets.length > 0))
+                .map((exp, i) => (
                 <div key={i} style={{ marginBottom: '14px', paddingLeft: '12px', borderLeft: `3px solid ${style.colors.primary}30` }}>
                   <div style={{ fontWeight: '600', fontSize: '12px', color: style.colors.heading }}>{exp.title}</div>
                   <div style={{ fontSize: '10px', color: style.colors.secondary }}>
