@@ -3207,16 +3207,37 @@ class ApiClient {
     file_name: string;
     content_type: string;
     question_context: string;
+    interview_prep_id?: number;
   }): Promise<ApiResponse<{ upload_url: string; s3_key: string }>> {
     try {
+      const headers = this.getHeaders({ 'Content-Type': 'application/json' });
+      console.log('[API] Recording upload request:', {
+        url: `${this.baseUrl}/api/recordings/presigned-upload-url`,
+        headers: Object.fromEntries(Object.entries(headers).map(([k, v]) =>
+          k === 'Authorization' ? [k, v ? 'Bearer ***' : 'missing'] : [k, v]
+        )),
+        body: data
+      });
+
       const response = await fetch(`${this.baseUrl}/api/recordings/presigned-upload-url`, {
         method: 'POST',
-        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        headers,
         body: JSON.stringify(data),
       });
+
       const result = await response.json();
+
+      if (!response.ok) {
+        console.error('[API] Recording upload failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: result
+        });
+      }
+
       return { success: response.ok, data: result };
     } catch (error: any) {
+      console.error('[API] Recording upload exception:', error);
       return { success: false, error: error.message };
     }
   }

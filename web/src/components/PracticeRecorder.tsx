@@ -372,6 +372,7 @@ export default function PracticeRecorder({
         file_name: `${questionContext}.webm`,
         content_type: contentType,
         question_context: questionContext,
+        interview_prep_id: interviewPrepId,
       });
 
       if (!uploadRes.success || !uploadRes.data?.upload_url) {
