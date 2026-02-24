@@ -425,6 +425,13 @@ export const api = {
         tokenPrefix: token?.substring(0, 20),
       });
 
+      // iOS WORKAROUND: Add auth to FormData fields in addition to headers
+      // iOS has known bugs dropping custom headers on multipart requests
+      formData.append('authorization', `Bearer ${token}`);
+      formData.append('x_user_id', userId);
+
+      console.log('[UploadResume] Auth added to both headers AND form fields (iOS compatibility)');
+
       // Use XMLHttpRequest instead of fetch for better iOS FormData + header support
       // Fetch on iOS has known issues with custom headers when uploading FormData
       return new Promise((resolve) => {
