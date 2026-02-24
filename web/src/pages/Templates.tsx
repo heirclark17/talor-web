@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { FileText, ArrowRight, Info, Download, Crown } from 'lucide-react'
+import { FileText, ArrowRight, Info, Download, Crown, Upload } from 'lucide-react'
 import TemplateGallery from '../components/templates/TemplateGallery'
 import ResumeSelector from '../components/templates/ResumeSelector'
 import ExportButtons from '../components/templates/ExportButtons'
@@ -8,9 +8,11 @@ import type { ResumeTemplate } from '../types/template'
 import { useTemplateStore } from '../stores/templateStore'
 import { useSubscriptionStore } from '../stores/subscriptionStore'
 import { useResumeStore, parseExperienceItem } from '../stores/resumeStore'
+import { useOnboardingStore } from '../stores/onboardingStore'
 import { api } from '../api/client'
 import { showSuccess, showError } from '../utils/toast'
 import ResumePreview from '../components/templates/ResumePreview'
+import EmptyState from '../components/guidance/EmptyState'
 
 /**
  * Templates Page
@@ -23,6 +25,7 @@ export default function Templates() {
   const { selectedTemplate, setSelectedTemplate, clearSelectedTemplate } = useTemplateStore()
   const { checkFeatureAccess } = useSubscriptionStore()
   const { resumes } = useResumeStore()
+  const { markStepComplete } = useOnboardingStore()
   const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate | null>(null)
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null)
   const [resumeType, setResumeType] = useState<'base' | 'tailored'>('base')
@@ -112,6 +115,13 @@ export default function Templates() {
     return base
   }, [activeResume, tailoredData, resumeType])
 
+  // Mark template selection step as complete when template is selected
+  useEffect(() => {
+    if (selectedTemplate) {
+      markStepComplete('select_template')
+    }
+  }, [selectedTemplate, markStepComplete])
+
   const handleSelectTemplate = (template: ResumeTemplate) => {
     if (template.isPremium && !checkFeatureAccess('premium_templates')) {
       showError('This is a premium template. Upgrade to Pro to use it.')
@@ -135,6 +145,29 @@ export default function Templates() {
 
   const handlePreviewTemplate = (template: ResumeTemplate) => {
     setPreviewTemplate(template)
+  }
+
+  // Show empty state if no resumes uploaded
+  if (!resumes || resumes.length === 0) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-theme">Templates</h1>
+          </div>
+          <EmptyState
+            icon={Upload}
+            headline="No resume uploaded yet"
+            description="Upload your resume first to preview it with different templates"
+            primaryAction={{
+              label: 'Upload Resume',
+              href: '/upload',
+            }}
+            metric="Professional, ATS-friendly templates waiting for you"
+          />
+        </div>
+      </div>
+    )
   }
 
   return (

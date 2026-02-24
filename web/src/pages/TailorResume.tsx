@@ -9,7 +9,11 @@ import KeywordPanel from '../components/KeywordPanel'
 import MatchScore from '../components/MatchScore'
 import AILoadingScreen from '../components/AILoadingScreen'
 import SalaryInsights from '../components/SalaryInsights'
+import WorkflowStepper from '../components/guidance/WorkflowStepper'
+import InlineHelp from '../components/guidance/InlineHelp'
+import NextStepPrompt from '../components/guidance/NextStepPrompt'
 import { useResumeStore, parseExperienceItem } from '../stores/resumeStore'
+import { useOnboardingStore } from '../stores/onboardingStore'
 import { usePostHog } from '../contexts/PostHogContext'
 import { useTemplateStore } from '../stores/templateStore'
 import { exportResumeToPDF, type ResumeData } from '../lib/pdfExport'
@@ -113,6 +117,9 @@ export default function TailorResume() {
   // Resume state from Zustand store
   const { resumes, fetchResumes, deleteResume: deleteResumeFromStore, loading: storeLoadingResumes } = useResumeStore()
 
+  // Onboarding state
+  const { markStepComplete } = useOnboardingStore()
+
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
   const [selectedResume, setSelectedResume] = useState<BaseResume | null>(null)
   const [tailoredResume, setTailoredResume] = useState<TailoredResume | null>(null)
@@ -210,6 +217,13 @@ export default function TailorResume() {
       page_type: 'core_feature',
     })
   }, [fetchResumes])
+
+  // Mark tailor step as complete when tailored resume exists
+  useEffect(() => {
+    if (tailoredResume) {
+      markStepComplete('tailor_resume')
+    }
+  }, [tailoredResume, markStepComplete])
 
   const loadSavedJobs = async () => {
     setLoadingSavedJobs(true)
@@ -2801,6 +2815,35 @@ export default function TailorResume() {
             AI-powered resume customization for every job application
           </p>
         </div>
+
+        {/* Workflow Stepper */}
+        <WorkflowStepper
+          steps={[
+            {
+              label: 'Upload Resume',
+              status: selectedResume ? 'complete' : 'current',
+            },
+            {
+              label: 'Paste Job Description',
+              status: !selectedResume ? 'upcoming' : (jobUrl && company && jobTitle) ? 'complete' : 'current',
+              tooltip: 'We analyze the job to extract key requirements',
+            },
+            {
+              label: 'Review Tailored Resume',
+              status: !tailoredResume ? 'upcoming' : 'current',
+            },
+            {
+              label: 'Export & Apply',
+              status: 'upcoming',
+            },
+          ]}
+          currentStep={
+            !selectedResume ? 1 :
+            !(jobUrl && company && jobTitle) ? 2 :
+            !tailoredResume ? 3 : 4
+          }
+          estimatedTime={!tailoredResume ? '2 min' : undefined}
+        />
 
         {error && (
           <div className="mb-16 p-5 glass border-2 border-red-500/30 rounded-2xl">

@@ -24,6 +24,9 @@ import { showError } from '../utils/toast'
 import SearchFilter from '../components/SearchFilter'
 import { SkeletonCard } from '../components/SkeletonLoader'
 import { useResumeStore } from '../stores/resumeStore'
+import { useOnboardingStore } from '../stores/onboardingStore'
+import ActivationChecklist from '../components/guidance/ActivationChecklist'
+import EmptyState from '../components/guidance/EmptyState'
 
 interface Resume {
   id: number
@@ -104,6 +107,9 @@ export default function Home() {
   const [tailoredResumes, setTailoredResumes] = useState<TailoredResume[]>([])
   const [tailoredLoading, setTailoredLoading] = useState(false)
   const [deletingTailoredId, setDeletingTailoredId] = useState<number | null>(null)
+
+  // Onboarding state
+  const { markStepComplete, activationSteps, isEventCelebrated } = useOnboardingStore()
 
   const [error, setError] = useState<string | null>(null)
   const [analysisModal, setAnalysisModal] = useState(false)
@@ -227,6 +233,13 @@ export default function Home() {
   // -------------------------------------------------------------------------
   // Action handlers
   // -------------------------------------------------------------------------
+
+  // Mark upload step as complete when resumes exist
+  useEffect(() => {
+    if (resumes.length > 0 && !activationSteps.upload_resume) {
+      markStepComplete('upload_resume')
+    }
+  }, [resumes, activationSteps.upload_resume, markStepComplete])
 
   const handleDeleteBase = (resumeId: number) => {
     setConfirmDeleteItem({ type: 'base', id: resumeId })
@@ -381,24 +394,22 @@ export default function Home() {
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-theme">My Resumes</h1>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-theme">Dashboard</h1>
           </div>
-          <div className="glass rounded-xl sm:rounded-2xl p-8 sm:p-12 text-center">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-theme-glass-5 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-theme-secondary" />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-semibold text-theme mb-2 sm:mb-3">No Resumes Yet</h2>
-            <p className="text-theme-secondary text-sm sm:text-base mb-6 sm:mb-8 max-w-md mx-auto px-4">
-              Upload your first resume to get started with tailoring for specific jobs.
-            </p>
-            <button
-              onClick={() => navigate('/upload')}
-              className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors min-h-[48px] w-full sm:w-auto"
-            >
-              <Upload className="w-5 h-5 flex-shrink-0" />
-              <span>Upload Resume</span>
-            </button>
-          </div>
+          <EmptyState
+            icon={FileText}
+            headline="Ready to land your dream job?"
+            description="Upload your resume and we'll help you tailor it for every application"
+            primaryAction={{
+              label: 'Upload Resume',
+              href: '/upload',
+            }}
+            secondaryAction={{
+              label: 'See how it works',
+              href: '/templates',
+            }}
+            metric="Join thousands of users who've landed interviews using TailorMe"
+          />
         </div>
       </div>
     )
@@ -436,6 +447,11 @@ export default function Home() {
             <Upload className="w-5 h-5 flex-shrink-0" />
             <span>Upload Resume</span>
           </button>
+        </div>
+
+        {/* Activation Checklist */}
+        <div className="mb-6">
+          <ActivationChecklist />
         </div>
 
         {/* Quick Actions */}

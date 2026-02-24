@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { FileEdit, Plus, Download, Loader2, Wand2, ChevronDown, Trash2, X, Upload, FileText, Search } from 'lucide-react'
+import { FileEdit, Plus, Download, Loader2, Wand2, ChevronDown, Trash2, X, Upload, FileText, Search, Mail } from 'lucide-react'
 import { api } from '../api/client'
 import { useResumeStore } from '../stores/resumeStore'
+import { useOnboardingStore } from '../stores/onboardingStore'
 import { showError } from '../utils/toast'
+import EmptyState from '../components/guidance/EmptyState'
+import WorkflowStepper from '../components/guidance/WorkflowStepper'
 
 interface CoverLetter {
   id: number
@@ -79,10 +82,20 @@ export default function CoverLetterGenerator() {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Onboarding state
+  const { markStepComplete } = useOnboardingStore()
+
   useEffect(() => {
     loadLetters()
     fetchResumes()
   }, [fetchResumes])
+
+  // Mark cover letter step as complete when letters exist
+  useEffect(() => {
+    if (letters.length > 0) {
+      markStepComplete('generate_cover_letter')
+    }
+  }, [letters, markStepComplete])
 
   async function handleFileUpload(file: File) {
     if (!file) return
@@ -308,6 +321,34 @@ export default function CoverLetterGenerator() {
     }
   }
 
+  // Show empty state if no letters and not showing generator
+  if (!loading && letters.length === 0 && !showGenerator) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-theme">Cover Letters</h1>
+          </div>
+          <EmptyState
+            icon={Mail}
+            headline="Create your first cover letter"
+            description="Generate a personalized cover letter in 60 seconds"
+            primaryAction={{
+              label: 'Generate Cover Letter',
+              href: '#',
+              onClick: () => setShowGenerator(true),
+            }}
+            secondaryAction={{
+              label: 'View Templates',
+              href: '/templates',
+            }}
+            metric="Matching cover letters get 3x more responses"
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8 max-w-7xl">
       {/* Header */}
@@ -328,17 +369,34 @@ export default function CoverLetterGenerator() {
         </button>
       </div>
 
+      {/* Workflow Stepper (when showing generator) */}
+      {showGenerator && (
+        <WorkflowStepper
+          steps={[
+            {
+              label: 'Job Details',
+              status: (jobTitle && companyName) ? 'complete' : 'current',
+            },
+            {
+              label: 'Select Resume',
+              status: !jobTitle && !companyName ? 'upcoming' : selectedResumeId ? 'complete' : 'current',
+              tooltip: 'Choose a resume to pull experience from',
+            },
+            {
+              label: 'Customize',
+              status: !selectedResumeId ? 'upcoming' : generating ? 'current' : 'upcoming',
+            },
+          ]}
+          currentStep={!(jobTitle && companyName) ? 1 : !selectedResumeId ? 2 : 3}
+          estimatedTime={generating ? '45 sec' : '1 min'}
+        />
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Letters List */}
         <div className="lg:col-span-1 space-y-3">
           {loading ? (
             <div className="text-center py-8 text-theme-secondary">Loading...</div>
-          ) : letters.length === 0 ? (
-            <div className="text-center py-8">
-              <FileEdit className="w-12 h-12 text-theme-tertiary mx-auto mb-3" />
-              <p className="text-theme-secondary">No cover letters yet</p>
-              <p className="text-theme-tertiary text-sm mt-1">Generate your first cover letter</p>
-            </div>
           ) : (
             letters.map(letter => (
               <div
