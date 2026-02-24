@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from 'react'
-import { Check, Crown, Star } from 'lucide-react'
+import React, { useMemo } from 'react'
+import { Check, Crown } from 'lucide-react'
 import type { ResumeTemplate } from '../../types/template'
 import { useSubscriptionStore } from '../../stores/subscriptionStore'
 import { useResumeStore } from '../../stores/resumeStore'
-import { generateTemplatePlaceholder } from '../../utils/generateTemplatePlaceholder'
 import ResumePreview from './ResumePreview'
 
 interface TemplateCardProps {
@@ -39,14 +38,6 @@ export default function TemplateCard({
   const { checkFeatureAccess } = useSubscriptionStore()
   const { resumes } = useResumeStore()
   const hasAccess = !template.isPremium || checkFeatureAccess('premium_templates')
-
-  const [imgError, setImgError] = useState(false)
-
-  // Use AI-generated preview if available
-  const previewImage = useMemo(() => {
-    if (template.preview && !imgError) return template.preview
-    return ''
-  }, [template.preview, imgError])
 
   // Use provided resume data or convert from store
   // The resumeStore.Resume uses a flat shape (not nested personalInfo)
@@ -117,20 +108,10 @@ export default function TemplateCard({
     >
       {/* Preview Image */}
       <div className="relative aspect-[8.5/11] overflow-hidden bg-neutral-100">
-        {/* If AI-generated preview image exists, use it. Otherwise render live preview */}
-        {previewImage ? (
-          <img
-            src={previewImage}
-            alt={`${template.name} preview`}
-            className="w-full h-full object-cover"
-            onError={() => setImgError(true)}
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-start justify-center pt-0 overflow-hidden">
-            <ResumePreview template={template} resumeData={resumeData} scale={0.28} />
-          </div>
-        )}
+        {/* Live resume preview rendering with user data */}
+        <div className="w-full h-full flex items-start justify-center pt-0 overflow-hidden">
+          <ResumePreview template={template} resumeData={resumeData} scale={0.28} />
+        </div>
 
         {/* Premium Badge */}
         {template.isPremium && (
