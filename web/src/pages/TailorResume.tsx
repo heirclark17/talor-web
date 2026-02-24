@@ -1039,6 +1039,11 @@ export default function TailorResume() {
       return
     }
 
+    // Skip extraction for non-URL values (e.g. manual_ placeholder IDs from saved jobs)
+    if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+      return
+    }
+
     setExtracting(true)
     setExtractionAttempted(false)
     setExtractionError({})
