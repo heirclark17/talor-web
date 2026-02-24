@@ -6,29 +6,58 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react'
-import { Upload, FileText, Briefcase, Award, Calendar, Check, Trash2, X } from 'lucide-react'
+import { Upload, FileText, Briefcase, Award, Calendar, Check, Trash2, X, Sparkles } from 'lucide-react'
 import { useResumeStore } from '../../stores/resumeStore'
 import type { Resume } from '../../stores/resumeStore'
 import { useNavigate } from 'react-router-dom'
 import { formatLocalDateTime } from '../../utils/dateUtils'
 import { showSuccess, showError } from '../../utils/toast'
+import { api } from '../../api/client'
+
+interface TailoredResume {
+  id: number
+  job_title: string
+  company_name?: string
+  created_at: string
+  base_resume_id: number
+}
 
 interface ResumeSelectorProps {
   selectedResumeId?: string | null
-  onResumeSelect: (resumeId: string | null) => void
+  onResumeSelect: (resumeId: string | null, type: 'base' | 'tailored') => void
+  resumeType?: 'base' | 'tailored'
 }
 
-export default function ResumeSelector({ selectedResumeId, onResumeSelect }: ResumeSelectorProps) {
+export default function ResumeSelector({ selectedResumeId, onResumeSelect, resumeType: initialResumeType = 'base' }: ResumeSelectorProps) {
   const navigate = useNavigate()
   const { resumes, fetchResumes, deleteResume } = useResumeStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [resumeType, setResumeType] = useState<'base' | 'tailored'>(initialResumeType)
+  const [tailoredResumes, setTailoredResumes] = useState<TailoredResume[]>([])
+  const [loadingTailored, setLoadingTailored] = useState(false)
 
   // Always fetch fresh resume data on mount
   useEffect(() => {
     fetchResumes()
+    fetchTailoredResumes()
   }, [])
+
+  // Fetch tailored resumes
+  const fetchTailoredResumes = async () => {
+    setLoadingTailored(true)
+    try {
+      const result = await api.listTailoredResumes()
+      if (result.success && result.data?.tailored_resumes) {
+        setTailoredResumes(result.data.tailored_resumes)
+      }
+    } catch (error) {
+      console.error('Error fetching tailored resumes:', error)
+    } finally {
+      setLoadingTailored(false)
+    }
+  }
 
   // Get all available resumes
   const availableResumes = resumes || []
@@ -39,8 +68,9 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
     ? availableResumes.find(r => String(r.id) === String(selectedResumeId)) || latestResume
     : latestResume
 
-  const handleResumeSelect = (resumeId: number) => {
-    onResumeSelect(String(resumeId))
+  const handleResumeSelect = (resumeId: number, type: 'base' | 'tailored') => {
+    onResumeSelect(String(resumeId), type)
+    setResumeType(type)
     setIsModalOpen(false)
   }
 
@@ -57,7 +87,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
         showSuccess('Resume deleted successfully')
         // If deleted resume was selected, clear selection
         if (selectedResumeId && String(resumeId) === String(selectedResumeId)) {
-          onResumeSelect(null)
+          onResumeSelect(null, resumeType)
         }
       } else {
         showError('Failed to delete resume')
@@ -528,93 +558,192 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="sticky top-0 bg-theme-card border-b border-theme-subtle p-6 flex items-center justify-between z-10">
-              <div>
-                <h3 className="text-2xl font-bold text-theme">Select Resume</h3>
-                <p className="text-sm text-theme-secondary mt-1">
-                  Choose a resume to use with templates
-                </p>
+            <div className="sticky top-0 bg-theme-card border-b border-theme-subtle p-6 z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-2xl font-bold text-theme">Select Resume</h3>
+                  <p className="text-sm text-theme-secondary mt-1">
+                    Choose a resume to use with templates
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 hover:bg-theme-glass-10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-theme-secondary" />
+                </button>
               </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-theme-glass-10 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-theme-secondary" />
-              </button>
+
+              {/* Tabs */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setResumeType('base')}
+                  className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
+                    resumeType === 'base'
+                      ? 'bg-accent text-white'
+                      : 'bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    <span>Uploaded Resumes</span>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setResumeType('tailored')}
+                  className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
+                    resumeType === 'tailored'
+                      ? 'bg-accent text-white'
+                      : 'bg-theme-glass-5 text-theme-secondary hover:bg-theme-glass-10'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Tailored Resumes</span>
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Resume List */}
-            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
-              {availableResumes.length > 0 ? (
-                <div className="space-y-3">
-                  {availableResumes.map((resume) => (
-                    <div
-                      key={resume.id}
-                      className={`group p-4 rounded-xl border transition-all ${
-                        selectedResume?.id === resume.id
-                          ? 'bg-accent/10 border-accent/30'
-                          : 'bg-theme-glass-5 border-theme-subtle hover:bg-theme-glass-10 hover:border-theme-tertiary'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <FileText
-                          className={`w-5 h-5 shrink-0 mt-1 ${
-                            selectedResume?.id === resume.id ? 'text-accent' : 'text-theme-secondary'
-                          }`}
-                        />
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-180px)]">
+              {resumeType === 'base' ? (
+                /* Base Resumes */
+                availableResumes.length > 0 ? (
+                  <div className="space-y-3">
+                    {availableResumes.map((resume) => (
+                      <div
+                        key={resume.id}
+                        className={`group p-4 rounded-xl border transition-all ${
+                          selectedResume?.id === resume.id && resumeType === 'base'
+                            ? 'bg-accent/10 border-accent/30'
+                            : 'bg-theme-glass-5 border-theme-subtle hover:bg-theme-glass-10 hover:border-theme-tertiary'
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <FileText
+                            className={`w-5 h-5 shrink-0 mt-1 ${
+                              selectedResume?.id === resume.id && resumeType === 'base' ? 'text-accent' : 'text-theme-secondary'
+                            }`}
+                          />
 
-                        <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0">
+                            <button
+                              onClick={() => handleResumeSelect(resume.id, 'base')}
+                              className="w-full text-left"
+                            >
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-semibold text-theme truncate">
+                                  {getResumeName(resume)}
+                                </h4>
+                                {selectedResume?.id === resume.id && resumeType === 'base' && (
+                                  <Check className="w-4 h-4 text-accent shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-sm text-theme-secondary">
+                                Uploaded {formatLocalDateTime(resume.uploaded_at)}
+                              </p>
+                            </button>
+                          </div>
+
                           <button
-                            onClick={() => handleResumeSelect(resume.id)}
-                            className="w-full text-left"
+                            onClick={() => handleDeleteResume(resume.id, getResumeName(resume))}
+                            disabled={deletingId === resume.id}
+                            className="p-2 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                            title="Delete resume"
                           >
+                            {deletingId === resume.id ? (
+                              <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 className="w-5 h-5 text-red-400 hover:text-red-300" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <FileText className="w-16 h-16 text-theme-faint mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-theme mb-2">No Resumes Found</h4>
+                    <p className="text-sm text-theme-secondary mb-4">
+                      Upload your first resume to get started
+                    </p>
+                    <button
+                      onClick={() => {
+                        setIsModalOpen(false)
+                        navigate('/upload')
+                      }}
+                      className="px-6 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-colors"
+                    >
+                      Upload Resume
+                    </button>
+                  </div>
+                )
+              ) : (
+                /* Tailored Resumes */
+                loadingTailored ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-theme-secondary">Loading tailored resumes...</p>
+                  </div>
+                ) : tailoredResumes.length > 0 ? (
+                  <div className="space-y-3">
+                    {tailoredResumes.map((tailored) => (
+                      <div
+                        key={tailored.id}
+                        className={`group p-4 rounded-xl border transition-all ${
+                          Number(selectedResumeId) === tailored.id && resumeType === 'tailored'
+                            ? 'bg-accent/10 border-accent/30'
+                            : 'bg-theme-glass-5 border-theme-subtle hover:bg-theme-glass-10 hover:border-theme-tertiary'
+                        }`}
+                      >
+                        <button
+                          onClick={() => handleResumeSelect(tailored.id, 'tailored')}
+                          className="w-full text-left flex items-start gap-4"
+                        >
+                          <Sparkles
+                            className={`w-5 h-5 shrink-0 mt-1 ${
+                              Number(selectedResumeId) === tailored.id && resumeType === 'tailored' ? 'text-accent' : 'text-purple-400'
+                            }`}
+                          />
+
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <h4 className="font-semibold text-theme truncate">
-                                {getResumeName(resume)}
+                                {tailored.job_title}
+                                {tailored.company_name && ` at ${tailored.company_name}`}
                               </h4>
-                              {selectedResume?.id === resume.id && (
+                              {Number(selectedResumeId) === tailored.id && resumeType === 'tailored' && (
                                 <Check className="w-4 h-4 text-accent shrink-0" />
                               )}
                             </div>
                             <p className="text-sm text-theme-secondary">
-                              Uploaded {formatLocalDateTime(resume.uploaded_at)}
+                              Tailored {formatLocalDateTime(tailored.created_at)}
                             </p>
-                          </button>
-                        </div>
-
-                        <button
-                          onClick={() => handleDeleteResume(resume.id, getResumeName(resume))}
-                          disabled={deletingId === resume.id}
-                          className="p-2 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
-                          title="Delete resume"
-                        >
-                          {deletingId === resume.id ? (
-                            <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Trash2 className="w-5 h-5 text-red-400 hover:text-red-300" />
-                          )}
+                          </div>
                         </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-theme-faint mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-theme mb-2">No Resumes Found</h4>
-                  <p className="text-sm text-theme-secondary mb-4">
-                    Upload your first resume to get started
-                  </p>
-                  <button
-                    onClick={() => {
-                      setIsModalOpen(false)
-                      navigate('/upload')
-                    }}
-                    className="px-6 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-colors"
-                  >
-                    Upload Resume
-                  </button>
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Sparkles className="w-16 h-16 text-theme-faint mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-theme mb-2">No Tailored Resumes</h4>
+                    <p className="text-sm text-theme-secondary mb-4">
+                      Create your first tailored resume for a specific job
+                    </p>
+                    <button
+                      onClick={() => {
+                        setIsModalOpen(false)
+                        navigate('/tailor')
+                      }}
+                      className="px-6 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-colors"
+                    >
+                      Tailor Resume
+                    </button>
+                  </div>
+                )
               )}
             </div>
           </div>

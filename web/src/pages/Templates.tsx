@@ -25,21 +25,27 @@ export default function Templates() {
   const { resumes } = useResumeStore()
   const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate | null>(null)
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null)
+  const [resumeType, setResumeType] = useState<'base' | 'tailored'>('base')
   const [tailoredData, setTailoredData] = useState<any>(null)
 
-  // Load tailored resume data if resumeId param is provided (from tailor/batch flow)
+  // Load tailored resume data if resumeId param is provided (from tailor/batch flow) OR when tailored resume selected
   const tailoredResumeId = searchParams.get('resumeId')
   useEffect(() => {
-    if (!tailoredResumeId) return
+    const idToLoad = tailoredResumeId || (resumeType === 'tailored' && selectedResumeId ? selectedResumeId : null)
+    if (!idToLoad) {
+      setTailoredData(null)
+      return
+    }
     let cancelled = false
     async function loadTailored() {
       try {
-        const result = await api.getTailoredResume(Number(tailoredResumeId))
+        const result = await api.getTailoredResume(Number(idToLoad))
         if (!cancelled && result.success && result.data) {
           setTailoredData(result.data)
-          // Auto-select the base resume this was tailored from
-          if (result.data.base_resume_id) {
-            setSelectedResumeId(String(result.data.base_resume_id))
+          // Auto-select the tailored resume
+          if (!tailoredResumeId) {
+            setSelectedResumeId(String(result.data.id))
+            setResumeType('tailored')
           }
         }
       } catch {
@@ -48,19 +54,43 @@ export default function Templates() {
     }
     loadTailored()
     return () => { cancelled = true }
-  }, [tailoredResumeId])
+  }, [tailoredResumeId, selectedResumeId, resumeType])
 
   // Get the selected resume or default to the most recently uploaded (index 0)
   const activeResume = useMemo(() => {
+    // For tailored resumes, we'll load the data via API, so just return null for now
+    if (resumeType === 'tailored') {
+      return null
+    }
+
     const availableResumes = resumes || []
     if (selectedResumeId) {
       return availableResumes.find(r => String(r.id) === selectedResumeId) || availableResumes[0] || null
     }
     return availableResumes[0] || null
-  }, [selectedResumeId, resumes])
+  }, [selectedResumeId, resumes, resumeType])
 
   // Build resume data for preview, merging tailored content over base resume
   const resumeData = useMemo(() => {
+    // For tailored resumes, use tailoredData directly
+    if (resumeType === 'tailored' && tailoredData) {
+      return {
+        name: tailoredData.name || tailoredData.candidate_name,
+        email: tailoredData.email || tailoredData.candidate_email,
+        phone: tailoredData.phone || tailoredData.candidate_phone,
+        linkedin: tailoredData.linkedin || tailoredData.candidate_linkedin,
+        location: tailoredData.location || tailoredData.candidate_location,
+        summary: tailoredData.summary || tailoredData.tailored_summary,
+        skills: tailoredData.competencies || tailoredData.tailored_skills || tailoredData.skills,
+        experience: Array.isArray(tailoredData.experience || tailoredData.tailored_experience)
+          ? (tailoredData.experience || tailoredData.tailored_experience).map(parseExperienceItem)
+          : undefined,
+        education: tailoredData.education,
+        certifications: tailoredData.certifications,
+      }
+    }
+
+    // For base resumes
     if (!activeResume) return null
 
     // Base resume fields (contact info, education, certs)
@@ -79,28 +109,8 @@ export default function Templates() {
       certifications: activeResume.certifications,
     }
 
-    // If we have tailored data, overlay the tailored summary/skills/experience
-    if (tailoredData) {
-      if (tailoredData.summary) base.summary = tailoredData.summary
-      if (tailoredData.competencies && tailoredData.competencies.length > 0) {
-        base.skills = tailoredData.competencies
-      }
-      if (tailoredData.experience && tailoredData.experience.length > 0) {
-        base.experience = tailoredData.experience.map(parseExperienceItem)
-      }
-      // Map education and certifications from tailored response
-      if (tailoredData.education) base.education = tailoredData.education
-      if (tailoredData.certifications) base.certifications = tailoredData.certifications
-      // Map contact info from tailored response (includes base resume data)
-      if (tailoredData.name) base.name = tailoredData.name
-      if (tailoredData.email) base.email = tailoredData.email
-      if (tailoredData.phone) base.phone = tailoredData.phone
-      if (tailoredData.linkedin) base.linkedin = tailoredData.linkedin
-      if (tailoredData.location) base.location = tailoredData.location
-    }
-
     return base
-  }, [activeResume, tailoredData])
+  }, [activeResume, tailoredData, resumeType])
 
   const handleSelectTemplate = (template: ResumeTemplate) => {
     if (template.isPremium && !checkFeatureAccess('premium_templates')) {
@@ -145,7 +155,11 @@ export default function Templates() {
       <div className="max-w-7xl mx-auto mb-12">
         <ResumeSelector
           selectedResumeId={selectedResumeId}
-          onResumeSelect={setSelectedResumeId}
+          onResumeSelect={(id, type) => {
+            setSelectedResumeId(id)
+            setResumeType(type)
+          }}
+          resumeType={resumeType}
         />
       </div>
 
