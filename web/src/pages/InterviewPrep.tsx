@@ -353,14 +353,28 @@ export default function InterviewPrep() {
       const hasCachedData = cachedData && (
         cachedData.company_research ||
         cachedData.strategic_news ||
-        cachedData.values_alignment
+        cachedData.values_alignment ||
+        cachedData.competitive_intelligence
       )
 
+      console.log('[InterviewPrep] Cache check:', {
+        hasCachedData,
+        hasCompanyResearch: !!cachedData?.company_research,
+        hasStrategicNews: !!cachedData?.strategic_news,
+        hasValuesAlignment: !!cachedData?.values_alignment,
+        hasCompetitiveIntelligence: !!cachedData?.competitive_intelligence,
+        hasBehavioralTechnical: !!cachedData?.behavioral_technical_questions,
+        hasCommonQuestions: !!cachedData?.common_questions,
+      })
+
       if (hasCachedData) {
+        console.log('[InterviewPrep] Loading from cache - skipping AI generation')
         if (cachedData.company_research) setCompanyResearch(cachedData.company_research)
         if (cachedData.strategic_news) setCompanyNews(cachedData.strategic_news)
         if (cachedData.values_alignment) setCompanyValues(cachedData.values_alignment)
         if (cachedData.competitive_intelligence) setInterviewQuestions(cachedData.competitive_intelligence)
+      } else {
+        console.log('[InterviewPrep] No cache found - will fetch from AI services')
       }
 
       // Hydrate cached AI-generated child component data
@@ -537,51 +551,69 @@ export default function InterviewPrep() {
       if (researchResult.status === 'fulfilled' && researchResult.value?.success) {
         setCompanyResearch(researchResult.value.data)
         cacheData.companyResearch = researchResult.value.data
+        console.log('[InterviewPrep] Company research fetched successfully')
       } else {
+        console.warn('[InterviewPrep] Company research failed:', researchResult.status === 'rejected' ? researchResult.reason : 'API returned failure')
       }
 
       // Handle news result
       if (newsResult.status === 'fulfilled' && newsResult.value?.success) {
         setCompanyNews(newsResult.value.data)
         cacheData.companyNews = newsResult.value.data
+        console.log('[InterviewPrep] Company news fetched successfully')
       } else {
+        console.warn('[InterviewPrep] Company news failed:', newsResult.status === 'rejected' ? newsResult.reason : 'API returned failure')
       }
 
       // Handle interview questions result
       if (questionsResult.status === 'fulfilled' && questionsResult.value?.success) {
         setInterviewQuestions(questionsResult.value.data)
         cacheData.interviewQuestions = questionsResult.value.data
+        console.log('[InterviewPrep] Interview questions fetched successfully')
       } else {
+        console.warn('[InterviewPrep] Interview questions failed:', questionsResult.status === 'rejected' ? questionsResult.reason : 'API returned failure')
       }
 
       // Handle company values result - merge with prep data if available
       if (valuesResult.status === 'fulfilled' && valuesResult.value?.success) {
         setCompanyValues(valuesResult.value.data)
         cacheData.companyValues = valuesResult.value.data
+        console.log('[InterviewPrep] Company values fetched successfully')
       } else {
+        console.warn('[InterviewPrep] Company values failed:', valuesResult.status === 'rejected' ? valuesResult.reason : 'API returned failure')
       }
 
       // Save to database for permanent caching (instead of just localStorage)
       if (currentPrepId) {
+        console.log('[InterviewPrep] Saving fetched data to cache, prepId:', currentPrepId)
         try {
+          const savePayload = {
+            company_research: cacheData.companyResearch || null,
+            strategic_news: cacheData.companyNews || null,
+            values_alignment: cacheData.companyValues || null,
+            interview_questions: cacheData.interviewQuestions || null,
+          }
+          console.log('[InterviewPrep] PATCH /cache payload keys:', Object.keys(savePayload).filter(k => savePayload[k as keyof typeof savePayload] !== null))
           const saveResponse = await fetch(`${API_BASE_URL}/api/interview-prep/${currentPrepId}/cache`, {
             method: 'PATCH',
             headers: getApiHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({
-              company_research: cacheData.companyResearch || null,
-              strategic_news: cacheData.companyNews || null,
-              values_alignment: cacheData.companyValues || null,
-              interview_questions: cacheData.interviewQuestions || null,
-            }),
+            body: JSON.stringify(savePayload),
           })
 
           if (saveResponse.ok) {
+            console.log('[InterviewPrep] Cache saved to database successfully')
           } else {
+            const errBody = await saveResponse.text()
+            console.error('[InterviewPrep] Cache save FAILED - status:', saveResponse.status, 'body:', errBody)
           }
         } catch (saveErr) {
+          console.error('[InterviewPrep] Cache save threw an exception:', saveErr)
         }
+      } else {
+        console.warn('[InterviewPrep] No prepId available - cannot save cache to database')
       }
     } catch (err: any) {
+      console.error('[InterviewPrep] fetchRealData error:', err)
     } finally {
       setLoadingRealData(false)
     }

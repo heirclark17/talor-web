@@ -212,20 +212,57 @@ export default function ResumeBuilder() {
           </p>
         </div>
 
-        {/* Progress Bar */}
+        {/* Step Indicators */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-theme-secondary">
-              Step {currentStep} of {totalSteps}
-            </span>
-            <span className="text-sm text-theme-secondary">
-              {Math.round((currentStep / totalSteps) * 100)}% Complete
-            </span>
+          <div className="flex items-center justify-between mb-4">
+            {[
+              { icon: User, label: 'Contact' },
+              { icon: Briefcase, label: 'Summary' },
+              { icon: Briefcase, label: 'Experience' },
+              { icon: GraduationCap, label: 'Education' },
+              { icon: Code, label: 'Skills' },
+            ].map((step, index) => {
+              const StepIcon = step.icon;
+              const stepNum = index + 1;
+              const isCompleted = stepNum < currentStep;
+              const isActive = stepNum === currentStep;
+              return (
+                <button
+                  key={index}
+                  onClick={() => {
+                    if (stepNum < currentStep || canProceed()) setCurrentStep(stepNum);
+                  }}
+                  className={`flex flex-col items-center gap-1.5 flex-1 transition-all ${
+                    isActive ? 'opacity-100' : isCompleted ? 'opacity-80' : 'opacity-40'
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                      isCompleted
+                        ? 'border-green-500 bg-green-500/15'
+                        : isActive
+                          ? 'border-accent'
+                          : 'border-theme bg-theme-glass-5'
+                    }`}
+                    style={isActive ? { borderColor: 'var(--accent-color)', background: 'color-mix(in srgb, var(--accent-color) 15%, transparent)' } : undefined}
+                  >
+                    {isCompleted ? (
+                      <Check className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <StepIcon className={`w-5 h-5 ${isActive ? 'text-accent' : 'text-theme-tertiary'}`} />
+                    )}
+                  </div>
+                  <span className={`text-xs font-medium hidden sm:block ${isActive ? 'text-accent' : 'text-theme-secondary'}`}>
+                    {step.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
           <div className="w-full h-2 bg-theme-glass-10 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-500 transition-all duration-300"
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+              className="h-full transition-all duration-300"
+              style={{ backgroundColor: 'var(--accent-color)', width: `${(currentStep / totalSteps) * 100}%` }}
             />
           </div>
         </div>
@@ -236,7 +273,7 @@ export default function ResumeBuilder() {
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
-                <User className="w-6 h-6 text-blue-500" />
+                <User className="w-6 h-6 text-accent" />
                 <h2 className="text-2xl font-bold text-theme">
                   Contact Information
                 </h2>
@@ -331,7 +368,7 @@ export default function ResumeBuilder() {
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
-                <Briefcase className="w-6 h-6 text-blue-500" />
+                <Briefcase className="w-6 h-6 text-accent" />
                 <h2 className="text-2xl font-bold text-theme">
                   Professional Summary
                 </h2>
@@ -360,7 +397,7 @@ export default function ResumeBuilder() {
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <Briefcase className="w-6 h-6 text-blue-500" />
+                  <Briefcase className="w-6 h-6 text-accent" />
                   <h2 className="text-2xl font-bold text-theme">
                     Work Experience
                   </h2>
@@ -466,7 +503,7 @@ export default function ResumeBuilder() {
                             }
                             setExperience(updated);
                           }}
-                          className="w-4 h-4"
+                          className="checkbox-styled"
                         />
                         <label className="text-sm font-medium text-theme-secondary">
                           I currently work here
@@ -517,7 +554,7 @@ export default function ResumeBuilder() {
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <GraduationCap className="w-6 h-6 text-blue-500" />
+                  <GraduationCap className="w-6 h-6 text-accent" />
                   <h2 className="text-2xl font-bold text-theme">Education</h2>
                 </div>
                 <button onClick={addEducation} className="btn-secondary flex items-center gap-2">
@@ -652,7 +689,7 @@ export default function ResumeBuilder() {
           {currentStep === 5 && (
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
-                <Code className="w-6 h-6 text-blue-500" />
+                <Code className="w-6 h-6 text-accent" />
                 <h2 className="text-2xl font-bold text-theme">Skills & Certifications</h2>
               </div>
 
@@ -661,7 +698,7 @@ export default function ResumeBuilder() {
                   <label className="block text-sm font-medium text-theme-secondary">
                     Skills *
                   </label>
-                  <button onClick={addSkill} className="text-blue-500 hover:text-blue-600 text-sm flex items-center gap-1">
+                  <button onClick={addSkill} className="text-accent hover:opacity-80 text-sm flex items-center gap-1">
                     <Plus className="w-4 h-4" />
                     Add Skill
                   </button>

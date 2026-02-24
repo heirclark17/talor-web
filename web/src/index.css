@@ -244,6 +244,55 @@ input, button, textarea, select {
   transform: translateY(0);
 }
 
+/* Form Input styles - Theme-aware for dark, light, and sand-tan modes */
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.5;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.input:hover {
+  border-color: color-mix(in srgb, var(--text-primary) 30%, transparent);
+}
+
+.input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 15%, transparent);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Textarea variant inherits .input styles */
+textarea.input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Styled checkbox */
+.checkbox-styled {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
 /* Button Size Variants - Standardized with mobile */
 .btn-sm {
   min-height: 40px;
