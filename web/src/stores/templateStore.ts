@@ -64,11 +64,13 @@ export const useTemplateStore = create<TemplateState>()(
           if (!res.ok) return
           const data = await res.json()
           const previews: Record<string, string> = data.previews || {}
-          // Merge preview URLs into templates
-          const updated = get().templates.map((t) => ({
-            ...t,
-            preview: previews[t.id] || t.preview,
-          }))
+          // Merge preview URLs into templates - convert relative paths to absolute
+          const updated = get().templates.map((t) => {
+            const relUrl = previews[t.id]
+            if (!relUrl) return t
+            const fullUrl = relUrl.startsWith('http') ? relUrl : `${API_BASE_URL}${relUrl}`
+            return { ...t, preview: fullUrl }
+          })
           set({ templates: updated, previewsLoaded: true })
         } catch {
           // Silently fail - live rendering fallback will be used
