@@ -179,12 +179,13 @@ export default function BatchTailor() {
         setResults(validUrls.map((url, index) => {
           const jobResult = batchResults[index]
           if (jobResult?.success) {
+            const data = jobResult.data || jobResult
             return {
               jobUrl: url,
               status: 'success' as const,
-              tailoredResumeId: jobResult.tailored_resume_id,
-              company: jobResult.company,
-              title: jobResult.title,
+              tailoredResumeId: data.tailored_resume_id,
+              company: data.company,
+              title: data.title,
             }
           } else {
             return {
@@ -197,6 +198,24 @@ export default function BatchTailor() {
         const successCount = batchResults.filter((r: any) => r?.success).length
         if (successCount > 0) {
           showSuccess(`${successCount} resume${successCount !== 1 ? 's' : ''} tailored successfully`)
+
+          // Auto-create application entries for successful results so tracker works
+          for (const br of batchResults) {
+            if (br?.success) {
+              const d = br.data || br
+              try {
+                await api.createApplication({
+                  job_title: d.title || 'Unknown Title',
+                  company_name: d.company || 'Unknown Company',
+                  job_url: br.job_url || '',
+                  status: 'saved',
+                  tailored_resume_id: d.tailored_resume_id,
+                })
+              } catch {
+                // Non-critical - don't block results display
+              }
+            }
+          }
         }
       } else {
         setResults(validUrls.map(url => ({
