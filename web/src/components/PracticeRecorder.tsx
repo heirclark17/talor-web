@@ -48,6 +48,7 @@ export default function PracticeRecorder({
   const [state, setState] = useState<RecorderState>(existingRecordingUrl ? 'saved' : 'idle');
   const [mode, setMode] = useState<RecordingMode>('video');
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -307,7 +308,12 @@ export default function PracticeRecorder({
     }
   };
 
-  const cancelRecording = () => {
+  const openRecordingModal = async () => {
+    setIsModalOpen(true);
+    await startPreview();
+  };
+
+  const closeRecordingModal = () => {
     stopRecording();
     stopStream();
     blobRef.current = null;
@@ -316,6 +322,11 @@ export default function PracticeRecorder({
     setExpanded(false);
     setRecordingTime(0);
     setError(null);
+    setIsModalOpen(false);
+  };
+
+  const cancelRecording = () => {
+    closeRecordingModal();
   };
 
   const uploadRecording = async () => {
@@ -455,10 +466,10 @@ export default function PracticeRecorder({
   // ============= RENDER =============
 
   // Idle: show compact "Record Practice" button
-  if (state === 'idle' && !expanded) {
+  if (state === 'idle' && !expanded && !isModalOpen) {
     return (
       <button
-        onClick={startPreview}
+        onClick={openRecordingModal}
         className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-rose-600/80 to-pink-600/80 hover:from-rose-500 hover:to-pink-500 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-rose-500/20"
       >
         <Video className="w-4 h-4" />
@@ -468,11 +479,11 @@ export default function PracticeRecorder({
   }
 
   // Saved with recording: compact playback bar (collapsed)
-  if ((state === 'saved' || (state === 'recorded' && s3Key)) && !expanded) {
+  if ((state === 'saved' || (state === 'recorded' && s3Key)) && !isModalOpen) {
     return (
       <div className="flex items-center gap-3 p-3 bg-theme-glass-5 rounded-xl border border-theme-subtle">
         <button
-          onClick={() => { setExpanded(true); }}
+          onClick={() => { setExpanded(true); setIsModalOpen(true); }}
           className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm font-medium hover:bg-green-500/30 transition-colors"
         >
           <Play className="w-3.5 h-3.5" />
@@ -507,38 +518,50 @@ export default function PracticeRecorder({
     );
   }
 
-  // Expanded view (recording, playback, etc.)
+  // Modal wrapper for recording interface
+  if (!isModalOpen) return null;
+
   return (
-    <div className="relative bg-theme-glass-5 rounded-xl border border-theme-subtle overflow-hidden">
-      {/* Header with mode toggle and close */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-theme-subtle">
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => switchMode('video')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              mode === 'video' ? 'bg-rose-500/20 text-rose-400' : 'text-theme-tertiary hover:text-theme-secondary hover:bg-theme-glass-5'
-            }`}
-          >
-            <Camera className="w-3.5 h-3.5" />
-            Video
-          </button>
-          <button
-            onClick={() => switchMode('audio')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              mode === 'audio' ? 'bg-blue-500/20 text-blue-400' : 'text-theme-tertiary hover:text-theme-secondary hover:bg-theme-glass-5'
-            }`}
-          >
-            <Mic className="w-3.5 h-3.5" />
-            Audio
-          </button>
-        </div>
-        <button
-          onClick={cancelRecording}
-          className="p-1.5 text-theme-tertiary hover:text-theme-secondary hover:bg-theme-glass-5 rounded-lg transition-colors"
+    <>
+      {/* Modal backdrop */}
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        onClick={closeRecordingModal}
+      >
+        {/* Modal content */}
+        <div
+          className="relative bg-theme-card rounded-2xl border border-theme-subtle overflow-hidden w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
         >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+          {/* Header with mode toggle and close */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-theme-subtle sticky top-0 bg-theme-card z-10">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => switchMode('video')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  mode === 'video' ? 'bg-rose-500/20 text-rose-400' : 'text-theme-tertiary hover:text-theme-secondary hover:bg-theme-glass-5'
+                }`}
+              >
+                <Camera className="w-4 h-4" />
+                Video
+              </button>
+              <button
+                onClick={() => switchMode('audio')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  mode === 'audio' ? 'bg-blue-500/20 text-blue-400' : 'text-theme-tertiary hover:text-theme-secondary hover:bg-theme-glass-5'
+                }`}
+              >
+                <Mic className="w-4 h-4" />
+                Audio
+              </button>
+            </div>
+            <button
+              onClick={closeRecordingModal}
+              className="p-2 text-theme-tertiary hover:text-theme-secondary hover:bg-theme-glass-5 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
       {/* Error state */}
       {(state === 'error' || error) && (
@@ -560,7 +583,7 @@ export default function PracticeRecorder({
 
       {/* Camera preview (during previewing/recording) */}
       {(state === 'previewing' || state === 'recording') && mode === 'video' && (
-        <div className="relative aspect-video max-h-[200px] bg-black">
+        <div className="relative aspect-video w-full bg-black">
           <video
             ref={videoPreviewRef}
             autoPlay
@@ -650,7 +673,7 @@ export default function PracticeRecorder({
             ref={videoPlaybackRef}
             src={playbackUrl}
             playsInline
-            className={mode === 'video' ? 'w-full aspect-video max-h-[200px] object-cover bg-black' : 'hidden'}
+            className={mode === 'video' ? 'w-full aspect-video object-cover bg-black' : 'hidden'}
             style={mode === 'video' ? { transform: 'scaleX(-1)' } : undefined}
           />
           {/* Audio-only playback visual */}
@@ -790,37 +813,39 @@ export default function PracticeRecorder({
             <span className="text-xs font-medium">Recording saved</span>
           </div>
           <button
-            onClick={() => setExpanded(false)}
+            onClick={() => { setExpanded(false); setIsModalOpen(false); }}
             className="text-xs text-theme-tertiary hover:text-theme-secondary"
           >
-            Collapse
+            Close
           </button>
         </div>
       )}
 
-      {/* Delete confirmation overlay */}
-      {showDeleteConfirm && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/70 backdrop-blur-sm rounded-xl">
-          <div className="bg-theme-card p-5 rounded-xl shadow-2xl text-center space-y-3 mx-4">
-            <p className="text-sm text-theme font-medium">Delete this recording?</p>
-            <p className="text-xs text-theme-tertiary">This action cannot be undone.</p>
-            <div className="flex gap-2 justify-center">
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm rounded-lg transition-colors"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 bg-theme-glass-10 hover:bg-theme-glass-15 text-theme-secondary text-sm rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
+          {/* Delete confirmation overlay */}
+          {showDeleteConfirm && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/70 backdrop-blur-sm rounded-xl">
+              <div className="bg-theme-card p-5 rounded-xl shadow-2xl text-center space-y-3 mx-4">
+                <p className="text-sm text-theme font-medium">Delete this recording?</p>
+                <p className="text-xs text-theme-tertiary">This action cannot be undone.</p>
+                <div className="flex gap-2 justify-center">
+                  <button
+                    onClick={handleDelete}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm rounded-lg transition-colors"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-4 py-2 bg-theme-glass-10 hover:bg-theme-glass-15 text-theme-secondary text-sm rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
