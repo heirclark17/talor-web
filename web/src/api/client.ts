@@ -538,9 +538,10 @@ class ApiClient {
    */
   async analyzeResume(resumeId: number): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/resumes/${resumeId}/analyze`, {
+      const response = await fetch(`${this.baseUrl}/api/resumes/analyze`, {
         method: 'POST',
         headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ resume_id: resumeId }),
       });
 
       const data = await response.json();
