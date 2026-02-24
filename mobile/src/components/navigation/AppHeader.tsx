@@ -379,7 +379,6 @@ const styles = StyleSheet.create({
     borderRadius: GLASS.getCornerRadius('large'),
     overflow: 'hidden',
     zIndex: 200,
-    elevation: 20,
     ...GLASS.getShadow('large'),
   },
   userDropdownContent: {

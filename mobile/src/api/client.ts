@@ -3,6 +3,7 @@ import { getUserId } from '../utils/userSession';
 import { fetchWithAuth as secureFetchWithAuth, snakeToCamel as baseSnakeToCamel } from './base';
 import { supabase } from '../lib/supabase';
 import * as FileSystem from 'expo-file-system';
+import { FileSystemUploadType } from 'expo-file-system/build/legacy/FileSystem.types';
 
 /**
  * Convert snake_case keys to camelCase recursively
@@ -457,7 +458,7 @@ export const api = {
 
       const result = await FileSystem.uploadAsync(url, fileUri, {
         httpMethod: 'POST',
-        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        uploadType: FileSystemUploadType.MULTIPART,
         fieldName: 'file',
         mimeType: mimeType || 'application/pdf',
         headers,
