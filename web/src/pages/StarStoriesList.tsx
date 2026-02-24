@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BookOpen, Calendar, Briefcase, Trash2, Eye, Loader, AlertCircle, Sparkles } from 'lucide-react'
 import { api } from '../api/client'
 import { showError } from '../utils/toast'
+import { formatLocalDate } from '../utils/dateUtils'
 
 interface StarStory {
   id: number
@@ -75,19 +76,6 @@ export default function StarStoriesList() {
       showError('Failed to delete STAR story. Please try again.')
     } finally {
       setDeletingId(null)
-    }
-  }
-
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr)
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      })
-    } catch {
-      return dateStr
     }
   }
 
@@ -226,7 +214,7 @@ export default function StarStoriesList() {
                     <div className="flex items-center gap-4 text-xs text-theme-tertiary">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        <span>{formatDate(story.created_at)}</span>
+                        <span>{formatLocalDate(story.created_at)}</span>
                       </div>
                       <span>•</span>
                       <span>{getWordCount(story.situation + story.task + story.action + story.result)} words</span>

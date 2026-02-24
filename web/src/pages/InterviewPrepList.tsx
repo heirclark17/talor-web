@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BookOpen, Calendar, MapPin, Trash2, Eye, Loader, AlertCircle } from 'lucide-react'
 import { api } from '../api/client'
 import { showError } from '../utils/toast'
+import { formatLocalDateTime } from '../utils/dateUtils'
 
 interface InterviewPrepItem {
   id: number
@@ -71,21 +72,6 @@ export default function InterviewPrepList() {
 
   const handleView = (tailoredResumeId: number) => {
     navigate(`/interview-prep/${tailoredResumeId}`)
-  }
-
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr)
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    } catch {
-      return dateStr
-    }
   }
 
   return (
@@ -199,7 +185,7 @@ export default function InterviewPrepList() {
                         )}
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
-                          <span>Created {formatDate(prep.created_at)}</span>
+                          <span>Created {formatLocalDateTime(prep.created_at)}</span>
                         </div>
                       </div>
                     </div>

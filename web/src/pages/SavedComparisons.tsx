@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bookmark, Calendar, Building2, Briefcase, Trash2, Loader2, Pin } from 'lucide-react'
 import { api } from '../api/client'
 import { showError } from '../utils/toast'
+import { formatLocalDate } from '../utils/dateUtils'
 
 interface SavedComparisonItem {
   id: number
@@ -91,15 +92,6 @@ export default function SavedComparisons() {
     navigate(`/tailor?comparison=${comparisonId}`)
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    }).format(date)
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
@@ -182,11 +174,11 @@ export default function SavedComparisons() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        Saved {formatDate(comparison.saved_at)}
+                        Saved {formatLocalDate(comparison.saved_at)}
                       </div>
                       {comparison.last_viewed_at && (
                         <div className="text-theme-tertiary">
-                          Last viewed {formatDate(comparison.last_viewed_at)}
+                          Last viewed {formatLocalDate(comparison.last_viewed_at)}
                         </div>
                       )}
                     </div>

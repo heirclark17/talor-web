@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Briefcase, Plus, Search, Filter, ChevronDown, Calendar, MapPin, DollarSign, ExternalLink, MoreHorizontal, X, Bookmark, Check, Layers } from 'lucide-react'
 import { api } from '../api/client'
 import SalaryInsights from '../components/SalaryInsights'
+import { formatLocalDate } from '../utils/dateUtils'
 
 interface SavedJob {
   id: number
@@ -317,7 +318,7 @@ export default function ApplicationTracker() {
                     )}
                     {app.appliedDate && (
                       <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" /> Applied {new Date(app.appliedDate).toLocaleDateString()}
+                        <Calendar className="w-3 h-3" /> Applied {formatLocalDate(app.appliedDate)}
                       </span>
                     )}
                   </div>
