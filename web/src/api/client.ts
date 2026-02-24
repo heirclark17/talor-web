@@ -3354,6 +3354,67 @@ class ApiClient {
       return { success: false, error: error.message };
     }
   }
+  // ==================== Builder AI ====================
+
+  async builderGenerateSummary(params: {
+    job_title: string;
+    years_experience?: string;
+    highlights?: string[];
+    existing_skills?: string[];
+    tone?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/builder/generate-summary`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async builderEnhanceBullets(params: {
+    job_title: string;
+    company: string;
+    bullets: string[];
+    mode?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/builder/enhance-bullets`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async builderSuggestSkills(params: {
+    job_title: string;
+    existing_skills?: string[];
+    experience_titles?: string[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/builder/suggest-skills`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 // Export singleton instance
