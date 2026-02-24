@@ -397,10 +397,12 @@ export default function TailorResume() {
   }, [searchParams])
 
   // Load tailored resume from URL parameter (from BatchTailor "View Result" button)
+  // silentOn404=false: the user explicitly navigated here, so show a clear message
+  // if the resume is gone rather than silently showing the empty form.
   useEffect(() => {
     const resumeId = searchParams.get('resumeId')
     if (resumeId && !tailoredResume && !loading) {
-      loadTailoredResumeById(parseInt(resumeId))
+      loadTailoredResumeById(parseInt(resumeId), false)
     }
   }, [searchParams])
 
@@ -452,9 +454,12 @@ export default function TailorResume() {
       const savedId = localStorage.getItem(LAST_TAILORED_RESUME_KEY)
       const session = loadSessionFromLocalStorage()
 
-      // Only load from API if no session data exists
+      // Only load from API if no session data exists.
+      // Pass silentOn404=true: if the stored ID is stale (deleted, from a different
+      // account, or the backend was reset) just show the clean empty form instead
+      // of an error banner — the user didn't explicitly ask to load this resume.
       if (savedId && !tailoredResume && !loading && !session) {
-        await loadTailoredResumeById(parseInt(savedId))
+        await loadTailoredResumeById(parseInt(savedId), true)
       }
     }
     restoreLastViewed()
@@ -769,8 +774,15 @@ export default function TailorResume() {
     }
   }, [resumes, selectedResumeId])
 
+  // Sentinel error used to distinguish "stale/deleted resume" (404) from genuine failures.
+  // When this error is thrown the caller should silently clear localStorage without
+  // showing an error banner to the user.
+  class StaleResumeError extends Error {
+    constructor() { super('stale_resume_not_found'); this.name = 'StaleResumeError' }
+  }
+
   // Load a tailored resume by ID (for restoring from localStorage)
-  const loadTailoredResumeById = async (tailoredId: number) => {
+  const loadTailoredResumeById = async (tailoredId: number, silentOn404 = false) => {
     // Race the entire restore operation against a 30-second deadline.
     // This covers both the tailored-resume fetch AND the loadFullResume fetch.
     const TIMEOUT_MS = 30_000
@@ -786,7 +798,8 @@ export default function TailorResume() {
       if (!response.ok) {
         if (response.status === 404) {
           localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
-          throw new Error('Saved resume no longer exists')
+          // Use sentinel so the caller can decide whether to show an error
+          throw new StaleResumeError()
         }
         throw new Error('Failed to load saved resume')
       }
@@ -839,10 +852,6 @@ export default function TailorResume() {
       setLoading(true)
       await doRestore(controller.signal)
     } catch (err: any) {
-      const message = err.name === 'AbortError'
-        ? 'Loading saved resume timed out. Please try again.'
-        : err.message
-      setError(message)
       localStorage.removeItem(LAST_TAILORED_RESUME_KEY)
       // Clear stale ?resumeId= from URL so user doesn't keep hitting this error
       const params = new URLSearchParams(window.location.search)
@@ -851,6 +860,24 @@ export default function TailorResume() {
         const newUrl = params.toString() ? `${window.location.pathname}?${params}` : window.location.pathname
         window.history.replaceState({}, '', newUrl)
       }
+
+      // A StaleResumeError means the record no longer exists in the backend (404).
+      // When triggered by the automatic background restore (silentOn404=true), just
+      // clear localStorage and show the user a clean empty form — no error banner.
+      // When triggered by an explicit ?resumeId= URL param the user shared/bookmarked,
+      // show a clear message so they understand why the resume isn't loading.
+      if (err instanceof StaleResumeError) {
+        if (!silentOn404) {
+          setError('This resume link has expired or was deleted. Please create a new tailored resume.')
+        }
+        // silentOn404 path: do nothing — user sees the empty tailor form
+        return
+      }
+
+      const message = err.name === 'AbortError'
+        ? 'Loading saved resume timed out. Please try again.'
+        : err.message
+      setError(message)
     } finally {
       clearTimeout(timeoutId)
       setLoading(false)
