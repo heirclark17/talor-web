@@ -2,7 +2,7 @@ import { API_BASE_URL } from '../utils/constants';
 import { getUserId } from '../utils/userSession';
 import { fetchWithAuth as secureFetchWithAuth, snakeToCamel as baseSnakeToCamel } from './base';
 import { supabase } from '../lib/supabase';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 /**
  * Convert snake_case keys to camelCase recursively
