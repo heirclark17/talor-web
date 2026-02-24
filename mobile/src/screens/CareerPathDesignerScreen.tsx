@@ -251,12 +251,17 @@ export default function CareerPathDesignerScreen() {
       setError(undefined);
       setUploadProgress(10);
 
-      // Use native file upload to bypass React Native fetch FormData header bug
-      const uploadResult = await api.uploadResumeFile(
-        file.uri,
-        file.name,
-        file.mimeType || 'application/pdf',
-      );
+      // Create FormData with file
+      const formData = new FormData();
+      // @ts-ignore - FormData append in React Native accepts this structure
+      formData.append('file', {
+        uri: file.uri,
+        name: file.name,
+        type: file.mimeType || 'application/pdf',
+      });
+
+      // Use updated uploadResume method with direct fetch + explicit auth headers
+      const uploadResult = await api.uploadResume(formData);
       setUploadProgress(50);
 
       if (!uploadResult.success || !uploadResult.data) {
