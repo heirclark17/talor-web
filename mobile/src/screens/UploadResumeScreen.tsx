@@ -120,16 +120,6 @@ export default function UploadResumeScreen() {
         return;
       }
 
-      const formData = new FormData();
-
-      // React Native FormData requires proper file object structure
-      // @ts-ignore - FormData append in React Native accepts this structure
-      formData.append('file', {
-        uri: selectedFile.uri,
-        name: selectedFile.name,
-        type: selectedFile.mimeType || 'application/pdf',
-      });
-
       console.log('[UploadResume] Uploading file:', {
         name: selectedFile.name,
         type: selectedFile.mimeType,
@@ -137,7 +127,12 @@ export default function UploadResumeScreen() {
         uriPrefix: selectedFile.uri.substring(0, 20),
       });
 
-      const result = await api.uploadResume(formData);
+      // Use native file upload (expo-file-system) to bypass React Native fetch FormData header bug
+      const result = await api.uploadResumeFile(
+        selectedFile.uri,
+        selectedFile.name,
+        selectedFile.mimeType || 'application/pdf',
+      );
 
       console.log('[UploadResume] Upload result:', {
         success: result.success,

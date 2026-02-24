@@ -2,6 +2,7 @@ import { API_BASE_URL } from '../utils/constants';
 import { getUserId } from '../utils/userSession';
 import { fetchWithAuth as secureFetchWithAuth, snakeToCamel as baseSnakeToCamel } from './base';
 import { supabase } from '../lib/supabase';
+import * as FileSystem from 'expo-file-system';
 
 /**
  * Convert snake_case keys to camelCase recursively
@@ -391,6 +392,7 @@ export const api = {
   },
 
   async uploadResume(formData: FormData): Promise<ApiResponse> {
+    // FormData-based upload kept as fallback — callers can use uploadResumeFile() for reliability
     try {
       console.log('[UploadResume] Starting upload with fetchWithAuth...');
 
@@ -411,6 +413,81 @@ export const api = {
       }
     } catch (error: any) {
       console.error('[UploadResume] Upload failed:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Upload resume using native iOS file upload (expo-file-system).
+   * Bypasses React Native fetch FormData header bug where auth headers are silently dropped.
+   */
+  async uploadResumeFile(fileUri: string, fileName: string, mimeType: string): Promise<ApiResponse> {
+    try {
+      const url = `${API_BASE_URL}/api/resumes/upload`;
+
+      // Get auth tokens
+      let token: string | null = null;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        token = session?.access_token ?? null;
+      } catch (e) {
+        console.warn('[UploadResume] Failed to get Supabase session:', e);
+      }
+
+      let userId: string | null = null;
+      try {
+        userId = await getUserId();
+      } catch (e) {}
+
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      if (userId) {
+        headers['X-User-ID'] = userId;
+      }
+
+      console.log('[UploadResume] Native upload starting:', {
+        hasAuth: !!token,
+        hasUserId: !!userId,
+        fileName,
+        mimeType,
+        uriPrefix: fileUri.substring(0, 30),
+      });
+
+      const result = await FileSystem.uploadAsync(url, fileUri, {
+        httpMethod: 'POST',
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        fieldName: 'file',
+        mimeType: mimeType || 'application/pdf',
+        headers,
+        parameters: {
+          filename: fileName,
+        },
+      });
+
+      console.log('[UploadResume] Native upload response:', {
+        status: result.status,
+        bodyLength: result.body?.length || 0,
+      });
+
+      let data: any = {};
+      try {
+        data = JSON.parse(result.body);
+      } catch (e) {
+        console.warn('[UploadResume] Could not parse response body');
+      }
+
+      if (result.status >= 200 && result.status < 300) {
+        console.log('[UploadResume] Upload successful');
+        return { success: true, data };
+      } else {
+        const errorMsg = data?.error || data?.detail || data?.message || `Server error: ${result.status}`;
+        console.error('[UploadResume] Server error:', { status: result.status, data });
+        return { success: false, error: errorMsg };
+      }
+    } catch (error: any) {
+      console.error('[UploadResume] Native upload failed:', error);
       return { success: false, error: error.message };
     }
   },
