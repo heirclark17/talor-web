@@ -1,16 +1,10 @@
 /**
  * Job Search Service
  *
- * Provides job search functionality across multiple job boards.
- * Supports filtering by location, remote work, salary, and date posted.
+ * Integrates with Adzuna API for real job postings.
+ * Free tier: 250 API calls/month
  *
- * Future integration options:
- * - Adzuna API (free tier available)
- * - Indeed API (requires sponsorship)
- * - LinkedIn Jobs API (requires partnership)
- * - Custom scraping with Playwright (backup)
- *
- * Current implementation: Built-in job database (starter dataset)
+ * Fallback to sample data if API is unavailable or quota exceeded.
  */
 
 export interface JobPosting {
@@ -29,7 +23,7 @@ export interface JobPosting {
   requirements: string[]
   responsibilities: string[]
   url: string
-  source: 'linkedin' | 'indeed' | 'glassdoor' | 'built-in'
+  source: 'linkedin' | 'indeed' | 'glassdoor' | 'built-in' | 'adzuna'
   postedDate: Date
   applicationDeadline?: Date
   companyLogo?: string
@@ -55,8 +49,40 @@ export interface JobSearchResult {
 }
 
 /**
- * Sample job database (starter dataset)
- * In production, this would be replaced with real API calls
+ * Adzuna API Response Types
+ */
+interface AdzunaJob {
+  id: string
+  title: string
+  company: {
+    display_name: string
+  }
+  location: {
+    display_name: string
+    area: string[]
+  }
+  description: string
+  redirect_url: string
+  created: string
+  salary_min?: number
+  salary_max?: number
+  salary_is_predicted?: string
+  category: {
+    label: string
+    tag: string
+  }
+  contract_type?: string
+  contract_time?: string
+}
+
+interface AdzunaResponse {
+  results: AdzunaJob[]
+  count: number
+  mean?: number
+}
+
+/**
+ * Sample job database (fallback when API unavailable)
  */
 const SAMPLE_JOBS: JobPosting[] = [
   {
@@ -82,7 +108,7 @@ const SAMPLE_JOBS: JobPosting[] = [
     ],
     url: 'https://careers.google.com/jobs/results/123456789',
     source: 'built-in',
-    postedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+    postedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     companyLogo: '🔵',
     tags: ['Backend', 'Distributed Systems', 'Java', 'Go'],
   },
@@ -108,117 +134,12 @@ const SAMPLE_JOBS: JobPosting[] = [
     ],
     url: 'https://www.metacareers.com/jobs/234567890',
     source: 'built-in',
-    postedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+    postedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     companyLogo: '🔵',
     tags: ['Product Strategy', 'Analytics', 'User Research'],
   },
   {
     id: '3',
-    title: 'Staff Software Engineer',
-    company: 'Netflix',
-    location: 'Los Gatos, CA',
-    remote: false,
-    salary: { min: 200000, max: 350000, currency: 'USD' },
-    description: 'Drive technical excellence across our streaming platform.',
-    requirements: [
-      '8+ years of software engineering experience',
-      'Proven track record of technical leadership',
-      'Deep expertise in distributed systems',
-      'Experience with streaming technologies',
-    ],
-    responsibilities: [
-      'Lead complex technical initiatives',
-      'Architect scalable systems',
-      'Mentor and guide engineering teams',
-      'Drive technical strategy',
-    ],
-    url: 'https://jobs.netflix.com/jobs/345678901',
-    source: 'built-in',
-    postedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-    companyLogo: '🔴',
-    tags: ['Streaming', 'Cloud', 'Microservices', 'Leadership'],
-  },
-  {
-    id: '4',
-    title: 'Senior Product Designer',
-    company: 'Airbnb',
-    location: 'San Francisco, CA',
-    remote: false,
-    hybrid: true,
-    salary: { min: 140000, max: 200000, currency: 'USD' },
-    description: 'Design delightful experiences for our global community.',
-    requirements: [
-      '5+ years of product design experience',
-      'Strong portfolio demonstrating UX/UI expertise',
-      'Proficiency with Figma and design systems',
-      'Experience with user research and testing',
-    ],
-    responsibilities: [
-      'Create user-centered designs',
-      'Collaborate with product and engineering',
-      'Conduct user research and usability testing',
-      'Maintain and evolve design system',
-    ],
-    url: 'https://careers.airbnb.com/positions/456789012',
-    source: 'built-in',
-    postedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-    companyLogo: '🎨',
-    tags: ['UX/UI', 'Figma', 'Design Systems', 'User Research'],
-  },
-  {
-    id: '5',
-    title: 'Data Scientist',
-    company: 'Amazon',
-    location: 'Seattle, WA',
-    remote: false,
-    salary: { min: 120000, max: 180000, currency: 'USD' },
-    description: 'Apply machine learning to solve complex business problems.',
-    requirements: [
-      'Master\'s or PhD in Computer Science, Statistics, or related field',
-      '3+ years of data science experience',
-      'Strong programming skills in Python/R',
-      'Experience with ML frameworks (TensorFlow, PyTorch)',
-    ],
-    responsibilities: [
-      'Build and deploy ML models',
-      'Analyze large datasets',
-      'Collaborate with product teams',
-      'Present findings to stakeholders',
-    ],
-    url: 'https://amazon.jobs/en/jobs/567890123',
-    source: 'built-in',
-    postedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-    companyLogo: '🟠',
-    tags: ['Machine Learning', 'Python', 'SQL', 'Analytics'],
-  },
-  {
-    id: '6',
-    title: 'DevOps Engineer',
-    company: 'Microsoft',
-    location: 'Remote',
-    remote: true,
-    salary: { min: 110000, max: 170000, currency: 'USD' },
-    description: 'Build and maintain infrastructure for Azure services.',
-    requirements: [
-      'Bachelor\'s degree in Computer Science or equivalent',
-      '4+ years of DevOps experience',
-      'Experience with Kubernetes and Docker',
-      'Knowledge of CI/CD pipelines',
-    ],
-    responsibilities: [
-      'Manage cloud infrastructure',
-      'Implement automation and monitoring',
-      'Ensure high availability and scalability',
-      'Collaborate with development teams',
-    ],
-    url: 'https://careers.microsoft.com/us/en/job/678901234',
-    source: 'built-in',
-    postedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4 days ago
-    companyLogo: '🔷',
-    tags: ['Kubernetes', 'Azure', 'CI/CD', 'Infrastructure'],
-  },
-  {
-    id: '7',
     title: 'Frontend Engineer',
     company: 'Stripe',
     location: 'New York, NY',
@@ -240,115 +161,253 @@ const SAMPLE_JOBS: JobPosting[] = [
     ],
     url: 'https://stripe.com/jobs/listing/789012345',
     source: 'built-in',
-    postedDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 days ago
+    postedDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
     companyLogo: '🟣',
     tags: ['React', 'TypeScript', 'Web Performance', 'UI/UX'],
-  },
-  {
-    id: '8',
-    title: 'Security Engineer',
-    company: 'Apple',
-    location: 'Cupertino, CA',
-    remote: false,
-    salary: { min: 150000, max: 220000, currency: 'USD' },
-    description: 'Protect our users\' privacy and security across all Apple platforms.',
-    requirements: [
-      '5+ years of security engineering experience',
-      'Deep knowledge of cryptography and secure coding',
-      'Experience with penetration testing',
-      'Understanding of mobile and cloud security',
-    ],
-    responsibilities: [
-      'Conduct security reviews and audits',
-      'Design secure systems and protocols',
-      'Respond to security incidents',
-      'Educate teams on security best practices',
-    ],
-    url: 'https://jobs.apple.com/en-us/details/890123456',
-    source: 'built-in',
-    postedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    companyLogo: '🍎',
-    tags: ['Security', 'Cryptography', 'Mobile', 'Privacy'],
   },
 ]
 
 /**
- * Search jobs with filters
+ * Map Adzuna job to our JobPosting format
+ */
+function mapAdzunaJob(adzunaJob: AdzunaJob): JobPosting {
+  // Extract keywords/tags from category and title
+  const tags: string[] = []
+  if (adzunaJob.category?.label) {
+    tags.push(adzunaJob.category.label)
+  }
+  if (adzunaJob.contract_type) {
+    tags.push(adzunaJob.contract_type)
+  }
+
+  // Detect remote from location or title
+  const locationStr = adzunaJob.location.display_name.toLowerCase()
+  const titleStr = adzunaJob.title.toLowerCase()
+  const descStr = adzunaJob.description.toLowerCase()
+  const isRemote =
+    locationStr.includes('remote') ||
+    titleStr.includes('remote') ||
+    descStr.includes('remote work') ||
+    descStr.includes('work from home')
+
+  // Extract simple requirements from description
+  const requirements: string[] = []
+  const responsibilities: string[] = []
+
+  // Basic extraction (can be improved with NLP)
+  const descLines = adzunaJob.description.split('\n').filter((line) => line.trim())
+  descLines.forEach((line) => {
+    const lowerLine = line.toLowerCase()
+    if (
+      lowerLine.includes('required') ||
+      lowerLine.includes('must have') ||
+      lowerLine.includes('qualification')
+    ) {
+      requirements.push(line.trim())
+    } else if (
+      lowerLine.includes('responsibility') ||
+      lowerLine.includes('will') ||
+      lowerLine.includes('you will')
+    ) {
+      responsibilities.push(line.trim())
+    }
+  })
+
+  return {
+    id: adzunaJob.id,
+    title: adzunaJob.title,
+    company: adzunaJob.company.display_name,
+    location: adzunaJob.location.display_name,
+    remote: isRemote,
+    salary:
+      adzunaJob.salary_min || adzunaJob.salary_max
+        ? {
+            min: adzunaJob.salary_min,
+            max: adzunaJob.salary_max,
+            currency: 'USD',
+          }
+        : undefined,
+    description: adzunaJob.description,
+    requirements: requirements.length > 0 ? requirements : ['See job description for details'],
+    responsibilities:
+      responsibilities.length > 0 ? responsibilities : ['See job description for details'],
+    url: adzunaJob.redirect_url,
+    source: 'adzuna',
+    postedDate: new Date(adzunaJob.created),
+    tags,
+  }
+}
+
+/**
+ * Search jobs using Adzuna API
+ */
+async function searchAdzunaJobs(
+  filters: JobSearchFilters,
+  page: number,
+  pageSize: number
+): Promise<JobSearchResult> {
+  const appId = import.meta.env.VITE_ADZUNA_APP_ID
+  const apiKey = import.meta.env.VITE_ADZUNA_API_KEY
+
+  if (!appId || !apiKey || appId === 'your_app_id_here') {
+    throw new Error('Adzuna API credentials not configured')
+  }
+
+  // Build Adzuna API URL
+  // Format: https://api.adzuna.com/v1/api/jobs/{country}/search/{page}?app_id={app_id}&app_key={app_key}&what={keywords}&where={location}
+  const country = 'us' // United States
+  const baseUrl = `https://api.adzuna.com/v1/api/jobs/${country}/search/${page}`
+
+  const params = new URLSearchParams({
+    app_id: appId,
+    app_key: apiKey,
+    results_per_page: pageSize.toString(),
+  })
+
+  // Add search filters
+  if (filters.keywords) {
+    params.append('what', filters.keywords)
+  }
+
+  if (filters.location) {
+    params.append('where', filters.location)
+  }
+
+  if (filters.salaryMin) {
+    params.append('salary_min', filters.salaryMin.toString())
+  }
+
+  // Date posted filter (max_days_old)
+  if (filters.datePosted && filters.datePosted !== 'any') {
+    const daysOld =
+      filters.datePosted === 'day' ? 1 : filters.datePosted === 'week' ? 7 : 30
+    params.append('max_days_old', daysOld.toString())
+  }
+
+  // Contract type filter
+  if (filters.jobType) {
+    if (filters.jobType === 'full-time') params.append('full_time', '1')
+    if (filters.jobType === 'part-time') params.append('part_time', '1')
+    if (filters.jobType === 'contract') params.append('contract', '1')
+  }
+
+  try {
+    const response = await fetch(`${baseUrl}?${params.toString()}`)
+
+    if (!response.ok) {
+      // Check for rate limit (429) or quota exceeded
+      if (response.status === 429) {
+        throw new Error('QUOTA_EXCEEDED')
+      }
+      throw new Error(`Adzuna API error: ${response.status}`)
+    }
+
+    const data: AdzunaResponse = await response.json()
+
+    // Map Adzuna jobs to our format
+    const jobs = data.results.map(mapAdzunaJob)
+
+    // Filter by remote if specified (Adzuna doesn't have direct remote filter)
+    let filteredJobs = jobs
+    if (filters.remote !== undefined) {
+      filteredJobs = jobs.filter((job) => job.remote === filters.remote)
+    }
+
+    return {
+      jobs: filteredJobs,
+      totalCount: data.count,
+      page,
+      pageSize,
+      hasMore: filteredJobs.length === pageSize,
+    }
+  } catch (error) {
+    console.error('Adzuna API error:', error)
+    throw error
+  }
+}
+
+/**
+ * Search jobs with filters (with fallback to sample data)
  */
 export async function searchJobs(
   filters: JobSearchFilters = {},
   page = 1,
   pageSize = 10
 ): Promise<JobSearchResult> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
+  try {
+    // Try Adzuna API first
+    return await searchAdzunaJobs(filters, page, pageSize)
+  } catch (error) {
+    console.warn('Falling back to sample jobs:', error)
 
-  let filteredJobs = [...SAMPLE_JOBS]
+    // Fallback to sample data
+    let filteredJobs = [...SAMPLE_JOBS]
 
-  // Apply keyword filter
-  if (filters.keywords) {
-    const keywords = filters.keywords.toLowerCase()
-    filteredJobs = filteredJobs.filter(
-      (job) =>
-        job.title.toLowerCase().includes(keywords) ||
-        job.company.toLowerCase().includes(keywords) ||
-        job.description.toLowerCase().includes(keywords) ||
-        job.tags.some((tag) => tag.toLowerCase().includes(keywords))
-    )
-  }
+    // Apply keyword filter
+    if (filters.keywords) {
+      const keywords = filters.keywords.toLowerCase()
+      filteredJobs = filteredJobs.filter(
+        (job) =>
+          job.title.toLowerCase().includes(keywords) ||
+          job.company.toLowerCase().includes(keywords) ||
+          job.description.toLowerCase().includes(keywords) ||
+          job.tags.some((tag) => tag.toLowerCase().includes(keywords))
+      )
+    }
 
-  // Apply location filter
-  if (filters.location) {
-    const location = filters.location.toLowerCase()
-    filteredJobs = filteredJobs.filter(
-      (job) =>
-        job.location.toLowerCase().includes(location) ||
-        (job.remote && location.includes('remote'))
-    )
-  }
+    // Apply location filter
+    if (filters.location) {
+      const location = filters.location.toLowerCase()
+      filteredJobs = filteredJobs.filter(
+        (job) =>
+          job.location.toLowerCase().includes(location) ||
+          (job.remote && location.includes('remote'))
+      )
+    }
 
-  // Apply remote filter
-  if (filters.remote !== undefined) {
-    filteredJobs = filteredJobs.filter((job) => job.remote === filters.remote)
-  }
+    // Apply remote filter
+    if (filters.remote !== undefined) {
+      filteredJobs = filteredJobs.filter((job) => job.remote === filters.remote)
+    }
 
-  // Apply salary filter
-  if (filters.salaryMin) {
-    filteredJobs = filteredJobs.filter(
-      (job) => job.salary && job.salary.min && job.salary.min >= filters.salaryMin!
-    )
-  }
+    // Apply salary filter
+    if (filters.salaryMin) {
+      filteredJobs = filteredJobs.filter(
+        (job) => job.salary && job.salary.min && job.salary.min >= filters.salaryMin!
+      )
+    }
 
-  // Apply date posted filter
-  if (filters.datePosted && filters.datePosted !== 'any') {
-    const now = Date.now()
-    const cutoff =
-      filters.datePosted === 'day'
-        ? 24 * 60 * 60 * 1000
-        : filters.datePosted === 'week'
-        ? 7 * 24 * 60 * 60 * 1000
-        : 30 * 24 * 60 * 60 * 1000 // month
+    // Apply date posted filter
+    if (filters.datePosted && filters.datePosted !== 'any') {
+      const now = Date.now()
+      const cutoff =
+        filters.datePosted === 'day'
+          ? 24 * 60 * 60 * 1000
+          : filters.datePosted === 'week'
+          ? 7 * 24 * 60 * 60 * 1000
+          : 30 * 24 * 60 * 60 * 1000
 
-    filteredJobs = filteredJobs.filter(
-      (job) => now - job.postedDate.getTime() <= cutoff
-    )
-  }
+      filteredJobs = filteredJobs.filter(
+        (job) => now - job.postedDate.getTime() <= cutoff
+      )
+    }
 
-  // Sort by posted date (newest first)
-  filteredJobs.sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime())
+    // Sort by posted date (newest first)
+    filteredJobs.sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime())
 
-  // Paginate
-  const totalCount = filteredJobs.length
-  const startIndex = (page - 1) * pageSize
-  const endIndex = startIndex + pageSize
-  const jobs = filteredJobs.slice(startIndex, endIndex)
+    // Paginate
+    const totalCount = filteredJobs.length
+    const startIndex = (page - 1) * pageSize
+    const endIndex = startIndex + pageSize
+    const jobs = filteredJobs.slice(startIndex, endIndex)
 
-  return {
-    jobs,
-    totalCount,
-    page,
-    pageSize,
-    hasMore: endIndex < totalCount,
+    return {
+      jobs,
+      totalCount,
+      page,
+      pageSize,
+      hasMore: endIndex < totalCount,
+    }
   }
 }
 
