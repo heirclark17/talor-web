@@ -90,6 +90,7 @@ export default function TemplateCard({
 
   return (
     <div
+      data-testid="template-card"
       className={`group relative overflow-hidden rounded-xl border transition-all duration-200 ${
         isSelected
           ? 'border-accent ring-2 ring-accent ring-offset-2 ring-offset-theme'
