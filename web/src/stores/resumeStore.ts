@@ -214,8 +214,10 @@ export const useResumeStore = create<ResumeState>()(
         try {
           const result = await api.analyzeResume(resumeId)
           if (result.success && result.data) {
-            set({ currentAnalysis: result.data })
-            return result.data
+            // Extract the analysis object from the response
+            const analysis = (result.data as any).analysis
+            set({ currentAnalysis: analysis })
+            return analysis
           }
           return null
         } catch (error) {
