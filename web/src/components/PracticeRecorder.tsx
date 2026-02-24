@@ -124,6 +124,22 @@ export default function PracticeRecorder({
     };
   }, [playbackUrl, state]);
 
+  // Keep video preview connected during previewing and recording
+  useEffect(() => {
+    if (!streamRef.current || !videoPreviewRef.current || mode !== 'video') return;
+
+    if (state === 'previewing' || state === 'recording') {
+      // Ensure video preview has the stream
+      if (videoPreviewRef.current.srcObject !== streamRef.current) {
+        console.log('[PracticeRecorder] Setting/restoring video preview srcObject');
+        videoPreviewRef.current.srcObject = streamRef.current;
+        videoPreviewRef.current.play().catch((e) => {
+          console.error('[PracticeRecorder] Error playing video preview:', e);
+        });
+      }
+    }
+  }, [state, mode]);
+
   const loadPlaybackUrl = async (key: string) => {
     setLoadingPlayback(true);
     try {
