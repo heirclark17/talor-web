@@ -223,9 +223,9 @@ export default function Templates() {
             </div>
 
             {/* Live Resume Preview */}
-            <div className="h-[500px] bg-theme-glass-5 rounded-lg mb-6 flex items-center justify-center overflow-auto">
-              <div id="resume-preview-export" className="w-full h-full flex items-center justify-center p-4">
-                <ResumePreview template={previewTemplate} resumeData={resumeData} scale={0.65} />
+            <div className="rounded-lg mb-6 flex justify-center overflow-auto bg-neutral-200 py-6">
+              <div id="resume-preview-export">
+                <ResumePreview template={previewTemplate} resumeData={resumeData} scale={0.6} />
               </div>
             </div>
 

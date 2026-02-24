@@ -34,6 +34,9 @@ interface ResumePreviewProps {
   scale?: number
 }
 
+const PAGE_WIDTH = 8.5 * 96 // 816px (8.5 inches at 96 DPI)
+const PAGE_HEIGHT = 11 * 96 // 1056px (11 inches at 96 DPI)
+
 export default function ResumePreview({ template, resumeData, scale = 1 }: ResumePreviewProps) {
   const { style, layout } = template
 
@@ -65,9 +68,19 @@ export default function ResumePreview({ template, resumeData, scale = 1 }: Resum
     certifications: 'PMP Certified | 2019',
   }
 
+  // Wrapper takes the scaled dimensions so it occupies correct layout space
+  const wrapperStyle: React.CSSProperties = {
+    width: `${PAGE_WIDTH * scale}px`,
+    height: `${PAGE_HEIGHT * scale}px`,
+    overflow: 'hidden',
+    borderRadius: scale < 1 ? '4px' : '0',
+    boxShadow: scale < 1 ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
+  }
+
+  // Inner page renders at full size then scales visually
   const containerStyle: React.CSSProperties = {
-    width: `${8.5 * 96}px`, // 8.5 inches at 96 DPI
-    height: `${11 * 96}px`, // 11 inches at 96 DPI
+    width: `${PAGE_WIDTH}px`,
+    height: `${PAGE_HEIGHT}px`,
     transform: `scale(${scale})`,
     transformOrigin: 'top left',
     backgroundColor: style.colors.background,
@@ -110,6 +123,7 @@ export default function ResumePreview({ template, resumeData, scale = 1 }: Resum
   }
 
   const renderSingleColumn = () => (
+    <div style={wrapperStyle}>
     <div style={containerStyle}>
       {/* Header */}
       <div style={{ marginBottom: style.spacing.section }}>
@@ -184,9 +198,11 @@ export default function ResumePreview({ template, resumeData, scale = 1 }: Resum
         </div>
       )}
     </div>
+    </div>
   )
 
   const renderTwoColumn = () => (
+    <div style={wrapperStyle}>
     <div style={containerStyle}>
       <div style={{ display: 'flex', gap: layout.columns?.gap || '20px' }}>
         {/* Left Column */}
@@ -249,6 +265,7 @@ export default function ResumePreview({ template, resumeData, scale = 1 }: Resum
           )}
         </div>
       </div>
+    </div>
     </div>
   )
 

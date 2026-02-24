@@ -114,7 +114,7 @@ export default function TemplateCard({
       onClick={handleClick}
     >
       {/* Preview Image */}
-      <div className="relative aspect-[8.5/11] bg-theme-glass-5 overflow-hidden">
+      <div className="relative aspect-[8.5/11] overflow-hidden bg-neutral-100">
         {/* If template has static preview image, use it, otherwise render live preview */}
         {template.preview ? (
           <img
@@ -123,8 +123,8 @@ export default function TemplateCard({
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <ResumePreview template={template} resumeData={resumeData} scale={0.33} />
+          <div className="w-full h-full flex items-start justify-center pt-0 overflow-hidden">
+            <ResumePreview template={template} resumeData={resumeData} scale={0.28} />
           </div>
         )}
 
