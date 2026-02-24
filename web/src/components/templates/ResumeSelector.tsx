@@ -10,6 +10,7 @@ import { Upload, ChevronDown, FileText, Briefcase, Award, Calendar, Check } from
 import { useResumeStore } from '../../stores/resumeStore'
 import type { Resume } from '../../stores/resumeStore'
 import { useNavigate } from 'react-router-dom'
+import { formatLocalDateTime } from '../../utils/dateUtils'
 
 interface ResumeSelectorProps {
   selectedResumeId?: string | null
@@ -24,11 +25,9 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Fetch resumes on mount if not already loaded
+  // Always fetch fresh resume data on mount (stale localStorage may have incomplete fields)
   useEffect(() => {
-    if (!resumes || resumes.length === 0) {
-      fetchResumes()
-    }
+    fetchResumes()
   }, [])
 
   // Close dropdown when clicking outside
@@ -92,23 +91,6 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
   const getResumeName = (resume: Resume) => {
     // The flat Resume shape from resumeStore uses top-level name/email fields
     return resume.name || resume.filename || 'Untitled Resume'
-  }
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'Recently'
-    // Parse ISO string from backend (UTC) and convert to user's local timezone
-    const date = new Date(dateStr)
-    if (isNaN(date.getTime())) return 'Recently'
-
-    // Display date and time in user's local timezone
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    })
   }
 
   return (
@@ -555,7 +537,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
                     <div className="dropdown-item-content">
                       <div className="dropdown-item-name">{getResumeName(resume)}</div>
                       <div className="dropdown-item-meta">
-                        Uploaded {formatDate(resume.uploaded_at)}
+                        Uploaded {formatLocalDateTime(resume.uploaded_at)}
                       </div>
                     </div>
                     {selectedResume?.id === resume.id && (
@@ -631,7 +613,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
               <div className="metadata-content">
                 <div className="metadata-label">Uploaded</div>
                 <div className="metadata-value">
-                  {formatDate(selectedResume.uploaded_at)}
+                  {formatLocalDateTime(selectedResume.uploaded_at)}
                 </div>
               </div>
             </div>
