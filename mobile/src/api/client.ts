@@ -423,8 +423,6 @@ export const api = {
    */
   async uploadResumeFile(fileUri: string, fileName: string, mimeType: string): Promise<ApiResponse> {
     try {
-      const url = `${API_BASE_URL}/api/resumes/upload`;
-
       // Get auth tokens
       let token: string | null = null;
       try {
@@ -439,6 +437,12 @@ export const api = {
         userId = await getUserId();
       } catch (e) {}
 
+      // Add auth credentials to URL as query params (workaround for iOS header-stripping)
+      let url = `${API_BASE_URL}/api/resumes/upload`;
+      if (userId) {
+        url += `?user_id=${encodeURIComponent(userId)}`;
+      }
+
       const headers: Record<string, string> = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -450,10 +454,23 @@ export const api = {
       console.log('[UploadResume] Native upload starting:', {
         hasAuth: !!token,
         hasUserId: !!userId,
+        hasQueryParam: url.includes('?'),
         fileName,
         mimeType,
         uriPrefix: fileUri.substring(0, 30),
       });
+
+      // Build parameters object with auth fallbacks
+      const parameters: Record<string, string> = {
+        filename: fileName,
+      };
+      // Add auth as form fields (fallback if headers don't work)
+      if (token) {
+        parameters.authorization = `Bearer ${token}`;
+      }
+      if (userId) {
+        parameters.user_id = userId;
+      }
 
       const result = await FileSystem.uploadAsync(url, fileUri, {
         httpMethod: 'POST',
@@ -461,9 +478,7 @@ export const api = {
         fieldName: 'file',
         mimeType: mimeType || 'application/pdf',
         headers,
-        parameters: {
-          filename: fileName,
-        },
+        parameters,
       });
 
       console.log('[UploadResume] Native upload response:', {
