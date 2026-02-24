@@ -7,7 +7,7 @@ import ExportButtons from '../components/templates/ExportButtons'
 import type { ResumeTemplate } from '../types/template'
 import { useTemplateStore } from '../stores/templateStore'
 import { useSubscriptionStore } from '../stores/subscriptionStore'
-import { useResumeStore } from '../stores/resumeStore'
+import { useResumeStore, parseExperienceItem } from '../stores/resumeStore'
 import { api } from '../api/client'
 import { showSuccess, showError } from '../utils/toast'
 import ResumePreview from '../components/templates/ResumePreview'
@@ -73,14 +73,7 @@ export default function Templates() {
       summary: activeResume.summary,
       skills: activeResume.skills,
       experience: Array.isArray(activeResume.experience)
-        ? activeResume.experience.map((exp: any) => ({
-            company: exp.company,
-            title: exp.title,
-            location: exp.location,
-            dates: exp.dates,
-            bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
-            description: exp.description,
-          }))
+        ? activeResume.experience.map(parseExperienceItem)
         : undefined,
       education: activeResume.education,
       certifications: activeResume.certifications,
@@ -93,14 +86,7 @@ export default function Templates() {
         base.skills = tailoredData.competencies
       }
       if (tailoredData.experience && tailoredData.experience.length > 0) {
-        base.experience = tailoredData.experience.map((exp: any) => ({
-          company: exp.company,
-          title: exp.title,
-          location: exp.location,
-          dates: exp.dates,
-          bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
-          description: exp.description,
-        }))
+        base.experience = tailoredData.experience.map(parseExperienceItem)
       }
     }
 
@@ -270,7 +256,7 @@ export default function Templates() {
             {/* Live Resume Preview */}
             <div className="rounded-lg mb-6 flex justify-center overflow-auto bg-neutral-200 py-6">
               <div id="resume-preview-export">
-                <ResumePreview template={previewTemplate} resumeData={resumeData} scale={0.6} />
+                <ResumePreview template={previewTemplate} resumeData={resumeData} scale={0.85} />
               </div>
             </div>
 

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { Check, Crown } from 'lucide-react'
 import type { ResumeTemplate } from '../../types/template'
 import { useSubscriptionStore } from '../../stores/subscriptionStore'
-import { useResumeStore } from '../../stores/resumeStore'
+import { useResumeStore, parseExperienceItem } from '../../stores/resumeStore'
 import ResumePreview from './ResumePreview'
 
 interface TemplateCardProps {
@@ -58,14 +58,7 @@ export default function TemplateCard({
       summary: latestResume.summary,
       skills: latestResume.skills,
       experience: Array.isArray(latestResume.experience)
-        ? latestResume.experience.map((exp: any) => ({
-            company: exp.company,
-            title: exp.title,
-            location: exp.location,
-            dates: exp.dates,
-            bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
-            description: exp.description,
-          }))
+        ? latestResume.experience.map(parseExperienceItem)
         : undefined,
       education: latestResume.education,
       certifications: latestResume.certifications,
@@ -110,7 +103,7 @@ export default function TemplateCard({
       <div className="relative aspect-[8.5/11] overflow-hidden bg-neutral-100">
         {/* Live resume preview rendering with user data */}
         <div className="w-full h-full flex items-start justify-center pt-0 overflow-hidden">
-          <ResumePreview template={template} resumeData={resumeData} scale={0.28} />
+          <ResumePreview template={template} resumeData={resumeData} scale={0.38} />
         </div>
 
         {/* Premium Badge */}

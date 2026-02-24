@@ -42,8 +42,45 @@ interface ResumeState {
   reset: () => void
 }
 
+// Parse experience items that may use "header" field instead of separate title/company.
+// Backend stores: {header: "Title, Company", location, dates, bullets}
+// Tailored AI may output: {header: "Title – Company | Location | Dates", bullets}
+export function parseExperienceItem(exp: any) {
+  if (!exp) return { title: '', company: '', location: '', dates: '', bullets: [] }
+
+  let title = exp.title || ''
+  let company = exp.company || ''
+  const location = exp.location || ''
+  const dates = exp.dates || ''
+  const bullets = exp.bullets || (exp.description ? [exp.description] : [])
+
+  // If title is missing but header exists, parse it
+  if (!title && exp.header) {
+    const h = exp.header as string
+    // Try "Title – Company" or "Title - Company" (em-dash / en-dash / hyphen with spaces)
+    const dashMatch = h.match(/^(.+?)\s+[–—-]\s+(.+)$/)
+    if (dashMatch) {
+      title = dashMatch[1].trim()
+      if (!company) company = dashMatch[2].trim()
+    } else {
+      // Try "Title, Company" (split on last comma)
+      const lastComma = h.lastIndexOf(',')
+      if (lastComma > 0) {
+        title = h.substring(0, lastComma).trim()
+        if (!company) company = h.substring(lastComma + 1).trim()
+      } else {
+        // Use whole header as title
+        title = h.trim()
+      }
+    }
+  }
+
+  return { title, company, location, dates, bullets }
+}
+
 // Normalize backend field names (candidate_name → name, etc.)
 function normalizeResume(r: any): Resume {
+  const rawExp = r.experience || []
   return {
     id: r.id,
     filename: r.filename,
@@ -54,7 +91,7 @@ function normalizeResume(r: any): Resume {
     location: r.candidate_location || r.location,
     summary: r.summary,
     skills: r.skills || [],
-    experience: r.experience || [],
+    experience: Array.isArray(rawExp) ? rawExp.map(parseExperienceItem) : [],
     education: r.education,
     certifications: r.certifications,
     skills_count: r.skills_count ?? (r.skills ? r.skills.length : 0),
