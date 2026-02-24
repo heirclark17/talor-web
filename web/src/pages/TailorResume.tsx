@@ -9,7 +9,7 @@ import KeywordPanel from '../components/KeywordPanel'
 import MatchScore from '../components/MatchScore'
 import AILoadingScreen from '../components/AILoadingScreen'
 import SalaryInsights from '../components/SalaryInsights'
-import { useResumeStore } from '../stores/resumeStore'
+import { useResumeStore, parseExperienceItem } from '../stores/resumeStore'
 import { usePostHog } from '../contexts/PostHogContext'
 import { useTemplateStore } from '../stores/templateStore'
 import { exportResumeToPDF, type ResumeData } from '../lib/pdfExport'
@@ -945,7 +945,7 @@ export default function TailorResume() {
           linkedin: selectedResume.linkedin,
         },
         summary: tailoredResume.tailored_summary || selectedResume.summary,
-        experience: tailoredResume.tailored_experience || selectedResume.experience || [],
+        experience: parseExperienceForExport(tailoredResume.tailored_experience || selectedResume.experience || []),
         education: parseEducation(tailoredResume.tailored_education || selectedResume.education),
         skills: tailoredResume.tailored_skills || selectedResume.skills || [],
         certifications: parseCertifications(tailoredResume.tailored_certifications || selectedResume.certifications),
@@ -990,6 +990,25 @@ export default function TailorResume() {
       issuer: '',
       date: '',
     }))
+  }
+
+  // Helper: Transform experience data for PDF export
+  const parseExperienceForExport = (experienceArray: any[]) => {
+    if (!experienceArray || !Array.isArray(experienceArray)) return []
+
+    return experienceArray.map((exp) => {
+      // Use parseExperienceItem to extract title, company, location, dates
+      const parsed = parseExperienceItem(exp)
+
+      return {
+        title: parsed.title || exp.title || exp.position || 'Position',
+        company: parsed.company || exp.company || '',
+        location: parsed.location || exp.location || '',
+        startDate: '', // dates are combined in parsed.dates
+        endDate: parsed.dates || exp.dates || '',
+        bullets: exp.bullets || []
+      }
+    })
   }
 
   const handleDeleteResume = async (resumeId: number, e: React.MouseEvent) => {
