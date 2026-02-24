@@ -17,6 +17,13 @@ import {
 } from 'lucide-react';
 import { api } from '../api/client';
 
+interface STARStory {
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+}
+
 interface PracticeRecorderProps {
   questionContext: string;
   interviewPrepId?: number;
@@ -24,6 +31,7 @@ interface PracticeRecorderProps {
   questionText?: string;
   existingRecordingUrl?: string | null;
   onRecordingChange?: (url: string | null) => void;
+  starStory?: STARStory | null;
 }
 
 type RecorderState = 'idle' | 'previewing' | 'recording' | 'paused' | 'recorded' | 'uploading' | 'saved' | 'error';
@@ -44,6 +52,7 @@ export default function PracticeRecorder({
   questionText,
   existingRecordingUrl,
   onRecordingChange,
+  starStory,
 }: PracticeRecorderProps) {
   const [state, setState] = useState<RecorderState>(existingRecordingUrl ? 'saved' : 'idle');
   const [mode, setMode] = useState<RecordingMode>('video');
@@ -862,6 +871,36 @@ export default function PracticeRecorder({
           )}
         </div>
       </div>
+
+      {/* STAR Story Reference - displayed below modal */}
+      {starStory && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-full max-w-md mx-4">
+          <div className="bg-theme-card/95 backdrop-blur-lg rounded-xl border border-theme-subtle p-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-theme">Reference Story</h4>
+              <span className="text-xs text-theme-tertiary">STAR Method</span>
+            </div>
+            <div className="space-y-2">
+              <div>
+                <span className="text-green-400 text-xs font-medium block mb-1">SITUATION</span>
+                <p className="text-theme-secondary text-xs leading-relaxed">{starStory.situation}</p>
+              </div>
+              <div>
+                <span className="text-blue-400 text-xs font-medium block mb-1">TASK</span>
+                <p className="text-theme-secondary text-xs leading-relaxed">{starStory.task}</p>
+              </div>
+              <div>
+                <span className="text-purple-400 text-xs font-medium block mb-1">ACTION</span>
+                <p className="text-theme-secondary text-xs leading-relaxed">{starStory.action}</p>
+              </div>
+              <div>
+                <span className="text-yellow-400 text-xs font-medium block mb-1">RESULT</span>
+                <p className="text-theme-secondary text-xs leading-relaxed">{starStory.result}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -860,6 +860,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                           questionText={question.question}
                           existingRecordingUrl={recordingUrls[questionKey]}
                           onRecordingChange={(url) => setRecordingUrls(prev => ({ ...prev, [questionKey]: url }))}
+                          starStory={aiStory}
                         />
                       </div>
                     </div>
@@ -1352,6 +1353,7 @@ export default function BehavioralTechnicalQuestions({ interviewPrepId, companyN
                             questionText={question.question}
                             existingRecordingUrl={recordingUrls[questionKey]}
                             onRecordingChange={(url) => setRecordingUrls(prev => ({ ...prev, [questionKey]: url }))}
+                            starStory={aiStory}
                           />
                         </div>
                       </div>
