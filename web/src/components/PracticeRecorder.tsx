@@ -218,6 +218,13 @@ export default function PracticeRecorder({
       // Start audio level analysis for speaking animation
       startAudioAnalysis(stream);
 
+      // Set state first so the video element renders
+      setState('previewing');
+      setExpanded(true);
+
+      // Wait for next tick to ensure video element is in DOM
+      await new Promise(resolve => setTimeout(resolve, 0));
+
       if (mode === 'video' && videoPreviewRef.current) {
         console.log('[PracticeRecorder] Setting video preview srcObject');
         videoPreviewRef.current.srcObject = stream;
@@ -233,9 +240,6 @@ export default function PracticeRecorder({
       } else if (mode === 'audio') {
         console.log('[PracticeRecorder] Audio-only mode, no preview needed');
       }
-
-      setState('previewing');
-      setExpanded(true);
     } catch (e: any) {
       console.error('[PracticeRecorder] getUserMedia error:', e);
       if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
