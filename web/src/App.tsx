@@ -52,6 +52,8 @@ const Pricing = lazyWithRetry(() => import('./pages/Pricing'))
 const Templates = lazyWithRetry(() => import('./pages/Templates'))
 const MockInterview = lazyWithRetry(() => import('./pages/MockInterview'))
 const ResumeBuilder = lazyWithRetry(() => import('./pages/ResumeBuilder'))
+const JobSearch = lazyWithRetry(() => import('./pages/JobSearch'))
+const Help = lazyWithRetry(() => import('./pages/Help'))
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'))
 const OnboardingTour = lazyWithRetry(() => import('./components/OnboardingTour'))
 
@@ -664,6 +666,7 @@ function AppContent() {
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/help" element={<Help />} />
 
               {/* Protected routes */}
               <Route path="/resumes" element={<ProtectedRoute><Home /></ProtectedRoute>} />

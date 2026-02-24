@@ -151,6 +151,7 @@ export default function TailorResume() {
   const [showSaveWarning, setShowSaveWarning] = useState(false)
   const [savingFromWarning, setSavingFromWarning] = useState(false)
   const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
+  const [showNextStepPrompt, setShowNextStepPrompt] = useState(false)
 
   // Enhancement states
   const [showChanges, setShowChanges] = useState(true)
@@ -1260,6 +1261,7 @@ export default function TailorResume() {
 
       setSuccess(true)
       setShowComparison(true)
+      setShowNextStepPrompt(true)
 
       // Track successful resume tailoring
       capture('resume_tailored', {
@@ -3017,10 +3019,14 @@ export default function TailorResume() {
                   )}
                 </button>
               </div>
-              <p className="text-xs sm:text-sm text-theme-secondary mt-3 sm:mt-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 flex-shrink-0" />
-                <span>Paste the job URL and click "Extract Details" to automatically extract company name and job title.</span>
-              </p>
+              <InlineHelp
+                text="Paste the full job posting URL from LinkedIn, Indeed, or the company's careers page. Our AI will automatically extract the company name and job title to help tailor your resume."
+                link={{
+                  href: '/help',
+                  label: 'Learn more',
+                }}
+                className="mt-3 sm:mt-4"
+              />
             </div>
 
             {/* Conditionally Show Company & Title Fields if Extraction Failed */}
@@ -3047,6 +3053,12 @@ export default function TailorResume() {
                         {extractionError.company}
                       </p>
                     )}
+                    {!extractionError.company && (
+                      <InlineHelp
+                        text="Enter the full company name as it appears on the job posting (e.g., 'JPMorgan Chase', not 'JP Morgan')."
+                        className="mt-2"
+                      />
+                    )}
                   </div>
                 )}
 
@@ -3070,6 +3082,12 @@ export default function TailorResume() {
                         <AlertCircle className="w-4 h-4" />
                         {extractionError.title}
                       </p>
+                    )}
+                    {!extractionError.title && (
+                      <InlineHelp
+                        text="Enter the exact job title from the posting. Be specific (e.g., 'Senior Software Engineer', not just 'Engineer')."
+                        className="mt-2"
+                      />
                     )}
                   </div>
                 )}
@@ -3200,6 +3218,42 @@ export default function TailorResume() {
         </button>
         </div>
       </div>
+
+      {/* Next Step Prompt */}
+      {showNextStepPrompt && tailoredResume && (
+        <NextStepPrompt
+          primaryAction={{
+            label: 'Generate Cover Letter',
+            href: '/cover-letters',
+            onClick: () => setShowNextStepPrompt(false),
+          }}
+          secondaryAction={{
+            label: 'Download Resume',
+            href: '#',
+            onClick: async () => {
+              setShowNextStepPrompt(false)
+              if (tailoredResume) {
+                const { selectedTemplate } = useTemplateStore.getState()
+                const template = selectedTemplate || defaultTemplates[0]
+                await exportResumeToPDF({
+                  resumeData: {
+                    ...selectedResume!,
+                    summary: tailoredResume.tailored_summary,
+                    skills: tailoredResume.tailored_skills,
+                    experience: tailoredResume.tailored_experience,
+                    education: tailoredResume.tailored_education,
+                    certifications: tailoredResume.tailored_certifications,
+                  },
+                  template,
+                  fileName: `${tailoredResume.company}_Resume_${template.name.replace(/\s+/g, '_')}.pdf`,
+                })
+              }
+            },
+          }}
+          context="Great work! Your resume is tailored and ready. What would you like to do next?"
+          autoDismissMs={15000}
+        />
+      )}
     </div>
   )
 }

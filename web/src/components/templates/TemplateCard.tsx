@@ -4,6 +4,7 @@ import type { ResumeTemplate } from '../../types/template'
 import { useSubscriptionStore } from '../../stores/subscriptionStore'
 import { useResumeStore, parseExperienceItem } from '../../stores/resumeStore'
 import ResumePreview from './ResumePreview'
+import Tooltip from '../guidance/Tooltip'
 
 interface TemplateCardProps {
   template: ResumeTemplate
@@ -149,17 +150,44 @@ export default function TemplateCard({
           <h3 className="font-semibold text-theme text-sm">{template.name}</h3>
 
           {/* ATS Score Badge */}
-          <div
-            className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium shrink-0 ${
-              template.atsScore >= 9
-                ? 'bg-green-500/20 text-green-400'
-                : template.atsScore >= 7
-                ? 'bg-blue-500/20 text-blue-400'
-                : 'bg-yellow-500/20 text-yellow-400'
-            }`}
+          <Tooltip
+            tooltipId={`ats-score-${template.id}`}
+            content="ATS scores indicate how well a template works with automated resume screening software"
+            expandedContent={
+              <>
+                <p className="mb-2">
+                  Companies use Applicant Tracking Systems (ATS) to filter resumes before human review.
+                </p>
+                <p className="mb-2">
+                  <strong>Higher scores (9-10)</strong> are best for corporate roles where ATS systems
+                  are common.
+                </p>
+                <p className="mb-3">
+                  <strong>Creative templates (5-7)</strong> prioritize visual appeal over ATS
+                  optimization.
+                </p>
+                <a
+                  href="/help"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-blue-400 hover:underline inline-flex items-center gap-1 text-sm"
+                >
+                  Learn more about ATS →
+                </a>
+              </>
+            }
           >
-            <span>ATS {template.atsScore}/10</span>
-          </div>
+            <div
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium shrink-0 cursor-help ${
+                template.atsScore >= 9
+                  ? 'bg-green-500/20 text-green-400'
+                  : template.atsScore >= 7
+                  ? 'bg-blue-500/20 text-blue-400'
+                  : 'bg-yellow-500/20 text-yellow-400'
+              }`}
+            >
+              <span>ATS {template.atsScore}/10</span>
+            </div>
+          </Tooltip>
         </div>
 
         <p className="text-xs text-theme-secondary mb-3 line-clamp-2">{template.description}</p>
