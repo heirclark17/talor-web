@@ -794,6 +794,63 @@ class ApiClient {
   }
 
   /**
+   * Get saved batch job URLs
+   */
+  async getBatchJobUrls(): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/jobs/batch-urls`, {
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Failed to fetch batch URLs' };
+      }
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Save batch job URLs (full replace)
+   */
+  async saveBatchJobUrls(urls: string[]): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/jobs/batch-urls`, {
+        method: 'PUT',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ urls }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Failed to save batch URLs' };
+      }
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Delete a single batch job URL
+   */
+  async deleteBatchJobUrl(urlId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/jobs/batch-urls/${urlId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Failed to delete batch URL' };
+      }
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Generate interview prep for a tailored resume
    */
   async generateInterviewPrep(tailoredResumeId: number): Promise<ApiResponse> {

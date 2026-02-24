@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Target, Loader2, CheckCircle, AlertCircle, Clock, FileText, Plus, X, Layers, ChevronDown } from 'lucide-react'
+import { Target, Loader2, CheckCircle, AlertCircle, Clock, FileText, Plus, X, Layers, ChevronDown, Trash2 } from 'lucide-react'
 import { api } from '../api/client'
 import { showSuccess, showError } from '../utils/toast'
 import { useResumeStore } from '../stores/resumeStore'
@@ -12,6 +12,11 @@ interface BatchResult {
   tailoredResumeId?: number
   company?: string
   title?: string
+}
+
+interface SavedUrl {
+  id: number
+  url: string
 }
 
 const MAX_JOBS = 10
@@ -30,13 +35,19 @@ export default function BatchTailor() {
 
   const [showResumeDropdown, setShowResumeDropdown] = useState(false)
 
-  // Form state
+  // Form state - each entry tracks the DB id (if saved) and the url string
+  const [savedUrls, setSavedUrls] = useState<SavedUrl[]>([])
   const [jobUrls, setJobUrls] = useState<string[]>([''])
+  const [urlIds, setUrlIds] = useState<(number | null)[]>([null])
+  const [loadingUrls, setLoadingUrls] = useState(true)
 
   // Batch processing state
   const [processing, setProcessing] = useState(false)
   const [results, setResults] = useState<BatchResult[]>([])
   const [showResults, setShowResults] = useState(false)
+
+  // Debounce timer for auto-save
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     fetchResumes()
@@ -49,22 +60,94 @@ export default function BatchTailor() {
     }
   }, [resumes, selectedResumeId, setSelectedResumeId])
 
+  // Load saved batch URLs on mount
+  useEffect(() => {
+    async function loadBatchUrls() {
+      try {
+        const result = await api.getBatchJobUrls()
+        if (result.success && result.data?.urls?.length > 0) {
+          const urls = result.data.urls as SavedUrl[]
+          setSavedUrls(urls)
+          setJobUrls(urls.map(u => u.url))
+          setUrlIds(urls.map(u => u.id))
+        }
+      } catch (e) {
+        // Silently fail - user just sees empty form
+      } finally {
+        setLoadingUrls(false)
+      }
+    }
+    loadBatchUrls()
+  }, [])
+
+  // Debounced auto-save whenever URLs change
+  const autoSave = useCallback((urls: string[]) => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current)
+    }
+    saveTimerRef.current = setTimeout(async () => {
+      const nonEmpty = urls.filter(u => u.trim().length > 0)
+      if (nonEmpty.length > 0) {
+        const result = await api.saveBatchJobUrls(urls)
+        if (result.success && result.data?.urls) {
+          const saved = result.data.urls as SavedUrl[]
+          setSavedUrls(saved)
+          // Rebuild urlIds to match current jobUrls
+          const newIds: (number | null)[] = urls.map(u => {
+            const match = saved.find(s => s.url === u.trim())
+            return match ? match.id : null
+          })
+          setUrlIds(newIds)
+        }
+      }
+    }, 800)
+  }, [])
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    }
+  }, [])
+
   const handleAddUrl = () => {
     if (jobUrls.length < MAX_JOBS) {
       setJobUrls([...jobUrls, ''])
+      setUrlIds([...urlIds, null])
     }
   }
 
-  const handleRemoveUrl = (index: number) => {
-    if (jobUrls.length > 1) {
-      setJobUrls(jobUrls.filter((_, i) => i !== index))
+  const handleDeleteUrl = async (index: number) => {
+    const id = urlIds[index]
+
+    // Remove from local state
+    const newUrls = jobUrls.filter((_, i) => i !== index)
+    const newIds = urlIds.filter((_, i) => i !== index)
+
+    // Ensure at least one empty row
+    if (newUrls.length === 0) {
+      setJobUrls([''])
+      setUrlIds([null])
+    } else {
+      setJobUrls(newUrls)
+      setUrlIds(newIds)
     }
+
+    // Delete from DB if it has an id
+    if (id) {
+      await api.deleteBatchJobUrl(id)
+    }
+
+    // Auto-save remaining
+    const remaining = newUrls.length > 0 ? newUrls : ['']
+    autoSave(remaining)
   }
 
   const handleUrlChange = (index: number, value: string) => {
     const newUrls = [...jobUrls]
     newUrls[index] = value
     setJobUrls(newUrls)
+    autoSave(newUrls)
   }
 
   const handleBatchTailor = async () => {
@@ -138,7 +221,20 @@ export default function BatchTailor() {
   const handleReset = () => {
     setShowResults(false)
     setResults([])
-    setJobUrls([''])
+    // Reload saved URLs instead of clearing
+    async function reload() {
+      const result = await api.getBatchJobUrls()
+      if (result.success && result.data?.urls?.length > 0) {
+        const urls = result.data.urls as SavedUrl[]
+        setSavedUrls(urls)
+        setJobUrls(urls.map(u => u.url))
+        setUrlIds(urls.map(u => u.id))
+      } else {
+        setJobUrls([''])
+        setUrlIds([null])
+      }
+    }
+    reload()
   }
 
   const handleViewResult = (tailoredResumeId: number) => {
@@ -163,12 +259,12 @@ export default function BatchTailor() {
   const errorCount = results.filter(r => r.status === 'error').length
 
   // Loading state
-  if (resumesLoading) {
+  if (resumesLoading || loadingUrls) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-10 h-10 animate-spin text-theme-secondary mx-auto mb-3" />
-          <p className="text-theme-secondary">Loading resumes...</p>
+          <p className="text-theme-secondary">Loading...</p>
         </div>
       </div>
     )
@@ -304,7 +400,7 @@ export default function BatchTailor() {
       <div className="rounded-xl p-4 border border-blue-500/30 bg-blue-500/5 mb-6 flex items-center gap-3">
         <Target className="w-5 h-5 text-blue-400 flex-shrink-0" />
         <p className="text-sm text-theme-secondary">
-          Paste LinkedIn or company career page URLs below. Each job will be tailored individually using your selected resume.
+          Paste LinkedIn or company career page URLs below. Your URLs are saved automatically and will persist until you delete them.
         </p>
       </div>
 
@@ -373,15 +469,13 @@ export default function BatchTailor() {
                   className="flex-1 bg-transparent py-3 pr-3 text-theme focus:outline-none text-sm placeholder:text-theme-tertiary"
                 />
               </div>
-              {jobUrls.length > 1 && (
-                <button
-                  onClick={() => handleRemoveUrl(index)}
-                  className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors flex-shrink-0"
-                  title="Remove URL"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <button
+                onClick={() => handleDeleteUrl(index)}
+                className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors flex-shrink-0"
+                title="Delete URL"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
             </div>
           ))}
         </div>
