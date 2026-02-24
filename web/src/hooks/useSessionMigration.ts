@@ -38,13 +38,16 @@ export function useSessionMigration() {
         new_user_id: userId,
       }),
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`Migration failed: ${res.status}`)
+        return res.json()
+      })
       .then(() => {
         localStorage.setItem(MIGRATION_DONE_KEY, 'true')
         localStorage.removeItem(OLD_USER_ID_KEY)
       })
       .catch(() => {
-        // Migration failed silently - will retry on next sign-in
+        // Migration failed - will retry on next sign-in
       })
   }, [isLoaded, isSignedIn, userId])
 }
