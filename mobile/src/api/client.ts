@@ -2,7 +2,6 @@ import { API_BASE_URL } from '../utils/constants';
 import { getUserId } from '../utils/userSession';
 import { fetchWithAuth as secureFetchWithAuth, snakeToCamel as baseSnakeToCamel } from './base';
 import { supabase } from '../lib/supabase';
-import * as FileSystem from 'expo-file-system/legacy';
 
 /**
  * Convert snake_case keys to camelCase recursively
@@ -392,38 +391,10 @@ export const api = {
   },
 
   async uploadResume(formData: FormData): Promise<ApiResponse> {
-    // FormData-based upload kept as fallback — callers can use uploadResumeFile() for reliability
     try {
-      console.log('[UploadResume] Starting upload with fetchWithAuth...');
+      console.log('[UploadResume] Starting file upload via fetch + FormData');
 
-      const response = await fetchWithAuth('/api/resumes/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log('[UploadResume] Upload successful');
-        return { success: true, data };
-      } else {
-        const errorMsg = data?.error || data?.detail || data?.message || `Server error: ${response.status}`;
-        console.error('[UploadResume] Server error:', { status: response.status, data });
-        return { success: false, error: errorMsg };
-      }
-    } catch (error: any) {
-      console.error('[UploadResume] Upload failed:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  /**
-   * Upload resume using native iOS file upload (expo-file-system).
-   * Bypasses React Native fetch FormData header bug where auth headers are silently dropped.
-   */
-  async uploadResumeFile(fileUri: string, fileName: string, mimeType: string): Promise<ApiResponse> {
-    try {
-      // Get auth tokens
+      // Get auth token from Supabase (same pattern as base.ts fetchWithAuth)
       let token: string | null = null;
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -432,78 +403,72 @@ export const api = {
         console.warn('[UploadResume] Failed to get Supabase session:', e);
       }
 
+      // Get user ID (same pattern as base.ts)
       let userId: string | null = null;
       try {
         userId = await getUserId();
-      } catch (e) {}
-
-      // Add auth credentials to URL as query params (workaround for iOS header-stripping)
-      let url = `${API_BASE_URL}/api/resumes/upload`;
-      if (userId) {
-        url += `?user_id=${encodeURIComponent(userId)}`;
+      } catch (e) {
+        console.warn('[UploadResume] Failed to get user ID:', e);
       }
 
-      const headers: Record<string, string> = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      if (userId) {
-        headers['X-User-ID'] = userId;
+      if (!token || !userId) {
+        console.error('[UploadResume] Missing authentication credentials');
+        return {
+          success: false,
+          error: 'Authentication required. Please sign in again.'
+        };
       }
 
-      console.log('[UploadResume] Native upload starting:', {
-        hasAuth: !!token,
-        hasUserId: !!userId,
-        hasQueryParam: url.includes('?'),
-        fileName,
-        mimeType,
-        uriPrefix: fileUri.substring(0, 30),
-      });
-
-      // Build parameters object with auth fallbacks
-      const parameters: Record<string, string> = {
-        filename: fileName,
+      // Build headers (DO NOT set Content-Type - fetch handles boundary)
+      const headers: Record<string, string> = {
+        'Authorization': `Bearer ${token}`,
+        'X-User-ID': userId,
       };
-      // Add auth as form fields (fallback if headers don't work)
-      if (token) {
-        parameters.authorization = `Bearer ${token}`;
-      }
-      if (userId) {
-        parameters.user_id = userId;
-      }
 
-      const result = await FileSystem.uploadAsync(url, fileUri, {
-        httpMethod: 'POST',
-        uploadType: 1, // FileSystemUploadType.MULTIPART
-        fieldName: 'file',
-        mimeType: mimeType || 'application/pdf',
+      console.log('[UploadResume] Uploading via fetch with auth headers');
+
+      // Make fetch request
+      const response = await fetch(`${API_BASE_URL}/api/resumes/upload`, {
+        method: 'POST',
         headers,
-        parameters,
+        body: formData,
       });
 
-      console.log('[UploadResume] Native upload response:', {
-        status: result.status,
-        bodyLength: result.body?.length || 0,
+      // Parse response
+      const responseText = await response.text();
+      console.log('[UploadResume] Response:', {
+        status: response.status,
+        bodyPreview: responseText.substring(0, 200),
       });
 
       let data: any = {};
       try {
-        data = JSON.parse(result.body);
+        data = JSON.parse(responseText);
       } catch (e) {
-        console.warn('[UploadResume] Could not parse response body');
+        console.error('[UploadResume] Failed to parse JSON:', e);
+        if (!response.ok) {
+          return {
+            success: false,
+            error: `Server error (${response.status}): ${responseText.substring(0, 100)}`
+          };
+        }
       }
 
-      if (result.status >= 200 && result.status < 300) {
+      if (response.ok) {
         console.log('[UploadResume] Upload successful');
         return { success: true, data };
       } else {
-        const errorMsg = data?.error || data?.detail || data?.message || `Server error: ${result.status}`;
-        console.error('[UploadResume] Server error:', { status: result.status, data });
+        const errorMsg = data?.error || data?.detail || data?.message || `Upload failed (${response.status})`;
+        console.error('[UploadResume] Server error:', { status: response.status, data });
         return { success: false, error: errorMsg };
       }
+
     } catch (error: any) {
-      console.error('[UploadResume] Native upload failed:', error);
-      return { success: false, error: error.message };
+      console.error('[UploadResume] Upload failed:', error);
+      return {
+        success: false,
+        error: error.message || 'Network error during upload'
+      };
     }
   },
 
