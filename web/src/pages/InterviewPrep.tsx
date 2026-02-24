@@ -1833,9 +1833,8 @@ export default function InterviewPrep() {
                             <h4 className="text-theme font-semibold mb-2 capitalize">{category}</h4>
                             <ul className="space-y-1">
                               {questions.map((q, idx) => (
-                                <li key={idx} className="text-theme-secondary text-sm flex gap-2">
-                                  <span className="text-theme-faint">?</span>
-                                  <span>{q}</span>
+                                <li key={idx} className="text-theme-secondary text-sm">
+                                  {q}
                                 </li>
                               ))}
                             </ul>
@@ -1850,10 +1849,7 @@ export default function InterviewPrep() {
                           <ul className="space-y-2">
                             {customQuestions.map((q) => (
                               <li key={q.id} className="flex items-start justify-between gap-2 bg-theme-glass-5 p-3 rounded-lg">
-                                <div className="flex gap-2 flex-1">
-                                  <span className="text-theme-faint">?</span>
-                                  <span className="text-theme-secondary text-sm">{q.question}</span>
-                                </div>
+                                <span className="text-theme-secondary text-sm flex-1">{q.question}</span>
                                 <button
                                   onClick={() => deleteCustomQuestion(q.id)}
                                   className="text-red-400 hover:text-red-300 transition-colors"
