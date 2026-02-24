@@ -222,20 +222,19 @@ export default function InterviewPrep() {
     return saved ? JSON.parse(saved) : {}
   })
 
+  const ALL_SECTION_KEYS = ['companyResearch', 'rolePositioning', 'practiceQuestions', 'prepGrowth'] as const
+
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
     const saved = localStorage.getItem(`interview-prep-expanded-${tailoredResumeId}`)
-    return saved ? JSON.parse(saved) : {
-      companyProfile: true,
-      roleAnalysis: true,
-      valuesAndCulture: true,
-      strategy: true,
-      preparation: true,
-      questions: true,
-      commonQuestions: true,
-      behavioralTechnical: true,
-      positioning: true,
-      certifications: true
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      // If saved state has old per-card keys, reset to new group keys
+      if ('companyProfile' in parsed || Object.keys(parsed).length === 0) {
+        return { companyResearch: true, rolePositioning: true, practiceQuestions: true, prepGrowth: true }
+      }
+      return parsed
     }
+    return { companyResearch: true, rolePositioning: true, practiceQuestions: true, prepGrowth: true }
   })
 
   const [notes, setNotes] = useState<Record<string, string>>(() => {
@@ -634,13 +633,13 @@ export default function InterviewPrep() {
   }
 
   const expandAll = () => {
-    const allExpanded = Object.keys(expandedSections).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+    const allExpanded = ALL_SECTION_KEYS.reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<string, boolean>)
     setExpandedSections(allExpanded)
     localStorage.setItem(`interview-prep-expanded-${tailoredResumeId}`, JSON.stringify(allExpanded))
   }
 
   const collapseAll = () => {
-    const allCollapsed = Object.keys(expandedSections).reduce((acc, key) => ({ ...acc, [key]: false }), {})
+    const allCollapsed = ALL_SECTION_KEYS.reduce((acc, key) => ({ ...acc, [key]: false }), {} as Record<string, boolean>)
     setExpandedSections(allCollapsed)
     localStorage.setItem(`interview-prep-expanded-${tailoredResumeId}`, JSON.stringify(allCollapsed))
   }
@@ -1009,12 +1008,16 @@ export default function InterviewPrep() {
 
           {/* Section 1: Company Research */}
           <div>
-            <div className="flex items-center gap-2 mb-3 px-1">
+            <button
+              onClick={() => toggleSection('companyResearch')}
+              className="flex items-center gap-2 mb-3 px-1 w-full text-left group"
+            >
               <Building2 className="w-4 h-4 text-blue-400" />
               <h2 className="text-sm font-semibold text-theme-secondary uppercase tracking-wider">Company Research</h2>
               <div className="flex-1 h-px bg-theme-glass-10" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {expandedSections['companyResearch'] ? <ChevronUp className="w-4 h-4 text-theme-secondary" /> : <ChevronDown className="w-4 h-4 text-theme-secondary" />}
+            </button>
+            {expandedSections['companyResearch'] && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {/* Company Profile Card */}
               <button
                 onClick={() => openModal('companyProfile')}
@@ -1071,17 +1074,21 @@ export default function InterviewPrep() {
                   </div>
                 </button>
               )}
-            </div>
+            </div>}
           </div>
 
           {/* Section 2: Role & Positioning */}
           <div>
-            <div className="flex items-center gap-2 mb-3 px-1">
+            <button
+              onClick={() => toggleSection('rolePositioning')}
+              className="flex items-center gap-2 mb-3 px-1 w-full text-left group"
+            >
               <Target className="w-4 h-4 text-green-400" />
               <h2 className="text-sm font-semibold text-theme-secondary uppercase tracking-wider">Role & Positioning</h2>
               <div className="flex-1 h-px bg-theme-glass-10" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {expandedSections['rolePositioning'] ? <ChevronUp className="w-4 h-4 text-theme-secondary" /> : <ChevronDown className="w-4 h-4 text-theme-secondary" />}
+            </button>
+            {expandedSections['rolePositioning'] && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {/* Role Analysis Card */}
               <button
                 onClick={() => openModal('roleAnalysis')}
@@ -1116,17 +1123,21 @@ export default function InterviewPrep() {
                   View Details <ChevronRight className="w-4 h-4" />
                 </div>
               </button>
-            </div>
+            </div>}
           </div>
 
           {/* Section 3: Practice Questions */}
           <div>
-            <div className="flex items-center gap-2 mb-3 px-1">
+            <button
+              onClick={() => toggleSection('practiceQuestions')}
+              className="flex items-center gap-2 mb-3 px-1 w-full text-left group"
+            >
               <MessageSquare className="w-4 h-4 text-purple-400" />
               <h2 className="text-sm font-semibold text-theme-secondary uppercase tracking-wider">Practice Questions</h2>
               <div className="flex-1 h-px bg-theme-glass-10" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {expandedSections['practiceQuestions'] ? <ChevronUp className="w-4 h-4 text-theme-secondary" /> : <ChevronDown className="w-4 h-4 text-theme-secondary" />}
+            </button>
+            {expandedSections['practiceQuestions'] && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {/* Behavioral & Technical Card */}
               {interviewPrepId && (
                 <button
@@ -1184,17 +1195,21 @@ export default function InterviewPrep() {
                   View Details <ChevronRight className="w-4 h-4" />
                 </div>
               </button>
-            </div>
+            </div>}
           </div>
 
           {/* Section 4: Preparation & Growth */}
           <div>
-            <div className="flex items-center gap-2 mb-3 px-1">
+            <button
+              onClick={() => toggleSection('prepGrowth')}
+              className="flex items-center gap-2 mb-3 px-1 w-full text-left group"
+            >
               <CheckCircle2 className="w-4 h-4 text-cyan-400" />
               <h2 className="text-sm font-semibold text-theme-secondary uppercase tracking-wider">Preparation & Growth</h2>
               <div className="flex-1 h-px bg-theme-glass-10" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {expandedSections['prepGrowth'] ? <ChevronUp className="w-4 h-4 text-theme-secondary" /> : <ChevronDown className="w-4 h-4 text-theme-secondary" />}
+            </button>
+            {expandedSections['prepGrowth'] && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {/* Interview Preparation Card */}
               <button
                 onClick={() => openModal('preparation')}
@@ -1230,7 +1245,7 @@ export default function InterviewPrep() {
                   View Details <ChevronRight className="w-4 h-4" />
                 </div>
               </button>
-            </div>
+            </div>}
           </div>
 
         </div>
