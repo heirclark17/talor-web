@@ -96,9 +96,19 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'Recently'
+    // Parse ISO string from backend (UTC) and convert to user's local timezone
     const date = new Date(dateStr)
     if (isNaN(date.getTime())) return 'Recently'
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+    // Display date and time in user's local timezone
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })
   }
 
   return (
@@ -241,7 +251,7 @@ export default function ResumeSelector({ selectedResumeId, onResumeSelect }: Res
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 16px;
           padding: 0.5rem;
-          z-index: 100;
+          z-index: 1000;
           max-height: 320px;
           overflow-y: auto;
           animation: dropdownSlide 0.3s ease-out;

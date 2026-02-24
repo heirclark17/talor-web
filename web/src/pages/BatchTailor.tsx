@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Target, Loader2, CheckCircle, AlertCircle, Clock, FileText, Plus, X, Layers, ChevronDown, Trash2 } from 'lucide-react'
+import { Target, Loader2, CheckCircle, AlertCircle, Clock, FileText, Plus, X, Layers, ChevronDown, Trash2, Bookmark } from 'lucide-react'
 import { api } from '../api/client'
 import { showSuccess, showError } from '../utils/toast'
 import { useResumeStore } from '../stores/resumeStore'
+
+const BATCH_RESULTS_KEY = 'batch_tailor_results'
 
 interface BatchResult {
   jobUrl: string
@@ -60,7 +62,7 @@ export default function BatchTailor() {
     }
   }, [resumes, selectedResumeId, setSelectedResumeId])
 
-  // Load saved batch URLs on mount
+  // Load saved batch URLs on mount + restore persisted results
   useEffect(() => {
     async function loadBatchUrls() {
       try {
@@ -77,6 +79,21 @@ export default function BatchTailor() {
         setLoadingUrls(false)
       }
     }
+
+    // Restore persisted batch results from localStorage
+    try {
+      const stored = localStorage.getItem(BATCH_RESULTS_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored) as BatchResult[]
+        if (parsed.length > 0) {
+          setResults(parsed)
+          setShowResults(true)
+        }
+      }
+    } catch {
+      // Corrupt data - ignore
+    }
+
     loadBatchUrls()
   }, [])
 
@@ -176,7 +193,7 @@ export default function BatchTailor() {
 
       if (result.success && result.data) {
         const batchResults = result.data.results || []
-        setResults(validUrls.map((url, index) => {
+        const finalResults = validUrls.map((url, index) => {
           const jobResult = batchResults[index]
           if (jobResult?.success) {
             const data = jobResult.data || jobResult
@@ -194,12 +211,17 @@ export default function BatchTailor() {
               error: jobResult?.error || 'Failed to tailor',
             }
           }
-        }))
+        })
+        setResults(finalResults)
+
+        // Persist results to localStorage
+        localStorage.setItem(BATCH_RESULTS_KEY, JSON.stringify(finalResults))
+
         const successCount = batchResults.filter((r: any) => r?.success).length
         if (successCount > 0) {
           showSuccess(`${successCount} resume${successCount !== 1 ? 's' : ''} tailored successfully`)
 
-          // Auto-create application entries for successful results so tracker works
+          // Auto-create application entries + saved comparisons for successful results
           for (const br of batchResults) {
             if (br?.success) {
               const d = br.data || br
@@ -212,25 +234,35 @@ export default function BatchTailor() {
                   tailored_resume_id: d.tailored_resume_id,
                 })
               } catch {
-                // Non-critical - don't block results display
+                // Non-critical
+              }
+              try {
+                await api.saveComparison({
+                  tailored_resume_id: d.tailored_resume_id,
+                  title: `${d.company || 'Unknown'} - ${d.title || 'Untitled'}`,
+                })
+              } catch {
+                // Non-critical
               }
             }
           }
         }
       } else {
-        setResults(validUrls.map(url => ({
+        const errorResults = validUrls.map(url => ({
           jobUrl: url,
           status: 'error' as const,
           error: result.error || 'Batch tailoring failed',
-        })))
+        }))
+        setResults(errorResults)
         showError(result.error || 'Batch tailoring failed')
       }
     } catch (error: any) {
-      setResults(validUrls.map(url => ({
+      const errorResults = validUrls.map(url => ({
         jobUrl: url,
         status: 'error' as const,
         error: error.message || 'An error occurred',
-      })))
+      }))
+      setResults(errorResults)
       showError(error.message || 'An error occurred')
     } finally {
       setProcessing(false)
@@ -240,6 +272,8 @@ export default function BatchTailor() {
   const handleReset = () => {
     setShowResults(false)
     setResults([])
+    // Clear persisted results
+    localStorage.removeItem(BATCH_RESULTS_KEY)
     // Reload saved URLs instead of clearing
     async function reload() {
       const result = await api.getBatchJobUrls()
@@ -261,15 +295,7 @@ export default function BatchTailor() {
   }
 
   const handleViewAllResults = () => {
-    // Get all successful tailored resume IDs
-    const successfulResumeIds = results
-      .filter(r => r.status === 'success' && r.tailoredResumeId)
-      .map(r => r.tailoredResumeId)
-      .join(',')
-
-    if (successfulResumeIds) {
-      navigate(`/applications?batch=${successfulResumeIds}`)
-    }
+    navigate('/saved-comparisons')
   }
 
   const selectedResume = resumes.find(r => r.id === selectedResumeId)
@@ -325,9 +351,10 @@ export default function BatchTailor() {
             {!processing && successCount > 0 && (
               <button
                 onClick={handleViewAllResults}
-                className="btn-primary text-sm px-4 py-2 whitespace-nowrap"
+                className="btn-primary text-sm px-4 py-2 whitespace-nowrap flex items-center gap-2"
               >
-                View All in Tracker
+                <Bookmark className="w-4 h-4" />
+                View in Saved
               </button>
             )}
           </div>

@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useMemo, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { FileText, ArrowRight, Info, Download, Crown } from 'lucide-react'
 import TemplateGallery from '../components/templates/TemplateGallery'
 import ResumeSelector from '../components/templates/ResumeSelector'
@@ -8,6 +8,7 @@ import type { ResumeTemplate } from '../types/template'
 import { useTemplateStore } from '../stores/templateStore'
 import { useSubscriptionStore } from '../stores/subscriptionStore'
 import { useResumeStore } from '../stores/resumeStore'
+import { api } from '../api/client'
 import { showSuccess, showError } from '../utils/toast'
 import ResumePreview from '../components/templates/ResumePreview'
 
@@ -18,11 +19,36 @@ import ResumePreview from '../components/templates/ResumePreview'
  */
 export default function Templates() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { selectedTemplate, setSelectedTemplate, clearSelectedTemplate } = useTemplateStore()
   const { checkFeatureAccess } = useSubscriptionStore()
   const { resumes } = useResumeStore()
   const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate | null>(null)
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null)
+  const [tailoredData, setTailoredData] = useState<any>(null)
+
+  // Load tailored resume data if resumeId param is provided (from tailor/batch flow)
+  const tailoredResumeId = searchParams.get('resumeId')
+  useEffect(() => {
+    if (!tailoredResumeId) return
+    let cancelled = false
+    async function loadTailored() {
+      try {
+        const result = await api.getTailoredResume(Number(tailoredResumeId))
+        if (!cancelled && result.success && result.data) {
+          setTailoredData(result.data)
+          // Auto-select the base resume this was tailored from
+          if (result.data.base_resume_id) {
+            setSelectedResumeId(String(result.data.base_resume_id))
+          }
+        }
+      } catch {
+        // Non-critical - fall back to base resume data
+      }
+    }
+    loadTailored()
+    return () => { cancelled = true }
+  }, [tailoredResumeId])
 
   // Get the selected resume or default to the most recently uploaded (index 0)
   const activeResume = useMemo(() => {
@@ -33,13 +59,12 @@ export default function Templates() {
     return availableResumes[0] || null
   }, [selectedResumeId, resumes])
 
-  // Convert resume store data to ResumePreview format
-  // The resumeStore.Resume uses a flat shape: name, email, phone, linkedin, location,
-  // summary, skills[], experience[], education, certifications, uploaded_at
+  // Build resume data for preview, merging tailored content over base resume
   const resumeData = useMemo(() => {
     if (!activeResume) return null
 
-    return {
+    // Base resume fields (contact info, education, certs)
+    const base = {
       name: activeResume.name,
       email: activeResume.email,
       phone: activeResume.phone,
@@ -60,7 +85,27 @@ export default function Templates() {
       education: activeResume.education,
       certifications: activeResume.certifications,
     }
-  }, [activeResume])
+
+    // If we have tailored data, overlay the tailored summary/skills/experience
+    if (tailoredData) {
+      if (tailoredData.summary) base.summary = tailoredData.summary
+      if (tailoredData.competencies && tailoredData.competencies.length > 0) {
+        base.skills = tailoredData.competencies
+      }
+      if (tailoredData.experience && tailoredData.experience.length > 0) {
+        base.experience = tailoredData.experience.map((exp: any) => ({
+          company: exp.company,
+          title: exp.title,
+          location: exp.location,
+          dates: exp.dates,
+          bullets: exp.bullets || (exp.description ? [exp.description] : undefined),
+          description: exp.description,
+        }))
+      }
+    }
+
+    return base
+  }, [activeResume, tailoredData])
 
   const handleSelectTemplate = (template: ResumeTemplate) => {
     if (template.isPremium && !checkFeatureAccess('premium_templates')) {

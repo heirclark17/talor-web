@@ -42,6 +42,26 @@ interface ResumeState {
   reset: () => void
 }
 
+// Normalize backend field names (candidate_name → name, etc.)
+function normalizeResume(r: any): Resume {
+  return {
+    id: r.id,
+    filename: r.filename,
+    name: r.candidate_name || r.name,
+    email: r.candidate_email || r.email,
+    phone: r.candidate_phone || r.phone,
+    linkedin: r.candidate_linkedin || r.linkedin,
+    location: r.candidate_location || r.location,
+    summary: r.summary,
+    skills: r.skills || [],
+    experience: r.experience || [],
+    education: r.education,
+    certifications: r.certifications,
+    skills_count: r.skills_count ?? (r.skills ? r.skills.length : 0),
+    uploaded_at: r.uploaded_at,
+  }
+}
+
 const initialState = {
   resumes: [],
   selectedResumeId: null,
@@ -71,7 +91,7 @@ export const useResumeStore = create<ResumeState>()(
           clearTimeout(timeoutId)
           if (result.success && result.data) {
             const resumeList = Array.isArray(result.data.resumes)
-              ? result.data.resumes
+              ? result.data.resumes.map(normalizeResume)
               : []
             set({ resumes: resumeList })
           } else {
@@ -92,7 +112,7 @@ export const useResumeStore = create<ResumeState>()(
           const result = await api.listResumes()
           if (result.success && result.data) {
             const resumeList = Array.isArray(result.data.resumes)
-              ? result.data.resumes
+              ? result.data.resumes.map(normalizeResume)
               : []
             set({ resumes: resumeList })
           }

@@ -40,8 +40,9 @@ const PAGE_HEIGHT = 11 * 96 // 1056px (11 inches at 96 DPI)
 export default function ResumePreview({ template, resumeData, scale = 1 }: ResumePreviewProps) {
   const { style, layout } = template
 
-  // Use sample data if no resume data provided
-  const data = resumeData || {
+  // Use sample data if no resume data or resume data has no meaningful content
+  const hasContent = resumeData && (resumeData.name || resumeData.summary || (resumeData.skills && resumeData.skills.length > 0) || (resumeData.experience && resumeData.experience.length > 0))
+  const data = hasContent ? resumeData : {
     name: 'John Doe',
     email: 'john.doe@email.com',
     phone: '(555) 123-4567',
