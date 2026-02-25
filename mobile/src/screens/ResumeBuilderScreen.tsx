@@ -1069,10 +1069,10 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   formCard: {
-    padding: 14,
+    padding: 20,
   },
   formSection: {
-    gap: 18,
+    gap: 22,
   },
   sectionHeader: {
     flexDirection: 'row',
