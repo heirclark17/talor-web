@@ -1089,17 +1089,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   inputGroup: {
-    gap: 8,
+    gap: 4,
   },
   inputLabel: {
-    ...TYPOGRAPHY.subhead,
+    ...TYPOGRAPHY.caption1,
   },
   textInput: {
     ...TYPOGRAPHY.callout,
+    fontSize: 14,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   textArea: {
     height: 120,
