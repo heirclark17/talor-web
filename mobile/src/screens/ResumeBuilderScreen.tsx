@@ -1062,11 +1062,12 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   formContainer: {
-    flex: 1,
+    flexGrow: 0,
+    flexShrink: 1,
   },
   formContent: {
     padding: 16,
-    paddingBottom: 16,
+    paddingBottom: 8,
   },
   formCard: {
     padding: 20,
