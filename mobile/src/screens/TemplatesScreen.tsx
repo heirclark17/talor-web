@@ -12,6 +12,7 @@ import {
   StyleSheet,
   Dimensions,
   Image,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -84,6 +85,8 @@ export default function TemplatesScreen() {
   const { colors, isDark } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [imageError, setImageError] = useState<{ [key: string]: boolean }>({});
 
   const ds = useMemo(() => ({
     container: { backgroundColor: colors.background },
@@ -91,7 +94,8 @@ export default function TemplatesScreen() {
     subtitle: { color: colors.textSecondary },
     categoryChip: {
       backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'transparent',
+      borderWidth: isDark ? 1 : 0,
     },
     categoryChipText: { color: colors.textSecondary },
     templatePreview: { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' },
@@ -113,6 +117,12 @@ export default function TemplatesScreen() {
   const handleUseTemplate = () => {
     if (selectedTemplate) {
       (navigation as any).navigate('ResumeBuilder', { templateId: selectedTemplate });
+    }
+  };
+
+  const handlePreview = () => {
+    if (selectedTemplate) {
+      setPreviewVisible(true);
     }
   };
 
@@ -179,11 +189,16 @@ export default function TemplatesScreen() {
                     ]}
                   >
                     <View style={[styles.templatePreview, ds.templatePreview]}>
-                      <Image
-                        source={{ uri: template.preview }}
-                        style={styles.previewImage}
-                        resizeMode="cover"
-                      />
+                      {imageError[template.id] ? (
+                        <FileText size={64} color={colors.textSecondary} />
+                      ) : (
+                        <Image
+                          source={{ uri: template.preview }}
+                          style={styles.previewImage}
+                          resizeMode="cover"
+                          onError={() => setImageError({ ...imageError, [template.id]: true })}
+                        />
+                      )}
                     </View>
 
                     {isSelected && (
@@ -221,8 +236,8 @@ export default function TemplatesScreen() {
                   <View style={styles.detailsActions}>
                     <GlassButton
                       variant="secondary"
-                      style={styles.detailsButton}
-                      onPress={() => {}}
+                      style={styles.previewButton}
+                      onPress={handlePreview}
                     >
                       <Eye size={18} color={colors.text} />
                       <Text style={[styles.detailsButtonText, { color: colors.text }]}>
@@ -232,7 +247,7 @@ export default function TemplatesScreen() {
 
                     <GlassButton
                       variant="primary"
-                      style={styles.detailsButton}
+                      style={styles.useButton}
                       onPress={handleUseTemplate}
                     >
                       <Text style={styles.detailsButtonTextPrimary}>
@@ -246,6 +261,55 @@ export default function TemplatesScreen() {
           )}
         </ScrollView>
       </View>
+
+      {/* Preview Modal */}
+      <Modal
+        visible={previewVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPreviewVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setPreviewVisible(false)}
+          />
+          <View style={styles.modalContent}>
+            <GlassCard style={styles.previewCard}>
+              {selectedTemplate && (
+                <>
+                  <View style={styles.previewHeader}>
+                    <Text style={[styles.previewTitle, { color: colors.text }]}>
+                      {templates.find((t) => t.id === selectedTemplate)?.name}
+                    </Text>
+                    <TouchableOpacity onPress={() => setPreviewVisible(false)}>
+                      <Text style={[styles.closeButton, { color: colors.text }]}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.previewImageContainer}>
+                    {imageError[selectedTemplate] ? (
+                      <View style={styles.previewPlaceholder}>
+                        <FileText size={80} color={colors.textSecondary} />
+                        <Text style={[styles.previewPlaceholderText, { color: colors.textSecondary }]}>
+                          Preview not available
+                        </Text>
+                      </View>
+                    ) : (
+                      <Image
+                        source={{ uri: templates.find((t) => t.id === selectedTemplate)?.preview }}
+                        style={styles.previewImageFull}
+                        resizeMode="contain"
+                        onError={() => setImageError({ ...imageError, [selectedTemplate]: true })}
+                      />
+                    )}
+                  </View>
+                </>
+              )}
+            </GlassCard>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -368,7 +432,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-  detailsButton: {
+  previewButton: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  useButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -385,5 +456,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: TYPOGRAPHY.headline.fontFamily,
     color: '#FFF',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  modalContent: {
+    width: '90%',
+    maxHeight: '80%',
+  },
+  previewCard: {
+    padding: 20,
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  previewTitle: {
+    ...TYPOGRAPHY.title3,
+  },
+  closeButton: {
+    fontSize: 28,
+    fontWeight: '300',
+  },
+  previewImageContainer: {
+    height: 500,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewImageFull: {
+    width: '100%',
+    height: '100%',
+  },
+  previewPlaceholder: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  previewPlaceholderText: {
+    ...TYPOGRAPHY.subhead,
   },
 });
