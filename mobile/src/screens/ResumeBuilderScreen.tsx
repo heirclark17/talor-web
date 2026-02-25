@@ -1018,7 +1018,7 @@ const styles = StyleSheet.create({
   progressContainer: {
     paddingHorizontal: SPACING.screenMargin,
     paddingTop: 0,
-    paddingBottom: SPACING.xs,
+    paddingBottom: 12,
   },
   progressBar: {
     height: 4,
@@ -1037,6 +1037,7 @@ const styles = StyleSheet.create({
   },
   sectionNav: {
     maxHeight: 60,
+    marginBottom: 16,
   },
   sectionNavContent: {
     paddingHorizontal: 16,
