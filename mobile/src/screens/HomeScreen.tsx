@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.screenMargin,
     paddingTop: 0,
-    paddingBottom: 0,
+    paddingBottom: SPACING.sm,
     marginTop: -SPACING.md,
   },
   addButton: {
