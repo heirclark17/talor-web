@@ -265,6 +265,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...TYPOGRAPHY.title1,
+    fontSize: 34,
     marginBottom: 8,
   },
   subtitle: {
