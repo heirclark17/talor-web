@@ -58,7 +58,7 @@ export function ApplicationFormModal({
   onSave,
   onDelete,
 }: ApplicationFormModalProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -273,7 +273,7 @@ export function ApplicationFormModal({
                         styles.chip,
                         {
                           backgroundColor: colors.backgroundSecondary,
-                          borderColor: GLASS.getBorderColor(),
+                          borderColor: isDark ? GLASS.getBorderColor() : 'transparent',
                         },
                         status === option.value && {
                           backgroundColor: COLORS.primary,
