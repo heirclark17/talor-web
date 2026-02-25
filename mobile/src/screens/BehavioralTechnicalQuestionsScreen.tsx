@@ -137,6 +137,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
   const [data, setData] = useState<QuestionsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('behavioral');
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
 
@@ -150,12 +151,64 @@ export default function BehavioralTechnicalQuestionsScreen() {
   const [savingStory, setSavingStory] = useState(false);
 
   useEffect(() => {
-    handleGenerateQuestions();
+    loadCachedOrGenerate();
     loadSavedStories();
   }, []);
 
-  // Load saved STAR stories from AsyncStorage
+  // Try loading cached data first (like web), fall back to generating
+  const loadCachedOrGenerate = async () => {
+    try {
+      // Check AsyncStorage cache first
+      const cached = await AsyncStorage.getItem(`bt-questions-${interviewPrepId}`);
+      if (cached) {
+        const cachedData = JSON.parse(cached);
+        if (cachedData?.behavioral?.questions?.length > 0) {
+          console.log('[BT Questions] Loaded from cache');
+          setData(cachedData);
+          return;
+        }
+      }
+    } catch (err) {
+      console.log('[BT Questions] No cache found, generating...');
+    }
+    // No cache - generate fresh
+    handleGenerateQuestions();
+  };
+
+  // Load saved STAR stories from backend first, fallback to AsyncStorage
   const loadSavedStories = async () => {
+    try {
+      // Try backend first (like web)
+      const result = await api.getPracticeResponses(interviewPrepId);
+      if (result.success && result.data) {
+        const responses = Array.isArray(result.data) ? result.data : result.data?.responses || [];
+        if (responses.length > 0) {
+          const dbStories: Record<string, StarStory> = {};
+          for (const r of responses) {
+            const key = r.question_key || r.questionKey || `${r.question_category || r.questionCategory}_${r.id}`;
+            const starStory = r.star_story || r.starStory;
+            if (starStory) {
+              dbStories[key] = {
+                situation: starStory.situation || '',
+                task: starStory.task || '',
+                action: starStory.action || '',
+                result: starStory.result || '',
+              };
+            }
+          }
+          if (Object.keys(dbStories).length > 0) {
+            setStarStories(dbStories);
+            setAiGeneratedStories(dbStories);
+            // Sync to AsyncStorage as cache
+            await AsyncStorage.setItem(`bt-questions-stories-${interviewPrepId}`, JSON.stringify(dbStories));
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      // Fall through to AsyncStorage
+    }
+    // Fallback to AsyncStorage
     try {
       const saved = await AsyncStorage.getItem(`bt-questions-stories-${interviewPrepId}`);
       if (saved) {
@@ -179,15 +232,27 @@ export default function BehavioralTechnicalQuestionsScreen() {
       const result = await api.generatePracticeStarStory(interviewPrepId, questionText);
       if (result.success && result.data?.star_story) {
         const story = result.data.star_story;
+        const storyData: StarStory = {
+          situation: story.situation || '',
+          task: story.task || '',
+          action: story.action || '',
+          result: story.result || '',
+        };
         setAiGeneratedStories(prev => ({
           ...prev,
-          [questionKey]: {
-            situation: story.situation || '',
-            task: story.task || '',
-            action: story.action || '',
-            result: story.result || '',
-          }
+          [questionKey]: storyData,
         }));
+        // Fire-and-forget: persist AI story to backend (like web)
+        const questionType = questionKey.startsWith('behavioral_') ? 'behavioral' : 'technical';
+        const questionId = parseInt(questionKey.split('_')[1]) || 0;
+        api.saveQuestionStarStory({
+          interviewPrepId,
+          questionId,
+          questionText,
+          questionType,
+          starStory: storyData,
+          questionKey,
+        }).catch(() => {});
       }
     } catch (err) {
       console.error('Failed to generate AI STAR story:', err);
@@ -216,10 +281,14 @@ export default function BehavioralTechnicalQuestionsScreen() {
 
     setSavingStory(true);
     try {
+      const questionId = parseInt(questionKey.split('_')[1]) || 0;
       const result = await api.saveQuestionStarStory({
-        interviewPrepId: interviewPrepId,
-        questionId: questionKey,
+        interviewPrepId,
+        questionId,
+        questionText,
+        questionType,
         starStory: story,
+        questionKey,
       });
 
       if (result.success) {
@@ -246,42 +315,67 @@ export default function BehavioralTechnicalQuestionsScreen() {
   };
 
   const handleGenerateQuestions = async () => {
-    console.log('=== Starting to generate questions for interviewPrepId:', interviewPrepId);
+    console.log('[BT Questions] Starting generation for interviewPrepId:', interviewPrepId);
     setGenerating(true);
+    setError(null);
     try {
       const result = await api.generateBehavioralTechnicalQuestions(interviewPrepId);
-      console.log('=== API Result keys:', Object.keys(result.data || {}));
-      console.log('=== API Result:', JSON.stringify(result, null, 2).slice(0, 1000));
 
       if (result.success && result.data) {
-        // Handle nested data structure - API might return { success, data: { data: {...} } }
-        const questionsData = result.data.data || result.data;
-        console.log('=== Questions data keys:', Object.keys(questionsData || {}));
-        console.log('=== Behavioral questions count:', questionsData?.behavioral?.questions?.length);
-        console.log('=== Technical questions count:', questionsData?.technical?.questions?.length);
+        // API returns { success, data: { success, data: {...} } } due to client wrapper
+        // Check API-level success (like the web does)
+        const apiResponse = result.data;
+        if (apiResponse.success === false) {
+          const errorMsg = apiResponse.error || apiResponse.detail || 'Failed to generate questions';
+          console.error('[BT Questions] API error:', errorMsg);
+          if (apiResponse.detail?.includes('not found')) {
+            setError('Interview prep not found. The tailored resume may have been deleted. Please go back and create a new tailored resume.');
+          } else {
+            setError(errorMsg);
+          }
+          return;
+        }
+
+        const questionsData = apiResponse.data || apiResponse;
+        console.log('[BT Questions] Generated:', {
+          behavioral: questionsData?.behavioral?.questions?.length || 0,
+          technical: questionsData?.technical?.questions?.length || 0,
+        });
         setData(questionsData);
+
+        // Cache to AsyncStorage for fast reload
+        AsyncStorage.setItem(
+          `bt-questions-${interviewPrepId}`,
+          JSON.stringify(questionsData)
+        ).catch(() => {});
+
+        // Fire-and-forget: cache generated questions to backend (like web)
+        api.cacheInterviewPrepData(interviewPrepId, {
+          behavioral_technical_questions: questionsData,
+        }).catch(() => {});
       } else {
-        console.log('=== API Error:', result.error);
-        Alert.alert('Error', result.error || 'Failed to generate questions');
+        const errorMsg = result.error || result.data?.error || result.data?.detail || 'Failed to generate questions';
+        console.error('[BT Questions] Error:', errorMsg);
+        setError(errorMsg);
       }
-    } catch (error) {
-      console.error('Error generating questions:', error);
-      Alert.alert('Error', 'Failed to generate behavioral and technical questions');
+    } catch (error: any) {
+      console.error('[BT Questions] Exception:', error);
+      setError(error.message || 'Failed to generate behavioral and technical questions');
     } finally {
       setGenerating(false);
     }
   };
 
   const toggleExpanded = (type: string, id: number, questionText?: string) => {
-    const key = `${type}-${id}`;
+    const key = `${type}_${id}`;
     setExpandedQuestions(prev => {
       const newSet = new Set(prev);
       if (newSet.has(key)) {
         newSet.delete(key);
       } else {
         newSet.add(key);
-        // Auto-generate AI STAR story when expanding a behavioral question
-        if (type === 'behavioral' && questionText) {
+        // Auto-generate AI STAR story when expanding any question (like web)
+        if (questionText) {
           generateAiStarStory(key, questionText);
         }
       }
@@ -338,6 +432,54 @@ export default function BehavioralTechnicalQuestionsScreen() {
           <Text style={[styles.loadingSubtext, { color: colors.textSecondary }]}>
             Researching company tech stack and creating personalized questions
           </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Error or empty state with retry button (like web's Generate button)
+  if (!data && !generating) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <ArrowLeft color={colors.text} size={24} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Interview Questions</Text>
+          <View style={styles.headerPlaceholder} />
+        </View>
+
+        <View style={styles.emptyStateContainer}>
+          <View style={styles.emptyIconRow}>
+            <Brain color={COLORS.purple} size={48} />
+            <Code color={COLORS.primary} size={48} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>
+            Behavioral & Technical Questions
+          </Text>
+          <Text style={[styles.emptyDescription, { color: colors.textSecondary }]}>
+            Generate 10 behavioral and 10 technical interview questions specifically aligned to this role.
+            Includes STAR story prompts and tech stack analysis.
+          </Text>
+          {error && (
+            <View style={[styles.errorBanner, { backgroundColor: `${COLORS.error}15` }]}>
+              <AlertTriangle color={COLORS.error} size={18} />
+              <Text style={[styles.errorBannerText, { color: COLORS.error }]}>{error}</Text>
+            </View>
+          )}
+          <TouchableOpacity
+            style={styles.generateButton}
+            onPress={handleGenerateQuestions}
+            activeOpacity={0.7}
+          >
+            <Sparkles color="#fff" size={20} />
+            <Text style={styles.generateButtonText}>Generate Questions</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -442,7 +584,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
 
             {/* Behavioral Questions */}
             {data?.behavioral?.questions?.map((question) => {
-              const questionKey = `behavioral-${question.id}`;
+              const questionKey = `behavioral_${question.id}`;
               const isExpanded = expandedQuestions.has(questionKey);
               const aiStory = aiGeneratedStories[questionKey];
               const userStory = starStories[questionKey];
@@ -785,9 +927,9 @@ export default function BehavioralTechnicalQuestionsScreen() {
 
             {/* Technical Questions */}
             {data?.technical?.questions?.map((question) => {
-              const isExpanded = expandedQuestions.has(`technical-${question.id}`);
+              const isExpanded = expandedQuestions.has(`technical_${question.id}`);
               return (
-                <View key={`technical-${question.id}`} style={[styles.questionCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <View key={`technical_${question.id}`} style={[styles.questionCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
                   <TouchableOpacity
                     style={styles.questionHeader}
                     onPress={() => toggleExpanded('technical', question.id)}
@@ -1476,5 +1618,58 @@ const styles = StyleSheet.create({
   },
   editSavedButton: {
     padding: SPACING.xs,
+  },
+  // Empty/error state styles
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+  },
+  emptyIconRow: {
+    flexDirection: 'row',
+    gap: SPACING.lg,
+    marginBottom: SPACING.lg,
+  },
+  emptyTitle: {
+    ...TYPOGRAPHY.headline,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
+  emptyDescription: {
+    ...TYPOGRAPHY.subhead,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: SPACING.lg,
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    marginBottom: SPACING.lg,
+    width: '100%',
+  },
+  errorBannerText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+  },
+  generateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: RADIUS.lg,
+  },
+  generateButtonText: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+    color: '#fff',
   },
 });
