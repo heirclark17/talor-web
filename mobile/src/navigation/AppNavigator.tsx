@@ -12,6 +12,7 @@ import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 
 // Screens
+import DashboardScreen from '../screens/DashboardScreen';
 import HomeScreen from '../screens/HomeScreen';
 import UploadResumeScreen from '../screens/UploadResumeScreen';
 import TailorResumeScreen from '../screens/TailorResumeScreen';
@@ -47,6 +48,9 @@ export type AuthStackParamList = {
 
 // Main Stack param list - all screens in one stack
 export type MainStackParamList = {
+  // Dashboard
+  Dashboard: undefined;
+
   // Home / Resumes
   HomeMain: undefined;
   UploadResume: undefined;
@@ -134,13 +138,19 @@ function MainStackNavigator() {
     <ErrorBoundary screenName="Main">
       <MainStack.Navigator
         screenOptions={stackScreenOptions}
-        screenLayout={({ children }) => (
-          <>
-            <AppHeader />
-            {children}
-          </>
-        )}
+        screenLayout={({ children, route }) => {
+          const hideHeader = route.name === 'Dashboard';
+          return (
+            <>
+              {!hideHeader && <AppHeader />}
+              {children}
+            </>
+          );
+        }}
       >
+        {/* Dashboard - initial route */}
+        <MainStack.Screen name="Dashboard" component={DashboardScreen} />
+
         {/* Home / Resumes */}
         <MainStack.Screen name="HomeMain" component={HomeScreen} />
         <MainStack.Screen
