@@ -570,8 +570,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.screenMargin,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.sm,
+    paddingTop: SPACING.xs,
+    paddingBottom: 0,
   },
   addButton: {
     width: SPACING.touchTarget,
@@ -581,8 +581,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: SPACING.md,
     paddingHorizontal: SPACING.screenMargin,
-    paddingTop: SPACING.sm,
-    paddingBottom: SPACING.sm,
+    paddingTop: SPACING.xs,
+    paddingBottom: SPACING.xs,
   },
   quickActionButton: {
     flex: 1,
