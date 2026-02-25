@@ -1063,11 +1063,10 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     flex: 1,
-    marginBottom: -50,
   },
   formContent: {
     padding: 16,
-    paddingBottom: 64,
+    paddingBottom: 16,
   },
   formCard: {
     padding: 14,
@@ -1110,7 +1109,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.screenMargin,
-    paddingTop: SPACING.sm,
+    paddingTop: 4,
     paddingBottom: SPACING.md,
     gap: 12,
   },
