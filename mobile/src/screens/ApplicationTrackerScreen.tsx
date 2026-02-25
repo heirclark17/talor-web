@@ -9,11 +9,11 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../utils/constants';
+import { GlassCard } from '../components/glass/GlassCard';
 import { ApplicationFormModal } from '../components/ApplicationFormModal';
 
 interface Application {
@@ -62,6 +62,19 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: 'Rejected',
   withdrawn: 'Withdrawn',
   no_response: 'No Response',
+};
+
+const PIPELINE_STAGES = [
+  { key: 'applied', label: 'Applied', color: COLORS.info },
+  { key: 'screening', label: 'Screen', color: COLORS.primary },
+  { key: 'interviewing', label: 'Interview', color: COLORS.cyan },
+  { key: 'offer', label: 'Offer', color: COLORS.success },
+  { key: 'accepted', label: 'Accepted', color: COLORS.success },
+];
+
+const getStageIndex = (status: string): number => {
+  const idx = PIPELINE_STAGES.findIndex(s => s.key === status);
+  return idx >= 0 ? idx : -1;
 };
 
 export default function ApplicationTrackerScreen() {
@@ -123,7 +136,7 @@ export default function ApplicationTrackerScreen() {
   };
 
   const renderApplicationCard = ({ item }: { item: Application }) => (
-    <BlurView intensity={GLASS.getBlurIntensity('subtle')} tint="light" style={styles.cardBlur}>
+    <GlassCard style={styles.cardGlass}>
       <TouchableOpacity
         style={styles.card}
         onPress={() => {
@@ -164,41 +177,86 @@ export default function ApplicationTrackerScreen() {
             {item.appliedDate ? `Applied ${formatDate(item.appliedDate)}` : `Saved ${formatDate(item.createdAt)}`}
           </Text>
         </View>
+
+        {/* Status Progress Dots */}
+        <View style={[styles.progressDots, { borderTopColor: colors.textTertiary + '20' }]}>
+          {PIPELINE_STAGES.map((stage, index) => {
+            const currentIdx = getStageIndex(item.status);
+            const isCompleted = index <= currentIdx;
+            const isCurrent = index === currentIdx;
+            return (
+              <React.Fragment key={stage.key}>
+                {index > 0 && (
+                  <View style={[styles.progressLine, { backgroundColor: isCompleted ? stage.color : colors.textTertiary + '20' }]} />
+                )}
+                <View style={[
+                  styles.progressDot,
+                  isCompleted
+                    ? { backgroundColor: stage.color }
+                    : { backgroundColor: colors.textTertiary + '20' },
+                  isCurrent && styles.progressDotCurrent,
+                ]} />
+              </React.Fragment>
+            );
+          })}
+        </View>
       </TouchableOpacity>
-    </BlurView>
+    </GlassCard>
   );
 
-  const renderStatsCard = () => {
+  const renderPipelineView = () => {
     if (!stats) return null;
 
-    const totalActive = Object.entries(stats)
-      .filter(([key]) => !['rejected', 'withdrawn', 'no_response'].includes(key))
-      .reduce((sum, [, value]) => sum + value, 0);
-
     return (
-      <BlurView intensity={GLASS.getBlurIntensity('regular')} tint="light" style={styles.statsBlur}>
-        <View style={styles.statsContainer}>
-          <Text style={[styles.statsTitle, { color: colors.text }]}>Application Summary</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{totalActive}</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Active</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{stats.applied || 0}</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Applied</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{stats.interviewing || 0}</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Interviews</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{stats.offer || 0}</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Offers</Text>
-            </View>
-          </View>
+      <GlassCard style={styles.pipelineCard}>
+        <Text style={[styles.statsTitle, { color: colors.text }]}>Application Pipeline</Text>
+        <View style={styles.pipeline}>
+          {PIPELINE_STAGES.map((stage, index) => {
+            const count = (stats as any)[stage.key] || 0;
+            const isActive = count > 0;
+            return (
+              <React.Fragment key={stage.key}>
+                {index > 0 && (
+                  <View style={[styles.pipelineConnector, { backgroundColor: isActive ? stage.color : colors.textTertiary + '30' }]} />
+                )}
+                <View style={styles.pipelineStage}>
+                  <View style={[
+                    styles.pipelineCircle,
+                    isActive
+                      ? { backgroundColor: stage.color }
+                      : { backgroundColor: 'transparent', borderWidth: 2, borderColor: colors.textTertiary + '40' }
+                  ]}>
+                    <Text style={[
+                      styles.pipelineCount,
+                      { color: isActive ? '#ffffff' : colors.textTertiary }
+                    ]}>
+                      {count}
+                    </Text>
+                  </View>
+                  <Text style={[styles.pipelineLabel, { color: isActive ? colors.text : colors.textTertiary }]}>
+                    {stage.label}
+                  </Text>
+                </View>
+              </React.Fragment>
+            );
+          })}
         </View>
-      </BlurView>
+
+        {/* Summary row below pipeline */}
+        <View style={[styles.summaryRow, { borderTopColor: colors.textTertiary + '20' }]}>
+          <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
+            {stats.saved || 0} saved
+          </Text>
+          <Text style={[styles.summaryDot, { color: colors.textTertiary }]}>{'\u2022'}</Text>
+          <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
+            {stats.rejected || 0} rejected
+          </Text>
+          <Text style={[styles.summaryDot, { color: colors.textTertiary }]}>{'\u2022'}</Text>
+          <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
+            {stats.no_response || 0} no response
+          </Text>
+        </View>
+      </GlassCard>
     );
   };
 
@@ -261,7 +319,7 @@ export default function ApplicationTrackerScreen() {
         }
         ListHeaderComponent={
           <>
-            {renderStatsCard()}
+            {renderPipelineView()}
             {renderFilterChips()}
           </>
         }
@@ -328,32 +386,58 @@ const styles = StyleSheet.create({
   listContainer: {
     padding: SPACING.md,
   },
-  statsBlur: {
-    borderRadius: GLASS.getCornerRadius('medium'),
-    overflow: 'hidden',
-    marginBottom: SPACING.lg,
-  },
-  statsContainer: {
+  pipelineCard: {
     padding: SPACING.lg,
+    marginBottom: SPACING.lg,
   },
   statsTitle: {
     ...TYPOGRAPHY.heading3,
     marginBottom: SPACING.md,
   },
-  statsGrid: {
+  pipeline: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
   },
-  statItem: {
+  pipelineStage: {
     alignItems: 'center',
   },
-  statValue: {
-    ...TYPOGRAPHY.heading2,
-    color: COLORS.primary,
+  pipelineCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  statLabel: {
-    ...TYPOGRAPHY.caption,
-    marginTop: SPACING.xs,
+  pipelineCount: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  pipelineLabel: {
+    fontSize: 10,
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  pipelineConnector: {
+    height: 2,
+    flex: 1,
+    marginHorizontal: 2,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    paddingTop: SPACING.sm,
+    marginTop: SPACING.sm,
+    borderTopWidth: 1,
+  },
+  summaryText: {
+    fontSize: 12,
+  },
+  summaryDot: {
+    fontSize: 8,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -379,16 +463,11 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: '600',
   },
-  cardBlur: {
-    borderRadius: GLASS.getCornerRadius('large'),
-    overflow: 'hidden',
+  cardGlass: {
     marginBottom: SPACING.md,
-    ...GLASS.getShadow('medium'),
   },
   card: {
     padding: SPACING.lg,
-    borderWidth: GLASS.getBorderWidth(),
-    borderColor: GLASS.getBorderColor(),
   },
   cardHeader: {
     flexDirection: 'row',
@@ -430,6 +509,29 @@ const styles = StyleSheet.create({
   },
   dateText: {
     ...TYPOGRAPHY.caption,
+  },
+  progressDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+  },
+  progressLine: {
+    height: 2,
+    flex: 1,
+  },
+  progressDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  progressDotCurrent: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: '#ffffff',
   },
   emptyContainer: {
     alignItems: 'center',

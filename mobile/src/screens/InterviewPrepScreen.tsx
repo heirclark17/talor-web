@@ -560,6 +560,107 @@ export default function InterviewPrepScreen() {
             )}
           </GlassCard>
 
+          {/* Competitive Intelligence Card + Expandable */}
+          {competitiveIntelligence && (
+            <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
+              <TouchableOpacity
+                style={styles.stackedCardItem}
+                onPress={() => handleSectionPress('competitiveIntel')}
+                activeOpacity={0.7}
+              >
+                <View style={styles.stackedCardLeft}>
+                  <View style={[styles.stackedCardIcon, { backgroundColor: ALPHA_COLORS.info.bg }]}>
+                    <TrendingUp color={COLORS.info} size={24} />
+                  </View>
+                  <View style={styles.stackedCardContent}>
+                    <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Competitive Intelligence</Text>
+                    <Text style={[styles.stackedCardSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+                      Market position & strategy
+                    </Text>
+                  </View>
+                </View>
+                {selectedSection === 'competitiveIntel' ? (
+                  <ChevronDown color={COLORS.info} size={20} />
+                ) : (
+                  <ChevronRight color={colors.textTertiary} size={20} />
+                )}
+              </TouchableOpacity>
+              {selectedSection === 'competitiveIntel' && (
+                <View style={[styles.expandedContent, { borderTopColor: colors.border }]}>
+                  {/* Market Position */}
+                  {competitiveIntelligence.market_position && (
+                    <View style={styles.expandedSection}>
+                      <Text style={[styles.expandedSectionTitle, { color: COLORS.info }]}>Market Position</Text>
+                      <Text style={[styles.expandedText, { color: colors.textSecondary }]}>
+                        {competitiveIntelligence.market_position}
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Competitive Advantages */}
+                  {competitiveIntelligence.competitive_advantages && competitiveIntelligence.competitive_advantages.length > 0 && (
+                    <View style={styles.expandedSection}>
+                      <Text style={[styles.expandedSectionTitle, { color: COLORS.success }]}>Competitive Advantages</Text>
+                      {competitiveIntelligence.competitive_advantages.map((item: string, index: number) => (
+                        <View key={index} style={styles.bulletItem}>
+                          <CheckCircle color={COLORS.success} size={14} style={{ marginTop: 3, marginRight: SPACING.sm }} />
+                          <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{item}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {/* Challenges */}
+                  {competitiveIntelligence.challenges && competitiveIntelligence.challenges.length > 0 && (
+                    <View style={styles.expandedSection}>
+                      <Text style={[styles.expandedSectionTitle, { color: COLORS.warning }]}>Key Challenges</Text>
+                      {competitiveIntelligence.challenges.map((item: string, index: number) => (
+                        <View key={index} style={styles.bulletItem}>
+                          <View style={[styles.bulletDot, { backgroundColor: COLORS.warning }]} />
+                          <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{item}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {/* Differentiation Strategy */}
+                  {competitiveIntelligence.differentiation_strategy && (
+                    <View style={styles.expandedSection}>
+                      <Text style={[styles.expandedSectionTitle, { color: COLORS.primary }]}>Differentiation Strategy</Text>
+                      <Text style={[styles.expandedText, { color: colors.textSecondary }]}>
+                        {competitiveIntelligence.differentiation_strategy}
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Interview Angles */}
+                  {competitiveIntelligence.interview_angles && competitiveIntelligence.interview_angles.length > 0 && (
+                    <View style={styles.expandedSection}>
+                      <Text style={[styles.expandedSectionTitle, { color: COLORS.purple }]}>Interview Talking Points</Text>
+                      {competitiveIntelligence.interview_angles.map((item: string, index: number) => (
+                        <View key={index} style={styles.bulletItem}>
+                          <MessageCircle color={COLORS.purple} size={14} style={{ marginTop: 3, marginRight: SPACING.sm }} />
+                          <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{item}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              )}
+            </GlassCard>
+          )}
+
+          {loadingCompetitiveIntelligence && !competitiveIntelligence && (
+            <GlassCard padding={SPACING.lg} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
+              <View style={{ alignItems: 'center' }}>
+                <ActivityIndicator size="small" color={COLORS.info} />
+                <Text style={[styles.loadingText, { color: colors.textSecondary, fontSize: 12 }]}>
+                  Loading competitive intelligence...
+                </Text>
+              </View>
+            </GlassCard>
+          )}
+
           {/* Role & Preparation Section */}
           <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>ROLE & PREPARATION</Text>
 

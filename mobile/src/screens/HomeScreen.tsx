@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FileText, Upload, Trash2, Target, FileSearch, X, CheckCircle, AlertCircle, TrendingUp, TrendingDown, BookOpen, Briefcase } from 'lucide-react-native';
+import { FileText, Upload, Trash2, Target, FileSearch, X, CheckCircle, AlertCircle, TrendingUp, TrendingDown, BookOpen, Briefcase, Clock, GitBranch, Download, Building2 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -23,6 +23,7 @@ import { GlassButton } from '../components/glass/GlassButton';
 import { OnboardingTour } from '../components/OnboardingTour';
 import { SearchFilter, useSearchFilter } from '../components/SearchFilter';
 import { useResumeStore, Resume } from '../stores/resumeStore';
+import { api } from '../api/client';
 import { NumberText } from '../components/ui';
 import { SectionHeader } from '../components/layout';
 import { CardStyles, BadgeStyles, ModalStyles } from '../constants/SharedStyles';
@@ -53,6 +54,12 @@ export default function HomeScreen() {
   // Local UI state (not shared across screens)
   const [analysisModal, setAnalysisModal] = useState(false);
   const [currentFilename, setCurrentFilename] = useState<string>('');
+
+  // Version history state
+  const [versionsModal, setVersionsModal] = useState(false);
+  const [selectedResumeForVersions, setSelectedResumeForVersions] = useState<number | null>(null);
+  const [tailoredVersions, setTailoredVersions] = useState<any[]>([]);
+  const [loadingVersions, setLoadingVersions] = useState(false);
 
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -148,6 +155,24 @@ export default function HomeScreen() {
     setCurrentFilename('');
   };
 
+  const handleViewVersions = async (resumeId: number) => {
+    setSelectedResumeForVersions(resumeId);
+    setVersionsModal(true);
+    setLoadingVersions(true);
+    try {
+      const result = await api.listTailoredResumes();
+      if (result.success && Array.isArray(result.data)) {
+        // Filter to only versions of THIS base resume
+        const versions = result.data.filter((t: any) => t.base_resume_id === resumeId);
+        setTailoredVersions(versions);
+      }
+    } catch (error) {
+      console.error('Error loading versions:', error);
+    } finally {
+      setLoadingVersions(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -209,6 +234,17 @@ export default function HomeScreen() {
           style={styles.actionButton}
           accessibilityLabel={`Tailor ${item.filename} for a job`}
           accessibilityHint="Opens resume tailoring screen to customize for specific job posting"
+        />
+
+        <GlassButton
+          label="Versions"
+          variant="secondary"
+          size="sm"
+          icon={<GitBranch color={COLORS.success} size={20} />}
+          onPress={() => handleViewVersions(item.id)}
+          style={styles.actionButton}
+          accessibilityLabel={`View tailored versions of ${item.filename}`}
+          accessibilityHint="Shows all tailored versions created from this resume"
         />
 
         <GlassButton
@@ -339,6 +375,83 @@ export default function HomeScreen() {
           />
         }
       />
+
+      {/* Version History Modal */}
+      <Modal visible={versionsModal} animationType="slide" transparent onRequestClose={() => { setVersionsModal(false); setTailoredVersions([]); }}>
+        <View style={styles.modalOverlay}>
+          <GlassCard style={[styles.versionsModalContent, { backgroundColor: colors.background }]}>
+            <View style={styles.versionsModalHeader}>
+              <Text style={[TYPOGRAPHY.title2, { color: colors.text }]}>Tailored Versions</Text>
+              <TouchableOpacity onPress={() => { setVersionsModal(false); setTailoredVersions([]); }}>
+                <X color={colors.text} size={24} />
+              </TouchableOpacity>
+            </View>
+
+            {loadingVersions ? (
+              <View style={{ padding: 40, alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+              </View>
+            ) : tailoredVersions.length === 0 ? (
+              <View style={{ padding: 40, alignItems: 'center' }}>
+                <GitBranch color={colors.textTertiary} size={48} />
+                <Text style={[TYPOGRAPHY.body, { color: colors.textSecondary, marginTop: 12, textAlign: 'center' }]}>
+                  No tailored versions yet.{'\n'}Tailor this resume for a job to create one.
+                </Text>
+              </View>
+            ) : (
+              <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+                {tailoredVersions.map((version: any) => (
+                  <GlassCard key={version.id} style={styles.versionCard} material="thin">
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                      <Building2 color={COLORS.primary} size={16} />
+                      <Text style={[TYPOGRAPHY.bodyBold || { fontSize: 14, fontWeight: '600' }, { color: colors.text, marginLeft: 8, flex: 1 }]} numberOfLines={1}>
+                        {version.company || 'Unknown Company'}
+                      </Text>
+                    </View>
+                    <Text style={[TYPOGRAPHY.subhead || { fontSize: 13 }, { color: colors.textSecondary, marginBottom: 8 }]} numberOfLines={1}>
+                      {version.title || version.job_title || 'Untitled Position'}
+                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Clock color={colors.textTertiary} size={12} />
+                        <Text style={[TYPOGRAPHY.caption1 || { fontSize: 11 }, { color: colors.textTertiary, marginLeft: 4 }]}>
+                          {version.created_at ? new Date(version.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown date'}
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', gap: 8 }}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setVersionsModal(false);
+                            navigation.navigate('InterviewPrep' as any, { tailoredResumeId: version.id });
+                          }}
+                          style={{ padding: 6 }}
+                        >
+                          <Briefcase color={COLORS.info} size={18} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={async () => {
+                            try {
+                              const url = await api.downloadTailoredResume(version.id);
+                              if (url) {
+                                Alert.alert('Export', 'Download started for tailored resume.');
+                              }
+                            } catch (e) {
+                              Alert.alert('Error', 'Failed to download resume');
+                            }
+                          }}
+                          style={{ padding: 6 }}
+                        >
+                          <Download color={COLORS.success} size={18} />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </GlassCard>
+                ))}
+              </ScrollView>
+            )}
+          </GlassCard>
+        </View>
+      </Modal>
 
       {/* Analysis Modal */}
       <Modal
@@ -739,5 +852,27 @@ const styles = StyleSheet.create({
   },
   exampleBox: {
     // Styling applied inline in component
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  versionsModalContent: {
+    margin: 20,
+    marginTop: 100,
+    padding: 20,
+    borderRadius: 20,
+    maxHeight: '70%',
+  },
+  versionsModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  versionCard: {
+    padding: 14,
+    marginBottom: 10,
   },
 });
