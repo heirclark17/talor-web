@@ -117,7 +117,7 @@ function requiresLongTimeout(endpoint: string): boolean {
 /**
  * Base fetch with authentication headers
  * Includes security controls: host validation, rate limiting, timeout
- * Uses Clerk JWT tokens for authentication
+ * Uses Supabase JWT tokens for authentication
  */
 export async function fetchWithAuth(
   endpoint: string,
