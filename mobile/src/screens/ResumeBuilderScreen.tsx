@@ -87,6 +87,7 @@ export default function ResumeBuilderScreen() {
           placeholder="John Doe"
           placeholderTextColor="#9CA3AF"
           style={styles.textInput}
+          caretHidden={true}
         />
       </View>
 
@@ -105,6 +106,7 @@ export default function ResumeBuilderScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
           style={styles.textInput}
+          caretHidden={true}
         />
       </View>
 
@@ -122,6 +124,7 @@ export default function ResumeBuilderScreen() {
           placeholderTextColor="#9CA3AF"
           keyboardType="phone-pad"
           style={styles.textInput}
+          caretHidden={true}
         />
       </View>
 
@@ -138,6 +141,7 @@ export default function ResumeBuilderScreen() {
           placeholder="San Francisco, CA"
           placeholderTextColor="#9CA3AF"
           style={styles.textInput}
+          caretHidden={true}
         />
       </View>
 
@@ -155,6 +159,7 @@ export default function ResumeBuilderScreen() {
           placeholderTextColor="#9CA3AF"
           autoCapitalize="none"
           style={styles.textInput}
+          caretHidden={true}
         />
       </View>
     </View>
@@ -174,6 +179,7 @@ export default function ResumeBuilderScreen() {
         multiline
         numberOfLines={6}
         style={[styles.textInput, styles.textArea]}
+        caretHidden={true}
       />
     </View>
   );
@@ -451,7 +457,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.screenMargin,
-    paddingVertical: SPACING.md,
+    paddingTop: SPACING.xs,
+    paddingBottom: SPACING.md,
+    marginTop: -SPACING.md,
     gap: 12,
   },
   navButton: {
