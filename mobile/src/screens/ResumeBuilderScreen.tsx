@@ -88,6 +88,8 @@ export default function ResumeBuilderScreen() {
           placeholderTextColor="#9CA3AF"
           style={styles.textInput}
           caretHidden={true}
+          cursorColor="transparent"
+          selectionColor="transparent"
         />
       </View>
 
@@ -107,6 +109,8 @@ export default function ResumeBuilderScreen() {
           autoCapitalize="none"
           style={styles.textInput}
           caretHidden={true}
+          cursorColor="transparent"
+          selectionColor="transparent"
         />
       </View>
 
@@ -125,6 +129,8 @@ export default function ResumeBuilderScreen() {
           keyboardType="phone-pad"
           style={styles.textInput}
           caretHidden={true}
+          cursorColor="transparent"
+          selectionColor="transparent"
         />
       </View>
 
@@ -142,6 +148,8 @@ export default function ResumeBuilderScreen() {
           placeholderTextColor="#9CA3AF"
           style={styles.textInput}
           caretHidden={true}
+          cursorColor="transparent"
+          selectionColor="transparent"
         />
       </View>
 
@@ -160,6 +168,8 @@ export default function ResumeBuilderScreen() {
           autoCapitalize="none"
           style={styles.textInput}
           caretHidden={true}
+          cursorColor="transparent"
+          selectionColor="transparent"
         />
       </View>
     </View>
@@ -180,6 +190,8 @@ export default function ResumeBuilderScreen() {
         numberOfLines={6}
         style={[styles.textInput, styles.textArea]}
         caretHidden={true}
+        cursorColor="transparent"
+        selectionColor="transparent"
       />
     </View>
   );
@@ -397,10 +409,11 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     flex: 1,
+    marginBottom: -50,
   },
   formContent: {
     padding: 16,
-    paddingBottom: 0,
+    paddingBottom: 64,
   },
   formCard: {
     padding: 20,
@@ -458,9 +471,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.screenMargin,
-    paddingTop: 0,
+    paddingTop: SPACING.sm,
     paddingBottom: SPACING.md,
-    marginTop: -50,
     gap: 12,
   },
   navButton: {
