@@ -850,6 +850,11 @@ export default function CareerPathDesigner() {
       return
     }
 
+    if (transitionMotivation.length === 0) {
+      setError('Please select at least one motivation for transitioning')
+      return
+    }
+
     setLoading(true)
     setError(undefined)
     setStep('generating')
