@@ -230,8 +230,10 @@ export default function BehavioralTechnicalQuestionsScreen() {
 
     try {
       const result = await api.generatePracticeStarStory(interviewPrepId, questionText);
-      if (result.success && result.data?.star_story) {
-        const story = result.data.star_story;
+      // Unwrap nested response: API returns { success, data: { success, data: { star_story: {...} } } }
+      const apiResponse = result.data?.data || result.data;
+      if (result.success && apiResponse?.star_story) {
+        const story = apiResponse.star_story;
         const storyData: StarStory = {
           situation: story.situation || '',
           task: story.task || '',
