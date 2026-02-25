@@ -29,6 +29,7 @@ import {
 } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
+import { TYPOGRAPHY, SPACING } from '../utils/constants';
 
 type Section =
   | 'contact'
@@ -328,19 +329,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: SPACING.screenMargin,
+    paddingTop: SPACING.xs,
+    paddingBottom: SPACING.sm,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.title3,
     color: '#FFF',
   },
   progressContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: SPACING.screenMargin,
+    paddingTop: SPACING.xs,
+    paddingBottom: SPACING.sm,
   },
   progressBar: {
     height: 4,
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   progressText: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption1,
     color: '#9CA3AF',
     textAlign: 'center',
   },
@@ -382,9 +382,8 @@ const styles = StyleSheet.create({
     borderColor: '#3B82F6',
   },
   sectionTabText: {
+    ...TYPOGRAPHY.subhead,
     color: '#9CA3AF',
-    fontSize: 14,
-    fontWeight: '500',
   },
   sectionTabTextActive: {
     color: '#3B82F6',
@@ -402,13 +401,12 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.headline,
     color: '#FFF',
     marginBottom: 4,
   },
   sectionDescription: {
-    fontSize: 14,
+    ...TYPOGRAPHY.subhead,
     color: '#9CA3AF',
     marginBottom: 8,
   },
@@ -416,11 +414,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   inputLabel: {
-    fontSize: 14,
-    fontWeight: '500',
+    ...TYPOGRAPHY.subhead,
     color: '#9CA3AF',
   },
   textInput: {
+    ...TYPOGRAPHY.callout,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -428,7 +426,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     color: '#FFF',
-    fontSize: 16,
   },
   textArea: {
     height: 120,
@@ -439,24 +436,21 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   comingSoonTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    ...TYPOGRAPHY.headline,
     color: '#FFF',
     marginTop: 16,
     marginBottom: 8,
   },
   comingSoonText: {
-    fontSize: 14,
+    ...TYPOGRAPHY.subhead,
     color: '#9CA3AF',
     textAlign: 'center',
   },
   navigation: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: SPACING.screenMargin,
+    paddingVertical: SPACING.md,
     gap: 12,
   },
   navButton: {
@@ -467,8 +461,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   navButtonText: {
+    ...TYPOGRAPHY.callout,
     color: '#FFF',
-    fontSize: 16,
     fontWeight: '600',
   },
 });
