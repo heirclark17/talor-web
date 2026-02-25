@@ -59,7 +59,9 @@ export const getUserId = async (): Promise<string> => {
     // First, try to get user ID from Supabase session (primary source of truth)
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user?.id) {
-      return session.user.id;
+      // Prefix with supa_ to match backend user ID format
+      const uid = session.user.id;
+      return uid.startsWith('supa_') ? uid : `supa_${uid}`;
     }
 
     // Fallback: Try secure storage (for offline scenarios)
