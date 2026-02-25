@@ -128,7 +128,7 @@ export function AppHeader() {
           {/* Logo */}
           <TouchableOpacity
             style={styles.logo}
-            onPress={() => navigation.navigate('UploadResume' as any)}
+            onPress={() => navigation.navigate('Dashboard' as any)}
             activeOpacity={0.7}
           >
             <FileText color={COLORS.primary} size={28} />
