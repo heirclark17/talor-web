@@ -68,7 +68,7 @@ export function FeatureGrid({ cardAnimatedStyles }: FeatureGridProps) {
         );
       })}
       {/* Bottom padding for safe area */}
-      <View style={{ height: 40 }} />
+      <View style={{ height: 80 }} />
     </ScrollView>
   );
 }

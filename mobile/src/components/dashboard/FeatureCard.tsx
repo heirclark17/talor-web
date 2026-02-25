@@ -53,16 +53,19 @@ export function FeatureCard({ feature, animatedStyle }: FeatureCardProps) {
             bordered
             tintColor={feature.iconColor + '1A'}
             style={styles.card}
+            padding={14}
           >
-            <View style={[styles.iconCircle, { backgroundColor: iconBgColor }]}>
-              <IconComponent size={22} color={feature.iconColor} />
+            <View style={styles.cardContent}>
+              <View style={[styles.iconCircle, { backgroundColor: iconBgColor }]}>
+                <IconComponent size={22} color={feature.iconColor} />
+              </View>
+              <Text style={[styles.label, { color: colors.text }]} numberOfLines={1}>
+                {feature.label}
+              </Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]} numberOfLines={2}>
+                {feature.subtitle}
+              </Text>
             </View>
-            <Text style={[styles.label, { color: colors.text }]} numberOfLines={1}>
-              {feature.label}
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-              {feature.subtitle}
-            </Text>
           </GlassCard>
         </TouchableOpacity>
       </Animated.View>
@@ -72,9 +75,11 @@ export function FeatureCard({ feature, animatedStyle }: FeatureCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    height: 104,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
+    minHeight: 132,
+  },
+  cardContent: {
+    flex: 1,
+    width: '100%',
   },
   iconCircle: {
     width: 42,
@@ -82,17 +87,17 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   label: {
     fontFamily: FONTS.semibold,
     fontSize: 14,
     lineHeight: 18,
+    marginBottom: 4,
   },
   subtitle: {
     fontFamily: FONTS.regular,
-    fontSize: 11,
-    lineHeight: 14,
-    marginTop: 2,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });
