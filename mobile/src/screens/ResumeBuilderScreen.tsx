@@ -1013,7 +1013,7 @@ const styles = StyleSheet.create({
     marginTop: -SPACING.xxl,
   },
   title: {
-    ...TYPOGRAPHY.title3,
+    ...TYPOGRAPHY.largeTitle,
   },
   progressContainer: {
     paddingHorizontal: SPACING.screenMargin,
