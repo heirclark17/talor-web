@@ -989,8 +989,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    paddingTop: 75,
-    paddingBottom: SPACING.md,
+    paddingTop: 0,
+    paddingBottom: SPACING.sm,
+    marginTop: -SPACING.md,
   },
   backButton: {
     width: 44,
