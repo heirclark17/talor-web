@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
     paddingHorizontal: SPACING.screenMargin,
     paddingTop: 0,
-    paddingBottom: SPACING.xs,
+    paddingBottom: SPACING.md,
   },
   quickActionButton: {
     flex: 1,
@@ -599,6 +599,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: SPACING.screenMargin,
+    paddingTop: SPACING.sm,
     paddingBottom: SPACING.sm,
   },
   list: {
