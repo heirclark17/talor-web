@@ -3,7 +3,7 @@
  * Build resume from scratch with guided flow
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -29,7 +29,8 @@ import {
 } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
-import { TYPOGRAPHY, SPACING } from '../utils/constants';
+import { TYPOGRAPHY, SPACING, COLORS } from '../utils/constants';
+import { useTheme } from '../hooks/useTheme';
 
 type Section =
   | 'contact'
@@ -41,6 +42,7 @@ type Section =
 
 export default function ResumeBuilderScreen() {
   const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
   const [currentSection, setCurrentSection] = useState<Section>('contact');
   const [resumeData, setResumeData] = useState({
     contact: {
@@ -66,6 +68,29 @@ export default function ResumeBuilderScreen() {
     { id: 'certifications', title: 'Certifications', icon: Award },
   ];
 
+  const dynamicStyles = useMemo(() => ({
+    container: { backgroundColor: colors.background },
+    title: { color: colors.text },
+    progressBar: { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' },
+    progressText: { color: colors.textSecondary },
+    sectionTab: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+    },
+    sectionTabText: { color: colors.textSecondary },
+    sectionTitle: { color: colors.text },
+    sectionDescription: { color: colors.textSecondary },
+    inputLabel: { color: colors.textSecondary },
+    textInput: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+      color: colors.text,
+    },
+    comingSoonTitle: { color: colors.text },
+    comingSoonText: { color: colors.textSecondary },
+    navButtonText: { color: colors.text },
+  }), [colors, isDark]);
+
   const handleSave = async () => {
     // TODO: Save resume via API
     console.log('Saving resume:', resumeData);
@@ -73,9 +98,9 @@ export default function ResumeBuilderScreen() {
 
   const renderContactSection = () => (
     <View style={styles.formSection}>
-      <Text style={styles.sectionTitle}>Contact Information</Text>
+      <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Contact Information</Text>
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Full Name *</Text>
+        <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>Full Name *</Text>
         <TextInput
           value={resumeData.contact.name}
           onChangeText={(text) =>
@@ -85,8 +110,8 @@ export default function ResumeBuilderScreen() {
             })
           }
           placeholder="John Doe"
-          placeholderTextColor="#9CA3AF"
-          style={styles.textInput}
+          placeholderTextColor={colors.textTertiary}
+          style={[styles.textInput, dynamicStyles.textInput]}
           caretHidden={true}
           cursorColor="transparent"
           selectionColor="transparent"
@@ -94,7 +119,7 @@ export default function ResumeBuilderScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Email *</Text>
+        <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>Email *</Text>
         <TextInput
           value={resumeData.contact.email}
           onChangeText={(text) =>
@@ -104,10 +129,10 @@ export default function ResumeBuilderScreen() {
             })
           }
           placeholder="john@example.com"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.textTertiary}
           keyboardType="email-address"
           autoCapitalize="none"
-          style={styles.textInput}
+          style={[styles.textInput, dynamicStyles.textInput]}
           caretHidden={true}
           cursorColor="transparent"
           selectionColor="transparent"
@@ -115,7 +140,7 @@ export default function ResumeBuilderScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Phone *</Text>
+        <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>Phone *</Text>
         <TextInput
           value={resumeData.contact.phone}
           onChangeText={(text) =>
@@ -125,9 +150,9 @@ export default function ResumeBuilderScreen() {
             })
           }
           placeholder="(555) 123-4567"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.textTertiary}
           keyboardType="phone-pad"
-          style={styles.textInput}
+          style={[styles.textInput, dynamicStyles.textInput]}
           caretHidden={true}
           cursorColor="transparent"
           selectionColor="transparent"
@@ -135,7 +160,7 @@ export default function ResumeBuilderScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Location</Text>
+        <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>Location</Text>
         <TextInput
           value={resumeData.contact.location}
           onChangeText={(text) =>
@@ -145,8 +170,8 @@ export default function ResumeBuilderScreen() {
             })
           }
           placeholder="San Francisco, CA"
-          placeholderTextColor="#9CA3AF"
-          style={styles.textInput}
+          placeholderTextColor={colors.textTertiary}
+          style={[styles.textInput, dynamicStyles.textInput]}
           caretHidden={true}
           cursorColor="transparent"
           selectionColor="transparent"
@@ -154,7 +179,7 @@ export default function ResumeBuilderScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>LinkedIn</Text>
+        <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>LinkedIn</Text>
         <TextInput
           value={resumeData.contact.linkedin}
           onChangeText={(text) =>
@@ -164,9 +189,9 @@ export default function ResumeBuilderScreen() {
             })
           }
           placeholder="linkedin.com/in/johndoe"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.textTertiary}
           autoCapitalize="none"
-          style={styles.textInput}
+          style={[styles.textInput, dynamicStyles.textInput]}
           caretHidden={true}
           cursorColor="transparent"
           selectionColor="transparent"
@@ -177,18 +202,18 @@ export default function ResumeBuilderScreen() {
 
   const renderSummarySection = () => (
     <View style={styles.formSection}>
-      <Text style={styles.sectionTitle}>Professional Summary</Text>
-      <Text style={styles.sectionDescription}>
+      <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Professional Summary</Text>
+      <Text style={[styles.sectionDescription, dynamicStyles.sectionDescription]}>
         Write a brief summary highlighting your key qualifications and career goals
       </Text>
       <TextInput
         value={resumeData.summary}
         onChangeText={(text) => setResumeData({ ...resumeData, summary: text })}
         placeholder="Experienced software engineer with 5+ years..."
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.textTertiary}
         multiline
         numberOfLines={6}
-        style={[styles.textInput, styles.textArea]}
+        style={[styles.textInput, styles.textArea, dynamicStyles.textInput]}
         caretHidden={true}
         cursorColor="transparent"
         selectionColor="transparent"
@@ -205,11 +230,11 @@ export default function ResumeBuilderScreen() {
       default:
         return (
           <View style={styles.comingSoon}>
-            <FileText size={48} color="#9CA3AF" />
-            <Text style={styles.comingSoonTitle}>
+            <FileText size={48} color={colors.textSecondary} />
+            <Text style={[styles.comingSoonTitle, dynamicStyles.comingSoonTitle]}>
               {sections.find((s) => s.id === currentSection)?.title}
             </Text>
-            <Text style={styles.comingSoonText}>
+            <Text style={[styles.comingSoonText, dynamicStyles.comingSoonText]}>
               This section is under construction. Continue building other sections.
             </Text>
           </View>
@@ -218,7 +243,7 @@ export default function ResumeBuilderScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, dynamicStyles.container]} edges={['top']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -226,15 +251,15 @@ export default function ResumeBuilderScreen() {
         <View style={styles.content}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Resume Builder</Text>
+            <Text style={[styles.title, dynamicStyles.title]}>Resume Builder</Text>
             <TouchableOpacity onPress={handleSave}>
-              <Save size={24} color="#3B82F6" />
+              <Save size={24} color={colors.accent} />
             </TouchableOpacity>
           </View>
 
           {/* Progress Bar */}
           <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
+            <View style={[styles.progressBar, dynamicStyles.progressBar]}>
               <View
                 style={[
                   styles.progressFill,
@@ -248,7 +273,7 @@ export default function ResumeBuilderScreen() {
                 ]}
               />
             </View>
-            <Text style={styles.progressText}>
+            <Text style={[styles.progressText, dynamicStyles.progressText]}>
               Step {sections.findIndex((s) => s.id === currentSection) + 1} of{' '}
               {sections.length}
             </Text>
@@ -270,13 +295,15 @@ export default function ResumeBuilderScreen() {
                   onPress={() => setCurrentSection(section.id)}
                   style={[
                     styles.sectionTab,
+                    dynamicStyles.sectionTab,
                     isActive && styles.sectionTabActive,
                   ]}
                 >
-                  <Icon size={20} color={isActive ? '#3B82F6' : '#9CA3AF'} />
+                  <Icon size={20} color={isActive ? colors.accent : colors.textSecondary} />
                   <Text
                     style={[
                       styles.sectionTabText,
+                      dynamicStyles.sectionTabText,
                       isActive && styles.sectionTabTextActive,
                     ]}
                   >
@@ -309,7 +336,7 @@ export default function ResumeBuilderScreen() {
                 variant="secondary"
                 style={styles.navButton}
               >
-                <Text style={styles.navButtonText}>Previous</Text>
+                <Text style={[styles.navButtonText, dynamicStyles.navButtonText]}>Previous</Text>
               </GlassButton>
             )}
             {sections.findIndex((s) => s.id === currentSection) <
@@ -324,8 +351,8 @@ export default function ResumeBuilderScreen() {
                 variant="primary"
                 style={styles.navButton}
               >
-                <Text style={styles.navButtonText}>Next</Text>
-                <ChevronRight size={20} color="#FFF" />
+                <Text style={[styles.navButtonText, dynamicStyles.navButtonText]}>Next</Text>
+                <ChevronRight size={20} color={colors.text} />
               </GlassButton>
             )}
           </View>
@@ -338,7 +365,6 @@ export default function ResumeBuilderScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   content: {
     flex: 1,
@@ -354,7 +380,6 @@ const styles = StyleSheet.create({
   },
   title: {
     ...TYPOGRAPHY.title3,
-    color: '#FFF',
   },
   progressContainer: {
     paddingHorizontal: SPACING.screenMargin,
@@ -363,19 +388,17 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 2,
     overflow: 'hidden',
     marginBottom: 8,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#3B82F6',
+    backgroundColor: COLORS.primary,
     borderRadius: 2,
   },
   progressText: {
     ...TYPOGRAPHY.caption1,
-    color: '#9CA3AF',
     textAlign: 'center',
   },
   sectionNav: {
@@ -391,21 +414,18 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 20,
   },
   sectionTabActive: {
     backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    borderColor: '#3B82F6',
+    borderColor: COLORS.primary,
   },
   sectionTabText: {
     ...TYPOGRAPHY.subhead,
-    color: '#9CA3AF',
   },
   sectionTabTextActive: {
-    color: '#3B82F6',
+    color: COLORS.primary,
   },
   formContainer: {
     flex: 1,
@@ -423,12 +443,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.headline,
-    color: '#FFF',
     marginBottom: 4,
   },
   sectionDescription: {
     ...TYPOGRAPHY.subhead,
-    color: '#9CA3AF',
     marginBottom: 8,
   },
   inputGroup: {
@@ -436,17 +454,13 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     ...TYPOGRAPHY.subhead,
-    color: '#9CA3AF',
   },
   textInput: {
     ...TYPOGRAPHY.callout,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: '#FFF',
   },
   textArea: {
     height: 120,
@@ -458,13 +472,11 @@ const styles = StyleSheet.create({
   },
   comingSoonTitle: {
     ...TYPOGRAPHY.headline,
-    color: '#FFF',
     marginTop: 16,
     marginBottom: 8,
   },
   comingSoonText: {
     ...TYPOGRAPHY.subhead,
-    color: '#9CA3AF',
     textAlign: 'center',
   },
   navigation: {
@@ -484,7 +496,6 @@ const styles = StyleSheet.create({
   },
   navButtonText: {
     ...TYPOGRAPHY.callout,
-    color: '#FFF',
     fontWeight: '600',
   },
 });
