@@ -26,6 +26,9 @@ import {
   FileText,
   Calendar,
   Target,
+  Sparkles,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -34,6 +37,7 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { useInterviewPrepStore } from '../stores';
+import { api } from '../api/client';
 import {
   Certification,
   CertificationRecommendations,
@@ -65,10 +69,47 @@ export default function CertificationsScreen() {
   const [selectedLevel, setSelectedLevel] = useState<LevelFilter>('all');
   const [expandedCerts, setExpandedCerts] = useState<Set<string>>(new Set());
   const [savedCerts, setSavedCerts] = useState<Set<string>>(new Set());
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadSavedCerts();
+    // If no cached data and not already loading, try to load
+    if (!certifications && !loadingCertifications) {
+      loadCertifications();
+    }
   }, []);
+
+  const loadCertifications = async () => {
+    setGenerating(true);
+    setError(null);
+    try {
+      const result = await api.getCertificationRecommendations(interviewPrepId);
+      if (result.success && result.data) {
+        // Update the store cache directly
+        const store = useInterviewPrepStore.getState();
+        const preps = Object.values(store.cachedPreps);
+        const prep = preps.find((p) => p.interviewPrepId === interviewPrepId);
+        if (prep) {
+          useInterviewPrepStore.setState((state) => ({
+            cachedPreps: {
+              ...state.cachedPreps,
+              [prep.tailoredResumeId]: {
+                ...prep,
+                certificationRecommendations: result.data,
+              },
+            },
+          }));
+        }
+      } else {
+        setError(result.error || 'Failed to generate certification recommendations');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate certification recommendations');
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const loadSavedCerts = async () => {
     try {
@@ -169,9 +210,9 @@ export default function CertificationsScreen() {
 
   const filteredCerts = getFilteredCertifications();
 
-  if (loading) {
+  if (loading || generating) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ArrowLeft color={colors.text} size={24} />
@@ -181,9 +222,50 @@ export default function CertificationsScreen() {
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-            Loading certification recommendations...
+          <Text style={[styles.loadingText, { color: colors.text }]}>
+            Generating Certifications...
           </Text>
+          <Text style={[styles.loadingSubtext, { color: colors.textSecondary }]}>
+            Analyzing your role and recommending certifications
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Empty/error state with generate button
+  if (!certifications) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ArrowLeft color={colors.text} size={24} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Certifications</Text>
+          <View style={styles.headerPlaceholder} />
+        </View>
+        <View style={styles.emptyStateContainer}>
+          <Award color={COLORS.warning} size={48} />
+          <Text style={[styles.emptyStateTitle, { color: colors.text }]}>
+            Certification Recommendations
+          </Text>
+          <Text style={[styles.emptyStateDescription, { color: colors.textSecondary }]}>
+            Generate AI-curated certification recommendations based on your target role and current skills.
+          </Text>
+          {error && (
+            <View style={[styles.errorBanner, { backgroundColor: `${COLORS.error}15` }]}>
+              <AlertTriangle color={COLORS.error} size={18} />
+              <Text style={[styles.errorBannerText, { color: COLORS.error }]}>{error}</Text>
+            </View>
+          )}
+          <TouchableOpacity
+            style={styles.generateButton}
+            onPress={loadCertifications}
+            activeOpacity={0.7}
+          >
+            <Sparkles color="#fff" size={20} />
+            <Text style={styles.generateButtonText}>Generate Recommendations</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -202,7 +284,14 @@ export default function CertificationsScreen() {
           <ArrowLeft color={colors.text} size={24} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Certifications</Text>
-        <View style={styles.headerPlaceholder} />
+        <TouchableOpacity
+          style={styles.refreshButton}
+          onPress={loadCertifications}
+          accessibilityRole="button"
+          accessibilityLabel="Regenerate certifications"
+        >
+          <RefreshCw color={COLORS.primary} size={20} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
@@ -544,8 +633,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: SPACING.md,
+    marginTop: SPACING.lg,
+    ...TYPOGRAPHY.headline,
+    textAlign: 'center',
+  },
+  loadingSubtext: {
+    marginTop: SPACING.sm,
     ...TYPOGRAPHY.subhead,
+    textAlign: 'center',
+  },
+  refreshButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xl,
+  },
+  emptyStateTitle: {
+    ...TYPOGRAPHY.headline,
+    textAlign: 'center',
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
+  },
+  emptyStateDescription: {
+    ...TYPOGRAPHY.subhead,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: SPACING.lg,
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    marginBottom: SPACING.lg,
+    width: '100%',
+  },
+  errorBannerText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+  },
+  generateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: RADIUS.lg,
+  },
+  generateButtonText: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+    color: '#fff',
   },
   introCard: {
     marginBottom: SPACING.lg,

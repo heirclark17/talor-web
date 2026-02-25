@@ -1469,7 +1469,21 @@ export const api = {
         body: JSON.stringify({ interview_prep_id: interviewPrepId }),
       });
       const data = await response.json();
-      return { success: response.ok, data };
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `Server error: ${response.status}`,
+        };
+      }
+
+      // Extract nested certifications data like web client does
+      const certData = data.certifications || data.data || data;
+
+      return {
+        success: true,
+        data: certData,
+      };
     } catch (error: any) {
       console.error('Error getting certification recommendations:', error);
       return { success: false, error: error.message };
