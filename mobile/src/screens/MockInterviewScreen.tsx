@@ -3,7 +3,7 @@
  * AI-powered interactive mock interviews
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -19,15 +19,41 @@ import { useNavigation } from '@react-navigation/native';
 import { Brain, Code, Briefcase, Play, ArrowLeft } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
+import { COLORS } from '../utils/constants';
+import { useTheme } from '../hooks/useTheme';
 
 type InterviewType = 'behavioral' | 'technical' | 'company-specific';
 
 export default function MockInterviewScreen() {
   const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
   const [showChat, setShowChat] = useState(false);
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [interviewType, setInterviewType] = useState<InterviewType>('behavioral');
+
+  const ds = useMemo(() => ({
+    container: { backgroundColor: colors.background },
+    title: { color: colors.text },
+    subtitle: { color: colors.textSecondary },
+    inputLabel: { color: colors.textSecondary },
+    textInput: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+      color: colors.text,
+    },
+    typeOption: {
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+    },
+    typeOptionTitle: { color: colors.text },
+    typeOptionDesc: { color: colors.textSecondary },
+    chatInput: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+      color: colors.text,
+    },
+  }), [colors, isDark]);
 
   const startInterview = () => {
     setShowChat(true);
@@ -39,25 +65,25 @@ export default function MockInterviewScreen() {
 
   if (showChat) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, ds.container]} edges={['top']}>
         <View style={styles.chatContainer}>
           <TouchableOpacity
             onPress={handleBackToSetup}
             style={styles.backButton}
           >
-            <ArrowLeft size={20} color="#FFF" />
-            <Text style={styles.backButtonText}>Back to Setup</Text>
+            <ArrowLeft size={20} color={colors.text} />
+            <Text style={[styles.backButtonText, { color: colors.text }]}>Back to Setup</Text>
           </TouchableOpacity>
 
           <GlassCard style={styles.chatCard}>
-            <Text style={styles.chatTitle}>Mock Interview</Text>
-            <Text style={styles.chatSubtitle}>
+            <Text style={[styles.chatTitle, { color: colors.text }]}>Mock Interview</Text>
+            <Text style={[styles.chatSubtitle, { color: colors.textSecondary }]}>
               {company} - {jobTitle}
             </Text>
 
             <View style={styles.chatMessages}>
               <View style={styles.messageAI}>
-                <Text style={styles.messageAIText}>
+                <Text style={[styles.messageAIText, { color: colors.text }]}>
                   Hello! I'm your AI interviewer. Let's begin with a question about your
                   background. Tell me about yourself and why you're interested in this
                   position at {company}.
@@ -68,8 +94,8 @@ export default function MockInterviewScreen() {
             <View style={styles.inputContainer}>
               <TextInput
                 placeholder="Type your response..."
-                placeholderTextColor="#9CA3AF"
-                style={styles.chatInput}
+                placeholderTextColor={colors.textTertiary}
+                style={[styles.chatInput, ds.chatInput]}
                 multiline
               />
               <GlassButton variant="primary" style={styles.sendButton}>
@@ -79,8 +105,8 @@ export default function MockInterviewScreen() {
           </GlassCard>
 
           <GlassCard style={styles.tipsCard}>
-            <Text style={styles.tipsTitle}>Interview Tips</Text>
-            <Text style={styles.tipsText}>
+            <Text style={[styles.tipsTitle, { color: colors.text }]}>Interview Tips</Text>
+            <Text style={[styles.tipsText, { color: colors.textSecondary }]}>
               • Use the STAR method (Situation, Task, Action, Result){'\n'}
               • Be specific and provide examples{'\n'}
               • Take your time to think before answering
@@ -92,7 +118,7 @@ export default function MockInterviewScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, ds.container]} edges={['top']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -104,8 +130,8 @@ export default function MockInterviewScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>AI Mock Interview</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, ds.title]}>AI Mock Interview</Text>
+            <Text style={[styles.subtitle, ds.subtitle]}>
               Practice your interview skills with an AI interviewer that adapts to your
               responses
             </Text>
@@ -113,56 +139,55 @@ export default function MockInterviewScreen() {
 
           {/* Setup Form */}
           <GlassCard style={styles.setupCard}>
-            <Text style={styles.setupTitle}>Interview Setup</Text>
+            <Text style={[styles.setupTitle, { color: colors.text }]}>Interview Setup</Text>
 
-            {/* Company Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Company Name</Text>
+              <Text style={[styles.inputLabel, ds.inputLabel]}>Company Name</Text>
               <TextInput
                 value={company}
                 onChangeText={setCompany}
                 placeholder="e.g., Google"
-                placeholderTextColor="#9CA3AF"
-                style={styles.textInput}
+                placeholderTextColor={colors.textTertiary}
+                style={[styles.textInput, ds.textInput]}
               />
             </View>
 
-            {/* Job Title Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Job Title</Text>
+              <Text style={[styles.inputLabel, ds.inputLabel]}>Job Title</Text>
               <TextInput
                 value={jobTitle}
                 onChangeText={setJobTitle}
                 placeholder="e.g., Senior Software Engineer"
-                placeholderTextColor="#9CA3AF"
-                style={styles.textInput}
+                placeholderTextColor={colors.textTertiary}
+                style={[styles.textInput, ds.textInput]}
               />
             </View>
 
-            {/* Interview Type Selection */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Interview Type</Text>
+              <Text style={[styles.inputLabel, ds.inputLabel]}>Interview Type</Text>
               <View style={styles.typeOptions}>
                 <TouchableOpacity
                   onPress={() => setInterviewType('behavioral')}
                   style={[
                     styles.typeOption,
+                    ds.typeOption,
                     interviewType === 'behavioral' && styles.typeOptionActive,
                   ]}
                 >
                   <Brain
                     size={32}
-                    color={interviewType === 'behavioral' ? '#3B82F6' : '#9CA3AF'}
+                    color={interviewType === 'behavioral' ? COLORS.primary : colors.textSecondary}
                   />
                   <Text
                     style={[
                       styles.typeOptionTitle,
+                      ds.typeOptionTitle,
                       interviewType === 'behavioral' && styles.typeOptionTitleActive,
                     ]}
                   >
                     Behavioral
                   </Text>
-                  <Text style={styles.typeOptionDesc}>
+                  <Text style={[styles.typeOptionDesc, ds.typeOptionDesc]}>
                     STAR method questions about past experiences
                   </Text>
                 </TouchableOpacity>
@@ -171,22 +196,24 @@ export default function MockInterviewScreen() {
                   onPress={() => setInterviewType('technical')}
                   style={[
                     styles.typeOption,
+                    ds.typeOption,
                     interviewType === 'technical' && styles.typeOptionActive,
                   ]}
                 >
                   <Code
                     size={32}
-                    color={interviewType === 'technical' ? '#10B981' : '#9CA3AF'}
+                    color={interviewType === 'technical' ? COLORS.success : colors.textSecondary}
                   />
                   <Text
                     style={[
                       styles.typeOptionTitle,
+                      ds.typeOptionTitle,
                       interviewType === 'technical' && styles.typeOptionTitleActive,
                     ]}
                   >
                     Technical
                   </Text>
-                  <Text style={styles.typeOptionDesc}>
+                  <Text style={[styles.typeOptionDesc, ds.typeOptionDesc]}>
                     Technical skills and problem-solving
                   </Text>
                 </TouchableOpacity>
@@ -195,30 +222,31 @@ export default function MockInterviewScreen() {
                   onPress={() => setInterviewType('company-specific')}
                   style={[
                     styles.typeOption,
+                    ds.typeOption,
                     interviewType === 'company-specific' && styles.typeOptionActive,
                   ]}
                 >
                   <Briefcase
                     size={32}
-                    color={interviewType === 'company-specific' ? '#8B5CF6' : '#9CA3AF'}
+                    color={interviewType === 'company-specific' ? COLORS.purple : colors.textSecondary}
                   />
                   <Text
                     style={[
                       styles.typeOptionTitle,
+                      ds.typeOptionTitle,
                       interviewType === 'company-specific' &&
                         styles.typeOptionTitleActive,
                     ]}
                   >
                     Company-Specific
                   </Text>
-                  <Text style={styles.typeOptionDesc}>
+                  <Text style={[styles.typeOptionDesc, ds.typeOptionDesc]}>
                     Company culture and values
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
 
-            {/* Start Button */}
             <GlassButton
               onPress={startInterview}
               disabled={!company.trim() || !jobTitle.trim()}
@@ -233,22 +261,28 @@ export default function MockInterviewScreen() {
           {/* Info Cards */}
           <View style={styles.infoCards}>
             <GlassCard style={styles.infoCard}>
-              <Text style={styles.infoCardTitle}>Adaptive Questions</Text>
-              <Text style={styles.infoCardText}>
+              <Text style={[styles.infoCardTitle, { color: colors.text }]}>
+                Adaptive Questions
+              </Text>
+              <Text style={[styles.infoCardText, { color: colors.textSecondary }]}>
                 AI interviewer adapts follow-up questions based on your answers
               </Text>
             </GlassCard>
 
             <GlassCard style={styles.infoCard}>
-              <Text style={styles.infoCardTitle}>Realistic Scenarios</Text>
-              <Text style={styles.infoCardText}>
+              <Text style={[styles.infoCardTitle, { color: colors.text }]}>
+                Realistic Scenarios
+              </Text>
+              <Text style={[styles.infoCardText, { color: colors.textSecondary }]}>
                 Practice with questions tailored to your role and industry
               </Text>
             </GlassCard>
 
             <GlassCard style={styles.infoCard}>
-              <Text style={styles.infoCardTitle}>Instant Feedback</Text>
-              <Text style={styles.infoCardText}>
+              <Text style={[styles.infoCardTitle, { color: colors.text }]}>
+                Instant Feedback
+              </Text>
+              <Text style={[styles.infoCardText, { color: colors.textSecondary }]}>
                 Get detailed feedback on your responses and areas to improve
               </Text>
             </GlassCard>
@@ -262,7 +296,6 @@ export default function MockInterviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   scrollView: {
     flex: 1,
@@ -277,13 +310,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFF',
     marginBottom: 12,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#9CA3AF',
     textAlign: 'center',
     lineHeight: 24,
     maxWidth: 320,
@@ -295,7 +326,6 @@ const styles = StyleSheet.create({
   setupTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFF',
     marginBottom: 20,
   },
   inputGroup: {
@@ -304,17 +334,13 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#9CA3AF',
     marginBottom: 8,
   },
   textInput: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: '#FFF',
     fontSize: 16,
   },
   typeOptions: {
@@ -324,27 +350,23 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
     alignItems: 'center',
   },
   typeOptionActive: {
-    borderColor: '#3B82F6',
+    borderColor: COLORS.primary,
     backgroundColor: 'rgba(59, 130, 246, 0.1)',
   },
   typeOptionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFF',
     marginTop: 8,
     marginBottom: 4,
   },
   typeOptionTitleActive: {
-    color: '#3B82F6',
+    color: COLORS.primary,
   },
   typeOptionDesc: {
     fontSize: 12,
-    color: '#9CA3AF',
     textAlign: 'center',
   },
   startButton: {
@@ -368,12 +390,10 @@ const styles = StyleSheet.create({
   infoCardTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFF',
     marginBottom: 8,
   },
   infoCardText: {
     fontSize: 14,
-    color: '#9CA3AF',
     lineHeight: 20,
   },
   chatContainer: {
@@ -388,7 +408,6 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   backButtonText: {
-    color: '#FFF',
     fontSize: 16,
   },
   chatCard: {
@@ -398,12 +417,10 @@ const styles = StyleSheet.create({
   chatTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFF',
     marginBottom: 4,
   },
   chatSubtitle: {
     fontSize: 14,
-    color: '#9CA3AF',
     marginBottom: 20,
   },
   chatMessages: {
@@ -418,7 +435,6 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   messageAIText: {
-    color: '#FFF',
     fontSize: 15,
     lineHeight: 22,
   },
@@ -426,13 +442,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   chatInput: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    color: '#FFF',
     fontSize: 15,
     minHeight: 100,
     textAlignVertical: 'top',
@@ -452,12 +465,10 @@ const styles = StyleSheet.create({
   tipsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFF',
     marginBottom: 8,
   },
   tipsText: {
     fontSize: 13,
-    color: '#9CA3AF',
     lineHeight: 20,
   },
 });

@@ -3,7 +3,7 @@
  * Display subscription tiers and features
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Check, Zap, Crown, Sparkles } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
+import { COLORS } from '../utils/constants';
+import { useTheme } from '../hooks/useTheme';
 
 interface PricingTier {
   id: string;
@@ -84,19 +86,34 @@ const pricingTiers: PricingTier[] = [
 ];
 
 export default function PricingScreen() {
+  const { colors, isDark } = useTheme();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annually'>(
     'monthly'
   );
 
+  const ds = useMemo(() => ({
+    container: { backgroundColor: colors.background },
+    title: { color: colors.text },
+    subtitle: { color: colors.textSecondary },
+    billingToggle: { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' },
+    billingOptionText: { color: colors.textSecondary },
+    tierName: { color: colors.text },
+    tierDescription: { color: colors.textSecondary },
+    price: { color: colors.text },
+    period: { color: colors.textSecondary },
+    featureText: { color: colors.text },
+    faqTitle: { color: colors.text },
+    faqQuestion: { color: colors.text },
+    faqAnswer: { color: colors.textSecondary },
+  }), [colors, isDark]);
+
   const handleSubscribe = (tierId: string) => {
-    // TODO: Implement subscription flow
     console.log('Subscribe to:', tierId);
-    // For now, link to web version
     Linking.openURL('https://yourapp.com/pricing');
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, ds.container]} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -104,14 +121,14 @@ export default function PricingScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Choose Your Plan</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, ds.title]}>Choose Your Plan</Text>
+          <Text style={[styles.subtitle, ds.subtitle]}>
             Unlock powerful features to accelerate your job search
           </Text>
         </View>
 
         {/* Billing Period Toggle */}
-        <View style={styles.billingToggle}>
+        <View style={[styles.billingToggle, ds.billingToggle]}>
           <TouchableOpacity
             onPress={() => setBillingPeriod('monthly')}
             style={[
@@ -122,6 +139,7 @@ export default function PricingScreen() {
             <Text
               style={[
                 styles.billingOptionText,
+                ds.billingOptionText,
                 billingPeriod === 'monthly' && styles.billingOptionTextActive,
               ]}
             >
@@ -138,6 +156,7 @@ export default function PricingScreen() {
             <Text
               style={[
                 styles.billingOptionText,
+                ds.billingOptionText,
                 billingPeriod === 'annually' && styles.billingOptionTextActive,
               ]}
             >
@@ -170,15 +189,17 @@ export default function PricingScreen() {
                 <View style={styles.cardHeader}>
                   <Icon
                     size={32}
-                    color={tier.highlighted ? '#3B82F6' : '#9CA3AF'}
+                    color={tier.highlighted ? colors.accent : colors.textSecondary}
                   />
-                  <Text style={styles.tierName}>{tier.name}</Text>
-                  <Text style={styles.tierDescription}>{tier.description}</Text>
+                  <Text style={[styles.tierName, ds.tierName]}>{tier.name}</Text>
+                  <Text style={[styles.tierDescription, ds.tierDescription]}>
+                    {tier.description}
+                  </Text>
                 </View>
 
                 <View style={styles.priceContainer}>
-                  <Text style={styles.price}>{tier.price}</Text>
-                  <Text style={styles.period}>
+                  <Text style={[styles.price, ds.price]}>{tier.price}</Text>
+                  <Text style={[styles.period, ds.period]}>
                     {tier.period === 'per month' && billingPeriod === 'annually'
                       ? 'per year'
                       : tier.period}
@@ -188,8 +209,8 @@ export default function PricingScreen() {
                 <View style={styles.features}>
                   {tier.features.map((feature, index) => (
                     <View key={index} style={styles.feature}>
-                      <Check size={18} color="#10B981" />
-                      <Text style={styles.featureText}>{feature}</Text>
+                      <Check size={18} color={COLORS.success} />
+                      <Text style={[styles.featureText, ds.featureText]}>{feature}</Text>
                     </View>
                   ))}
                 </View>
@@ -215,25 +236,27 @@ export default function PricingScreen() {
 
         {/* FAQ */}
         <GlassCard style={styles.faqCard}>
-          <Text style={styles.faqTitle}>Frequently Asked Questions</Text>
+          <Text style={[styles.faqTitle, ds.faqTitle]}>Frequently Asked Questions</Text>
 
           <View style={styles.faqItem}>
-            <Text style={styles.faqQuestion}>Can I cancel anytime?</Text>
-            <Text style={styles.faqAnswer}>
+            <Text style={[styles.faqQuestion, ds.faqQuestion]}>Can I cancel anytime?</Text>
+            <Text style={[styles.faqAnswer, ds.faqAnswer]}>
               Yes, you can cancel your subscription at any time. No questions asked.
             </Text>
           </View>
 
           <View style={styles.faqItem}>
-            <Text style={styles.faqQuestion}>What payment methods do you accept?</Text>
-            <Text style={styles.faqAnswer}>
+            <Text style={[styles.faqQuestion, ds.faqQuestion]}>
+              What payment methods do you accept?
+            </Text>
+            <Text style={[styles.faqAnswer, ds.faqAnswer]}>
               We accept all major credit cards, debit cards, and PayPal.
             </Text>
           </View>
 
           <View style={styles.faqItem}>
-            <Text style={styles.faqQuestion}>Is there a free trial?</Text>
-            <Text style={styles.faqAnswer}>
+            <Text style={[styles.faqQuestion, ds.faqQuestion]}>Is there a free trial?</Text>
+            <Text style={[styles.faqAnswer, ds.faqAnswer]}>
               Yes! Pro plan includes a 7-day free trial. No credit card required.
             </Text>
           </View>
@@ -246,7 +269,6 @@ export default function PricingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   scrollView: {
     flex: 1,
@@ -261,19 +283,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFF',
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#9CA3AF',
     textAlign: 'center',
     maxWidth: 320,
   },
   billingToggle: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     padding: 4,
     marginBottom: 24,
@@ -291,16 +310,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(59, 130, 246, 0.2)',
   },
   billingOptionText: {
-    color: '#9CA3AF',
     fontSize: 14,
     fontWeight: '500',
   },
   billingOptionTextActive: {
-    color: '#3B82F6',
+    color: COLORS.primary,
     fontWeight: '600',
   },
   saveBadge: {
-    backgroundColor: '#10B981',
+    backgroundColor: COLORS.success,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -320,14 +338,14 @@ const styles = StyleSheet.create({
   },
   pricingCardHighlighted: {
     borderWidth: 2,
-    borderColor: '#3B82F6',
+    borderColor: COLORS.primary,
   },
   popularBadge: {
     position: 'absolute',
     top: -12,
     left: '50%',
     transform: [{ translateX: -50 }],
-    backgroundColor: '#3B82F6',
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 16,
@@ -344,13 +362,11 @@ const styles = StyleSheet.create({
   tierName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFF',
     marginTop: 12,
     marginBottom: 8,
   },
   tierDescription: {
     fontSize: 14,
-    color: '#9CA3AF',
     textAlign: 'center',
   },
   priceContainer: {
@@ -360,11 +376,9 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#FFF',
   },
   period: {
     fontSize: 14,
-    color: '#9CA3AF',
     marginTop: 4,
   },
   features: {
@@ -379,7 +393,6 @@ const styles = StyleSheet.create({
   featureText: {
     flex: 1,
     fontSize: 14,
-    color: '#FFF',
   },
   subscribeButton: {},
   subscribeButtonText: {
@@ -396,7 +409,6 @@ const styles = StyleSheet.create({
   faqTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFF',
     marginBottom: 20,
   },
   faqItem: {
@@ -405,12 +417,10 @@ const styles = StyleSheet.create({
   faqQuestion: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFF',
     marginBottom: 8,
   },
   faqAnswer: {
     fontSize: 14,
-    color: '#9CA3AF',
     lineHeight: 20,
   },
 });

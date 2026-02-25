@@ -3,7 +3,7 @@
  * Browse and select resume templates
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,9 +17,11 @@ import { useNavigation } from '@react-navigation/native';
 import { FileText, Check, Eye } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
+import { COLORS } from '../utils/constants';
+import { useTheme } from '../hooks/useTheme';
 
 const { width } = Dimensions.get('window');
-const TEMPLATE_WIDTH = (width - 48) / 2; // 2 columns with padding
+const TEMPLATE_WIDTH = (width - 48) / 2;
 
 interface Template {
   id: string;
@@ -78,8 +80,26 @@ const categories = ['All', 'Classic', 'Contemporary', 'Tech', 'Design', 'Leaders
 
 export default function TemplatesScreen() {
   const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+
+  const ds = useMemo(() => ({
+    container: { backgroundColor: colors.background },
+    title: { color: colors.text },
+    subtitle: { color: colors.textSecondary },
+    headerBorder: { borderBottomColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' },
+    categoryChip: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+    },
+    categoryChipText: { color: colors.textSecondary },
+    templatePreview: { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' },
+    templateName: { color: colors.text },
+    templateCategory: { color: colors.textSecondary },
+    detailsTitle: { color: colors.text },
+    detailsDescription: { color: colors.textSecondary },
+  }), [colors, isDark]);
 
   const filteredTemplates =
     selectedCategory === 'All'
@@ -97,12 +117,12 @@ export default function TemplatesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, ds.container]} edges={['top']}>
       <View style={styles.content}>
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Resume Templates</Text>
-          <Text style={styles.subtitle}>
+        <View style={[styles.header, ds.headerBorder]}>
+          <Text style={[styles.title, ds.title]}>Resume Templates</Text>
+          <Text style={[styles.subtitle, ds.subtitle]}>
             Choose a professional template to get started
           </Text>
         </View>
@@ -120,12 +140,14 @@ export default function TemplatesScreen() {
               onPress={() => setSelectedCategory(category)}
               style={[
                 styles.categoryChip,
+                ds.categoryChip,
                 selectedCategory === category && styles.categoryChipActive,
               ]}
             >
               <Text
                 style={[
                   styles.categoryChipText,
+                  ds.categoryChipText,
                   selectedCategory === category && styles.categoryChipTextActive,
                 ]}
               >
@@ -156,22 +178,23 @@ export default function TemplatesScreen() {
                       isSelected && styles.templateCardSelected,
                     ]}
                   >
-                    {/* Template Preview */}
-                    <View style={styles.templatePreview}>
-                      <FileText size={64} color="#9CA3AF" />
+                    <View style={[styles.templatePreview, ds.templatePreview]}>
+                      <FileText size={64} color={colors.textSecondary} />
                     </View>
 
-                    {/* Selected Indicator */}
                     {isSelected && (
                       <View style={styles.selectedBadge}>
                         <Check size={16} color="#FFF" />
                       </View>
                     )}
 
-                    {/* Template Info */}
                     <View style={styles.templateInfo}>
-                      <Text style={styles.templateName}>{template.name}</Text>
-                      <Text style={styles.templateCategory}>{template.category}</Text>
+                      <Text style={[styles.templateName, ds.templateName]}>
+                        {template.name}
+                      </Text>
+                      <Text style={[styles.templateCategory, ds.templateCategory]}>
+                        {template.category}
+                      </Text>
                     </View>
                   </GlassCard>
                 </TouchableOpacity>
@@ -184,10 +207,10 @@ export default function TemplatesScreen() {
             <GlassCard style={styles.detailsCard}>
               {templates.find((t) => t.id === selectedTemplate) && (
                 <>
-                  <Text style={styles.detailsTitle}>
+                  <Text style={[styles.detailsTitle, ds.detailsTitle]}>
                     {templates.find((t) => t.id === selectedTemplate)!.name}
                   </Text>
-                  <Text style={styles.detailsDescription}>
+                  <Text style={[styles.detailsDescription, ds.detailsDescription]}>
                     {templates.find((t) => t.id === selectedTemplate)!.description}
                   </Text>
 
@@ -197,8 +220,10 @@ export default function TemplatesScreen() {
                       style={styles.detailsButton}
                       onPress={() => {}}
                     >
-                      <Eye size={18} color="#FFF" />
-                      <Text style={styles.detailsButtonText}>Preview</Text>
+                      <Eye size={18} color={colors.text} />
+                      <Text style={[styles.detailsButtonText, { color: colors.text }]}>
+                        Preview
+                      </Text>
                     </GlassButton>
 
                     <GlassButton
@@ -224,7 +249,6 @@ export default function TemplatesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   content: {
     flex: 1,
@@ -233,17 +257,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFF',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#9CA3AF',
   },
   categoryScroll: {
     maxHeight: 60,
@@ -256,23 +277,20 @@ const styles = StyleSheet.create({
   categoryChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 20,
     marginRight: 8,
   },
   categoryChipActive: {
     backgroundColor: 'rgba(59, 130, 246, 0.2)',
-    borderColor: '#3B82F6',
+    borderColor: COLORS.primary,
   },
   categoryChipText: {
-    color: '#9CA3AF',
     fontSize: 14,
     fontWeight: '500',
   },
   categoryChipTextActive: {
-    color: '#3B82F6',
+    color: COLORS.primary,
     fontWeight: '600',
   },
   templatesScroll: {
@@ -296,11 +314,10 @@ const styles = StyleSheet.create({
   },
   templateCardSelected: {
     borderWidth: 2,
-    borderColor: '#3B82F6',
+    borderColor: COLORS.primary,
   },
   templatePreview: {
     height: 200,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -310,7 +327,7 @@ const styles = StyleSheet.create({
     right: 8,
     width: 28,
     height: 28,
-    backgroundColor: '#3B82F6',
+    backgroundColor: COLORS.primary,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
@@ -321,12 +338,10 @@ const styles = StyleSheet.create({
   templateName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFF',
     marginBottom: 4,
   },
   templateCategory: {
     fontSize: 12,
-    color: '#9CA3AF',
   },
   detailsCard: {
     padding: 20,
@@ -334,12 +349,10 @@ const styles = StyleSheet.create({
   detailsTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFF',
     marginBottom: 8,
   },
   detailsDescription: {
     fontSize: 14,
-    color: '#9CA3AF',
     lineHeight: 20,
     marginBottom: 20,
   },
@@ -355,7 +368,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   detailsButtonText: {
-    color: '#FFF',
     fontSize: 14,
     fontWeight: '600',
   },

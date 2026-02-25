@@ -3,16 +3,29 @@
  * 404 error page with navigation options
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AlertCircle, Home, Search, FileText, MessageCircle } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
+import { COLORS } from '../utils/constants';
+import { useTheme } from '../hooks/useTheme';
 
 export default function NotFoundScreen() {
   const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
+
+  const ds = useMemo(() => ({
+    container: { backgroundColor: colors.background },
+    title: { color: colors.text },
+    description: { color: colors.textSecondary },
+    quickLinksTitle: { color: colors.text },
+    quickLinkTitle: { color: colors.text },
+    quickLinkDescription: { color: colors.textSecondary },
+    quickLinkIcon: { backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(59,130,246,0.08)' },
+  }), [colors, isDark]);
 
   const quickLinks = [
     {
@@ -42,20 +55,20 @@ export default function NotFoundScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, ds.container]} edges={['top']}>
       <View style={styles.content}>
         {/* Error Icon */}
         <View style={styles.iconContainer}>
           <View style={styles.iconCircle}>
-            <AlertCircle size={64} color="#EF4444" />
+            <AlertCircle size={64} color={COLORS.danger} />
           </View>
         </View>
 
         {/* Error Message */}
         <View style={styles.messageContainer}>
           <Text style={styles.errorCode}>404</Text>
-          <Text style={styles.title}>Page Not Found</Text>
-          <Text style={styles.description}>
+          <Text style={[styles.title, ds.title]}>Page Not Found</Text>
+          <Text style={[styles.description, ds.description]}>
             Sorry, we couldn't find the page you're looking for. It might have been
             moved or doesn't exist.
           </Text>
@@ -73,7 +86,7 @@ export default function NotFoundScreen() {
 
         {/* Quick Links */}
         <View style={styles.quickLinks}>
-          <Text style={styles.quickLinksTitle}>Quick Links</Text>
+          <Text style={[styles.quickLinksTitle, ds.quickLinksTitle]}>Quick Links</Text>
           {quickLinks.map((link, index) => {
             const Icon = link.icon;
             return (
@@ -82,12 +95,12 @@ export default function NotFoundScreen() {
                 style={styles.quickLinkCard}
                 onPress={link.action}
               >
-                <View style={styles.quickLinkIcon}>
-                  <Icon size={24} color="#3B82F6" />
+                <View style={[styles.quickLinkIcon, ds.quickLinkIcon]}>
+                  <Icon size={24} color={colors.accent} />
                 </View>
                 <View style={styles.quickLinkContent}>
-                  <Text style={styles.quickLinkTitle}>{link.title}</Text>
-                  <Text style={styles.quickLinkDescription}>
+                  <Text style={[styles.quickLinkTitle, ds.quickLinkTitle]}>{link.title}</Text>
+                  <Text style={[styles.quickLinkDescription, ds.quickLinkDescription]}>
                     {link.description}
                   </Text>
                 </View>
@@ -103,7 +116,6 @@ export default function NotFoundScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   content: {
     flex: 1,
@@ -131,19 +143,17 @@ const styles = StyleSheet.create({
   errorCode: {
     fontSize: 72,
     fontWeight: 'bold',
-    color: '#EF4444',
+    color: COLORS.danger,
     marginBottom: 16,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFF',
     marginBottom: 12,
     textAlign: 'center',
   },
   description: {
     fontSize: 16,
-    color: '#9CA3AF',
     textAlign: 'center',
     lineHeight: 24,
     maxWidth: 320,
@@ -166,7 +176,6 @@ const styles = StyleSheet.create({
   quickLinksTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFF',
     marginBottom: 8,
   },
   quickLinkCard: {
@@ -179,7 +188,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -189,11 +197,9 @@ const styles = StyleSheet.create({
   quickLinkTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFF',
     marginBottom: 4,
   },
   quickLinkDescription: {
     fontSize: 14,
-    color: '#9CA3AF',
   },
 });

@@ -3,7 +3,7 @@
  * Search for jobs and tailor resume with one click
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -32,6 +32,8 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
 import { GlassInput } from '../components/glass/GlassInput';
 import { tailorApi } from '../api';
+import { COLORS } from '../utils/constants';
+import { useTheme } from '../hooks/useTheme';
 
 interface JobPosting {
   id: string;
@@ -49,6 +51,7 @@ interface JobPosting {
 
 export default function JobSearchScreen() {
   const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -60,32 +63,43 @@ export default function JobSearchScreen() {
   const [remote, setRemote] = useState<boolean | undefined>(undefined);
   const [salaryMin, setSalaryMin] = useState<string>('');
 
+  const ds = useMemo(() => ({
+    container: { backgroundColor: colors.background },
+    title: { color: colors.text },
+    subtitle: { color: colors.textSecondary },
+    inputContainer: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+    },
+    input: { color: colors.text },
+    filterDivider: { borderTopColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' },
+    filterButton: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+    },
+    recentChip: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+    },
+    companyLogo: { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' },
+  }), [colors, isDark]);
+
   useEffect(() => {
-    // Load recent searches from storage
     loadRecentSearches();
   }, []);
 
   const loadRecentSearches = async () => {
-    // TODO: Load from AsyncStorage
     setRecentSearches([]);
   };
 
   const handleSearch = async () => {
-    if (!keywords.trim()) {
-      return;
-    }
-
+    if (!keywords.trim()) return;
     setLoading(true);
     try {
-      // TODO: Implement actual job search API
-      // For now, show empty results
       setJobs([]);
-
-      // Save to recent searches
       if (keywords.trim() && !recentSearches.includes(keywords.trim())) {
         const updated = [keywords.trim(), ...recentSearches.slice(0, 4)];
         setRecentSearches(updated);
-        // TODO: Save to AsyncStorage
       }
     } catch (error) {
       console.error('Job search failed:', error);
@@ -126,7 +140,7 @@ export default function JobSearchScreen() {
   ].filter(Boolean).length;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, ds.container]} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -134,8 +148,8 @@ export default function JobSearchScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Find Your Next Role</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, ds.title]}>Find Your Next Role</Text>
+          <Text style={[styles.subtitle, ds.subtitle]}>
             Search thousands of jobs and tailor your resume with one click
           </Text>
         </View>
@@ -143,35 +157,32 @@ export default function JobSearchScreen() {
         {/* Search Bar */}
         <GlassCard style={styles.searchCard}>
           <View style={styles.searchInputs}>
-            {/* Keywords Input */}
-            <View style={styles.inputContainer}>
-              <Search size={20} color="#9CA3AF" style={styles.inputIcon} />
+            <View style={[styles.inputContainer, ds.inputContainer]}>
+              <Search size={20} color={colors.textSecondary} style={styles.inputIcon} />
               <TextInput
                 value={keywords}
                 onChangeText={setKeywords}
                 onSubmitEditing={handleSearch}
                 placeholder="Job title, keywords, or company"
-                placeholderTextColor="#9CA3AF"
-                style={styles.input}
+                placeholderTextColor={colors.textTertiary}
+                style={[styles.input, ds.input]}
                 returnKeyType="search"
               />
             </View>
 
-            {/* Location Input */}
-            <View style={styles.inputContainer}>
-              <MapPin size={20} color="#9CA3AF" style={styles.inputIcon} />
+            <View style={[styles.inputContainer, ds.inputContainer]}>
+              <MapPin size={20} color={colors.textSecondary} style={styles.inputIcon} />
               <TextInput
                 value={location}
                 onChangeText={setLocation}
                 onSubmitEditing={handleSearch}
                 placeholder="City, state, or remote"
-                placeholderTextColor="#9CA3AF"
-                style={styles.input}
+                placeholderTextColor={colors.textTertiary}
+                style={[styles.input, ds.input]}
                 returnKeyType="search"
               />
             </View>
 
-            {/* Search Button */}
             <GlassButton
               onPress={handleSearch}
               disabled={loading}
@@ -190,13 +201,15 @@ export default function JobSearchScreen() {
           </View>
 
           {/* Filters Toggle */}
-          <View style={styles.filtersToggleRow}>
+          <View style={[styles.filtersToggleRow, ds.filterDivider]}>
             <TouchableOpacity
               onPress={() => setShowFilters(!showFilters)}
               style={styles.filtersToggle}
             >
-              <Filter size={16} color="#9CA3AF" />
-              <Text style={styles.filtersToggleText}>Advanced Filters</Text>
+              <Filter size={16} color={colors.textSecondary} />
+              <Text style={[styles.filtersToggleText, { color: colors.textSecondary }]}>
+                Advanced Filters
+              </Text>
               {activeFilterCount > 0 && (
                 <View style={styles.filterBadge}>
                   <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
@@ -206,67 +219,47 @@ export default function JobSearchScreen() {
 
             {activeFilterCount > 0 && (
               <TouchableOpacity onPress={clearFilters} style={styles.clearFilters}>
-                <X size={16} color="#9CA3AF" />
-                <Text style={styles.clearFiltersText}>Clear Filters</Text>
+                <X size={16} color={colors.textSecondary} />
+                <Text style={[styles.clearFiltersText, { color: colors.textSecondary }]}>
+                  Clear Filters
+                </Text>
               </TouchableOpacity>
             )}
           </View>
 
           {/* Advanced Filters */}
           {showFilters && (
-            <View style={styles.advancedFilters}>
-              {/* Remote Toggle */}
+            <View style={[styles.advancedFilters, ds.filterDivider]}>
               <View style={styles.filterGroup}>
-                <Text style={styles.filterLabel}>Work Location</Text>
+                <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>
+                  Work Location
+                </Text>
                 <View style={styles.filterButtons}>
-                  <TouchableOpacity
-                    onPress={() => setRemote(undefined)}
-                    style={[
-                      styles.filterButton,
-                      remote === undefined && styles.filterButtonActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.filterButtonText,
-                        remote === undefined && styles.filterButtonTextActive,
-                      ]}
-                    >
-                      Any
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => setRemote(true)}
-                    style={[
-                      styles.filterButton,
-                      remote === true && styles.filterButtonActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.filterButtonText,
-                        remote === true && styles.filterButtonTextActive,
-                      ]}
-                    >
-                      Remote
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => setRemote(false)}
-                    style={[
-                      styles.filterButton,
-                      remote === false && styles.filterButtonActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.filterButtonText,
-                        remote === false && styles.filterButtonTextActive,
-                      ]}
-                    >
-                      On-site
-                    </Text>
-                  </TouchableOpacity>
+                  {(['Any', 'Remote', 'On-site'] as const).map((label, i) => {
+                    const value = i === 0 ? undefined : i === 1 ? true : false;
+                    const isActive = remote === value;
+                    return (
+                      <TouchableOpacity
+                        key={label}
+                        onPress={() => setRemote(value)}
+                        style={[
+                          styles.filterButton,
+                          ds.filterButton,
+                          isActive && styles.filterButtonActive,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.filterButtonText,
+                            { color: colors.textSecondary },
+                            isActive && styles.filterButtonTextActive,
+                          ]}
+                        >
+                          {label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </View>
             </View>
@@ -276,16 +269,18 @@ export default function JobSearchScreen() {
         {/* Recent Searches */}
         {!jobs.length && recentSearches.length > 0 && (
           <View style={styles.recentSearches}>
-            <Text style={styles.recentSearchesTitle}>Recent Searches</Text>
+            <Text style={[styles.recentSearchesTitle, { color: colors.textSecondary }]}>
+              Recent Searches
+            </Text>
             <View style={styles.recentSearchesContainer}>
               {recentSearches.map((search, index) => (
                 <TouchableOpacity
                   key={index}
                   onPress={() => handleRecentSearch(search)}
-                  style={styles.recentSearchChip}
+                  style={[styles.recentSearchChip, ds.recentChip]}
                 >
-                  <Clock size={14} color="#9CA3AF" />
-                  <Text style={styles.recentSearchText}>{search}</Text>
+                  <Clock size={14} color={colors.textSecondary} />
+                  <Text style={[styles.recentSearchText, { color: colors.text }]}>{search}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -295,39 +290,46 @@ export default function JobSearchScreen() {
         {/* Search Results */}
         {jobs.length > 0 && (
           <View style={styles.results}>
-            <Text style={styles.resultsCount}>
+            <Text style={[styles.resultsCount, { color: colors.text }]}>
               {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
             </Text>
 
             {jobs.map((job) => (
               <GlassCard key={job.id} style={styles.jobCard}>
                 <View style={styles.jobHeader}>
-                  <View style={styles.companyLogo}>
-                    <Building2 size={24} color="#9CA3AF" />
+                  <View style={[styles.companyLogo, ds.companyLogo]}>
+                    <Building2 size={24} color={colors.textSecondary} />
                   </View>
                   <View style={styles.jobTitleContainer}>
-                    <Text style={styles.jobTitle}>{job.title}</Text>
-                    <Text style={styles.jobCompany}>{job.company}</Text>
+                    <Text style={[styles.jobTitle, { color: colors.text }]}>{job.title}</Text>
+                    <Text style={[styles.jobCompany, { color: colors.textSecondary }]}>
+                      {job.company}
+                    </Text>
                   </View>
                 </View>
 
                 <View style={styles.jobMeta}>
                   <View style={styles.jobMetaItem}>
-                    <MapPin size={14} color="#9CA3AF" />
-                    <Text style={styles.jobMetaText}>
+                    <MapPin size={14} color={colors.textSecondary} />
+                    <Text style={[styles.jobMetaText, { color: colors.textSecondary }]}>
                       {job.remote ? 'Remote' : job.location}
                       {job.hybrid && ' (Hybrid)'}
                     </Text>
                   </View>
                   {job.salary && (
                     <View style={styles.jobMetaItem}>
-                      <DollarSign size={14} color="#9CA3AF" />
-                      <Text style={styles.jobMetaText}>{job.salary}</Text>
+                      <DollarSign size={14} color={colors.textSecondary} />
+                      <Text style={[styles.jobMetaText, { color: colors.textSecondary }]}>
+                        {job.salary}
+                      </Text>
                     </View>
                   )}
                 </View>
 
-                <Text style={styles.jobDescription} numberOfLines={3}>
+                <Text
+                  style={[styles.jobDescription, { color: colors.textSecondary }]}
+                  numberOfLines={3}
+                >
                   {job.description}
                 </Text>
 
@@ -345,8 +347,8 @@ export default function JobSearchScreen() {
                     onPress={() => handleViewJob(job)}
                     style={styles.viewJobButton}
                   >
-                    <Text style={styles.viewJobText}>View Job</Text>
-                    <ExternalLink size={16} color="#3B82F6" />
+                    <Text style={[styles.viewJobText, { color: colors.accent }]}>View Job</Text>
+                    <ExternalLink size={16} color={colors.accent} />
                   </TouchableOpacity>
                 </View>
               </GlassCard>
@@ -357,9 +359,9 @@ export default function JobSearchScreen() {
         {/* Empty State */}
         {!loading && jobs.length === 0 && keywords && (
           <GlassCard style={styles.emptyState}>
-            <Briefcase size={48} color="#9CA3AF" />
-            <Text style={styles.emptyTitle}>No jobs found</Text>
-            <Text style={styles.emptyText}>
+            <Briefcase size={48} color={colors.textSecondary} />
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>No jobs found</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               Try adjusting your search filters or keywords
             </Text>
           </GlassCard>
@@ -372,7 +374,6 @@ export default function JobSearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   scrollView: {
     flex: 1,
@@ -387,13 +388,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFF',
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#9CA3AF',
     textAlign: 'center',
     maxWidth: 320,
   },
@@ -407,9 +406,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
     paddingHorizontal: 12,
   },
@@ -419,7 +416,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 48,
-    color: '#FFF',
     fontSize: 16,
   },
   searchButton: {
@@ -442,7 +438,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   filtersToggle: {
     flexDirection: 'row',
@@ -450,7 +445,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   filtersToggleText: {
-    color: '#9CA3AF',
     fontSize: 14,
   },
   filterBadge: {
@@ -460,7 +454,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   filterBadgeText: {
-    color: '#3B82F6',
+    color: COLORS.primary,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -470,14 +464,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   clearFiltersText: {
-    color: '#9CA3AF',
     fontSize: 14,
   },
   advancedFilters: {
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   filterGroup: {
     marginBottom: 16,
@@ -485,7 +477,6 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#9CA3AF',
     marginBottom: 8,
   },
   filterButtons: {
@@ -496,22 +487,19 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 8,
     alignItems: 'center',
   },
   filterButtonActive: {
     backgroundColor: 'rgba(59, 130, 246, 0.2)',
-    borderColor: '#3B82F6',
+    borderColor: COLORS.primary,
   },
   filterButtonText: {
-    color: '#9CA3AF',
     fontSize: 14,
   },
   filterButtonTextActive: {
-    color: '#3B82F6',
+    color: COLORS.primary,
     fontWeight: '600',
   },
   recentSearches: {
@@ -520,7 +508,6 @@ const styles = StyleSheet.create({
   recentSearchesTitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#9CA3AF',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 12,
@@ -536,13 +523,10 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 8,
   },
   recentSearchText: {
-    color: '#FFF',
     fontSize: 14,
   },
   results: {
@@ -551,7 +535,6 @@ const styles = StyleSheet.create({
   resultsCount: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFF',
     marginBottom: 8,
   },
   jobCard: {
@@ -565,7 +548,6 @@ const styles = StyleSheet.create({
   companyLogo: {
     width: 48,
     height: 48,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
@@ -577,12 +559,10 @@ const styles = StyleSheet.create({
   jobTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFF',
     marginBottom: 4,
   },
   jobCompany: {
     fontSize: 14,
-    color: '#9CA3AF',
     fontWeight: '500',
   },
   jobMeta: {
@@ -598,11 +578,9 @@ const styles = StyleSheet.create({
   },
   jobMetaText: {
     fontSize: 12,
-    color: '#9CA3AF',
   },
   jobDescription: {
     fontSize: 14,
-    color: '#9CA3AF',
     lineHeight: 20,
     marginBottom: 16,
   },
@@ -629,7 +607,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   viewJobText: {
-    color: '#3B82F6',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -641,13 +618,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFF',
     marginTop: 16,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: '#9CA3AF',
     textAlign: 'center',
   },
 });
