@@ -36,6 +36,7 @@ import MockInterviewScreen from '../screens/MockInterviewScreen';
 import ResumeBuilderScreen from '../screens/ResumeBuilderScreen';
 import TemplatesScreen from '../screens/TemplatesScreen';
 import PricingScreen from '../screens/PricingScreen';
+import PracticeHistoryScreen from '../screens/PracticeHistoryScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
 
 // Auth Stack param list
@@ -66,6 +67,7 @@ export type MainStackParamList = {
   Certifications: { interviewPrepId: number };
   STARStoryBuilder: { interviewPrepId: number; tailoredResumeId: number };
   MockInterview: undefined;
+  PracticeHistory: undefined;
 
   // Stories
   StoriesMain: undefined;
@@ -94,7 +96,7 @@ export type MainStackParamList = {
 // Legacy type exports for backwards compatibility
 export type HomeStackParamList = Pick<MainStackParamList, 'HomeMain' | 'UploadResume' | 'ResumeBuilder' | 'Templates'>;
 export type TailorStackParamList = Pick<MainStackParamList, 'TailorMain' | 'TailorResume' | 'BatchTailor'>;
-export type InterviewStackParamList = Pick<MainStackParamList, 'InterviewList' | 'InterviewPrep' | 'CommonQuestions' | 'PracticeQuestions' | 'BehavioralTechnicalQuestions' | 'Certifications' | 'STARStoryBuilder' | 'MockInterview'>;
+export type InterviewStackParamList = Pick<MainStackParamList, 'InterviewList' | 'InterviewPrep' | 'CommonQuestions' | 'PracticeQuestions' | 'BehavioralTechnicalQuestions' | 'Certifications' | 'STARStoryBuilder' | 'MockInterview' | 'PracticeHistory'>;
 export type StoriesStackParamList = Pick<MainStackParamList, 'StoriesMain'>;
 export type CareerStackParamList = Pick<MainStackParamList, 'CareerMain' | 'CoverLetters'>;
 export type SavedStackParamList = Pick<MainStackParamList, 'SavedMain' | 'Applications'>;
@@ -169,6 +171,7 @@ function MainStackNavigator() {
         <MainStack.Screen name="Certifications" component={CertificationsScreen} />
         <MainStack.Screen name="STARStoryBuilder" component={STARStoryBuilderScreen} />
         <MainStack.Screen name="MockInterview" component={MockInterviewScreen} />
+        <MainStack.Screen name="PracticeHistory" component={PracticeHistoryScreen} />
 
         {/* Stories */}
         <MainStack.Screen name="StoriesMain" component={StarStoriesScreen} />

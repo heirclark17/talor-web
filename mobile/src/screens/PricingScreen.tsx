@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Linking,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Check, Zap, Crown, Sparkles } from 'lucide-react-native';
@@ -108,8 +108,21 @@ export default function PricingScreen() {
   }), [colors, isDark]);
 
   const handleSubscribe = (tierId: string) => {
-    console.log('Subscribe to:', tierId);
-    Linking.openURL('https://yourapp.com/pricing');
+    if (tierId === 'free') {
+      Alert.alert('Free Plan', 'You are already on the Free plan. Start using the app!');
+      return;
+    }
+    if (tierId === 'enterprise') {
+      Alert.alert('Enterprise', 'Contact us at support@talor.app for enterprise pricing and custom solutions.');
+      return;
+    }
+    Alert.alert(
+      'Upgrade to Pro',
+      billingPeriod === 'annually'
+        ? 'Pro plan: $182/year ($15.20/mo). In-app purchases coming soon.'
+        : 'Pro plan: $19/month. In-app purchases coming soon.',
+      [{ text: 'OK' }]
+    );
   };
 
   return (

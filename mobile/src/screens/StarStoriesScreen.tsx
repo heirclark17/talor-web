@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
+  TextInput,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -13,7 +14,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { BookOpen, Trash2, X, Plus, ArrowLeft, BarChart3, Lightbulb, Copy, TrendingUp } from 'lucide-react-native';
+import { BookOpen, Trash2, X, Plus, ArrowLeft, BarChart3, Lightbulb, Copy, TrendingUp, Search } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
@@ -61,6 +62,44 @@ export default function StarStoriesScreen() {
   const [storyVariations, setStoryVariations] = useState<any>(null);
   const [generatingVariations, setGeneratingVariations] = useState(false);
   const [showVariationsModal, setShowVariationsModal] = useState(false);
+
+  // Search & Filter
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+
+  // Derive unique themes from all stories
+  const allThemes = useMemo(() => {
+    const themes = new Set<string>();
+    stories.forEach(s => {
+      if (s.key_themes) s.key_themes.forEach(t => themes.add(t));
+      if (s.story_theme) themes.add(s.story_theme);
+    });
+    return Array.from(themes).sort();
+  }, [stories]);
+
+  // Filtered stories
+  const filteredStories = useMemo(() => {
+    let result = stories;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(s =>
+        (s.title || '').toLowerCase().includes(q) ||
+        (s.story_theme || '').toLowerCase().includes(q) ||
+        (s.situation || '').toLowerCase().includes(q) ||
+        (s.task || '').toLowerCase().includes(q) ||
+        (s.action || '').toLowerCase().includes(q) ||
+        (s.result || '').toLowerCase().includes(q) ||
+        (s.key_themes || []).some(t => t.toLowerCase().includes(q))
+      );
+    }
+    if (selectedTheme) {
+      result = result.filter(s =>
+        s.story_theme === selectedTheme ||
+        (s.key_themes || []).includes(selectedTheme)
+      );
+    }
+    return result;
+  }, [stories, searchQuery, selectedTheme]);
 
   const loadStories = async () => {
     try {
@@ -336,8 +375,72 @@ export default function StarStoriesScreen() {
         )}
       </View>
 
+      {/* Search Bar */}
+      {stories.length > 0 && (
+        <View style={[styles.searchContainer, { borderBottomColor: colors.border }]}>
+          <View style={[styles.searchBar, { backgroundColor: colors.backgroundTertiary }]}>
+            <Search color={colors.textTertiary} size={18} />
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search stories..."
+              placeholderTextColor={colors.textTertiary}
+              style={[styles.searchInput, { color: colors.text }]}
+              returnKeyType="search"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <X color={colors.textTertiary} size={16} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Theme Filter Chips */}
+          {allThemes.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filterChipsContent}
+              style={styles.filterChips}
+            >
+              <TouchableOpacity
+                style={[
+                  styles.filterChip,
+                  { backgroundColor: colors.backgroundTertiary },
+                  !selectedTheme && { backgroundColor: COLORS.primary },
+                ]}
+                onPress={() => setSelectedTheme(null)}
+              >
+                <Text style={[
+                  styles.filterChipText,
+                  { color: colors.textSecondary },
+                  !selectedTheme && { color: '#fff' },
+                ]}>All</Text>
+              </TouchableOpacity>
+              {allThemes.map(theme => (
+                <TouchableOpacity
+                  key={theme}
+                  style={[
+                    styles.filterChip,
+                    { backgroundColor: colors.backgroundTertiary },
+                    selectedTheme === theme && { backgroundColor: COLORS.primary },
+                  ]}
+                  onPress={() => setSelectedTheme(selectedTheme === theme ? null : theme)}
+                >
+                  <Text style={[
+                    styles.filterChipText,
+                    { color: colors.textSecondary },
+                    selectedTheme === theme && { color: '#fff' },
+                  ]} numberOfLines={1}>{theme}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+      )}
+
       <FlatList
-        data={stories}
+        data={filteredStories}
         renderItem={renderStoryCard}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
@@ -791,6 +894,41 @@ export default function StarStoriesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    padding: 0,
+  },
+  filterChips: {
+    marginTop: 8,
+    maxHeight: 36,
+  },
+  filterChipsContent: {
+    gap: 8,
+    paddingRight: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  filterChipText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
   loadingContainer: {
     flex: 1,

@@ -2498,4 +2498,129 @@ export const api = {
       return { success: false, error: error.message };
     }
   },
+
+  // ─── MOCK INTERVIEW ─────────────────────────────────────────────
+  async mockInterviewChat(payload: {
+    company: string;
+    jobTitle: string;
+    interviewType: string;
+    messages: Array<{ role: string; content: string }>;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/interview-prep/mock-interview', {
+        method: 'POST',
+        body: JSON.stringify({
+          company: payload.company,
+          job_title: payload.jobTitle,
+          interview_type: payload.interviewType,
+          messages: payload.messages,
+        }),
+        timeout: 60000,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || data.error || `HTTP ${response.status}`,
+        };
+      }
+
+      return { success: true, data: data.data || data };
+    } catch (error: any) {
+      console.error('Error in mock interview:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // ─── RESUME BUILDER AI ──────────────────────────────────────────
+  async builderGenerateSummary(payload: {
+    jobTitle: string;
+    yearsExperience?: string;
+    highlights?: string[];
+    existingSkills?: string[];
+    tone?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/builder/generate-summary', {
+        method: 'POST',
+        body: JSON.stringify({
+          job_title: payload.jobTitle,
+          years_experience: payload.yearsExperience || '',
+          highlights: payload.highlights,
+          existing_skills: payload.existingSkills,
+          tone: payload.tone || 'professional',
+        }),
+        timeout: 30000,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { success: false, error: data.detail || data.error || `HTTP ${response.status}` };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error generating summary:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async builderEnhanceBullets(payload: {
+    jobTitle: string;
+    company: string;
+    bullets: string[];
+    mode?: string;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/builder/enhance-bullets', {
+        method: 'POST',
+        body: JSON.stringify({
+          job_title: payload.jobTitle,
+          company: payload.company,
+          bullets: payload.bullets,
+          mode: payload.mode || 'enhance',
+        }),
+        timeout: 30000,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { success: false, error: data.detail || data.error || `HTTP ${response.status}` };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error enhancing bullets:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async builderSuggestSkills(payload: {
+    jobTitle: string;
+    existingSkills?: string[];
+    experienceTitles?: string[];
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/builder/suggest-skills', {
+        method: 'POST',
+        body: JSON.stringify({
+          job_title: payload.jobTitle,
+          existing_skills: payload.existingSkills,
+          experience_titles: payload.experienceTitles,
+        }),
+        timeout: 30000,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { success: false, error: data.detail || data.error || `HTTP ${response.status}` };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error suggesting skills:', error);
+      return { success: false, error: error.message };
+    }
+  },
 };
