@@ -748,11 +748,13 @@ const styles = StyleSheet.create({
   },
   cardActions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     marginTop: SPACING.lg,
     gap: SPACING.sm,
   },
   actionButton: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: '30%',
   },
   emptyState: {
     flex: 1,
