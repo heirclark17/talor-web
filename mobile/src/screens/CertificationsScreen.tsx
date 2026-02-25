@@ -48,7 +48,7 @@ type LevelFilter = 'all' | 'entry' | 'mid' | 'advanced';
 export default function CertificationsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<CertificationsRouteProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { interviewPrepId } = route.params;
 
   // Get cached data from store
@@ -226,6 +226,7 @@ export default function CertificationsScreen() {
               key={level}
               style={[
                 styles.filterButton,
+                { backgroundColor: isDark ? ALPHA_COLORS.white[5] : ALPHA_COLORS.black[3] },
                 selectedLevel === level && styles.filterButtonActive,
                 selectedLevel === level && { backgroundColor: getLevelColor(level) },
               ]}
@@ -292,7 +293,7 @@ export default function CertificationsScreen() {
                   </View>
                   <View style={styles.certHeaderRight}>
                     <TouchableOpacity
-                      style={[styles.saveButton, isSaved && styles.saveButtonActive]}
+                      style={[styles.saveButton, { backgroundColor: isDark ? ALPHA_COLORS.white[5] : ALPHA_COLORS.black[3] }, isSaved && styles.saveButtonActive]}
                       onPress={(e) => {
                         e.stopPropagation();
                         toggleSaveCert(cert.name);
@@ -317,7 +318,7 @@ export default function CertificationsScreen() {
                 </TouchableOpacity>
 
                 {/* Quick Stats */}
-                <View style={styles.quickStats}>
+                <View style={[styles.quickStats, { borderTopColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10] }]}>
                   <View style={styles.statItem}>
                     <DollarSign color={COLORS.success} size={14} />
                     <Text style={[styles.statText, { color: colors.textSecondary }]}>{cert.cost}</Text>
@@ -573,7 +574,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.sm,
     borderRadius: RADIUS.md,
-    backgroundColor: ALPHA_COLORS.white[5],
+    // backgroundColor set dynamically for light/dark mode
     alignItems: 'center',
   },
   filterButtonActive: {
@@ -646,7 +647,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: ALPHA_COLORS.white[5],
+    // backgroundColor set dynamically for light/dark mode
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -659,7 +660,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: ALPHA_COLORS.white[10],
+    // borderTopColor set dynamically for light/dark mode
   },
   statItem: {
     flexDirection: 'row',

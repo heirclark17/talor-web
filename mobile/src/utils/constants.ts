@@ -355,7 +355,7 @@ export const GLASS = {
     if (isSelected) {
       return isDark ? 'rgba(150, 206, 180, 0.15)' : 'rgba(150, 206, 180, 0.12)';
     }
-    return isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
+    return isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)';
   },
 
   // Helper to get liquid glass border color based on theme
@@ -373,7 +373,7 @@ export const GLASS = {
     if (isSelected) {
       return isDark ? 'rgba(150, 206, 180, 0.4)' : 'rgba(150, 206, 180, 0.45)';
     }
-    return isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)';
+    return isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.08)';
   },
 
   // Helper to get blur intensity based on theme

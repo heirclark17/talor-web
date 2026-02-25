@@ -591,7 +591,7 @@ export default function STARStoryBuilderScreen() {
           {showGuide && (
             <View style={[styles.guideContent, { borderTopColor: colors.border }]}>
               {/* Situation Section */}
-              <View style={styles.guideSection}>
+              <View style={[styles.guideSection, { borderBottomColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10] }]}>
                 <TouchableOpacity
                   style={styles.guideSectionHeader}
                   onPress={() => toggleGuideSection('situation')}
@@ -622,7 +622,7 @@ export default function STARStoryBuilderScreen() {
 
                 {expandedGuideSections.has('situation') && (
                   <View style={styles.guideSectionContent}>
-                    <View style={styles.guideKeyQuestions}>
+                    <View style={[styles.guideKeyQuestions, { borderBottomColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10] }]}>
                       <Text style={[styles.guideKeyQuestionsText, { color: colors.text }]}>
                         {STAR_GUIDANCE.situation.keyQuestions}
                       </Text>
@@ -656,7 +656,7 @@ export default function STARStoryBuilderScreen() {
               </View>
 
               {/* Action Section */}
-              <View style={styles.guideSection}>
+              <View style={[styles.guideSection, { borderBottomColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10] }]}>
                 <TouchableOpacity
                   style={styles.guideSectionHeader}
                   onPress={() => toggleGuideSection('action')}
@@ -693,7 +693,7 @@ export default function STARStoryBuilderScreen() {
                       </Text>
                     </View>
 
-                    <View style={styles.guideKeyQuestions}>
+                    <View style={[styles.guideKeyQuestions, { borderBottomColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10] }]}>
                       <Text style={[styles.guideKeyQuestionsText, { color: colors.text }]}>
                         {STAR_GUIDANCE.action.keyQuestions}
                       </Text>
@@ -727,7 +727,7 @@ export default function STARStoryBuilderScreen() {
               </View>
 
               {/* Result Section */}
-              <View style={[styles.guideSection, { borderBottomWidth: 0 }]}>
+              <View style={[styles.guideSection, { borderBottomWidth: 0, borderBottomColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10] }]}>
                 <TouchableOpacity
                   style={styles.guideSectionHeader}
                   onPress={() => toggleGuideSection('result')}
@@ -1198,7 +1198,7 @@ export default function STARStoryBuilderScreen() {
                           ))}
                           <View style={styles.editButtons}>
                             <TouchableOpacity
-                              style={[styles.editButton, styles.cancelButton]}
+                              style={[styles.editButton, styles.cancelButton, { backgroundColor: isDark ? ALPHA_COLORS.white[5] : ALPHA_COLORS.black[3] }]}
                               onPress={cancelEditing}
                               accessibilityRole="button"
                               accessibilityLabel="Cancel editing"
@@ -1689,7 +1689,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
   },
   cancelButton: {
-    backgroundColor: ALPHA_COLORS.white[5],
+    // backgroundColor set dynamically for light/dark mode
   },
   editButtonText: {
     fontSize: 14,
@@ -1735,7 +1735,7 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.md,
     marginBottom: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: ALPHA_COLORS.white[10],
+    // borderBottomColor set dynamically for light/dark mode
   },
   guideSectionHeader: {
     flexDirection: 'row',
@@ -1779,7 +1779,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: ALPHA_COLORS.white[10],
+    // borderBottomColor set dynamically for light/dark mode
   },
   guideKeyQuestionsText: {
     fontSize: 13,

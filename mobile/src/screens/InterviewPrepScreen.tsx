@@ -143,7 +143,7 @@ const Chip: React.FC<{ label: string; color?: string }> = ({ label, color = COLO
 export default function InterviewPrepScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<InterviewPrepRouteProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { capture } = usePostHog();
   const { tailoredResumeId } = route.params;
 
@@ -906,7 +906,7 @@ export default function InterviewPrepScreen() {
                         </View>
                         <Text style={[styles.storyPromptDescription, { color: colors.textSecondary }]}>{prompt.description}</Text>
                         {prompt.star_hint && (
-                          <View style={styles.starHintContainer}>
+                          <View style={[styles.starHintContainer, { borderTopColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10] }]}>
                             <Text style={[styles.starHintLabel, { color: colors.textTertiary }]}>STAR Hint:</Text>
                             <View style={styles.starHintRow}>
                               <Text style={[styles.starLetter, { color: COLORS.success }]}>S</Text>
@@ -1651,7 +1651,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 12,
     borderRadius: RADIUS.full,
-    backgroundColor: ALPHA_COLORS.white[10],
+    // backgroundColor set dynamically for light/dark mode
     borderWidth: 1,
     overflow: 'hidden',
   },
@@ -1714,7 +1714,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: ALPHA_COLORS.white[5],
+    // borderBottomColor set dynamically for light/dark mode
   },
   valuesMatchHeader: {
     flexDirection: 'row',
@@ -1742,7 +1742,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: ALPHA_COLORS.white[5],
+    // borderBottomColor set dynamically for light/dark mode
   },
   valuesGapHeader: {
     flexDirection: 'row',
@@ -1989,7 +1989,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: ALPHA_COLORS.white[5],
+    // borderTopColor set dynamically for light/dark mode
   },
   strategicNewsSection: {
     marginBottom: SPACING.md,
@@ -2577,7 +2577,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: ALPHA_COLORS.white[10],
+    // borderTopColor set dynamically for light/dark mode
   },
   starHintLabel: {
     fontSize: 11,

@@ -132,7 +132,7 @@ export function GlassCard({
 
   const borderColor = isDark
     ? `rgba(255, 255, 255, ${opacity * 0.4})`
-    : `rgba(0, 0, 0, ${opacity * 0.15})`;
+    : `rgba(0, 0, 0, ${opacity * 0.3})`;
 
   // Liquid glass tint color
   const glassTint = tintColor || (isDark
