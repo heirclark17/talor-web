@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.screenMargin,
     paddingTop: 0,
     paddingBottom: SPACING.xs,
-    marginTop: -SPACING.sm,
+    marginTop: -SPACING.lg,
   },
   title: {
     ...TYPOGRAPHY.title3,
