@@ -8,132 +8,315 @@ import {
   RefreshControl,
   ActivityIndicator,
   SafeAreaView,
+  TextInput,
+  ScrollView,
+  Linking,
+  Modal,
+  Pressable,
+  Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {
+  Briefcase,
+  Plus,
+  Search,
+  MapPin,
+  DollarSign,
+  Calendar,
+  ExternalLink,
+  MoreHorizontal,
+  Bookmark,
+  ChevronDown,
+  X,
+} from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
 import { api } from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { SPACING, TYPOGRAPHY, GLASS, COLORS, FONTS } from '../utils/constants';
 import { GlassCard } from '../components/glass/GlassCard';
 import { ApplicationFormModal } from '../components/ApplicationFormModal';
 
+type ApplicationStatus = 'saved' | 'applied' | 'screening' | 'interviewing' | 'offer' | 'accepted' | 'rejected' | 'withdrawn' | 'no_response';
+
 interface Application {
   id: number;
   jobTitle: string;
   companyName: string;
-  status: string;
-  location?: string;
-  salaryMin?: number;
-  salaryMax?: number;
-  appliedDate?: string;
+  jobUrl?: string | null;
+  status: ApplicationStatus;
+  location?: string | null;
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  appliedDate?: string | null;
+  notes?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  tailoredResumeId?: number | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
-interface Stats {
-  saved: number;
-  applied: number;
-  screening: number;
-  interviewing: number;
-  offer: number;
-  accepted: number;
-  rejected: number;
-  withdrawn: number;
-  no_response: number;
+interface SavedJob {
+  id: number;
+  jobUrl: string;
+  company: string;
+  jobTitle: string;
+  location?: string;
+  salary?: string;
+  createdAt: string | null;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  saved: COLORS.warning,
-  applied: COLORS.info,
-  screening: COLORS.primary,
-  interviewing: COLORS.cyan,
-  offer: COLORS.success,
-  accepted: COLORS.success,
-  rejected: COLORS.error,
-  withdrawn: '#9ca3af',
-  no_response: '#6b7280',
+const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string; bg: string }> = {
+  saved: { label: 'Saved', color: '#9CA3AF', bg: 'rgba(107,114,128,0.2)' },
+  applied: { label: 'Applied', color: '#60A5FA', bg: 'rgba(59,130,246,0.2)' },
+  screening: { label: 'Screening', color: '#22D3EE', bg: 'rgba(6,182,212,0.2)' },
+  interviewing: { label: 'Interviewing', color: '#A78BFA', bg: 'rgba(139,92,246,0.2)' },
+  offer: { label: 'Offer', color: '#FBBF24', bg: 'rgba(245,158,11,0.2)' },
+  accepted: { label: 'Accepted', color: '#34D399', bg: 'rgba(16,185,129,0.2)' },
+  rejected: { label: 'Rejected', color: '#F87171', bg: 'rgba(239,68,68,0.2)' },
+  withdrawn: { label: 'Withdrawn', color: '#FB923C', bg: 'rgba(249,115,22,0.2)' },
+  no_response: { label: 'No Response', color: '#6B7280', bg: 'rgba(107,114,128,0.15)' },
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  saved: 'Saved',
-  applied: 'Applied',
-  screening: 'Screening',
-  interviewing: 'Interviewing',
-  offer: 'Offer',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
-  withdrawn: 'Withdrawn',
-  no_response: 'No Response',
-};
+const ALL_STATUSES: ApplicationStatus[] = ['saved', 'applied', 'screening', 'interviewing', 'offer', 'accepted', 'rejected', 'withdrawn', 'no_response'];
+const STATS_STATUSES: ApplicationStatus[] = ['applied', 'screening', 'interviewing', 'offer', 'accepted'];
 
-const PIPELINE_STAGES = [
-  { key: 'applied', label: 'Applied', color: COLORS.info },
-  { key: 'screening', label: 'Screen', color: COLORS.primary },
-  { key: 'interviewing', label: 'Interview', color: COLORS.cyan },
-  { key: 'offer', label: 'Offer', color: COLORS.success },
-  { key: 'accepted', label: 'Accepted', color: COLORS.success },
-];
-
-const getStageIndex = (status: string): number => {
-  const idx = PIPELINE_STAGES.findIndex(s => s.key === status);
-  return idx >= 0 ? idx : -1;
+const formatLocalDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 export default function ApplicationTrackerScreen() {
-  const navigation = useNavigation();
   const { colors, isDark } = useTheme();
   const [applications, setApplications] = useState<Application[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<ApplicationStatus | 'all'>('all');
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
 
   // Modal state
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [prefilledJob, setPrefilledJob] = useState<SavedJob | null>(null);
 
-  const loadData = useCallback(async () => {
+  // Status picker state
+  const [statusPickerVisible, setStatusPickerVisible] = useState(false);
+  const [statusPickerApp, setStatusPickerApp] = useState<Application | null>(null);
+
+  const loadApplications = useCallback(async () => {
     try {
-      const [appsResult, statsResult] = await Promise.all([
-        api.listApplications(selectedStatus || undefined),
-        api.getApplicationStats(),
-      ]);
-
-      if (appsResult.success) {
-        setApplications(appsResult.data);
-      }
-
-      if (statsResult.success) {
-        setStats(statsResult.data);
+      const res = await api.listApplications(filterStatus === 'all' ? undefined : filterStatus);
+      if (res.success) {
+        setApplications(res.data || []);
       }
     } catch (error) {
-      console.error('Error loading applications:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+      console.error('[ApplicationTracker] Load error:', error);
     }
-  }, [selectedStatus]);
+  }, [filterStatus]);
+
+  const loadStats = useCallback(async () => {
+    try {
+      const res = await api.getApplicationStats();
+      if (res.success) {
+        setStats(res.data || {});
+      }
+    } catch (error) {
+      console.error('[ApplicationTracker] Stats error:', error);
+    }
+  }, []);
+
+  const loadSavedJobs = useCallback(async () => {
+    try {
+      const res = await api.getSavedJobs();
+      if (res.success) {
+        setSavedJobs(res.data || []);
+      }
+    } catch (error) {
+      console.error('[ApplicationTracker] Saved jobs error:', error);
+    }
+  }, []);
+
+  const loadData = useCallback(async () => {
+    await Promise.all([loadApplications(), loadStats(), loadSavedJobs()]);
+    setLoading(false);
+    setRefreshing(false);
+  }, [loadApplications, loadStats, loadSavedJobs]);
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
+
+  useEffect(() => {
+    loadApplications();
+  }, [filterStatus]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     loadData();
   }, [loadData]);
 
-  const formatSalary = (min?: number, max?: number) => {
-    if (!min && !max) return null;
-    if (min && max) return `$${(min / 1000).toFixed(0)}k - $${(max / 1000).toFixed(0)}k`;
-    if (min) return `$${(min / 1000).toFixed(0)}k+`;
-    if (max) return `Up to $${(max / 1000).toFixed(0)}k`;
-    return null;
+  const handleStatusChange = async (appId: number, newStatus: ApplicationStatus) => {
+    const res = await api.updateApplication(appId, { status: newStatus });
+    if (res.success) {
+      setApplications(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus } : a));
+      loadStats();
+    }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const handleDelete = async (appId: number) => {
+    const res = await api.deleteApplication(appId);
+    if (res.success) {
+      setApplications(prev => prev.filter(a => a.id !== appId));
+      loadStats();
+    }
   };
+
+  const filtered = applications.filter(a => {
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return a.jobTitle.toLowerCase().includes(q) || a.companyName.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  const totalActive = (stats['applied'] || 0) + (stats['screening'] || 0) + (stats['interviewing'] || 0);
+
+  const renderStatsRow = () => (
+    <View style={styles.statsRow}>
+      {STATS_STATUSES.map(status => {
+        const config = STATUS_CONFIG[status];
+        const isSelected = filterStatus === status;
+        return (
+          <TouchableOpacity
+            key={status}
+            style={[
+              styles.statCard,
+              { backgroundColor: config.bg, borderColor: isSelected ? config.color : (isDark ? colors.glassBorder : 'transparent') },
+              isSelected && { borderWidth: 1.5 },
+            ]}
+            onPress={() => setFilterStatus(filterStatus === status ? 'all' : status)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.statCount, { color: config.color }]}>
+              {stats[status] || 0}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+              {config.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+
+  const renderSavedJobs = () => {
+    if (savedJobs.length === 0) return null;
+
+    return (
+      <View style={styles.savedJobsSection}>
+        <View style={styles.savedJobsHeader}>
+          <Bookmark color={colors.textSecondary} size={14} />
+          <Text style={[styles.savedJobsTitle, { color: colors.textSecondary }]}>
+            Quick Add from Saved Jobs
+          </Text>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.savedJobsScroll}
+        >
+          {savedJobs.map(job => (
+            <TouchableOpacity
+              key={job.id}
+              style={[
+                styles.savedJobCard,
+                {
+                  backgroundColor: colors.backgroundSecondary + '40',
+                  borderColor: isDark ? colors.glassBorder : 'transparent',
+                },
+              ]}
+              onPress={() => {
+                setPrefilledJob(job);
+                setSelectedApplication(null);
+                setModalVisible(true);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.savedJobCompany, { color: colors.text }]} numberOfLines={1}>
+                {job.company}
+              </Text>
+              <Text style={[styles.savedJobTitle, { color: colors.textSecondary }]} numberOfLines={1}>
+                {job.jobTitle}
+              </Text>
+              {job.location && (
+                <Text style={[styles.savedJobLocation, { color: colors.textTertiary }]} numberOfLines={1}>
+                  {job.location}
+                </Text>
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  };
+
+  const renderSearchAndFilter = () => (
+    <View style={styles.searchFilterRow}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.backgroundSecondary + '40', borderColor: isDark ? colors.glassBorder : 'transparent' }]}>
+        <Search color={colors.textTertiary} size={18} />
+        <TextInput
+          style={[styles.searchInput, { color: colors.text }]}
+          placeholder="Search by job title or company..."
+          placeholderTextColor={colors.textTertiary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCapitalize="none"
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <X color={colors.textTertiary} size={16} />
+          </TouchableOpacity>
+        )}
+      </View>
+      <TouchableOpacity
+        style={[
+          styles.filterButton,
+          {
+            backgroundColor: filterStatus !== 'all'
+              ? STATUS_CONFIG[filterStatus].bg
+              : colors.backgroundSecondary + '40',
+            borderColor: filterStatus !== 'all'
+              ? STATUS_CONFIG[filterStatus].color
+              : (isDark ? colors.glassBorder : 'transparent'),
+          },
+        ]}
+        onPress={() => {
+          // Cycle through statuses or show picker
+          const currentIndex = filterStatus === 'all' ? -1 : ALL_STATUSES.indexOf(filterStatus);
+          const nextIndex = currentIndex + 1;
+          setFilterStatus(nextIndex >= ALL_STATUSES.length ? 'all' : ALL_STATUSES[nextIndex]);
+        }}
+        onLongPress={() => setFilterStatus('all')}
+        activeOpacity={0.7}
+      >
+        <Text style={[
+          styles.filterButtonText,
+          {
+            color: filterStatus !== 'all'
+              ? STATUS_CONFIG[filterStatus].color
+              : colors.textSecondary,
+          },
+        ]}>
+          {filterStatus === 'all' ? 'All' : STATUS_CONFIG[filterStatus].label}
+        </Text>
+        <ChevronDown
+          color={filterStatus !== 'all' ? STATUS_CONFIG[filterStatus].color : colors.textSecondary}
+          size={14}
+        />
+      </TouchableOpacity>
+    </View>
+  );
 
   const renderApplicationCard = ({ item }: { item: Application }) => (
     <GlassCard style={styles.cardGlass}>
@@ -141,147 +324,151 @@ export default function ApplicationTrackerScreen() {
         style={styles.card}
         onPress={() => {
           setSelectedApplication(item);
+          setPrefilledJob(null);
           setModalVisible(true);
         }}
         activeOpacity={0.7}
       >
-        <View style={styles.cardHeader}>
-          <View style={styles.cardHeaderLeft}>
-            <Text style={[styles.jobTitle, { color: colors.text }]} numberOfLines={1}>
-              {item.jobTitle}
-            </Text>
+        <View style={styles.cardTop}>
+          <View style={styles.cardTopLeft}>
+            {/* Title + Status Badge */}
+            <View style={styles.titleRow}>
+              <Text style={[styles.jobTitle, { color: colors.text }]} numberOfLines={1}>
+                {item.jobTitle}
+              </Text>
+              <TouchableOpacity
+                style={[styles.statusBadge, { backgroundColor: STATUS_CONFIG[item.status]?.bg }]}
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  setStatusPickerApp(item);
+                  setStatusPickerVisible(true);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.statusText, { color: STATUS_CONFIG[item.status]?.color }]}>
+                  {STATUS_CONFIG[item.status]?.label}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {/* Company */}
             <Text style={[styles.companyName, { color: colors.textSecondary }]} numberOfLines={1}>
               {item.companyName}
             </Text>
+            {/* Details row */}
+            <View style={styles.detailsRow}>
+              {item.location && (
+                <View style={styles.detailItem}>
+                  <MapPin color={colors.textTertiary} size={12} />
+                  <Text style={[styles.detailText, { color: colors.textTertiary }]} numberOfLines={1}>
+                    {item.location}
+                  </Text>
+                </View>
+              )}
+              {item.salaryMin && (
+                <View style={styles.detailItem}>
+                  <DollarSign color={colors.textTertiary} size={12} />
+                  <Text style={[styles.detailText, { color: colors.textTertiary }]}>
+                    {item.salaryMin.toLocaleString()}{item.salaryMax ? ` - ${item.salaryMax.toLocaleString()}` : ''}
+                  </Text>
+                </View>
+              )}
+              {item.appliedDate && (
+                <View style={styles.detailItem}>
+                  <Calendar color={colors.textTertiary} size={12} />
+                  <Text style={[styles.detailText, { color: colors.textTertiary }]}>
+                    Applied {formatLocalDate(item.appliedDate)}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[item.status] + '20' }]}>
-            <Text style={[styles.statusText, { color: STATUS_COLORS[item.status] }]}>
-              {STATUS_LABELS[item.status]}
+
+          {/* Right actions */}
+          <View style={styles.cardActions}>
+            {item.jobUrl && (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => {
+                  if (item.jobUrl) Linking.openURL(item.jobUrl);
+                }}
+                activeOpacity={0.7}
+              >
+                <ExternalLink color={colors.textSecondary} size={16} />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => {
+                setSelectedApplication(item);
+                setPrefilledJob(null);
+                setModalVisible(true);
+              }}
+              activeOpacity={0.7}
+            >
+              <MoreHorizontal color={colors.textSecondary} size={16} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Notes */}
+        {item.notes && (
+          <View style={[styles.notesSection, { borderTopColor: isDark ? colors.glassBorder : colors.border }]}>
+            <Text style={[styles.notesText, { color: colors.textTertiary }]} numberOfLines={2}>
+              {item.notes}
             </Text>
           </View>
-        </View>
-
-        {(item.location || item.salaryMin || item.salaryMax) && (
-          <View style={styles.cardDetails}>
-            {item.location && (
-              <Text style={[styles.detailText, { color: colors.textSecondary }]}>📍 {item.location}</Text>
-            )}
-            {formatSalary(item.salaryMin, item.salaryMax) && (
-              <Text style={[styles.detailText, { color: colors.textSecondary }]}>💰 {formatSalary(item.salaryMin, item.salaryMax)}</Text>
-            )}
-          </View>
         )}
-
-        <View style={styles.cardFooter}>
-          <Text style={[styles.dateText, { color: colors.textTertiary }]}>
-            {item.appliedDate ? `Applied ${formatDate(item.appliedDate)}` : `Saved ${formatDate(item.createdAt)}`}
-          </Text>
-        </View>
-
-        {/* Status Progress Dots */}
-        <View style={[styles.progressDots, { borderTopColor: colors.textTertiary + '20' }]}>
-          {PIPELINE_STAGES.map((stage, index) => {
-            const currentIdx = getStageIndex(item.status);
-            const isCompleted = index <= currentIdx;
-            const isCurrent = index === currentIdx;
-            return (
-              <React.Fragment key={stage.key}>
-                {index > 0 && (
-                  <View style={[styles.progressLine, { backgroundColor: isCompleted ? stage.color : colors.textTertiary + '20' }]} />
-                )}
-                <View style={[
-                  styles.progressDot,
-                  isCompleted
-                    ? { backgroundColor: stage.color }
-                    : { backgroundColor: colors.textTertiary + '20' },
-                  isCurrent && styles.progressDotCurrent,
-                ]} />
-              </React.Fragment>
-            );
-          })}
-        </View>
       </TouchableOpacity>
     </GlassCard>
   );
 
-  const renderPipelineView = () => {
-    if (!stats) return null;
-
-    return (
-      <GlassCard style={styles.pipelineCard}>
-        <Text style={[styles.statsTitle, { color: colors.text }]}>Application Pipeline</Text>
-        <View style={styles.pipeline}>
-          {PIPELINE_STAGES.map((stage, index) => {
-            const count = (stats as any)[stage.key] || 0;
-            const isActive = count > 0;
-            return (
-              <React.Fragment key={stage.key}>
-                {index > 0 && (
-                  <View style={[styles.pipelineConnector, { backgroundColor: isActive ? stage.color : colors.textTertiary + '30' }]} />
-                )}
-                <View style={styles.pipelineStage}>
-                  <View style={[
-                    styles.pipelineCircle,
-                    isActive
-                      ? { backgroundColor: stage.color }
-                      : { backgroundColor: 'transparent', borderWidth: 2, borderColor: colors.textTertiary + '40' }
-                  ]}>
-                    <Text style={[
-                      styles.pipelineCount,
-                      { color: isActive ? '#ffffff' : colors.textTertiary }
-                    ]}>
-                      {count}
-                    </Text>
-                  </View>
-                  <Text style={[styles.pipelineLabel, { color: isActive ? colors.text : colors.textTertiary }]}>
-                    {stage.label}
-                  </Text>
-                </View>
-              </React.Fragment>
-            );
-          })}
-        </View>
-
-        {/* Summary row below pipeline */}
-        <View style={[styles.summaryRow, { borderTopColor: colors.textTertiary + '20' }]}>
-          <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
-            {stats.saved || 0} saved
-          </Text>
-          <Text style={[styles.summaryDot, { color: colors.textTertiary }]}>{'\u2022'}</Text>
-          <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
-            {stats.rejected || 0} rejected
-          </Text>
-          <Text style={[styles.summaryDot, { color: colors.textTertiary }]}>{'\u2022'}</Text>
-          <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
-            {stats.no_response || 0} no response
-          </Text>
-        </View>
-      </GlassCard>
-    );
-  };
-
-  const renderFilterChips = () => (
-    <View style={styles.filterContainer}>
-      <TouchableOpacity
-        style={[styles.filterChip, { backgroundColor: colors.backgroundSecondary + '40', borderColor: isDark ? GLASS.getBorderColor() : 'transparent' }, !selectedStatus && styles.filterChipActive]}
-        onPress={() => setSelectedStatus(null)}
-      >
-        <Text style={[styles.filterChipText, { color: colors.textSecondary }, !selectedStatus && styles.filterChipTextActive]}>
-          All
-        </Text>
-      </TouchableOpacity>
-      {Object.entries(STATUS_LABELS).map(([key, label]) => (
-        <TouchableOpacity
-          key={key}
-          style={[styles.filterChip, { backgroundColor: colors.backgroundSecondary + '40', borderColor: isDark ? GLASS.getBorderColor() : 'transparent' }, selectedStatus === key && styles.filterChipActive]}
-          onPress={() => setSelectedStatus(key)}
+  const renderStatusPicker = () => (
+    <Modal
+      visible={statusPickerVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setStatusPickerVisible(false)}
+    >
+      <Pressable style={styles.pickerOverlay} onPress={() => setStatusPickerVisible(false)}>
+        <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+      </Pressable>
+      <View style={styles.pickerContainer}>
+        <BlurView
+          intensity={GLASS.getBlurIntensity('strong')}
+          tint={isDark ? 'dark' : 'light'}
+          style={styles.pickerContent}
         >
-          <Text style={[styles.filterChipText, { color: colors.textSecondary }, selectedStatus === key && styles.filterChipTextActive]}>
-            {label}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
+          <View style={[styles.pickerInner, { borderColor: colors.glassBorder }]}>
+            <Text style={[styles.pickerTitle, { color: colors.text }]}>Change Status</Text>
+            {ALL_STATUSES.map(status => {
+              const config = STATUS_CONFIG[status];
+              const isCurrentStatus = statusPickerApp?.status === status;
+              return (
+                <TouchableOpacity
+                  key={status}
+                  style={[
+                    styles.pickerOption,
+                    isCurrentStatus && { backgroundColor: config.bg },
+                  ]}
+                  onPress={() => {
+                    if (statusPickerApp) {
+                      handleStatusChange(statusPickerApp.id, status);
+                    }
+                    setStatusPickerVisible(false);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.pickerDot, { backgroundColor: config.color }]} />
+                  <Text style={[styles.pickerOptionText, { color: isCurrentStatus ? config.color : colors.text }]}>
+                    {config.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </BlurView>
+      </View>
+    </Modal>
   );
 
   if (loading) {
@@ -296,21 +483,33 @@ export default function ApplicationTrackerScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Application Tracker</Text>
+        <View>
+          <View style={styles.headerTitleRow}>
+            <Briefcase color={colors.text} size={28} />
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Application Tracker</Text>
+          </View>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+            {totalActive} active application{totalActive !== 1 ? 's' : ''} in pipeline
+          </Text>
+        </View>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
             setSelectedApplication(null);
+            setPrefilledJob(null);
             setModalVisible(true);
           }}
+          activeOpacity={0.7}
         >
-          <Text style={styles.addButtonText}>+ Add</Text>
+          <Plus color="#ffffff" size={18} />
+          <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={applications}
+        data={filtered}
         renderItem={renderApplicationCard}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
@@ -319,32 +518,43 @@ export default function ApplicationTrackerScreen() {
         }
         ListHeaderComponent={
           <>
-            {renderPipelineView()}
-            {renderFilterChips()}
+            {renderStatsRow()}
+            {renderSavedJobs()}
+            {renderSearchAndFilter()}
           </>
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
+            <Briefcase color={colors.textTertiary} size={56} />
             <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>No applications yet</Text>
             <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
-              Start tracking your job applications by tapping the Add button above
+              Start tracking your job applications by tapping "Add" above
             </Text>
           </View>
         }
       />
 
+      {/* Status Picker Modal */}
+      {renderStatusPicker()}
+
+      {/* Add/Edit Modal */}
       <ApplicationFormModal
         visible={modalVisible}
         application={selectedApplication}
+        savedJobs={savedJobs}
+        prefilledJob={prefilledJob}
         onClose={() => {
           setModalVisible(false);
           setSelectedApplication(null);
+          setPrefilledJob(null);
         }}
         onSave={() => {
-          loadData();
+          loadApplications();
+          loadStats();
         }}
         onDelete={() => {
-          loadData();
+          loadApplications();
+          loadStats();
         }}
       />
     </SafeAreaView>
@@ -363,20 +573,33 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: SPACING.lg,
     marginTop: -SPACING.sm,
-    paddingBottom: SPACING.xs,
+    paddingBottom: SPACING.sm,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
   },
   headerTitle: {
-    fontSize: 34,
-    fontFamily: FONTS.semibold,
+    fontSize: 28,
+    fontFamily: FONTS.bold,
+  },
+  headerSubtitle: {
+    ...TYPOGRAPHY.body,
+    marginTop: 2,
+    marginLeft: 36,
   },
   addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
     backgroundColor: COLORS.primary,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    borderRadius: GLASS.getCornerRadius('small'),
+    borderRadius: GLASS.getCornerRadius('medium'),
     ...GLASS.getShadow('medium'),
   },
   addButtonText: {
@@ -385,161 +608,236 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: SPACING.md,
+    paddingBottom: SPACING.xl * 2,
   },
-  pipelineCard: {
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
-  },
-  statsTitle: {
-    ...TYPOGRAPHY.heading3,
-    marginBottom: SPACING.md,
-  },
-  pipeline: {
+
+  // Stats Row
+  statsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.md,
-  },
-  pipelineStage: {
-    alignItems: 'center',
-  },
-  pipelineCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pipelineCount: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  pipelineLabel: {
-    fontSize: 10,
-    fontWeight: '500',
-    marginTop: 4,
-  },
-  pipelineConnector: {
-    height: 2,
-    flex: 1,
-    marginHorizontal: 2,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-    paddingTop: SPACING.sm,
-    marginTop: SPACING.sm,
-    borderTopWidth: 1,
-  },
-  summaryText: {
-    fontSize: 12,
-  },
-  summaryDot: {
-    fontSize: 8,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: SPACING.sm,
     marginBottom: SPACING.lg,
   },
-  filterChip: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: GLASS.getCornerRadius('full'),
+  statCard: {
+    flex: 1,
+    borderRadius: GLASS.getCornerRadius('medium'),
+    padding: SPACING.sm,
     borderWidth: GLASS.getBorderWidth(),
-    borderColor: GLASS.getBorderColor(),
   },
-  filterChipActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+  statCount: {
+    fontSize: 22,
+    fontFamily: FONTS.bold,
   },
-  filterChipText: {
+  statLabel: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+
+  // Saved Jobs
+  savedJobsSection: {
+    marginBottom: SPACING.lg,
+  },
+  savedJobsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  savedJobsTitle: {
     ...TYPOGRAPHY.caption,
-  },
-  filterChipTextActive: {
-    color: '#ffffff',
     fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
+  savedJobsScroll: {
+    gap: SPACING.sm,
+  },
+  savedJobCard: {
+    minWidth: 200,
+    maxWidth: 260,
+    borderRadius: GLASS.getCornerRadius('medium'),
+    padding: SPACING.sm,
+    borderWidth: GLASS.getBorderWidth(),
+  },
+  savedJobCompany: {
+    ...TYPOGRAPHY.bodyBold,
+    fontSize: 13,
+  },
+  savedJobTitle: {
+    ...TYPOGRAPHY.caption,
+    marginTop: 2,
+  },
+  savedJobLocation: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+
+  // Search + Filter
+  searchFilterRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.lg,
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: GLASS.getCornerRadius('medium'),
+    borderWidth: GLASS.getBorderWidth(),
+    height: 44,
+  },
+  searchInput: {
+    flex: 1,
+    ...TYPOGRAPHY.body,
+    fontSize: 14,
+    paddingVertical: 0,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.md,
+    borderRadius: GLASS.getCornerRadius('medium'),
+    borderWidth: GLASS.getBorderWidth(),
+    height: 44,
+  },
+  filterButtonText: {
+    ...TYPOGRAPHY.bodyBold,
+    fontSize: 13,
+  },
+
+  // Application Cards
   cardGlass: {
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   card: {
-    padding: SPACING.lg,
+    padding: SPACING.md,
   },
-  cardHeader: {
+  cardTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: SPACING.sm,
+    gap: SPACING.sm,
   },
-  cardHeaderLeft: {
+  cardTopLeft: {
     flex: 1,
-    marginRight: SPACING.md,
+    minWidth: 0,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: 2,
   },
   jobTitle: {
-    ...TYPOGRAPHY.heading3,
-    marginBottom: SPACING.xs,
-  },
-  companyName: {
-    ...TYPOGRAPHY.body,
+    ...TYPOGRAPHY.bodyBold,
+    fontSize: 15,
+    flex: 1,
   },
   statusBadge: {
     paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: GLASS.getCornerRadius('small'),
+    paddingVertical: 2,
+    borderRadius: GLASS.getCornerRadius('full'),
   },
   statusText: {
-    ...TYPOGRAPHY.caption,
+    fontSize: 11,
     fontWeight: '600',
   },
-  cardDetails: {
-    marginBottom: SPACING.sm,
-  },
-  detailText: {
+  companyName: {
     ...TYPOGRAPHY.body,
+    fontSize: 14,
     marginBottom: SPACING.xs,
   },
-  cardFooter: {
-    borderTopWidth: GLASS.getBorderWidth(),
-    borderTopColor: GLASS.getBorderColor(),
-    paddingTop: SPACING.sm,
+  detailsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginTop: 4,
   },
-  dateText: {
-    ...TYPOGRAPHY.caption,
-  },
-  progressDots: {
+  detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 3,
+  },
+  detailText: {
+    fontSize: 12,
+  },
+  cardActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  actionButton: {
+    width: 34,
+    height: 34,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: GLASS.getCornerRadius('small'),
+  },
+  notesSection: {
     marginTop: SPACING.sm,
     paddingTop: SPACING.sm,
-    borderTopWidth: 1,
+    borderTopWidth: GLASS.getBorderWidth(),
   },
-  progressLine: {
-    height: 2,
+  notesText: {
+    ...TYPOGRAPHY.caption,
+    fontSize: 13,
+  },
+
+  // Status Picker Modal
+  pickerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  pickerContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.xl,
   },
-  progressDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  pickerContent: {
+    width: '100%',
+    maxWidth: 320,
+    borderRadius: GLASS.getCornerRadius('large'),
+    overflow: 'hidden',
   },
-  progressDotCurrent: {
+  pickerInner: {
+    padding: SPACING.lg,
+    borderWidth: GLASS.getBorderWidth(),
+    borderRadius: GLASS.getCornerRadius('large'),
+    gap: 4,
+  },
+  pickerTitle: {
+    ...TYPOGRAPHY.heading3,
+    marginBottom: SPACING.sm,
+  },
+  pickerOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: GLASS.getCornerRadius('small'),
+  },
+  pickerDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    borderWidth: 2,
-    borderColor: '#ffffff',
   },
+  pickerOptionText: {
+    ...TYPOGRAPHY.body,
+    fontSize: 15,
+  },
+
+  // Empty State
   emptyContainer: {
     alignItems: 'center',
-    paddingVertical: SPACING.xl * 2,
+    paddingVertical: SPACING.xl * 3,
+    gap: SPACING.md,
   },
   emptyTitle: {
-    ...TYPOGRAPHY.heading2,
-    marginBottom: SPACING.sm,
+    ...TYPOGRAPHY.heading3,
   },
   emptyText: {
     ...TYPOGRAPHY.body,

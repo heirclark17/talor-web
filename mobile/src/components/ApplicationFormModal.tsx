@@ -11,7 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { X, Save, Trash2 } from 'lucide-react-native';
+import { X, Save, Trash2, Bookmark, Check } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../utils/constants';
 import { api } from '../api';
@@ -43,9 +43,21 @@ interface ApplicationData {
   contactEmail?: string;
 }
 
+interface SavedJob {
+  id: number;
+  jobUrl: string;
+  company: string;
+  jobTitle: string;
+  location?: string;
+  salary?: string;
+  createdAt: string | null;
+}
+
 interface ApplicationFormModalProps {
   visible: boolean;
   application?: ApplicationData | null;
+  savedJobs?: SavedJob[];
+  prefilledJob?: SavedJob | null;
   onClose: () => void;
   onSave?: () => void;
   onDelete?: () => void;
@@ -54,6 +66,8 @@ interface ApplicationFormModalProps {
 export function ApplicationFormModal({
   visible,
   application,
+  savedJobs = [],
+  prefilledJob,
   onClose,
   onSave,
   onDelete,
@@ -61,6 +75,7 @@ export function ApplicationFormModal({
   const { colors, isDark } = useTheme();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [selectedSavedJobId, setSelectedSavedJobId] = useState<number | null>(null);
 
   // Form state
   const [jobTitle, setJobTitle] = useState('');
@@ -75,6 +90,14 @@ export function ApplicationFormModal({
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
 
+  const handleSelectSavedJob = (job: SavedJob) => {
+    setSelectedSavedJobId(job.id);
+    setJobTitle(job.jobTitle);
+    setCompanyName(job.company);
+    setJobUrl(job.jobUrl);
+    if (job.location) setLocation(job.location);
+  };
+
   useEffect(() => {
     if (application) {
       setJobTitle(application.jobTitle || '');
@@ -88,6 +111,20 @@ export function ApplicationFormModal({
       setAppliedDate(application.appliedDate || '');
       setContactName(application.contactName || '');
       setContactEmail(application.contactEmail || '');
+      setSelectedSavedJobId(null);
+    } else if (prefilledJob) {
+      setJobTitle(prefilledJob.jobTitle || '');
+      setCompanyName(prefilledJob.company || '');
+      setJobUrl(prefilledJob.jobUrl || '');
+      setStatus('saved');
+      setLocation(prefilledJob.location || '');
+      setSalaryMin('');
+      setSalaryMax('');
+      setNotes('');
+      setAppliedDate('');
+      setContactName('');
+      setContactEmail('');
+      setSelectedSavedJobId(prefilledJob.id);
     } else {
       // Reset form for new application
       setJobTitle('');
@@ -101,8 +138,9 @@ export function ApplicationFormModal({
       setAppliedDate('');
       setContactName('');
       setContactEmail('');
+      setSelectedSavedJobId(null);
     }
-  }, [application, visible]);
+  }, [application, prefilledJob, visible]);
 
   const handleSave = async () => {
     // Validation
@@ -207,6 +245,61 @@ export function ApplicationFormModal({
 
             {/* Form */}
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+              {/* Saved Jobs Selector - only show when adding new */}
+              {!application && savedJobs.length > 0 && (
+                <View style={styles.inputGroup}>
+                  <View style={styles.savedJobsLabelRow}>
+                    <Bookmark color={colors.textSecondary} size={14} />
+                    <Text style={[styles.inputLabel, { color: colors.textSecondary, marginBottom: 0 }]}>
+                      Fill from saved job
+                    </Text>
+                  </View>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.savedJobsScrollContent}
+                    style={styles.savedJobsScroll}
+                  >
+                    {savedJobs.map(job => (
+                      <TouchableOpacity
+                        key={job.id}
+                        style={[
+                          styles.savedJobChip,
+                          {
+                            backgroundColor: colors.backgroundSecondary,
+                            borderColor: selectedSavedJobId === job.id
+                              ? COLORS.primary
+                              : (isDark ? GLASS.getBorderColor() : 'transparent'),
+                          },
+                          selectedSavedJobId === job.id && {
+                            backgroundColor: COLORS.primary + '15',
+                          },
+                        ]}
+                        onPress={() => handleSelectSavedJob(job)}
+                      >
+                        <View style={styles.savedJobChipHeader}>
+                          {selectedSavedJobId === job.id && (
+                            <Check color={COLORS.primary} size={12} />
+                          )}
+                          <Text
+                            style={[styles.savedJobChipCompany, { color: colors.text }]}
+                            numberOfLines={1}
+                          >
+                            {job.company}
+                          </Text>
+                        </View>
+                        <Text
+                          style={[styles.savedJobChipTitle, { color: colors.textTertiary }]}
+                          numberOfLines={1}
+                        >
+                          {job.jobTitle}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
               <View style={styles.inputGroup}>
                 <Text style={[styles.inputLabel, { color: colors.text }]}>Job Title *</Text>
                 <TextInput
@@ -578,5 +671,40 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     ...TYPOGRAPHY.heading3,
+  },
+  savedJobsLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: SPACING.sm,
+  },
+  savedJobsScroll: {
+    marginHorizontal: -SPACING.sm,
+  },
+  savedJobsScrollContent: {
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+  },
+  savedJobChip: {
+    minWidth: 150,
+    maxWidth: 200,
+    borderRadius: GLASS.getCornerRadius('small'),
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    borderWidth: GLASS.getBorderWidth(),
+  },
+  savedJobChipHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  savedJobChipCompany: {
+    ...TYPOGRAPHY.bodyBold,
+    fontSize: 12,
+  },
+  savedJobChipTitle: {
+    ...TYPOGRAPHY.caption,
+    fontSize: 11,
+    marginTop: 2,
   },
 });
