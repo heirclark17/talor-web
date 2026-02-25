@@ -1624,9 +1624,10 @@ const styles = StyleSheet.create({
   // Empty/error state styles
   emptyStateContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xl,
   },
   emptyIconRow: {
     flexDirection: 'row',
