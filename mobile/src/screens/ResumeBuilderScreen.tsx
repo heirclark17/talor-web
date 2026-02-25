@@ -1018,7 +1018,7 @@ const styles = StyleSheet.create({
   progressContainer: {
     paddingHorizontal: SPACING.screenMargin,
     paddingTop: 0,
-    paddingBottom: 12,
+    paddingBottom: 20,
   },
   progressBar: {
     height: 4,
