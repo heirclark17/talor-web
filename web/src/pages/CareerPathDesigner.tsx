@@ -327,6 +327,48 @@ export default function CareerPathDesigner() {
   // Delete saved career plans
   const [deletingPlanId, setDeletingPlanId] = useState<number | null>(null)
   const [deletingAll, setDeletingAll] = useState(false)
+  const [selectedPlanIds, setSelectedPlanIds] = useState<Set<number>>(new Set())
+  const [deletingSelected, setDeletingSelected] = useState(false)
+
+  const togglePlanSelection = (id: number) => {
+    setSelectedPlanIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedPlanIds.size === savedPlans.length) {
+      setSelectedPlanIds(new Set())
+    } else {
+      setSelectedPlanIds(new Set(savedPlans.map(p => p.id)))
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedPlanIds.size === 0) return
+    if (!confirm(`Delete ${selectedPlanIds.size} selected career plan${selectedPlanIds.size > 1 ? 's' : ''}? This cannot be undone.`)) return
+
+    setDeletingSelected(true)
+    try {
+      const ids = Array.from(selectedPlanIds)
+      const results = await Promise.all(ids.map(id => api.deleteCareerPlan(id)))
+      const successIds = ids.filter((_, i) => results[i].success)
+      if (successIds.length > 0) {
+        setSavedPlans(prev => prev.filter(p => !successIds.includes(p.id)))
+        setSelectedPlanIds(new Set())
+      }
+      if (successIds.length < ids.length) {
+        setError(`Failed to delete ${ids.length - successIds.length} plan(s)`)
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete selected plans')
+    } finally {
+      setDeletingSelected(false)
+    }
+  }
 
   const handleDeleteAllPlans = async () => {
     if (!confirm(`Delete all ${savedPlans.length} saved career plans? This cannot be undone.`)) return
@@ -1100,27 +1142,76 @@ export default function CareerPathDesigner() {
                     <FolderOpen className="w-5 h-5 text-theme-muted" />
                     <h3 className="text-lg font-semibold text-theme">Your Saved Career Plans</h3>
                   </div>
-                  {savedPlans.length > 1 && (
-                    <button
-                      onClick={handleDeleteAllPlans}
-                      disabled={deletingAll}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-theme-secondary hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
-                    >
-                      {deletingAll ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-3.5 h-3.5" />
-                      )}
-                      Delete All
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {savedPlans.length > 1 && (
+                      <button
+                        onClick={toggleSelectAll}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-theme-secondary hover:text-theme hover:bg-theme-glass-10 transition-all"
+                      >
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                          selectedPlanIds.size === savedPlans.length
+                            ? 'bg-blue-500 border-blue-500'
+                            : selectedPlanIds.size > 0
+                              ? 'bg-blue-500/50 border-blue-500'
+                              : 'border-gray-500'
+                        }`}>
+                          {selectedPlanIds.size > 0 && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        {selectedPlanIds.size === savedPlans.length ? 'Deselect All' : 'Select All'}
+                      </button>
+                    )}
+                    {selectedPlanIds.size > 0 ? (
+                      <button
+                        onClick={handleDeleteSelected}
+                        disabled={deletingSelected}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-all disabled:opacity-50"
+                      >
+                        {deletingSelected ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                        Delete {selectedPlanIds.size}
+                      </button>
+                    ) : savedPlans.length > 1 && (
+                      <button
+                        onClick={handleDeleteAllPlans}
+                        disabled={deletingAll}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-theme-secondary hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
+                      >
+                        {deletingAll ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                        Delete All
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="glass rounded-2xl p-4 border border-theme-subtle space-y-3">
                   {savedPlans.slice(0, 5).map((savedPlan: any) => (
                     <div
                       key={savedPlan.id}
-                      className="w-full glass rounded-lg p-4 border border-theme-subtle hover:border-theme-muted transition-all flex items-center justify-between group"
+                      className={`w-full glass rounded-lg p-4 border transition-all flex items-center justify-between group ${
+                        selectedPlanIds.has(savedPlan.id)
+                          ? 'border-blue-500/50 bg-blue-500/5'
+                          : 'border-theme-subtle hover:border-theme-muted'
+                      }`}
                     >
+                      {/* Checkbox */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); togglePlanSelection(savedPlan.id) }}
+                        className="p-1 mr-2 shrink-0"
+                      >
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                          selectedPlanIds.has(savedPlan.id)
+                            ? 'bg-blue-500 border-blue-500'
+                            : 'border-gray-500 hover:border-gray-400'
+                        }`}>
+                          {selectedPlanIds.has(savedPlan.id) && <Check className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                      </button>
                       <button
                         onClick={() => handleLoadSavedPlan(savedPlan.id)}
                         disabled={loading || deletingPlanId === savedPlan.id}
