@@ -924,7 +924,7 @@ export default function ResumeBuilderScreen() {
                     isActive && styles.sectionTabActive,
                   ]}
                 >
-                  <Icon size={20} color={isActive ? colors.accent : colors.textSecondary} />
+                  <Icon size={16} color={isActive ? colors.accent : colors.textSecondary} />
                   <Text
                     style={[
                       styles.sectionTabText,
@@ -1045,18 +1045,18 @@ const styles = StyleSheet.create({
   sectionTab: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderWidth: 1,
-    borderRadius: 20,
+    borderRadius: 16,
   },
   sectionTabActive: {
     backgroundColor: 'rgba(59, 130, 246, 0.1)',
     borderColor: COLORS.primary,
   },
   sectionTabText: {
-    ...TYPOGRAPHY.subhead,
+    ...TYPOGRAPHY.caption1,
   },
   sectionTabTextActive: {
     color: COLORS.primary,
