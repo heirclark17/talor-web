@@ -18,7 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FileText, Check, Eye } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
-import { COLORS } from '../utils/constants';
+import { COLORS, TYPOGRAPHY } from '../utils/constants';
 import { useTheme } from '../hooks/useTheme';
 
 const { width } = Dimensions.get('window');
@@ -264,12 +264,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.title1,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    ...TYPOGRAPHY.callout,
   },
   categoryScroll: {
     maxHeight: 60,
@@ -291,12 +290,12 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
   categoryChipText: {
+    ...TYPOGRAPHY.subhead,
     fontSize: 14,
-    fontWeight: '500',
   },
   categoryChipTextActive: {
     color: COLORS.primary,
-    fontWeight: '600',
+    fontFamily: TYPOGRAPHY.headline.fontFamily,
   },
   templatesScroll: {
     flex: 1,
@@ -346,24 +345,22 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   templateName: {
-    fontSize: 16,
-    fontWeight: '600',
+    ...TYPOGRAPHY.h6,
     marginBottom: 4,
   },
   templateCategory: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption1,
   },
   detailsCard: {
     padding: 20,
   },
   detailsTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.title3,
     marginBottom: 8,
   },
   detailsDescription: {
+    ...TYPOGRAPHY.subhead,
     fontSize: 14,
-    lineHeight: 20,
     marginBottom: 20,
   },
   detailsActions: {
@@ -378,12 +375,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   detailsButtonText: {
+    ...TYPOGRAPHY.subhead,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: TYPOGRAPHY.headline.fontFamily,
   },
   detailsButtonTextPrimary: {
-    color: '#FFF',
+    ...TYPOGRAPHY.subhead,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: TYPOGRAPHY.headline.fontFamily,
+    color: '#FFF',
   },
 });
