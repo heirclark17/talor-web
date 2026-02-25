@@ -22,6 +22,7 @@ import {
   Sparkles,
   FileEdit,
   Bookmark,
+  ClipboardCheck,
   TrendingUp,
   CreditCard,
   Settings,
@@ -72,6 +73,7 @@ export function AppHeader() {
         { to: '/upload', screen: 'UploadResume', stack: 'Home', icon: Upload, label: 'Upload', desc: 'Upload a new base resume', iconColor: '#10B981' },
         { to: '/tailor', screen: 'TailorMain', stack: 'Tailor', icon: Target, label: 'Tailor', desc: 'Customize for a specific job', iconColor: '#FB7185' },
         { to: '/batch-tailor', screen: 'BatchTailor', stack: 'Tailor', icon: Layers, label: 'Batch Tailor', desc: 'Tailor for multiple jobs at once', iconColor: '#8B5CF6' },
+        { to: '/tailored-resumes', screen: 'TailoredResumes', stack: 'Tailor', icon: ClipboardCheck, label: 'My Tailored Resumes', desc: 'View all tailored resumes', iconColor: '#EC4899' },
       ],
     },
     {

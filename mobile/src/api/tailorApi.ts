@@ -236,15 +236,76 @@ export async function deleteSavedJob(jobId: number): Promise<ApiResponse<void>> 
   }
 }
 
+/**
+ * List all tailored resumes (calls /api/tailor/list)
+ */
+export async function listTailoredResumes(): Promise<ApiResponse<TailoredResume[]>> {
+  try {
+    const response = await fetchWithAuth('/api/tailor/list');
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.error || data.detail || `Server error: ${response.status}`,
+      };
+    }
+
+    // Backend returns { tailored_resumes: [...] }
+    const list = data.tailored_resumes || data.tailoredResumes || [];
+    return { success: true, data: list.map((item: any) => snakeToCamel<TailoredResume>(item)) };
+  } catch (error) {
+    console.error('Error listing tailored resumes:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Delete a single tailored resume
+ */
+export async function deleteTailoredResume(id: number): Promise<ApiResponse<void>> {
+  try {
+    const response = await fetchWithAuth(`/api/tailor/tailored/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (response.status === 204) {
+      return { success: true };
+    }
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, error: data.error || data.detail || `Server error: ${response.status}` };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting tailored resume:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+/**
+ * Bulk delete tailored resumes
+ */
+export async function bulkDeleteTailoredResumes(ids: number[]): Promise<ApiResponse<{ deletedCount: number }>> {
+  return post<{ deletedCount: number }>('/api/tailor/tailored/bulk-delete', { ids });
+}
+
 export const tailorApi = {
   extractJobDetails,
   tailorResume,
   getTailoredResume,
   getTailoredResumes,
+  listTailoredResumes,
   tailorResumeBatch,
   getKeywordAnalysis,
   updateTailoredResume,
   exportTailoredResume,
+  deleteTailoredResume,
+  bulkDeleteTailoredResumes,
   getSavedJobs,
   saveJob,
   deleteSavedJob,

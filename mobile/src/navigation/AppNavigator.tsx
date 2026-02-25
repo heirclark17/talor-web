@@ -26,6 +26,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import StarStoriesScreen from '../screens/StarStoriesScreen';
 import CareerPathDesignerScreen from '../screens/CareerPathDesignerScreen';
 import BatchTailorScreen from '../screens/BatchTailorScreen';
+import TailoredResumesScreen from '../screens/TailoredResumesScreen';
 import CertificationsScreen from '../screens/CertificationsScreen';
 import STARStoryBuilderScreen from '../screens/STARStoryBuilderScreen';
 import CoverLetterGeneratorScreen from '../screens/CoverLetterGeneratorScreen';
@@ -61,6 +62,7 @@ export type MainStackParamList = {
   TailorMain: undefined;
   TailorResume: { resumeId?: number };
   BatchTailor: undefined;
+  TailoredResumes: undefined;
 
   // Interview
   InterviewList: undefined;
@@ -99,7 +101,7 @@ export type MainStackParamList = {
 
 // Legacy type exports for backwards compatibility
 export type HomeStackParamList = Pick<MainStackParamList, 'HomeMain' | 'UploadResume' | 'ResumeBuilder' | 'Templates'>;
-export type TailorStackParamList = Pick<MainStackParamList, 'TailorMain' | 'TailorResume' | 'BatchTailor'>;
+export type TailorStackParamList = Pick<MainStackParamList, 'TailorMain' | 'TailorResume' | 'BatchTailor' | 'TailoredResumes'>;
 export type InterviewStackParamList = Pick<MainStackParamList, 'InterviewList' | 'InterviewPrep' | 'CommonQuestions' | 'PracticeQuestions' | 'BehavioralTechnicalQuestions' | 'Certifications' | 'STARStoryBuilder' | 'MockInterview' | 'PracticeHistory'>;
 export type StoriesStackParamList = Pick<MainStackParamList, 'StoriesMain'>;
 export type CareerStackParamList = Pick<MainStackParamList, 'CareerMain' | 'CoverLetters'>;
@@ -171,6 +173,7 @@ function MainStackNavigator() {
         <MainStack.Screen name="TailorMain" component={TailorResumeScreen} />
         <MainStack.Screen name="TailorResume" component={TailorResumeScreen} />
         <MainStack.Screen name="BatchTailor" component={BatchTailorScreen} />
+        <MainStack.Screen name="TailoredResumes" component={TailoredResumesScreen} />
 
         {/* Interview */}
         <MainStack.Screen name="InterviewList" component={InterviewPrepListScreen} />

@@ -61,7 +61,10 @@ export const api = {
   tailorResume: tailorApi.tailorResume,
   getTailoredResume: tailorApi.getTailoredResume,
   getTailoredResumes: tailorApi.getTailoredResumes,
+  listTailoredResumes: tailorApi.listTailoredResumes,
   tailorResumeBatch: tailorApi.tailorResumeBatch,
+  deleteTailoredResume: tailorApi.deleteTailoredResume,
+  bulkDeleteTailoredResumes: tailorApi.bulkDeleteTailoredResumes,
 
   // Interview prep endpoints
   getInterviewPreps: interviewApi.getInterviewPreps,
