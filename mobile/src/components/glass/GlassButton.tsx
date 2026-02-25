@@ -131,7 +131,7 @@ export function GlassButton({
       case 'secondary':
         return {
           bg: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[5],
-          border: isDark ? ALPHA_COLORS.white[15] : ALPHA_COLORS.black[10],
+          border: isDark ? ALPHA_COLORS.white[15] : 'transparent',
           text: colors.text,
           blurTint: isDark ? 'dark' : 'light',
           tintColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[5],
