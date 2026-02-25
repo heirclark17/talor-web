@@ -1071,7 +1071,7 @@ const styles = StyleSheet.create({
     paddingBottom: 64,
   },
   formCard: {
-    padding: 20,
+    padding: 14,
   },
   formSection: {
     gap: 32,
