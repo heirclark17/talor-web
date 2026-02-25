@@ -1073,7 +1073,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   formSection: {
-    gap: 16,
+    gap: 28,
   },
   sectionHeader: {
     flexDirection: 'row',
