@@ -367,8 +367,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.screenMargin,
-    paddingVertical: SPACING.xs,
-    marginBottom: SPACING.xs,
+    paddingTop: SPACING.xs,
+    paddingBottom: 0,
   },
   closeButton: {
     width: SPACING.touchTarget,
@@ -381,6 +381,7 @@ const styles = StyleSheet.create({
   },
   uploadArea: {
     marginHorizontal: SPACING.screenMargin,
+    marginTop: SPACING.sm,
     marginBottom: SPACING.sectionGap,
   },
   dropZone: {
