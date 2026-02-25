@@ -330,8 +330,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.screenMargin,
-    paddingTop: SPACING.xs,
-    paddingBottom: SPACING.sm,
+    paddingTop: 0,
+    paddingBottom: SPACING.xs,
+    marginTop: -SPACING.sm,
   },
   title: {
     ...TYPOGRAPHY.title3,
@@ -339,8 +340,8 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     paddingHorizontal: SPACING.screenMargin,
-    paddingTop: SPACING.xs,
-    paddingBottom: SPACING.sm,
+    paddingTop: 0,
+    paddingBottom: SPACING.xs,
   },
   progressBar: {
     height: 4,
