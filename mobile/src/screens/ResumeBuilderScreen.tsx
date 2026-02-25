@@ -457,9 +457,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.screenMargin,
-    paddingTop: SPACING.xs,
+    paddingTop: 0,
     paddingBottom: SPACING.md,
-    marginTop: -SPACING.md,
+    marginTop: -SPACING.xl,
     gap: 12,
   },
   navButton: {
