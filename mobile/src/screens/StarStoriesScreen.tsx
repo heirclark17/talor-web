@@ -63,6 +63,11 @@ export default function StarStoriesScreen() {
   const [generatingVariations, setGeneratingVariations] = useState(false);
   const [showVariationsModal, setShowVariationsModal] = useState(false);
 
+  // AI Generation
+  const [showAIInputModal, setShowAIInputModal] = useState(false);
+  const [aiExperienceText, setAIExperienceText] = useState('');
+  const [aiGenerating, setAIGenerating] = useState(false);
+
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
@@ -198,15 +203,51 @@ export default function StarStoriesScreen() {
   };
 
   const handleGenerateAI = async (title: string) => {
-    // AI generation requires a tailored resume context
-    // For standalone STAR story creation, return null to indicate
-    // that the user should manually fill in the story details
-    console.log('AI STAR story generation requested for:', title);
-    Alert.alert(
-      'Manual Entry Required',
-      'Please fill in your STAR story details manually. AI-assisted generation is available when creating stories from your tailored resume context.'
-    );
+    setShowAIInputModal(true);
     return null;
+  };
+
+  const handleAIGenerate = async () => {
+    if (!aiExperienceText.trim()) {
+      Alert.alert('Input Required', 'Please describe your experience or accomplishment.');
+      return;
+    }
+
+    setAIGenerating(true);
+    try {
+      const genResult = await api.generateStarStoryFromExperience({
+        experienceText: aiExperienceText.trim(),
+      });
+
+      if (genResult.success && genResult.data) {
+        const story = genResult.data;
+        const saveResult = await api.createStarStory({
+          title: story.title || 'AI Generated Story',
+          situation: story.situation,
+          task: story.task,
+          action: story.action,
+          result: story.result,
+          key_themes: story.key_themes || [],
+          talking_points: story.talking_points || [],
+        });
+
+        if (saveResult.success) {
+          setShowAIInputModal(false);
+          setShowBuilder(false);
+          setAIExperienceText('');
+          loadStories();
+          Alert.alert('Success', 'AI-generated STAR story saved!');
+        } else {
+          Alert.alert('Save Failed', saveResult.error || 'Could not save generated story');
+        }
+      } else {
+        Alert.alert('Generation Failed', genResult.error || 'Could not generate STAR story');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to generate story');
+    } finally {
+      setAIGenerating(false);
+    }
   };
 
   // Feature #18: Analyze STAR Story
@@ -818,12 +859,12 @@ export default function StarStoriesScreen() {
                       <View style={styles.variationHeader}>
                         <View style={[styles.variationBadge, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
                           <Text style={[styles.variationContext, { color: COLORS.primary }]}>
-                            {variation.context.replace(/_/g, ' ').toUpperCase()}
+                            {(variation.name || '').replace(/_/g, ' ').toUpperCase()}
                           </Text>
                         </View>
                         <View style={[styles.variationBadge, { backgroundColor: colors.backgroundTertiary }]}>
                           <Text style={[styles.variationTone, { color: colors.text }]}>
-                            {variation.tone}
+                            {variation.emphasis}
                           </Text>
                         </View>
                       </View>
@@ -856,11 +897,24 @@ export default function StarStoriesScreen() {
                         </Text>
                       </View>
 
-                      {variation.optimal_use_case && (
+                      {variation.key_phrases && variation.key_phrases.length > 0 && (
+                        <View style={styles.variationContent}>
+                          <Text style={[styles.variationLabel, { color: colors.textSecondary }]}>Key Phrases</Text>
+                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                            {variation.key_phrases.map((phrase: string, pi: number) => (
+                              <View key={pi} style={[styles.variationBadge, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                                <Text style={{ color: COLORS.primary, fontSize: 12, fontFamily: FONTS.medium }}>{phrase}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      )}
+
+                      {variation.when_to_use && (
                         <View style={[styles.useCaseBox, { backgroundColor: colors.backgroundTertiary }]}>
                           <Text style={[styles.useCaseLabel, { color: colors.textSecondary }]}>Best For:</Text>
                           <Text style={[styles.useCaseText, { color: colors.text }]}>
-                            {variation.optimal_use_case}
+                            {variation.when_to_use}
                           </Text>
                         </View>
                       )}
@@ -885,6 +939,57 @@ export default function StarStoriesScreen() {
               )}
             </ScrollView>
           )}
+        </SafeAreaView>
+      </Modal>
+
+      {/* AI Experience Input Modal */}
+      <Modal
+        visible={showAIInputModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAIInputModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => { setShowAIInputModal(false); setAIExperienceText(''); }}
+            >
+              <X color={colors.text} size={24} />
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>AI Story Generator</Text>
+            <View style={styles.headerPlaceholder} />
+          </View>
+
+          <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentContainer}>
+            <Text style={[styles.sectionLabel, { color: colors.textSecondary, marginBottom: 8 }]}>
+              Describe an experience, accomplishment, or challenge from your career. AI will structure it into a STAR story.
+            </Text>
+            <TextInput
+              style={[styles.aiInput, { color: colors.text, borderColor: colors.glassBorder, backgroundColor: colors.glass }]}
+              value={aiExperienceText}
+              onChangeText={setAIExperienceText}
+              placeholder="e.g., Led a team of 5 engineers to migrate our authentication system from legacy LDAP to OAuth 2.0, reducing login failures by 40%..."
+              placeholderTextColor={colors.textTertiary}
+              multiline
+              numberOfLines={6}
+              textAlignVertical="top"
+            />
+            <TouchableOpacity
+              style={[styles.generateButton, { backgroundColor: COLORS.primary, opacity: aiGenerating || !aiExperienceText.trim() ? 0.6 : 1 }]}
+              onPress={handleAIGenerate}
+              disabled={aiGenerating || !aiExperienceText.trim()}
+            >
+              {aiGenerating ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Plus color="#fff" size={18} />
+              )}
+              <Text style={styles.generateButtonText}>
+                {aiGenerating ? 'Generating...' : 'Generate STAR Story'}
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -1394,5 +1499,28 @@ const styles = StyleSheet.create({
   guideText: {
     ...TYPOGRAPHY.subhead,
     lineHeight: 20,
+  },
+  aiInput: {
+    borderWidth: 1,
+    borderRadius: SPACING.radiusMD,
+    padding: SPACING.md,
+    fontSize: 15,
+    fontFamily: FONTS.regular,
+    minHeight: 150,
+    lineHeight: 22,
+    marginBottom: SPACING.lg,
+  },
+  generateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: SPACING.radiusMD,
+  },
+  generateButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
   },
 });

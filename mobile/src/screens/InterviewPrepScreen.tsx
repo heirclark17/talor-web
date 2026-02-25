@@ -34,7 +34,7 @@ import {
   RefreshCw,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ReadinessScore, ValuesAlignment, CompanyResearch, StrategicNewsItem, CompetitiveIntelligence, InterviewStrategy, ExecutiveInsights } from '../api/client';
+import { api, ReadinessScore, ValuesAlignment, CompanyResearch, StrategicNewsItem, CompetitiveIntelligence, InterviewStrategy, ExecutiveInsights } from '../api/client';
 import { COLORS, SPACING, RADIUS, FONTS, TAB_BAR_HEIGHT, ALPHA_COLORS, TYPOGRAPHY } from '../utils/constants';
 import { GlassCard } from '../components/glass/GlassCard';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -180,6 +180,7 @@ export default function InterviewPrepScreen() {
   const certificationRecommendations = cachedPrep?.certificationRecommendations || null;
 
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [starStoryCount, setStarStoryCount] = useState<number>(0);
 
   // Debug: Log when section changes
   const handleSectionPress = (section: string) => {
@@ -208,6 +209,19 @@ export default function InterviewPrepScreen() {
     if (!cachedPrep) {
       getInterviewPrep(tailoredResumeId);
     }
+
+    // Load STAR story count
+    const loadStoryCount = async () => {
+      try {
+        const result = await api.listStarStories(tailoredResumeId);
+        if (result.success && Array.isArray(result.data)) {
+          setStarStoryCount(result.data.length);
+        }
+      } catch (error) {
+        console.error('Error loading story count:', error);
+      }
+    };
+    loadStoryCount();
   }, [tailoredResumeId]);
 
   // Handle generate prep
@@ -935,8 +949,24 @@ export default function InterviewPrepScreen() {
                     >
                       <Star color="#10b981" size={18} />
                       <Text style={[styles.buildStoriesButtonText, { color: '#10b981' }]}>Build Full STAR Stories</Text>
+                      {starStoryCount > 0 && (
+                        <View style={[styles.storyCountBadge, { backgroundColor: '#10b981' }]}>
+                          <Text style={styles.storyCountText}>{starStoryCount}</Text>
+                        </View>
+                      )}
                       <ChevronRight color="#10b981" size={18} />
                     </TouchableOpacity>
+                    {starStoryCount > 0 && (
+                      <TouchableOpacity
+                        style={[styles.viewStoriesLink]}
+                        onPress={() => navigation.navigate('StarStories' as any, { tailoredResumeId })}
+                      >
+                        <Text style={[styles.viewStoriesText, { color: COLORS.primary }]}>
+                          View {starStoryCount} saved {starStoryCount === 1 ? 'story' : 'stories'}
+                        </Text>
+                        <ChevronRight color={COLORS.primary} size={14} />
+                      </TouchableOpacity>
+                    )}
                   </View>
                 )}
               </View>
@@ -2613,5 +2643,31 @@ const styles = StyleSheet.create({
   buildStoriesButtonText: {
     ...TYPOGRAPHY.subhead,
     fontWeight: '600',
+    flex: 1,
+  },
+  storyCountBadge: {
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  storyCountText: {
+    color: '#fff',
+    fontSize: 11,
+    fontFamily: FONTS.semibold,
+  },
+  viewStoriesLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    gap: 4,
+  },
+  viewStoriesText: {
+    fontSize: 13,
+    fontFamily: FONTS.medium,
   },
 });

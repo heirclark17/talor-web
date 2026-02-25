@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Briefcase, Building2, ChevronRight, Target } from 'lucide-react-native';
+import { Briefcase, Building2, ChevronRight, Target, Star } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
 import { COLORS, SPACING, RADIUS, FONTS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
@@ -35,6 +35,7 @@ export default function InterviewPrepListScreen() {
   const [preps, setPreps] = useState<InterviewPrep[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [storyCounts, setStoryCounts] = useState<Record<number, number>>({});
 
   const loadPreps = async () => {
     try {
@@ -42,6 +43,22 @@ export default function InterviewPrepListScreen() {
       if (result.success && result.data) {
         const prepsList = Array.isArray(result.data) ? result.data : [];
         setPreps(prepsList);
+
+        // Load story counts for each prep
+        const counts: Record<number, number> = {};
+        await Promise.all(
+          prepsList.map(async (prep: InterviewPrep) => {
+            try {
+              const storiesResult = await api.listStarStories(prep.tailored_resume_id);
+              if (storiesResult.success && Array.isArray(storiesResult.data)) {
+                counts[prep.id] = storiesResult.data.length;
+              }
+            } catch {
+              counts[prep.id] = 0;
+            }
+          })
+        );
+        setStoryCounts(counts);
       } else {
         console.error('Failed to load interview preps:', result.error);
         setPreps([]);
@@ -97,10 +114,18 @@ export default function InterviewPrepListScreen() {
           <Text style={[styles.jobTitle, { color: colors.text }]} numberOfLines={2}>
             {item.job_title || 'Interview Prep'}
           </Text>
-          <Text style={[styles.meta, { color: colors.textTertiary }]}>
-            {item.job_location ? `${item.job_location} • ` : ''}
-            {formatDate(item.created_at)}
-          </Text>
+          <View style={styles.metaRow}>
+            <Text style={[styles.meta, { color: colors.textTertiary }]}>
+              {item.job_location ? `${item.job_location} • ` : ''}
+              {formatDate(item.created_at)}
+            </Text>
+            {(storyCounts[item.id] || 0) > 0 && (
+              <View style={styles.storyBadge}>
+                <Star color="#f59e0b" size={12} />
+                <Text style={styles.storyBadgeText}>{storyCounts[item.id]} STAR {storyCounts[item.id] === 1 ? 'story' : 'stories'}</Text>
+              </View>
+            )}
+          </View>
         </View>
       </View>
       <ChevronRight color={colors.textTertiary} size={20} />
@@ -233,6 +258,26 @@ const styles = StyleSheet.create({
   },
   meta: {
     ...TYPOGRAPHY.caption1,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  storyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#f59e0b20',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  storyBadgeText: {
+    color: '#f59e0b',
+    fontSize: 11,
+    fontFamily: FONTS.medium,
   },
   emptyState: {
     flex: 1,

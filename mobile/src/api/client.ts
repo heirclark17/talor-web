@@ -254,15 +254,16 @@ export interface StorySuggestions {
 // Story Variations interface (Feature #20)
 export interface StoryVariations {
   variations: Array<{
-    context: string;
-    tone: string;
+    name: string;
+    emphasis: string;
+    when_to_use: string;
+    key_phrases: string[];
     story: {
       situation: string;
       task: string;
       action: string;
       result: string;
     };
-    optimal_use_case: string;
   }>;
   usage_guide: {
     technical_interviews: string;
@@ -1531,8 +1532,11 @@ export const api = {
   // Save STAR story for a specific question
   async saveQuestionStarStory(params: {
     interviewPrepId: number;
-    questionId: string;
+    questionId: number;
+    questionText: string;
+    questionType: string;
     starStory: object;
+    questionKey: string;
   }): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/interview-prep/save-question-star-story', {
@@ -1540,13 +1544,30 @@ export const api = {
         body: JSON.stringify({
           interview_prep_id: params.interviewPrepId,
           question_id: params.questionId,
+          question_text: params.questionText,
+          question_type: params.questionType,
           star_story: params.starStory,
+          question_key: params.questionKey,
         }),
       });
       const data = await response.json();
       return { success: response.ok, data };
     } catch (error: any) {
       console.error('Error saving question STAR story:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async cacheInterviewPrepData(interviewPrepId: number, cacheData: object): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${interviewPrepId}/cache`, {
+        method: 'PATCH',
+        body: JSON.stringify(cacheData),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error caching interview prep data:', error);
       return { success: false, error: error.message };
     }
   },

@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   TextInput,
+  Modal,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -22,6 +23,10 @@ import {
   Trash2,
   X,
   HelpCircle,
+  BarChart3,
+  Lightbulb,
+  Copy,
+  TrendingUp,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
@@ -138,6 +143,18 @@ export default function STARStoryBuilderScreen() {
   // Guidance states
   const [showGuide, setShowGuide] = useState(false);
   const [expandedGuideSections, setExpandedGuideSections] = useState<Set<string>>(new Set(['situation']));
+
+  // Analysis / Suggestions / Variations states
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [suggestionsResult, setSuggestionsResult] = useState<any>(null);
+  const [variationsResult, setVariationsResult] = useState<any>(null);
+  const [selectedStoryForAnalysis, setSelectedStoryForAnalysis] = useState<STARStory | null>(null);
+  const [analyzingId, setAnalyzingId] = useState<string | number | null>(null);
+  const [loadingSuggestionsId, setLoadingSuggestionsId] = useState<string | number | null>(null);
+  const [generatingVariationsId, setGeneratingVariationsId] = useState<string | number | null>(null);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
+  const [showVariationsModal, setShowVariationsModal] = useState(false);
 
   useEffect(() => {
     loadInterviewPrepContext();
@@ -447,6 +464,80 @@ export default function STARStoryBuilderScreen() {
         },
       ]
     );
+  };
+
+  // Analyze / Suggestions / Variations handlers
+  const handleAnalyzeStory = async (story: STARStory) => {
+    if (typeof story.id !== 'number') {
+      Alert.alert('Save Required', 'Please save the story first before analyzing.');
+      return;
+    }
+    setAnalyzingId(story.id);
+    setAnalysisResult(null);
+    setSelectedStoryForAnalysis(story);
+    try {
+      const result = await api.analyzeStarStory(story.id);
+      if (result.success && result.data) {
+        setAnalysisResult(result.data);
+        setShowAnalysisModal(true);
+      } else {
+        Alert.alert('Analysis Failed', result.error || 'Could not analyze story');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to analyze story');
+    } finally {
+      setAnalyzingId(null);
+    }
+  };
+
+  const handleGetSuggestions = async (story: STARStory) => {
+    if (typeof story.id !== 'number') {
+      Alert.alert('Save Required', 'Please save the story first before getting suggestions.');
+      return;
+    }
+    setLoadingSuggestionsId(story.id);
+    setSuggestionsResult(null);
+    setSelectedStoryForAnalysis(story);
+    try {
+      const result = await api.getStorySuggestions(story.id);
+      if (result.success && result.data) {
+        setSuggestionsResult(result.data);
+        setShowSuggestionsModal(true);
+      } else {
+        Alert.alert('Suggestions Failed', result.error || 'Could not get suggestions');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to get suggestions');
+    } finally {
+      setLoadingSuggestionsId(null);
+    }
+  };
+
+  const handleGenerateVariations = async (story: STARStory) => {
+    if (typeof story.id !== 'number') {
+      Alert.alert('Save Required', 'Please save the story first before generating variations.');
+      return;
+    }
+    setGeneratingVariationsId(story.id);
+    setVariationsResult(null);
+    setSelectedStoryForAnalysis(story);
+    try {
+      const result = await api.generateStoryVariations({
+        storyId: story.id,
+        contexts: ['technical_interview', 'behavioral_interview', 'executive_presentation', 'networking'],
+        tones: ['professional', 'conversational', 'enthusiastic'],
+      });
+      if (result.success && result.data) {
+        setVariationsResult(result.data);
+        setShowVariationsModal(true);
+      } else {
+        Alert.alert('Generation Failed', result.error || 'Could not generate variations');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to generate variations');
+    } finally {
+      setGeneratingVariationsId(null);
+    }
   };
 
   const getExperienceTitle = (exp: Experience) => {
@@ -1333,6 +1424,54 @@ export default function STARStoryBuilderScreen() {
                               )}
                             </TouchableOpacity>
                           </View>
+
+                          {/* Analyze / Suggest / Variations Buttons */}
+                          {typeof story.id === 'number' && (
+                            <View style={[styles.storyActionButtons, { marginTop: 8 }]}>
+                              <TouchableOpacity
+                                style={[styles.actionButton, { backgroundColor: ALPHA_COLORS.primary.bg }]}
+                                onPress={() => handleAnalyzeStory(story)}
+                                disabled={analyzingId === story.id}
+                              >
+                                {analyzingId === story.id ? (
+                                  <ActivityIndicator size="small" color={COLORS.primary} />
+                                ) : (
+                                  <>
+                                    <BarChart3 color={COLORS.primary} size={16} />
+                                    <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>Analyze</Text>
+                                  </>
+                                )}
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[styles.actionButton, { backgroundColor: ALPHA_COLORS.primary.bg }]}
+                                onPress={() => handleGetSuggestions(story)}
+                                disabled={loadingSuggestionsId === story.id}
+                              >
+                                {loadingSuggestionsId === story.id ? (
+                                  <ActivityIndicator size="small" color={COLORS.primary} />
+                                ) : (
+                                  <>
+                                    <Lightbulb color={COLORS.primary} size={16} />
+                                    <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>Suggest</Text>
+                                  </>
+                                )}
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[styles.actionButton, { backgroundColor: ALPHA_COLORS.primary.bg }]}
+                                onPress={() => handleGenerateVariations(story)}
+                                disabled={generatingVariationsId === story.id}
+                              >
+                                {generatingVariationsId === story.id ? (
+                                  <ActivityIndicator size="small" color={COLORS.primary} />
+                                ) : (
+                                  <>
+                                    <Copy color={COLORS.primary} size={16} />
+                                    <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>Variations</Text>
+                                  </>
+                                )}
+                              </TouchableOpacity>
+                            </View>
+                          )}
                         </View>
                       )}
                     </View>
@@ -1345,6 +1484,255 @@ export default function STARStoryBuilderScreen() {
 
         <View style={{ height: SPACING.xl }} />
       </ScrollView>
+
+      {/* Analysis Modal */}
+      <Modal
+        visible={showAnalysisModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAnalysisModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setShowAnalysisModal(false)}>
+              <X color={colors.text} size={24} />
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>STAR Analysis</Text>
+            <View style={{ width: 44 }} />
+          </View>
+
+          {analysisResult && (
+            <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentContainer}>
+              <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                <View style={styles.modalCardHeader}>
+                  <BarChart3 color={COLORS.primary} size={24} />
+                  <Text style={[styles.modalCardTitle, { color: colors.text }]}>Overall Score</Text>
+                </View>
+                <Text style={[styles.scoreText, { color: COLORS.primary }]}>{analysisResult.overall_score}/100</Text>
+              </View>
+
+              {analysisResult.component_scores && (
+                <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.modalCardTitle, { color: colors.text, marginBottom: 12 }]}>Component Scores</Text>
+                  {Object.entries(analysisResult.component_scores).map(([key, value]: [string, any]) => (
+                    <View key={key} style={styles.componentRow}>
+                      <Text style={[styles.componentLabel, { color: colors.text }]}>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </Text>
+                      <Text style={[styles.componentScore, { color: value.score >= 80 ? COLORS.success : value.score >= 60 ? COLORS.warning : COLORS.error }]}>
+                        {value.score}
+                      </Text>
+                      <Text style={[styles.componentFeedback, { color: colors.textSecondary }]} numberOfLines={2}>
+                        {value.feedback}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {analysisResult.strengths?.length > 0 && (
+                <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.modalCardTitle, { color: COLORS.success }]}>Strengths</Text>
+                  {analysisResult.strengths.map((s: string, i: number) => (
+                    <Text key={i} style={[styles.bulletItem, { color: colors.text }]}>• {s}</Text>
+                  ))}
+                </View>
+              )}
+
+              {analysisResult.areas_for_improvement?.length > 0 && (
+                <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.modalCardTitle, { color: COLORS.warning }]}>Areas for Improvement</Text>
+                  {analysisResult.areas_for_improvement.map((a: string, i: number) => (
+                    <Text key={i} style={[styles.bulletItem, { color: colors.text }]}>• {a}</Text>
+                  ))}
+                </View>
+              )}
+
+              {analysisResult.impact_assessment && (
+                <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.modalCardTitle, { color: colors.text }]}>Impact Assessment</Text>
+                  <View style={styles.impactRow}>
+                    <Text style={[styles.impactLabel, { color: colors.textSecondary }]}>Quantifiable Results:</Text>
+                    <Text style={{ color: analysisResult.impact_assessment.quantifiable_results ? COLORS.success : COLORS.error, fontFamily: FONTS.semibold }}>
+                      {analysisResult.impact_assessment.quantifiable_results ? 'Yes' : 'No'}
+                    </Text>
+                  </View>
+                  <View style={styles.impactRow}>
+                    <Text style={[styles.impactLabel, { color: colors.textSecondary }]}>Leadership:</Text>
+                    <Text style={{ color: analysisResult.impact_assessment.leadership_demonstrated ? COLORS.success : COLORS.error, fontFamily: FONTS.semibold }}>
+                      {analysisResult.impact_assessment.leadership_demonstrated ? 'Yes' : 'No'}
+                    </Text>
+                  </View>
+                  <View style={styles.impactRow}>
+                    <Text style={[styles.impactLabel, { color: colors.textSecondary }]}>Problem Solving:</Text>
+                    <Text style={{ color: analysisResult.impact_assessment.problem_solving_shown ? COLORS.success : COLORS.error, fontFamily: FONTS.semibold }}>
+                      {analysisResult.impact_assessment.problem_solving_shown ? 'Yes' : 'No'}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
+
+      {/* Suggestions Modal */}
+      <Modal
+        visible={showSuggestionsModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowSuggestionsModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setShowSuggestionsModal(false)}>
+              <X color={colors.text} size={24} />
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Improvement Suggestions</Text>
+            <View style={{ width: 44 }} />
+          </View>
+
+          {suggestionsResult && (
+            <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentContainer}>
+              {suggestionsResult.improvement_tips?.length > 0 && (
+                <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.modalCardTitle, { color: colors.text }]}>Component Improvements</Text>
+                  {suggestionsResult.improvement_tips.map((tip: any, i: number) => (
+                    <View key={i} style={[styles.suggestionCard, { backgroundColor: colors.backgroundTertiary }]}>
+                      <Text style={[styles.suggestionComponent, { color: COLORS.primary }]}>{tip.component.toUpperCase()}</Text>
+                      <Text style={[styles.suggestionText, { color: colors.text }]}>{tip.suggestion}</Text>
+                      <Text style={[styles.suggestionReason, { color: colors.textSecondary }]}>{tip.reasoning}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {suggestionsResult.alternative_framings?.length > 0 && (
+                <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.modalCardTitle, { color: colors.text }]}>Alternative Framings</Text>
+                  {suggestionsResult.alternative_framings.map((framing: any, i: number) => (
+                    <View key={i} style={[styles.suggestionCard, { backgroundColor: colors.backgroundTertiary }]}>
+                      <Text style={[styles.suggestionComponent, { color: COLORS.primary }]}>{framing.perspective}</Text>
+                      <Text style={[styles.framingLabel, { color: colors.textSecondary }]}>Situation:</Text>
+                      <Text style={[styles.suggestionText, { color: colors.text }]}>{framing.reframed_story.situation}</Text>
+                      <Text style={[styles.framingLabel, { color: colors.textSecondary }]}>Result:</Text>
+                      <Text style={[styles.suggestionText, { color: colors.text }]}>{framing.reframed_story.result}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {suggestionsResult.impact_enhancements?.length > 0 && (
+                <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.modalCardTitle, { color: colors.text }]}>Impact Enhancements</Text>
+                  {suggestionsResult.impact_enhancements.map((e: any, i: number) => (
+                    <View key={i} style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                      <TrendingUp color={COLORS.success} size={16} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.suggestionComponent, { color: COLORS.success }]}>{e.type.toUpperCase()}</Text>
+                        <Text style={[styles.suggestionText, { color: colors.text }]}>{e.enhancement}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {suggestionsResult.keyword_recommendations?.length > 0 && (
+                <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.modalCardTitle, { color: colors.text }]}>Recommended Keywords</Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                    {suggestionsResult.keyword_recommendations.map((kw: string, i: number) => (
+                      <View key={i} style={[styles.keywordChip, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                        <Text style={{ color: COLORS.primary, fontSize: 12, fontFamily: FONTS.medium }}>{kw}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
+
+      {/* Variations Modal */}
+      <Modal
+        visible={showVariationsModal}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setShowVariationsModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setShowVariationsModal(false)}>
+              <X color={colors.text} size={24} />
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Story Variations</Text>
+            <View style={{ width: 44 }} />
+          </View>
+
+          {variationsResult && (
+            <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentContainer}>
+              {variationsResult.variations?.map((variation: any, index: number) => (
+                <View key={index} style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                    <View style={[styles.keywordChip, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                      <Text style={{ color: COLORS.primary, fontSize: 12, fontFamily: FONTS.semibold }}>
+                        {(variation.name || '').replace(/_/g, ' ').toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={[styles.keywordChip, { backgroundColor: colors.backgroundTertiary }]}>
+                      <Text style={{ color: colors.text, fontSize: 12, fontFamily: FONTS.medium }}>{variation.emphasis}</Text>
+                    </View>
+                  </View>
+
+                  <Text style={[styles.framingLabel, { color: colors.textSecondary }]}>Situation</Text>
+                  <Text style={[styles.suggestionText, { color: colors.text }]}>{variation.story.situation}</Text>
+                  <Text style={[styles.framingLabel, { color: colors.textSecondary, marginTop: 8 }]}>Task</Text>
+                  <Text style={[styles.suggestionText, { color: colors.text }]}>{variation.story.task}</Text>
+                  <Text style={[styles.framingLabel, { color: colors.textSecondary, marginTop: 8 }]}>Action</Text>
+                  <Text style={[styles.suggestionText, { color: colors.text }]}>{variation.story.action}</Text>
+                  <Text style={[styles.framingLabel, { color: colors.textSecondary, marginTop: 8 }]}>Result</Text>
+                  <Text style={[styles.suggestionText, { color: colors.text }]}>{variation.story.result}</Text>
+
+                  {variation.key_phrases?.length > 0 && (
+                    <View style={{ marginTop: 10 }}>
+                      <Text style={[styles.framingLabel, { color: colors.textSecondary }]}>Key Phrases</Text>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                        {variation.key_phrases.map((phrase: string, pi: number) => (
+                          <View key={pi} style={[styles.keywordChip, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                            <Text style={{ color: COLORS.primary, fontSize: 12, fontFamily: FONTS.medium }}>{phrase}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+
+                  {variation.when_to_use && (
+                    <View style={[styles.useCaseBox, { backgroundColor: colors.backgroundTertiary, marginTop: 10 }]}>
+                      <Text style={[styles.framingLabel, { color: colors.textSecondary }]}>Best For:</Text>
+                      <Text style={[styles.suggestionText, { color: colors.text }]}>{variation.when_to_use}</Text>
+                    </View>
+                  )}
+                </View>
+              ))}
+
+              {variationsResult.usage_guide && (
+                <View style={[styles.modalCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <Text style={[styles.modalCardTitle, { color: colors.text }]}>Usage Guide</Text>
+                  {Object.entries(variationsResult.usage_guide).map(([key, value]: [string, any]) => (
+                    <View key={key} style={{ marginTop: 8 }}>
+                      <Text style={[styles.suggestionComponent, { color: COLORS.primary }]}>
+                        {key.replace(/_/g, ' ').toUpperCase()}
+                      </Text>
+                      <Text style={[styles.suggestionText, { color: colors.text }]}>{value}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -1892,5 +2280,125 @@ const styles = StyleSheet.create({
     flex: 1,
     ...TYPOGRAPHY.caption1,
     lineHeight: 17,
+  },
+  // Modal styles for Analysis/Suggestions/Variations
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+  },
+  modalCloseButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    ...TYPOGRAPHY.headline,
+    flex: 1,
+    textAlign: 'center',
+  },
+  modalContent: {
+    flex: 1,
+  },
+  modalContentContainer: {
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xl * 2,
+  },
+  modalCard: {
+    borderRadius: SPACING.radiusMD,
+    borderWidth: 1,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  modalCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+  },
+  modalCardTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
+  },
+  scoreText: {
+    fontSize: 32,
+    fontFamily: FONTS.bold,
+    textAlign: 'center',
+    marginVertical: 8,
+  },
+  componentRow: {
+    marginBottom: 12,
+  },
+  componentLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    marginBottom: 2,
+  },
+  componentScore: {
+    fontSize: 18,
+    fontFamily: FONTS.bold,
+  },
+  componentFeedback: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+    marginTop: 2,
+  },
+  bulletItem: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+    marginTop: 6,
+  },
+  impactRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  impactLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+  },
+  suggestionCard: {
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginTop: 10,
+  },
+  suggestionComponent: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    marginBottom: 4,
+  },
+  suggestionText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  suggestionReason: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    lineHeight: 17,
+    marginTop: 4,
+  },
+  framingLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    marginBottom: 2,
+  },
+  keywordChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  useCaseBox: {
+    borderRadius: RADIUS.sm,
+    padding: SPACING.sm,
   },
 });

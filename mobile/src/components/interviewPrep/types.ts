@@ -307,3 +307,16 @@ export interface ThemeColors {
   backgroundTertiary?: string;
   border?: string;
 }
+
+export interface StoryVariation {
+  name: string;
+  emphasis: string;
+  when_to_use: string;
+  key_phrases: string[];
+  story: {
+    situation: string;
+    task: string;
+    action: string;
+    result: string;
+  };
+}
