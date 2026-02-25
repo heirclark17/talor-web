@@ -13,7 +13,6 @@ import {
   Bookmark,
   TrendingUp,
   CreditCard,
-  Settings,
 } from 'lucide-react-native';
 
 export type FeatureCategory = 'Resume Tools' | 'Career Prep' | 'Growth';
@@ -158,15 +157,6 @@ export const DASHBOARD_FEATURES: DashboardFeature[] = [
     subtitle: 'View subscription plans and manage billing',
     icon: CreditCard,
     iconColor: '#A78BFA',
-    category: 'Growth',
-  },
-  {
-    id: 'settings',
-    screen: 'SettingsMain',
-    label: 'Settings',
-    subtitle: 'Manage your account and app preferences',
-    icon: Settings,
-    iconColor: '#94A3B8',
     category: 'Growth',
   },
 ];
