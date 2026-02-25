@@ -273,7 +273,7 @@ export function AppHeader() {
                               backgroundColor: isLinkActive
                                 ? COLORS.primary + '20'
                                 : colors.backgroundSecondary + '40',
-                              borderColor: isLinkActive ? COLORS.primary : colors.glassBorder,
+                              borderColor: isLinkActive ? COLORS.primary : (isDark ? colors.glassBorder : 'transparent'),
                             },
                           ]}
                           onPress={() => handleNavigate(link)}

@@ -68,7 +68,7 @@ export default function CertificationRecommendations({
   companyName,
   onGenerate,
 }: Props) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<RecommendationsData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -252,7 +252,7 @@ export default function CertificationRecommendations({
                         priorityFilter === priority
                           ? ALPHA_COLORS.primary.bg
                           : colors.backgroundTertiary,
-                      borderColor: priorityFilter === priority ? COLORS.primary : colors.border,
+                      borderColor: priorityFilter === priority ? COLORS.primary : (isDark ? colors.border : 'transparent'),
                     },
                   ]}
                   accessibilityRole="button"
@@ -299,7 +299,7 @@ export default function CertificationRecommendations({
                         difficultyFilter === diff
                           ? ALPHA_COLORS.primary.bg
                           : colors.backgroundTertiary,
-                      borderColor: difficultyFilter === diff ? COLORS.primary : colors.border,
+                      borderColor: difficultyFilter === diff ? COLORS.primary : (isDark ? colors.border : 'transparent'),
                     },
                   ]}
                   accessibilityRole="button"

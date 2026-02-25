@@ -146,7 +146,7 @@ export function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProp
                 : ALPHA_COLORS.white[80],
               borderColor: isDark
                 ? ALPHA_COLORS.white[10]
-                : ALPHA_COLORS.black[10],
+                : 'transparent',
             },
           ]}
         >

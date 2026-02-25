@@ -270,7 +270,7 @@ export function SearchFilter({
                       : ALPHA_COLORS.black[15]
                     : isDark
                     ? ALPHA_COLORS.white[10]
-                    : ALPHA_COLORS.black[10],
+                    : 'transparent',
               },
             ]}
           >
@@ -306,7 +306,7 @@ export function SearchFilter({
                     : ALPHA_COLORS.black[15]
                   : isDark
                   ? ALPHA_COLORS.white[10]
-                  : ALPHA_COLORS.black[10],
+                  : 'transparent',
               },
             ]}
           >
@@ -353,7 +353,7 @@ export function SearchFilter({
                               ? ALPHA_COLORS.primary.border
                               : isDark
                               ? ALPHA_COLORS.white[10]
-                              : ALPHA_COLORS.black[10],
+                              : 'transparent',
                           },
                         ]}
                       >
@@ -389,7 +389,7 @@ export function SearchFilter({
                                   ? ALPHA_COLORS.primary.border
                                   : isDark
                                   ? ALPHA_COLORS.white[10]
-                                  : ALPHA_COLORS.black[10],
+                                  : 'transparent',
                             },
                           ]}
                         >

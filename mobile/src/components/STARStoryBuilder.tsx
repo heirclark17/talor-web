@@ -66,7 +66,7 @@ export default function STARStoryBuilder({
   onCancel,
   onGenerateAI,
 }: Props) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [story, setStory] = useState<STARStory>(
     initialStory || {
       title: '',
@@ -223,7 +223,7 @@ export default function STARStoryBuilder({
                       backgroundColor: isComplete
                         ? ALPHA_COLORS.success.bg
                         : colors.backgroundTertiary,
-                      borderColor: isComplete ? COLORS.success : colors.border,
+                      borderColor: isComplete ? COLORS.success : (isDark ? colors.border : 'transparent'),
                     },
                   ]}
                 >

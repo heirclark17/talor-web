@@ -57,7 +57,7 @@ export default function BehavioralTechnicalQuestions({
   jobTitle,
   onGenerate,
 }: Props) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<QuestionsData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -196,7 +196,7 @@ export default function BehavioralTechnicalQuestions({
                 {
                   backgroundColor:
                     typeFilter === type ? ALPHA_COLORS.primary.bg : colors.backgroundTertiary,
-                  borderColor: typeFilter === type ? COLORS.primary : colors.border,
+                  borderColor: typeFilter === type ? COLORS.primary : (isDark ? colors.border : 'transparent'),
                 },
               ]}
               accessibilityRole="button"
@@ -232,7 +232,7 @@ export default function BehavioralTechnicalQuestions({
                     difficultyFilter === diff
                       ? ALPHA_COLORS.primary.bg
                       : colors.backgroundTertiary,
-                  borderColor: difficultyFilter === diff ? COLORS.primary : colors.border,
+                  borderColor: difficultyFilter === diff ? COLORS.primary : (isDark ? colors.border : 'transparent'),
                 },
               ]}
               accessibilityRole="button"

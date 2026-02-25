@@ -65,7 +65,7 @@ export default function CareerPathCertifications({
   onToggleCompleted,
   completedCertIds = [],
 }: Props) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [expandedCerts, setExpandedCerts] = useState<Set<string>>(new Set());
   const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
 
@@ -170,7 +170,7 @@ export default function CareerPathCertifications({
                     priorityFilter === priority
                       ? ALPHA_COLORS.primary.bg
                       : colors.backgroundTertiary,
-                  borderColor: priorityFilter === priority ? COLORS.primary : colors.border,
+                  borderColor: priorityFilter === priority ? COLORS.primary : (isDark ? colors.border : 'transparent'),
                 },
               ]}
               accessibilityRole="button"

@@ -338,7 +338,7 @@ export function BackgroundSelector({ visible, onClose }: BackgroundSelectorProps
                       ? ALPHA_COLORS.primary.border
                       : isDark
                         ? ALPHA_COLORS.white[10]
-                        : ALPHA_COLORS.black[10],
+                        : 'transparent',
                     borderWidth: 1,
                   },
                 ]}
@@ -361,7 +361,7 @@ export function BackgroundSelector({ visible, onClose }: BackgroundSelectorProps
               styles.categoryTab,
               {
                 backgroundColor: colors.glass,
-                borderColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10],
+                borderColor: isDark ? ALPHA_COLORS.white[10] : 'transparent',
                 borderWidth: 1,
               },
             ]}
