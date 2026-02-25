@@ -977,7 +977,6 @@ export default function ResumeBuilderScreen() {
                 style={styles.navButton}
               >
                 <Text style={[styles.navButtonText, dynamicStyles.navButtonText]}>Next</Text>
-                <ChevronRight size={20} color={colors.text} />
               </GlassButton>
             ) : (
               <GlassButton
