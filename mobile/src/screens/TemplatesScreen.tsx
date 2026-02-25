@@ -11,6 +11,7 @@ import {
   ScrollView,
   StyleSheet,
   Dimensions,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -179,7 +180,11 @@ export default function TemplatesScreen() {
                     ]}
                   >
                     <View style={[styles.templatePreview, ds.templatePreview]}>
-                      <FileText size={64} color={colors.textSecondary} />
+                      <Image
+                        source={{ uri: template.preview }}
+                        style={styles.previewImage}
+                        resizeMode="cover"
+                      />
                     </View>
 
                     {isSelected && (
@@ -320,6 +325,11 @@ const styles = StyleSheet.create({
     height: 200,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
   },
   selectedBadge: {
     position: 'absolute',
