@@ -17,7 +17,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   Target, Link, FileText, ChevronDown, Sparkles, Building2, ArrowLeft,
   Check, Download, RefreshCw, Bookmark, Briefcase, ChevronRight, BarChart3,
-  Key, Share2, BookOpen, ClipboardCheck
+  Key, Share2, BookOpen, ClipboardCheck, Clock, X, History
 } from 'lucide-react-native';
 import { MatchScore, KeywordPanel, ResumeAnalysis } from '../components';
 import { GlassButton } from '../components/glass/GlassButton';
@@ -97,6 +97,9 @@ export default function TailorResumeScreen() {
   const [keywordsData, setKeywordsData] = useState<any>(null);
   const [loadingKeywords, setLoadingKeywords] = useState(false);
 
+  // Saved jobs state
+  const [savedJobs, setSavedJobs] = useState<any[]>([]);
+
   // Set selected resume when resumes are loaded
   useEffect(() => {
     if (resumes.length > 0 && !selectedResumeId) {
@@ -105,18 +108,30 @@ export default function TailorResumeScreen() {
     }
   }, [resumes, selectedResumeId, initialResumeId]);
 
+  const fetchSavedJobs = useCallback(async () => {
+    try {
+      const result = await api.getSavedJobs();
+      if (result.success && result.data) {
+        setSavedJobs(Array.isArray(result.data) ? result.data.slice(0, 5) : []);
+      }
+    } catch (e) {
+      // silent - non-critical
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       // Only fetch if not showing comparison
       if (!showComparison) {
         fetchResumes();
+        fetchSavedJobs();
         capture('screen_viewed', {
           screen_name: 'Tailor Resume',
           screen_type: 'core_feature',
           resume_count: resumes.length,
         });
       }
-    }, [showComparison, fetchResumes, capture, resumes.length])
+    }, [showComparison, fetchResumes, fetchSavedJobs, capture, resumes.length])
   );
 
   const handleExtractJob = async () => {
@@ -129,9 +144,15 @@ export default function TailorResumeScreen() {
     try {
       const result = await api.extractJobDetails(jobUrl);
       if (result.success && result.data) {
-        setCompany(result.data.company || '');
-        setJobTitle(result.data.title || '');
+        const extractedCompany = result.data.company || '';
+        const extractedTitle = result.data.title || '';
+        setCompany(extractedCompany);
+        setJobTitle(extractedTitle);
         Alert.alert('Success', 'Job details extracted successfully!');
+        // Auto-save the job
+        if (extractedCompany || extractedTitle) {
+          api.saveJob(jobUrl.trim(), extractedCompany, extractedTitle).then(() => fetchSavedJobs());
+        }
       } else {
         Alert.alert('Error', result.error || 'Could not extract job details. Please enter them manually.');
       }
@@ -194,6 +215,15 @@ export default function TailorResumeScreen() {
           has_job_url: !!jobUrl.trim(),
           tailored_resume_id: result.data.tailored_resume_id,
         });
+
+        // Auto-save the job URL if present
+        if (jobUrl.trim()) {
+          api.saveJob(
+            jobUrl.trim(),
+            result.data.company || company,
+            result.data.title || jobTitle
+          ).then(() => fetchSavedJobs());
+        }
 
         // Show the comparison view
         setShowComparison(true);
@@ -336,6 +366,21 @@ export default function TailorResumeScreen() {
   const handleViewInterviewPrep = () => {
     if (tailoredResumeData) {
       navigation.navigate('InterviewPrep' as any, { tailoredResumeId: tailoredResumeData.id });
+    }
+  };
+
+  const handleSelectSavedJob = (job: any) => {
+    setJobUrl(job.job_url || job.jobUrl || '');
+    setCompany(job.company || '');
+    setJobTitle(job.job_title || job.jobTitle || '');
+  };
+
+  const handleDeleteSavedJob = async (jobId: number) => {
+    try {
+      await api.deleteSavedJob(jobId);
+      setSavedJobs((prev) => prev.filter((j) => j.id !== jobId));
+    } catch (e) {
+      // silent
     }
   };
 
@@ -909,6 +954,40 @@ export default function TailorResumeScreen() {
             </Text>
           </View>
 
+          {/* Recent Jobs */}
+          {savedJobs.length > 0 && (
+            <View style={styles.section}>
+              <View style={styles.recentJobsHeader}>
+                <History color={colors.textTertiary} size={14} />
+                <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: 0 }]}>Recent Jobs</Text>
+              </View>
+              {savedJobs.map((job) => (
+                <TouchableOpacity
+                  key={job.id}
+                  style={[styles.recentJobItem, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+                  onPress={() => handleSelectSavedJob(job)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.recentJobContent}>
+                    <Text style={[styles.recentJobCompany, { color: colors.text }]} numberOfLines={1}>
+                      {job.company || 'Unknown Company'}
+                    </Text>
+                    <Text style={[styles.recentJobTitle, { color: colors.textSecondary }]} numberOfLines={1}>
+                      {job.job_title || job.jobTitle || 'Untitled Position'}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteSavedJob(job.id)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    style={styles.recentJobDelete}
+                  >
+                    <X color={colors.textTertiary} size={16} />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
           {/* Manual Entry */}
           <View style={styles.divider}>
             <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
@@ -947,22 +1026,22 @@ export default function TailorResumeScreen() {
               />
             </View>
           </View>
-        </ScrollView>
 
-        <View style={styles.footer}>
-          <GlassButton
-            label={tailoring ? 'Tailoring...' : 'Tailor Resume'}
-            variant="primary"
-            size="lg"
-            onPress={handleTailor}
-            disabled={tailoring}
-            loading={tailoring}
-            icon={!tailoring ? <Target color="#fff" size={20} /> : undefined}
-            fullWidth
-            accessibilityLabel={tailoring ? "Tailoring resume in progress" : "Tailor resume for job"}
-            accessibilityHint="Customizes your resume to match the job requirements using AI"
-          />
-        </View>
+          <View style={styles.footer}>
+            <GlassButton
+              label={tailoring ? 'Tailoring...' : 'Tailor Resume'}
+              variant="primary"
+              size="lg"
+              onPress={handleTailor}
+              disabled={tailoring}
+              loading={tailoring}
+              icon={!tailoring ? <Target color="#fff" size={20} /> : undefined}
+              fullWidth
+              accessibilityLabel={tailoring ? "Tailoring resume in progress" : "Tailor resume for job"}
+              accessibilityHint="Customizes your resume to match the job requirements using AI"
+            />
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -990,7 +1069,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
     paddingTop: 0,
-    paddingBottom: SPACING.sm,
+    paddingBottom: SPACING.xl,
     marginTop: -SPACING.md,
   },
   backButton: {
@@ -1003,9 +1082,10 @@ const styles = StyleSheet.create({
   },
   title: {
     ...TYPOGRAPHY.largeTitle,
+    fontSize: 35,
   },
   titleWithBack: {
-    fontSize: 24,
+    fontSize: 35,
   },
   content: {
     flex: 1,
@@ -1099,6 +1179,38 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.caption1,
     marginTop: SPACING.xs,
   },
+  recentJobsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  recentJobItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.xs,
+    minHeight: 44,
+  },
+  recentJobContent: {
+    flex: 1,
+    gap: 2,
+  },
+  recentJobCompany: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  recentJobTitle: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+  },
+  recentJobDelete: {
+    padding: SPACING.xs,
+    marginLeft: SPACING.sm,
+  },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1113,7 +1225,8 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.md,
   },
   footer: {
-    padding: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
   },
   emptyState: {
     flex: 1,

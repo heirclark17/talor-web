@@ -2623,4 +2623,44 @@ export const api = {
       return { success: false, error: error.message };
     }
   },
+
+  // Saved jobs endpoints
+  async getSavedJobs(): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/jobs/saved');
+      const data = await response.json();
+      return { success: response.ok, data: Array.isArray(data) ? data : (data.jobs || []) };
+    } catch (error: any) {
+      console.error('Error fetching saved jobs:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  },
+
+  async saveJob(url: string, company: string, title: string): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/jobs/save', {
+        method: 'POST',
+        body: JSON.stringify({ job_url: url, company, job_title: title }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error saving job:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async deleteSavedJob(jobId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/jobs/saved/${jobId}`, {
+        method: 'DELETE',
+      });
+      if (response.status === 204) return { success: true };
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error deleting saved job:', error);
+      return { success: false, error: error.message };
+    }
+  },
 };

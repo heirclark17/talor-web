@@ -186,6 +186,56 @@ export async function exportTailoredResume(
   return get(`/api/tailor/tailored/${tailoredResumeId}/export?format=${format}`);
 }
 
+export interface SavedJob {
+  id: number;
+  jobUrl: string;
+  company: string;
+  jobTitle: string;
+  createdAt: string;
+}
+
+/**
+ * Get saved jobs, newest first
+ */
+export async function getSavedJobs(): Promise<ApiResponse<SavedJob[]>> {
+  return get<SavedJob[]>('/api/jobs/saved');
+}
+
+/**
+ * Save a job (upserts by URL)
+ */
+export async function saveJob(url: string, company: string, title: string): Promise<ApiResponse<SavedJob>> {
+  return post<SavedJob>('/api/jobs/save', {
+    job_url: url,
+    company,
+    job_title: title,
+  });
+}
+
+/**
+ * Delete a saved job
+ */
+export async function deleteSavedJob(jobId: number): Promise<ApiResponse<void>> {
+  try {
+    const response = await fetchWithAuth(`/api/jobs/saved/${jobId}`, {
+      method: 'DELETE',
+    });
+
+    if (response.status === 204) {
+      return { success: true };
+    }
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, error: data.error || `Server error: ${response.status}` };
+    }
+    return { success: true, data: snakeToCamel(data) };
+  } catch (error) {
+    console.error('Error deleting saved job:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
 export const tailorApi = {
   extractJobDetails,
   tailorResume,
@@ -195,6 +245,9 @@ export const tailorApi = {
   getKeywordAnalysis,
   updateTailoredResume,
   exportTailoredResume,
+  getSavedJobs,
+  saveJob,
+  deleteSavedJob,
 };
 
 export default tailorApi;
