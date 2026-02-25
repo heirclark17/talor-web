@@ -400,6 +400,7 @@ const styles = StyleSheet.create({
   },
   formContent: {
     padding: 16,
+    paddingBottom: 0,
   },
   formCard: {
     padding: 20,
@@ -459,7 +460,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.screenMargin,
     paddingTop: 0,
     paddingBottom: SPACING.md,
-    marginTop: -SPACING.xl,
+    marginTop: -50,
     gap: 12,
   },
   navButton: {
