@@ -1,6 +1,7 @@
 /**
  * Templates Screen
  * Browse and select resume templates
+ * Updated: Fixed FileText reference error with custom renderer
  */
 
 import React, { useState, useMemo } from 'react';
