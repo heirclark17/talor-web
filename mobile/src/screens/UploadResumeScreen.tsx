@@ -367,7 +367,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.screenMargin,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.xs,
+    marginBottom: SPACING.xs,
   },
   closeButton: {
     width: SPACING.touchTarget,
