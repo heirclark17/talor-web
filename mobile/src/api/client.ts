@@ -1202,10 +1202,13 @@ export const api = {
   async updateStarStory(
     storyId: number,
     updates: {
+      title?: string;
       situation?: string;
       task?: string;
       action?: string;
       result?: string;
+      key_themes?: string[];
+      talking_points?: string[];
       tags?: string[];
     }
   ): Promise<ApiResponse> {
