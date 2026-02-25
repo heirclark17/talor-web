@@ -50,7 +50,7 @@ export type AuthStackParamList = {
 // Main Stack param list - all screens in one stack
 export type MainStackParamList = {
   // Dashboard
-  Dashboard: undefined;
+  Dashboard: { skipGreeting?: boolean } | undefined;
 
   // Home / Resumes
   HomeMain: undefined;

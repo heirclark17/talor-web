@@ -1,23 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
   SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { FileText, CheckCircle, Target } from 'lucide-react-native';
 import { api } from '../api/client';
+import { tailorApi, TailoredResume } from '../api/tailorApi';
 import { useTheme } from '../context/ThemeContext';
 import { SPACING, TYPOGRAPHY, GLASS, COLORS, FONTS } from '../utils/constants';
 import { CoverLetterDetailModal } from '../components/CoverLetterDetailModal';
+import { MainStackParamList } from '../navigation/AppNavigator';
 
 interface CoverLetter {
   id: number;
@@ -36,30 +36,30 @@ const TONE_OPTIONS = [
 ];
 
 const LENGTH_OPTIONS = [
-  { value: 'concise', label: 'Concise (3 paragraphs)' },
-  { value: 'standard', label: 'Standard (4 paragraphs)' },
-  { value: 'detailed', label: 'Detailed (5 paragraphs)' },
+  { value: 'concise', label: 'Concise (3 para)' },
+  { value: 'standard', label: 'Standard (4 para)' },
+  { value: 'detailed', label: 'Detailed (5 para)' },
 ];
 
 const FOCUS_OPTIONS = [
   { value: 'leadership', label: 'Leadership' },
-  { value: 'technical', label: 'Technical Expertise' },
-  { value: 'program_management', label: 'Program Management' },
+  { value: 'technical', label: 'Technical' },
+  { value: 'program_management', label: 'Program Mgmt' },
   { value: 'cross_functional', label: 'Cross-Functional' },
 ];
 
 export default function CoverLetterGeneratorScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
 
-  // Form state
-  const [inputMethod, setInputMethod] = useState<'url' | 'manual'>('url');
-  const [jobUrl, setJobUrl] = useState('');
-  const [jobDescription, setJobDescription] = useState('');
-  const [jobTitle, setJobTitle] = useState('');
-  const [companyName, setCompanyName] = useState('');
+  // Tailored resume selection
+  const [tailoredResumes, setTailoredResumes] = useState<TailoredResume[]>([]);
+  const [selectedResume, setSelectedResume] = useState<TailoredResume | null>(null);
+  const [loadingResumes, setLoadingResumes] = useState(true);
+
+  // Options state
   const [tone, setTone] = useState<string>('professional');
   const [length, setLength] = useState<string>('standard');
   const [focus, setFocus] = useState<string>('program_management');
@@ -69,8 +69,23 @@ export default function CoverLetterGeneratorScreen() {
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
+    loadTailoredResumes();
     loadCoverLetters();
   }, []);
+
+  const loadTailoredResumes = async () => {
+    setLoadingResumes(true);
+    try {
+      const result = await tailorApi.listTailoredResumes();
+      if (result.success && result.data) {
+        setTailoredResumes(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading tailored resumes:', error);
+    } finally {
+      setLoadingResumes(false);
+    }
+  };
 
   const loadCoverLetters = async () => {
     try {
@@ -84,31 +99,18 @@ export default function CoverLetterGeneratorScreen() {
   };
 
   const handleGenerate = async () => {
-    // Validation
-    if (!jobTitle.trim()) {
-      Alert.alert('Validation Error', 'Job title is required');
-      return;
-    }
-    if (!companyName.trim()) {
-      Alert.alert('Validation Error', 'Company name is required');
-      return;
-    }
-    if (inputMethod === 'url' && !jobUrl.trim()) {
-      Alert.alert('Validation Error', 'Job URL is required when using URL input method');
-      return;
-    }
-    if (inputMethod === 'manual' && !jobDescription.trim()) {
-      Alert.alert('Validation Error', 'Job description is required when using manual input method');
+    if (!selectedResume) {
+      Alert.alert('Select Resume', 'Please select a tailored resume first.');
       return;
     }
 
     setLoading(true);
     try {
       const result = await api.generateCoverLetter({
-        jobTitle,
-        companyName,
-        jobUrl: inputMethod === 'url' ? jobUrl : undefined,
-        jobDescription: inputMethod === 'manual' ? jobDescription : undefined,
+        jobTitle: selectedResume.jobTitle,
+        companyName: selectedResume.company,
+        jobDescription: selectedResume.jobDescription || '',
+        baseResumeId: selectedResume.resumeId,
         tone: tone as any,
         length: length as any,
         focus: focus as any,
@@ -117,11 +119,7 @@ export default function CoverLetterGeneratorScreen() {
       if (result.success) {
         Alert.alert('Success', 'Cover letter generated successfully!');
         loadCoverLetters();
-        // Reset form
-        setJobUrl('');
-        setJobDescription('');
-        setJobTitle('');
-        setCompanyName('');
+        setSelectedResume(null);
       } else {
         Alert.alert('Error', result.error || 'Failed to generate cover letter');
       }
@@ -162,11 +160,64 @@ export default function CoverLetterGeneratorScreen() {
     </View>
   );
 
+  const renderResumeCard = (item: TailoredResume) => {
+    const isSelected = selectedResume?.id === item.id;
+    return (
+      <TouchableOpacity
+        key={item.id}
+        activeOpacity={0.7}
+        onPress={() => setSelectedResume(isSelected ? null : item)}
+      >
+        <BlurView
+          intensity={GLASS.getBlurIntensity('subtle')}
+          tint={isDark ? 'dark' : 'light'}
+          style={styles.resumeCardBlur}
+        >
+          <View
+            style={[
+              styles.resumeCard,
+              {
+                borderColor: isSelected ? COLORS.primary : (isDark ? GLASS.getBorderColor() : 'transparent'),
+                borderWidth: isSelected ? 2 : GLASS.getBorderWidth(),
+              },
+            ]}
+          >
+            <View style={styles.resumeCardContent}>
+              <View style={styles.resumeCardLeft}>
+                <FileText color={isSelected ? COLORS.primary : colors.textSecondary} size={20} />
+              </View>
+              <View style={styles.resumeCardText}>
+                <Text style={[styles.resumeCardTitle, { color: isSelected ? COLORS.primary : colors.text }]} numberOfLines={1}>
+                  {item.jobTitle}
+                </Text>
+                <Text style={[styles.resumeCardCompany, { color: colors.textSecondary }]} numberOfLines={1}>
+                  {item.company}
+                </Text>
+              </View>
+              <View style={styles.resumeCardRight}>
+                {item.matchScore != null && (
+                  <View style={[styles.matchBadge, { backgroundColor: COLORS.primary + '20' }]}>
+                    <Text style={[styles.matchBadgeText, { color: COLORS.primary }]}>
+                      {item.matchScore}%
+                    </Text>
+                  </View>
+                )}
+                {isSelected && (
+                  <CheckCircle color={COLORS.primary} size={20} />
+                )}
+              </View>
+            </View>
+          </View>
+        </BlurView>
+      </TouchableOpacity>
+    );
+  };
+
   const renderCoverLetterCard = (item: CoverLetter) => (
     <BlurView
       key={item.id}
       intensity={GLASS.getBlurIntensity('subtle')}
-      tint="light"
+      tint={isDark ? 'dark' : 'light'}
       style={styles.cardBlur}
     >
       <TouchableOpacity
@@ -189,141 +240,90 @@ export default function CoverLetterGeneratorScreen() {
     </BlurView>
   );
 
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Target color={colors.textTertiary} size={48} />
+      <Text style={[styles.emptyStateTitle, { color: colors.text }]}>No Tailored Resumes Yet</Text>
+      <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>
+        Tailor a resume first to generate a cover letter.
+      </Text>
+      <TouchableOpacity
+        style={styles.emptyStateButton}
+        onPress={() => navigation.navigate('TailorMain')}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.emptyStateButtonText}>Tailor a Resume</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <BlurView intensity={GLASS.getBlurIntensity('regular')} tint="light" style={styles.formBlur}>
-            <View style={styles.formContainer}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Generate Cover Letter</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <BlurView intensity={GLASS.getBlurIntensity('regular')} tint={isDark ? 'dark' : 'light'} style={styles.formBlur}>
+          <View style={styles.formContainer}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Generate Cover Letter</Text>
 
-              {/* Input Method Toggle */}
-              <View style={[styles.toggleContainer, { backgroundColor: colors.backgroundSecondary + '40' }]}>
-                <TouchableOpacity
-                  style={[styles.toggleButton, inputMethod === 'url' && styles.toggleButtonActive]}
-                  onPress={() => setInputMethod('url')}
-                >
-                  <Text
-                    style={[
-                      styles.toggleButtonText,
-                      { color: colors.textSecondary },
-                      inputMethod === 'url' && styles.toggleButtonTextActive,
-                    ]}
-                  >
-                    Job URL
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.toggleButton, inputMethod === 'manual' && styles.toggleButtonActive]}
-                  onPress={() => setInputMethod('manual')}
-                >
-                  <Text
-                    style={[
-                      styles.toggleButtonText,
-                      { color: colors.textSecondary },
-                      inputMethod === 'manual' && styles.toggleButtonTextActive,
-                    ]}
-                  >
-                    Manual Input
-                  </Text>
-                </TouchableOpacity>
+            {/* Tailored Resume Selection */}
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Select a Tailored Resume</Text>
+
+            {loadingResumes ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator color={COLORS.primary} />
+                <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading resumes...</Text>
               </View>
-
-              {/* Job Details */}
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Job Title *</Text>
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="e.g., Senior Product Manager"
-                  placeholderTextColor={colors.textTertiary}
-                  value={jobTitle}
-                  onChangeText={setJobTitle}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Company Name *</Text>
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="e.g., Apple"
-                  placeholderTextColor={colors.textTertiary}
-                  value={companyName}
-                  onChangeText={setCompanyName}
-                />
-              </View>
-
-              {inputMethod === 'url' ? (
-                <View style={styles.inputGroup}>
-                  <Text style={[styles.inputLabel, { color: colors.text }]}>Job URL *</Text>
-                  <TextInput
-                    style={[styles.input, { color: colors.text }]}
-                    placeholder="https://..."
-                    placeholderTextColor={colors.textTertiary}
-                    value={jobUrl}
-                    onChangeText={setJobUrl}
-                    autoCapitalize="none"
-                    keyboardType="url"
-                  />
+            ) : tailoredResumes.length === 0 ? (
+              renderEmptyState()
+            ) : (
+              <>
+                <View style={styles.resumeList}>
+                  {tailoredResumes.map(renderResumeCard)}
                 </View>
-              ) : (
+
+                {/* Customization Options */}
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.inputLabel, { color: colors.text }]}>Job Description *</Text>
-                  <TextInput
-                    style={[styles.input, styles.textArea, { color: colors.text }]}
-                    placeholder="Paste the job description here..."
-                    placeholderTextColor={colors.textTertiary}
-                    value={jobDescription}
-                    onChangeText={setJobDescription}
-                    multiline
-                    numberOfLines={6}
-                    textAlignVertical="top"
-                  />
+                  <Text style={[styles.inputLabel, { color: colors.text }]}>Tone</Text>
+                  {renderOptionButtons(TONE_OPTIONS, tone, setTone)}
                 </View>
-              )}
 
-              {/* Customization Options */}
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Tone</Text>
-                {renderOptionButtons(TONE_OPTIONS, tone, setTone)}
-              </View>
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.text }]}>Length</Text>
+                  {renderOptionButtons(LENGTH_OPTIONS, length, setLength)}
+                </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Length</Text>
-                {renderOptionButtons(LENGTH_OPTIONS, length, setLength)}
-              </View>
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.text }]}>Focus</Text>
+                  {renderOptionButtons(FOCUS_OPTIONS, focus, setFocus)}
+                </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Focus</Text>
-                {renderOptionButtons(FOCUS_OPTIONS, focus, setFocus)}
-              </View>
+                {/* Generate Button */}
+                <TouchableOpacity
+                  style={[
+                    styles.generateButton,
+                    (loading || !selectedResume) && styles.generateButtonDisabled,
+                  ]}
+                  onPress={handleGenerate}
+                  disabled={loading || !selectedResume}
+                >
+                  {loading ? (
+                    <ActivityIndicator color={'#ffffff'} />
+                  ) : (
+                    <Text style={styles.generateButtonText}>Generate Cover Letter</Text>
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </BlurView>
 
-              {/* Generate Button */}
-              <TouchableOpacity
-                style={[styles.generateButton, loading && styles.generateButtonDisabled]}
-                onPress={handleGenerate}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color={'#ffffff'} />
-                ) : (
-                  <Text style={styles.generateButtonText}>Generate Cover Letter</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </BlurView>
-
-          {/* Previous Cover Letters */}
-          {coverLetters.length > 0 && (
-            <View style={styles.historySection}>
-              <Text style={[styles.historySectionTitle, { color: colors.text }]}>Previous Cover Letters</Text>
-              {coverLetters.map(renderCoverLetterCard)}
-            </View>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {/* Previous Cover Letters */}
+        {coverLetters.length > 0 && (
+          <View style={styles.historySection}>
+            <Text style={[styles.historySectionTitle, { color: colors.text }]}>Previous Cover Letters</Text>
+            {coverLetters.map(renderCoverLetterCard)}
+          </View>
+        )}
+      </ScrollView>
 
       <CoverLetterDetailModal
         visible={modalVisible}
@@ -363,29 +363,6 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.semibold,
     marginBottom: SPACING.lg,
   },
-  toggleContainer: {
-    flexDirection: 'row',
-    marginBottom: SPACING.lg,
-    borderRadius: GLASS.getCornerRadius('medium'),
-    padding: SPACING.xs,
-  },
-  toggleButton: {
-    flex: 1,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderRadius: GLASS.getCornerRadius('small'),
-    alignItems: 'center',
-  },
-  toggleButtonActive: {
-    backgroundColor: COLORS.primary,
-  },
-  toggleButtonText: {
-    ...TYPOGRAPHY.body,
-  },
-  toggleButtonTextActive: {
-    color: '#ffffff',
-    fontWeight: '600',
-  },
   inputGroup: {
     marginBottom: SPACING.lg,
   },
@@ -393,19 +370,59 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.bodyBold,
     marginBottom: SPACING.sm,
   },
-  input: {
-    ...TYPOGRAPHY.body,
-    backgroundColor: '#ffffff80',
+  // Resume selection list
+  resumeList: {
+    gap: SPACING.sm,
+    marginBottom: SPACING.lg,
+  },
+  resumeCardBlur: {
     borderRadius: GLASS.getCornerRadius('medium'),
-    borderWidth: GLASS.getBorderWidth(),
-    borderColor: GLASS.getBorderColor(),
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
+    overflow: 'hidden',
   },
-  textArea: {
-    minHeight: 120,
-    paddingTop: SPACING.md,
+  resumeCard: {
+    padding: SPACING.md,
+    borderRadius: GLASS.getCornerRadius('medium'),
   },
+  resumeCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  resumeCardLeft: {
+    width: 36,
+    height: 36,
+    borderRadius: GLASS.getCornerRadius('small'),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  resumeCardText: {
+    flex: 1,
+  },
+  resumeCardTitle: {
+    ...TYPOGRAPHY.bodyBold,
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  resumeCardCompany: {
+    ...TYPOGRAPHY.caption,
+    fontSize: 13,
+  },
+  resumeCardRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  matchBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: GLASS.getCornerRadius('small'),
+  },
+  matchBadgeText: {
+    ...TYPOGRAPHY.caption,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  // Options
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -444,6 +461,42 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.heading3,
     color: '#ffffff',
   },
+  // Empty state
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xl * 2,
+    gap: SPACING.md,
+  },
+  emptyStateTitle: {
+    ...TYPOGRAPHY.heading3,
+    marginTop: SPACING.sm,
+  },
+  emptyStateText: {
+    ...TYPOGRAPHY.body,
+    textAlign: 'center',
+    paddingHorizontal: SPACING.lg,
+  },
+  emptyStateButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: GLASS.getCornerRadius('medium'),
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  emptyStateButtonText: {
+    ...TYPOGRAPHY.bodyBold,
+    color: '#ffffff',
+  },
+  // Loading
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xl,
+    gap: SPACING.sm,
+  },
+  loadingText: {
+    ...TYPOGRAPHY.caption,
+  },
+  // History
   historySection: {
     marginTop: SPACING.xl,
   },

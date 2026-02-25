@@ -16,7 +16,7 @@ export type DashboardPhase = 'greeting' | 'transitioning' | 'dashboard';
 // Category group boundaries: Resume Tools (0-5), Career Prep (6-10), Growth (11-14)
 const GROUP_BREAKS = [6, 11];
 
-export function useDashboardAnimations() {
+export function useDashboardAnimations(skipGreetingParam: boolean = false) {
   const [phase, setPhase] = useState<DashboardPhase>('greeting');
   const hasPlayedGreeting = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -168,8 +168,8 @@ export function useDashboardAnimations() {
 
   // Start greeting timer on mount (only once)
   useEffect(() => {
-    if (hasPlayedGreeting.current) {
-      // Already played - show dashboard immediately
+    if (skipGreetingParam || hasPlayedGreeting.current) {
+      // Skip greeting when navigating via logo tap or already played
       showDashboardImmediate();
       return;
     }

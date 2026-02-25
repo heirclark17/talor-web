@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated from 'react-native-reanimated';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
 import { Sun, Moon } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
@@ -35,13 +35,15 @@ export default function DashboardScreen() {
   const { colors, isDark, setThemeMode } = useTheme();
   const { user } = useSupabaseAuth();
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+  const route = useRoute();
+  const skipGreetingParam = (route.params as any)?.skipGreeting ?? false;
   const {
     phase,
     greetingStyle,
     dashboardStyle,
     cardAnimatedStyles,
     skipGreeting,
-  } = useDashboardAnimations();
+  } = useDashboardAnimations(skipGreetingParam);
 
   const greeting = getGreeting();
   const userName = getUserFirstName(user);
