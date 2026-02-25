@@ -143,7 +143,7 @@ export default function CoverLetterGeneratorScreen() {
           key={option.value}
           style={[
             styles.optionButton,
-            { backgroundColor: colors.backgroundSecondary + '40' },
+            { backgroundColor: colors.backgroundSecondary + '40', borderColor: isDark ? GLASS.getBorderColor() : 'transparent' },
             selectedValue === option.value && styles.optionButtonActive,
           ]}
           onPress={() => onSelect(option.value)}

@@ -66,7 +66,7 @@ type TailorResumeRouteProp = RouteProp<RootStackParamList, 'TailorResume'>;
 export default function TailorResumeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<TailorResumeRouteProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { capture } = usePostHog();
   const initialResumeId = route.params?.resumeId;
 
@@ -693,7 +693,7 @@ export default function TailorResumeScreen() {
         <View style={styles.comparisonFooter}>
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity
-              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: isDark ? colors.glassBorder : 'transparent' }]}
               onPress={handleSaveComparison}
               disabled={saving}
             >
@@ -706,7 +706,7 @@ export default function TailorResumeScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: isDark ? colors.glassBorder : 'transparent' }]}
               onPress={showExportOptions}
               disabled={exporting}
             >
@@ -730,7 +730,7 @@ export default function TailorResumeScreen() {
 
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity
-              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: isDark ? colors.glassBorder : 'transparent' }]}
               onPress={() => navigation.navigate('Applications' as any)}
             >
               <ClipboardCheck color={COLORS.primary} size={18} />
@@ -738,7 +738,7 @@ export default function TailorResumeScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+              style={[styles.secondaryButton, { backgroundColor: colors.glass, borderColor: isDark ? colors.glassBorder : 'transparent' }]}
               onPress={() => navigation.navigate('CoverLetters' as any)}
             >
               <BookOpen color={COLORS.primary} size={18} />

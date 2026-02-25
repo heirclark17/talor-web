@@ -130,7 +130,8 @@ export default function ResumeBuilderScreen() {
     progressText: { color: colors.textSecondary },
     sectionTab: {
       backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'transparent',
+      borderWidth: isDark ? 1 : 0,
     },
     sectionTabText: { color: colors.textSecondary },
     sectionTitle: { color: colors.text },
@@ -148,7 +149,8 @@ export default function ResumeBuilderScreen() {
     },
     skillTag: {
       backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.1)',
-      borderColor: isDark ? 'rgba(59,130,246,0.3)' : 'rgba(59,130,246,0.2)',
+      borderColor: isDark ? 'rgba(59,130,246,0.3)' : 'transparent',
+      borderWidth: isDark ? 1 : 0,
     },
     bulletText: { color: colors.text },
     emptyText: { color: colors.textSecondary },
@@ -1054,6 +1056,7 @@ const styles = StyleSheet.create({
   sectionTabActive: {
     backgroundColor: 'rgba(59, 130, 246, 0.1)',
     borderColor: COLORS.primary,
+    borderWidth: 1,
   },
   sectionTabText: {
     ...TYPOGRAPHY.caption1,

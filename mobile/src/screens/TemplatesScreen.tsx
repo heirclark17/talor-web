@@ -11,12 +11,11 @@ import {
   ScrollView,
   StyleSheet,
   Dimensions,
-  Image,
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { FileText, Check, Eye } from 'lucide-react-native';
+import { Check, Eye } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
 import { COLORS, TYPOGRAPHY } from '../utils/constants';
@@ -30,7 +29,8 @@ interface Template {
   name: string;
   category: string;
   description: string;
-  preview: string;
+  accentColor: string;
+  headerStyle: 'centered' | 'left' | 'sidebar' | 'bold' | 'split' | 'minimal';
 }
 
 const templates: Template[] = [
@@ -39,44 +39,308 @@ const templates: Template[] = [
     name: 'Professional',
     category: 'Classic',
     description: 'Clean and professional design suitable for any industry',
-    preview: 'https://via.placeholder.com/400x600/000000/FFFFFF?text=Professional',
+    accentColor: '#2563EB',
+    headerStyle: 'centered',
   },
   {
     id: '2',
     name: 'Modern',
     category: 'Contemporary',
     description: 'Modern design with bold typography and clean layout',
-    preview: 'https://via.placeholder.com/400x600/1F2937/FFFFFF?text=Modern',
+    accentColor: '#7C3AED',
+    headerStyle: 'left',
   },
   {
     id: '3',
     name: 'Technical',
     category: 'Tech',
     description: 'Optimized for software engineers and technical roles',
-    preview: 'https://via.placeholder.com/400x600/111827/FFFFFF?text=Technical',
+    accentColor: '#059669',
+    headerStyle: 'sidebar',
   },
   {
     id: '4',
     name: 'Creative',
     category: 'Design',
     description: 'Eye-catching design for creative professionals',
-    preview: 'https://via.placeholder.com/400x600/374151/FFFFFF?text=Creative',
+    accentColor: '#DC2626',
+    headerStyle: 'bold',
   },
   {
     id: '5',
     name: 'Executive',
     category: 'Leadership',
     description: 'Sophisticated design for senior-level positions',
-    preview: 'https://via.placeholder.com/400x600/4B5563/FFFFFF?text=Executive',
+    accentColor: '#1E293B',
+    headerStyle: 'split',
   },
   {
     id: '6',
     name: 'Minimal',
     category: 'Simple',
     description: 'Minimalist design that focuses on content',
-    preview: 'https://via.placeholder.com/400x600/6B7280/FFFFFF?text=Minimal',
+    accentColor: '#6B7280',
+    headerStyle: 'minimal',
   },
 ];
+
+// Rendered template preview - no network required, no images needed.
+// Each style renders a distinct layout that visually represents the actual
+// template design the user will get.
+function TemplatePreviewRenderer({
+  template,
+  large = false,
+}: {
+  template: Template;
+  large?: boolean;
+}) {
+  const s = large ? previewLarge : previewSmall;
+  const accent = template.accentColor;
+  const bg = '#FFFFFF';
+  const textDark = '#1F2937';
+  const textMid = '#6B7280';
+  const textLight = '#D1D5DB';
+
+  // Shared reusable line blocks
+  const Line = ({
+    width,
+    height = 3,
+    color = textLight,
+    style,
+  }: {
+    width: string | number;
+    height?: number;
+    color?: string;
+    style?: object;
+  }) => (
+    <View
+      style={[
+        { width: width as any, height, backgroundColor: color, borderRadius: 2 },
+        style,
+      ]}
+    />
+  );
+
+  const Gap = ({ h }: { h: number }) => <View style={{ height: h }} />;
+
+  // --- Professional: centered name header, section dividers ---
+  if (template.headerStyle === 'centered') {
+    return (
+      <View style={[s.canvas, { backgroundColor: bg }]}>
+        {/* Header */}
+        <View style={[s.centeredHeader, { borderBottomColor: accent }]}>
+          <View style={[s.nameLine, { backgroundColor: textDark, width: '60%' }]} />
+          <Gap h={large ? 5 : 3} />
+          <View style={[s.nameLine, { backgroundColor: textMid, width: '40%', height: large ? 5 : 3 }]} />
+          <Gap h={large ? 4 : 2} />
+          <Line width="70%" height={large ? 2 : 1} color={textMid} />
+        </View>
+        <Gap h={large ? 10 : 5} />
+        {/* Section */}
+        {[{ label: 60, lines: [80, 65, 72] }, { label: 55, lines: [75, 68] }].map((sec, si) => (
+          <View key={si} style={s.section}>
+            <View style={[s.sectionLabel, { width: `${sec.label}%`, backgroundColor: accent }]} />
+            <Gap h={large ? 5 : 3} />
+            {sec.lines.map((w, li) => (
+              <React.Fragment key={li}>
+                <Line width={`${w}%`} />
+                <Gap h={large ? 4 : 2} />
+              </React.Fragment>
+            ))}
+            <Gap h={large ? 6 : 3} />
+          </View>
+        ))}
+      </View>
+    );
+  }
+
+  // --- Modern: left-aligned bold name, colored left border on sections ---
+  if (template.headerStyle === 'left') {
+    return (
+      <View style={[s.canvas, { backgroundColor: bg }]}>
+        <View style={{ paddingHorizontal: large ? 16 : 8 }}>
+          <View style={[s.nameLine, { backgroundColor: accent, width: '55%', height: large ? 12 : 7 }]} />
+          <Gap h={large ? 4 : 2} />
+          <Line width="45%" height={large ? 3 : 2} color={textMid} />
+          <Gap h={large ? 4 : 2} />
+          <Line width="70%" height={large ? 2 : 1} color={textLight} />
+        </View>
+        <Gap h={large ? 12 : 6} />
+        {[{ w: [85, 70, 75] }, { w: [80, 65] }].map((sec, si) => (
+          <View key={si} style={[s.section, { borderLeftWidth: large ? 3 : 2, borderLeftColor: accent, paddingLeft: large ? 10 : 5 }]}>
+            <Line width="50%" height={large ? 4 : 2} color={textDark} />
+            <Gap h={large ? 5 : 3} />
+            {sec.w.map((w, li) => (
+              <React.Fragment key={li}>
+                <Line width={`${w}%`} />
+                <Gap h={large ? 4 : 2} />
+              </React.Fragment>
+            ))}
+            <Gap h={large ? 6 : 3} />
+          </View>
+        ))}
+      </View>
+    );
+  }
+
+  // --- Technical: dark sidebar left, content right ---
+  if (template.headerStyle === 'sidebar') {
+    return (
+      <View style={[s.canvas, { backgroundColor: bg, flexDirection: 'row' }]}>
+        {/* Sidebar */}
+        <View style={[s.sidebar, { backgroundColor: accent }]}>
+          <View style={[s.avatarCircle, { borderColor: 'rgba(255,255,255,0.4)' }]} />
+          <Gap h={large ? 8 : 4} />
+          {[50, 70, 55, 45, 60, 40].map((w, i) => (
+            <React.Fragment key={i}>
+              <Line width={`${w}%`} color="rgba(255,255,255,0.5)" height={large ? 3 : 2} />
+              <Gap h={large ? 4 : 2} />
+            </React.Fragment>
+          ))}
+        </View>
+        {/* Content */}
+        <View style={s.sidebarContent}>
+          <Line width="80%" height={large ? 6 : 4} color={textDark} />
+          <Gap h={large ? 3 : 2} />
+          <Line width="60%" height={large ? 3 : 2} color={textMid} />
+          <Gap h={large ? 10 : 5} />
+          {[{ w: [90, 75, 80] }, { w: [85, 70] }].map((sec, si) => (
+            <View key={si} style={{ marginBottom: large ? 8 : 4 }}>
+              <Line width="55%" height={large ? 4 : 2} color={accent} />
+              <Gap h={large ? 4 : 2} />
+              {sec.w.map((w, li) => (
+                <React.Fragment key={li}>
+                  <Line width={`${w}%`} height={large ? 2 : 1} />
+                  <Gap h={large ? 3 : 2} />
+                </React.Fragment>
+              ))}
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  // --- Creative: bold full-width color header block ---
+  if (template.headerStyle === 'bold') {
+    return (
+      <View style={[s.canvas, { backgroundColor: bg }]}>
+        <View style={[s.boldHeader, { backgroundColor: accent }]}>
+          <View style={[s.nameLine, { backgroundColor: 'rgba(255,255,255,0.9)', width: '65%', height: large ? 13 : 8 }]} />
+          <Gap h={large ? 5 : 3} />
+          <Line width="45%" height={large ? 3 : 2} color="rgba(255,255,255,0.6)" />
+          <Gap h={large ? 3 : 2} />
+          <Line width="70%" height={large ? 2 : 1} color="rgba(255,255,255,0.4)" />
+        </View>
+        <View style={{ padding: large ? 12 : 6 }}>
+          {[{ w: [80, 68, 74] }, { w: [78, 62] }].map((sec, si) => (
+            <View key={si} style={{ marginBottom: large ? 8 : 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: large ? 4 : 2 }}>
+                <View style={{ width: large ? 8 : 5, height: large ? 8 : 5, borderRadius: 4, backgroundColor: accent, marginRight: large ? 5 : 3 }} />
+                <Line width="40%" height={large ? 4 : 2} color={textDark} />
+              </View>
+              {sec.w.map((w, li) => (
+                <React.Fragment key={li}>
+                  <Line width={`${w}%`} />
+                  <Gap h={large ? 3 : 2} />
+                </React.Fragment>
+              ))}
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  // --- Executive: two-tone split header (dark top / light bottom) ---
+  if (template.headerStyle === 'split') {
+    return (
+      <View style={[s.canvas, { backgroundColor: bg }]}>
+        <View style={[s.splitHeader, { backgroundColor: accent }]}>
+          <Line width="55%" height={large ? 12 : 7} color="#FFFFFF" />
+          <Gap h={large ? 4 : 2} />
+          <Line width="42%" height={large ? 3 : 2} color="rgba(255,255,255,0.6)" />
+        </View>
+        <View style={[s.splitSubHeader, { borderBottomColor: accent, borderBottomWidth: large ? 2 : 1 }]}>
+          {[40, 55, 38].map((w, i) => (
+            <Line key={i} width={`${w}%`} height={large ? 2 : 1} color={textMid} />
+          ))}
+        </View>
+        <View style={{ padding: large ? 12 : 6 }}>
+          {[{ w: [85, 70, 76] }, { w: [80, 65] }].map((sec, si) => (
+            <View key={si} style={{ marginBottom: large ? 8 : 4 }}>
+              <Line width="50%" height={large ? 4 : 2} color={accent} />
+              <View style={{ height: large ? 2 : 1, backgroundColor: textLight, marginVertical: large ? 3 : 2 }} />
+              {sec.w.map((w, li) => (
+                <React.Fragment key={li}>
+                  <Line width={`${w}%`} />
+                  <Gap h={large ? 3 : 2} />
+                </React.Fragment>
+              ))}
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  // --- Minimal: clean, lots of whitespace, thin lines ---
+  return (
+    <View style={[s.canvas, { backgroundColor: bg }]}>
+      <View style={{ padding: large ? 16 : 8 }}>
+        <Line width="50%" height={large ? 9 : 5} color={textDark} />
+        <Gap h={large ? 5 : 3} />
+        <Line width="35%" height={large ? 2 : 1} color={textMid} />
+        <Gap h={large ? 2 : 1} />
+        <Line width="60%" height={large ? 1 : 1} color={textLight} />
+      </View>
+      <View style={{ height: large ? 1 : 1, backgroundColor: textLight, marginHorizontal: large ? 16 : 8 }} />
+      <View style={{ padding: large ? 16 : 8 }}>
+        {[{ lw: 45, lines: [90, 78, 82, 70] }, { lw: 40, lines: [85, 72] }].map((sec, si) => (
+          <View key={si} style={{ marginBottom: large ? 12 : 6 }}>
+            <Line width={`${sec.lw}%`} height={large ? 2 : 1} color={textDark} />
+            <Gap h={large ? 6 : 3} />
+            {sec.lines.map((w, li) => (
+              <React.Fragment key={li}>
+                <Line width={`${w}%`} height={large ? 2 : 1} color={textLight} />
+                <Gap h={large ? 4 : 2} />
+              </React.Fragment>
+            ))}
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// Sizing tokens for small (grid card) vs large (modal preview)
+const previewSmall = StyleSheet.create({
+  canvas: { flex: 1, overflow: 'hidden' },
+  centeredHeader: { alignItems: 'center', paddingVertical: 8, borderBottomWidth: 2, marginHorizontal: 8 },
+  nameLine: { height: 8, borderRadius: 2 },
+  section: { paddingHorizontal: 8, marginBottom: 4 },
+  sectionLabel: { height: 3, borderRadius: 1 },
+  sidebar: { width: '30%', padding: 6, alignItems: 'center' },
+  avatarCircle: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, backgroundColor: 'rgba(255,255,255,0.3)' },
+  sidebarContent: { flex: 1, padding: 6 },
+  boldHeader: { paddingVertical: 12, paddingHorizontal: 8, alignItems: 'flex-start' },
+  splitHeader: { paddingVertical: 10, paddingHorizontal: 8, alignItems: 'flex-start' },
+  splitSubHeader: { paddingHorizontal: 8, paddingVertical: 5, gap: 3 },
+});
+
+const previewLarge = StyleSheet.create({
+  canvas: { flex: 1, overflow: 'hidden' },
+  centeredHeader: { alignItems: 'center', paddingVertical: 18, borderBottomWidth: 3, marginHorizontal: 16 },
+  nameLine: { height: 14, borderRadius: 3 },
+  section: { paddingHorizontal: 16, marginBottom: 8 },
+  sectionLabel: { height: 5, borderRadius: 2 },
+  sidebar: { width: '32%', padding: 12, alignItems: 'center' },
+  avatarCircle: { width: 44, height: 44, borderRadius: 22, borderWidth: 3, backgroundColor: 'rgba(255,255,255,0.3)' },
+  sidebarContent: { flex: 1, padding: 12 },
+  boldHeader: { paddingVertical: 22, paddingHorizontal: 16, alignItems: 'flex-start' },
+  splitHeader: { paddingVertical: 18, paddingHorizontal: 16, alignItems: 'flex-start' },
+  splitSubHeader: { paddingHorizontal: 16, paddingVertical: 10, gap: 5 },
+});
 
 const categories = ['All', 'Classic', 'Contemporary', 'Tech', 'Design', 'Leadership', 'Simple'];
 
@@ -86,7 +350,6 @@ export default function TemplatesScreen() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [previewVisible, setPreviewVisible] = useState(false);
-  const [imageError, setImageError] = useState<{ [key: string]: boolean }>({});
 
   const ds = useMemo(() => ({
     container: { backgroundColor: colors.background },
@@ -189,16 +452,7 @@ export default function TemplatesScreen() {
                     ]}
                   >
                     <View style={[styles.templatePreview, ds.templatePreview]}>
-                      {imageError[template.id] ? (
-                        <FileText size={64} color={colors.textSecondary} />
-                      ) : (
-                        <Image
-                          source={{ uri: template.preview }}
-                          style={styles.previewImage}
-                          resizeMode="cover"
-                          onError={() => setImageError({ ...imageError, [template.id]: true })}
-                        />
-                      )}
+                      <TemplatePreviewRenderer template={template} />
                     </View>
 
                     {isSelected && (
@@ -288,21 +542,12 @@ export default function TemplatesScreen() {
                     </TouchableOpacity>
                   </View>
                   <View style={styles.previewImageContainer}>
-                    {imageError[selectedTemplate] ? (
-                      <View style={styles.previewPlaceholder}>
-                        <FileText size={80} color={colors.textSecondary} />
-                        <Text style={[styles.previewPlaceholderText, { color: colors.textSecondary }]}>
-                          Preview not available
-                        </Text>
-                      </View>
-                    ) : (
-                      <Image
-                        source={{ uri: templates.find((t) => t.id === selectedTemplate)?.preview }}
-                        style={styles.previewImageFull}
-                        resizeMode="contain"
-                        onError={() => setImageError({ ...imageError, [selectedTemplate]: true })}
-                      />
-                    )}
+                    {(() => {
+                      const tmpl = templates.find((t) => t.id === selectedTemplate);
+                      return tmpl ? (
+                        <TemplatePreviewRenderer template={tmpl} large />
+                      ) : null;
+                    })()}
                   </View>
                 </>
               )}
@@ -390,10 +635,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-  },
-  previewImage: {
-    width: '100%',
-    height: '100%',
   },
   selectedBadge: {
     position: 'absolute',
@@ -494,16 +735,5 @@ const styles = StyleSheet.create({
     height: 500,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  previewImageFull: {
-    width: '100%',
-    height: '100%',
-  },
-  previewPlaceholder: {
-    alignItems: 'center',
-    gap: 12,
-  },
-  previewPlaceholderText: {
-    ...TYPOGRAPHY.subhead,
   },
 });

@@ -131,7 +131,7 @@ interface StarStory {
 export default function BehavioralTechnicalQuestionsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<BehavioralTechnicalQuestionsRouteProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { interviewPrepId } = route.params;
 
   const [data, setData] = useState<QuestionsData | null>(null);
@@ -369,7 +369,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tab, { backgroundColor: colors.glass, borderColor: colors.border }, activeTab === 'behavioral' && styles.activeTab]}
+          style={[styles.tab, { backgroundColor: colors.glass, borderColor: isDark ? colors.border : 'transparent' }, activeTab === 'behavioral' && styles.activeTab]}
           onPress={() => setActiveTab('behavioral')}
           accessibilityRole="tab"
           accessibilityLabel={`Behavioral questions, ${data?.behavioral?.questions?.length || 0} questions`}
@@ -385,7 +385,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, { backgroundColor: colors.glass, borderColor: colors.border }, activeTab === 'technical' && styles.activeTab]}
+          style={[styles.tab, { backgroundColor: colors.glass, borderColor: isDark ? colors.border : 'transparent' }, activeTab === 'technical' && styles.activeTab]}
           onPress={() => setActiveTab('technical')}
           accessibilityRole="tab"
           accessibilityLabel={`Technical questions, ${data?.technical?.questions?.length || 0} questions`}
@@ -616,7 +616,7 @@ export default function BehavioralTechnicalQuestionsScreen() {
                             </View>
                             <View style={styles.editButtonRow}>
                               <TouchableOpacity
-                                style={[styles.cancelButton, { borderColor: colors.border }]}
+                                style={[styles.cancelButton, { borderColor: isDark ? colors.border : 'transparent' }]}
                                 onPress={() => setEditingQuestionId(null)}
                                 accessibilityRole="button"
                                 accessibilityLabel="Cancel editing"

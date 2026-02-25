@@ -86,7 +86,8 @@ export default function MockInterviewScreen() {
       color: colors.text,
     },
     typeOption: {
-      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+      borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'transparent',
+      borderWidth: isDark ? 2 : 0,
       backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
     },
   }), [colors, isDark]);
@@ -454,7 +455,7 @@ export default function MockInterviewScreen() {
                     style={[
                       styles.typeOption,
                       ds.typeOption,
-                      interviewType === opt.id && { borderColor: opt.color, backgroundColor: opt.color + '10' },
+                      interviewType === opt.id && { borderColor: opt.color, backgroundColor: opt.color + '10', borderWidth: 2 },
                     ]}
                   >
                     <opt.icon size={28} color={interviewType === opt.id ? opt.color : colors.textSecondary} />

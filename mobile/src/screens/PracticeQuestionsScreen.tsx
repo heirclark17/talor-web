@@ -62,7 +62,7 @@ interface SavedPracticeResponse {
 export default function PracticeQuestionsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<PracticeQuestionsRouteProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { interviewPrepId, tailoredResumeId } = route.params;
 
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -545,7 +545,7 @@ export default function PracticeQuestionsScreen() {
                   <View style={styles.actionButtons}>
                     {!starStory && !isGeneratingStory && (
                       <TouchableOpacity
-                        style={styles.actionButton}
+                        style={[styles.actionButton, { borderColor: isDark ? COLORS.primary : 'transparent' }]}
                         onPress={() => handleGenerateStory(index)}
                         accessibilityRole="button"
                         accessibilityLabel="Generate STAR story"

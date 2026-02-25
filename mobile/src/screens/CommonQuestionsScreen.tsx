@@ -65,7 +65,7 @@ const TABS: { key: TabType; label: string; icon: React.ElementType }[] = [
 export default function CommonQuestionsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<CommonQuestionsRouteProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { interviewPrepId } = route.params;
 
   const [questions, setQuestions] = useState<CommonQuestion[]>([]);
@@ -264,7 +264,7 @@ export default function CommonQuestionsScreen() {
                           style={[
                             styles.tab,
                             isActive && styles.activeTab,
-                            { borderColor: isActive ? COLORS.primary : colors.border },
+                            { borderColor: isActive ? COLORS.primary : (isDark ? colors.border : 'transparent') },
                           ]}
                           onPress={() => setActiveTab(question.id, tab.key)}
                           accessibilityRole="tab"
@@ -526,7 +526,7 @@ export default function CommonQuestionsScreen() {
 
                   {/* Regenerate Button */}
                   <TouchableOpacity
-                    style={[styles.regenerateButton, { borderColor: COLORS.primary }]}
+                    style={[styles.regenerateButton, { borderColor: isDark ? COLORS.primary : 'transparent' }]}
                     onPress={() => handleRegenerateQuestion(question.id)}
                     disabled={isRegenerating}
                     accessibilityRole="button"

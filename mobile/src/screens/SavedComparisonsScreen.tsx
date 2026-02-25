@@ -49,7 +49,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SavedComparisonsScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [comparisons, setComparisons] = useState<SavedComparison[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -359,7 +359,7 @@ export default function SavedComparisonsScreen() {
               {item.tags.map((tag, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={[styles.tagPill, { backgroundColor: ALPHA_COLORS.primary.bg, borderColor: ALPHA_COLORS.primary.border }]}
+                  style={[styles.tagPill, { backgroundColor: ALPHA_COLORS.primary.bg, borderColor: isDark ? ALPHA_COLORS.primary.border : 'transparent' }]}
                   onPress={() => handleRemoveTag(item.id, tag)}
                   accessibilityRole="button"
                   accessibilityLabel={`Remove tag ${tag}`}

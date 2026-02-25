@@ -99,7 +99,7 @@ const DEFAULT_THEMES = [
 export default function STARStoryBuilderScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<STARStoryBuilderRouteProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { tailoredResumeId, interviewPrepId } = route.params;
 
   // Context states
@@ -831,7 +831,7 @@ export default function STARStoryBuilderScreen() {
                     key={index}
                     style={[
                       styles.experienceCard,
-                      { backgroundColor: colors.glass, borderColor: isSelected ? COLORS.primary : colors.glassBorder },
+                      { backgroundColor: colors.glass, borderColor: isSelected ? COLORS.primary : (isDark ? colors.glassBorder : 'transparent') },
                       isSelected && styles.experienceCardSelected,
                     ]}
                     onPress={() => toggleExperience(index)}

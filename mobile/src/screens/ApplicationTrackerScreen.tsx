@@ -263,7 +263,7 @@ export default function ApplicationTrackerScreen() {
   const renderFilterChips = () => (
     <View style={styles.filterContainer}>
       <TouchableOpacity
-        style={[styles.filterChip, { backgroundColor: colors.backgroundSecondary + '40' }, !selectedStatus && styles.filterChipActive]}
+        style={[styles.filterChip, { backgroundColor: colors.backgroundSecondary + '40', borderColor: isDark ? GLASS.getBorderColor() : 'transparent' }, !selectedStatus && styles.filterChipActive]}
         onPress={() => setSelectedStatus(null)}
       >
         <Text style={[styles.filterChipText, { color: colors.textSecondary }, !selectedStatus && styles.filterChipTextActive]}>
@@ -273,7 +273,7 @@ export default function ApplicationTrackerScreen() {
       {Object.entries(STATUS_LABELS).map(([key, label]) => (
         <TouchableOpacity
           key={key}
-          style={[styles.filterChip, { backgroundColor: colors.backgroundSecondary + '40' }, selectedStatus === key && styles.filterChipActive]}
+          style={[styles.filterChip, { backgroundColor: colors.backgroundSecondary + '40', borderColor: isDark ? GLASS.getBorderColor() : 'transparent' }, selectedStatus === key && styles.filterChipActive]}
           onPress={() => setSelectedStatus(key)}
         >
           <Text style={[styles.filterChipText, { color: colors.textSecondary }, selectedStatus === key && styles.filterChipTextActive]}>

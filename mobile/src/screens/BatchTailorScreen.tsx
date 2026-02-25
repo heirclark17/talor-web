@@ -40,7 +40,7 @@ const MAX_JOBS = 10;
 
 export default function BatchTailorScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   // Resume store
   const {
@@ -478,7 +478,7 @@ export default function BatchTailorScreen() {
 
             {jobUrls.length < MAX_JOBS && (
               <TouchableOpacity
-                style={[styles.addButton, { borderColor: colors.glassBorder }]}
+                style={[styles.addButton, { borderColor: isDark ? colors.glassBorder : 'transparent', borderWidth: isDark ? 1 : 0 }]}
                 onPress={handleAddUrl}
                 accessibilityRole="button"
                 accessibilityLabel="Add another job URL"

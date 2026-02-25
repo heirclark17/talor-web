@@ -596,7 +596,7 @@ export default function HomeScreen() {
                   <View style={styles.sectionHeader}>
                     <FileText color={COLORS.purple} size={20} />
                     <Text style={[TYPOGRAPHY.headline, { color: colors.text, flex: 1, marginLeft: SPACING.sm }]}>ATS Compatibility</Text>
-                    <View style={[BadgeStyles.base, BadgeStyles.primary, { backgroundColor: ALPHA_COLORS.purple.bg, borderColor: ALPHA_COLORS.purple.border }]}>
+                    <View style={[BadgeStyles.base, BadgeStyles.primary, { backgroundColor: ALPHA_COLORS.purple.bg, borderColor: isDark ? ALPHA_COLORS.purple.border : 'transparent' }]}>
                       <NumberText weight="bold" style={[TYPOGRAPHY.caption1, { color: COLORS.purple }]}>
                         {currentAnalysis.ats_compatibility.score}
                       </NumberText>

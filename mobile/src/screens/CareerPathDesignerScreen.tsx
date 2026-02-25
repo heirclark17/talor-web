@@ -55,7 +55,7 @@ interface CareerPlan {
 
 export default function CareerPathDesignerScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { capture } = usePostHog();
 
   // Resume store
@@ -922,7 +922,7 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chip,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
                             educationLevel === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setEducationLevel(option.value)}
@@ -1011,7 +1011,7 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chip,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
                             targetRoleLevel === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setTargetRoleLevel(option.value)}
@@ -1039,7 +1039,7 @@ export default function CareerPathDesignerScreen() {
                           key={industry}
                           style={[
                             styles.chip,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
                             targetIndustries.includes(industry) && styles.chipSelected,
                           ]}
                           onPress={() => toggleArrayItem(targetIndustries, setTargetIndustries, industry)}
@@ -1082,7 +1082,7 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chipLarge,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
                             timeline === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setTimeline(option.value)}
@@ -1119,7 +1119,7 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chip,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
                             currentEmploymentStatus === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setCurrentEmploymentStatus(option.value)}
@@ -1172,7 +1172,7 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chip,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
                             inPersonVsRemote === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setInPersonVsRemote(option.value)}
@@ -1218,7 +1218,7 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chipLarge,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
                             learningStyle.includes(option.value) && styles.chipSelected,
                           ]}
                           onPress={() => toggleArrayItem(learningStyle, setLearningStyle, option.value)}
@@ -1248,7 +1248,7 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chipLarge,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
                             technicalBackground === option.value && styles.chipSelected,
                           ]}
                           onPress={() => setTechnicalBackground(option.value)}
@@ -1295,7 +1295,7 @@ export default function CareerPathDesignerScreen() {
                           key={option.value}
                           style={[
                             styles.chipLarge,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: colors.glassBorder },
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
                             transitionMotivation.includes(option.value) && styles.chipSelected,
                           ]}
                           onPress={() => toggleArrayItem(transitionMotivation, setTransitionMotivation, option.value)}
