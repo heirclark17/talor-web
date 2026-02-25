@@ -260,8 +260,8 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
     paddingTop: 0,
-    paddingBottom: 12,
-    marginTop: -24,
+    paddingBottom: 8,
+    marginTop: -32,
   },
   title: {
     ...TYPOGRAPHY.title1,
