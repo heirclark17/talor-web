@@ -89,7 +89,6 @@ export default function TemplatesScreen() {
     container: { backgroundColor: colors.background },
     title: { color: colors.text },
     subtitle: { color: colors.textSecondary },
-    headerBorder: { borderBottomColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' },
     categoryChip: {
       backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
       borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
@@ -121,7 +120,7 @@ export default function TemplatesScreen() {
     <SafeAreaView style={[styles.container, ds.container]} edges={['top']}>
       <View style={styles.content}>
         {/* Header */}
-        <View style={[styles.header, ds.headerBorder]}>
+        <View style={styles.header}>
           <Text style={[styles.title, ds.title]}>Resume Templates</Text>
           <Text style={[styles.subtitle, ds.subtitle]}>
             Choose a professional template to get started
@@ -260,8 +259,9 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
+    paddingTop: 0,
+    paddingBottom: 12,
+    marginTop: -24,
   },
   title: {
     ...TYPOGRAPHY.title1,
