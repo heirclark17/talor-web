@@ -606,8 +606,9 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.regular,
   },
   header: {
-    paddingHorizontal: SPACING.screenMargin,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -670,8 +671,8 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   headerTitle: {
-    fontSize: 32,
-    fontFamily: FONTS.extralight,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
   },
   headerCount: {
     ...TYPOGRAPHY.subhead,

@@ -309,7 +309,7 @@ export default function HomeScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[TYPOGRAPHY.largeTitle, { color: colors.text }]}>My Resumes</Text>
+        <Text style={[styles.pageTitle, { color: colors.text }]}>My Resumes</Text>
         <GlassButton
           variant="secondary"
           size="sm"
@@ -682,10 +682,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.screenMargin,
-    paddingTop: 0,
-    paddingBottom: SPACING.sm,
-    marginTop: -SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
+  },
+  pageTitle: {
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
   },
   addButton: {
     width: SPACING.touchTarget,

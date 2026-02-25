@@ -16,7 +16,7 @@ import { BlurView } from 'expo-blur';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../api/client';
 import { useTheme } from '../context/ThemeContext';
-import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../utils/constants';
+import { SPACING, TYPOGRAPHY, GLASS, COLORS, FONTS } from '../utils/constants';
 import { CoverLetterDetailModal } from '../components/CoverLetterDetailModal';
 
 interface CoverLetter {
@@ -359,7 +359,8 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   sectionTitle: {
-    ...TYPOGRAPHY.heading2,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.lg,
   },
   toggleContainer: {

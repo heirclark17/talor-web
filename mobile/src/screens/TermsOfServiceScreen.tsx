@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme } from '../context/ThemeContext';
-import { SPACING, TYPOGRAPHY, GLASS } from '../utils/constants';
+import { SPACING, TYPOGRAPHY, GLASS, FONTS } from '../utils/constants';
 
 export default function TermsOfServiceScreen() {
   const { colors } = useTheme();
@@ -113,7 +113,8 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   title: {
-    ...TYPOGRAPHY.heading1,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
   },
   lastUpdated: {

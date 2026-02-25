@@ -32,7 +32,7 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
 import { GlassInput } from '../components/glass/GlassInput';
 import { tailorApi } from '../api';
-import { COLORS } from '../utils/constants';
+import { COLORS, SPACING, FONTS } from '../utils/constants';
 import { useTheme } from '../hooks/useTheme';
 
 interface JobPosting {
@@ -151,10 +151,10 @@ export default function JobSearchScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.title, ds.title]}>Find Your Next Role</Text>
-          <Text style={[styles.subtitle, ds.subtitle]}>
-            Search thousands of jobs and tailor your resume with one click
-          </Text>
         </View>
+        <Text style={[styles.subtitle, ds.subtitle]}>
+          Search thousands of jobs and tailor your resume with one click
+        </Text>
 
         {/* Search Bar */}
         <GlassCard style={styles.searchCard}>
@@ -384,19 +384,23 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    marginBottom: 24,
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
     marginBottom: 8,
-    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
     maxWidth: 320,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
   },
   searchCard: {
     padding: 16,

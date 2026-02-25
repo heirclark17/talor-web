@@ -34,7 +34,7 @@ import {
 } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
-import { COLORS, SPACING, TYPOGRAPHY } from '../utils/constants';
+import { COLORS, SPACING, TYPOGRAPHY, FONTS } from '../utils/constants';
 import { useTheme } from '../hooks/useTheme';
 import { api } from '../api/client';
 
@@ -411,10 +411,10 @@ export default function MockInterviewScreen() {
         >
           <View style={styles.header}>
             <Text style={[styles.title, ds.title]}>AI Mock Interview</Text>
-            <Text style={[styles.subtitle, ds.subtitle]}>
-              Practice with an AI interviewer that adapts to your responses
-            </Text>
           </View>
+          <Text style={[styles.subtitle, ds.subtitle]}>
+            Practice with an AI interviewer that adapts to your responses
+          </Text>
 
           <GlassCard style={styles.setupCard}>
             <Text style={[styles.setupTitle, { color: colors.text }]}>Interview Setup</Text>
@@ -507,9 +507,9 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollView: { flex: 1 },
   scrollContent: { padding: 16 },
-  header: { marginBottom: 24, alignItems: 'center' },
-  title: { fontSize: 32, fontWeight: 'bold', marginBottom: 12, textAlign: 'center' },
-  subtitle: { fontSize: 16, textAlign: 'center', lineHeight: 24, maxWidth: 320 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.lg, marginTop: -SPACING.sm, paddingBottom: SPACING.xs },
+  title: { fontSize: 34, fontFamily: FONTS.semibold, marginBottom: 12 },
+  subtitle: { fontSize: 16, textAlign: 'center', lineHeight: 24, maxWidth: 320, paddingHorizontal: SPACING.lg, marginBottom: SPACING.lg },
   setupCard: { padding: 20, marginBottom: 16 },
   setupTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 20 },
   inputGroup: { marginBottom: 20 },

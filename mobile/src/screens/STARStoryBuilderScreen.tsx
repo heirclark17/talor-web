@@ -386,7 +386,6 @@ export default function STARStoryBuilderScreen() {
           <ArrowLeft color={colors.text} size={24} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>STAR Story Builder</Text>
-        <View style={styles.headerPlaceholder} />
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
@@ -848,18 +847,21 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   backButton: {
     width: 44,
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: -SPACING.sm,
+    marginRight: SPACING.sm,
   },
   headerTitle: {
-    ...TYPOGRAPHY.headline,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
   },
   headerPlaceholder: {
     width: 44,

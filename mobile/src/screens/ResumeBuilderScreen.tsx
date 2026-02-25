@@ -36,7 +36,7 @@ import {
 } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
-import { TYPOGRAPHY, SPACING, COLORS } from '../utils/constants';
+import { TYPOGRAPHY, SPACING, COLORS, FONTS } from '../utils/constants';
 import { useTheme } from '../hooks/useTheme';
 import { api } from '../api/client';
 
@@ -1008,13 +1008,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.screenMargin,
-    paddingTop: 0,
+    paddingHorizontal: SPACING.lg,
+    marginTop: -SPACING.sm,
     paddingBottom: SPACING.xs,
-    marginTop: -SPACING.xxl,
   },
   title: {
-    ...TYPOGRAPHY.largeTitle,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
   },
   progressContainer: {
     paddingHorizontal: SPACING.screenMargin,

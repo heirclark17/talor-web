@@ -1068,9 +1068,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    paddingTop: 0,
-    paddingBottom: SPACING.xl,
-    marginTop: -SPACING.md,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   backButton: {
     width: 44,
@@ -1081,11 +1080,11 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   title: {
-    ...TYPOGRAPHY.largeTitle,
-    fontSize: 35,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
   },
   titleWithBack: {
-    fontSize: 35,
+    fontSize: 34,
   },
   content: {
     flex: 1,

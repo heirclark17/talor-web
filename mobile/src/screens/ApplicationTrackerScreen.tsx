@@ -12,7 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../api/client';
 import { useTheme } from '../context/ThemeContext';
-import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../utils/constants';
+import { SPACING, TYPOGRAPHY, GLASS, COLORS, FONTS } from '../utils/constants';
 import { GlassCard } from '../components/glass/GlassCard';
 import { ApplicationFormModal } from '../components/ApplicationFormModal';
 
@@ -365,12 +365,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    borderBottomWidth: GLASS.getBorderWidth(),
-    borderBottomColor: GLASS.getBorderColor(),
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   headerTitle: {
-    ...TYPOGRAPHY.heading1,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
   },
   addButton: {
     backgroundColor: COLORS.primary,

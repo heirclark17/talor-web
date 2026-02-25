@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
   },
   header: { alignItems: 'center', marginBottom: SPACING.xl },
-  title: { fontSize: 32, fontFamily: FONTS.bold, color: COLORS.dark.text, marginBottom: SPACING.xs },
+  title: { fontSize: 34, fontFamily: FONTS.semibold, color: COLORS.dark.text, marginBottom: SPACING.xs },
   subtitle: { fontSize: 16, fontFamily: FONTS.regular, color: COLORS.dark.textSecondary, textAlign: 'center', marginTop: SPACING.sm },
   emailText: { fontFamily: FONTS.semibold, color: COLORS.primary },
   glassContainer: { borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.dark.glassBorder, overflow: 'hidden' },

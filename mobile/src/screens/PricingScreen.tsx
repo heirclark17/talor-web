@@ -16,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Check, Zap, Crown, Sparkles } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
-import { COLORS } from '../utils/constants';
+import { COLORS, SPACING, FONTS } from '../utils/constants';
 import { useTheme } from '../hooks/useTheme';
 
 interface PricingTier {
@@ -135,10 +135,10 @@ export default function PricingScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.title, ds.title]}>Choose Your Plan</Text>
-          <Text style={[styles.subtitle, ds.subtitle]}>
-            Unlock powerful features to accelerate your job search
-          </Text>
         </View>
+        <Text style={[styles.subtitle, ds.subtitle]}>
+          Unlock powerful features to accelerate your job search
+        </Text>
 
         {/* Billing Period Toggle */}
         <View style={[styles.billingToggle, ds.billingToggle]}>
@@ -290,19 +290,23 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    marginBottom: 24,
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
     marginBottom: 8,
-    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
     maxWidth: 320,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
   },
   billingToggle: {
     flexDirection: 'row',

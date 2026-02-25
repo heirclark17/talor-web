@@ -203,7 +203,7 @@ export default function BatchTailorScreen() {
           >
             <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
-          <Text style={[styles.title, styles.titleWithBack, { color: colors.text }]}>Batch Results</Text>
+          <Text style={[styles.pageTitle, { color: colors.text }]}>Batch Results</Text>
         </View>
 
         {/* Summary Banner */}
@@ -319,7 +319,7 @@ export default function BatchTailorScreen() {
           >
             <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
-          <Text style={[styles.title, styles.titleWithBack, { color: colors.text }]}>Batch Tailor</Text>
+          <Text style={[styles.pageTitle, { color: colors.text }]}>Batch Tailor</Text>
         </View>
         <View style={styles.emptyState}>
           <View style={styles.emptyIcon}>
@@ -360,7 +360,7 @@ export default function BatchTailorScreen() {
           >
             <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
-          <Text style={[styles.title, styles.titleWithBack, { color: colors.text }]}>Batch Tailor</Text>
+          <Text style={[styles.pageTitle, { color: colors.text }]}>Batch Tailor</Text>
         </View>
 
         {/* Info Banner */}
@@ -530,7 +530,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   backButton: {
     width: 44,
@@ -547,12 +548,17 @@ const styles = StyleSheet.create({
   titleWithBack: {
     fontSize: 24,
   },
+  pageTitle: {
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
+  },
   infoBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
     borderWidth: 1,
     marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
     padding: SPACING.md,
     borderRadius: RADIUS.md,
   },
@@ -566,6 +572,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     borderWidth: 1,
     marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
     padding: SPACING.md,
     borderRadius: RADIUS.md,
   },

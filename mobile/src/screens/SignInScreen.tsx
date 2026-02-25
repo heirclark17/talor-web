@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   keyboardView: { flex: 1 },
   scrollContent: { flexGrow: 1, justifyContent: 'center', padding: SPACING.lg },
   header: { alignItems: 'center', marginBottom: SPACING.xl },
-  title: { fontSize: 32, fontFamily: FONTS.bold, color: COLORS.dark.text, marginBottom: SPACING.xs },
+  title: { fontSize: 34, fontFamily: FONTS.semibold, color: COLORS.dark.text, marginBottom: SPACING.xs },
   subtitle: { fontSize: 16, fontFamily: FONTS.regular, color: COLORS.dark.textSecondary, textAlign: 'center', marginTop: SPACING.sm },
   glassContainer: { borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.dark.glassBorder, overflow: 'hidden' },
   innerContainer: { padding: SPACING.xl },

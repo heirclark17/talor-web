@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { AlertCircle, Home, Search, FileText, MessageCircle } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
-import { COLORS } from '../utils/constants';
+import { COLORS, FONTS } from '../utils/constants';
 import { useTheme } from '../hooks/useTheme';
 
 export default function NotFoundScreen() {
@@ -147,8 +147,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
     marginBottom: 12,
     textAlign: 'center',
   },

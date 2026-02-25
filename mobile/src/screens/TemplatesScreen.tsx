@@ -19,7 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Check, Eye } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
-import { COLORS, TYPOGRAPHY } from '../utils/constants';
+import { COLORS, TYPOGRAPHY, SPACING, FONTS } from '../utils/constants';
 import { useTheme } from '../hooks/useTheme';
 
 const { width } = Dimensions.get('window');
@@ -396,10 +396,10 @@ export default function TemplatesScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.title, ds.title]}>Resume Templates</Text>
-          <Text style={[styles.subtitle, ds.subtitle]}>
-            Choose a professional template to get started
-          </Text>
         </View>
+        <Text style={[styles.subtitle, ds.subtitle]}>
+          Choose a professional template to get started
+        </Text>
 
         {/* Category Filter */}
         <ScrollView
@@ -568,18 +568,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingTop: 0,
-    paddingBottom: 4,
-    marginTop: -40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   title: {
-    ...TYPOGRAPHY.title1,
     fontSize: 34,
+    fontFamily: FONTS.semibold,
     marginBottom: 8,
   },
   subtitle: {
     ...TYPOGRAPHY.callout,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
   },
   categoryScroll: {
     maxHeight: 60,

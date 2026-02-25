@@ -386,13 +386,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: SPACING.screenMargin,
-    paddingTop: 75,
-    paddingBottom: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   title: {
-    fontSize: 32,
-    fontFamily: FONTS.extralight,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
   },
   content: {
     flex: 1,

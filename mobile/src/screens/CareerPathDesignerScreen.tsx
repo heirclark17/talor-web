@@ -1816,8 +1816,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   welcomeTitle: {
-    fontSize: 32,
-    fontFamily: FONTS.extralight,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
     textAlign: 'center',
     marginBottom: SPACING.md,
     paddingHorizontal: SPACING.md,
@@ -1940,8 +1940,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   screenTitle: {
-    fontSize: 28,
-    fontFamily: FONTS.extralight,
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
     textAlign: 'center',
   },

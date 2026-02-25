@@ -12,7 +12,7 @@ import { X, Upload, FileText, CheckCircle } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { api } from '../api/client';
 import { supabase } from '../lib/supabase';
-import { COLORS, SPACING, TYPOGRAPHY } from '../utils/constants';
+import { COLORS, SPACING, TYPOGRAPHY, FONTS } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { GlassButton } from '../components/glass/GlassButton';
@@ -225,8 +225,7 @@ export default function UploadResumeScreen() {
         >
           <X color={colors.text} size={24} />
         </TouchableOpacity>
-        <Text style={[TYPOGRAPHY.title3, { color: colors.text }]}>Upload Resume</Text>
-        <View style={styles.placeholder} />
+        <Text style={[styles.pageTitle, { color: colors.text }]}>Upload Resume</Text>
       </View>
 
       {/* Upload Area */}
@@ -364,20 +363,22 @@ export default function UploadResumeScreen() {
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.screenMargin,
-    paddingTop: SPACING.xs,
-    paddingBottom: 0,
+    paddingHorizontal: SPACING.lg,
+    marginTop: -SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   closeButton: {
-    width: SPACING.touchTarget,
-    height: SPACING.touchTarget,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: -SPACING.sm,
+    marginRight: SPACING.sm,
   },
-  placeholder: {
-    width: SPACING.touchTarget,
+  pageTitle: {
+    fontSize: 34,
+    fontFamily: FONTS.semibold,
   },
   uploadArea: {
     marginHorizontal: SPACING.screenMargin,
