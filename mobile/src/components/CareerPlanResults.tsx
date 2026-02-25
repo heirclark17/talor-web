@@ -217,7 +217,7 @@ const timelineStyles = StyleSheet.create({
 });
 
 export default function CareerPlanResults({ planData, onSavePlan, onExportPlan }: Props) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [expandedMilestones, setExpandedMilestones] = useState<Set<string>>(new Set([planData.milestones[0]?.id]));
   const [showSkillGaps, setShowSkillGaps] = useState(true);
   const [showActions, setShowActions] = useState(true);
@@ -333,7 +333,7 @@ export default function CareerPlanResults({ planData, onSavePlan, onExportPlan }
       </GlassCard>
 
       {/* View Mode Toggle */}
-      <View style={styles.viewModeContainer}>
+      <View style={[styles.viewModeContainer, { backgroundColor: isDark ? ALPHA_COLORS.white[5] : ALPHA_COLORS.black[3] }]}>
         <TouchableOpacity
           style={[
             styles.viewModeButton,
@@ -1158,7 +1158,6 @@ const styles = StyleSheet.create({
   },
   viewModeContainer: {
     flexDirection: 'row',
-    backgroundColor: ALPHA_COLORS.white[5],
     borderRadius: RADIUS.md,
     padding: 4,
   },

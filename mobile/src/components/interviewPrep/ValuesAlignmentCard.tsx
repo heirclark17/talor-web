@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { Heart, CheckCircle, AlertTriangle, Lightbulb, Users } from 'lucide-react-native';
 import { GlassCard } from '../glass/GlassCard';
+import { useTheme } from '../../context/ThemeContext';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS } from '../../utils/constants';
 import { ValuesAlignment, ThemeColors } from './types';
 import { ConfidenceBar } from './SharedComponents';
@@ -13,6 +14,7 @@ interface ValuesAlignmentCardProps {
 }
 
 export const ValuesAlignmentCard: React.FC<ValuesAlignmentCardProps> = ({ alignment, loading, colors }) => {
+  const { isDark } = useTheme();
   const getAlignmentColor = (score: number) => {
     if (score >= 80) return COLORS.success;
     if (score >= 60) return COLORS.warning;
@@ -59,7 +61,7 @@ export const ValuesAlignmentCard: React.FC<ValuesAlignmentCardProps> = ({ alignm
         <View style={styles.valuesSection}>
           <Text style={[styles.valuesSectionTitle, { color: colors.text }]}>Matched Values</Text>
           {alignment.matched_values.map((match, index) => (
-            <View key={index} style={styles.valuesMatchItem}>
+            <View key={index} style={[styles.valuesMatchItem, { borderBottomColor: isDark ? ALPHA_COLORS.white[5] : ALPHA_COLORS.black[5] }]}>
               <View style={styles.valuesMatchHeader}>
                 <CheckCircle color={COLORS.success} size={16} />
                 <Text style={[styles.valuesMatchValue, { color: colors.text }]}>{match.value}</Text>
@@ -84,7 +86,7 @@ export const ValuesAlignmentCard: React.FC<ValuesAlignmentCardProps> = ({ alignm
         <View style={styles.valuesSection}>
           <Text style={[styles.valuesSectionTitle, { color: colors.text }]}>Areas to Develop</Text>
           {alignment.value_gaps.map((gap, index) => (
-            <View key={index} style={styles.valuesGapItem}>
+            <View key={index} style={[styles.valuesGapItem, { borderBottomColor: isDark ? ALPHA_COLORS.white[5] : ALPHA_COLORS.black[5] }]}>
               <View style={styles.valuesGapHeader}>
                 <AlertTriangle color={COLORS.warning} size={16} />
                 <Text style={[styles.valuesGapValue, { color: colors.text }]}>{gap.value}</Text>
@@ -159,7 +161,6 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: ALPHA_COLORS.white[5],
   },
   valuesMatchHeader: {
     flexDirection: 'row',
@@ -188,7 +189,6 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: ALPHA_COLORS.white[5],
   },
   valuesGapHeader: {
     flexDirection: 'row',

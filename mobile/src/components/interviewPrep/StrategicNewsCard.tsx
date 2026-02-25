@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { TrendingUp, Newspaper, Target, Lightbulb, ChevronUp, ChevronDown } from 'lucide-react-native';
 import { GlassCard } from '../glass/GlassCard';
+import { useTheme } from '../../context/ThemeContext';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS } from '../../utils/constants';
 import { StrategicNewsItem, ThemeColors } from './types';
 
@@ -12,6 +13,7 @@ interface StrategicNewsCardProps {
 }
 
 export const StrategicNewsCard: React.FC<StrategicNewsCardProps> = ({ newsItems, loading, colors }) => {
+  const { isDark } = useTheme();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const toggleNewsItem = (index: number) => {
@@ -104,7 +106,7 @@ export const StrategicNewsCard: React.FC<StrategicNewsCardProps> = ({ newsItems,
             )}
 
             {expandedIndex === index && (
-              <View style={styles.strategicNewsExpandedContent}>
+              <View style={[styles.strategicNewsExpandedContent, { borderTopColor: isDark ? ALPHA_COLORS.white[5] : ALPHA_COLORS.black[5] }]}>
                 {/* Summary */}
                 <View style={styles.strategicNewsSection}>
                   <Text style={[styles.strategicNewsSectionTitle, { color: colors.text }]}>Summary</Text>
@@ -234,7 +236,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: ALPHA_COLORS.white[5],
   },
   strategicNewsSection: {
     marginBottom: SPACING.md,

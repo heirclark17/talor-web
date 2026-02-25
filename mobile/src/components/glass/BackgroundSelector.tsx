@@ -210,7 +210,7 @@ export function BackgroundSelector({ visible, onClose }: BackgroundSelectorProps
             style={[
               styles.thumbnailContent,
               styles.addPhotoThumbnail,
-              { backgroundColor: colors.glass },
+              { backgroundColor: colors.glass, borderColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10] },
             ]}
           >
             <ImagePlus size={24} color={colors.textSecondary} />
@@ -295,7 +295,7 @@ export function BackgroundSelector({ visible, onClose }: BackgroundSelectorProps
             )}
 
             {/* Glass card preview */}
-            <BlurView intensity={30} tint={isDark ? 'dark' : 'light'} style={styles.previewCard}>
+            <BlurView intensity={30} tint={isDark ? 'dark' : 'light'} style={[styles.previewCard, { borderColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[10] }]}>
               <Text style={[styles.previewCardTitle, { color: colors.text }]}>
                 Preview Card
               </Text>
@@ -448,7 +448,6 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: ALPHA_COLORS.white[10],
   },
   previewCardTitle: {
     fontSize: 16,
@@ -511,7 +510,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: ALPHA_COLORS.white[10],
     borderStyle: 'dashed',
   },
   checkmark: {

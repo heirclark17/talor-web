@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { ChevronUp, ChevronDown } from 'lucide-react-native';
+import { useTheme } from '../../context/ThemeContext';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS } from '../../utils/constants';
 import { ThemeColors } from './types';
 
@@ -100,19 +101,22 @@ interface ConfidenceBarProps {
   color: string;
 }
 
-export const ConfidenceBar: React.FC<ConfidenceBarProps> = ({ level, color }) => (
-  <View style={styles.confidenceBarContainer}>
-    <View style={[styles.confidenceBarBackground, { borderColor: `${color}40` }]}>
-      <View
-        style={[
-          styles.confidenceBarFill,
-          { width: `${level}%`, backgroundColor: color }
-        ]}
-      />
+export const ConfidenceBar: React.FC<ConfidenceBarProps> = ({ level, color }) => {
+  const { isDark } = useTheme();
+  return (
+    <View style={styles.confidenceBarContainer}>
+      <View style={[styles.confidenceBarBackground, { borderColor: `${color}40`, backgroundColor: isDark ? ALPHA_COLORS.white[10] : ALPHA_COLORS.black[5] }]}>
+        <View
+          style={[
+            styles.confidenceBarFill,
+            { width: `${level}%`, backgroundColor: color }
+          ]}
+        />
+      </View>
+      <Text style={[styles.confidenceBarLabel, { color }]}>{level}%</Text>
     </View>
-    <Text style={[styles.confidenceBarLabel, { color }]}>{level}%</Text>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   // Section styles
@@ -190,7 +194,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 12,
     borderRadius: RADIUS.full,
-    backgroundColor: ALPHA_COLORS.white[10],
     borderWidth: 1,
     overflow: 'hidden',
   },

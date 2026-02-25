@@ -117,11 +117,11 @@ export function OfflineIndicator({
         </View>
 
         <View style={styles.textContainer}>
-          <Text style={styles.title}>
+          <Text style={[styles.title, { color: isDark ? '#ffffff' : colors.text }]}>
             {isOffline ? 'No Internet Connection' : 'Syncing Pending Changes'}
           </Text>
           {showDetails && hasPendingRequests && (
-            <Text style={styles.subtitle}>
+            <Text style={[styles.subtitle, { color: isDark ? ALPHA_COLORS.white[80] : colors.textSecondary }]}>
               {queueStats.total} pending {queueStats.total === 1 ? 'request' : 'requests'}
               {queueStats.byPriority.high > 0 && ` (${queueStats.byPriority.high} high priority)`}
             </Text>
@@ -133,7 +133,7 @@ export function OfflineIndicator({
             <TouchableOpacity
               onPress={handleRetry}
               disabled={isProcessing}
-              style={styles.retryButton}
+              style={[styles.retryButton, { backgroundColor: isDark ? ALPHA_COLORS.white[20] : ALPHA_COLORS.black[10] }]}
               accessibilityRole="button"
               accessibilityLabel="Retry pending requests"
             >
@@ -260,12 +260,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: '#ffffff',
     fontSize: 14,
     fontFamily: FONTS.semibold,
   },
   subtitle: {
-    color: ALPHA_COLORS.white[80],
     fontSize: 12,
     fontFamily: FONTS.regular,
     marginTop: 2,
@@ -279,7 +277,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: ALPHA_COLORS.white[20],
     alignItems: 'center',
     justifyContent: 'center',
   },
