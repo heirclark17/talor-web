@@ -1446,7 +1446,7 @@ class ApiClient {
 
       return {
         success: true,
-        data: result,
+        data: snakeToCamel(result),
       };
     } catch (error: any) {
       return {
@@ -3376,6 +3376,53 @@ class ApiClient {
       return { success: false, error: error.message };
     }
   }
+
+  async saveMockSession(prepId: number, data: {
+    interview_type: string;
+    company: string;
+    job_title: string;
+    messages: any[];
+    performance?: any;
+    question_count: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/mock-sessions`, {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      return { success: response.ok, data: result.data || result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getMockSessions(prepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/mock-sessions`, {
+        headers: this.getHeaders(),
+      });
+      const result = await response.json();
+      return { success: response.ok, data: result.data || result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteMockSession(prepId: number, sessionId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/interview-prep/${prepId}/mock-sessions/${sessionId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+      const result = await response.json();
+      return { success: response.ok, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
   // ==================== Builder AI ====================
 
   async builderGenerateSummary(params: {
