@@ -19,7 +19,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Check, Eye, Crown, Info, Upload, FileText, ChevronDown, Download, Share2 } from 'lucide-react-native';
-import * as Print from 'expo-print';
+// expo-print loaded lazily — requires dev build (not Expo Go)
+let Print: typeof import('expo-print') | null = null;
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { GlassCard } from '../components/glass/GlassCard';
@@ -984,6 +985,7 @@ export default function TemplatesScreen() {
 
     setExporting(true);
     try {
+      if (!Print) Print = await import('expo-print');
       const html = buildResumeHtml(resumeContent, tmpl);
       const { uri } = await Print.printToFileAsync({ html, base64: false });
 
@@ -1021,6 +1023,7 @@ export default function TemplatesScreen() {
 
     setExporting(true);
     try {
+      if (!Print) Print = await import('expo-print');
       const html = buildResumeHtml(resumeContent, tmpl);
       const { uri } = await Print.printToFileAsync({ html, base64: false });
 
