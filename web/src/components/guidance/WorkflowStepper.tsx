@@ -15,13 +15,13 @@ interface WorkflowStepperProps {
 
 export default function WorkflowStepper({ steps, currentStep, estimatedTime }: WorkflowStepperProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-6">
+    <div className="bg-theme-glass-10 border border-theme-muted rounded-2xl p-6 mb-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <h3 className="text-sm font-medium text-theme-secondary">
           Step {currentStep} of {steps.length}
         </h3>
         {estimatedTime && (
-          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center text-sm text-theme-tertiary">
             <Clock className="w-4 h-4 mr-1.5" />
             <span>{estimatedTime} remaining</span>
           </div>
@@ -46,10 +46,10 @@ export default function WorkflowStepper({ steps, currentStep, estimatedTime }: W
                     relative flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all
                     ${
                       isComplete
-                        ? 'border-green-500 bg-green-500'
+                        ? 'border-[#10b981] bg-success'
                         : isCurrent
-                        ? 'border-blue-600 bg-blue-600'
-                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
+                        ? 'border-[var(--accent-color)] bg-accent'
+                        : 'border-theme-muted bg-theme-glass-5'
                     }
                   `}
                   title={step.tooltip}
@@ -59,7 +59,7 @@ export default function WorkflowStepper({ steps, currentStep, estimatedTime }: W
                   ) : (
                     <span
                       className={`text-sm font-semibold ${
-                        isCurrent ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                        isCurrent ? 'text-white' : 'text-theme-secondary'
                       }`}
                     >
                       {stepNumber}
@@ -72,16 +72,16 @@ export default function WorkflowStepper({ steps, currentStep, estimatedTime }: W
                   <p
                     className={`text-sm font-medium ${
                       isCurrent
-                        ? 'text-blue-600 dark:text-blue-400'
+                        ? 'text-accent'
                         : isComplete
-                        ? 'text-gray-900 dark:text-white'
-                        : 'text-gray-500 dark:text-gray-400'
+                        ? 'text-theme'
+                        : 'text-theme-secondary'
                     }`}
                   >
                     {step.label}
                   </p>
                   {step.tooltip && isCurrent && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-[150px]">
+                    <p className="text-xs text-theme-tertiary mt-1 max-w-[150px]">
                       {step.tooltip}
                     </p>
                   )}
@@ -90,10 +90,10 @@ export default function WorkflowStepper({ steps, currentStep, estimatedTime }: W
 
               {/* Connector Line */}
               {!isLast && (
-                <div className="flex-1 px-2">
+                <div className="flex-1 px-2 min-w-[16px]">
                   <div
                     className={`h-0.5 ${
-                      isComplete ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
+                      isComplete ? 'bg-success' : 'bg-theme-glass-20'
                     }`}
                   />
                 </div>
@@ -118,10 +118,10 @@ export default function WorkflowStepper({ steps, currentStep, estimatedTime }: W
                   flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all
                   ${
                     isComplete
-                      ? 'border-green-500 bg-green-500'
+                      ? 'border-[#10b981] bg-success'
                       : isCurrent
-                      ? 'border-blue-600 bg-blue-600'
-                      : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
+                      ? 'border-[var(--accent-color)] bg-accent'
+                      : 'border-theme-muted bg-theme-glass-5'
                   }
                 `}
               >
@@ -130,7 +130,7 @@ export default function WorkflowStepper({ steps, currentStep, estimatedTime }: W
                 ) : (
                   <span
                     className={`text-xs font-semibold ${
-                      isCurrent ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                      isCurrent ? 'text-white' : 'text-theme-secondary'
                     }`}
                   >
                     {stepNumber}
@@ -143,16 +143,16 @@ export default function WorkflowStepper({ steps, currentStep, estimatedTime }: W
                 <p
                   className={`text-sm font-medium ${
                     isCurrent
-                      ? 'text-blue-600 dark:text-blue-400'
+                      ? 'text-accent'
                       : isComplete
-                      ? 'text-gray-900 dark:text-white'
-                      : 'text-gray-500 dark:text-gray-400'
+                      ? 'text-theme'
+                      : 'text-theme-secondary'
                   }`}
                 >
                   {step.label}
                 </p>
                 {step.tooltip && isCurrent && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-theme-tertiary mt-1">
                     {step.tooltip}
                   </p>
                 )}

@@ -108,6 +108,7 @@ input, button, textarea, select {
 @utility text-theme-faint { color: color-mix(in srgb, var(--text-primary) 40%, transparent); }
 @utility text-theme-inverse { color: var(--bg-primary); }
 @utility text-accent { color: var(--accent-color); }
+@utility text-success { color: #10b981; }
 
 /* Background utilities */
 @utility bg-theme { background-color: var(--bg-primary); }
@@ -116,6 +117,8 @@ input, button, textarea, select {
 @utility bg-theme-glass-5 { background-color: color-mix(in srgb, var(--text-primary) 5%, transparent); }
 @utility bg-theme-glass-10 { background-color: color-mix(in srgb, var(--text-primary) 10%, transparent); }
 @utility bg-theme-glass-20 { background-color: color-mix(in srgb, var(--text-primary) 20%, transparent); }
+@utility bg-accent { background-color: var(--accent-color); }
+@utility bg-success { background-color: #10b981; }
 
 /* Border utilities */
 @utility border-theme { border-color: var(--border-color); }

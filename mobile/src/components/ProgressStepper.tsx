@@ -8,12 +8,6 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Check } from 'lucide-react-native';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  interpolateColor,
-} from 'react-native-reanimated';
 import { useTheme } from '../context/ThemeContext';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS } from '../utils/constants';
 

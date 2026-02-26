@@ -23,7 +23,7 @@ import {
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
-import { MatchScore, KeywordPanel, ResumeAnalysis } from '../components';
+import { MatchScore, KeywordPanel, ResumeAnalysis, ProgressStepper } from '../components';
 import { GlassButton } from '../components/glass/GlassButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
@@ -1534,6 +1534,23 @@ export default function TailorResumeScreen() {
           contentContainerStyle={styles.contentContainer}
           keyboardShouldPersistTaps="handled"
         >
+          {/* Workflow Stepper */}
+          <ProgressStepper
+            steps={[
+              { id: 'resume', label: 'Resume' },
+              { id: 'job', label: 'Job Details' },
+              { id: 'tailor', label: 'Tailor' },
+              { id: 'export', label: 'Export' },
+            ]}
+            currentStep={
+              !selectedResumeId ? 0 :
+              !(jobUrl && company && jobTitle) ? 1 :
+              !showComparison ? 2 : 3
+            }
+            variant="default"
+            style={{ marginBottom: SPACING.md }}
+          />
+
           {/* Resume Selector */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Select Resume</Text>
