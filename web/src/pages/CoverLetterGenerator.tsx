@@ -216,6 +216,20 @@ export default function CoverLetterGenerator() {
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault()
 
+    // Validate that we have job content before submitting
+    const hasValidUrl = jobInputMethod === 'url' && (jobUrl.startsWith('http://') || jobUrl.startsWith('https://'))
+    const hasDescription = jobDescription.trim().length > 0
+
+    if (jobInputMethod === 'url' && !hasValidUrl && !hasDescription) {
+      showError('Please either enter a valid job URL (starting with http:// or https://) or paste the job description text. Switch to "Paste Text" mode to enter the description directly.')
+      return
+    }
+
+    if (jobInputMethod === 'text' && !hasDescription) {
+      showError('Please paste the job description text before generating.')
+      return
+    }
+
     setGenerating(true)
 
     setGenerationStage('researching')
@@ -236,12 +250,12 @@ export default function CoverLetterGenerator() {
 
       // Send job description or job URL based on input method
       if (jobInputMethod === 'url') {
-        // Only send job_url if it's a real URL
-        if (jobUrl.startsWith('http://') || jobUrl.startsWith('https://')) {
+        // Only send job_url if it's a real HTTP(S) URL - never send manual_ placeholders
+        if (hasValidUrl) {
           params.job_url = jobUrl
         }
         // Always include description if we have it (from extraction or manual)
-        if (jobDescription) {
+        if (hasDescription) {
           params.job_description = jobDescription
         }
       } else {
