@@ -2431,18 +2431,27 @@ export const api = {
     focus?: 'leadership' | 'technical' | 'program_management' | 'cross_functional';
   }): Promise<ApiResponse> {
     try {
+      const body: Record<string, unknown> = {
+        job_title: payload.jobTitle,
+        company_name: payload.companyName,
+        tone: payload.tone || 'professional',
+        length: payload.length || 'standard',
+        focus: payload.focus || 'program_management',
+      };
+      // Only include job_description when it has actual content — the backend
+      // treats an empty string as falsy and raises 400 if neither field is set.
+      if (payload.jobDescription) {
+        body.job_description = payload.jobDescription;
+      }
+      if (payload.jobUrl) {
+        body.job_url = payload.jobUrl;
+      }
+      if (payload.baseResumeId != null) {
+        body.base_resume_id = payload.baseResumeId;
+      }
       const response = await fetchWithAuth('/api/cover-letters/generate', {
         method: 'POST',
-        body: JSON.stringify({
-          job_title: payload.jobTitle,
-          company_name: payload.companyName,
-          job_description: payload.jobDescription,
-          job_url: payload.jobUrl,
-          base_resume_id: payload.baseResumeId,
-          tone: payload.tone || 'professional',
-          length: payload.length || 'standard',
-          focus: payload.focus || 'program_management',
-        }),
+        body: JSON.stringify(body),
       });
       const data = await response.json();
 

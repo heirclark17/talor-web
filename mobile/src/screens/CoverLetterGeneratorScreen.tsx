@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { FileText, CheckCircle, Target } from 'lucide-react-native';
+import { FileText, CheckCircle, Circle, Target, Trash2 } from 'lucide-react-native';
 import { api } from '../api/client';
 import { tailorApi, TailoredResume } from '../api/tailorApi';
 import { useTheme } from '../context/ThemeContext';
@@ -63,6 +63,11 @@ export default function CoverLetterGeneratorScreen() {
   const [tone, setTone] = useState<string>('professional');
   const [length, setLength] = useState<string>('standard');
   const [focus, setFocus] = useState<string>('program_management');
+
+  // Bulk delete state
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   // Modal state
   const [selectedCoverLetter, setSelectedCoverLetter] = useState<CoverLetter | null>(null);
@@ -130,6 +135,66 @@ export default function CoverLetterGeneratorScreen() {
     }
   };
 
+  const toggleSelectMode = () => {
+    if (selectMode) {
+      setSelectedIds(new Set());
+    }
+    setSelectMode(!selectMode);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === tailoredResumes.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(tailoredResumes.map(r => r.id)));
+    }
+  };
+
+  const toggleSelectId = (id: number) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setSelectedIds(next);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    Alert.alert(
+      'Delete Resumes',
+      `Delete ${selectedIds.size} tailored resume${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              const ids = Array.from(selectedIds);
+              const result = await tailorApi.bulkDeleteTailoredResumes(ids);
+              if (result.success) {
+                setTailoredResumes(prev => prev.filter(r => !selectedIds.has(r.id)));
+                setSelectedIds(new Set());
+                setSelectMode(false);
+                setSelectedResume(null);
+              } else {
+                Alert.alert('Error', result.error || 'Failed to delete resumes');
+              }
+            } catch (err: any) {
+              console.error('Bulk delete error:', err);
+              Alert.alert('Error', 'Failed to delete resumes');
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderOptionButtons = (
     options: { value: string; label: string }[],
     selectedValue: string,
@@ -162,11 +227,12 @@ export default function CoverLetterGeneratorScreen() {
 
   const renderResumeCard = (item: TailoredResume) => {
     const isSelected = selectedResume?.id === item.id;
+    const isChecked = selectedIds.has(item.id);
     return (
       <TouchableOpacity
         key={item.id}
         activeOpacity={0.7}
-        onPress={() => setSelectedResume(isSelected ? null : item)}
+        onPress={() => selectMode ? toggleSelectId(item.id) : setSelectedResume(isSelected ? null : item)}
       >
         <BlurView
           intensity={GLASS.getBlurIntensity('subtle')}
@@ -177,17 +243,29 @@ export default function CoverLetterGeneratorScreen() {
             style={[
               styles.resumeCard,
               {
-                borderColor: isSelected ? COLORS.primary : (isDark ? GLASS.getBorderColor() : 'transparent'),
-                borderWidth: isSelected ? 2 : GLASS.getBorderWidth(),
+                borderColor: selectMode
+                  ? (isChecked ? COLORS.danger : (isDark ? GLASS.getBorderColor() : 'transparent'))
+                  : (isSelected ? COLORS.primary : (isDark ? GLASS.getBorderColor() : 'transparent')),
+                borderWidth: (selectMode ? isChecked : isSelected) ? 2 : GLASS.getBorderWidth(),
               },
             ]}
           >
             <View style={styles.resumeCardContent}>
-              <View style={styles.resumeCardLeft}>
-                <FileText color={isSelected ? COLORS.primary : colors.textSecondary} size={20} />
-              </View>
+              {selectMode ? (
+                <View style={styles.resumeCardLeft}>
+                  {isChecked ? (
+                    <CheckCircle color={COLORS.danger} size={20} />
+                  ) : (
+                    <Circle color={colors.textSecondary} size={20} />
+                  )}
+                </View>
+              ) : (
+                <View style={styles.resumeCardLeft}>
+                  <FileText color={isSelected ? COLORS.primary : colors.textSecondary} size={20} />
+                </View>
+              )}
               <View style={styles.resumeCardText}>
-                <Text style={[styles.resumeCardTitle, { color: isSelected ? COLORS.primary : colors.text }]} numberOfLines={1}>
+                <Text style={[styles.resumeCardTitle, { color: !selectMode && isSelected ? COLORS.primary : colors.text }]}>
                   {item.jobTitle}
                 </Text>
                 <Text style={[styles.resumeCardCompany, { color: colors.textSecondary }]} numberOfLines={1}>
@@ -202,7 +280,7 @@ export default function CoverLetterGeneratorScreen() {
                     </Text>
                   </View>
                 )}
-                {isSelected && (
+                {!selectMode && isSelected && (
                   <CheckCircle color={COLORS.primary} size={20} />
                 )}
               </View>
@@ -260,12 +338,21 @@ export default function CoverLetterGeneratorScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Generate Cover Letter</Text>
         <BlurView intensity={GLASS.getBlurIntensity('regular')} tint={isDark ? 'dark' : 'light'} style={styles.formBlur}>
           <View style={styles.formContainer}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Generate Cover Letter</Text>
 
             {/* Tailored Resume Selection */}
-            <Text style={[styles.inputLabel, { color: colors.text }]}>Select a Tailored Resume</Text>
+            <View style={styles.resumeListHeader}>
+              <Text style={[styles.inputLabel, { color: colors.text, marginBottom: 0 }]}>Select a Tailored Resume</Text>
+              {tailoredResumes.length > 0 && (
+                <TouchableOpacity onPress={toggleSelectMode} style={styles.selectModeButton}>
+                  <Text style={[styles.selectModeText, { color: selectMode ? COLORS.danger : COLORS.primary }]}>
+                    {selectMode ? 'Cancel' : 'Select'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
 
             {loadingResumes ? (
               <View style={styles.loadingContainer}>
@@ -276,6 +363,33 @@ export default function CoverLetterGeneratorScreen() {
               renderEmptyState()
             ) : (
               <>
+                {selectMode && (
+                  <View style={styles.bulkActions}>
+                    <TouchableOpacity onPress={toggleSelectAll} style={styles.selectAllButton}>
+                      {selectedIds.size === tailoredResumes.length ? (
+                        <CheckCircle color={COLORS.danger} size={18} />
+                      ) : (
+                        <Circle color={colors.textSecondary} size={18} />
+                      )}
+                      <Text style={[styles.selectAllText, { color: colors.text }]}>
+                        {selectedIds.size === tailoredResumes.length ? 'Deselect All' : 'Select All'}
+                      </Text>
+                    </TouchableOpacity>
+                    {selectedIds.size > 0 && (
+                      <TouchableOpacity onPress={handleBulkDelete} style={styles.deleteButton} disabled={deleting}>
+                        {deleting ? (
+                          <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                          <>
+                            <Trash2 color="#fff" size={16} />
+                            <Text style={styles.deleteButtonText}>Delete ({selectedIds.size})</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+
                 <View style={styles.resumeList}>
                   {tailoredResumes.map(renderResumeCard)}
                 </View>
@@ -359,7 +473,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   sectionTitle: {
-    fontSize: 34,
+    fontSize: 28,
     fontFamily: FONTS.semibold,
     marginBottom: SPACING.lg,
   },
@@ -369,6 +483,51 @@ const styles = StyleSheet.create({
   inputLabel: {
     ...TYPOGRAPHY.bodyBold,
     marginBottom: SPACING.sm,
+  },
+  // Resume list header & bulk actions
+  resumeListHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  selectModeButton: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+  },
+  selectModeText: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  bulkActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  selectAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.xs,
+  },
+  selectAllText: {
+    fontSize: 14,
+    fontFamily: FONTS.medium,
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    backgroundColor: COLORS.danger,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs + 2,
+    borderRadius: GLASS.getCornerRadius('small'),
+  },
+  deleteButtonText: {
+    fontSize: 13,
+    fontFamily: FONTS.semibold,
+    color: '#fff',
   },
   // Resume selection list
   resumeList: {

@@ -26,10 +26,13 @@ import {
   Palette,
   Image as ImageIcon,
   LogOut,
+  Copy,
+  Check,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Clipboard from 'expo-clipboard';
 import { clearUserSession, getUserId } from '../utils/userSession';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -48,6 +51,7 @@ export default function SettingsScreen() {
   const [userId, setUserId] = useState<string>('');
   const [notifications, setNotifications] = useState(true);
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
+  const [copiedUserId, setCopiedUserId] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -131,8 +135,18 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleCopyUserId = async () => {
+    try {
+      await Clipboard.setStringAsync(userId);
+      setCopiedUserId(true);
+      setTimeout(() => setCopiedUserId(false), 2000);
+    } catch {
+      Alert.alert('Error', 'Failed to copy User ID');
+    }
+  };
+
   const handleContact = () => {
-    Linking.openURL('mailto:support@talor.app?subject=Mobile App Support');
+    Linking.openURL('mailto:support@talorme.com?subject=Mobile App Support');
   };
 
   const handlePrivacy = () => {
@@ -205,10 +219,19 @@ export default function SettingsScreen() {
           {renderItem(
             <User color={colors.textSecondary} size={20} />,
             'User ID',
-            undefined,
-            <Text style={[styles.itemValue, { color: colors.textSecondary }]} numberOfLines={1}>
-              {userId.slice(0, 16)}...
-            </Text>
+            handleCopyUserId,
+            <View style={styles.themeIndicator}>
+              <Text style={[styles.itemValue, { color: colors.textSecondary }]} numberOfLines={1}>
+                {userId.slice(0, 16)}...
+              </Text>
+              {copiedUserId ? (
+                <Check color={COLORS.success} size={16} />
+              ) : (
+                <Copy color={colors.textTertiary} size={16} />
+              )}
+            </View>,
+            false,
+            'Copy your User ID to clipboard'
           )}
           {renderItem(
             <LogOut color={COLORS.danger} size={20} />,

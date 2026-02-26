@@ -39,6 +39,7 @@ interface ApplicationData {
   salaryMax?: number;
   notes?: string;
   appliedDate?: string;
+  nextFollowUp?: string;
   contactName?: string;
   contactEmail?: string;
 }
@@ -87,6 +88,7 @@ export function ApplicationFormModal({
   const [salaryMax, setSalaryMax] = useState('');
   const [notes, setNotes] = useState('');
   const [appliedDate, setAppliedDate] = useState('');
+  const [nextFollowUp, setNextFollowUp] = useState('');
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
 
@@ -109,6 +111,7 @@ export function ApplicationFormModal({
       setSalaryMax(application.salaryMax?.toString() || '');
       setNotes(application.notes || '');
       setAppliedDate(application.appliedDate || '');
+      setNextFollowUp(application.nextFollowUp || '');
       setContactName(application.contactName || '');
       setContactEmail(application.contactEmail || '');
       setSelectedSavedJobId(null);
@@ -122,6 +125,7 @@ export function ApplicationFormModal({
       setSalaryMax('');
       setNotes('');
       setAppliedDate('');
+      setNextFollowUp('');
       setContactName('');
       setContactEmail('');
       setSelectedSavedJobId(prefilledJob.id);
@@ -136,6 +140,7 @@ export function ApplicationFormModal({
       setSalaryMax('');
       setNotes('');
       setAppliedDate('');
+      setNextFollowUp('');
       setContactName('');
       setContactEmail('');
       setSelectedSavedJobId(null);
@@ -165,6 +170,7 @@ export function ApplicationFormModal({
         salaryMax: salaryMax ? parseInt(salaryMax, 10) : undefined,
         notes: notes.trim() || undefined,
         appliedDate: appliedDate.trim() || undefined,
+        nextFollowUp: nextFollowUp.trim() || undefined,
         contactName: contactName.trim() || undefined,
         contactEmail: contactEmail.trim() || undefined,
       };
@@ -462,6 +468,24 @@ export function ApplicationFormModal({
                   placeholderTextColor={colors.textTertiary}
                   value={appliedDate}
                   onChangeText={setAppliedDate}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>Next Follow-Up</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      color: colors.text,
+                      backgroundColor: colors.backgroundSecondary,
+                      borderColor: GLASS.getBorderColor(),
+                    },
+                  ]}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={colors.textTertiary}
+                  value={nextFollowUp}
+                  onChangeText={setNextFollowUp}
                 />
               </View>
 

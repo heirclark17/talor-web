@@ -201,7 +201,7 @@ export default function SavedCareerPathsScreen() {
           {/* Checkbox */}
           <TouchableOpacity onPress={() => toggleSelect(item.id)} style={styles.checkbox}>
             {selectedIds.has(item.id)
-              ? <CheckSquare size={20} color={COLORS.accent.green} />
+              ? <CheckSquare size={20} color={COLORS.success} />
               : <Square size={20} color={colors.textTertiary} />
             }
           </TouchableOpacity>
@@ -218,8 +218,8 @@ export default function SavedCareerPathsScreen() {
                 <Text style={[styles.transitionText, { color: colors.textSecondary }]} numberOfLines={1}>
                   {currentRole}
                 </Text>
-                <ArrowRight size={14} color={COLORS.accent.green} />
-                <Text style={[styles.transitionTarget, { color: COLORS.accent.green }]} numberOfLines={1}>
+                <ArrowRight size={14} color={COLORS.success} />
+                <Text style={[styles.transitionTarget, { color: COLORS.success }]} numberOfLines={1}>
                   {dreamRole}
                 </Text>
               </View>
@@ -278,7 +278,7 @@ export default function SavedCareerPathsScreen() {
               onPress={() => navigation.navigate('SavedCareerPlanDetail', { planId: item.id })}
               style={[styles.viewBtn, { backgroundColor: 'rgba(16,185,129,0.15)' }]}
             >
-              <Eye size={16} color={COLORS.accent.green} />
+              <Eye size={16} color={COLORS.success} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleDelete(item.id)}
@@ -321,7 +321,7 @@ export default function SavedCareerPathsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <FolderOpen size={28} color={COLORS.accent.green} />
+          <FolderOpen size={28} color={COLORS.success} />
           <View>
             <Text style={[styles.title, { color: colors.text }]}>Saved Career Plans</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -343,7 +343,7 @@ export default function SavedCareerPathsScreen() {
         <View style={styles.bulkActions}>
           <TouchableOpacity onPress={toggleSelectAll} style={styles.bulkBtn}>
             {allSelected
-              ? <CheckSquare size={16} color={COLORS.accent.green} />
+              ? <CheckSquare size={16} color={COLORS.success} />
               : <Square size={16} color={colors.textTertiary} />
             }
             <Text style={[styles.bulkText, { color: colors.textSecondary }]}>
@@ -369,7 +369,7 @@ export default function SavedCareerPathsScreen() {
       {/* Loading */}
       {loading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.accent.green} />
+          <ActivityIndicator size="large" color={COLORS.success} />
           <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading career plans...</Text>
         </View>
       )}
@@ -383,7 +383,7 @@ export default function SavedCareerPathsScreen() {
           ListEmptyComponent={renderEmpty}
           contentContainerStyle={[styles.listContent, plans.length === 0 && styles.listEmpty]}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.accent.green} />
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.success} />
           }
         />
       )}
@@ -401,18 +401,18 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-  title: { fontSize: 22, fontFamily: FONTS.urbanist.bold },
-  subtitle: { fontSize: 13, fontFamily: FONTS.urbanist.regular, marginTop: 2 },
+  title: { fontSize: 22, fontFamily: FONTS.bold },
+  subtitle: { fontSize: 13, fontFamily: FONTS.regular, marginTop: 2 },
   newBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: COLORS.accent.green,
+    backgroundColor: COLORS.success,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs + 2,
     borderRadius: RADIUS.md,
   },
-  newBtnText: { color: '#fff', fontSize: 14, fontFamily: FONTS.urbanist.semiBold },
+  newBtnText: { color: '#fff', fontSize: 14, fontFamily: FONTS.semibold },
   bulkActions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.sm,
   },
   bulkBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  bulkText: { fontSize: 12, fontFamily: FONTS.urbanist.medium },
+  bulkText: { fontSize: 12, fontFamily: FONTS.medium },
   bulkDeleteBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
   },
-  bulkDeleteText: { fontSize: 12, fontFamily: FONTS.urbanist.medium, color: '#EF4444' },
+  bulkDeleteText: { fontSize: 12, fontFamily: FONTS.medium, color: '#EF4444' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: SPACING.md },
   loadingText: { fontSize: 15 },
   listContent: { paddingHorizontal: SPACING.lg, paddingBottom: TAB_BAR_HEIGHT + SPACING.xl },
@@ -452,18 +452,18 @@ const styles = StyleSheet.create({
   cardRow: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm },
   checkbox: { paddingTop: 2 },
   cardContent: { flex: 1 },
-  dreamRole: { fontSize: 17, fontFamily: FONTS.urbanist.bold, marginBottom: 4 },
+  dreamRole: { fontSize: 17, fontFamily: FONTS.bold, marginBottom: 4 },
   transitionRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 6 },
-  transitionText: { fontSize: 12, fontFamily: FONTS.urbanist.regular, maxWidth: '35%' },
-  transitionTarget: { fontSize: 12, fontFamily: FONTS.urbanist.semiBold, maxWidth: '35%' },
+  transitionText: { fontSize: 12, fontFamily: FONTS.regular, maxWidth: '35%' },
+  transitionTarget: { fontSize: 12, fontFamily: FONTS.semibold, maxWidth: '35%' },
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginBottom: 6 },
   pill: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, borderWidth: 1 },
-  pillText: { fontSize: 11, fontFamily: FONTS.urbanist.medium },
-  moreText: { fontSize: 11, fontFamily: FONTS.urbanist.regular, alignSelf: 'center' },
-  summary: { fontSize: 13, fontFamily: FONTS.urbanist.regular, lineHeight: 18, marginBottom: 6 },
+  pillText: { fontSize: 11, fontFamily: FONTS.medium },
+  moreText: { fontSize: 11, fontFamily: FONTS.regular, alignSelf: 'center' },
+  summary: { fontSize: 13, fontFamily: FONTS.regular, lineHeight: 18, marginBottom: 6 },
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  metaText: { fontSize: 11, fontFamily: FONTS.urbanist.regular },
+  metaText: { fontSize: 11, fontFamily: FONTS.regular },
   actions: { gap: 6 },
   viewBtn: { padding: 8, borderRadius: RADIUS.sm },
   deleteBtn: { padding: 8, borderRadius: RADIUS.sm },
@@ -474,17 +474,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: SPACING.sm,
   },
-  emptyTitle: { fontSize: 18, fontFamily: FONTS.urbanist.bold, marginTop: SPACING.sm },
-  emptyDesc: { fontSize: 14, fontFamily: FONTS.urbanist.regular, textAlign: 'center', lineHeight: 20 },
+  emptyTitle: { fontSize: 18, fontFamily: FONTS.bold, marginTop: SPACING.sm },
+  emptyDesc: { fontSize: 14, fontFamily: FONTS.regular, textAlign: 'center', lineHeight: 20 },
   createBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: COLORS.accent.green,
+    backgroundColor: COLORS.success,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm + 2,
     borderRadius: RADIUS.md,
     marginTop: SPACING.md,
   },
-  createBtnText: { color: '#fff', fontSize: 15, fontFamily: FONTS.urbanist.semiBold },
+  createBtnText: { color: '#fff', fontSize: 15, fontFamily: FONTS.semibold },
 });

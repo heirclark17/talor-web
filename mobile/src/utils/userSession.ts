@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import * as Crypto from 'expo-crypto';
 import { STORAGE_KEYS } from './constants';
 import { supabase } from '../lib/supabase';
 
@@ -12,32 +11,6 @@ const SECURE_KEYS = {
   AUTH_TOKEN: 'secure_auth_token',
   REFRESH_TOKEN: 'secure_refresh_token',
 } as const;
-
-/**
- * Generate a cryptographically secure UUID v4
- * Uses expo-crypto for secure random generation
- * Format: user_XXXXXXXX-XXXX-4XXX-YXXX-XXXXXXXXXXXX
- */
-const generateUserId = async (): Promise<string> => {
-  // Generate 16 random bytes using cryptographically secure RNG
-  const randomBytes = await Crypto.getRandomBytesAsync(16);
-
-  // Convert to hex string
-  const hex = Array.from(randomBytes)
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-
-  // Format as UUID v4
-  const uuid = [
-    hex.slice(0, 8),
-    hex.slice(8, 12),
-    '4' + hex.slice(13, 16), // Version 4
-    ((parseInt(hex.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, '0') + hex.slice(18, 20), // Variant
-    hex.slice(20, 32),
-  ].join('-');
-
-  return 'user_' + uuid;
-};
 
 /**
  * Check if secure storage is available on this device

@@ -133,7 +133,7 @@ export default function SavedCareerPlanDetailScreen() {
       {/* Loading */}
       {loading && (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={COLORS.accent.green} />
+          <ActivityIndicator size="large" color={COLORS.success} />
           <Text style={[styles.centerText, { color: colors.textSecondary }]}>Loading career plan...</Text>
         </View>
       )}
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
   },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  backText: { fontSize: 14, fontFamily: FONTS.urbanist.medium },
+  backText: { fontSize: 14, fontFamily: FONTS.medium },
   topActions: { flexDirection: 'row', gap: SPACING.xs },
   actionBtn: { padding: 8, borderRadius: RADIUS.sm },
   centerContainer: {
@@ -202,8 +202,8 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     padding: SPACING.xl,
   },
-  centerText: { fontSize: 15, fontFamily: FONTS.urbanist.regular, textAlign: 'center' },
-  errorTitle: { fontSize: 18, fontFamily: FONTS.urbanist.bold },
+  centerText: { fontSize: 15, fontFamily: FONTS.regular, textAlign: 'center' },
+  errorTitle: { fontSize: 18, fontFamily: FONTS.bold },
   retryBtn: {
     backgroundColor: 'rgba(239,68,68,0.15)',
     paddingHorizontal: SPACING.lg,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     marginTop: SPACING.sm,
   },
-  retryText: { color: '#EF4444', fontSize: 14, fontFamily: FONTS.urbanist.semiBold },
+  retryText: { color: '#EF4444', fontSize: 14, fontFamily: FONTS.semibold },
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: TAB_BAR_HEIGHT + SPACING.xl,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
-  planTitle: { fontSize: 22, fontFamily: FONTS.urbanist.bold, marginBottom: 6 },
-  planSummary: { fontSize: 14, fontFamily: FONTS.urbanist.regular, lineHeight: 20, marginBottom: 6 },
-  planDate: { fontSize: 12, fontFamily: FONTS.urbanist.regular },
+  planTitle: { fontSize: 22, fontFamily: FONTS.bold, marginBottom: 6 },
+  planSummary: { fontSize: 14, fontFamily: FONTS.regular, lineHeight: 20, marginBottom: 6 },
+  planDate: { fontSize: 12, fontFamily: FONTS.regular },
 });

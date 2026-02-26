@@ -15,11 +15,13 @@ export interface JobDetails {
 
 export interface TailoredResume {
   id: number;
-  resumeId: number;
-  jobTitle: string;
-  company: string;
+  resumeId: number;       // mapped from base_resume_id
+  jobTitle: string;       // mapped from job_title
+  company: string;        // alias kept for backward compat (populated below)
+  companyName?: string;   // mapped from company_name (backend /api/tailor/list)
   createdAt: string;
-  matchScore?: number;
+  matchScore?: number;    // alias kept for backward compat
+  qualityScore?: number;  // mapped from quality_score (backend /api/tailor/list)
   tailoredContent?: Record<string, unknown>;
   originalContent?: Record<string, unknown>;
   jobDescription?: string;
@@ -253,7 +255,27 @@ export async function listTailoredResumes(): Promise<ApiResponse<TailoredResume[
 
     // Backend returns { tailored_resumes: [...] }
     const list = data.tailored_resumes || data.tailoredResumes || [];
-    return { success: true, data: list.map((item: any) => snakeToCamel<TailoredResume>(item)) };
+    return {
+      success: true,
+      data: list.map((item: any) => {
+        const camel = snakeToCamel<TailoredResume>(item);
+        // Normalize field aliases so all consumers work regardless of which
+        // backend endpoint populated the list:
+        //   company_name  → company  (for backward-compat card rendering)
+        //   quality_score → matchScore (used in resume card badge)
+        //   base_resume_id → resumeId
+        if (!camel.company && camel.companyName) {
+          camel.company = camel.companyName;
+        }
+        if (camel.matchScore == null && camel.qualityScore != null) {
+          camel.matchScore = camel.qualityScore;
+        }
+        if (!camel.resumeId && (camel as any).baseResumeId) {
+          camel.resumeId = (camel as any).baseResumeId;
+        }
+        return camel;
+      }),
+    };
   } catch (error) {
     console.error('Error listing tailored resumes:', error);
     return {

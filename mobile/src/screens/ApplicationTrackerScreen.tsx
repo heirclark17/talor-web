@@ -27,6 +27,9 @@ import {
   Bookmark,
   ChevronDown,
   X,
+  User,
+  Mail,
+  Clock,
 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { api } from '../api/client';
@@ -47,10 +50,12 @@ interface Application {
   salaryMin?: number | null;
   salaryMax?: number | null;
   appliedDate?: string | null;
+  nextFollowUp?: string | null;
   notes?: string | null;
   contactName?: string | null;
   contactEmail?: string | null;
   tailoredResumeId?: number | null;
+  salaryInsights?: any;
   createdAt: string;
   updatedAt?: string;
 }
@@ -409,6 +414,34 @@ export default function ApplicationTrackerScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Contact & Follow-up */}
+        {(item.contactName || item.contactEmail || item.nextFollowUp) && (
+          <View style={[styles.notesSection, { borderTopColor: isDark ? colors.glassBorder : colors.border }]}>
+            <View style={styles.detailsRow}>
+              {item.contactName && (
+                <View style={styles.detailItem}>
+                  <User color={colors.textTertiary} size={12} />
+                  <Text style={[styles.detailText, { color: colors.textTertiary }]}>{item.contactName}</Text>
+                </View>
+              )}
+              {item.contactEmail && (
+                <View style={styles.detailItem}>
+                  <Mail color={colors.textTertiary} size={12} />
+                  <Text style={[styles.detailText, { color: colors.textTertiary }]}>{item.contactEmail}</Text>
+                </View>
+              )}
+              {item.nextFollowUp && (
+                <View style={styles.detailItem}>
+                  <Clock color={COLORS.warning || '#FBBF24'} size={12} />
+                  <Text style={[styles.detailText, { color: COLORS.warning || '#FBBF24' }]}>
+                    Follow up {formatLocalDate(item.nextFollowUp)}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* Notes */}
         {item.notes && (

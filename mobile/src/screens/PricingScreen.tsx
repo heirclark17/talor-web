@@ -36,51 +36,57 @@ const pricingTiers: PricingTier[] = [
     name: 'Free',
     price: '$0',
     period: 'forever',
-    description: 'Perfect for getting started',
+    description: 'Perfect for trying out Talor',
     icon: Sparkles,
     features: [
-      '3 resume uploads',
-      '5 tailored resumes per month',
-      'Basic ATS optimization',
-      'Standard templates',
-      'Email support',
+      '1 resume upload',
+      '1 resume tailoring',
+      'Basic ATS analysis',
+      'Resume keyword matching',
+      'Basic interview prep',
+      'Application tracker (5 jobs)',
     ],
   },
   {
     id: 'pro',
     name: 'Pro',
-    price: '$19',
+    price: '$15',
     period: 'per month',
-    description: 'For serious job seekers',
+    description: 'Everything you need to accelerate your job search',
     icon: Zap,
     highlighted: true,
     features: [
       'Unlimited resume uploads',
-      'Unlimited tailored resumes',
-      'Advanced ATS optimization',
-      'Premium templates',
-      'Interview prep with AI',
-      'Cover letter generation',
+      'Unlimited resume tailoring',
+      'Batch tailoring (10 jobs at once)',
+      'Full ATS optimization',
+      'Advanced keyword analysis',
+      'Complete interview prep',
+      'Company research & intelligence',
+      '30 tailored practice questions',
+      'STAR story builder with recording',
+      'Cover letter generator (5 tones)',
+      'Career path designer',
+      'Certification recommendations',
+      'Application tracker (unlimited)',
+      'Side-by-side resume comparison',
       'Priority support',
-      'Export to PDF/DOCX',
     ],
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: 'Custom',
-    period: 'contact us',
-    description: 'For teams and organizations',
+    id: 'lifetime',
+    name: 'Lifetime',
+    price: '$199',
+    period: 'one-time',
+    description: 'One-time payment, unlimited access forever',
     icon: Crown,
     features: [
       'Everything in Pro',
-      'Team collaboration',
-      'Custom branding',
-      'API access',
-      'Dedicated account manager',
-      'Custom integrations',
-      'SLA guarantee',
-      'Advanced analytics',
+      'Lifetime access (no recurring fees)',
+      'All future features included',
+      'Priority feature requests',
+      'VIP support',
+      'Early access to new features',
     ],
   },
 ];
@@ -112,15 +118,19 @@ export default function PricingScreen() {
       Alert.alert('Free Plan', 'You are already on the Free plan. Start using the app!');
       return;
     }
-    if (tierId === 'enterprise') {
-      Alert.alert('Enterprise', 'Contact us at support@talor.app for enterprise pricing and custom solutions.');
+    if (tierId === 'lifetime') {
+      Alert.alert(
+        'Get Lifetime Access',
+        'Lifetime plan: $199 one-time payment. Unlimited access forever. In-app purchases coming soon.',
+        [{ text: 'OK' }]
+      );
       return;
     }
     Alert.alert(
       'Upgrade to Pro',
       billingPeriod === 'annually'
-        ? 'Pro plan: $182/year ($15.20/mo). In-app purchases coming soon.'
-        : 'Pro plan: $19/month. In-app purchases coming soon.',
+        ? 'Pro plan: $99/year (Save 45% vs monthly). In-app purchases coming soon.'
+        : 'Pro plan: $15/month. In-app purchases coming soon.',
       [{ text: 'OK' }]
     );
   };
@@ -176,7 +186,7 @@ export default function PricingScreen() {
               Annually
             </Text>
             <View style={styles.saveBadge}>
-              <Text style={styles.saveBadgeText}>Save 20%</Text>
+              <Text style={styles.saveBadgeText}>Save 45%</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -211,12 +221,19 @@ export default function PricingScreen() {
                 </View>
 
                 <View style={styles.priceContainer}>
-                  <Text style={[styles.price, ds.price]}>{tier.price}</Text>
+                  <Text style={[styles.price, ds.price]}>
+                    {tier.id === 'pro' && billingPeriod === 'annually' ? '$99' : tier.price}
+                  </Text>
                   <Text style={[styles.period, ds.period]}>
-                    {tier.period === 'per month' && billingPeriod === 'annually'
-                      ? 'per year'
+                    {tier.id === 'pro'
+                      ? billingPeriod === 'annually' ? '/year' : '/month'
                       : tier.period}
                   </Text>
+                  {tier.id === 'pro' && billingPeriod === 'annually' && (
+                    <Text style={[styles.savingsNote, { color: COLORS.success }]}>
+                      Save $81/year vs monthly
+                    </Text>
+                  )}
                 </View>
 
                 <View style={styles.features}>
@@ -268,12 +285,43 @@ export default function PricingScreen() {
           </View>
 
           <View style={styles.faqItem}>
-            <Text style={[styles.faqQuestion, ds.faqQuestion]}>Is there a free trial?</Text>
+            <Text style={[styles.faqQuestion, ds.faqQuestion]}>Is the Lifetime plan really lifetime?</Text>
             <Text style={[styles.faqAnswer, ds.faqAnswer]}>
-              Yes! Pro plan includes a 7-day free trial. No credit card required.
+              Yes! Pay once and get access to all current and future features forever. No recurring fees, ever.
+            </Text>
+          </View>
+
+          <View style={styles.faqItem}>
+            <Text style={[styles.faqQuestion, ds.faqQuestion]}>Can I upgrade or downgrade my plan?</Text>
+            <Text style={[styles.faqAnswer, ds.faqAnswer]}>
+              Absolutely. You can upgrade from Free to Pro or Lifetime anytime. Downgrades take effect at the end of your current billing cycle.
+            </Text>
+          </View>
+
+          <View style={styles.faqItem}>
+            <Text style={[styles.faqQuestion, ds.faqQuestion]}>Do you offer refunds?</Text>
+            <Text style={[styles.faqAnswer, ds.faqAnswer]}>
+              We offer a 14-day money-back guarantee on all paid plans. If you're not satisfied, contact support for a full refund.
             </Text>
           </View>
         </GlassCard>
+
+        {/* Trust Signals */}
+        <View style={styles.trustSection}>
+          <Text style={[styles.trustText, ds.faqAnswer]}>
+            Trusted by professionals worldwide
+          </Text>
+          <Text style={[styles.trustText, ds.faqAnswer]}>
+            Secure payments powered by Stripe
+          </Text>
+          <View style={styles.trustBadges}>
+            <Text style={[styles.trustBadge, { color: colors.textTertiary }]}>256-bit SSL</Text>
+            <Text style={[styles.trustDot, { color: colors.textTertiary }]}>{'\u2022'}</Text>
+            <Text style={[styles.trustBadge, { color: colors.textTertiary }]}>PCI Compliant</Text>
+            <Text style={[styles.trustDot, { color: colors.textTertiary }]}>{'\u2022'}</Text>
+            <Text style={[styles.trustBadge, { color: colors.textTertiary }]}>SOC 2 Certified</Text>
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -439,5 +487,32 @@ const styles = StyleSheet.create({
   faqAnswer: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  savingsNote: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  trustSection: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    gap: 6,
+  },
+  trustText: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  trustBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+    opacity: 0.6,
+  },
+  trustBadge: {
+    fontSize: 11,
+  },
+  trustDot: {
+    fontSize: 8,
   },
 });
