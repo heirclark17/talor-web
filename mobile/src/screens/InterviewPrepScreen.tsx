@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,13 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  TextInput,
+  Share,
+  Linking,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   ArrowLeft,
   Building2,
@@ -32,6 +36,16 @@ import {
   MessageCircle,
   ClipboardList,
   RefreshCw,
+  Calendar,
+  Square,
+  CheckSquare,
+  Plus,
+  Trash2,
+  Share2,
+  StickyNote,
+  ChevronsDown,
+  ChevronsUp,
+  X,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api, ReadinessScore, ValuesAlignment, CompanyResearch, StrategicNewsItem, CompetitiveIntelligence, InterviewStrategy, ExecutiveInsights } from '../api/client';
@@ -182,12 +196,207 @@ export default function InterviewPrepScreen() {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [starStoryCount, setStarStoryCount] = useState<number>(0);
 
-  // Debug: Log when section changes
+  // New web-parity state
+  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [showNotesFor, setShowNotesFor] = useState<string | null>(null);
+  const [customQuestions, setCustomQuestions] = useState<Array<{ id: string; question: string; category: string }>>([]);
+  const [showAddQuestion, setShowAddQuestion] = useState(false);
+  const [newQuestion, setNewQuestion] = useState('');
+  const [newQuestionCategory, setNewQuestionCategory] = useState('product');
+  const [interviewDate, setInterviewDate] = useState<string>('');
+  const [showDateInput, setShowDateInput] = useState(false);
+  const [dateInputValue, setDateInputValue] = useState('');
+  const [allExpanded, setAllExpanded] = useState(false);
+
+  // Debounced save refs
+  const saveTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const interviewPrepIdRef = useRef<number | null>(null);
+
+  // Keep ref in sync
+  useEffect(() => {
+    interviewPrepIdRef.current = interviewPrepId;
+  }, [interviewPrepId]);
+
+  // Debounced save to backend
+  const debouncedSaveUserData = useCallback((field: string, value: any) => {
+    const prepId = interviewPrepIdRef.current;
+    if (!prepId) return;
+
+    if (saveTimerRef.current[field]) {
+      clearTimeout(saveTimerRef.current[field]);
+    }
+
+    saveTimerRef.current[field] = setTimeout(() => {
+      api.cacheInterviewPrepData(prepId, { user_data: { [field]: value } });
+    }, 500);
+  }, []);
+
+  // Load persisted user data from AsyncStorage
+  useEffect(() => {
+    const loadPersistedData = async () => {
+      try {
+        const [checks, savedNotes, questions, date] = await Promise.all([
+          AsyncStorage.getItem(`interview-prep-checks-${tailoredResumeId}`),
+          AsyncStorage.getItem(`interview-prep-notes-${tailoredResumeId}`),
+          AsyncStorage.getItem(`interview-prep-custom-questions-${tailoredResumeId}`),
+          AsyncStorage.getItem(`interview-date-${tailoredResumeId}`),
+        ]);
+        if (checks) setCheckedItems(JSON.parse(checks));
+        if (savedNotes) setNotes(JSON.parse(savedNotes));
+        if (questions) setCustomQuestions(JSON.parse(questions));
+        if (date) setInterviewDate(date);
+      } catch (error) {
+        console.error('Error loading persisted interview prep data:', error);
+      }
+    };
+    loadPersistedData();
+  }, [tailoredResumeId]);
+
+  // Toggle checklist item
+  const toggleCheck = useCallback((itemId: string) => {
+    setCheckedItems(prev => {
+      const newState = { ...prev, [itemId]: !prev[itemId] };
+      AsyncStorage.setItem(`interview-prep-checks-${tailoredResumeId}`, JSON.stringify(newState));
+      debouncedSaveUserData('checklist_checks', newState);
+      return newState;
+    });
+  }, [tailoredResumeId, debouncedSaveUserData]);
+
+  // Update note for a section
+  const updateNote = useCallback((sectionId: string, content: string) => {
+    setNotes(prev => {
+      const newNotes = { ...prev, [sectionId]: content };
+      AsyncStorage.setItem(`interview-prep-notes-${tailoredResumeId}`, JSON.stringify(newNotes));
+      debouncedSaveUserData('notes', newNotes);
+      return newNotes;
+    });
+  }, [tailoredResumeId, debouncedSaveUserData]);
+
+  // Add custom question
+  const addCustomQuestion = useCallback(() => {
+    if (!newQuestion.trim()) return;
+    const question = { id: Date.now().toString(), question: newQuestion.trim(), category: newQuestionCategory };
+    setCustomQuestions(prev => {
+      const updated = [...prev, question];
+      AsyncStorage.setItem(`interview-prep-custom-questions-${tailoredResumeId}`, JSON.stringify(updated));
+      debouncedSaveUserData('custom_questions', updated);
+      return updated;
+    });
+    setNewQuestion('');
+    setShowAddQuestion(false);
+  }, [newQuestion, newQuestionCategory, tailoredResumeId, debouncedSaveUserData]);
+
+  // Delete custom question
+  const deleteCustomQuestion = useCallback((id: string) => {
+    setCustomQuestions(prev => {
+      const updated = prev.filter(q => q.id !== id);
+      AsyncStorage.setItem(`interview-prep-custom-questions-${tailoredResumeId}`, JSON.stringify(updated));
+      debouncedSaveUserData('custom_questions', updated);
+      return updated;
+    });
+  }, [tailoredResumeId, debouncedSaveUserData]);
+
+  // Save interview date
+  const saveInterviewDate = useCallback((date: string) => {
+    setInterviewDate(date);
+    AsyncStorage.setItem(`interview-date-${tailoredResumeId}`, date);
+    debouncedSaveUserData('interview_date', date);
+  }, [tailoredResumeId, debouncedSaveUserData]);
+
+  // Get days until interview
+  const getDaysUntilInterview = () => {
+    if (!interviewDate) return null;
+    const today = new Date();
+    const interview = new Date(interviewDate);
+    if (isNaN(interview.getTime())) return null;
+    return Math.ceil((interview.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  };
+
+  // Get countdown color
+  const getCountdownColor = () => {
+    const days = getDaysUntilInterview();
+    if (days === null) return colors.textTertiary;
+    if (days <= 3) return COLORS.error;
+    if (days <= 7) return COLORS.warning;
+    return COLORS.success;
+  };
+
+  // Progress stats calculation
+  const getProgressStats = () => {
+    const researchTasks = prepData?.interview_preparation?.research_tasks || [];
+    const researchCompleted = researchTasks.filter((_: string, idx: number) => checkedItems[`research-${idx}`]).length;
+    const checklistItems = prepData?.interview_preparation?.day_of_checklist || [];
+    const checklistCompleted = checklistItems.filter((_: string, idx: number) => checkedItems[`checklist-${idx}`]).length;
+    return { researchCompleted, researchTotal: researchTasks.length, checklistCompleted, checklistTotal: checklistItems.length };
+  };
+
+  // Expand/collapse all
+  const toggleExpandAll = () => {
+    if (allExpanded) {
+      setSelectedSection(null);
+      setAllExpanded(false);
+    } else {
+      setAllExpanded(true);
+    }
+  };
+
+  // Export / Share
+  const handleExport = async () => {
+    const companyName = prepData?.company_profile?.name || 'Company';
+    const jobTitleText = prepData?.role_analysis?.job_title || 'Position';
+    try {
+      await Share.share({
+        title: `Interview Prep: ${jobTitleText} at ${companyName}`,
+        message: `Interview Preparation Guide\n\n${jobTitleText} at ${companyName}\n\nUse the Talor app to view your full prep materials.`,
+      });
+    } catch (error) {
+      // User cancelled
+    }
+  };
+
+  // Handle email
+  const handleEmailPrep = () => {
+    const companyName = prepData?.company_profile?.name || 'Company';
+    const jobTitleText = prepData?.role_analysis?.job_title || 'Position';
+    const subject = encodeURIComponent(`Interview Prep: ${jobTitleText} at ${companyName}`);
+    const body = encodeURIComponent(`Your interview preparation guide for ${jobTitleText} at ${companyName} is ready in the Talor app.`);
+    Linking.openURL(`mailto:?subject=${subject}&body=${body}`);
+  };
+
+  // Notes toggle component
+  const renderNotesButton = (sectionId: string) => (
+    <TouchableOpacity
+      style={styles.notesToggleButton}
+      onPress={() => setShowNotesFor(showNotesFor === sectionId ? null : sectionId)}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+    >
+      <StickyNote color={notes[sectionId] ? COLORS.warning : colors.textTertiary} size={16} />
+    </TouchableOpacity>
+  );
+
+  // Notes editor component
+  const renderNotesEditor = (sectionId: string) => {
+    if (showNotesFor !== sectionId) return null;
+    return (
+      <View style={[styles.notesContainer, { backgroundColor: colors.backgroundTertiary }]}>
+        <Text style={[styles.notesLabel, { color: colors.textSecondary }]}>Your Notes</Text>
+        <TextInput
+          style={[styles.notesInput, { color: colors.text, borderColor: colors.border }]}
+          value={notes[sectionId] || ''}
+          onChangeText={(text) => updateNote(sectionId, text)}
+          placeholder="Add your notes here..."
+          placeholderTextColor={colors.textTertiary}
+          multiline
+          textAlignVertical="top"
+        />
+      </View>
+    );
+  };
+
+  // Section press handler
   const handleSectionPress = (section: string) => {
-    console.log('=== CARD PRESSED ===', section);
-    console.log('Current selectedSection:', selectedSection);
     const newValue = selectedSection === section ? null : section;
-    console.log('Setting to:', newValue);
     setSelectedSection(newValue);
   };
 
@@ -322,17 +531,155 @@ export default function InterviewPrepScreen() {
           <ArrowLeft color={colors.text} size={24} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Interview Prep</Text>
-        <TouchableOpacity
-          style={styles.refreshButton}
-          onPress={handleRefresh}
-          accessibilityRole="button"
-          accessibilityLabel="Refresh interview prep data"
-        >
-          <RefreshCw color={colors.textSecondary} size={20} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            style={styles.headerActionButton}
+            onPress={toggleExpandAll}
+            accessibilityRole="button"
+            accessibilityLabel={allExpanded ? 'Collapse all sections' : 'Expand all sections'}
+          >
+            {allExpanded ? (
+              <ChevronsUp color={colors.textSecondary} size={20} />
+            ) : (
+              <ChevronsDown color={colors.textSecondary} size={20} />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.headerActionButton}
+            onPress={handleExport}
+            accessibilityRole="button"
+            accessibilityLabel="Share interview prep"
+          >
+            <Share2 color={colors.textSecondary} size={20} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.headerActionButton}
+            onPress={handleRefresh}
+            accessibilityRole="button"
+            accessibilityLabel="Refresh interview prep data"
+          >
+            <RefreshCw color={colors.textSecondary} size={20} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        {/* Progress Dashboard */}
+        {(() => {
+          const stats = getProgressStats();
+          const daysUntil = getDaysUntilInterview();
+          const countdownColor = getCountdownColor();
+          return (
+            <GlassCard material="thin" borderRadius={RADIUS.lg} style={styles.progressDashboard}>
+              {/* Interview Date Countdown */}
+              <View style={styles.countdownRow}>
+                <TouchableOpacity
+                  style={[styles.countdownButton, { borderColor: countdownColor }]}
+                  onPress={() => setShowDateInput(!showDateInput)}
+                >
+                  <Calendar color={countdownColor} size={18} />
+                  {daysUntil !== null ? (
+                    <View style={styles.countdownContent}>
+                      <Text style={[styles.countdownNumber, { color: countdownColor }]}>{daysUntil}</Text>
+                      <Text style={[styles.countdownLabel, { color: colors.textSecondary }]}>
+                        {daysUntil === 1 ? 'day until interview' : 'days until interview'}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text style={[styles.countdownLabel, { color: colors.textSecondary }]}>Set interview date</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {/* Date Input */}
+              {showDateInput && (
+                <View style={styles.dateInputContainer}>
+                  <TextInput
+                    style={[styles.dateInput, { color: colors.text, borderColor: colors.border }]}
+                    value={dateInputValue || interviewDate}
+                    onChangeText={setDateInputValue}
+                    placeholder="YYYY-MM-DD"
+                    placeholderTextColor={colors.textTertiary}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity
+                    style={[styles.dateInputSave, { backgroundColor: COLORS.primary }]}
+                    onPress={() => {
+                      const val = dateInputValue || interviewDate;
+                      if (val && !isNaN(new Date(val).getTime())) {
+                        saveInterviewDate(val);
+                        setShowDateInput(false);
+                        setDateInputValue('');
+                      } else {
+                        Alert.alert('Invalid Date', 'Please enter a valid date in YYYY-MM-DD format.');
+                      }
+                    }}
+                  >
+                    <Text style={styles.dateInputSaveText}>Save</Text>
+                  </TouchableOpacity>
+                  {interviewDate && (
+                    <TouchableOpacity
+                      style={styles.dateInputClear}
+                      onPress={() => {
+                        saveInterviewDate('');
+                        setShowDateInput(false);
+                        setDateInputValue('');
+                      }}
+                    >
+                      <X color={COLORS.error} size={18} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+
+              {/* Progress Bars */}
+              <View style={styles.progressBarsContainer}>
+                {/* Research Tasks Progress */}
+                <View style={styles.progressBarSection}>
+                  <View style={styles.progressBarHeader}>
+                    <Text style={[styles.progressBarLabel, { color: colors.text }]}>Research Tasks</Text>
+                    <Text style={[styles.progressBarCount, { color: colors.textSecondary }]}>
+                      {stats.researchCompleted}/{stats.researchTotal}
+                    </Text>
+                  </View>
+                  <View style={[styles.progressBarTrack, { backgroundColor: colors.backgroundTertiary }]}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          backgroundColor: COLORS.primary,
+                          width: stats.researchTotal > 0 ? `${(stats.researchCompleted / stats.researchTotal) * 100}%` : '0%',
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+
+                {/* Day-Of Checklist Progress */}
+                <View style={styles.progressBarSection}>
+                  <View style={styles.progressBarHeader}>
+                    <Text style={[styles.progressBarLabel, { color: colors.text }]}>Day-Of Checklist</Text>
+                    <Text style={[styles.progressBarCount, { color: colors.textSecondary }]}>
+                      {stats.checklistCompleted}/{stats.checklistTotal}
+                    </Text>
+                  </View>
+                  <View style={[styles.progressBarTrack, { backgroundColor: colors.backgroundTertiary }]}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          backgroundColor: COLORS.success,
+                          width: stats.checklistTotal > 0 ? `${(stats.checklistCompleted / stats.checklistTotal) * 100}%` : '0%',
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+              </View>
+            </GlassCard>
+          );
+        })()}
+
         {/* Job Info Card - Header in Frosted Glass */}
         <GlassCard material="thin" borderRadius={RADIUS.lg} style={styles.jobCardGlass}>
           <View style={styles.jobCardHeader}>
@@ -412,6 +759,7 @@ export default function InterviewPrepScreen() {
                     <Text style={[styles.expandedValue, { color: colors.textSecondary }]}>{company_profile.industry}</Text>
                   </View>
                 )}
+                {renderNotesEditor('companyProfile')}
               </View>
             )}
           </GlassCard>
@@ -464,6 +812,7 @@ export default function InterviewPrepScreen() {
                     ))}
                   </View>
                 )}
+                {renderNotesEditor('valuesCulture')}
               </View>
             )}
           </GlassCard>
@@ -747,7 +1096,12 @@ export default function InterviewPrepScreen() {
                 <View style={styles.stackedCardContent}>
                   <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Preparation Checklist</Text>
                   <Text style={[styles.stackedCardSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {interview_preparation?.research_tasks?.length || 0} tasks to complete
+                    {(() => {
+                      const stats = getProgressStats();
+                      const total = stats.researchTotal + stats.checklistTotal;
+                      const done = stats.researchCompleted + stats.checklistCompleted;
+                      return `${done}/${total} tasks completed`;
+                    })()}
                   </Text>
                 </View>
               </View>
@@ -762,25 +1116,68 @@ export default function InterviewPrepScreen() {
                 {interview_preparation?.research_tasks && interview_preparation.research_tasks.length > 0 && (
                   <View style={styles.expandedSection}>
                     <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Research Tasks</Text>
-                    {interview_preparation.research_tasks.map((task, index) => (
-                      <View key={index} style={styles.bulletItem}>
-                        <View style={[styles.bulletDot, { backgroundColor: COLORS.info }]} />
-                        <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{task}</Text>
-                      </View>
-                    ))}
+                    {interview_preparation.research_tasks.map((task: string, index: number) => {
+                      const itemId = `research-${index}`;
+                      const isChecked = !!checkedItems[itemId];
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.checklistItem}
+                          onPress={() => toggleCheck(itemId)}
+                          activeOpacity={0.7}
+                        >
+                          {isChecked ? (
+                            <CheckSquare color={COLORS.success} size={20} />
+                          ) : (
+                            <Square color={colors.textTertiary} size={20} />
+                          )}
+                          <Text
+                            style={[
+                              styles.checklistText,
+                              { color: colors.textSecondary },
+                              isChecked && styles.checklistTextChecked,
+                            ]}
+                          >
+                            {task}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
                   </View>
                 )}
                 {interview_preparation?.day_of_checklist && interview_preparation.day_of_checklist.length > 0 && (
                   <View style={styles.expandedSection}>
                     <Text style={[styles.expandedSectionTitle, { color: colors.text }]}>Day-of Checklist</Text>
-                    {interview_preparation.day_of_checklist.map((item: string, index: number) => (
-                      <View key={index} style={styles.bulletItem}>
-                        <View style={[styles.bulletDot, { backgroundColor: COLORS.info }]} />
-                        <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{item}</Text>
-                      </View>
-                    ))}
+                    {interview_preparation.day_of_checklist.map((item: string, index: number) => {
+                      const itemId = `checklist-${index}`;
+                      const isChecked = !!checkedItems[itemId];
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.checklistItem}
+                          onPress={() => toggleCheck(itemId)}
+                          activeOpacity={0.7}
+                        >
+                          {isChecked ? (
+                            <CheckSquare color={COLORS.success} size={20} />
+                          ) : (
+                            <Square color={colors.textTertiary} size={20} />
+                          )}
+                          <Text
+                            style={[
+                              styles.checklistText,
+                              { color: colors.textSecondary },
+                              isChecked && styles.checklistTextChecked,
+                            ]}
+                          >
+                            {item}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
                   </View>
                 )}
+                {renderNotesEditor('preparation')}
               </View>
             )}
           </GlassCard>
@@ -830,6 +1227,85 @@ export default function InterviewPrepScreen() {
                 ) : (
                   <Text style={[styles.expandedText, { color: colors.textSecondary }]}>No questions generated yet.</Text>
                 )}
+
+                {/* Custom Questions */}
+                {customQuestions.length > 0 && (
+                  <View style={[styles.expandedSection, { marginTop: SPACING.md }]}>
+                    <Text style={[styles.expandedSectionTitle, { color: COLORS.primary }]}>Your Questions</Text>
+                    {customQuestions.map((q) => (
+                      <View key={q.id} style={styles.customQuestionItem}>
+                        <View style={styles.customQuestionLeft}>
+                          <View style={[styles.customQuestionCategoryBadge, { backgroundColor: `${COLORS.primary}20` }]}>
+                            <Text style={[styles.customQuestionCategoryText, { color: COLORS.primary }]}>{q.category}</Text>
+                          </View>
+                          <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{q.question}</Text>
+                        </View>
+                        <TouchableOpacity onPress={() => deleteCustomQuestion(q.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                          <Trash2 color={COLORS.error} size={16} />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* Add Custom Question */}
+                {showAddQuestion ? (
+                  <View style={[styles.addQuestionForm, { borderColor: colors.border }]}>
+                    <TextInput
+                      style={[styles.addQuestionInput, { color: colors.text, borderColor: colors.border }]}
+                      value={newQuestion}
+                      onChangeText={setNewQuestion}
+                      placeholder="Type your question..."
+                      placeholderTextColor={colors.textTertiary}
+                      multiline
+                    />
+                    <View style={styles.addQuestionCategoryRow}>
+                      {['product', 'team', 'culture', 'performance', 'strategy'].map((cat) => (
+                        <TouchableOpacity
+                          key={cat}
+                          style={[
+                            styles.categoryChip,
+                            { backgroundColor: newQuestionCategory === cat ? `${COLORS.primary}20` : colors.backgroundTertiary },
+                          ]}
+                          onPress={() => setNewQuestionCategory(cat)}
+                        >
+                          <Text
+                            style={[
+                              styles.categoryChipText,
+                              { color: newQuestionCategory === cat ? COLORS.primary : colors.textSecondary },
+                            ]}
+                          >
+                            {cat}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                    <View style={styles.addQuestionActions}>
+                      <TouchableOpacity
+                        style={[styles.addQuestionSave, { backgroundColor: COLORS.primary }]}
+                        onPress={addCustomQuestion}
+                      >
+                        <Text style={styles.addQuestionSaveText}>Add</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.addQuestionCancel}
+                        onPress={() => { setShowAddQuestion(false); setNewQuestion(''); }}
+                      >
+                        <Text style={[styles.addQuestionCancelText, { color: colors.textSecondary }]}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.addQuestionButton, { borderColor: colors.border }]}
+                    onPress={() => setShowAddQuestion(true)}
+                  >
+                    <Plus color={COLORS.primary} size={18} />
+                    <Text style={[styles.addQuestionButtonText, { color: COLORS.primary }]}>Add Your Question</Text>
+                  </TouchableOpacity>
+                )}
+
+                {renderNotesEditor('questions')}
               </View>
             )}
           </GlassCard>
@@ -1172,12 +1648,6 @@ const styles = StyleSheet.create({
   },
   headerPlaceholder: {
     width: 44,
-  },
-  refreshButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   content: {
     flex: 1,
@@ -2670,5 +3140,241 @@ const styles = StyleSheet.create({
   viewStoriesText: {
     fontSize: 13,
     fontFamily: FONTS.medium,
+  },
+  // Header actions
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+    gap: 4,
+  },
+  headerActionButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Progress Dashboard
+  progressDashboard: {
+    marginBottom: SPACING.md,
+  },
+  countdownRow: {
+    marginBottom: SPACING.md,
+  },
+  countdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    gap: SPACING.sm,
+  },
+  countdownContent: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: SPACING.xs,
+  },
+  countdownNumber: {
+    fontSize: 28,
+    fontFamily: FONTS.bold,
+  },
+  countdownLabel: {
+    ...TYPOGRAPHY.subhead,
+  },
+  dateInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  dateInput: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.md,
+    fontFamily: FONTS.regular,
+    fontSize: 14,
+  },
+  dateInputSave: {
+    height: 40,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dateInputSaveText: {
+    color: '#fff',
+    fontFamily: FONTS.semibold,
+    fontSize: 14,
+  },
+  dateInputClear: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  progressBarsContainer: {
+    gap: SPACING.md,
+  },
+  progressBarSection: {
+    gap: 6,
+  },
+  progressBarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  progressBarLabel: {
+    ...TYPOGRAPHY.caption1,
+    fontFamily: FONTS.medium,
+  },
+  progressBarCount: {
+    ...TYPOGRAPHY.caption1,
+  },
+  progressBarTrack: {
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  // Checklist items
+  checklistItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+    paddingVertical: 4,
+  },
+  checklistText: {
+    ...TYPOGRAPHY.subhead,
+    lineHeight: 20,
+    flex: 1,
+  },
+  checklistTextChecked: {
+    textDecorationLine: 'line-through',
+    opacity: 0.6,
+  },
+  // Notes
+  notesToggleButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notesContainer: {
+    marginTop: SPACING.md,
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+  },
+  notesLabel: {
+    ...TYPOGRAPHY.caption1,
+    fontFamily: FONTS.semibold,
+    marginBottom: SPACING.xs,
+  },
+  notesInput: {
+    minHeight: 80,
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    padding: SPACING.sm,
+    fontFamily: FONTS.regular,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  // Custom Questions
+  customQuestionItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  customQuestionLeft: {
+    flex: 1,
+    gap: 4,
+  },
+  customQuestionCategoryBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 4,
+  },
+  customQuestionCategoryText: {
+    ...TYPOGRAPHY.caption2,
+    fontFamily: FONTS.medium,
+    textTransform: 'capitalize',
+  },
+  addQuestionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.md,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderRadius: RADIUS.md,
+    marginTop: SPACING.md,
+  },
+  addQuestionButtonText: {
+    ...TYPOGRAPHY.subhead,
+    fontFamily: FONTS.medium,
+  },
+  addQuestionForm: {
+    marginTop: SPACING.md,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
+    gap: SPACING.sm,
+  },
+  addQuestionInput: {
+    minHeight: 60,
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    padding: SPACING.sm,
+    fontFamily: FONTS.regular,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  addQuestionCategoryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  categoryChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  categoryChipText: {
+    ...TYPOGRAPHY.caption1,
+    fontFamily: FONTS.medium,
+    textTransform: 'capitalize',
+  },
+  addQuestionActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  addQuestionSave: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.sm,
+  },
+  addQuestionSaveText: {
+    color: '#fff',
+    fontFamily: FONTS.semibold,
+    fontSize: 14,
+  },
+  addQuestionCancel: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+  },
+  addQuestionCancelText: {
+    fontFamily: FONTS.medium,
+    fontSize: 14,
   },
 });
