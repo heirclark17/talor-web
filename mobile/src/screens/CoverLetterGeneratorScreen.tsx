@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,9 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  Animated,
+  LayoutAnimation,
+  UIManager,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import * as DocumentPicker from 'expo-document-picker';
@@ -24,13 +27,21 @@ import {
   Link,
   Type,
   Search,
-  Loader2,
   Trash2,
+  ChevronDown,
+  ChevronUp,
+  Settings2,
 } from 'lucide-react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { api } from '../api/client';
 import { useTheme } from '../context/ThemeContext';
-import { SPACING, TYPOGRAPHY, GLASS, COLORS, FONTS } from '../utils/constants';
+import { SPACING, TYPOGRAPHY, GLASS, COLORS, ALPHA_COLORS, FONTS } from '../utils/constants';
 import { CoverLetterDetailModal } from '../components/CoverLetterDetailModal';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 interface CoverLetter {
   id: number;
@@ -51,6 +62,13 @@ interface ResumeItem {
 
 type ResumeSource = 'none' | 'existing' | 'upload';
 type JobInputMethod = 'text' | 'url';
+
+interface FieldErrors {
+  jobTitle?: string;
+  companyName?: string;
+  jobDescription?: string;
+  jobUrl?: string;
+}
 
 const TONES = [
   { value: 'professional', label: 'Professional', desc: 'Formal and polished' },
@@ -113,6 +131,15 @@ export default function CoverLetterGeneratorScreen() {
   const [selectedCoverLetter, setSelectedCoverLetter] = useState<CoverLetter | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // Inline validation
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  // Collapsible customize section
+  const [customizeExpanded, setCustomizeExpanded] = useState(false);
+
+  // Swipeable refs for closing
+  const swipeableRefs = useRef<Map<number, Swipeable>>(new Map());
+
   useEffect(() => {
     loadLetters();
     loadResumes();
@@ -149,13 +176,14 @@ export default function CoverLetterGeneratorScreen() {
   async function handleExtract() {
     const trimmedUrl = jobUrl.trim();
     if (!trimmedUrl) {
-      setExtractionError({ company: 'Please enter a job URL first', title: 'Please enter a job URL first' });
+      setFieldErrors(prev => ({ ...prev, jobUrl: 'Please enter a job URL first' }));
       return;
     }
 
     setExtracting(true);
     setExtractionAttempted(false);
     setExtractionError({});
+    setFieldErrors(prev => ({ ...prev, jobUrl: undefined }));
 
     try {
       const result = await api.extractJobDetails(trimmedUrl);
@@ -269,21 +297,32 @@ export default function CoverLetterGeneratorScreen() {
     setTone('professional');
     setLength('standard');
     setFocus('leadership');
+    setFieldErrors({});
+    setCustomizeExpanded(false);
+  }
+
+  function validateForm(): boolean {
+    const errors: FieldErrors = {};
+
+    if (!jobTitle.trim()) {
+      errors.jobTitle = 'Job title is required';
+    }
+    if (!companyName.trim()) {
+      errors.companyName = 'Company name is required';
+    }
+    if (jobInputMethod === 'text' && !jobDescription.trim()) {
+      errors.jobDescription = 'Job description is required';
+    }
+    if (jobInputMethod === 'url' && !jobUrl.trim()) {
+      errors.jobUrl = 'Job URL is required';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   }
 
   async function handleGenerate() {
-    if (!jobTitle.trim() || !companyName.trim()) {
-      Alert.alert('Missing Fields', 'Please enter both a job title and company name.');
-      return;
-    }
-    if (jobInputMethod === 'text' && !jobDescription.trim()) {
-      Alert.alert('Missing Fields', 'Please enter a job description.');
-      return;
-    }
-    if (jobInputMethod === 'url' && !jobUrl.trim()) {
-      Alert.alert('Missing Fields', 'Please enter a job URL.');
-      return;
-    }
+    if (!validateForm()) return;
 
     setGenerating(true);
     setGenerationStage('researching');
@@ -351,6 +390,7 @@ export default function CoverLetterGeneratorScreen() {
             try {
               const res = await api.deleteCoverLetter(id);
               if (res.success) {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                 setLetters(prev => prev.filter(l => l.id !== id));
               }
             } catch (err) {
@@ -361,6 +401,19 @@ export default function CoverLetterGeneratorScreen() {
       ]
     );
   }
+
+  const toggleCustomize = useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setCustomizeExpanded(prev => !prev);
+  }, []);
+
+  // Clear field error on change
+  const handleFieldChange = useCallback((field: keyof FieldErrors, value: string, setter: (v: string) => void) => {
+    setter(value);
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  }, [fieldErrors]);
 
   // --- Render helpers ---
 
@@ -380,12 +433,15 @@ export default function CoverLetterGeneratorScreen() {
               styles.optionCard,
               {
                 width: columns === 2 ? '48%' : columns === 3 ? '31.5%' : `${(100 / columns) - 2}%`,
-                backgroundColor: isActive ? COLORS.primary + '15' : (isDark ? colors.backgroundSecondary + '40' : colors.backgroundSecondary + '60'),
-                borderColor: isActive ? COLORS.primary + '60' : (isDark ? GLASS.getBorderColor() : 'transparent'),
+                backgroundColor: isActive ? ALPHA_COLORS.primary.bg : (isDark ? ALPHA_COLORS.white[10] : colors.backgroundSecondary),
+                borderColor: isActive ? ALPHA_COLORS.primary.border : (isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20]),
               },
             ]}
             onPress={() => onSelect(opt.value)}
             activeOpacity={0.7}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: isActive }}
+            accessibilityLabel={`${opt.label}: ${opt.desc}`}
           >
             <Text style={[styles.optionLabel, { color: isActive ? COLORS.primary : colors.text }]}>{opt.label}</Text>
             <Text style={[styles.optionDesc, { color: colors.textTertiary }]}>{opt.desc}</Text>
@@ -395,46 +451,67 @@ export default function CoverLetterGeneratorScreen() {
     </View>
   );
 
+  const renderSwipeDeleteAction = () => (
+    <TouchableOpacity style={styles.swipeDeleteAction} activeOpacity={0.8}>
+      <Trash2 color="#fff" size={20} />
+      <Text style={styles.swipeDeleteText}>Delete</Text>
+    </TouchableOpacity>
+  );
+
   const renderLetterCard = (letter: CoverLetter) => (
-    <TouchableOpacity
+    <Swipeable
       key={letter.id}
-      activeOpacity={0.7}
-      onPress={() => {
-        setSelectedCoverLetter(letter);
-        setModalVisible(true);
+      ref={ref => {
+        if (ref) swipeableRefs.current.set(letter.id, ref);
       }}
-      onLongPress={() => handleDeleteLetter(letter.id)}
+      renderRightActions={renderSwipeDeleteAction}
+      onSwipeableOpen={() => {
+        handleDeleteLetter(letter.id);
+        swipeableRefs.current.get(letter.id)?.close();
+      }}
+      overshootRight={false}
     >
-      <BlurView
-        intensity={GLASS.getBlurIntensity('subtle')}
-        tint={isDark ? 'dark' : 'light'}
-        style={styles.letterCardBlur}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => {
+          setSelectedCoverLetter(letter);
+          setModalVisible(true);
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={`${letter.jobTitle} at ${letter.companyName}, ${letter.tone} tone`}
+        accessibilityHint="Tap to view, swipe left to delete"
       >
-        <View style={[styles.letterCard, { borderColor: isDark ? GLASS.getBorderColor() : 'transparent' }]}>
-          <View style={styles.letterCardContent}>
-            <View style={styles.letterCardLeft}>
-              <FileText color={COLORS.primary} size={20} />
-            </View>
-            <View style={styles.letterCardText}>
-              <Text style={[styles.letterCardTitle, { color: colors.text }]} numberOfLines={1}>
-                {letter.jobTitle}
-              </Text>
-              <Text style={[styles.letterCardCompany, { color: colors.textSecondary }]} numberOfLines={1}>
-                {letter.companyName}
-              </Text>
-            </View>
-            <View style={styles.letterCardRight}>
-              <View style={[styles.toneBadge, { backgroundColor: COLORS.primary + '15' }]}>
-                <Text style={[styles.toneBadgeText, { color: COLORS.primary }]}>{letter.tone || 'professional'}</Text>
+        <BlurView
+          intensity={GLASS.getBlurIntensity('subtle')}
+          tint={isDark ? 'dark' : 'light'}
+          style={styles.letterCardBlur}
+        >
+          <View style={[styles.letterCard, { borderColor: isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20] }]}>
+            <View style={styles.letterCardContent}>
+              <View style={[styles.letterCardLeft, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                <FileText color={COLORS.primary} size={20} />
               </View>
-              <Text style={[styles.letterCardDate, { color: colors.textTertiary }]}>
-                {new Date(letter.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </Text>
+              <View style={styles.letterCardText}>
+                <Text style={[styles.letterCardTitle, { color: colors.text }]} numberOfLines={1}>
+                  {letter.jobTitle}
+                </Text>
+                <Text style={[styles.letterCardCompany, { color: colors.textSecondary }]} numberOfLines={1}>
+                  {letter.companyName}
+                </Text>
+              </View>
+              <View style={styles.letterCardRight}>
+                <View style={[styles.toneBadge, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                  <Text style={[styles.toneBadgeText, { color: COLORS.primary }]}>{letter.tone || 'professional'}</Text>
+                </View>
+                <Text style={[styles.letterCardDate, { color: colors.textTertiary }]}>
+                  {new Date(letter.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
-      </BlurView>
-    </TouchableOpacity>
+        </BlurView>
+      </TouchableOpacity>
+    </Swipeable>
   );
 
   const renderEmptyState = () => (
@@ -448,12 +525,23 @@ export default function CoverLetterGeneratorScreen() {
         style={styles.emptyButton}
         onPress={() => setShowGenerator(true)}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="Generate cover letter"
       >
         <Wand2 color="#fff" size={20} />
         <Text style={styles.emptyButtonText}>Generate Cover Letter</Text>
       </TouchableOpacity>
     </View>
   );
+
+  // Input field styling helper
+  const getInputStyle = (fieldKey?: keyof FieldErrors) => ({
+    color: colors.text,
+    backgroundColor: isDark ? ALPHA_COLORS.white[10] : colors.backgroundSecondary,
+    borderColor: fieldKey && fieldErrors[fieldKey]
+      ? COLORS.danger
+      : (isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20]),
+  });
 
   // --- Generator Form ---
   const renderGeneratorForm = () => (
@@ -471,8 +559,8 @@ export default function CoverLetterGeneratorScreen() {
             style={[
               styles.methodButton,
               {
-                backgroundColor: jobInputMethod === 'text' ? COLORS.primary + '15' : (isDark ? colors.backgroundSecondary + '40' : colors.backgroundSecondary + '60'),
-                borderColor: jobInputMethod === 'text' ? COLORS.primary + '60' : (isDark ? GLASS.getBorderColor() : 'transparent'),
+                backgroundColor: jobInputMethod === 'text' ? ALPHA_COLORS.primary.bg : (isDark ? ALPHA_COLORS.white[10] : colors.backgroundSecondary),
+                borderColor: jobInputMethod === 'text' ? ALPHA_COLORS.primary.border : (isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20]),
               },
             ]}
             onPress={() => {
@@ -481,8 +569,12 @@ export default function CoverLetterGeneratorScreen() {
               setCompanyExtracted(false);
               setTitleExtracted(false);
               setExtractionError({});
+              setFieldErrors(prev => ({ ...prev, jobUrl: undefined }));
             }}
             activeOpacity={0.7}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: jobInputMethod === 'text' }}
+            accessibilityLabel="Paste Text: Manually enter job details"
           >
             <Type color={jobInputMethod === 'text' ? COLORS.primary : colors.textSecondary} size={18} />
             <Text style={[styles.methodLabel, { color: jobInputMethod === 'text' ? COLORS.primary : colors.text }]}>Paste Text</Text>
@@ -492,8 +584,8 @@ export default function CoverLetterGeneratorScreen() {
             style={[
               styles.methodButton,
               {
-                backgroundColor: jobInputMethod === 'url' ? COLORS.primary + '15' : (isDark ? colors.backgroundSecondary + '40' : colors.backgroundSecondary + '60'),
-                borderColor: jobInputMethod === 'url' ? COLORS.primary + '60' : (isDark ? GLASS.getBorderColor() : 'transparent'),
+                backgroundColor: jobInputMethod === 'url' ? ALPHA_COLORS.primary.bg : (isDark ? ALPHA_COLORS.white[10] : colors.backgroundSecondary),
+                borderColor: jobInputMethod === 'url' ? ALPHA_COLORS.primary.border : (isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20]),
               },
             ]}
             onPress={() => {
@@ -502,8 +594,12 @@ export default function CoverLetterGeneratorScreen() {
               setCompanyExtracted(false);
               setTitleExtracted(false);
               setExtractionError({});
+              setFieldErrors(prev => ({ ...prev, jobDescription: undefined }));
             }}
             activeOpacity={0.7}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: jobInputMethod === 'url' }}
+            accessibilityLabel="Enter URL: Extract from job posting"
           >
             <Link color={jobInputMethod === 'url' ? COLORS.primary : colors.textSecondary} size={18} />
             <Text style={[styles.methodLabel, { color: jobInputMethod === 'url' ? COLORS.primary : colors.text }]}>Enter URL</Text>
@@ -518,17 +614,10 @@ export default function CoverLetterGeneratorScreen() {
           <Text style={[styles.label, { color: colors.text }]}>Job URL *</Text>
           <View style={styles.urlRow}>
             <TextInput
-              style={[
-                styles.urlInput,
-                {
-                  color: colors.text,
-                  backgroundColor: isDark ? colors.backgroundSecondary + '40' : colors.backgroundSecondary + '80',
-                  borderColor: isDark ? GLASS.getBorderColor() : 'transparent',
-                },
-              ]}
+              style={[styles.urlInput, getInputStyle('jobUrl')]}
               value={jobUrl}
               onChangeText={(text) => {
-                setJobUrl(text);
+                handleFieldChange('jobUrl', text, setJobUrl);
                 if (extractionAttempted) {
                   setExtractionAttempted(false);
                   setCompanyExtracted(false);
@@ -544,6 +633,7 @@ export default function CoverLetterGeneratorScreen() {
               autoCorrect={false}
               keyboardType="url"
               editable={!extracting}
+              accessibilityLabel="Job URL"
             />
             <TouchableOpacity
               style={[
@@ -553,6 +643,8 @@ export default function CoverLetterGeneratorScreen() {
               onPress={handleExtract}
               disabled={!jobUrl.trim() || extracting}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Extract job details from URL"
             >
               {extracting ? (
                 <ActivityIndicator color="#fff" size="small" />
@@ -561,44 +653,68 @@ export default function CoverLetterGeneratorScreen() {
               )}
             </TouchableOpacity>
           </View>
-          <Text style={[styles.helperText, { color: colors.textTertiary }]}>
-            Paste the job URL and tap Extract to auto-fill company and title.
-          </Text>
+          {fieldErrors.jobUrl ? (
+            <Text style={styles.errorText}>{fieldErrors.jobUrl}</Text>
+          ) : (
+            <Text style={[styles.helperText, { color: colors.textTertiary }]}>
+              Paste the job URL and tap Extract to auto-fill company and title.
+            </Text>
+          )}
         </View>
       )}
 
       {/* Extraction Success */}
       {jobInputMethod === 'url' && extractionAttempted && (companyExtracted || titleExtracted) && (
-        <View style={styles.extractionSuccess}>
-          <CheckCircle color="#34D399" size={18} />
+        <View style={[styles.extractionSuccess, { backgroundColor: ALPHA_COLORS.success.bg, borderColor: ALPHA_COLORS.success.border }]}>
+          <CheckCircle color={COLORS.success} size={18} />
           <View style={{ flex: 1 }}>
-            <Text style={styles.extractionSuccessTitle}>Extraction Successful!</Text>
-            {companyExtracted && <Text style={styles.extractionSuccessItem}>Company: {companyName}</Text>}
-            {titleExtracted && <Text style={styles.extractionSuccessItem}>Job Title: {jobTitle}</Text>}
+            <Text style={[styles.extractionSuccessTitle, { color: COLORS.success }]}>Extraction Successful!</Text>
+            {companyExtracted && <Text style={[styles.extractionSuccessItem, { color: COLORS.success }]}>Company: {companyName}</Text>}
+            {titleExtracted && <Text style={[styles.extractionSuccessItem, { color: COLORS.success }]}>Job Title: {jobTitle}</Text>}
+            {jobDescription ? (
+              <Text style={[styles.extractionSuccessItem, { color: COLORS.success }]}>Job description extracted</Text>
+            ) : null}
           </View>
         </View>
       )}
+
+      {/* Extracted Job Description (editable) */}
+      {jobInputMethod === 'url' && extractionAttempted && jobDescription ? (
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { color: colors.text }]}>Extracted Job Description</Text>
+          <TextInput
+            style={[styles.textArea, getInputStyle()]}
+            value={jobDescription}
+            onChangeText={setJobDescription}
+            placeholder="Extracted job description..."
+            placeholderTextColor={colors.textTertiary}
+            multiline
+            textAlignVertical="top"
+            accessibilityLabel="Extracted job description, editable"
+          />
+          <Text style={[styles.helperText, { color: colors.textTertiary }]}>
+            You can edit the extracted description if needed.
+          </Text>
+        </View>
+      ) : null}
 
       {/* Text Input - Job Description */}
       {jobInputMethod === 'text' && (
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { color: colors.text }]}>Job Description *</Text>
           <TextInput
-            style={[
-              styles.textArea,
-              {
-                color: colors.text,
-                backgroundColor: isDark ? colors.backgroundSecondary + '40' : colors.backgroundSecondary + '80',
-                borderColor: isDark ? GLASS.getBorderColor() : 'transparent',
-              },
-            ]}
+            style={[styles.textArea, getInputStyle('jobDescription')]}
             value={jobDescription}
-            onChangeText={setJobDescription}
+            onChangeText={(text) => handleFieldChange('jobDescription', text, setJobDescription)}
             placeholder="Paste the job description here..."
             placeholderTextColor={colors.textTertiary}
             multiline
             textAlignVertical="top"
+            accessibilityLabel="Job description"
           />
+          {fieldErrors.jobDescription && (
+            <Text style={styles.errorText}>{fieldErrors.jobDescription}</Text>
+          )}
         </View>
       )}
 
@@ -610,22 +726,18 @@ export default function CoverLetterGeneratorScreen() {
             {jobInputMethod === 'url' && <Text style={{ color: COLORS.danger, fontSize: 11 }}> (extraction failed)</Text>}
           </Text>
           <TextInput
-            style={[
-              styles.textInput,
-              {
-                color: colors.text,
-                backgroundColor: isDark ? colors.backgroundSecondary + '40' : colors.backgroundSecondary + '80',
-                borderColor: extractionError.company ? COLORS.danger : (isDark ? GLASS.getBorderColor() : 'transparent'),
-              },
-            ]}
+            style={[styles.textInput, getInputStyle('companyName')]}
             value={companyName}
-            onChangeText={setCompanyName}
+            onChangeText={(text) => handleFieldChange('companyName', text, setCompanyName)}
             placeholder="e.g., Microsoft"
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Company name"
           />
-          {extractionError.company && (
+          {fieldErrors.companyName ? (
+            <Text style={styles.errorText}>{fieldErrors.companyName}</Text>
+          ) : extractionError.company ? (
             <Text style={styles.errorText}>{extractionError.company}</Text>
-          )}
+          ) : null}
         </View>
       )}
 
@@ -636,28 +748,27 @@ export default function CoverLetterGeneratorScreen() {
             {jobInputMethod === 'url' && <Text style={{ color: COLORS.danger, fontSize: 11 }}> (extraction failed)</Text>}
           </Text>
           <TextInput
-            style={[
-              styles.textInput,
-              {
-                color: colors.text,
-                backgroundColor: isDark ? colors.backgroundSecondary + '40' : colors.backgroundSecondary + '80',
-                borderColor: extractionError.title ? COLORS.danger : (isDark ? GLASS.getBorderColor() : 'transparent'),
-              },
-            ]}
+            style={[styles.textInput, getInputStyle('jobTitle')]}
             value={jobTitle}
-            onChangeText={setJobTitle}
+            onChangeText={(text) => handleFieldChange('jobTitle', text, setJobTitle)}
             placeholder="e.g., Senior Software Engineer"
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Job title"
           />
-          {extractionError.title && (
+          {fieldErrors.jobTitle ? (
+            <Text style={styles.errorText}>{fieldErrors.jobTitle}</Text>
+          ) : extractionError.title ? (
             <Text style={styles.errorText}>{extractionError.title}</Text>
-          )}
+          ) : null}
         </View>
       )}
 
       {/* Resume Picker */}
       <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: colors.text }]}>Resume (Optional)</Text>
+        <Text style={[styles.label, { color: colors.text }]}>Attach Resume</Text>
+        <Text style={[styles.helperText, { color: colors.textTertiary, marginBottom: SPACING.sm, marginTop: 0 }]}>
+          Attach your resume to personalize the cover letter with your experience
+        </Text>
         <View style={styles.resumeSourceRow}>
           {([
             { key: 'none' as ResumeSource, icon: X, label: 'None' },
@@ -671,8 +782,8 @@ export default function CoverLetterGeneratorScreen() {
                 style={[
                   styles.resumeSourceButton,
                   {
-                    backgroundColor: isActive ? COLORS.primary + '15' : (isDark ? colors.backgroundSecondary + '40' : colors.backgroundSecondary + '60'),
-                    borderColor: isActive ? COLORS.primary + '60' : (isDark ? GLASS.getBorderColor() : 'transparent'),
+                    backgroundColor: isActive ? ALPHA_COLORS.primary.bg : (isDark ? ALPHA_COLORS.white[10] : colors.backgroundSecondary),
+                    borderColor: isActive ? ALPHA_COLORS.primary.border : (isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20]),
                   },
                 ]}
                 onPress={() => {
@@ -680,6 +791,9 @@ export default function CoverLetterGeneratorScreen() {
                   if (key === 'none') setSelectedResumeId(null);
                 }}
                 activeOpacity={0.7}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isActive }}
+                accessibilityLabel={`Resume source: ${label}`}
               >
                 <Icon color={isActive ? COLORS.primary : colors.textSecondary} size={16} />
                 <Text style={[styles.resumeSourceLabel, { color: isActive ? COLORS.primary : colors.text }]}>{label}</Text>
@@ -706,12 +820,15 @@ export default function CoverLetterGeneratorScreen() {
                     style={[
                       styles.resumePickerItem,
                       {
-                        backgroundColor: isSelected ? COLORS.primary + '15' : 'transparent',
-                        borderColor: isSelected ? COLORS.primary + '40' : (isDark ? GLASS.getBorderColor() : colors.backgroundSecondary),
+                        backgroundColor: isSelected ? ALPHA_COLORS.primary.bg : 'transparent',
+                        borderColor: isSelected ? ALPHA_COLORS.primary.border : (isDark ? GLASS.getBorderColor() : colors.backgroundSecondary),
                       },
                     ]}
                     onPress={() => setSelectedResumeId(isSelected ? null : r.id)}
                     activeOpacity={0.7}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    accessibilityLabel={`Resume: ${r.candidateName || r.filename}`}
                   >
                     {isSelected ? (
                       <CheckCircle color={COLORS.primary} size={18} />
@@ -742,12 +859,16 @@ export default function CoverLetterGeneratorScreen() {
                 <Text style={[styles.helperText, { color: colors.textSecondary }]}>Uploading resume...</Text>
               </View>
             ) : selectedResumeId && resumeSource === 'upload' ? (
-              <View style={styles.uploadedSuccess}>
-                <CheckCircle color="#34D399" size={18} />
+              <View style={[styles.uploadedSuccess, { backgroundColor: ALPHA_COLORS.success.bg, borderColor: ALPHA_COLORS.success.border }]}>
+                <CheckCircle color={COLORS.success} size={18} />
                 <Text style={[styles.uploadedText, { color: colors.text }]} numberOfLines={1}>
                   {resumes.find(r => r.id === selectedResumeId)?.filename || 'Resume uploaded'}
                 </Text>
-                <TouchableOpacity onPress={() => setSelectedResumeId(null)}>
+                <TouchableOpacity
+                  onPress={() => setSelectedResumeId(null)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove uploaded resume"
+                >
                   <X color={colors.textTertiary} size={18} />
                 </TouchableOpacity>
               </View>
@@ -756,6 +877,8 @@ export default function CoverLetterGeneratorScreen() {
                 style={[styles.uploadButton, { borderColor: isDark ? GLASS.getBorderColor() : colors.backgroundSecondary }]}
                 onPress={handleFileUpload}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="Choose resume file to upload"
               >
                 <Upload color={colors.textSecondary} size={18} />
                 <Text style={[styles.uploadButtonText, { color: colors.textSecondary }]}>
@@ -767,23 +890,56 @@ export default function CoverLetterGeneratorScreen() {
         )}
       </View>
 
-      {/* Tone */}
-      <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: colors.text }]}>Tone</Text>
-        {renderOptionSelector(TONES, tone, setTone, 3)}
-      </View>
+      {/* Collapsible Customize Section */}
+      <TouchableOpacity
+        style={[
+          styles.customizeToggle,
+          {
+            backgroundColor: isDark ? ALPHA_COLORS.white[5] : colors.backgroundSecondary,
+            borderColor: isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20],
+          },
+        ]}
+        onPress={toggleCustomize}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={`Customize tone, length, and focus. Currently ${customizeExpanded ? 'expanded' : 'collapsed'}`}
+        accessibilityState={{ expanded: customizeExpanded }}
+      >
+        <View style={styles.customizeToggleLeft}>
+          <Settings2 color={colors.textSecondary} size={18} />
+          <Text style={[styles.customizeToggleText, { color: colors.text }]}>Customize</Text>
+          <Text style={[styles.customizeToggleSummary, { color: colors.textTertiary }]}>
+            {tone} · {length} · {focus.replace('_', ' ')}
+          </Text>
+        </View>
+        {customizeExpanded ? (
+          <ChevronUp color={colors.textSecondary} size={20} />
+        ) : (
+          <ChevronDown color={colors.textSecondary} size={20} />
+        )}
+      </TouchableOpacity>
 
-      {/* Length */}
-      <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: colors.text }]}>Length</Text>
-        {renderOptionSelector(LENGTHS, length, setLength, 3)}
-      </View>
+      {customizeExpanded && (
+        <View style={styles.customizeContent}>
+          {/* Tone */}
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, { color: colors.text }]}>Tone</Text>
+            {renderOptionSelector(TONES, tone, setTone, 3)}
+          </View>
 
-      {/* Focus Area */}
-      <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: colors.text }]}>Focus Area</Text>
-        {renderOptionSelector(FOCUS_AREAS, focus, setFocus, 2)}
-      </View>
+          {/* Length */}
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, { color: colors.text }]}>Length</Text>
+            {renderOptionSelector(LENGTHS, length, setLength, 3)}
+          </View>
+
+          {/* Focus Area */}
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, { color: colors.text }]}>Focus Area</Text>
+            {renderOptionSelector(FOCUS_AREAS, focus, setFocus, 2)}
+          </View>
+        </View>
+      )}
 
       {/* Generate Button */}
       <TouchableOpacity
@@ -791,6 +947,9 @@ export default function CoverLetterGeneratorScreen() {
         onPress={handleGenerate}
         disabled={generating || uploading}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={generating ? 'Generating cover letter' : 'Generate cover letter'}
+        accessibilityState={{ disabled: generating || uploading }}
       >
         {generating ? (
           <View style={styles.generatingRow}>
@@ -819,7 +978,7 @@ export default function CoverLetterGeneratorScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {showGenerator ? (
           // Generator View
@@ -827,9 +986,11 @@ export default function CoverLetterGeneratorScreen() {
             <View style={[styles.generatorHeader, { borderBottomColor: isDark ? GLASS.getBorderColor() : colors.backgroundSecondary }]}>
               <Text style={[styles.pageTitle, { color: colors.text }]}>Generate Cover Letter</Text>
               <TouchableOpacity
-                onPress={() => { if (!generating) { setShowGenerator(false); resetGeneratorForm(); } }}
+                onPress={() => { if (!generating) setShowGenerator(false); }}
                 style={styles.closeButton}
                 disabled={generating}
+                accessibilityRole="button"
+                accessibilityLabel="Close generator"
               >
                 <X color={colors.textSecondary} size={24} />
               </TouchableOpacity>
@@ -850,6 +1011,8 @@ export default function CoverLetterGeneratorScreen() {
                 style={styles.newButton}
                 onPress={() => setShowGenerator(true)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="Generate new cover letter"
               >
                 <Wand2 color="#fff" size={18} />
                 <Text style={styles.newButtonText}>Generate</Text>
@@ -864,6 +1027,9 @@ export default function CoverLetterGeneratorScreen() {
               renderEmptyState()
             ) : (
               <ScrollView contentContainerStyle={styles.lettersList} showsVerticalScrollIndicator={false}>
+                <Text style={[styles.swipeHint, { color: colors.textTertiary }]}>
+                  Swipe left on a letter to delete
+                </Text>
                 {letters.map(renderLetterCard)}
               </ScrollView>
             )}
@@ -901,10 +1067,12 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 28,
     fontFamily: FONTS.semibold,
+    lineHeight: 34,
   },
   pageSubtitle: {
     fontSize: 14,
     fontFamily: FONTS.regular,
+    lineHeight: 20,
     marginTop: 2,
   },
   newButton: {
@@ -920,11 +1088,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: FONTS.semibold,
     fontSize: 14,
+    lineHeight: 20,
   },
   // Letters list
   lettersList: {
     padding: SPACING.md,
     gap: SPACING.sm,
+  },
+  swipeHint: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    lineHeight: 16,
+    textAlign: 'center',
+    marginBottom: SPACING.xs,
   },
   letterCardBlur: {
     borderRadius: GLASS.getCornerRadius('medium'),
@@ -953,11 +1129,13 @@ const styles = StyleSheet.create({
   letterCardTitle: {
     ...TYPOGRAPHY.bodyBold,
     fontSize: 15,
+    lineHeight: 20,
     marginBottom: 2,
   },
   letterCardCompany: {
     ...TYPOGRAPHY.caption,
     fontSize: 13,
+    lineHeight: 18,
   },
   letterCardRight: {
     alignItems: 'flex-end',
@@ -971,11 +1149,29 @@ const styles = StyleSheet.create({
   toneBadgeText: {
     fontSize: 11,
     fontFamily: FONTS.medium,
+    lineHeight: 16,
     textTransform: 'capitalize',
   },
   letterCardDate: {
     fontSize: 11,
     fontFamily: FONTS.regular,
+    lineHeight: 16,
+  },
+  // Swipe delete action
+  swipeDeleteAction: {
+    backgroundColor: COLORS.danger,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    borderRadius: GLASS.getCornerRadius('medium'),
+    marginLeft: SPACING.sm,
+    gap: 4,
+  },
+  swipeDeleteText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    lineHeight: 16,
   },
   // Empty state
   emptyState: {
@@ -990,6 +1186,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.semibold,
     marginTop: SPACING.sm,
     textAlign: 'center',
+    lineHeight: 28,
   },
   emptySubtitle: {
     fontSize: 15,
@@ -1011,6 +1208,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: FONTS.semibold,
     fontSize: 16,
+    lineHeight: 22,
   },
   centerLoading: {
     flex: 1,
@@ -1043,6 +1241,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontFamily: FONTS.semibold,
+    lineHeight: 20,
     marginBottom: SPACING.sm,
   },
   textInput: {
@@ -1052,6 +1251,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 15,
     fontFamily: FONTS.regular,
+    lineHeight: 22,
   },
   textArea: {
     paddingHorizontal: SPACING.md,
@@ -1060,16 +1260,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 15,
     fontFamily: FONTS.regular,
+    lineHeight: 22,
     minHeight: 140,
   },
   helperText: {
     fontSize: 12,
     fontFamily: FONTS.regular,
+    lineHeight: 16,
     marginTop: SPACING.xs,
   },
   errorText: {
     fontSize: 12,
     fontFamily: FONTS.regular,
+    lineHeight: 16,
     color: COLORS.danger,
     marginTop: SPACING.xs,
   },
@@ -1089,11 +1292,13 @@ const styles = StyleSheet.create({
   methodLabel: {
     fontSize: 14,
     fontFamily: FONTS.semibold,
+    lineHeight: 20,
     marginTop: 4,
   },
   methodDesc: {
     fontSize: 11,
     fontFamily: FONTS.regular,
+    lineHeight: 16,
   },
   // URL extraction
   urlRow: {
@@ -1108,6 +1313,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 14,
     fontFamily: FONTS.regular,
+    lineHeight: 20,
   },
   extractButton: {
     backgroundColor: COLORS.primary,
@@ -1125,13 +1331,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: FONTS.semibold,
     fontSize: 14,
+    lineHeight: 20,
   },
   extractionSuccess: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: SPACING.sm,
-    backgroundColor: '#34D39915',
-    borderColor: '#34D39940',
     borderWidth: 1,
     borderRadius: GLASS.getCornerRadius('medium'),
     padding: SPACING.md,
@@ -1140,13 +1345,13 @@ const styles = StyleSheet.create({
   extractionSuccessTitle: {
     fontSize: 13,
     fontFamily: FONTS.semibold,
-    color: '#34D399',
+    lineHeight: 18,
     marginBottom: 4,
   },
   extractionSuccessItem: {
     fontSize: 13,
     fontFamily: FONTS.regular,
-    color: '#34D399',
+    lineHeight: 18,
   },
   // Resume picker
   resumeSourceRow: {
@@ -1164,6 +1369,7 @@ const styles = StyleSheet.create({
   resumeSourceLabel: {
     fontSize: 13,
     fontFamily: FONTS.semibold,
+    lineHeight: 18,
   },
   resumePickerList: {
     marginTop: SPACING.sm,
@@ -1180,10 +1386,12 @@ const styles = StyleSheet.create({
   resumePickerName: {
     fontSize: 14,
     fontFamily: FONTS.medium,
+    lineHeight: 20,
   },
   resumePickerDate: {
     fontSize: 11,
     fontFamily: FONTS.regular,
+    lineHeight: 16,
   },
   uploadingRow: {
     flexDirection: 'row',
@@ -1196,8 +1404,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: '#34D39915',
-    borderColor: '#34D39940',
     borderWidth: 1,
     borderRadius: GLASS.getCornerRadius('medium'),
     paddingHorizontal: SPACING.md,
@@ -1207,6 +1413,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: FONTS.regular,
+    lineHeight: 20,
   },
   uploadButton: {
     flexDirection: 'row',
@@ -1221,6 +1428,37 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     fontSize: 13,
     fontFamily: FONTS.regular,
+    lineHeight: 18,
+  },
+  // Customize section
+  customizeToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+    borderRadius: GLASS.getCornerRadius('medium'),
+    borderWidth: 1,
+    marginBottom: SPACING.md,
+  },
+  customizeToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    flex: 1,
+  },
+  customizeToggleText: {
+    fontSize: 15,
+    fontFamily: FONTS.semibold,
+    lineHeight: 22,
+  },
+  customizeToggleSummary: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    lineHeight: 16,
+    flex: 1,
+  },
+  customizeContent: {
+    marginBottom: SPACING.sm,
   },
   // Option selector grid
   optionGrid: {
@@ -1237,10 +1475,12 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontSize: 13,
     fontFamily: FONTS.semibold,
+    lineHeight: 18,
   },
   optionDesc: {
     fontSize: 10,
     fontFamily: FONTS.regular,
+    lineHeight: 14,
     marginTop: 2,
   },
   // Generate button
@@ -1259,6 +1499,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: FONTS.semibold,
     fontSize: 16,
+    lineHeight: 22,
   },
   generatingRow: {
     flexDirection: 'row',
