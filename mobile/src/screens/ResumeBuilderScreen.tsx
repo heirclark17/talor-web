@@ -3,7 +3,7 @@
  * Build resume from scratch with guided flow + AI enhancement
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   User,
   Briefcase,
@@ -33,6 +34,10 @@ import {
   Calendar,
   MapPin,
   Building2,
+  Check,
+  CheckCircle,
+  AlertTriangle,
+  TrendingUp,
 } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
@@ -46,7 +51,20 @@ type Section =
   | 'experience'
   | 'education'
   | 'skills'
-  | 'certifications';
+  | 'certifications'
+  | 'review';
+
+interface ScoreCategory {
+  category: string;
+  score: number;
+  maxScore: number;
+  tips: string[];
+}
+
+interface ResumeScore {
+  total: number;
+  breakdown: ScoreCategory[];
+}
 
 interface ExperienceEntry {
   id: string;
@@ -91,6 +109,110 @@ interface ResumeData {
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
+const STORAGE_KEY = 'resume-builder-draft';
+
+const ACTION_VERBS = [
+  'led', 'managed', 'built', 'developed', 'designed', 'implemented', 'created',
+  'launched', 'delivered', 'drove', 'increased', 'reduced', 'improved', 'optimized',
+  'established', 'architected', 'orchestrated', 'spearheaded', 'streamlined',
+  'transformed', 'automated', 'negotiated', 'collaborated', 'mentored',
+];
+
+function scoreResume(data: ResumeData): ResumeScore {
+  const breakdown: ScoreCategory[] = [];
+
+  // Contact Info (15 points)
+  let contactScore = 0;
+  const contactTips: string[] = [];
+  if (data.contact.name.trim()) contactScore += 4; else contactTips.push('Add your full name');
+  if (data.contact.email.trim()) contactScore += 4; else contactTips.push('Add your email address');
+  if (data.contact.phone.trim()) contactScore += 3; else contactTips.push('Add a phone number');
+  if (data.contact.location.trim()) contactScore += 2; else contactTips.push('Add your location');
+  if (data.contact.linkedin.trim()) contactScore += 2; else contactTips.push('Add your LinkedIn URL');
+  breakdown.push({ category: 'Contact Info', score: contactScore, maxScore: 15, tips: contactTips });
+
+  // Summary (20 points)
+  let summaryScore = 0;
+  const summaryTips: string[] = [];
+  const summaryLen = data.summary.trim().length;
+  if (summaryLen > 0) summaryScore += 5; else summaryTips.push('Write a professional summary');
+  if (summaryLen >= 100) summaryScore += 5; else if (summaryLen > 0) summaryTips.push('Expand summary to at least 100 characters');
+  if (summaryLen >= 200) summaryScore += 5; else if (summaryLen >= 100) summaryTips.push('Aim for 200+ characters for best results');
+  if (summaryLen > 0 && summaryLen <= 600) summaryScore += 5; else if (summaryLen > 600) summaryTips.push('Keep summary under 600 characters');
+  breakdown.push({ category: 'Summary', score: summaryScore, maxScore: 20, tips: summaryTips });
+
+  // Experience (25 points)
+  let expScore = 0;
+  const expTips: string[] = [];
+  const totalBullets = data.experience.reduce((sum, e) => sum + e.bullets.filter(b => b.trim()).length, 0);
+  if (data.experience.length >= 1) expScore += 5; else expTips.push('Add at least one work experience');
+  if (data.experience.length >= 2) expScore += 5; else if (data.experience.length === 1) expTips.push('Add a second position to show progression');
+  if (data.experience.length >= 3) expScore += 3;
+  if (totalBullets >= 3) expScore += 4; else expTips.push('Add more bullet points (aim for 3-6 per position)');
+  if (totalBullets >= 6) expScore += 4;
+  if (totalBullets >= 10) expScore += 4;
+  breakdown.push({ category: 'Experience', score: expScore, maxScore: 25, tips: expTips });
+
+  // Education (10 points)
+  let eduScore = 0;
+  const eduTips: string[] = [];
+  if (data.education.length > 0) eduScore += 7; else eduTips.push('Add your education');
+  if (data.education.some(e => e.degree.trim().length > 30)) eduScore += 3;
+  breakdown.push({ category: 'Education', score: eduScore, maxScore: 10, tips: eduTips });
+
+  // Skills (10 points)
+  let skillScore = 0;
+  const skillTips: string[] = [];
+  if (data.skills.length >= 1) skillScore += 2; else skillTips.push('Add at least one skill');
+  if (data.skills.length >= 3) skillScore += 2; else if (data.skills.length >= 1) skillTips.push('Add more skills (3+ recommended)');
+  if (data.skills.length >= 5) skillScore += 3;
+  if (data.skills.length >= 8) skillScore += 3;
+  breakdown.push({ category: 'Skills', score: skillScore, maxScore: 10, tips: skillTips });
+
+  // Keywords & Impact (10 points)
+  let keywordScore = 0;
+  const keywordTips: string[] = [];
+  const allBulletText = data.experience.flatMap(e => e.bullets).join(' ').toLowerCase();
+  const hasActionVerbs = ACTION_VERBS.some(v => allBulletText.includes(v));
+  if (hasActionVerbs) keywordScore += 3; else keywordTips.push('Use strong action verbs (Led, Built, Managed)');
+  const multipleVerbs = ACTION_VERBS.filter(v => allBulletText.includes(v)).length >= 3;
+  if (multipleVerbs) keywordScore += 3;
+  const hasMetrics = /\d+%|\$\d+|\d+\+|\d+,\d+/.test(allBulletText);
+  if (hasMetrics) keywordScore += 4; else keywordTips.push('Add measurable metrics (percentages, numbers, dollar amounts)');
+  breakdown.push({ category: 'Keywords & Impact', score: keywordScore, maxScore: 10, tips: keywordTips });
+
+  // Formatting (10 points)
+  let formatScore = 0;
+  const formatTips: string[] = [];
+  const hasDates = data.experience.some(e => e.startDate.trim());
+  if (hasDates) formatScore += 3; else formatTips.push('Add dates to your work experience');
+  const hasLocations = data.experience.some(e => e.location.trim());
+  if (hasLocations) formatScore += 2; else formatTips.push('Add locations to your positions');
+  if (data.certifications.length > 0) formatScore += 3; else formatTips.push('Add certifications to stand out');
+  const completeSections = [
+    data.contact.name, data.summary, data.experience.length > 0 ? 'y' : '',
+    data.education.length > 0 ? 'y' : '', data.skills.length > 0 ? 'y' : '',
+  ].filter(Boolean).length;
+  if (completeSections >= 4) formatScore += 2;
+  breakdown.push({ category: 'Formatting', score: formatScore, maxScore: 10, tips: formatTips });
+
+  const total = breakdown.reduce((sum, cat) => sum + cat.score, 0);
+  return { total, breakdown };
+}
+
+function getScoreLabel(score: number): string {
+  if (score >= 80) return 'Excellent';
+  if (score >= 70) return 'Good';
+  if (score >= 50) return 'Fair';
+  if (score >= 30) return 'Needs Work';
+  return 'Getting Started';
+}
+
+function getScoreColor(score: number): string {
+  if (score >= 70) return COLORS.success;
+  if (score >= 40) return '#EAB308';
+  return COLORS.danger;
+}
 
 export default function ResumeBuilderScreen() {
   const navigation = useNavigation();
@@ -115,13 +237,55 @@ export default function ResumeBuilderScreen() {
   });
 
   const sections: { id: Section; title: string; icon: any }[] = [
-    { id: 'contact', title: 'Contact Info', icon: User },
+    { id: 'contact', title: 'Contact', icon: User },
     { id: 'summary', title: 'Summary', icon: FileText },
     { id: 'experience', title: 'Experience', icon: Briefcase },
     { id: 'education', title: 'Education', icon: GraduationCap },
     { id: 'skills', title: 'Skills', icon: Award },
-    { id: 'certifications', title: 'Certifications', icon: Award },
+    { id: 'certifications', title: 'Certs', icon: Award },
+    { id: 'review', title: 'Review', icon: CheckCircle },
   ];
+
+  // Load saved draft from AsyncStorage
+  useEffect(() => {
+    (async () => {
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.resumeData) setResumeData(parsed.resumeData);
+          if (parsed.currentSection) setCurrentSection(parsed.currentSection);
+        }
+      } catch {
+        // Ignore load errors
+      }
+    })();
+  }, []);
+
+  // Auto-save draft to AsyncStorage on changes
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ resumeData, currentSection })).catch(() => {});
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [resumeData, currentSection]);
+
+  // Step validation - track which sections are complete
+  const completedSteps = useMemo(() => {
+    const set = new Set<number>();
+    if (resumeData.contact.name.trim() && resumeData.contact.email.trim()) set.add(0);
+    if (resumeData.summary.trim().length > 0) set.add(1);
+    if (resumeData.experience.some(e => e.company.trim() && e.title.trim())) set.add(2);
+    if (resumeData.education.some(e => e.institution.trim())) set.add(3);
+    if (resumeData.skills.length > 0) set.add(4);
+    // Certs are optional, mark complete if any exist or if 4+ other steps done
+    if (resumeData.certifications.length > 0 || set.size >= 4) set.add(5);
+    if (set.size >= 5) set.add(6); // Review accessible when 5+ steps done
+    return set;
+  }, [resumeData]);
+
+  // Quality score
+  const resumeScore = useMemo(() => scoreResume(resumeData), [resumeData]);
 
   const dynamicStyles = useMemo(() => ({
     container: { backgroundColor: colors.background },
@@ -418,7 +582,7 @@ export default function ResumeBuilderScreen() {
     }
     setSaving(true);
     try {
-      // Store resume data locally for now
+      await AsyncStorage.removeItem(STORAGE_KEY);
       Alert.alert('Resume Saved', 'Your resume has been saved successfully.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
@@ -427,6 +591,28 @@ export default function ResumeBuilderScreen() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleResetDraft = () => {
+    Alert.alert('Clear Draft', 'This will erase all resume data. Are you sure?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Clear',
+        style: 'destructive',
+        onPress: async () => {
+          await AsyncStorage.removeItem(STORAGE_KEY);
+          setResumeData({
+            contact: { name: '', email: '', phone: '', location: '', linkedin: '' },
+            summary: '',
+            experience: [],
+            education: [],
+            skills: [],
+            certifications: [],
+          });
+          setCurrentSection('contact');
+        },
+      },
+    ]);
   };
 
   // -- Render Sections --
@@ -492,6 +678,17 @@ export default function ResumeBuilderScreen() {
         numberOfLines={6}
         style={[styles.textInput, styles.textArea, dynamicStyles.textInput]}
       />
+      <Text
+        style={[
+          styles.charCounter,
+          { color: resumeData.summary.length > 600 ? COLORS.danger : colors.textTertiary },
+        ]}
+      >
+        {resumeData.summary.length}/600 characters
+        {resumeData.summary.length > 0 && resumeData.summary.length < 100
+          ? ' (aim for 100+)'
+          : ''}
+      </Text>
     </View>
   );
 
@@ -848,6 +1045,83 @@ export default function ResumeBuilderScreen() {
     </View>
   );
 
+  const renderReviewSection = () => {
+    const scoreColor = getScoreColor(resumeScore.total);
+    const scoreLabel = getScoreLabel(resumeScore.total);
+
+    return (
+      <View style={styles.formSection}>
+        <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Resume Quality Score</Text>
+
+        {/* Score Ring */}
+        <View style={styles.scoreRingContainer}>
+          <View style={[styles.scoreRing, { borderColor: scoreColor }]}>
+            <Text style={[styles.scoreNumber, { color: scoreColor }]}>{resumeScore.total}</Text>
+            <Text style={[styles.scoreMax, { color: colors.textSecondary }]}>/100</Text>
+          </View>
+          <Text style={[styles.scoreLabel, { color: scoreColor }]}>{scoreLabel}</Text>
+        </View>
+
+        {/* Category Breakdown */}
+        <View style={styles.scoreBreakdown}>
+          {resumeScore.breakdown.map((cat) => {
+            const pct = cat.maxScore > 0 ? (cat.score / cat.maxScore) * 100 : 0;
+            const catColor = getScoreColor(pct);
+            return (
+              <View key={cat.category} style={[styles.scoreCatCard, dynamicStyles.cardBg]}>
+                <View style={styles.scoreCatHeader}>
+                  <Text style={[styles.scoreCatName, { color: colors.text }]}>{cat.category}</Text>
+                  <Text style={[styles.scoreCatValue, { color: catColor }]}>
+                    {cat.score}/{cat.maxScore}
+                  </Text>
+                </View>
+                <View style={[styles.scoreCatBar, dynamicStyles.progressBar]}>
+                  <View
+                    style={[styles.scoreCatBarFill, { width: `${pct}%`, backgroundColor: catColor }]}
+                  />
+                </View>
+                {cat.tips.length > 0 && (
+                  <View style={styles.scoreTips}>
+                    {cat.tips.map((tip, i) => (
+                      <View key={i} style={styles.scoreTipRow}>
+                        <AlertTriangle size={12} color="#EAB308" />
+                        <Text style={[styles.scoreTipText, { color: colors.textSecondary }]}>
+                          {tip}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            );
+          })}
+        </View>
+
+        {/* Summary Stats */}
+        <View style={[styles.summaryStats, dynamicStyles.cardBg]}>
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Sections Complete</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{completedSteps.size}/7</Text>
+          </View>
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Work Positions</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{resumeData.experience.length}</Text>
+          </View>
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Bullets</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>
+              {resumeData.experience.reduce((s, e) => s + e.bullets.filter(b => b.trim()).length, 0)}
+            </Text>
+          </View>
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Skills</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{resumeData.skills.length}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   const renderContent = () => {
     switch (currentSection) {
       case 'contact':
@@ -862,6 +1136,8 @@ export default function ResumeBuilderScreen() {
         return renderSkillsSection();
       case 'certifications':
         return renderCertificationsSection();
+      case 'review':
+        return renderReviewSection();
     }
   };
 
@@ -875,13 +1151,25 @@ export default function ResumeBuilderScreen() {
           {/* Header */}
           <View style={styles.header}>
             <Text style={[styles.title, dynamicStyles.title]}>Resume Builder</Text>
-            <TouchableOpacity onPress={handleSave} disabled={saving}>
-              {saving ? (
-                <ActivityIndicator size="small" color={colors.accent} />
-              ) : (
-                <Save size={24} color={colors.accent} />
-              )}
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              {/* Score Badge */}
+              <TouchableOpacity
+                style={[styles.scoreBadge, { backgroundColor: getScoreColor(resumeScore.total) + '20' }]}
+                onPress={() => setCurrentSection('review')}
+              >
+                <TrendingUp size={14} color={getScoreColor(resumeScore.total)} />
+                <Text style={[styles.scoreBadgeText, { color: getScoreColor(resumeScore.total) }]}>
+                  {resumeScore.total}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSave} disabled={saving}>
+                {saving ? (
+                  <ActivityIndicator size="small" color={colors.accent} />
+                ) : (
+                  <Save size={24} color={colors.accent} />
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Progress Bar */}
@@ -913,9 +1201,10 @@ export default function ResumeBuilderScreen() {
             style={styles.sectionNav}
             contentContainerStyle={styles.sectionNavContent}
           >
-            {sections.map((section) => {
+            {sections.map((section, sIndex) => {
               const Icon = section.icon;
               const isActive = currentSection === section.id;
+              const isComplete = completedSteps.has(sIndex);
               return (
                 <TouchableOpacity
                   key={section.id}
@@ -924,14 +1213,20 @@ export default function ResumeBuilderScreen() {
                     styles.sectionTab,
                     dynamicStyles.sectionTab,
                     isActive && styles.sectionTabActive,
+                    isComplete && !isActive && styles.sectionTabComplete,
                   ]}
                 >
-                  <Icon size={16} color={isActive ? colors.accent : colors.textSecondary} />
+                  {isComplete && !isActive ? (
+                    <Check size={14} color={COLORS.success} />
+                  ) : (
+                    <Icon size={16} color={isActive ? colors.accent : colors.textSecondary} />
+                  )}
                   <Text
                     style={[
                       styles.sectionTabText,
                       dynamicStyles.sectionTabText,
                       isActive && styles.sectionTabTextActive,
+                      isComplete && !isActive && { color: COLORS.success },
                     ]}
                   >
                     {section.title}
@@ -1275,5 +1570,133 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.subhead,
     textAlign: 'center',
     paddingVertical: 24,
+  },
+
+  // Header actions
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  // Score badge in header
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  scoreBadgeText: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+
+  // Section tab complete state
+  sectionTabComplete: {
+    borderColor: COLORS.success + '40',
+  },
+
+  // Character counter
+  charCounter: {
+    ...TYPOGRAPHY.caption1,
+    textAlign: 'right',
+    marginTop: 4,
+  },
+
+  // Review section - Score Ring
+  scoreRingContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  scoreRing: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  scoreNumber: {
+    fontSize: 36,
+    fontFamily: FONTS.bold,
+  },
+  scoreMax: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    marginTop: -4,
+  },
+  scoreLabel: {
+    fontSize: 18,
+    fontFamily: FONTS.semibold,
+  },
+
+  // Score breakdown
+  scoreBreakdown: {
+    gap: 12,
+  },
+  scoreCatCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    gap: 8,
+  },
+  scoreCatHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  scoreCatName: {
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
+  },
+  scoreCatValue: {
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
+  },
+  scoreCatBar: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  scoreCatBarFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  scoreTips: {
+    gap: 4,
+    marginTop: 2,
+  },
+  scoreTipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  scoreTipText: {
+    ...TYPOGRAPHY.caption1,
+    flex: 1,
+  },
+
+  // Summary stats
+  summaryStats: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    gap: 12,
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  statLabel: {
+    ...TYPOGRAPHY.subhead,
+  },
+  statValue: {
+    ...TYPOGRAPHY.subhead,
+    fontWeight: '600',
   },
 });
