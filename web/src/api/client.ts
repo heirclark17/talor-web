@@ -2752,7 +2752,7 @@ class ApiClient {
    */
   async listTailoredResumes(): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/tailor/tailored/list`, {
+      const response = await fetch(`${this.baseUrl}/api/tailor/list`, {
         headers: this.getHeaders(),
       });
       const data = await response.json();
