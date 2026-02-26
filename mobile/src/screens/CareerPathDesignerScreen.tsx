@@ -40,7 +40,8 @@ import { useTheme } from '../hooks/useTheme';
 import { CareerPlanResults, CareerPathCertifications } from '../components';
 import { useResumeStore } from '../stores/resumeStore';
 import { usePostHog } from '../contexts/PostHogContext';
-import * as DocumentPicker from 'expo-document-picker';
+let DocumentPicker: typeof import('expo-document-picker') | null = null;
+try { DocumentPicker = require('expo-document-picker'); } catch {}
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type WizardStep = 'welcome' | 'upload' | 'questions' | 'generating' | 'results';
@@ -51,6 +52,163 @@ interface CareerPlan {
   profileSummary?: string;
   generatedAt?: string;
   [key: string]: any;
+}
+
+// --- Resume Intelligence Functions (matching web) ---
+
+function inferStrengths(experience: any[], skills: string[], summary: string): string[] {
+  const allText = [
+    summary || '',
+    ...experience.map((e: any) => [
+      e.title || '', e.company || '',
+      ...(Array.isArray(e.responsibilities) ? e.responsibilities : []),
+      ...(Array.isArray(e.bullets) ? e.bullets : []),
+      e.description || '',
+    ].join(' ')),
+    ...skills,
+  ].join(' ').toLowerCase();
+
+  const strengthPatterns: [RegExp, string][] = [
+    [/\b(led|lead|managed|directed|supervised|oversaw|coordinated|spearheaded|headed|mentored|coached)\b/g, 'Leadership & Team Management'],
+    [/\b(stakeholder|executive|c-suite|board|cross-functional|cross functional|collaborate|collaboration|partner)\b/g, 'Stakeholder & Executive Communication'],
+    [/\b(project manag|program manag|pmo|portfolio|agile|scrum|kanban|sprint|roadmap|milestone)\b/g, 'Program & Project Management'],
+    [/\b(strateg|vision|roadmap|transform|moderniz|initiative|innovation|architect)\b/g, 'Strategic Planning & Vision'],
+    [/\b(budget|cost|financial|roi|revenue|savings|p&l|forecast|resource allocation)\b/g, 'Budget & Financial Management'],
+    [/\b(security|cyber|vulnerability|threat|incident|soc |siem|firewall|penetration|compliance)\b/g, 'Cybersecurity & Risk Management'],
+    [/\b(cloud|aws|azure|gcp|infrastructure|devops|ci\/cd|kubernetes|docker|terraform)\b/g, 'Cloud & Infrastructure'],
+    [/\b(develop|engineer|code|software|application|api|database|full.?stack|backend|frontend)\b/g, 'Software Development & Engineering'],
+    [/\b(data|analytics|reporting|dashboard|metrics|kpi|insight|visualization|tableau|power bi)\b/g, 'Data Analysis & Reporting'],
+    [/\b(process|improv|optimi|efficien|automat|streamlin|workflow|operational excellence)\b/g, 'Process Improvement & Optimization'],
+    [/\b(vendor|third.?party|contract|procurement|negotiat|supplier|outsourc)\b/g, 'Vendor & Contract Management'],
+    [/\b(risk|governance|audit|compliance|regulat|framework|nist|iso|sox|hipaa|pci|gdpr)\b/g, 'Risk & Compliance Management'],
+    [/\b(train|mentor|develop talent|onboard|team building|culture|retention|hiring|recruit)\b/g, 'Talent Development & Mentoring'],
+    [/\b(present|communicat|report|document|brief|written|verbal|public speak)\b/g, 'Communication & Presentation'],
+    [/\b(problem.?solv|troubleshoot|root cause|diagnos|resolv|debug|investigat)\b/g, 'Problem Solving & Troubleshooting'],
+    [/\b(deliver|implement|deploy|launch|execut|ship|release|go.?live|migration)\b/g, 'Execution & Delivery'],
+    [/\b(client|customer|account|relationship|satisfaction|nps|retention|success)\b/g, 'Client Relationship Management'],
+  ];
+
+  const scored = strengthPatterns.map(([regex, label]) => {
+    const matches = allText.match(regex);
+    return { label, count: matches ? matches.length : 0 };
+  });
+
+  return scored
+    .filter(s => s.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
+    .map(s => s.label);
+}
+
+function inferIndustry(company: string, title: string, skills: string[]): string {
+  const all = `${company} ${title} ${skills.join(' ')}`.toLowerCase();
+
+  const patterns: [RegExp, string][] = [
+    [/\b(bank|financ|capital|invest|trading|hedge fund|mortgage|credit|jpmorgan|goldman|citi|wells fargo|fidelity|schwab|merrill|morgan stanley)\b/, 'Financial Services & Banking'],
+    [/\b(hospital|health|medical|pharma|biotech|clinical|patient|hipaa|epic|cerner|unitedhealth|anthem|aetna|humana|cvs health)\b/, 'Healthcare & Life Sciences'],
+    [/\b(defense|military|dod|army|navy|air force|lockheed|raytheon|northrop|boeing|clearance|classified|fedramp|disa)\b/, 'Defense & Aerospace'],
+    [/\b(federal|government|govt|public sector|state agency|gsa|va |usda|fbi|cia|nsa|homeland)\b/, 'Government & Public Sector'],
+    [/\b(school|university|college|education|edtech|academic|campus|student|coursera|udemy)\b/, 'Education & EdTech'],
+    [/\b(retail|ecommerce|e-commerce|shopping|merchant|walmart|amazon|target|costco|shopify)\b/, 'Retail & E-Commerce'],
+    [/\b(energy|oil|gas|petroleum|utility|utilities|solar|wind|renewable|power grid|exxon|chevron|shell|bp)\b/, 'Energy & Utilities'],
+    [/\b(telecom|wireless|5g|spectrum|at&t|verizon|t-mobile|comcast|charter)\b/, 'Telecommunications'],
+    [/\b(insurance|underwriting|actuari|claims|allstate|geico|progressive|state farm|liberty mutual)\b/, 'Insurance'],
+    [/\b(manufactur|automotive|vehicle|factory|assembly|ford|gm|toyota|tesla|caterpillar)\b/, 'Manufacturing & Automotive'],
+    [/\b(real estate|property|mortgage|reit|construction|building|housing)\b/, 'Real Estate & Construction'],
+    [/\b(media|entertainment|streaming|broadcast|publish|news|disney|netflix|warner|spotify)\b/, 'Media & Entertainment'],
+    [/\b(transport|logistics|shipping|freight|supply chain|fedex|ups|maersk|warehouse)\b/, 'Transportation & Logistics'],
+    [/\b(consult|advisory|deloitte|accenture|mckinsey|kpmg|pwc|ernst|ey |bain|bcg)\b/, 'Consulting & Professional Services'],
+    [/\b(saas|software|cloud|platform|devops|api|microsoft|google|apple|meta|oracle|salesforce|adobe|sap|ibm|cisco|intel|nvidia|aws|azure|gcp)\b/, 'Technology & Software'],
+    [/\b(cyber|security|infosec|soc |siem|penetration|vulnerability|threat|firewall|endpoint)\b/, 'Cybersecurity'],
+    [/\b(data|analytics|machine learning|artificial intelligence| ai |ml |deep learning|nlp)\b/, 'Data Science & AI'],
+  ];
+
+  for (const [regex, industry] of patterns) {
+    if (regex.test(all)) return industry;
+  }
+  return 'Technology';
+}
+
+function parseEducationLevel(education: any): string | null {
+  const text = (Array.isArray(education) ? education.map((e: any) => typeof e === 'string' ? e : e.degree || e.field || '').join(' ') : String(education || '')).toLowerCase();
+  if (/\b(ph\.?d|doctorate|doctoral)\b/.test(text)) return 'phd';
+  if (/\b(master|mba|m\.s\.|m\.a\.|msc|ma )\b/.test(text)) return 'masters';
+  if (/\b(bachelor|b\.s\.|b\.a\.|bsc|ba |bba)\b/.test(text)) return 'bachelors';
+  if (/\b(associate|a\.s\.|a\.a\.)\b/.test(text)) return 'associates';
+  return null;
+}
+
+function estimateYearsFromDates(experience: any[]): number {
+  if (!Array.isArray(experience)) return 0;
+
+  // Try duration_years first
+  const fromDuration = experience.reduce((total: number, exp: any) => total + (exp.duration_years || 0), 0);
+  if (fromDuration > 0) return Math.round(fromDuration);
+
+  // Try date parsing
+  let minYear = Infinity;
+  let maxYear = -Infinity;
+  for (const exp of experience) {
+    const dateStr = exp.dates || exp.date_range || exp.duration || '';
+    const yearMatches = dateStr.match(/\b(19|20)\d{2}\b/g);
+    if (yearMatches) {
+      for (const y of yearMatches) {
+        const year = parseInt(y, 10);
+        if (year < minYear) minYear = year;
+        if (year > maxYear) maxYear = year;
+      }
+    }
+    if (/present|current/i.test(dateStr)) {
+      maxYear = new Date().getFullYear();
+    }
+  }
+  if (minYear !== Infinity && maxYear !== -Infinity) {
+    return Math.max(1, maxYear - minYear);
+  }
+  return 0;
+}
+
+function autoPopulateFromResume(
+  data: any,
+  setCurrentRole: (v: string) => void,
+  setCurrentIndustry: (v: string) => void,
+  setYearsExperience: (v: number) => void,
+  setEducationLevel: (v: string) => void,
+  setStrengths: (v: string[]) => void,
+) {
+  let experience = data.experience || [];
+  let skills = data.skills || [];
+
+  // Parse stringified JSON arrays
+  if (typeof experience === 'string') {
+    try { experience = JSON.parse(experience); } catch { experience = []; }
+  }
+  if (typeof skills === 'string') {
+    try { skills = JSON.parse(skills); } catch { skills = []; }
+  }
+
+  // Set current role from latest position
+  if (Array.isArray(experience) && experience.length > 0) {
+    const first = experience[0];
+    const title = first.title || first.position || first.role || first.job_title || '';
+    const company = first.company || '';
+    if (title) setCurrentRole(title);
+    if (company || title) {
+      setCurrentIndustry(inferIndustry(company, title, skills));
+    }
+  }
+
+  // Calculate years of experience
+  const years = estimateYearsFromDates(experience);
+  if (years > 0) setYearsExperience(years);
+
+  // Determine education level
+  const eduLevel = parseEducationLevel(data.education);
+  if (eduLevel) setEducationLevel(eduLevel);
+
+  // Infer top strengths
+  const inferredStrengths = inferStrengths(experience, skills, data.summary || '');
+  if (inferredStrengths.length > 0) setStrengths(inferredStrengths);
 }
 
 export default function CareerPathDesignerScreen() {
@@ -217,17 +375,16 @@ export default function CareerPathDesignerScreen() {
       setResumeId(id);
       setUploadProgress(100);
 
-      // Auto-fill fields from resume
+      // Auto-fill fields from resume using inference functions
       if (resumeResult.data.parsed_data) {
-        const data = resumeResult.data.parsed_data;
-        if (data.experience?.[0]?.title) setCurrentRole(data.experience[0].title);
-        if (data.experience?.[0]?.company) setCurrentIndustry(data.experience[0].company);
-
-        // Calculate years of experience
-        const years = data.experience?.reduce((total: number, exp: any) => {
-          return total + (exp.duration_years || 0);
-        }, 0) || 0;
-        if (years > 0) setYearsExperience(years);
+        autoPopulateFromResume(
+          resumeResult.data.parsed_data,
+          setCurrentRole,
+          setCurrentIndustry,
+          setYearsExperience,
+          setEducationLevel,
+          setStrengths,
+        );
       }
 
       setTimeout(() => setStep('questions'), 500);
@@ -238,6 +395,10 @@ export default function CareerPathDesignerScreen() {
   };
 
   const handleFileSelect = async () => {
+    if (!DocumentPicker) {
+      Alert.alert('Unavailable', 'Document picker requires a new native build. Please rebuild the app.');
+      return;
+    }
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
@@ -274,16 +435,16 @@ export default function CareerPathDesignerScreen() {
       setResumeId(uploadResult.data.resume_id);
       setUploadProgress(100);
 
-      // Auto-fill from parsed data
+      // Auto-fill from parsed data using intelligence functions
       if (uploadResult.data.parsed_data) {
-        const data = uploadResult.data.parsed_data;
-        if (data.experience?.[0]?.title) setCurrentRole(data.experience[0].title);
-        if (data.experience?.[0]?.company) setCurrentIndustry(data.experience[0].company);
-
-        const years = data.experience?.reduce((total: number, exp: any) => {
-          return total + (exp.duration_years || 0);
-        }, 0) || 0;
-        if (years > 0) setYearsExperience(years);
+        autoPopulateFromResume(
+          uploadResult.data.parsed_data,
+          setCurrentRole,
+          setCurrentIndustry,
+          setYearsExperience,
+          setEducationLevel,
+          setStrengths,
+        );
       }
 
       setTimeout(() => setStep('questions'), 500);
