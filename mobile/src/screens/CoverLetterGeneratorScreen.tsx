@@ -70,6 +70,7 @@ interface SavedJob {
   title: string;
   location: string;
   salary: string;
+  description: string;
   created_at: string | null;
 }
 
@@ -211,6 +212,7 @@ export default function CoverLetterGeneratorScreen() {
     setCompanyName(job.company);
     setJobTitle(job.title);
     setJobUrl(job.url);
+    setJobDescription(job.description || '');
     setFieldErrors({});
   }
 
