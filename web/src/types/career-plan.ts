@@ -150,6 +150,10 @@ export interface Certification {
   difficulty?: string
   skillsGained?: string[]
   whyRecommended?: string
+  journeyOrder?: number
+  tier?: 'foundation' | 'intermediate' | 'advanced'
+  unlocksNext?: string
+  beginnerEntryPoint?: boolean
 }
 
 // ========== Education Types ==========
@@ -163,6 +167,12 @@ export interface EducationOption {
   pros: string[]
   cons: string[]
   sourceCitations: string[]
+  description?: string
+  whoItsBestFor?: string
+  financingOptions?: string
+  employmentOutcomes?: string
+  timeCommitmentWeekly?: string
+  comparisonRank?: number
 }
 
 // ========== Experience Types (ENHANCED) ==========
@@ -297,6 +307,8 @@ export interface CareerPlan {
   timeline: Timeline
   resumeAssets: ResumeAssets
   researchSources: string[]
+  certificationJourneySummary?: string
+  educationRecommendation?: string
 }
 
 // ========== API Types ==========

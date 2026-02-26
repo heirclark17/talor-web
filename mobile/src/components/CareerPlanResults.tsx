@@ -9,6 +9,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Linking,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -34,6 +35,10 @@ import {
   BookOpen,
   Users,
   ExternalLink,
+  Code,
+  GraduationCap,
+  Zap,
+  Star,
 } from 'lucide-react-native';
 import { GlassCard } from './glass/GlassCard';
 import { GlassButton } from './glass/GlassButton';
@@ -85,6 +90,37 @@ interface NetworkingEvent {
   relevance: string;
 }
 
+interface ExperienceProject {
+  type: string;
+  title: string;
+  description: string;
+  skills_demonstrated: string[];
+  difficulty_level: 'beginner' | 'intermediate' | 'advanced';
+  step_by_step_guide: string[];
+  time_commitment: string;
+  how_to_showcase: string;
+  detailed_tech_stack?: any[];
+  architecture_overview?: string;
+  github_example_repos?: string[];
+}
+
+interface EducationOptionItem {
+  type: string;
+  name: string;
+  duration: string;
+  cost_range: string;
+  format: string;
+  official_link?: string;
+  description?: string;
+  who_its_best_for?: string;
+  financing_options?: string;
+  employment_outcomes?: string;
+  time_commitment_weekly?: string;
+  comparison_rank?: number;
+  pros: string[];
+  cons: string[];
+}
+
 interface CareerPlanData {
   current_role: string;
   target_role: string;
@@ -100,6 +136,10 @@ interface CareerPlanData {
   };
   learning_resources?: LearningResource[];
   networking_events?: NetworkingEvent[];
+  experience_plan?: ExperienceProject[];
+  education_options?: EducationOptionItem[];
+  certification_journey_summary?: string;
+  education_recommendation?: string;
 }
 
 interface Props {
@@ -225,6 +265,10 @@ export default function CareerPlanResults({ planData, onSavePlan, onExportPlan }
   const [showNetworking, setShowNetworking] = useState(false);
   const [expandedSkillGaps, setExpandedSkillGaps] = useState<Set<number>>(new Set());
   const [viewMode, setViewMode] = useState<'timeline' | 'detailed'>('timeline');
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+  const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
+  const [showExperiencePlan, setShowExperiencePlan] = useState(false);
+  const [showEducationOptions, setShowEducationOptions] = useState(false);
 
   const toggleMilestone = useCallback((milestoneId: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -266,6 +310,57 @@ export default function CareerPlanResults({ planData, onSavePlan, onExportPlan }
         return COLORS.success;
       default:
         return colors.textSecondary;
+    }
+  };
+
+  const toggleProject = useCallback((projectTitle: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectTitle)) {
+        newSet.delete(projectTitle);
+      } else {
+        newSet.add(projectTitle);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner':
+        return COLORS.success;
+      case 'intermediate':
+        return COLORS.info;
+      case 'advanced':
+        return COLORS.warning;
+      default:
+        return colors.textSecondary;
+    }
+  };
+
+  const getProjectTypeColor = (type: string) => {
+    const t = type.toLowerCase();
+    if (t.includes('portfolio')) return COLORS.primary;
+    if (t.includes('volunteer')) return COLORS.success;
+    if (t.includes('lab')) return COLORS.warning;
+    return COLORS.info;
+  };
+
+  const filteredProjects = planData.experience_plan
+    ? difficultyFilter === 'all'
+      ? planData.experience_plan
+      : planData.experience_plan.filter((p) => p.difficulty_level === difficultyFilter)
+    : [];
+
+  const openUrl = async (url: string) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      }
+    } catch (error) {
+      console.error('Failed to open URL:', error);
     }
   };
 
@@ -876,6 +971,374 @@ export default function CareerPlanResults({ planData, onSavePlan, onExportPlan }
         </>
       )}
 
+      {/* Experience Plan */}
+      {planData.experience_plan && planData.experience_plan.length > 0 && (
+        <>
+          <GlassCard material="thin" style={styles.sectionCard}>
+            <TouchableOpacity
+              onPress={() => {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                setShowExperiencePlan(!showExperiencePlan);
+              }}
+              style={styles.sectionHeader}
+              accessibilityRole="button"
+              accessibilityLabel="Experience plan section"
+              accessibilityState={{ expanded: showExperiencePlan }}
+            >
+              <Code color={COLORS.primary} size={20} />
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Experience Plan ({planData.experience_plan.length})
+              </Text>
+              {showExperiencePlan ? (
+                <ChevronUp color={colors.textSecondary} size={20} />
+              ) : (
+                <ChevronDown color={colors.textSecondary} size={20} />
+              )}
+            </TouchableOpacity>
+          </GlassCard>
+
+          {showExperiencePlan && (
+            <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
+              {/* Difficulty Filter */}
+              <View style={[styles.expDifficultyFilter, { backgroundColor: isDark ? ALPHA_COLORS.white[5] : ALPHA_COLORS.black[3] }]}>
+                {(['all', 'beginner', 'intermediate', 'advanced'] as const).map((level) => (
+                  <TouchableOpacity
+                    key={level}
+                    style={[
+                      styles.expFilterChip,
+                      {
+                        backgroundColor: difficultyFilter === level ? ALPHA_COLORS.primary.bg : 'transparent',
+                        borderColor: difficultyFilter === level ? COLORS.primary : 'transparent',
+                      },
+                    ]}
+                    onPress={() => setDifficultyFilter(level)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Filter by ${level} difficulty`}
+                  >
+                    <Text
+                      style={[
+                        styles.expFilterChipText,
+                        { color: difficultyFilter === level ? COLORS.primary : colors.textSecondary },
+                      ]}
+                    >
+                      {level.charAt(0).toUpperCase() + level.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Project Cards */}
+              {filteredProjects.map((project, index) => {
+                const isExpanded = expandedProjects.has(project.title);
+                const isBeginnerProject = project.difficulty_level === 'beginner';
+
+                return (
+                  <GlassCard key={index} material="regular" shadow="subtle" style={styles.expProjectCard}>
+                    <TouchableOpacity
+                      onPress={() => toggleProject(project.title)}
+                      style={styles.expProjectHeader}
+                      accessibilityRole="button"
+                      accessibilityState={{ expanded: isExpanded }}
+                    >
+                      <View style={styles.expProjectHeaderContent}>
+                        <View style={styles.expProjectBadgeRow}>
+                          <View style={[styles.expTypeBadge, { backgroundColor: `${getProjectTypeColor(project.type)}20` }]}>
+                            <Text style={[styles.expTypeBadgeText, { color: getProjectTypeColor(project.type) }]}>
+                              {project.type.toUpperCase()}
+                            </Text>
+                          </View>
+                          <View style={[styles.expDiffBadge, { backgroundColor: `${getDifficultyColor(project.difficulty_level)}20` }]}>
+                            <Text style={[styles.expDiffBadgeText, { color: getDifficultyColor(project.difficulty_level) }]}>
+                              {project.difficulty_level.toUpperCase()}
+                            </Text>
+                          </View>
+                          {isBeginnerProject && (
+                            <View style={[styles.expGoodStartBadge, { backgroundColor: ALPHA_COLORS.success.bg }]}>
+                              <Zap color={COLORS.success} size={12} />
+                              <Text style={[styles.expGoodStartText, { color: COLORS.success }]}>
+                                Good Starting Project
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                        <Text style={[styles.expProjectTitle, { color: colors.text }]}>
+                          {project.title}
+                        </Text>
+                        <View style={styles.expProjectMeta}>
+                          <View style={styles.expProjectMetaItem}>
+                            <Clock color={colors.textTertiary} size={14} />
+                            <Text style={[styles.expProjectMetaText, { color: colors.textSecondary }]}>
+                              {project.time_commitment}
+                            </Text>
+                          </View>
+                        </View>
+                        {/* Top 3 skills */}
+                        <View style={styles.expSkillsRow}>
+                          {project.skills_demonstrated.slice(0, 3).map((skill, idx) => (
+                            <View key={idx} style={[styles.expSkillChip, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                              <Text style={[styles.expSkillChipText, { color: COLORS.primary }]}>{skill}</Text>
+                            </View>
+                          ))}
+                          {project.skills_demonstrated.length > 3 && (
+                            <Text style={[styles.expMoreSkills, { color: colors.textTertiary }]}>
+                              +{project.skills_demonstrated.length - 3} more
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+                      {isExpanded ? (
+                        <ChevronUp color={colors.textSecondary} size={20} />
+                      ) : (
+                        <ChevronDown color={colors.textSecondary} size={20} />
+                      )}
+                    </TouchableOpacity>
+
+                    {/* Expanded Project Content */}
+                    {isExpanded && (
+                      <View style={[styles.expExpandedContent, { borderTopColor: colors.border }]}>
+                        <Text style={[styles.expDescription, { color: colors.textSecondary }]}>
+                          {project.description}
+                        </Text>
+
+                        {/* Tech Stack */}
+                        {project.detailed_tech_stack && project.detailed_tech_stack.length > 0 && (
+                          <View style={styles.expSection}>
+                            <Text style={[styles.expSectionLabel, { color: COLORS.primary }]}>
+                              TECH STACK
+                            </Text>
+                            <View style={styles.expSkillsRow}>
+                              {project.detailed_tech_stack.map((tech: any, idx: number) => (
+                                <View key={idx} style={[styles.expSkillChip, { backgroundColor: ALPHA_COLORS.info.bg }]}>
+                                  <Text style={[styles.expSkillChipText, { color: COLORS.info }]}>
+                                    {typeof tech === 'string' ? tech : tech.name || tech.technology || String(tech)}
+                                  </Text>
+                                </View>
+                              ))}
+                            </View>
+                          </View>
+                        )}
+
+                        {/* Step-by-Step Guide */}
+                        {project.step_by_step_guide && project.step_by_step_guide.length > 0 && (
+                          <View style={styles.expSection}>
+                            <Text style={[styles.expSectionLabel, { color: COLORS.success }]}>
+                              STEP-BY-STEP GUIDE
+                            </Text>
+                            {project.step_by_step_guide.map((step, idx) => (
+                              <View key={idx} style={styles.expStepItem}>
+                                <View style={[styles.expStepNumber, { backgroundColor: ALPHA_COLORS.success.bg }]}>
+                                  <Text style={[styles.expStepNumberText, { color: COLORS.success }]}>{idx + 1}</Text>
+                                </View>
+                                <Text style={[styles.expStepText, { color: colors.textSecondary }]}>{step}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+
+                        {/* How to Showcase */}
+                        {project.how_to_showcase && (
+                          <View style={styles.expSection}>
+                            <Text style={[styles.expSectionLabel, { color: COLORS.warning }]}>
+                              HOW TO SHOWCASE
+                            </Text>
+                            <Text style={[styles.expDescription, { color: colors.textSecondary }]}>
+                              {project.how_to_showcase}
+                            </Text>
+                          </View>
+                        )}
+
+                        {/* All Skills */}
+                        <View style={styles.expSection}>
+                          <Text style={[styles.expSectionLabel, { color: COLORS.primary }]}>
+                            ALL SKILLS DEMONSTRATED
+                          </Text>
+                          <View style={styles.expSkillsRow}>
+                            {project.skills_demonstrated.map((skill, idx) => (
+                              <View key={idx} style={[styles.expSkillChip, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                                <Text style={[styles.expSkillChipText, { color: COLORS.primary }]}>{skill}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      </View>
+                    )}
+                  </GlassCard>
+                );
+              })}
+
+              {filteredProjects.length === 0 && (
+                <GlassCard material="regular" style={styles.expEmptyCard}>
+                  <Text style={[styles.expEmptyText, { color: colors.textSecondary }]}>
+                    No projects match the selected difficulty.
+                  </Text>
+                </GlassCard>
+              )}
+            </Animated.View>
+          )}
+        </>
+      )}
+
+      {/* Education Options */}
+      {planData.education_options && planData.education_options.length > 0 && (
+        <>
+          <GlassCard material="thin" style={styles.sectionCard}>
+            <TouchableOpacity
+              onPress={() => {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                setShowEducationOptions(!showEducationOptions);
+              }}
+              style={styles.sectionHeader}
+              accessibilityRole="button"
+              accessibilityLabel="Education options section"
+              accessibilityState={{ expanded: showEducationOptions }}
+            >
+              <GraduationCap color={COLORS.purple} size={20} />
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Education Options ({planData.education_options.length})
+              </Text>
+              {showEducationOptions ? (
+                <ChevronUp color={colors.textSecondary} size={20} />
+              ) : (
+                <ChevronDown color={colors.textSecondary} size={20} />
+              )}
+            </TouchableOpacity>
+          </GlassCard>
+
+          {showEducationOptions && (
+            <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
+              {/* Education Recommendation Banner */}
+              {planData.education_recommendation && (
+                <GlassCard material="regular" style={[styles.eduRecommendationCard, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
+                  <View style={styles.eduRecommendationContent}>
+                    <Star color={COLORS.purple} size={20} fill={COLORS.purple} />
+                    <Text style={[styles.eduRecommendationText, { color: colors.text }]}>
+                      {planData.education_recommendation}
+                    </Text>
+                  </View>
+                </GlassCard>
+              )}
+
+              {/* Education Option Cards */}
+              {planData.education_options.map((option, index) => {
+                const isBestForYou = option.comparison_rank === 1;
+
+                return (
+                  <GlassCard key={index} material="regular" shadow="subtle" style={styles.eduOptionCard}>
+                    <View style={styles.eduOptionContent}>
+                      {/* Badges Row */}
+                      <View style={styles.eduBadgeRow}>
+                        <View style={[styles.eduTypeBadge, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
+                          <Text style={[styles.eduTypeBadgeText, { color: COLORS.purple }]}>
+                            {option.type.toUpperCase()}
+                          </Text>
+                        </View>
+                        <View style={[styles.eduFormatBadge, { backgroundColor: ALPHA_COLORS.info.bg }]}>
+                          <Text style={[styles.eduFormatBadgeText, { color: COLORS.info }]}>
+                            {option.format.toUpperCase()}
+                          </Text>
+                        </View>
+                        {isBestForYou && (
+                          <View style={[styles.eduBestBadge, { backgroundColor: ALPHA_COLORS.success.bg }]}>
+                            <Star color={COLORS.success} size={12} fill={COLORS.success} />
+                            <Text style={[styles.eduBestBadgeText, { color: COLORS.success }]}>
+                              Best for You
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+
+                      {/* Name */}
+                      <Text style={[styles.eduOptionName, { color: colors.text }]}>
+                        {option.name}
+                      </Text>
+
+                      {/* Duration and Cost */}
+                      <View style={styles.eduMetaRow}>
+                        <View style={styles.eduMetaItem}>
+                          <Clock color={colors.textTertiary} size={14} />
+                          <Text style={[styles.eduMetaText, { color: colors.textSecondary }]}>
+                            {option.duration}
+                          </Text>
+                        </View>
+                        <View style={styles.eduMetaItem}>
+                          <DollarSign color={colors.textTertiary} size={14} />
+                          <Text style={[styles.eduMetaText, { color: colors.textSecondary }]}>
+                            {option.cost_range}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Description */}
+                      {option.description && (
+                        <Text style={[styles.eduDescription, { color: colors.textSecondary }]}>
+                          {option.description}
+                        </Text>
+                      )}
+
+                      {/* Who it's best for */}
+                      {option.who_its_best_for && (
+                        <Text style={[styles.eduBestFor, { color: colors.textTertiary }]}>
+                          {option.who_its_best_for}
+                        </Text>
+                      )}
+
+                      {/* Pros and Cons */}
+                      {option.pros && option.pros.length > 0 && (
+                        <View style={styles.eduProsConsContainer}>
+                          {option.pros.map((pro, idx) => (
+                            <View key={`pro-${idx}`} style={styles.eduProItem}>
+                              <Text style={[styles.eduProBullet, { color: COLORS.success }]}>+</Text>
+                              <Text style={[styles.eduProConText, { color: colors.textSecondary }]}>{pro}</Text>
+                            </View>
+                          ))}
+                          {option.cons && option.cons.map((con, idx) => (
+                            <View key={`con-${idx}`} style={styles.eduConItem}>
+                              <Text style={[styles.eduConBullet, { color: COLORS.danger }]}>-</Text>
+                              <Text style={[styles.eduProConText, { color: colors.textSecondary }]}>{con}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+
+                      {/* Financing Options */}
+                      {option.financing_options && (
+                        <View style={styles.eduInfoRow}>
+                          <DollarSign color={COLORS.success} size={14} />
+                          <Text style={[styles.eduInfoText, { color: colors.textSecondary }]}>
+                            {option.financing_options}
+                          </Text>
+                        </View>
+                      )}
+
+                      {/* Employment Outcomes */}
+                      {option.employment_outcomes && (
+                        <View style={styles.eduInfoRow}>
+                          <Briefcase color={COLORS.info} size={14} />
+                          <Text style={[styles.eduInfoText, { color: colors.textSecondary }]}>
+                            {option.employment_outcomes}
+                          </Text>
+                        </View>
+                      )}
+
+                      {/* View Program Button */}
+                      {option.official_link && (
+                        <GlassButton
+                          label="View Program"
+                          variant="secondary"
+                          icon={<ExternalLink color={colors.text} size={16} />}
+                          onPress={() => openUrl(option.official_link!)}
+                          style={styles.eduViewButton}
+                        />
+                      )}
+                    </View>
+                  </GlassCard>
+                );
+              })}
+            </Animated.View>
+          )}
+        </>
+      )}
+
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>
         {onSavePlan && (
@@ -1309,5 +1772,294 @@ const styles = StyleSheet.create({
   eventLinkText: {
     fontSize: 13,
     fontFamily: FONTS.medium,
+  },
+  // Experience Plan styles
+  expDifficultyFilter: {
+    flexDirection: 'row',
+    borderRadius: RADIUS.md,
+    padding: 4,
+    marginBottom: SPACING.sm,
+  },
+  expFilterChip: {
+    flex: 1,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.sm,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  expFilterChipText: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+  },
+  expProjectCard: {
+    overflow: 'hidden',
+    marginBottom: SPACING.sm,
+  },
+  expProjectHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.md,
+    gap: SPACING.sm,
+  },
+  expProjectHeaderContent: {
+    flex: 1,
+    gap: SPACING.xs,
+  },
+  expProjectBadgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    alignItems: 'center',
+  },
+  expTypeBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
+  expTypeBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+    letterSpacing: 0.5,
+  },
+  expDiffBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
+  expDiffBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+    letterSpacing: 0.5,
+  },
+  expGoodStartBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
+  expGoodStartText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+  },
+  expProjectTitle: {
+    fontSize: 16,
+    fontFamily: FONTS.bold,
+    lineHeight: 22,
+  },
+  expProjectMeta: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  expProjectMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  expProjectMetaText: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+  },
+  expSkillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    alignItems: 'center',
+  },
+  expSkillChip: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.full,
+  },
+  expSkillChipText: {
+    fontSize: 11,
+    fontFamily: FONTS.regular,
+  },
+  expMoreSkills: {
+    fontSize: 11,
+    fontFamily: FONTS.regular,
+  },
+  expExpandedContent: {
+    borderTopWidth: 1,
+    padding: SPACING.md,
+    gap: SPACING.lg,
+  },
+  expDescription: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  expSection: {
+    gap: SPACING.sm,
+  },
+  expSectionLabel: {
+    fontSize: 11,
+    fontFamily: FONTS.bold,
+    letterSpacing: 0.5,
+  },
+  expStepItem: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    alignItems: 'flex-start',
+  },
+  expStepNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  expStepNumberText: {
+    fontSize: 12,
+    fontFamily: FONTS.bold,
+  },
+  expStepText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  expEmptyCard: {
+    padding: SPACING.lg,
+    alignItems: 'center',
+  },
+  expEmptyText: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+  },
+  // Education Options styles
+  eduRecommendationCard: {
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  eduRecommendationContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+  },
+  eduRecommendationText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  eduOptionCard: {
+    overflow: 'hidden',
+    marginBottom: SPACING.sm,
+  },
+  eduOptionContent: {
+    padding: SPACING.md,
+    gap: SPACING.sm,
+  },
+  eduBadgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    alignItems: 'center',
+  },
+  eduTypeBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
+  eduTypeBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+    letterSpacing: 0.5,
+  },
+  eduFormatBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
+  eduFormatBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+    letterSpacing: 0.5,
+  },
+  eduBestBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
+  eduBestBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+  },
+  eduOptionName: {
+    fontSize: 16,
+    fontFamily: FONTS.bold,
+    lineHeight: 22,
+  },
+  eduMetaRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  eduMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  eduMetaText: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+  },
+  eduDescription: {
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  eduBestFor: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    fontStyle: 'italic',
+    lineHeight: 18,
+  },
+  eduProsConsContainer: {
+    gap: 4,
+  },
+  eduProItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.xs,
+  },
+  eduConItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.xs,
+  },
+  eduProBullet: {
+    fontSize: 16,
+    fontFamily: FONTS.bold,
+    lineHeight: 20,
+  },
+  eduConBullet: {
+    fontSize: 16,
+    fontFamily: FONTS.bold,
+    lineHeight: 20,
+  },
+  eduProConText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  eduInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.xs,
+  },
+  eduInfoText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+  },
+  eduViewButton: {
+    marginTop: SPACING.xs,
   },
 });

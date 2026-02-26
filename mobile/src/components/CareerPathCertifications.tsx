@@ -48,6 +48,10 @@ interface Certification {
     passing_score: string;
   };
   url?: string;
+  journey_order?: number;
+  tier?: 'foundation' | 'intermediate' | 'advanced';
+  unlocks_next?: string;
+  beginner_entry_point?: boolean;
 }
 
 interface Props {
@@ -56,6 +60,7 @@ interface Props {
   targetRole?: string;
   onToggleCompleted?: (certId: string) => void;
   completedCertIds?: string[];
+  certificationJourneySummary?: string;
 }
 
 export default function CareerPathCertifications({
@@ -64,10 +69,12 @@ export default function CareerPathCertifications({
   targetRole,
   onToggleCompleted,
   completedCertIds = [],
+  certificationJourneySummary,
 }: Props) {
   const { colors, isDark } = useTheme();
   const [expandedCerts, setExpandedCerts] = useState<Set<string>>(new Set());
   const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
+  const [viewMode, setViewMode] = useState<'journey' | 'priority'>('journey');
 
   const toggleExpand = (certId: string) => {
     const newSet = new Set(expandedCerts);
@@ -132,6 +139,45 @@ export default function CareerPathCertifications({
     return b.relevance_score - a.relevance_score;
   });
 
+  // Journey view: sort by journey_order and group by tier
+  const journeySortedCerts = [...certifications].sort((a, b) => {
+    const aOrder = a.journey_order ?? 999;
+    const bOrder = b.journey_order ?? 999;
+    return aOrder - bOrder;
+  });
+
+  const tierGroups: { tier: 'foundation' | 'intermediate' | 'advanced'; label: string; certs: Certification[] }[] = [
+    { tier: 'foundation', label: 'Phase 1: Foundation', certs: [] },
+    { tier: 'intermediate', label: 'Phase 2: Intermediate', certs: [] },
+    { tier: 'advanced', label: 'Phase 3: Advanced', certs: [] },
+  ];
+
+  journeySortedCerts.forEach((cert) => {
+    const group = tierGroups.find((g) => g.tier === cert.tier);
+    if (group) {
+      group.certs.push(cert);
+    } else {
+      // Default to foundation if no tier
+      tierGroups[0].certs.push(cert);
+    }
+  });
+
+  const getTierColor = (tier: string) => {
+    switch (tier) {
+      case 'foundation':
+        return COLORS.success;
+      case 'intermediate':
+        return COLORS.info;
+      case 'advanced':
+        return COLORS.warning;
+      default:
+        return COLORS.primary;
+    }
+  };
+
+  const displayCerts = viewMode === 'priority' ? sortedCerts : journeySortedCerts;
+  const totalJourneyCerts = journeySortedCerts.length;
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Header */}
@@ -155,49 +201,372 @@ export default function CareerPathCertifications({
         </GlassCard>
       )}
 
-      {/* Priority Filter */}
-      <GlassCard material="thin" style={styles.filterCard}>
-        <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>Priority:</Text>
-        <View style={styles.filterRow}>
-          {(['all', 'high', 'medium', 'low'] as const).map((priority) => (
-            <TouchableOpacity
-              key={priority}
-              onPress={() => setPriorityFilter(priority)}
-              style={[
-                styles.filterChip,
-                {
-                  backgroundColor:
-                    priorityFilter === priority
-                      ? ALPHA_COLORS.primary.bg
-                      : colors.backgroundTertiary,
-                  borderColor: priorityFilter === priority ? COLORS.primary : (isDark ? colors.border : 'transparent'),
-                },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={`Filter by ${priority} priority`}
-            >
-              <Text
+      {/* View Mode Toggle */}
+      <View style={[styles.viewModeContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
+        <TouchableOpacity
+          style={[
+            styles.viewModeButton,
+            viewMode === 'journey' && styles.viewModeButtonActive,
+            { backgroundColor: viewMode === 'journey' ? ALPHA_COLORS.primary.bg : 'transparent' },
+          ]}
+          onPress={() => setViewMode('journey')}
+          accessibilityRole="button"
+          accessibilityLabel="Journey view"
+        >
+          <Text
+            style={[
+              styles.viewModeText,
+              { color: viewMode === 'journey' ? COLORS.primary : colors.textSecondary },
+            ]}
+          >
+            Journey
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.viewModeButton,
+            viewMode === 'priority' && styles.viewModeButtonActive,
+            { backgroundColor: viewMode === 'priority' ? ALPHA_COLORS.primary.bg : 'transparent' },
+          ]}
+          onPress={() => setViewMode('priority')}
+          accessibilityRole="button"
+          accessibilityLabel="Priority view"
+        >
+          <Text
+            style={[
+              styles.viewModeText,
+              { color: viewMode === 'priority' ? COLORS.primary : colors.textSecondary },
+            ]}
+          >
+            Priority
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Journey Summary Banner */}
+      {viewMode === 'journey' && certificationJourneySummary && (
+        <GlassCard material="regular" style={[styles.journeySummaryCard, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+          <View style={styles.journeySummaryContent}>
+            <BookOpen color={COLORS.primary} size={20} />
+            <Text style={[styles.journeySummaryText, { color: colors.text }]}>
+              {certificationJourneySummary}
+            </Text>
+          </View>
+        </GlassCard>
+      )}
+
+      {/* Priority Filter - only shown in priority view */}
+      {viewMode === 'priority' && (
+        <GlassCard material="thin" style={styles.filterCard}>
+          <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>Priority:</Text>
+          <View style={styles.filterRow}>
+            {(['all', 'high', 'medium', 'low'] as const).map((priority) => (
+              <TouchableOpacity
+                key={priority}
+                onPress={() => setPriorityFilter(priority)}
                 style={[
-                  styles.filterChipText,
+                  styles.filterChip,
                   {
-                    color:
+                    backgroundColor:
                       priorityFilter === priority
-                        ? priority === 'all'
-                          ? COLORS.primary
-                          : getPriorityColor(priority)
-                        : colors.textSecondary,
+                        ? ALPHA_COLORS.primary.bg
+                        : colors.backgroundTertiary,
+                    borderColor: priorityFilter === priority ? COLORS.primary : (isDark ? colors.border : 'transparent'),
                   },
                 ]}
+                accessibilityRole="button"
+                accessibilityLabel={`Filter by ${priority} priority`}
               >
-                {priority.charAt(0).toUpperCase() + priority.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </GlassCard>
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    {
+                      color:
+                        priorityFilter === priority
+                          ? priority === 'all'
+                            ? COLORS.primary
+                            : getPriorityColor(priority)
+                          : colors.textSecondary,
+                    },
+                  ]}
+                >
+                  {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </GlassCard>
+      )}
 
-      {/* Certifications List */}
-      {sortedCerts.map((cert, index) => {
+      {/* Journey View - Grouped by Tier */}
+      {viewMode === 'journey' && tierGroups.map((group) => {
+        if (group.certs.length === 0) return null;
+        return (
+          <View key={group.tier}>
+            {/* Tier Group Header */}
+            <View style={styles.tierHeader}>
+              <View style={[styles.tierBadge, { backgroundColor: `${getTierColor(group.tier)}20` }]}>
+                <Text style={[styles.tierBadgeText, { color: getTierColor(group.tier) }]}>
+                  {group.label}
+                </Text>
+              </View>
+            </View>
+
+            {group.certs.map((cert, index) => {
+              const isExpanded = expandedCerts.has(cert.id);
+              const isCompleted = completedCertIds.includes(cert.id);
+              const stepNumber = (cert.journey_order ?? index + 1);
+
+              return (
+                <GlassCard
+                  key={cert.id}
+                  material="regular"
+                  shadow="subtle"
+                  style={[
+                    styles.certCard,
+                    isCompleted && { opacity: 0.7 },
+                  ]}
+                >
+                  {/* Cert Header */}
+                  <TouchableOpacity
+                    onPress={() => toggleExpand(cert.id)}
+                    style={styles.certHeader}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Step ${stepNumber} certification`}
+                    accessibilityState={{ expanded: isExpanded }}
+                  >
+                    <View style={styles.certHeaderContent}>
+                      <View style={styles.certMeta}>
+                        <View style={[styles.stepBadge, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+                          <Text style={[styles.stepBadgeText, { color: COLORS.primary }]}>
+                            Step {stepNumber} of {totalJourneyCerts}
+                          </Text>
+                        </View>
+                        {cert.beginner_entry_point && (
+                          <View style={[styles.startHereBadge, { backgroundColor: ALPHA_COLORS.success.bg }]}>
+                            <Text style={[styles.startHereBadgeText, { color: COLORS.success }]}>
+                              START HERE
+                            </Text>
+                          </View>
+                        )}
+                        <View style={styles.scoreContainer}>
+                          <Star color={COLORS.warning} size={14} fill={COLORS.warning} />
+                          <Text style={[styles.scoreText, { color: COLORS.warning }]}>
+                            {cert.relevance_score}%
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={[styles.certName, { color: colors.text }]}>
+                        {cert.name}
+                      </Text>
+                      <Text style={[styles.provider, { color: colors.textSecondary }]}>
+                        {cert.provider}
+                      </Text>
+                      <View style={styles.quickInfo}>
+                        <View style={styles.infoItem}>
+                          <Clock color={colors.textTertiary} size={14} />
+                          <Text style={[styles.infoText, { color: colors.textTertiary }]}>
+                            {cert.estimated_time}
+                          </Text>
+                        </View>
+                        <View style={styles.infoItem}>
+                          <DollarSign color={colors.textTertiary} size={14} />
+                          <Text style={[styles.infoText, { color: colors.textTertiary }]}>
+                            {cert.estimated_cost}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                    {isCompleted && (
+                      <CheckCircle color={COLORS.success} size={24} fill={COLORS.success} />
+                    )}
+                  </TouchableOpacity>
+
+                  {/* Expanded Content */}
+                  {isExpanded && (
+                    <View style={[styles.expandedContent, { borderTopColor: colors.border }]}>
+                      <Text style={[styles.description, { color: colors.textSecondary }]}>
+                        {cert.description}
+                      </Text>
+
+                      <View style={styles.section}>
+                        <Text style={[styles.sectionLabel, { color: COLORS.info }]}>
+                          WHY RECOMMENDED
+                        </Text>
+                        <Text style={[styles.sectionText, { color: colors.textSecondary }]}>
+                          {cert.why_recommended}
+                        </Text>
+                      </View>
+
+                      <View style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                          <TrendingUp color={COLORS.success} size={16} />
+                          <Text style={[styles.sectionLabel, { color: COLORS.success }]}>
+                            CAREER IMPACT
+                          </Text>
+                        </View>
+                        <Text style={[styles.sectionText, { color: colors.textSecondary }]}>
+                          {cert.career_impact}
+                        </Text>
+                      </View>
+
+                      <View style={styles.section}>
+                        <Text style={[styles.sectionLabel, { color: COLORS.primary }]}>
+                          SKILLS YOU'LL GAIN
+                        </Text>
+                        <View style={styles.skillsContainer}>
+                          {cert.skills_gained.map((skill, idx) => (
+                            <View
+                              key={idx}
+                              style={[styles.skillChip, { backgroundColor: ALPHA_COLORS.primary.bg }]}
+                            >
+                              <Text style={[styles.skillText, { color: COLORS.primary }]}>
+                                {skill}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+
+                      {cert.prerequisites && cert.prerequisites.length > 0 && (
+                        <View style={styles.section}>
+                          <Text style={[styles.sectionLabel, { color: COLORS.warning }]}>
+                            PREREQUISITES
+                          </Text>
+                          {cert.prerequisites.map((prereq, idx) => (
+                            <View key={idx} style={styles.prereqItem}>
+                              <Text style={[styles.bullet, { color: COLORS.warning }]}>•</Text>
+                              <Text style={[styles.sectionText, { color: colors.textSecondary }]}>
+                                {prereq}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+
+                      {cert.exam_details && (
+                        <View style={styles.section}>
+                          <Text style={[styles.sectionLabel, { color: colors.text }]}>
+                            EXAM DETAILS
+                          </Text>
+                          <View
+                            style={[
+                              styles.examBox,
+                              { backgroundColor: colors.backgroundTertiary },
+                            ]}
+                          >
+                            <View style={styles.examRow}>
+                              <Text style={[styles.examLabel, { color: colors.textSecondary }]}>Format:</Text>
+                              <Text style={[styles.examValue, { color: colors.text }]}>{cert.exam_details.format}</Text>
+                            </View>
+                            <View style={styles.examRow}>
+                              <Text style={[styles.examLabel, { color: colors.textSecondary }]}>Duration:</Text>
+                              <Text style={[styles.examValue, { color: colors.text }]}>{cert.exam_details.duration}</Text>
+                            </View>
+                            <View style={styles.examRow}>
+                              <Text style={[styles.examLabel, { color: colors.textSecondary }]}>Passing Score:</Text>
+                              <Text style={[styles.examValue, { color: colors.text }]}>{cert.exam_details.passing_score}</Text>
+                            </View>
+                          </View>
+                        </View>
+                      )}
+
+                      {cert.study_resources && cert.study_resources.length > 0 && (
+                        <View style={styles.section}>
+                          <View style={styles.sectionHeader}>
+                            <BookOpen color={COLORS.info} size={16} />
+                            <Text style={[styles.sectionLabel, { color: COLORS.info }]}>
+                              STUDY RESOURCES
+                            </Text>
+                          </View>
+                          {cert.study_resources.map((resource, idx) => (
+                            <TouchableOpacity
+                              key={idx}
+                              onPress={() => resource.url && openUrl(resource.url)}
+                              style={[
+                                styles.resourceItem,
+                                { backgroundColor: colors.backgroundTertiary },
+                              ]}
+                              disabled={!resource.url}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Open ${resource.name}`}
+                            >
+                              <View style={styles.resourceInfo}>
+                                <Text style={[styles.resourceName, { color: colors.text }]}>
+                                  {resource.name}
+                                </Text>
+                                <Text style={[styles.resourceType, { color: colors.textTertiary }]}>
+                                  {resource.type}
+                                </Text>
+                              </View>
+                              {resource.url && <ExternalLink color={COLORS.primary} size={16} />}
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      )}
+
+                      {/* Unlocks Next */}
+                      {cert.unlocks_next && (
+                        <View style={[styles.unlocksNextContainer, { backgroundColor: ALPHA_COLORS.info.bg }]}>
+                          <Award color={COLORS.info} size={16} />
+                          <Text style={[styles.unlocksNextText, { color: COLORS.info }]}>
+                            Next: {cert.unlocks_next}
+                          </Text>
+                        </View>
+                      )}
+
+                      {/* Actions */}
+                      <View style={styles.actions}>
+                        {cert.url && (
+                          <GlassButton
+                            label="Learn More"
+                            variant="secondary"
+                            icon={<ExternalLink color={colors.text} size={16} />}
+                            onPress={() => openUrl(cert.url!)}
+                            style={styles.actionButton}
+                          />
+                        )}
+                        {onToggleCompleted && (
+                          <TouchableOpacity
+                            onPress={() => onToggleCompleted(cert.id)}
+                            style={[
+                              styles.completeButton,
+                              {
+                                backgroundColor: isCompleted
+                                  ? ALPHA_COLORS.success.bg
+                                  : colors.backgroundTertiary,
+                              },
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel={isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
+                          >
+                            <CheckCircle
+                              color={isCompleted ? COLORS.success : colors.textSecondary}
+                              size={16}
+                              fill={isCompleted ? COLORS.success : 'none'}
+                            />
+                            <Text
+                              style={[
+                                styles.completeButtonText,
+                                { color: isCompleted ? COLORS.success : colors.textSecondary },
+                              ]}
+                            >
+                              {isCompleted ? 'Completed' : 'Mark Complete'}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                  )}
+                </GlassCard>
+              );
+            })}
+          </View>
+        );
+      })}
+
+      {/* Priority View - Certifications List */}
+      {viewMode === 'priority' && sortedCerts.map((cert, index) => {
         const isExpanded = expandedCerts.has(cert.id);
         const isCompleted = completedCertIds.includes(cert.id);
 
@@ -462,11 +831,20 @@ export default function CareerPathCertifications({
         );
       })}
 
-      {sortedCerts.length === 0 && (
+      {viewMode === 'priority' && sortedCerts.length === 0 && (
         <GlassCard material="regular" style={styles.emptyCard}>
           <Award color={colors.textTertiary} size={48} />
           <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
             No certifications match the selected filter.
+          </Text>
+        </GlassCard>
+      )}
+
+      {viewMode === 'journey' && certifications.length === 0 && (
+        <GlassCard material="regular" style={styles.emptyCard}>
+          <Award color={colors.textTertiary} size={48} />
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            No certifications available for journey view.
           </Text>
         </GlassCard>
       )}
@@ -699,5 +1077,85 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
+  },
+  viewModeContainer: {
+    flexDirection: 'row',
+    borderRadius: RADIUS.md,
+    padding: 4,
+  },
+  viewModeButton: {
+    flex: 1,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.sm,
+    alignItems: 'center',
+  },
+  viewModeButtonActive: {
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.30)',
+  },
+  viewModeText: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  journeySummaryCard: {
+    padding: SPACING.md,
+  },
+  journeySummaryContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+  },
+  journeySummaryText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    lineHeight: 20,
+  },
+  tierHeader: {
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  tierBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.full,
+  },
+  tierBadgeText: {
+    fontSize: 13,
+    fontFamily: FONTS.bold,
+    letterSpacing: 0.5,
+  },
+  stepBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
+  stepBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+    letterSpacing: 0.5,
+  },
+  startHereBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
+  startHereBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+    letterSpacing: 0.5,
+  },
+  unlocksNextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    padding: SPACING.sm,
+    borderRadius: RADIUS.md,
+  },
+  unlocksNextText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: FONTS.semibold,
   },
 });

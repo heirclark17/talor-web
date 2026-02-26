@@ -2160,6 +2160,10 @@ export default function CareerPathDesignerScreen() {
       immediate_actions: plan.immediate_actions || [],
       long_term_goals: plan.long_term_goals || [],
       salary_progression: plan.salary_progression,
+      experience_plan: plan.experience_plan || [],
+      education_options: plan.education_options || [],
+      certification_journey_summary: plan.certification_journey_summary,
+      education_recommendation: plan.education_recommendation,
     };
 
     const handleSavePlan = async () => {

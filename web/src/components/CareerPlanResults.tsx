@@ -7,7 +7,7 @@ import {
   DollarSign, MapPin, Users, TrendingUp, Code, Lightbulb,
   Download, Shield, Zap, Book, Video, FileQuestion, Globe,
   Building, Heart, Sparkles, Play, Star, ArrowRight, Info,
-  CheckCircle2, Circle, BarChart3, X
+  CheckCircle2, Circle, BarChart3, X, Filter, GraduationCap
 } from 'lucide-react'
 
 // Tooltip component for jargon terms
@@ -71,6 +71,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
   const [expandedProject, setExpandedProject] = useState<number | null>(null)
   const [expandedEvent, setExpandedEvent] = useState<number | null>(null)
   const [expandedBullet, setExpandedBullet] = useState<number | null>(null)
+  const [projectDifficultyFilter, setProjectDifficultyFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all')
 
   const openModal = (sectionId: string) => {
     setActiveModal(sectionId)
@@ -896,39 +897,98 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
               {/* ===== CERTIFICATIONS MODAL ===== */}
               {activeModal === 'certs' && plan.certificationPath && (
                 <div>
-                  <CareerPathCertifications certifications={plan.certificationPath} />
+                  <CareerPathCertifications
+                    certifications={plan.certificationPath}
+                    certificationJourneySummary={plan.certificationJourneySummary}
+                  />
                 </div>
               )}
 
               {/* ===== EXPERIENCE PLAN MODAL ===== */}
               {activeModal === 'experience' && plan.experiencePlan && (
                 <div className="space-y-4">
-                  {plan.experiencePlan.map((project, idx) => (
+                  {/* Difficulty Filter */}
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <Filter className="w-4 h-4 text-theme-secondary" />
+                    <span className="text-sm text-theme-secondary mr-1">Difficulty:</span>
+                    {(['all', 'beginner', 'intermediate', 'advanced'] as const).map((level) => (
+                      <button
+                        key={level}
+                        onClick={() => setProjectDifficultyFilter(level)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize ${
+                          projectDifficultyFilter === level
+                            ? level === 'beginner' ? 'bg-green-500 text-white'
+                              : level === 'intermediate' ? 'bg-yellow-500 text-white'
+                              : level === 'advanced' ? 'bg-red-500 text-white'
+                              : 'bg-blue-500 text-white'
+                            : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
+                        }`}
+                      >
+                        {level === 'all' ? `All (${plan.experiencePlan.length})` : `${level} (${plan.experiencePlan.filter(p => p.difficultyLevel?.toLowerCase() === level).length})`}
+                      </button>
+                    ))}
+                  </div>
+
+                  {plan.experiencePlan
+                    .filter(project => projectDifficultyFilter === 'all' || project.difficultyLevel?.toLowerCase() === projectDifficultyFilter)
+                    .map((project, idx) => {
+                      const isBeginnerProject = project.difficultyLevel?.toLowerCase() === 'beginner'
+                      const diffColor = project.difficultyLevel?.toLowerCase() === 'beginner' ? 'bg-green-500/20 text-green-300 border-green-500/30'
+                        : project.difficultyLevel?.toLowerCase() === 'intermediate' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                        : project.difficultyLevel?.toLowerCase() === 'advanced' ? 'bg-red-500/20 text-red-300 border-red-500/30'
+                        : 'bg-theme-glass-10 text-theme border-theme-subtle'
+
+                      return (
                     <div key={idx} className="bg-theme-glass-5 rounded-lg border border-theme-subtle overflow-hidden">
-                      {/* Project Header */}
+                      {/* Project Header (Collapsed View) */}
                       <button
                         onClick={() => setExpandedProject(expandedProject === idx ? null : idx)}
                         className="w-full p-6 flex items-start justify-between hover:bg-theme-glass-5 transition-colors"
                       >
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <h3 className="text-lg font-semibold text-theme">{project.title}</h3>
-                            <span className="text-xs bg-theme-glass-10 px-2 py-1 rounded text-theme uppercase">{project.type}</span>
-                            <span className="text-xs bg-theme-glass-10 px-2 py-1 rounded text-theme uppercase">{project.difficultyLevel}</span>
+                            <span className="text-xs bg-theme-glass-10 px-2 py-1 rounded text-theme uppercase border border-theme-subtle">{project.type}</span>
+                            <span className={`text-xs px-2 py-1 rounded uppercase border font-medium ${diffColor}`}>{project.difficultyLevel}</span>
+                            {isBeginnerProject && (
+                              <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded font-semibold flex items-center gap-1 border border-green-500/30">
+                                <Play className="w-3 h-3" /> Good Starting Project
+                              </span>
+                            )}
                           </div>
-                          <p className="text-theme-secondary text-sm mb-3">{project.description}</p>
-                          <div className="text-sm text-theme-tertiary">
-                            <Clock className="w-3 h-3 inline mr-1" />
-                            {project.timeCommitment}
+                          <div className="flex items-center gap-4 text-sm text-theme-tertiary mb-2">
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {project.timeCommitment}
+                            </span>
                           </div>
+                          {/* Top skills preview (collapsed) */}
+                          {project.skillsDemonstrated && project.skillsDemonstrated.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-1">
+                              {project.skillsDemonstrated.slice(0, 4).map((skill, sIdx) => (
+                                <span key={sIdx} className="bg-theme-glass-10 px-2 py-0.5 rounded text-xs text-theme-secondary">
+                                  {skill}
+                                </span>
+                              ))}
+                              {project.skillsDemonstrated.length > 4 && (
+                                <span className="text-xs text-theme-tertiary">+{project.skillsDemonstrated.length - 4} more</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <ChevronDown className={`w-5 h-5 text-theme-secondary transition-transform ml-4 flex-shrink-0 mt-1 ${expandedProject === idx ? 'rotate-180' : ''}`} />
                       </button>
 
-                      {/* Project Details */}
+                      {/* Expanded Project Details */}
                       {expandedProject === idx && (
                         <div className="px-6 pb-6 space-y-6">
-                          {/* Skills Demonstrated */}
+                          {/* Full Description */}
+                          <div>
+                            <h4 className="text-theme font-semibold mb-2">Project Description</h4>
+                            <p className="text-theme-secondary text-sm">{project.description}</p>
+                          </div>
+
+                          {/* Skills Demonstrated (full) */}
                           {project.skillsDemonstrated && project.skillsDemonstrated.length > 0 && (
                             <div>
                               <h4 className="text-theme font-semibold mb-3">Skills Demonstrated</h4>
@@ -947,7 +1007,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                             <div>
                               <h4 className="text-theme font-semibold mb-3 flex items-center gap-2">
                                 <Code className="w-4 h-4" />
-                                Detailed Tech Stack ({project.detailedTechStack.length} technologies)
+                                Tech Stack ({project.detailedTechStack.length} technologies)
                               </h4>
                               <div className="space-y-3">
                                 {project.detailedTechStack.map((tech, tIdx) => (
@@ -998,30 +1058,33 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                             </div>
                           )}
 
-                          {/* Step-by-Step Guide */}
+                          {/* Step-by-Step Guide (numbered list) */}
                           {project.stepByStepGuide && project.stepByStepGuide.length > 0 && (
                             <div>
                               <h4 className="text-theme font-semibold mb-3 flex items-center gap-2">
                                 <Lightbulb className="w-4 h-4" />
                                 Step-by-Step Implementation Guide
                               </h4>
-                              <div className="space-y-2">
+                              <ol className="space-y-2">
                                 {project.stepByStepGuide.map((step, sIdx) => (
-                                  <div key={sIdx} className="flex items-start gap-3 bg-theme-glass-5 rounded p-3">
-                                    <div className="w-6 h-6 rounded-full bg-theme-glass-10 flex items-center justify-center flex-shrink-0">
-                                      <span className="text-theme text-xs font-semibold">{sIdx + 1}</span>
+                                  <li key={sIdx} className="flex items-start gap-3 bg-theme-glass-5 rounded p-3">
+                                    <div className="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                                      {sIdx + 1}
                                     </div>
                                     <div className="text-sm text-theme-secondary">{step}</div>
-                                  </div>
+                                  </li>
                                 ))}
-                              </div>
+                              </ol>
                             </div>
                           )}
 
                           {/* How to Showcase */}
                           {project.howToShowcase && (
                             <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
-                              <h4 className="text-green-300 font-semibold mb-2">How to Showcase on Resume/LinkedIn</h4>
+                              <h4 className="text-green-300 font-semibold mb-2 flex items-center gap-2">
+                                <Star className="w-4 h-4" />
+                                Showcase Tips
+                              </h4>
                               <p className="text-sm text-theme-secondary">{project.howToShowcase}</p>
                             </div>
                           )}
@@ -1049,7 +1112,8 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                         </div>
                       )}
                     </div>
-                  ))}
+                      )
+                    })}
                 </div>
               )}
 
@@ -1520,16 +1584,37 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
               {/* ===== EDUCATION OPTIONS MODAL ===== */}
               {activeModal === 'education' && plan.educationOptions && (
                 <div className="space-y-4">
-                  {plan.educationOptions.map((option, idx) => (
-                    <div key={idx} className="bg-theme-glass-5 rounded-lg p-6 border border-theme-subtle">
+                  {/* Education Recommendation Banner */}
+                  {plan.educationRecommendation && (
+                    <div className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-blue-500/10 border border-indigo-500/30 rounded-lg p-4 flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <GraduationCap className="w-4 h-4 text-indigo-400" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-theme mb-1">Our Recommendation</h4>
+                        <p className="text-sm text-theme-secondary">{plan.educationRecommendation}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {plan.educationOptions.map((option, idx) => {
+                    const isBestForYou = option.comparisonRank === 1
+
+                    return (
+                    <div key={idx} className={`bg-theme-glass-5 rounded-lg p-6 border ${isBestForYou ? 'border-2 border-indigo-500/50 ring-1 ring-indigo-500/20' : 'border-theme-subtle'}`}>
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <h3 className="text-lg font-semibold text-theme">{option.name}</h3>
                             <span className="text-xs bg-theme-glass-10 px-2 py-1 rounded text-theme uppercase">{option.type}</span>
                             <span className="text-xs bg-theme-glass-10 px-2 py-1 rounded text-theme uppercase">{option.format}</span>
+                            {isBestForYou && (
+                              <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded font-semibold flex items-center gap-1 border border-indigo-500/30">
+                                <Star className="w-3 h-3" /> Best for You
+                              </span>
+                            )}
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-theme-secondary">
+                          <div className="flex items-center gap-4 text-sm text-theme-secondary flex-wrap">
                             <div className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
                               {option.duration}
@@ -1538,9 +1623,27 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                               <DollarSign className="w-4 h-4" />
                               {option.costRange}
                             </div>
+                            {option.timeCommitmentWeekly && (
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {option.timeCommitmentWeekly}/week
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
+
+                      {/* Description */}
+                      {option.description && (
+                        <p className="text-sm text-theme-secondary mb-4">{option.description}</p>
+                      )}
+
+                      {/* Who It's Best For */}
+                      {option.whoItsBestFor && (
+                        <div className="bg-theme-glass-5 rounded-lg p-3 mb-4 border border-theme-subtle">
+                          <p className="text-sm text-theme-secondary italic">{option.whoItsBestFor}</p>
+                        </div>
+                      )}
 
                       <div className="grid md:grid-cols-2 gap-4 mb-4">
                         {option.pros && option.pros.length > 0 && (
@@ -1563,7 +1666,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                             <ul className="space-y-1">
                               {option.cons.map((con, cIdx) => (
                                 <li key={cIdx} className="text-sm text-theme-secondary flex items-start gap-2">
-                                  <span className="text-red-400 flex-shrink-0">x</span>
+                                  <X className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
                                   {con}
                                 </li>
                               ))}
@@ -1572,19 +1675,40 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                         )}
                       </div>
 
+                      {/* Financing Options */}
+                      {option.financingOptions && (
+                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
+                          <h4 className="text-blue-300 font-semibold text-sm mb-1 flex items-center gap-1">
+                            <DollarSign className="w-3 h-3" /> Financing Options
+                          </h4>
+                          <p className="text-sm text-theme-secondary">{option.financingOptions}</p>
+                        </div>
+                      )}
+
+                      {/* Employment Outcomes */}
+                      {option.employmentOutcomes && (
+                        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 mb-4">
+                          <h4 className="text-green-300 font-semibold text-sm mb-1 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" /> Employment Outcomes
+                          </h4>
+                          <p className="text-sm text-theme-secondary">{option.employmentOutcomes}</p>
+                        </div>
+                      )}
+
                       {option.officialLink && (
                         <a
                           href={option.officialLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-theme-glass-10 hover:bg-theme-glass-20 rounded-lg text-sm text-theme transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/30 rounded-lg text-sm text-indigo-300 transition-colors"
                         >
                           <ExternalLink className="w-4 h-4" />
-                          View Program Details
+                          View Program
                         </a>
                       )}
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
 

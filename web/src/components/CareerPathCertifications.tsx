@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react'
-import { Award, Clock, DollarSign, TrendingUp, BookOpen, CheckCircle, Bookmark, ChevronDown, ChevronRight, ExternalLink, FileQuestion, Calendar } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Award, Clock, DollarSign, TrendingUp, BookOpen, CheckCircle, Bookmark, ChevronDown, ChevronRight, ExternalLink, FileQuestion, Calendar, Map, List, ArrowRight, Play } from 'lucide-react'
 import type { Certification, StudyMaterial } from '../types/career-plan'
 
 interface CareerPathCertificationsProps {
   certifications: Certification[]
   loading?: boolean
+  certificationJourneySummary?: string
 }
 
-export default function CareerPathCertifications({ certifications, loading }: CareerPathCertificationsProps) {
+export default function CareerPathCertifications({ certifications, loading, certificationJourneySummary }: CareerPathCertificationsProps) {
   const [selectedLevel, setSelectedLevel] = useState<'foundation' | 'intermediate' | 'advanced' | 'all'>('all')
+  const [viewMode, setViewMode] = useState<'journey' | 'priority'>('journey')
   const [expandedCerts, setExpandedCerts] = useState<Set<string>>(new Set())
   const [savedCerts, setSavedCerts] = useState<Set<string>>(new Set())
 
@@ -105,6 +107,41 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
     return certifications.filter(c => c.level === selectedLevel)
   }
 
+  // Journey view: sort by journeyOrder and group by tier
+  const journeyCerts = useMemo(() => {
+    const sorted = [...certifications].sort((a, b) => (a.journeyOrder ?? 999) - (b.journeyOrder ?? 999))
+    const tiers: { tier: string; label: string; certs: typeof certifications }[] = [
+      { tier: 'foundation', label: 'Phase 1: Foundation', certs: [] },
+      { tier: 'intermediate', label: 'Phase 2: Intermediate', certs: [] },
+      { tier: 'advanced', label: 'Phase 3: Advanced', certs: [] },
+    ]
+    sorted.forEach(cert => {
+      const t = cert.tier || cert.level || 'foundation'
+      const group = tiers.find(g => g.tier === t)
+      if (group) group.certs.push(cert)
+      else tiers[0].certs.push(cert) // default to foundation
+    })
+    return { sorted, tiers: tiers.filter(g => g.certs.length > 0) }
+  }, [certifications])
+
+  const getTierColor = (tier: string) => {
+    switch (tier) {
+      case 'foundation': return 'border-green-500/40 bg-green-500/5'
+      case 'intermediate': return 'border-yellow-500/40 bg-yellow-500/5'
+      case 'advanced': return 'border-red-500/40 bg-red-500/5'
+      default: return 'border-theme-subtle bg-theme-glass-5'
+    }
+  }
+
+  const getTierHeaderColor = (tier: string) => {
+    switch (tier) {
+      case 'foundation': return 'text-green-400'
+      case 'intermediate': return 'text-yellow-400'
+      case 'advanced': return 'text-red-400'
+      default: return 'text-theme'
+    }
+  }
+
   if (loading) {
     return (
       <div className="p-6 text-center" data-testid="career-certifications-section">
@@ -138,55 +175,305 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
         <Award className="w-6 h-6 text-blue-500" />
       </div>
 
-      {/* Level Filters */}
-      <div className="flex flex-wrap gap-2" data-testid="cert-level-filters">
+      {/* View Mode Toggle */}
+      <div className="flex items-center gap-2" data-testid="cert-view-toggle">
         <button
-          onClick={() => setSelectedLevel('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            selectedLevel === 'all'
+          onClick={() => setViewMode('journey')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            viewMode === 'journey'
               ? 'bg-blue-500 text-white'
               : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
-          data-testid="level-filter-all"
         >
-          All Levels ({certifications.length})
+          <Map className="w-4 h-4" />
+          Journey
         </button>
         <button
-          onClick={() => setSelectedLevel('foundation')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            selectedLevel === 'foundation'
-              ? 'bg-green-500 text-white'
+          onClick={() => setViewMode('priority')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            viewMode === 'priority'
+              ? 'bg-blue-500 text-white'
               : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
           }`}
-          data-testid="level-filter-foundation"
         >
-          Beginner ({certifications.filter(c => c.level === 'foundation').length})
-        </button>
-        <button
-          onClick={() => setSelectedLevel('intermediate')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            selectedLevel === 'intermediate'
-              ? 'bg-yellow-500 text-white'
-              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
-          }`}
-          data-testid="level-filter-intermediate"
-        >
-          Intermediate ({certifications.filter(c => c.level === 'intermediate').length})
-        </button>
-        <button
-          onClick={() => setSelectedLevel('advanced')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            selectedLevel === 'advanced'
-              ? 'bg-red-500 text-white'
-              : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
-          }`}
-          data-testid="level-filter-advanced"
-        >
-          Advanced ({certifications.filter(c => c.level === 'advanced').length})
+          <List className="w-4 h-4" />
+          Priority
         </button>
       </div>
 
+      {/* Journey Summary Banner */}
+      {viewMode === 'journey' && certificationJourneySummary && (
+        <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-green-500/10 border border-blue-500/30 rounded-lg p-4 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <Play className="w-4 h-4 text-blue-400" />
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold text-theme mb-1">Your Certification Journey</h4>
+            <p className="text-sm text-theme-secondary">{certificationJourneySummary}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Level Filters (only show in priority view) */}
+      {viewMode === 'priority' && (
+        <div className="flex flex-wrap gap-2" data-testid="cert-level-filters">
+          <button
+            onClick={() => setSelectedLevel('all')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedLevel === 'all'
+                ? 'bg-blue-500 text-white'
+                : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
+            }`}
+            data-testid="level-filter-all"
+          >
+            All Levels ({certifications.length})
+          </button>
+          <button
+            onClick={() => setSelectedLevel('foundation')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedLevel === 'foundation'
+                ? 'bg-green-500 text-white'
+                : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
+            }`}
+            data-testid="level-filter-foundation"
+          >
+            Beginner ({certifications.filter(c => c.level === 'foundation').length})
+          </button>
+          <button
+            onClick={() => setSelectedLevel('intermediate')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedLevel === 'intermediate'
+                ? 'bg-yellow-500 text-white'
+                : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
+            }`}
+            data-testid="level-filter-intermediate"
+          >
+            Intermediate ({certifications.filter(c => c.level === 'intermediate').length})
+          </button>
+          <button
+            onClick={() => setSelectedLevel('advanced')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedLevel === 'advanced'
+                ? 'bg-red-500 text-white'
+                : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
+            }`}
+            data-testid="level-filter-advanced"
+          >
+            Advanced ({certifications.filter(c => c.level === 'advanced').length})
+          </button>
+        </div>
+      )}
+
       {/* Certification Cards */}
+      {viewMode === 'journey' ? (
+        /* ===== JOURNEY VIEW ===== */
+        <div className="space-y-6">
+          {journeyCerts.tiers.map((tierGroup) => (
+            <div key={tierGroup.tier} className={`rounded-xl border-2 p-4 ${getTierColor(tierGroup.tier)}`}>
+              {/* Tier Header */}
+              <h4 className={`text-base font-bold mb-3 flex items-center gap-2 ${getTierHeaderColor(tierGroup.tier)}`}>
+                {tierGroup.tier === 'foundation' && <Play className="w-4 h-4" />}
+                {tierGroup.tier === 'intermediate' && <TrendingUp className="w-4 h-4" />}
+                {tierGroup.tier === 'advanced' && <Award className="w-4 h-4" />}
+                {tierGroup.label}
+              </h4>
+
+              <div className="space-y-3">
+                {tierGroup.certs.map((cert, idx) => {
+                  const isExpanded = expandedCerts.has(cert.name)
+                  const isSaved = savedCerts.has(cert.name)
+                  const globalIndex = journeyCerts.sorted.indexOf(cert)
+
+                  return (
+                    <div
+                      key={idx}
+                      className="bg-theme rounded-lg border border-theme-subtle overflow-hidden"
+                      data-testid="cert-card"
+                    >
+                      {/* Card Header */}
+                      <button
+                        onClick={() => toggleExpanded(cert.name)}
+                        className="w-full px-4 py-4 flex items-start justify-between hover:bg-theme-glass-10 transition-colors text-left"
+                      >
+                        <div className="flex-1 space-y-2">
+                          {/* Step label + badges */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs bg-theme-glass-10 text-theme-secondary px-2 py-0.5 rounded font-medium">
+                              Step {globalIndex + 1} of {journeyCerts.sorted.length}
+                            </span>
+                            {cert.beginnerEntryPoint && (
+                              <span className="text-xs bg-green-500/20 text-green-300 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
+                                <Play className="w-3 h-3" /> START HERE
+                              </span>
+                            )}
+                          </div>
+                          {/* Certification Name */}
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-theme" data-testid="cert-name">{cert.name}</h4>
+                              <p className="text-sm text-theme-secondary">{cert.certifyingBody}</p>
+                            </div>
+                          </div>
+
+                          {/* Badges */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span
+                              className={`px-2 py-1 rounded text-xs font-medium border capitalize ${getLevelColor(cert.level)}`}
+                              data-testid="cert-level"
+                            >
+                              {getLevelLabel(cert.level)}
+                            </span>
+                            <span className="text-xs text-theme-secondary flex items-center gap-1">
+                              <DollarSign className="w-3 h-3" />
+                              {cert.estCostRange}
+                            </span>
+                            <span className="text-xs text-theme-secondary flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {cert.estStudyWeeks} weeks
+                            </span>
+                            {cert.roiRating && (
+                              <span className={`text-xs flex items-center gap-1 ${getRoiColor(cert.roiRating)}`}>
+                                <TrendingUp className="w-3 h-3" />
+                                {cert.roiRating} ROI
+                              </span>
+                            )}
+                          </div>
+
+                          {/* What It Unlocks Preview */}
+                          <p className="text-sm text-theme-secondary line-clamp-2">{cert.whatItUnlocks}</p>
+                        </div>
+
+                        <div className="flex items-center gap-2 ml-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleSaved(cert.name)
+                            }}
+                            className={`p-2 rounded-lg transition-colors ${
+                              isSaved
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-theme-glass-10 text-theme-secondary hover:bg-theme-glass-20'
+                            }`}
+                            data-testid="save-cert-btn"
+                          >
+                            <Bookmark className="w-4 h-4" fill={isSaved ? 'currentColor' : 'none'} />
+                          </button>
+                          {isExpanded ? (
+                            <ChevronDown className="w-5 h-5 text-theme-secondary" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5 text-theme-secondary" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Expanded Details (journey mode) */}
+                      {isExpanded && (
+                        <div className="px-4 pb-4 space-y-4">
+                          {/* What It Unlocks (Full) */}
+                          <div className="pt-4">
+                            <h5 className="text-sm font-semibold text-theme mb-2">What This Certification Unlocks</h5>
+                            <p className="text-sm text-theme-secondary">{cert.whatItUnlocks}</p>
+                          </div>
+
+                          {/* Why Recommended */}
+                          {cert.whyRecommended && (
+                            <div>
+                              <h5 className="text-sm font-semibold text-theme mb-2">Why Recommended</h5>
+                              <p className="text-sm text-theme-secondary">{cert.whyRecommended}</p>
+                            </div>
+                          )}
+
+                          {/* Skills Gained */}
+                          {cert.skillsGained && cert.skillsGained.length > 0 && (
+                            <div>
+                              <h5 className="text-sm font-semibold text-theme mb-2">Skills Gained</h5>
+                              <div className="flex flex-wrap gap-2">
+                                {cert.skillsGained.map((skill, skillIdx) => (
+                                  <span
+                                    key={skillIdx}
+                                    className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs rounded"
+                                  >
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Key Details Grid */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <h5 className="text-xs font-semibold text-theme-secondary mb-1">Cost Range</h5>
+                              <p className="text-sm text-theme">{cert.estCostRange}</p>
+                            </div>
+                            <div>
+                              <h5 className="text-xs font-semibold text-theme-secondary mb-1">Study Time</h5>
+                              <p className="text-sm text-theme">{cert.estStudyWeeks} weeks</p>
+                            </div>
+                          </div>
+
+                          {/* Study Materials */}
+                          {cert.studyMaterials && cert.studyMaterials.length > 0 && (
+                            <div>
+                              <h5 className="text-sm font-semibold text-theme mb-2 flex items-center gap-2">
+                                <BookOpen className="w-4 h-4" />
+                                Study Materials ({cert.studyMaterials.length})
+                              </h5>
+                              <div className="space-y-2">
+                                {cert.studyMaterials
+                                  .sort((a, b) => (a.recommendedOrder || 0) - (b.recommendedOrder || 0))
+                                  .slice(0, 3)
+                                  .map((material, mIdx) => (
+                                    <div key={mIdx} className="bg-theme-glass-10 rounded-lg p-3">
+                                      <h6 className="text-theme font-medium text-sm">{material.title}</h6>
+                                      <p className="text-xs text-theme-secondary">{material.provider} - {material.cost}</p>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Unlocks Next (Journey-specific) */}
+                          {cert.unlocksNext && (
+                            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 flex items-center gap-2">
+                              <ArrowRight className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                              <span className="text-sm text-theme-secondary">
+                                <span className="text-blue-400 font-semibold">Next:</span> {cert.unlocksNext}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Official Links */}
+                          {cert.officialLinks && cert.officialLinks.length > 0 && (
+                            <div>
+                              <h5 className="text-sm font-semibold text-theme mb-2">Official Links</h5>
+                              <div className="space-y-1">
+                                {cert.officialLinks.map((link, lIdx) => (
+                                  <a
+                                    key={lIdx}
+                                    href={link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300"
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                    <span className="truncate">{link}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+      /* ===== PRIORITY VIEW (original) ===== */
       <div className="space-y-3">
         {filteredCerts.length === 0 ? (
           <div className="text-center py-8 text-theme-secondary">
@@ -547,6 +834,7 @@ export default function CareerPathCertifications({ certifications, loading }: Ca
           })
         )}
       </div>
+      )}
 
       {/* Certification Roadmap */}
       {certifications.length > 1 && (
