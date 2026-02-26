@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,11 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { X, Upload, FileText, CheckCircle, AlertCircle, Trash2, ChevronRight } from 'lucide-react-native';
+import { X, Upload, FileText, CheckCircle, Circle, AlertCircle, Trash2, ChevronRight, CheckCircle2 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 let DocumentPicker: typeof import('expo-document-picker') | null = null;
 try { DocumentPicker = require('expo-document-picker'); } catch {}
@@ -67,6 +68,34 @@ export default function UploadResumeScreen() {
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
+  // Resume list + bulk delete state
+  const [allResumes, setAllResumes] = useState<any[]>([]);
+  const [loadingResumes, setLoadingResumes] = useState(true);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  const fetchResumes = useCallback(async () => {
+    try {
+      setLoadingResumes(true);
+      const result = await api.getResumes();
+      if (result.success && result.data) {
+        setAllResumes(result.data);
+      }
+    } catch (err) {
+      console.error('[UploadResume] Error fetching resumes:', err);
+    } finally {
+      setLoadingResumes(false);
+    }
+  }, []);
+
+  // Refresh resume list when screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchResumes();
+    }, [fetchResumes])
+  );
+
   // Track screen view + clear old tailor session on mount
   useEffect(() => {
     capture('screen_viewed', {
@@ -87,6 +116,70 @@ export default function UploadResumeScreen() {
     };
     clearOldSession();
   }, [capture]);
+
+  const toggleSelectMode = () => {
+    setSelectMode(prev => !prev);
+    setSelectedIds(new Set());
+  };
+
+  const toggleSelectId = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === allResumes.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(allResumes.map((r: any) => r.id || r.resumeId)));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    Alert.alert(
+      'Delete Resumes',
+      `Are you sure you want to delete ${selectedIds.size} resume${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setBulkDeleting(true);
+            let failed = 0;
+            for (const id of selectedIds) {
+              try {
+                const result = await api.deleteResume(id);
+                if (!result.success) failed++;
+              } catch {
+                failed++;
+              }
+            }
+            if (parsedResume && selectedIds.has(parsedResume.resume_id)) {
+              setParsedResume(null);
+              setUploadSuccess(false);
+              setSelectedFile(null);
+            }
+            setSelectedIds(new Set());
+            setSelectMode(false);
+            setBulkDeleting(false);
+            await fetchResumes();
+            if (failed > 0) {
+              Alert.alert('Warning', `${failed} resume${failed > 1 ? 's' : ''} could not be deleted.`);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleSelectFile = async () => {
     if (!DocumentPicker) {
@@ -223,6 +316,7 @@ export default function UploadResumeScreen() {
         setParsedResume(mappedData);
         setUploadSuccess(true);
         setError(null);
+        fetchResumes();
         capture('resume_uploaded', {
           screen_name: 'Upload Resume',
           file_type: selectedFile.mimeType || 'unknown',
@@ -295,6 +389,7 @@ export default function UploadResumeScreen() {
                   setUploadSuccess(false);
                   setSelectedFile(null);
                 }
+                fetchResumes();
               } else {
                 Alert.alert('Error', `Failed to delete resume: ${result.error || 'Unknown error'}`);
               }
@@ -756,6 +851,126 @@ export default function UploadResumeScreen() {
         </View>
       )}
 
+      {/* My Resumes List */}
+      {allResumes.length > 0 && (
+        <View style={styles.resumeListContainer}>
+          {/* List Header */}
+          <View style={styles.resumeListHeader}>
+            <Text style={[TYPOGRAPHY.headline, { color: colors.text, flex: 1 }]}>
+              My Resumes ({allResumes.length})
+            </Text>
+            {!selectMode ? (
+              <TouchableOpacity onPress={toggleSelectMode} style={styles.selectModeButton}>
+                <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontWeight: '600' }]}>
+                  Select
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={toggleSelectMode} style={styles.selectModeButton}>
+                <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, fontWeight: '600' }]}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Select All + Bulk Delete Bar */}
+          {selectMode && (
+            <View style={styles.bulkActionBar}>
+              <TouchableOpacity onPress={handleSelectAll} style={styles.selectAllButton}>
+                {selectedIds.size === allResumes.length ? (
+                  <CheckCircle2 color={COLORS.primary} size={22} />
+                ) : (
+                  <Circle color={colors.textSecondary} size={22} />
+                )}
+                <Text style={[TYPOGRAPHY.subhead, { color: colors.text, marginLeft: SPACING.sm, fontWeight: '500' }]}>
+                  Select All
+                </Text>
+              </TouchableOpacity>
+              {selectedIds.size > 0 && (
+                <TouchableOpacity
+                  onPress={handleBulkDelete}
+                  style={styles.bulkDeleteButton}
+                  disabled={bulkDeleting}
+                >
+                  {bulkDeleting ? (
+                    <ActivityIndicator size="small" color={COLORS.danger} />
+                  ) : (
+                    <Trash2 color={COLORS.danger} size={18} />
+                  )}
+                  <Text style={[TYPOGRAPHY.subhead, { color: COLORS.danger, marginLeft: 6, fontWeight: '600' }]}>
+                    Delete ({selectedIds.size})
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
+          {/* Resume Items */}
+          {loadingResumes ? (
+            <ActivityIndicator size="small" color={COLORS.primary} style={{ marginVertical: SPACING.lg }} />
+          ) : (
+            allResumes.map((resume: any) => {
+              const id = resume.id || resume.resumeId;
+              const filename = resume.filename || resume.originalFilename || 'Resume';
+              const uploadedAt = resume.createdAt || resume.uploadedAt || resume.created_at;
+              const isSelected = selectedIds.has(id);
+
+              return (
+                <GlassCard
+                  key={id}
+                  style={styles.resumeListItem}
+                  material="thin"
+                  padding={SPACING.md}
+                >
+                  <TouchableOpacity
+                    style={styles.resumeItemRow}
+                    onPress={() => {
+                      if (selectMode) {
+                        toggleSelectId(id);
+                      } else {
+                        navigation.navigate('TailorResume' as any, { selectedResumeId: id });
+                      }
+                    }}
+                    onLongPress={() => {
+                      if (!selectMode) {
+                        setSelectMode(true);
+                        setSelectedIds(new Set([id]));
+                      }
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    {selectMode && (
+                      <View style={{ marginRight: SPACING.md }}>
+                        {isSelected ? (
+                          <CheckCircle2 color={COLORS.primary} size={24} />
+                        ) : (
+                          <Circle color={colors.textSecondary} size={24} />
+                        )}
+                      </View>
+                    )}
+                    <FileText color={COLORS.primary} size={24} />
+                    <View style={{ flex: 1, marginLeft: SPACING.md }}>
+                      <Text style={[TYPOGRAPHY.body, { color: colors.text, fontWeight: '600' }]} numberOfLines={1}>
+                        {filename}
+                      </Text>
+                      {uploadedAt && (
+                        <Text style={[TYPOGRAPHY.caption1, { color: colors.textSecondary, marginTop: 2 }]}>
+                          {new Date(uploadedAt).toLocaleDateString()}
+                        </Text>
+                      )}
+                    </View>
+                    {!selectMode && (
+                      <ChevronRight color={colors.textTertiary} size={20} />
+                    )}
+                  </TouchableOpacity>
+                </GlassCard>
+              );
+            })
+          )}
+        </View>
+      )}
+
       {/* Footer - Upload Button */}
       {selectedFile && !uploadSuccess && !uploading && !error && (
         <View style={styles.footer}>
@@ -941,5 +1156,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
+  },
+  // Resume list styles
+  resumeListContainer: {
+    marginTop: SPACING.sectionGap,
+    marginBottom: SPACING.xxl,
+  },
+  resumeListHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: SPACING.screenMargin,
+    marginBottom: SPACING.md,
+  },
+  selectModeButton: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+  },
+  bulkActionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: SPACING.screenMargin,
+    marginBottom: SPACING.md,
+  },
+  selectAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+  },
+  bulkDeleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+  },
+  resumeListItem: {
+    marginHorizontal: SPACING.screenMargin,
+    marginBottom: SPACING.sm,
+  },
+  resumeItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
