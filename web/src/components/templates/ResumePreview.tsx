@@ -274,7 +274,7 @@ function SingleColumnLayout({ data, style, layout, wrapper, container, templateI
                   {exp.location && ` — ${exp.location}`}
                 </div>
                 {exp.bullets && (
-                  <ul style={{ margin: '4px 0 0', paddingLeft: '18px', fontSize: '10px', lineHeight: '1.5' }}>
+                  <ul style={{ margin: '4px 0 0', paddingLeft: '18px', fontSize: '10px', lineHeight: '1.5', listStyleType: 'disc' }}>
                     {exp.bullets.map((b, bi) => (
                       <li key={bi} style={{ marginBottom: '2px' }}>
                         {b}
@@ -446,7 +446,7 @@ function AccentBarLayout({ data, style, layout, wrapper, container }: LayoutProp
                     {exp.location && ` • ${exp.location}`}
                   </div>
                   {exp.bullets && (
-                    <ul style={{ margin: '4px 0 0', paddingLeft: '18px', fontSize: '10px', lineHeight: '1.5' }}>
+                    <ul style={{ margin: '4px 0 0', paddingLeft: '18px', fontSize: '10px', lineHeight: '1.5', listStyleType: 'disc' }}>
                       {exp.bullets.map((b, bi) => (
                         <li key={bi} style={{ marginBottom: '2px' }}>
                           {b}
@@ -533,8 +533,8 @@ function SidebarLayout({ data, style, layout, wrapper, container }: LayoutProps)
         <div
           style={{
             width: sidebarWidth,
-            backgroundColor: `${style.colors.primary}0D`,
-            borderRight: `3px solid ${style.colors.primary}30`,
+            backgroundColor: `${style.colors.primary}1A`,
+            borderRight: `3px solid ${style.colors.primary}50`,
             padding: style.spacing.padding,
             display: 'flex',
             flexDirection: 'column',
@@ -647,7 +647,7 @@ function SidebarLayout({ data, style, layout, wrapper, container }: LayoutProps)
                     {exp.company} • {exp.dates}
                   </div>
                   {exp.bullets && (
-                    <ul style={{ margin: '4px 0 0', paddingLeft: '16px', fontSize: '9.5px', lineHeight: '1.5' }}>
+                    <ul style={{ margin: '4px 0 0', paddingLeft: '16px', fontSize: '9.5px', lineHeight: '1.5', listStyleType: 'disc' }}>
                       {exp.bullets.map((b, bi) => (
                         <li key={bi} style={{ marginBottom: '2px' }}>
                           {b}
@@ -677,7 +677,7 @@ function TwoColumnLayout({ data, style, layout, wrapper, container, templateId }
         <div
           style={{
             width: leftWidth,
-            backgroundColor: isCreative ? `${style.colors.primary}10` : style.colors.background,
+            backgroundColor: isCreative ? `${style.colors.primary}1A` : style.colors.background,
             borderRight: isCreative ? 'none' : `1px solid ${style.colors.border}`,
             padding: '32px 20px',
           }}
@@ -820,7 +820,7 @@ function TwoColumnLayout({ data, style, layout, wrapper, container, templateId }
                     {exp.company} • {exp.dates}
                   </div>
                   {exp.bullets && (
-                    <ul style={{ margin: '4px 0 0', paddingLeft: '16px', fontSize: '9.5px', lineHeight: '1.5' }}>
+                    <ul style={{ margin: '4px 0 0', paddingLeft: '16px', fontSize: '9.5px', lineHeight: '1.5', listStyleType: 'disc' }}>
                       {exp.bullets.map((b, bi) => (
                         <li key={bi} style={{ marginBottom: '2px' }}>
                           {b}
@@ -897,7 +897,7 @@ function ElegantMinimalLayout({ data, style, wrapper, container }: LayoutProps) 
                   {exp.company} — {exp.dates}
                 </div>
                 {exp.bullets && (
-                  <ul style={{ margin: '6px 0 0', paddingLeft: '16px', fontSize: '10px', lineHeight: '1.6', color: style.colors.text }}>
+                  <ul style={{ margin: '6px 0 0', paddingLeft: '16px', fontSize: '10px', lineHeight: '1.6', color: style.colors.text, listStyleType: 'disc' }}>
                     {exp.bullets.map((b, bi) => (
                       <li key={bi} style={{ marginBottom: '2px' }}>
                         {b}
@@ -991,7 +991,7 @@ function ExecutiveClassicLayout({ data, style, wrapper, container }: LayoutProps
                   {exp.location && `, ${exp.location}`}
                 </div>
                 {exp.bullets && (
-                  <ul style={{ margin: '6px 0 0', paddingLeft: '18px', fontSize: '10px', lineHeight: '1.5' }}>
+                  <ul style={{ margin: '6px 0 0', paddingLeft: '18px', fontSize: '10px', lineHeight: '1.5', listStyleType: 'disc' }}>
                     {exp.bullets.map((b, bi) => (
                       <li key={bi} style={{ marginBottom: '2px' }}>
                         {b}
@@ -1114,7 +1114,7 @@ function ExecutiveModernLayout({ data, style, wrapper, container }: LayoutProps)
                   {exp.location && ` | ${exp.location}`}
                 </div>
                 {exp.bullets && (
-                  <ul style={{ margin: '4px 0 0', paddingLeft: '18px', fontSize: '10px', lineHeight: '1.5' }}>
+                  <ul style={{ margin: '4px 0 0', paddingLeft: '18px', fontSize: '10px', lineHeight: '1.5', listStyleType: 'disc' }}>
                     {exp.bullets.map((b, bi) => (
                       <li key={bi} style={{ marginBottom: '2px' }}>
                         {b}
@@ -1216,7 +1216,7 @@ function CreativePortfolioLayout({ data, style, wrapper, container }: LayoutProp
                     {exp.company} • {exp.dates}
                   </div>
                   {exp.bullets && (
-                    <ul style={{ margin: '4px 0 0', paddingLeft: '16px', fontSize: '9.5px', lineHeight: '1.5' }}>
+                    <ul style={{ margin: '4px 0 0', paddingLeft: '16px', fontSize: '9.5px', lineHeight: '1.5', listStyleType: 'disc' }}>
                       {exp.bullets.map((b, bi) => (
                         <li key={bi}>{b}</li>
                       ))}

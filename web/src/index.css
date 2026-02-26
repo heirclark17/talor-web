@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@400;700&family=Raleway:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Bebas+Neue&family=Abril+Fatface&family=Fira+Sans:wght@400;600&family=EB+Garamond:wght@400;600;700&display=swap');
 @import "tailwindcss";
 
 /* Tailwind v4 Theme Configuration - Set Urbanist as default font */

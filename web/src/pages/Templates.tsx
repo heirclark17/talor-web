@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { FileText, ArrowRight, Info, Download, Crown, Upload } from 'lucide-react'
 import TemplateGallery from '../components/templates/TemplateGallery'
@@ -146,6 +146,18 @@ export default function Templates() {
   const handlePreviewTemplate = (template: ResumeTemplate) => {
     setPreviewTemplate(template)
   }
+
+  // Close preview modal on Escape
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && previewTemplate) {
+      setPreviewTemplate(null)
+    }
+  }, [previewTemplate])
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [handleKeyDown])
 
   // Show empty state if no resumes uploaded
   if (!resumes || resumes.length === 0) {

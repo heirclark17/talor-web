@@ -8,6 +8,7 @@
 import React, { useState, useRef } from 'react'
 import { FileText, Download, Loader2, CheckCircle } from 'lucide-react'
 import { exportResume } from '../../utils/exportResume'
+import { showError } from '../../utils/toast'
 import type { ResumeTemplate } from '../../types/template'
 
 interface ExportButtonsProps {
@@ -49,7 +50,7 @@ export default function ExportButtons({
       setTimeout(() => setPdfSuccess(false), 3000)
     } catch (error) {
       console.error('PDF export failed:', error)
-      alert('Failed to export PDF. Please try again.')
+      showError('Failed to export PDF. Please try again.')
     } finally {
       setExportingPDF(false)
     }
@@ -71,7 +72,7 @@ export default function ExportButtons({
       setTimeout(() => setWordSuccess(false), 3000)
     } catch (error) {
       console.error('Word export failed:', error)
-      alert('Failed to export Word document. Please try again.')
+      showError('Failed to export Word document. Please try again.')
     } finally {
       setExportingWord(false)
     }
