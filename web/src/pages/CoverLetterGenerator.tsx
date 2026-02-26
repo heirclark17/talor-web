@@ -130,7 +130,7 @@ export default function CoverLetterGenerator() {
     try {
       const res = await api.listCoverLetters()
       if (res.success && res.data) {
-        setLetters(res.data.cover_letters || [])
+        setLetters(res.data.coverLetters || [])
       }
     } catch (err) {
     } finally {

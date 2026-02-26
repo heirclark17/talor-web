@@ -2534,7 +2534,7 @@ class ApiClient {
       });
       const data = await response.json();
       if (!response.ok) return { success: false, error: data.detail || `HTTP ${response.status}` };
-      return { success: true, data };
+      return { success: true, data: snakeToCamel(data) };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
