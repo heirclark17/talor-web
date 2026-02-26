@@ -2491,7 +2491,7 @@ export default function CareerPathDesigner() {
       <AILoadingScreen
         title="Crafting Your Personalized Career Roadmap"
         subtitle={jobMessage || `Our AI is researching ${dreamRole} opportunities with real-world data...`}
-        footnote="This typically takes 1-3 minutes"
+        footnote="This typically takes 5-7 minutes"
         steps={[
           { id: 'research', label: 'Researching certifications, events, and job market data', description: 'Searching with Perplexity AI...' },
           { id: 'analyze', label: 'Analyzing your transferable skills', description: 'Matching your experience to target roles...' },
