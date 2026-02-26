@@ -143,8 +143,8 @@ export default function Help() {
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <HelpCircle className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Help Center</h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <h1 className="text-4xl font-bold text-theme mb-4">Help Center</h1>
+          <p className="text-lg text-theme-secondary max-w-2xl mx-auto">
             Learn how to get the most out of TailorMe
           </p>
         </div>
@@ -152,20 +152,20 @@ export default function Help() {
         {/* Search */}
         <div className="mb-12">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-tertiary" />
             <input
               type="text"
               placeholder="Search for help..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              className="w-full pl-12 pr-4 py-3 glass border border-theme-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-theme"
             />
           </div>
         </div>
 
         {/* Flow Diagrams */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">How It Works</h2>
+          <h2 className="text-2xl font-bold text-theme mb-6">How It Works</h2>
 
           {/* Flow Selector */}
           <div className="flex gap-3 mb-6">
@@ -174,7 +174,7 @@ export default function Help() {
               className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
                 selectedFlow === 'quick'
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  : 'bg-theme-glass-10 text-theme hover:bg-theme-glass-20'
               }`}
             >
               Quick Apply (5 min)
@@ -184,7 +184,7 @@ export default function Help() {
               className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
                 selectedFlow === 'deep'
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  : 'bg-theme-glass-10 text-theme hover:bg-theme-glass-20'
               }`}
             >
               Deep Customization (20 min)
@@ -213,19 +213,19 @@ export default function Help() {
 
         {/* FAQs */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          <h2 className="text-2xl font-bold text-theme mb-6">
             Frequently Asked Questions
           </h2>
           <div className="space-y-4">
             {filteredFaqs.map((faq, index) => (
               <details
                 key={index}
-                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden group"
+                className="glass rounded-xl border border-theme-subtle overflow-hidden group"
               >
-                <summary className="px-6 py-4 font-medium text-gray-900 dark:text-white cursor-pointer list-none flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+                <summary className="px-6 py-4 font-medium text-theme cursor-pointer list-none flex items-center justify-between hover:bg-theme-glass-5 transition-colors">
                   <span>{faq.question}</span>
                   <svg
-                    className="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180"
+                    className="w-5 h-5 text-theme-tertiary transition-transform group-open:rotate-180"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -238,7 +238,7 @@ export default function Help() {
                     />
                   </svg>
                 </summary>
-                <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
+                <div className="px-6 py-4 border-t border-theme-subtle text-theme-secondary">
                   {faq.answer}
                 </div>
               </details>
@@ -247,11 +247,11 @@ export default function Help() {
         </div>
 
         {/* Contact Support */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg p-8 text-center border border-blue-200 dark:border-blue-900">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="bg-blue-500/10 rounded-xl p-8 text-center border border-blue-500/20">
+          <h3 className="text-xl font-bold text-theme mb-2">
             Still need help?
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-theme-secondary mb-6">
             Our support team is here to assist you
           </p>
           <a
