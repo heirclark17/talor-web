@@ -176,6 +176,7 @@ function autoPopulateFromResume(
   setEducationLevel: (v: string) => void,
   setStrengths: (v: string[]) => void,
   setTools?: (v: string[]) => void,
+  setExistingCertifications?: (v: string[]) => void,
 ) {
   let experience = data.experience || [];
   let skills = data.skills || [];
@@ -216,6 +217,20 @@ function autoPopulateFromResume(
     const toolsFromSkills = skills.slice(0, 5).map((s: any) => typeof s === 'string' ? s : s.name || '');
     if (toolsFromSkills.filter((t: string) => t).length > 0) {
       setTools(toolsFromSkills.filter((t: string) => t));
+    }
+  }
+
+  // Pre-fill certifications from resume
+  if (setExistingCertifications && data.certifications) {
+    let certs: string[] = [];
+    if (typeof data.certifications === 'string' && data.certifications.trim()) {
+      // Backend returns newline-separated string
+      certs = data.certifications.split('\n').map((c: string) => c.trim()).filter((c: string) => c);
+    } else if (Array.isArray(data.certifications)) {
+      certs = data.certifications.map((c: any) => typeof c === 'string' ? c.trim() : '').filter((c: string) => c);
+    }
+    if (certs.length > 0) {
+      setExistingCertifications(certs);
     }
   }
 }
@@ -406,6 +421,7 @@ export default function CareerPathDesignerScreen() {
           setEducationLevel,
           setStrengths,
           setTools,
+          setExistingCertifications,
         );
       }
 
@@ -467,6 +483,7 @@ export default function CareerPathDesignerScreen() {
           setEducationLevel,
           setStrengths,
           setTools,
+          setExistingCertifications,
         );
       }
 

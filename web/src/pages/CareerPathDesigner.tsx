@@ -625,6 +625,17 @@ export default function CareerPathDesigner() {
         // Infer top strengths from resume content
         const inferredStrengths = inferStrengths(experience, skills, data.summary || '')
         if (inferredStrengths.length > 0) setStrengths(inferredStrengths)
+
+        // Pre-fill certifications from resume
+        if (data.certifications) {
+          let certs: string[] = []
+          if (typeof data.certifications === 'string' && data.certifications.trim()) {
+            certs = data.certifications.split('\n').map((c: string) => c.trim()).filter((c: string) => c)
+          } else if (Array.isArray(data.certifications)) {
+            certs = data.certifications.map((c: any) => typeof c === 'string' ? c.trim() : '').filter((c: string) => c)
+          }
+          if (certs.length > 0) setExistingCertifications(certs)
+        }
       }
     } catch (error: any) {
       setError(error.message || 'Failed to load resume')
@@ -853,6 +864,17 @@ export default function CareerPathDesigner() {
         // Determine education level (handles string or array)
         const eduLevel = parseEducationLevel(data.education)
         if (eduLevel) setEducationLevel(eduLevel)
+
+        // Pre-fill certifications from resume
+        if (data.certifications) {
+          let certs: string[] = []
+          if (typeof data.certifications === 'string' && data.certifications.trim()) {
+            certs = data.certifications.split('\n').map((c: string) => c.trim()).filter((c: string) => c)
+          } else if (Array.isArray(data.certifications)) {
+            certs = data.certifications.map((c: any) => typeof c === 'string' ? c.trim() : '').filter((c: string) => c)
+          }
+          if (certs.length > 0) setExistingCertifications(certs)
+        }
       }
 
     } catch (err: any) {
