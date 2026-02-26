@@ -235,13 +235,14 @@ export default function CoverLetterGenerator() {
       }
 
       // Send job description or job URL based on input method
-      // If URL was extracted and we have the description, send both for efficiency
       if (jobInputMethod === 'url') {
-        params.job_url = jobUrl
-        // If we already extracted the description, include it to avoid re-extraction
-        if (extractionAttempted && jobDescription) {
+        // Only send job_url if it's a real URL
+        if (jobUrl.startsWith('http://') || jobUrl.startsWith('https://')) {
+          params.job_url = jobUrl
+        }
+        // Always include description if we have it (from extraction or manual)
+        if (jobDescription) {
           params.job_description = jobDescription
-        } else {
         }
       } else {
         params.job_description = jobDescription
