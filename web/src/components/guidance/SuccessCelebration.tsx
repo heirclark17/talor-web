@@ -19,20 +19,6 @@ interface SuccessCelebrationProps {
  *
  * Shows celebration modal with confetti animation
  * Only displays once per event (tracked in onboardingStore)
- *
- * @example
- * ```tsx
- * <SuccessCelebration
- *   eventId="first_resume_upload"
- *   title="Resume Uploaded Successfully!"
- *   message="Your resume has been analyzed and is ready to be tailored."
- *   nextStep={{
- *     label: "Pick a Template",
- *     href: "/templates"
- *   }}
- *   metric="You're ahead of 80% of job seekers who don't optimize their resumes"
- * />
- * ```
  */
 export default function SuccessCelebration({
   eventId,
@@ -97,7 +83,7 @@ export default function SuccessCelebration({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-5">
+      <div className="glass rounded-2xl border border-theme-subtle max-w-md w-full overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-5">
         {/* Header */}
         <div className="relative p-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white">
           <button
@@ -118,11 +104,11 @@ export default function SuccessCelebration({
 
         {/* Content */}
         <div className="p-6">
-          <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">{message}</p>
+          <p className="text-theme-secondary text-lg mb-4">{message}</p>
 
           {metric && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-900 mb-4">
-              <p className="text-sm text-blue-900 dark:text-blue-300 font-medium">{metric}</p>
+            <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20 mb-4">
+              <p className="text-sm text-blue-400 font-medium">{metric}</p>
             </div>
           )}
         </div>
@@ -140,7 +126,7 @@ export default function SuccessCelebration({
           )}
           <button
             onClick={handleClose}
-            className="w-full px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="w-full px-6 py-3 bg-theme-glass-10 text-theme font-medium rounded-lg hover:bg-theme-glass-20 transition-colors"
           >
             Continue Exploring
           </button>

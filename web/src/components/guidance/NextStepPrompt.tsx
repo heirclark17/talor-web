@@ -41,18 +41,18 @@ export default function NextStepPrompt({
 
   return (
     <div className="fixed bottom-6 right-6 z-50 max-w-md animate-in slide-in-from-bottom-5">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 p-5">
+      <div className="glass rounded-xl border border-theme-subtle p-5">
         {/* Close button */}
         <button
           onClick={() => setVisible(false)}
-          className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          className="absolute top-3 right-3 p-1 text-theme-tertiary hover:text-theme transition-colors"
           aria-label="Dismiss"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Context */}
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 pr-6">{context}</p>
+        <p className="text-sm text-theme-secondary mb-4 pr-6">{context}</p>
 
         {/* Actions */}
         <div className="flex flex-col gap-2">
@@ -69,7 +69,7 @@ export default function NextStepPrompt({
             <Link
               to={secondaryAction.href}
               onClick={secondaryAction.onClick}
-              className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-center"
+              className="px-4 py-2.5 bg-theme-glass-10 text-theme font-medium rounded-lg hover:bg-theme-glass-20 transition-all text-center"
             >
               {secondaryAction.label}
             </Link>

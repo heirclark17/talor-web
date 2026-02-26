@@ -57,14 +57,14 @@ export default function ActivationChecklist() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden">
+    <div className="glass rounded-xl border border-theme-subtle overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-theme-subtle flex items-center justify-between">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-            {isComplete ? '🎉 All Set!' : 'Getting Started'}
+          <h3 className="text-lg font-semibold text-theme mb-1">
+            {isComplete ? 'All Set!' : 'Getting Started'}
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-theme-secondary">
             {isComplete
               ? "You're ready to land your dream job!"
               : `${completedSteps}/${totalSteps} Complete - You're ${Math.round(progress)}% there!`}
@@ -72,7 +72,7 @@ export default function ActivationChecklist() {
         </div>
         <button
           onClick={dismissChecklist}
-          className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-theme-tertiary hover:text-theme transition-colors"
           aria-label="Dismiss checklist"
         >
           <X className="w-5 h-5" />
@@ -80,8 +80,8 @@ export default function ActivationChecklist() {
       </div>
 
       {/* Progress Bar */}
-      <div className="px-6 py-3 bg-gray-50 dark:bg-gray-900/50">
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+      <div className="px-6 py-3 bg-theme-glass-5">
+        <div className="w-full bg-theme-glass-20 rounded-full h-2 overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
@@ -90,7 +90,7 @@ export default function ActivationChecklist() {
       </div>
 
       {/* Steps */}
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="divide-y divide-theme-subtle">
         {ACTIVATION_STEPS.map((step) => {
           const completed = activationSteps[step.id]
           const Icon = step.icon
@@ -99,27 +99,27 @@ export default function ActivationChecklist() {
             <Link
               key={step.id}
               to={step.href}
-              className="flex items-center px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors group"
+              className="flex items-center px-6 py-4 hover:bg-theme-glass-5 transition-colors group"
             >
               {/* Icon/Status */}
               <div className="flex-shrink-0 mr-4">
                 {completed ? (
-                  <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-green-400" />
                   </div>
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-950/30 transition-colors">
-                    <Icon className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+                  <div className="w-10 h-10 rounded-full bg-theme-glass-10 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors">
+                    <Icon className="w-5 h-5 text-theme-tertiary group-hover:text-blue-400" />
                   </div>
                 )}
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <h4 className={`text-sm font-medium ${completed ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                <h4 className={`text-sm font-medium ${completed ? 'text-theme' : 'text-theme-secondary'}`}>
                   {step.label}
                 </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                <p className="text-xs text-theme-tertiary mt-0.5">
                   {step.description}
                 </p>
               </div>
@@ -127,7 +127,7 @@ export default function ActivationChecklist() {
               {/* Arrow */}
               {!completed && (
                 <div className="flex-shrink-0 ml-4">
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                  <ChevronRight className="w-5 h-5 text-theme-tertiary group-hover:text-blue-400 transition-colors" />
                 </div>
               )}
             </Link>
@@ -137,9 +137,9 @@ export default function ActivationChecklist() {
 
       {/* Complete Message */}
       {isComplete && (
-        <div className="px-6 py-4 bg-green-50 dark:bg-green-950/20 border-t border-green-200 dark:border-green-900/30">
-          <p className="text-sm text-green-800 dark:text-green-300">
-            🎉 You're all set! Time to apply and land your dream job.
+        <div className="px-6 py-4 bg-green-500/10 border-t border-green-500/20">
+          <p className="text-sm text-green-400">
+            You're all set! Time to apply and land your dream job.
           </p>
         </div>
       )}

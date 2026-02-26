@@ -30,17 +30,17 @@ export default function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4">
       {/* Icon */}
-      <div className="mb-6 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-6">
-        <Icon className="w-16 h-16 text-blue-600 dark:text-blue-400" />
+      <div className="mb-6 rounded-full bg-blue-500/10 p-6">
+        <Icon className="w-16 h-16 text-blue-400" />
       </div>
 
       {/* Headline */}
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3 text-center">
+      <h2 className="text-2xl font-bold text-theme mb-3 text-center">
         {headline}
       </h2>
 
       {/* Description */}
-      <p className="text-gray-600 dark:text-gray-400 text-center max-w-md mb-8">
+      <p className="text-theme-secondary text-center max-w-md mb-8">
         {description}
       </p>
 
@@ -60,7 +60,7 @@ export default function EmptyState({
           <Link
             to={secondaryAction.href}
             onClick={secondaryAction.onClick}
-            className="px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+            className="px-6 py-3 bg-theme-glass-10 text-theme border border-theme-muted font-medium rounded-lg hover:bg-theme-glass-20 transition-all"
           >
             {secondaryAction.label}
           </Link>
@@ -69,7 +69,7 @@ export default function EmptyState({
 
       {/* Metric */}
       {metric && (
-        <p className="text-sm text-gray-500 dark:text-gray-500 text-center max-w-md">
+        <p className="text-sm text-theme-tertiary text-center max-w-md">
           {metric}
         </p>
       )}
