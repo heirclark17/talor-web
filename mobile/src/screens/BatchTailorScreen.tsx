@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -53,7 +53,9 @@ export default function BatchTailorScreen() {
 
   // Form state
   const [jobUrls, setJobUrls] = useState<string[]>(['']);
+  const [urlIds, setUrlIds] = useState<(number | null)[]>([null]);
   const [showResumeSelector, setShowResumeSelector] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Batch processing state
   const [processing, setProcessing] = useState(false);
@@ -64,9 +66,47 @@ export default function BatchTailorScreen() {
     useCallback(() => {
       if (!showResults) {
         fetchResumes();
+        loadSavedUrls();
       }
     }, [showResults])
   );
+
+  // Load saved URLs from backend
+  const loadSavedUrls = async () => {
+    try {
+      const result = await api.getBatchJobUrls();
+      if (result.success && result.data?.urls?.length > 0) {
+        const saved = result.data.urls as { id: number; url: string }[];
+        setJobUrls(saved.map(u => u.url));
+        setUrlIds(saved.map(u => u.id));
+      }
+    } catch {
+      // Non-critical, use empty state
+    }
+  };
+
+  // Auto-save URLs with debounce
+  const autoSaveUrls = useCallback((urls: string[]) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const nonEmpty = urls.filter(u => u.trim().length > 0);
+      if (nonEmpty.length > 0) {
+        try {
+          const result = await api.saveBatchJobUrls(urls);
+          if (result.success && result.data?.urls) {
+            const saved = result.data.urls as { id: number; url: string }[];
+            const newIds: (number | null)[] = urls.map(u => {
+              const match = saved.find((s: { id: number; url: string }) => s.url === u.trim());
+              return match ? match.id : null;
+            });
+            setUrlIds(newIds);
+          }
+        } catch {
+          // Non-critical
+        }
+      }
+    }, 800);
+  }, []);
 
   // Auto-select first resume if none selected
   useEffect(() => {
@@ -78,13 +118,21 @@ export default function BatchTailorScreen() {
   const handleAddUrl = () => {
     if (jobUrls.length < MAX_JOBS) {
       setJobUrls([...jobUrls, '']);
+      setUrlIds([...urlIds, null]);
     }
   };
 
-  const handleRemoveUrl = (index: number) => {
+  const handleRemoveUrl = async (index: number) => {
     if (jobUrls.length > 1) {
+      const id = urlIds[index];
       const newUrls = jobUrls.filter((_, i) => i !== index);
+      const newIds = urlIds.filter((_, i) => i !== index);
       setJobUrls(newUrls);
+      setUrlIds(newIds);
+      if (id) {
+        try { await api.deleteBatchJobUrl(id); } catch { /* non-critical */ }
+      }
+      autoSaveUrls(newUrls);
     }
   };
 
@@ -92,6 +140,7 @@ export default function BatchTailorScreen() {
     const newUrls = [...jobUrls];
     newUrls[index] = value;
     setJobUrls(newUrls);
+    autoSaveUrls(newUrls);
   };
 
   const handleBatchTailor = async () => {
@@ -125,15 +174,16 @@ export default function BatchTailorScreen() {
       if (result.success && result.data) {
         // Update results with success/error status
         const batchResults = result.data.results || [];
-        setResults(validUrls.map((url, index) => {
+        const finalResults = validUrls.map((url, index) => {
           const jobResult = batchResults[index];
           if (jobResult?.success) {
+            const d = jobResult.data || jobResult;
             return {
               jobUrl: url,
               status: 'success' as const,
-              tailoredResumeId: jobResult.tailored_resume_id,
-              company: jobResult.company,
-              title: jobResult.title,
+              tailoredResumeId: d.tailored_resume_id,
+              company: d.company,
+              title: d.title,
             };
           } else {
             return {
@@ -142,7 +192,30 @@ export default function BatchTailorScreen() {
               error: jobResult?.error || 'Failed to tailor',
             };
           }
-        }));
+        });
+        setResults(finalResults);
+
+        // Post-generation: create application entries + saved comparisons
+        for (const br of batchResults) {
+          if (br?.success) {
+            const d = br.data || br;
+            try {
+              await api.createApplication({
+                jobTitle: d.title || 'Unknown Title',
+                companyName: d.company || 'Unknown Company',
+                jobUrl: br.job_url || '',
+                status: 'saved',
+                tailoredResumeId: d.tailored_resume_id,
+              });
+            } catch { /* non-critical */ }
+            try {
+              await api.saveComparison({
+                tailoredResumeId: d.tailored_resume_id,
+                title: `${d.company || 'Unknown'} - ${d.title || 'Untitled'}`,
+              });
+            } catch { /* non-critical */ }
+          }
+        }
       } else {
         // All failed
         setResults(validUrls.map(url => ({

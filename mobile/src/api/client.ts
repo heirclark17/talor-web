@@ -630,6 +630,44 @@ export const api = {
     }
   },
 
+  async getBatchJobUrls(): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/jobs/batch-urls');
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error getting batch job URLs:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async saveBatchJobUrls(urls: string[]): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth('/api/jobs/batch-urls', {
+        method: 'PUT',
+        body: JSON.stringify({ urls }),
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error saving batch job URLs:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async deleteBatchJobUrl(urlId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/jobs/batch-urls/${urlId}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error deleting batch job URL:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
   async updateTailoredResume(
     tailoredResumeId: number,
     updates: {
@@ -662,6 +700,19 @@ export const api = {
     } catch (error: any) {
       console.error('Error fetching tailored resumes:', error);
       return { success: false, data: [], error: error.message };
+    }
+  },
+
+  async deleteTailoredResume(tailoredResumeId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/tailor/tailored/${tailoredResumeId}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      return { success: response.ok, data };
+    } catch (error: any) {
+      console.error('Error deleting tailored resume:', error);
+      return { success: false, error: error.message };
     }
   },
 

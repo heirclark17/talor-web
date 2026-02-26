@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FileText, Upload, Trash2, Target, FileSearch, X, CheckCircle, AlertCircle, TrendingUp, TrendingDown, BookOpen, Briefcase, Clock, GitBranch, Download, Building2 } from 'lucide-react-native';
+import { FileText, Upload, Trash2, Target, FileSearch, X, CheckCircle, AlertCircle, TrendingUp, TrendingDown, BookOpen, Briefcase, Clock, GitBranch, Download, Building2, Sparkles, Eye } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -28,6 +28,19 @@ import { NumberText } from '../components/ui';
 import { SectionHeader } from '../components/layout';
 import { CardStyles, BadgeStyles, ModalStyles } from '../constants/SharedStyles';
 import { usePostHog } from '../contexts/PostHogContext';
+
+interface TailoredResume {
+  id: number;
+  base_resume_id: number;
+  job_title?: string;
+  company?: string;
+  quality_score?: number;
+  created_at: string;
+}
+
+type UnifiedItem =
+  | { type: 'base'; data: Resume }
+  | { type: 'tailored'; data: TailoredResume };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -51,6 +64,10 @@ export default function HomeScreen() {
     clearAnalysis,
   } = useResumeStore();
 
+  // Tailored resumes state
+  const [tailoredResumes, setTailoredResumes] = useState<TailoredResume[]>([]);
+  const [tailoredLoading, setTailoredLoading] = useState(false);
+
   // Local UI state (not shared across screens)
   const [analysisModal, setAnalysisModal] = useState(false);
   const [currentFilename, setCurrentFilename] = useState<string>('');
@@ -66,43 +83,84 @@ export default function HomeScreen() {
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
   const [selectedSort, setSelectedSort] = useState('');
 
-  // Filter resumes based on search and filters
-  const filteredResumes = useMemo(() => {
-    let result = [...resumes];
+  const fetchTailoredResumes = useCallback(async () => {
+    try {
+      setTailoredLoading(true);
+      const result = await api.listTailoredResumes();
+      if (result.success && Array.isArray(result.data)) {
+        setTailoredResumes(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching tailored resumes:', error);
+    } finally {
+      setTailoredLoading(false);
+    }
+  }, []);
 
-    // Apply search
+  // Build unified list
+  const unifiedList = useMemo((): UnifiedItem[] => {
+    const items: UnifiedItem[] = [
+      ...resumes.map(r => ({ type: 'base' as const, data: r })),
+      ...tailoredResumes.map(t => ({ type: 'tailored' as const, data: t })),
+    ];
+    return items;
+  }, [resumes, tailoredResumes]);
+
+  // Filter and sort unified list
+  const filteredItems = useMemo(() => {
+    let result = [...unifiedList];
+
+    // Apply search across both types
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      result = result.filter((resume) =>
-        resume.filename.toLowerCase().includes(query) ||
-        (resume.name && resume.name.toLowerCase().includes(query))
-      );
+      result = result.filter((item) => {
+        if (item.type === 'base') {
+          return (
+            item.data.filename.toLowerCase().includes(query) ||
+            (item.data.name && item.data.name.toLowerCase().includes(query))
+          );
+        } else {
+          const jobTitle = (item.data.job_title || '').toLowerCase();
+          const company = (item.data.company || '').toLowerCase();
+          return jobTitle.includes(query) || company.includes(query);
+        }
+      });
     }
 
     // Apply sort
+    const getDate = (item: UnifiedItem) =>
+      item.type === 'base' ? item.data.uploaded_at : item.data.created_at;
+    const getName = (item: UnifiedItem) =>
+      item.type === 'base' ? item.data.filename : (item.data.job_title || '');
+    const getScore = (item: UnifiedItem) =>
+      item.type === 'base' ? item.data.skills_count : (item.data.quality_score || 0);
+
     if (selectedSort === 'newest') {
-      result.sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime());
+      result.sort((a, b) => new Date(getDate(b)).getTime() - new Date(getDate(a)).getTime());
     } else if (selectedSort === 'oldest') {
-      result.sort((a, b) => new Date(a.uploaded_at).getTime() - new Date(b.uploaded_at).getTime());
+      result.sort((a, b) => new Date(getDate(a)).getTime() - new Date(getDate(b)).getTime());
     } else if (selectedSort === 'name') {
-      result.sort((a, b) => a.filename.localeCompare(b.filename));
+      result.sort((a, b) => getName(a).localeCompare(getName(b)));
     } else if (selectedSort === 'skills') {
-      result.sort((a, b) => b.skills_count - a.skills_count);
+      result.sort((a, b) => getScore(b) - getScore(a));
+    } else if (selectedSort === 'base_first') {
+      result.sort((a, b) => (a.type === 'base' ? -1 : 1) - (b.type === 'base' ? -1 : 1));
     }
 
     return result;
-  }, [resumes, searchQuery, selectedSort]);
+  }, [unifiedList, searchQuery, selectedSort]);
 
   // Load resumes on screen focus
   useFocusEffect(
     useCallback(() => {
       fetchResumes();
+      fetchTailoredResumes();
       capture('screen_viewed', {
         screen_name: 'Home',
         screen_type: 'core_feature',
         resume_count: resumes.length,
       });
-    }, [fetchResumes, capture, resumes.length])
+    }, [fetchResumes, fetchTailoredResumes, capture, resumes.length])
   );
 
   const handleRefresh = () => {
@@ -182,16 +240,43 @@ export default function HomeScreen() {
     });
   };
 
-  const renderItem = ({ item }: { item: Resume }) => (
+  const handleDeleteTailored = (id: number) => {
+    Alert.alert(
+      'Delete Tailored Resume',
+      'Are you sure? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.deleteTailoredResume(id);
+              setTailoredResumes(prev => prev.filter(t => t.id !== id));
+            } catch {
+              Alert.alert('Error', 'Failed to delete tailored resume');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const renderBaseResumeCard = (item: Resume) => (
     <GlassCard style={styles.card} material="thin" borderRadius={SPACING.radiusMD}>
       <View style={styles.cardHeader}>
         <View style={[styles.iconContainer, { backgroundColor: colors.backgroundTertiary }]}>
           <FileText color={colors.text} size={24} />
         </View>
         <View style={styles.cardContent}>
-          <Text style={[TYPOGRAPHY.body, styles.filename, { color: colors.text }]} numberOfLines={1}>
-            {item.filename}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+            <Text style={[TYPOGRAPHY.body, styles.filename, { color: colors.text, marginBottom: 0 }]} numberOfLines={1}>
+              {item.filename}
+            </Text>
+            <View style={[BadgeStyles.base, { backgroundColor: ALPHA_COLORS.primary.bg }]}>
+              <Text style={[TYPOGRAPHY.caption2, { color: COLORS.primary, fontWeight: '600' }]}>Base</Text>
+            </View>
+          </View>
           {item.name && (
             <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, marginBottom: 4 }]}>{item.name}</Text>
           )}
@@ -268,6 +353,76 @@ export default function HomeScreen() {
     </GlassCard>
   );
 
+  const renderTailoredResumeCard = (item: TailoredResume) => {
+    const scoreColor = (item.quality_score || 0) >= 80
+      ? COLORS.success
+      : (item.quality_score || 0) >= 60
+      ? COLORS.warning
+      : COLORS.danger;
+
+    return (
+      <GlassCard style={[styles.card, { borderLeftWidth: 3, borderLeftColor: COLORS.purple }]} material="thin" borderRadius={SPACING.radiusMD}>
+        <View style={styles.cardHeader}>
+          <View style={[styles.iconContainer, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
+            <Sparkles color={COLORS.purple} size={24} />
+          </View>
+          <View style={styles.cardContent}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+              <Text style={[TYPOGRAPHY.body, styles.filename, { color: colors.text, marginBottom: 0 }]} numberOfLines={1}>
+                {item.job_title || 'Untitled Position'}
+              </Text>
+              <View style={[BadgeStyles.base, { backgroundColor: ALPHA_COLORS.purple.bg }]}>
+                <Text style={[TYPOGRAPHY.caption2, { color: COLORS.purple, fontWeight: '600' }]}>Tailored</Text>
+              </View>
+            </View>
+            <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, marginBottom: 4 }]}>
+              {item.company || 'Unknown Company'}
+            </Text>
+            <View style={styles.metaRow}>
+              {item.quality_score != null && (
+                <>
+                  <Text style={[TYPOGRAPHY.caption1, { color: scoreColor, fontWeight: '600' }]}>
+                    Score: {item.quality_score}%
+                  </Text>
+                  <Text style={[TYPOGRAPHY.caption1, { color: colors.textTertiary }]}> {'\u2022'} </Text>
+                </>
+              )}
+              <Text style={[TYPOGRAPHY.caption1, { color: colors.textTertiary }]}>{formatDate(item.created_at)}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.cardActions}>
+          <GlassButton
+            label="View"
+            variant="secondary"
+            size="sm"
+            icon={<Eye color={COLORS.primary} size={20} />}
+            onPress={() => navigation.navigate('TailorResume' as any, { resumeId: item.id })}
+            style={styles.actionButton}
+            accessibilityLabel={`View tailored resume for ${item.company}`}
+          />
+          <GlassButton
+            label="Delete"
+            variant="danger"
+            size="sm"
+            icon={<Trash2 color={COLORS.danger} size={20} />}
+            onPress={() => handleDeleteTailored(item.id)}
+            style={styles.actionButton}
+            accessibilityLabel={`Delete tailored resume for ${item.company}`}
+          />
+        </View>
+      </GlassCard>
+    );
+  };
+
+  const renderItem = ({ item }: { item: UnifiedItem }) => {
+    if (item.type === 'base') {
+      return renderBaseResumeCard(item.data);
+    }
+    return renderTailoredResumeCard(item.data);
+  };
+
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <View style={styles.emptyIcon}>
@@ -340,8 +495,17 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Resume Counts */}
+      {(resumes.length > 0 || tailoredResumes.length > 0) && (
+        <View style={styles.countsRow}>
+          <Text style={[TYPOGRAPHY.caption1, { color: colors.textTertiary }]}>
+            {resumes.length} base {resumes.length === 1 ? 'resume' : 'resumes'} {'\u2022'} {tailoredResumes.length} tailored
+          </Text>
+        </View>
+      )}
+
       {/* Search and Filter */}
-      {resumes.length > 0 && (
+      {unifiedList.length > 0 && (
         <View style={styles.searchContainer}>
           <SearchFilter
             placeholder="Search resumes..."
@@ -353,7 +517,8 @@ export default function HomeScreen() {
               { value: 'newest', label: 'Newest First' },
               { value: 'oldest', label: 'Oldest First' },
               { value: 'name', label: 'Name (A-Z)' },
-              { value: 'skills', label: 'Most Skills' },
+              { value: 'skills', label: 'Most Skills / Score' },
+              { value: 'base_first', label: 'Base First' },
             ]}
             selectedSort={selectedSort}
             onSortChange={setSelectedSort}
@@ -362,15 +527,15 @@ export default function HomeScreen() {
       )}
 
       <FlatList
-        data={filteredResumes}
+        data={filteredItems}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => `${item.type}-${item.data.id}`}
         contentContainerStyle={styles.list}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={handleRefresh}
+            onRefresh={() => { handleRefresh(); fetchTailoredResumes(); }}
             tintColor={COLORS.primary}
           />
         }
@@ -712,6 +877,10 @@ const styles = StyleSheet.create({
   },
   quickActionText: {
     ...TYPOGRAPHY.bodyBold,
+  },
+  countsRow: {
+    paddingHorizontal: SPACING.screenMargin,
+    paddingTop: SPACING.xs,
   },
   searchContainer: {
     paddingHorizontal: SPACING.screenMargin,
