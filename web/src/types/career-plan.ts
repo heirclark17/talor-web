@@ -320,7 +320,15 @@ export interface CareerPlanResponse {
 
 export interface CareerPlanListItem {
   id: number
+  dreamRole: string
   targetRoles: string[]
+  currentRole: string
+  currentIndustry: string
+  timeline: string
+  targetIndustries: string[]
+  numCertifications: number
+  numProjects: number
+  profileSummary: string
   createdAt: string
   updatedAt: string
   version: string

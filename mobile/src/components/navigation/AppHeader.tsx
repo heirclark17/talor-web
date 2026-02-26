@@ -32,6 +32,7 @@ import {
   Moon,
   User,
   LogOut,
+  FolderOpen,
 } from 'lucide-react-native';
 import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -91,6 +92,7 @@ export function AppHeader() {
       links: [
         { to: '/saved-comparisons', screen: 'SavedMain', stack: 'Saved', icon: Bookmark, label: 'Saved', desc: 'Bookmarked comparisons', iconColor: '#F97316' },
         { to: '/career-path', screen: 'CareerMain', stack: 'Career', icon: TrendingUp, label: 'Career Path', desc: 'Plan your career trajectory', iconColor: '#22C55E' },
+        { to: '/saved-career-paths', screen: 'SavedCareerPaths', stack: 'Career', icon: FolderOpen, label: 'Saved Plans', desc: 'View your career plans', iconColor: '#10B981' },
         { to: '/pricing', screen: 'Pricing', stack: 'Settings', icon: CreditCard, label: 'Pricing', desc: 'View plans and upgrade', iconColor: '#A78BFA' },
         { to: '/settings', screen: 'SettingsMain', stack: 'Settings', icon: Settings, label: 'Settings', desc: 'Preferences and account', iconColor: '#94A3B8' },
       ],

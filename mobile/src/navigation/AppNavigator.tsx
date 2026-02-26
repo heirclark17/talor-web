@@ -25,6 +25,8 @@ import SavedComparisonsScreen from '../screens/SavedComparisonsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import StarStoriesScreen from '../screens/StarStoriesScreen';
 import CareerPathDesignerScreen from '../screens/CareerPathDesignerScreen';
+import SavedCareerPathsScreen from '../screens/SavedCareerPathsScreen';
+import SavedCareerPlanDetailScreen from '../screens/SavedCareerPlanDetailScreen';
 import BatchTailorScreen from '../screens/BatchTailorScreen';
 import TailoredResumesScreen from '../screens/TailoredResumesScreen';
 import CertificationsScreen from '../screens/CertificationsScreen';
@@ -80,6 +82,8 @@ export type MainStackParamList = {
 
   // Career
   CareerMain: undefined;
+  SavedCareerPaths: undefined;
+  SavedCareerPlanDetail: { planId: number };
   CoverLetters: undefined;
 
   // Saved
@@ -104,7 +108,7 @@ export type HomeStackParamList = Pick<MainStackParamList, 'HomeMain' | 'UploadRe
 export type TailorStackParamList = Pick<MainStackParamList, 'TailorMain' | 'TailorResume' | 'BatchTailor' | 'TailoredResumes'>;
 export type InterviewStackParamList = Pick<MainStackParamList, 'InterviewList' | 'InterviewPrep' | 'CommonQuestions' | 'PracticeQuestions' | 'BehavioralTechnicalQuestions' | 'Certifications' | 'STARStoryBuilder' | 'MockInterview' | 'PracticeHistory'>;
 export type StoriesStackParamList = Pick<MainStackParamList, 'StoriesMain'>;
-export type CareerStackParamList = Pick<MainStackParamList, 'CareerMain' | 'CoverLetters'>;
+export type CareerStackParamList = Pick<MainStackParamList, 'CareerMain' | 'SavedCareerPaths' | 'SavedCareerPlanDetail' | 'CoverLetters'>;
 export type SavedStackParamList = Pick<MainStackParamList, 'SavedMain' | 'Applications'>;
 export type JobsStackParamList = Pick<MainStackParamList, 'JobSearch'>;
 export type SettingsStackParamList = Pick<MainStackParamList, 'SettingsMain' | 'Pricing' | 'Privacy' | 'Terms'>;
@@ -191,6 +195,8 @@ function MainStackNavigator() {
 
         {/* Career */}
         <MainStack.Screen name="CareerMain" component={CareerPathDesignerScreen} />
+        <MainStack.Screen name="SavedCareerPaths" component={SavedCareerPathsScreen} />
+        <MainStack.Screen name="SavedCareerPlanDetail" component={SavedCareerPlanDetailScreen} />
         <MainStack.Screen name="CoverLetters" component={CoverLetterGeneratorScreen} />
 
         {/* Saved */}

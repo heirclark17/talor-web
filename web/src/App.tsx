@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut, CreditCard, PenTool, Sun, Moon, Plus } from 'lucide-react'
+import { FileText, Upload, Target, Zap, CheckCircle, Clock, BookOpen, Sparkles, Bookmark, TrendingUp, Menu, X, Settings, Briefcase, FileEdit, Loader2, Layers, LogOut, CreditCard, PenTool, Sun, Moon, Plus, FolderOpen } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -55,6 +55,8 @@ const Templates = lazyWithRetry(() => import('./pages/Templates'))
 const MockInterview = lazyWithRetry(() => import('./pages/MockInterview'))
 const ResumeBuilder = lazyWithRetry(() => import('./pages/ResumeBuilder'))
 const Help = lazyWithRetry(() => import('./pages/Help'))
+const SavedCareerPaths = lazyWithRetry(() => import('./pages/SavedCareerPaths'))
+const SavedCareerPlanDetail = lazyWithRetry(() => import('./pages/SavedCareerPlanDetail'))
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'))
 const OnboardingTour = lazyWithRetry(() => import('./components/OnboardingTour'))
 
@@ -482,6 +484,7 @@ function AppContent() {
       links: [
         { to: '/saved-comparisons', icon: Bookmark, label: 'Saved', desc: 'Bookmarked comparisons', tourId: 'saved', iconColor: 'text-orange-400' },
         { to: '/career-path', icon: TrendingUp, label: 'Career Path', desc: 'Plan your career trajectory', tourId: 'career-path', iconColor: 'text-green-400' },
+        { to: '/saved-career-paths', icon: FolderOpen, label: 'Saved Plans', desc: 'View your career plans', tourId: 'saved-plans', iconColor: 'text-emerald-400' },
         { to: '/pricing', icon: CreditCard, label: 'Pricing', desc: 'View plans and upgrade', tourId: 'pricing', iconColor: 'text-purple-400' },
         { to: '/settings', icon: Settings, label: 'Settings', desc: 'Preferences and account', tourId: 'settings', iconColor: 'text-slate-400' },
       ],
@@ -694,6 +697,8 @@ function AppContent() {
               <Route path="/cover-letters" element={<ProtectedRoute><CoverLetterGenerator /></ProtectedRoute>} />
               <Route path="/saved-comparisons" element={<ProtectedRoute><SavedComparisons /></ProtectedRoute>} />
               <Route path="/career-path" element={<ProtectedRoute><CareerPathDesigner /></ProtectedRoute>} />
+              <Route path="/saved-career-paths" element={<ProtectedRoute><SavedCareerPaths /></ProtectedRoute>} />
+              <Route path="/saved-career-paths/:planId" element={<ProtectedRoute><SavedCareerPlanDetail /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
               {/* 404 catch-all */}
