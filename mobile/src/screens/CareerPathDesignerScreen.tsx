@@ -32,6 +32,12 @@ import {
   FolderOpen,
   Briefcase,
   Link2,
+  Video,
+  Wrench,
+  Users,
+  DollarSign,
+  Scale,
+  Home,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
@@ -1652,31 +1658,34 @@ export default function CareerPathDesignerScreen() {
                     <Text style={[styles.label, { color: colors.text }]}>Preferred Learning Styles (Select all that apply) *</Text>
                     <View style={styles.chipGrid}>
                       {[
-                        { value: 'video-courses', label: '📹 Video Courses' },
-                        { value: 'reading-books', label: '📚 Reading Books' },
-                        { value: 'hands-on-projects', label: '🛠️ Hands-On Projects' },
-                        { value: 'bootcamp', label: '🎓 Bootcamp' },
-                        { value: 'mentorship', label: '👥 Mentorship' },
-                        { value: 'self-paced', label: '⏰ Self-Paced' },
-                      ].map((option) => (
-                        <TouchableOpacity
-                          key={option.value}
-                          style={[
-                            styles.chipLarge,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
-                            learningStyle.includes(option.value) && styles.chipSelected,
-                          ]}
-                          onPress={() => toggleArrayItem(learningStyle, setLearningStyle, option.value)}
-                        >
-                          <Text style={[
-                            styles.chipText,
-                            { color: colors.text },
-                            learningStyle.includes(option.value) && { color: colors.background },
-                          ]}>
-                            {option.label}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                        { value: 'video-courses', label: 'Video Courses', Icon: Video },
+                        { value: 'reading-books', label: 'Reading Books', Icon: BookOpen },
+                        { value: 'hands-on-projects', label: 'Hands-On Projects', Icon: Wrench },
+                        { value: 'bootcamp', label: 'Bootcamp', Icon: GraduationCap },
+                        { value: 'mentorship', label: 'Mentorship', Icon: Users },
+                        { value: 'self-paced', label: 'Self-Paced', Icon: Clock },
+                      ].map((option) => {
+                        const isSelected = learningStyle.includes(option.value);
+                        const itemColor = isSelected ? colors.background : colors.text;
+                        return (
+                          <TouchableOpacity
+                            key={option.value}
+                            style={[
+                              styles.chipLarge,
+                              { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                              isSelected && styles.chipSelected,
+                            ]}
+                            onPress={() => toggleArrayItem(learningStyle, setLearningStyle, option.value)}
+                          >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                              <option.Icon size={16} color={itemColor} />
+                              <Text style={[styles.chipText, { color: itemColor }]}>
+                                {option.label}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      })}
                     </View>
                   </View>
 
@@ -1866,31 +1875,34 @@ export default function CareerPathDesignerScreen() {
                     <Text style={[styles.label, { color: colors.text }]}>Why are you transitioning? (Select all that apply) *</Text>
                     <View style={styles.chipGrid}>
                       {[
-                        { value: 'better-pay', label: '💰 Better Pay' },
-                        { value: 'work-life-balance', label: '⚖️ Work-Life Balance' },
-                        { value: 'interesting-work', label: '✨ More Interesting Work' },
-                        { value: 'remote-work', label: '🏠 Remote Work' },
-                        { value: 'career-growth', label: '📈 Career Growth' },
-                        { value: 'passion', label: '❤️ Follow Passion' },
-                      ].map((option) => (
-                        <TouchableOpacity
-                          key={option.value}
-                          style={[
-                            styles.chipLarge,
-                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
-                            transitionMotivation.includes(option.value) && styles.chipSelected,
-                          ]}
-                          onPress={() => toggleArrayItem(transitionMotivation, setTransitionMotivation, option.value)}
-                        >
-                          <Text style={[
-                            styles.chipText,
-                            { color: colors.text },
-                            transitionMotivation.includes(option.value) && { color: colors.background },
-                          ]}>
-                            {option.label}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                        { value: 'better-pay', label: 'Better Pay', Icon: DollarSign },
+                        { value: 'work-life-balance', label: 'Work-Life Balance', Icon: Scale },
+                        { value: 'interesting-work', label: 'More Interesting Work', Icon: Sparkles },
+                        { value: 'remote-work', label: 'Remote Work', Icon: Home },
+                        { value: 'career-growth', label: 'Career Growth', Icon: TrendingUp },
+                        { value: 'passion', label: 'Follow Passion', Icon: Heart },
+                      ].map((option) => {
+                        const isSelected = transitionMotivation.includes(option.value);
+                        const itemColor = isSelected ? colors.background : colors.text;
+                        return (
+                          <TouchableOpacity
+                            key={option.value}
+                            style={[
+                              styles.chipLarge,
+                              { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                              isSelected && styles.chipSelected,
+                            ]}
+                            onPress={() => toggleArrayItem(transitionMotivation, setTransitionMotivation, option.value)}
+                          >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                              <option.Icon size={16} color={itemColor} />
+                              <Text style={[styles.chipText, { color: itemColor }]}>
+                                {option.label}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      })}
                     </View>
                   </View>
 

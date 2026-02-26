@@ -10,7 +10,8 @@ import {
   FileText, Download, RefreshCw, ArrowLeft, Loader2, Upload,
   Check, ChevronRight, Target, Clock, MapPin, X, ChevronDown,
   Users, GraduationCap, Heart, Lightbulb, Building, Globe,
-  Zap, Code, Shield, TrendingDown, FolderOpen, Trash2, Link2
+  Zap, Code, Shield, TrendingDown, FolderOpen, Trash2, Link2,
+  Video, Wrench, DollarSign, Scale, Home
 } from 'lucide-react'
 
 type WizardStep = 'welcome' | 'upload' | 'questions' | 'generating' | 'results'
@@ -2136,12 +2137,12 @@ export default function CareerPathDesigner() {
                     <label className="text-theme font-semibold mb-3 block">Preferred Learning Styles (Select all that apply) *</label>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { value: 'video-courses', label: 'Video Courses', icon: '📹' },
-                        { value: 'reading-books', label: 'Reading Books', icon: '📚' },
-                        { value: 'hands-on-projects', label: 'Hands-On Projects', icon: '🛠️' },
-                        { value: 'bootcamp', label: 'Bootcamp', icon: '🎓' },
-                        { value: 'mentorship', label: 'Mentorship', icon: '👥' },
-                        { value: 'self-paced', label: 'Self-Paced', icon: '⏰' }
+                        { value: 'video-courses', label: 'Video Courses', Icon: Video },
+                        { value: 'reading-books', label: 'Reading Books', Icon: BookOpen },
+                        { value: 'hands-on-projects', label: 'Hands-On Projects', Icon: Wrench },
+                        { value: 'bootcamp', label: 'Bootcamp', Icon: GraduationCap },
+                        { value: 'mentorship', label: 'Mentorship', Icon: Users },
+                        { value: 'self-paced', label: 'Self-Paced', Icon: Clock }
                       ].map((option) => (
                         <button
                           key={option.value}
@@ -2153,7 +2154,7 @@ export default function CareerPathDesigner() {
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            <span className="text-2xl">{option.icon}</span>
+                            <option.Icon className="w-5 h-5 text-theme" />
                             <div className="font-semibold text-theme text-sm">{option.label}</div>
                           </div>
                         </button>
@@ -2290,12 +2291,12 @@ export default function CareerPathDesigner() {
                     <label className="text-theme font-semibold mb-3 block">Why are you transitioning? (Select all that apply) *</label>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { value: 'better-pay', label: 'Better Pay', icon: '💰' },
-                        { value: 'work-life-balance', label: 'Work-Life Balance', icon: '⚖️' },
-                        { value: 'interesting-work', label: 'More Interesting Work', icon: '✨' },
-                        { value: 'remote-work', label: 'Remote Work', icon: '🏠' },
-                        { value: 'career-growth', label: 'Career Growth', icon: '📈' },
-                        { value: 'passion', label: 'Follow Passion', icon: '❤️' }
+                        { value: 'better-pay', label: 'Better Pay', Icon: DollarSign },
+                        { value: 'work-life-balance', label: 'Work-Life Balance', Icon: Scale },
+                        { value: 'interesting-work', label: 'More Interesting Work', Icon: Sparkles },
+                        { value: 'remote-work', label: 'Remote Work', Icon: Home },
+                        { value: 'career-growth', label: 'Career Growth', Icon: TrendingUp },
+                        { value: 'passion', label: 'Follow Passion', Icon: Heart }
                       ].map((option) => (
                         <button
                           key={option.value}
@@ -2307,7 +2308,7 @@ export default function CareerPathDesigner() {
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            <span className="text-2xl">{option.icon}</span>
+                            <option.Icon className="w-5 h-5 text-theme" />
                             <div className="font-semibold text-theme text-sm">{option.label}</div>
                           </div>
                         </button>
