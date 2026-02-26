@@ -117,9 +117,8 @@ function getAtsColor(score: number): string {
   return '#EAB308';
 }
 
-// Rendered template preview - no network required, no images needed.
-// Each style renders a distinct layout that visually represents the actual
-// template design the user will get.
+// Live resume preview renderer matching web's ResumePreview component.
+// Renders actual text content (sample resume) scaled to fit thumbnail/modal.
 function TemplatePreviewRenderer({
   template,
   large = false,
@@ -127,252 +126,271 @@ function TemplatePreviewRenderer({
   template: Template;
   large?: boolean;
 }) {
-  const s = large ? previewLarge : previewSmall;
   const accent = template.accentColor;
   const bg = '#FFFFFF';
   const textDark = '#1F2937';
   const textMid = '#6B7280';
-  const textLight = '#D1D5DB';
+  const textLight = '#9CA3AF';
+  const borderColor = '#E5E7EB';
 
-  // Shared reusable line blocks
-  const Line = ({
-    width,
-    height = 3,
-    color = textLight,
-    style,
-  }: {
-    width: string | number;
-    height?: number;
-    color?: string;
-    style?: object;
-  }) => (
-    <View
-      style={[
-        { width: width as any, height, backgroundColor: color, borderRadius: 2 },
-        style,
-      ]}
-    />
-  );
+  // Scale factors for thumbnail vs modal
+  const f = large ? 1.8 : 1;
+  const nameSize = 11 * f;
+  const sectionSize = 6 * f;
+  const bodySize = 4.5 * f;
+  const contactSize = 4 * f;
+  const bulletSize = 4 * f;
+  const pad = 8 * f;
+  const sectionGap = 6 * f;
+  const lineGap = 2 * f;
 
-  const Gap = ({ h }: { h: number }) => <View style={{ height: h }} />;
+  // Sample resume content
+  const name = 'John Doe';
+  const contact = 'john@email.com | (555) 123-4567 | San Francisco, CA';
+  const summaryText = 'Results-driven professional with 8+ years of experience in software development and project management. Proven track record of delivering high-impact solutions.';
+  const sections = [
+    {
+      title: 'EXPERIENCE',
+      items: [
+        { role: 'Senior Software Engineer', company: 'Tech Corp', date: '2021 – Present', loc: 'San Francisco, CA',
+          bullets: ['Led development of microservices architecture serving 2M+ users', 'Reduced deployment time by 40% through CI/CD pipeline optimization', 'Mentored team of 5 junior engineers on best practices'] },
+        { role: 'Software Engineer', company: 'StartupCo', date: '2018 – 2021', loc: 'New York, NY',
+          bullets: ['Built RESTful APIs handling 10K+ requests/min', 'Improved test coverage from 45% to 92%'] },
+      ],
+    },
+    { title: 'EDUCATION', items: [{ role: 'B.S. Computer Science', company: 'Stanford University', date: '2018', loc: '', bullets: [] }] },
+  ];
+  const skills = ['JavaScript', 'TypeScript', 'React', 'Node.js', 'Python', 'AWS', 'Docker', 'SQL'];
 
-  // --- Professional: centered name header, section dividers ---
+  // --- Professional: centered header, section dividers ---
   if (template.headerStyle === 'centered') {
     return (
-      <View style={[s.canvas, { backgroundColor: bg }]}>
-        {/* Header */}
-        <View style={[s.centeredHeader, { borderBottomColor: accent }]}>
-          <View style={[s.nameLine, { backgroundColor: textDark, width: '60%' }]} />
-          <Gap h={large ? 5 : 3} />
-          <View style={[s.nameLine, { backgroundColor: textMid, width: '40%', height: large ? 5 : 3 }]} />
-          <Gap h={large ? 4 : 2} />
-          <Line width="70%" height={large ? 2 : 1} color={textMid} />
+      <View style={[pv.canvas, { backgroundColor: bg, padding: pad }]}>
+        <View style={{ alignItems: 'center', paddingBottom: pad * 0.6, borderBottomWidth: 1.5 * f, borderBottomColor: accent, marginBottom: sectionGap }}>
+          <Text style={{ fontSize: nameSize, fontWeight: '700', color: textDark, letterSpacing: 1 }}>{name}</Text>
+          <Text style={{ fontSize: contactSize, color: textMid, marginTop: lineGap }}>{contact}</Text>
         </View>
-        <Gap h={large ? 10 : 5} />
-        {/* Section */}
-        {[{ label: 60, lines: [80, 65, 72] }, { label: 55, lines: [75, 68] }].map((sec, si) => (
-          <View key={si} style={s.section}>
-            <View style={[s.sectionLabel, { width: `${sec.label}%`, backgroundColor: accent }]} />
-            <Gap h={large ? 5 : 3} />
-            {sec.lines.map((w, li) => (
-              <React.Fragment key={li}>
-                <Line width={`${w}%`} />
-                <Gap h={large ? 4 : 2} />
-              </React.Fragment>
+        <Text style={{ fontSize: bodySize, color: textMid, lineHeight: bodySize * 1.5, marginBottom: sectionGap }}>{summaryText}</Text>
+        {sections.map((sec, si) => (
+          <View key={si} style={{ marginBottom: sectionGap }}>
+            <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 1, textTransform: 'uppercase', borderBottomWidth: 0.5 * f, borderBottomColor: borderColor, paddingBottom: lineGap }}>{sec.title}</Text>
+            {sec.items.map((item, ii) => (
+              <View key={ii} style={{ marginTop: lineGap * 1.5 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '600', color: textDark }}>{item.role}</Text>
+                  <Text style={{ fontSize: bulletSize, color: textMid }}>{item.date}</Text>
+                </View>
+                <Text style={{ fontSize: bulletSize, color: textMid, fontStyle: 'italic' }}>{item.company}{item.loc ? ` | ${item.loc}` : ''}</Text>
+                {item.bullets.map((b, bi) => (
+                  <Text key={bi} style={{ fontSize: bulletSize, color: textDark, marginTop: lineGap * 0.5, paddingLeft: pad * 0.5 }}>{'\u2022'} {b}</Text>
+                ))}
+              </View>
             ))}
-            <Gap h={large ? 6 : 3} />
           </View>
         ))}
+        <View style={{ marginBottom: sectionGap }}>
+          <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 1, textTransform: 'uppercase', borderBottomWidth: 0.5 * f, borderBottomColor: borderColor, paddingBottom: lineGap }}>SKILLS</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 3 * f, marginTop: lineGap * 1.5 }}>
+            {skills.map((sk, i) => (
+              <View key={i} style={{ backgroundColor: accent + '12', paddingHorizontal: 4 * f, paddingVertical: 1.5 * f, borderRadius: 2 * f }}>
+                <Text style={{ fontSize: bulletSize - 0.5 * f, color: accent }}>{sk}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
       </View>
     );
   }
 
-  // --- Modern: left-aligned bold name, colored left border on sections ---
+  // --- Modern: left-aligned, accent left border on sections ---
   if (template.headerStyle === 'left') {
     return (
-      <View style={[s.canvas, { backgroundColor: bg }]}>
-        <View style={{ paddingHorizontal: large ? 16 : 8 }}>
-          <View style={[s.nameLine, { backgroundColor: accent, width: '55%', height: large ? 12 : 7 }]} />
-          <Gap h={large ? 4 : 2} />
-          <Line width="45%" height={large ? 3 : 2} color={textMid} />
-          <Gap h={large ? 4 : 2} />
-          <Line width="70%" height={large ? 2 : 1} color={textLight} />
-        </View>
-        <Gap h={large ? 12 : 6} />
-        {[{ w: [85, 70, 75] }, { w: [80, 65] }].map((sec, si) => (
-          <View key={si} style={[s.section, { borderLeftWidth: large ? 3 : 2, borderLeftColor: accent, paddingLeft: large ? 10 : 5 }]}>
-            <Line width="50%" height={large ? 4 : 2} color={textDark} />
-            <Gap h={large ? 5 : 3} />
-            {sec.w.map((w, li) => (
-              <React.Fragment key={li}>
-                <Line width={`${w}%`} />
-                <Gap h={large ? 4 : 2} />
-              </React.Fragment>
+      <View style={[pv.canvas, { backgroundColor: bg, padding: pad }]}>
+        <Text style={{ fontSize: nameSize * 1.1, fontWeight: '700', color: accent }}>{name}</Text>
+        <Text style={{ fontSize: contactSize, color: textMid, marginTop: lineGap }}>{contact}</Text>
+        <View style={{ height: 0.5 * f, backgroundColor: borderColor, marginVertical: sectionGap }} />
+        <Text style={{ fontSize: bodySize, color: textMid, lineHeight: bodySize * 1.5, marginBottom: sectionGap }}>{summaryText}</Text>
+        {sections.map((sec, si) => (
+          <View key={si} style={{ borderLeftWidth: 2 * f, borderLeftColor: accent, paddingLeft: pad * 0.7, marginBottom: sectionGap }}>
+            <Text style={{ fontSize: sectionSize, fontWeight: '700', color: textDark, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap * 1.5 }}>{sec.title}</Text>
+            {sec.items.map((item, ii) => (
+              <View key={ii} style={{ marginBottom: lineGap * 2 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '600', color: textDark }}>{item.role}</Text>
+                  <Text style={{ fontSize: bulletSize, color: textMid }}>{item.date}</Text>
+                </View>
+                <Text style={{ fontSize: bulletSize, color: accent, marginTop: lineGap * 0.3 }}>{item.company}{item.loc ? ` \u2022 ${item.loc}` : ''}</Text>
+                {item.bullets.map((b, bi) => (
+                  <Text key={bi} style={{ fontSize: bulletSize, color: textDark, marginTop: lineGap * 0.5, paddingLeft: pad * 0.3 }}>{'\u2022'} {b}</Text>
+                ))}
+              </View>
             ))}
-            <Gap h={large ? 6 : 3} />
           </View>
         ))}
-      </View>
-    );
-  }
-
-  // --- Technical: dark sidebar left, content right ---
-  if (template.headerStyle === 'sidebar') {
-    return (
-      <View style={[s.canvas, { backgroundColor: bg, flexDirection: 'row' }]}>
-        {/* Sidebar */}
-        <View style={[s.sidebar, { backgroundColor: accent }]}>
-          <View style={[s.avatarCircle, { borderColor: 'rgba(255,255,255,0.4)' }]} />
-          <Gap h={large ? 8 : 4} />
-          {[50, 70, 55, 45, 60, 40].map((w, i) => (
-            <React.Fragment key={i}>
-              <Line width={`${w}%`} color="rgba(255,255,255,0.5)" height={large ? 3 : 2} />
-              <Gap h={large ? 4 : 2} />
-            </React.Fragment>
-          ))}
-        </View>
-        {/* Content */}
-        <View style={s.sidebarContent}>
-          <Line width="80%" height={large ? 6 : 4} color={textDark} />
-          <Gap h={large ? 3 : 2} />
-          <Line width="60%" height={large ? 3 : 2} color={textMid} />
-          <Gap h={large ? 10 : 5} />
-          {[{ w: [90, 75, 80] }, { w: [85, 70] }].map((sec, si) => (
-            <View key={si} style={{ marginBottom: large ? 8 : 4 }}>
-              <Line width="55%" height={large ? 4 : 2} color={accent} />
-              <Gap h={large ? 4 : 2} />
-              {sec.w.map((w, li) => (
-                <React.Fragment key={li}>
-                  <Line width={`${w}%`} height={large ? 2 : 1} />
-                  <Gap h={large ? 3 : 2} />
-                </React.Fragment>
-              ))}
-            </View>
-          ))}
-        </View>
-      </View>
-    );
-  }
-
-  // --- Creative: bold full-width color header block ---
-  if (template.headerStyle === 'bold') {
-    return (
-      <View style={[s.canvas, { backgroundColor: bg }]}>
-        <View style={[s.boldHeader, { backgroundColor: accent }]}>
-          <View style={[s.nameLine, { backgroundColor: 'rgba(255,255,255,0.9)', width: '65%', height: large ? 13 : 8 }]} />
-          <Gap h={large ? 5 : 3} />
-          <Line width="45%" height={large ? 3 : 2} color="rgba(255,255,255,0.6)" />
-          <Gap h={large ? 3 : 2} />
-          <Line width="70%" height={large ? 2 : 1} color="rgba(255,255,255,0.4)" />
-        </View>
-        <View style={{ padding: large ? 12 : 6 }}>
-          {[{ w: [80, 68, 74] }, { w: [78, 62] }].map((sec, si) => (
-            <View key={si} style={{ marginBottom: large ? 8 : 4 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: large ? 4 : 2 }}>
-                <View style={{ width: large ? 8 : 5, height: large ? 8 : 5, borderRadius: 4, backgroundColor: accent, marginRight: large ? 5 : 3 }} />
-                <Line width="40%" height={large ? 4 : 2} color={textDark} />
+        <View style={{ borderLeftWidth: 2 * f, borderLeftColor: accent, paddingLeft: pad * 0.7 }}>
+          <Text style={{ fontSize: sectionSize, fontWeight: '700', color: textDark, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap * 1.5 }}>SKILLS</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 3 * f }}>
+            {skills.map((sk, i) => (
+              <View key={i} style={{ backgroundColor: accent + '15', paddingHorizontal: 5 * f, paddingVertical: 2 * f, borderRadius: 10 * f }}>
+                <Text style={{ fontSize: bulletSize - 0.5 * f, color: accent, fontWeight: '500' }}>{sk}</Text>
               </View>
-              {sec.w.map((w, li) => (
-                <React.Fragment key={li}>
-                  <Line width={`${w}%`} />
-                  <Gap h={large ? 3 : 2} />
-                </React.Fragment>
-              ))}
-            </View>
-          ))}
-        </View>
-      </View>
-    );
-  }
-
-  // --- Executive: two-tone split header (dark top / light bottom) ---
-  if (template.headerStyle === 'split') {
-    return (
-      <View style={[s.canvas, { backgroundColor: bg }]}>
-        <View style={[s.splitHeader, { backgroundColor: accent }]}>
-          <Line width="55%" height={large ? 12 : 7} color="#FFFFFF" />
-          <Gap h={large ? 4 : 2} />
-          <Line width="42%" height={large ? 3 : 2} color="rgba(255,255,255,0.6)" />
-        </View>
-        <View style={[s.splitSubHeader, { borderBottomColor: accent, borderBottomWidth: large ? 2 : 1 }]}>
-          {[40, 55, 38].map((w, i) => (
-            <Line key={i} width={`${w}%`} height={large ? 2 : 1} color={textMid} />
-          ))}
-        </View>
-        <View style={{ padding: large ? 12 : 6 }}>
-          {[{ w: [85, 70, 76] }, { w: [80, 65] }].map((sec, si) => (
-            <View key={si} style={{ marginBottom: large ? 8 : 4 }}>
-              <Line width="50%" height={large ? 4 : 2} color={accent} />
-              <View style={{ height: large ? 2 : 1, backgroundColor: textLight, marginVertical: large ? 3 : 2 }} />
-              {sec.w.map((w, li) => (
-                <React.Fragment key={li}>
-                  <Line width={`${w}%`} />
-                  <Gap h={large ? 3 : 2} />
-                </React.Fragment>
-              ))}
-            </View>
-          ))}
-        </View>
-      </View>
-    );
-  }
-
-  // --- Minimal: clean, lots of whitespace, thin lines ---
-  return (
-    <View style={[s.canvas, { backgroundColor: bg }]}>
-      <View style={{ padding: large ? 16 : 8 }}>
-        <Line width="50%" height={large ? 9 : 5} color={textDark} />
-        <Gap h={large ? 5 : 3} />
-        <Line width="35%" height={large ? 2 : 1} color={textMid} />
-        <Gap h={large ? 2 : 1} />
-        <Line width="60%" height={large ? 1 : 1} color={textLight} />
-      </View>
-      <View style={{ height: large ? 1 : 1, backgroundColor: textLight, marginHorizontal: large ? 16 : 8 }} />
-      <View style={{ padding: large ? 16 : 8 }}>
-        {[{ lw: 45, lines: [90, 78, 82, 70] }, { lw: 40, lines: [85, 72] }].map((sec, si) => (
-          <View key={si} style={{ marginBottom: large ? 12 : 6 }}>
-            <Line width={`${sec.lw}%`} height={large ? 2 : 1} color={textDark} />
-            <Gap h={large ? 6 : 3} />
-            {sec.lines.map((w, li) => (
-              <React.Fragment key={li}>
-                <Line width={`${w}%`} height={large ? 2 : 1} color={textLight} />
-                <Gap h={large ? 4 : 2} />
-              </React.Fragment>
             ))}
           </View>
+        </View>
+      </View>
+    );
+  }
+
+  // --- Technical: sidebar left, content right ---
+  if (template.headerStyle === 'sidebar') {
+    return (
+      <View style={[pv.canvas, { backgroundColor: bg, flexDirection: 'row' }]}>
+        {/* Sidebar */}
+        <View style={{ width: '32%', backgroundColor: accent + '0D', borderRightWidth: 2 * f, borderRightColor: accent + '30', padding: pad * 0.8 }}>
+          <Text style={{ fontSize: nameSize * 0.75, fontWeight: '700', color: textDark, lineHeight: nameSize * 0.9, marginBottom: sectionGap * 0.5 }}>{name}</Text>
+          {/* Contact */}
+          <Text style={{ fontSize: sectionSize * 0.75, fontWeight: '700', color: accent, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: lineGap }}>CONTACT</Text>
+          {['john@email.com', '(555) 123-4567', 'San Francisco, CA'].map((c, i) => (
+            <Text key={i} style={{ fontSize: bulletSize * 0.85, color: textMid, marginBottom: lineGap * 0.5 }}>{c}</Text>
+          ))}
+          {/* Skills in sidebar */}
+          <Text style={{ fontSize: sectionSize * 0.75, fontWeight: '700', color: accent, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: sectionGap * 0.6, marginBottom: lineGap }}>SKILLS</Text>
+          {skills.slice(0, 6).map((sk, i) => (
+            <Text key={i} style={{ fontSize: bulletSize * 0.85, color: textDark, marginBottom: lineGap * 0.3 }}>{'\u2022'} {sk}</Text>
+          ))}
+          {/* Education in sidebar */}
+          <Text style={{ fontSize: sectionSize * 0.75, fontWeight: '700', color: accent, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: sectionGap * 0.6, marginBottom: lineGap }}>EDUCATION</Text>
+          <Text style={{ fontSize: bulletSize * 0.85, fontWeight: '600', color: textDark }}>B.S. Computer Science</Text>
+          <Text style={{ fontSize: bulletSize * 0.75, color: textMid }}>Stanford University</Text>
+          <Text style={{ fontSize: bulletSize * 0.75, color: textMid }}>2018</Text>
+        </View>
+        {/* Main content */}
+        <View style={{ flex: 1, padding: pad * 0.8 }}>
+          <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap }}>PROFILE</Text>
+          <Text style={{ fontSize: bodySize * 0.9, color: textMid, lineHeight: bodySize * 1.4, marginBottom: sectionGap }}>{summaryText}</Text>
+          <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap }}>EXPERIENCE</Text>
+          {sections[0].items.map((item, ii) => (
+            <View key={ii} style={{ marginBottom: lineGap * 2 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: bulletSize, fontWeight: '600', color: textDark }}>{item.role}</Text>
+              </View>
+              <Text style={{ fontSize: bulletSize * 0.85, color: textMid }}>{item.company} | {item.date}</Text>
+              {item.bullets.slice(0, 2).map((b, bi) => (
+                <Text key={bi} style={{ fontSize: bulletSize * 0.85, color: textDark, marginTop: lineGap * 0.3 }}>{'\u2022'} {b}</Text>
+              ))}
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  // --- Creative: bold full-width gradient header ---
+  if (template.headerStyle === 'bold') {
+    return (
+      <View style={[pv.canvas, { backgroundColor: bg }]}>
+        <View style={{ backgroundColor: accent, paddingVertical: pad * 1.2, paddingHorizontal: pad }}>
+          <Text style={{ fontSize: nameSize * 1.2, fontWeight: '700', color: '#FFFFFF', letterSpacing: 1.5, textTransform: 'uppercase' }}>{name}</Text>
+          <Text style={{ fontSize: contactSize, color: 'rgba(255,255,255,0.7)', marginTop: lineGap }}>{contact}</Text>
+        </View>
+        <View style={{ padding: pad }}>
+          <Text style={{ fontSize: bodySize, color: textMid, lineHeight: bodySize * 1.5, marginBottom: sectionGap }}>{summaryText}</Text>
+          {sections.map((sec, si) => (
+            <View key={si} style={{ marginBottom: sectionGap }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: lineGap * 1.5 }}>
+                <View style={{ width: 4 * f, height: 4 * f, borderRadius: 2 * f, backgroundColor: accent, marginRight: 4 * f }} />
+                <Text style={{ fontSize: sectionSize, fontWeight: '700', color: textDark, letterSpacing: 0.8, textTransform: 'uppercase' }}>{sec.title}</Text>
+              </View>
+              {sec.items.map((item, ii) => (
+                <View key={ii} style={{ marginBottom: lineGap * 2 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '600', color: textDark }}>{item.role}</Text>
+                    <Text style={{ fontSize: bulletSize, color: textMid }}>{item.date}</Text>
+                  </View>
+                  <Text style={{ fontSize: bulletSize, color: accent }}>{item.company}</Text>
+                  {item.bullets.map((b, bi) => (
+                    <Text key={bi} style={{ fontSize: bulletSize, color: textDark, marginTop: lineGap * 0.4 }}>{'\u2022'} {b}</Text>
+                  ))}
+                </View>
+              ))}
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  // --- Executive: two-tone split header ---
+  if (template.headerStyle === 'split') {
+    return (
+      <View style={[pv.canvas, { backgroundColor: bg }]}>
+        <View style={{ backgroundColor: accent, paddingVertical: pad, paddingHorizontal: pad * 1.2 }}>
+          <Text style={{ fontSize: nameSize, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.5 }}>{name}</Text>
+          <Text style={{ fontSize: contactSize, color: 'rgba(255,255,255,0.6)', marginTop: lineGap }}>{contact}</Text>
+        </View>
+        <View style={{ paddingHorizontal: pad * 1.2, paddingVertical: sectionGap * 0.6, borderBottomWidth: 1 * f, borderBottomColor: accent + '40' }}>
+          <Text style={{ fontSize: bodySize, color: textMid, lineHeight: bodySize * 1.5 }}>{summaryText}</Text>
+        </View>
+        <View style={{ padding: pad * 1.2, paddingTop: sectionGap }}>
+          {sections.map((sec, si) => (
+            <View key={si} style={{ marginBottom: sectionGap }}>
+              <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 1, textTransform: 'uppercase' }}>{sec.title}</Text>
+              <View style={{ height: 0.5 * f, backgroundColor: borderColor, marginTop: lineGap, marginBottom: lineGap * 1.5 }} />
+              {sec.items.map((item, ii) => (
+                <View key={ii} style={{ marginBottom: lineGap * 2 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '600', color: textDark }}>{item.role}</Text>
+                    <Text style={{ fontSize: bulletSize, color: textMid }}>{item.date}</Text>
+                  </View>
+                  <Text style={{ fontSize: bulletSize, color: textMid, fontStyle: 'italic' }}>{item.company}</Text>
+                  {item.bullets.map((b, bi) => (
+                    <Text key={bi} style={{ fontSize: bulletSize, color: textDark, marginTop: lineGap * 0.4 }}>{'\u2022'} {b}</Text>
+                  ))}
+                </View>
+              ))}
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  // --- Minimal: ultra-clean, maximum whitespace ---
+  return (
+    <View style={[pv.canvas, { backgroundColor: bg, padding: pad * 1.2 }]}>
+      <Text style={{ fontSize: nameSize * 0.9, fontWeight: '300', color: textDark, letterSpacing: 0.5 }}>{name}</Text>
+      <Text style={{ fontSize: contactSize, color: textLight, marginTop: lineGap }}>{contact}</Text>
+      <View style={{ height: 0.5 * f, backgroundColor: borderColor, marginVertical: sectionGap }} />
+      <Text style={{ fontSize: bodySize, color: textMid, lineHeight: bodySize * 1.6, marginBottom: sectionGap }}>{summaryText}</Text>
+      {sections.map((sec, si) => (
+        <View key={si} style={{ marginBottom: sectionGap * 1.2 }}>
+          <Text style={{ fontSize: sectionSize * 0.9, fontWeight: '500', color: textDark, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: lineGap * 2 }}>{sec.title}</Text>
+          {sec.items.map((item, ii) => (
+            <View key={ii} style={{ marginBottom: lineGap * 2 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '500', color: textDark }}>{item.role}</Text>
+                <Text style={{ fontSize: bulletSize, color: textLight }}>{item.date}</Text>
+              </View>
+              <Text style={{ fontSize: bulletSize, color: textLight }}>{item.company}</Text>
+              {item.bullets.map((b, bi) => (
+                <Text key={bi} style={{ fontSize: bulletSize, color: textMid, marginTop: lineGap * 0.4 }}>{'\u2022'} {b}</Text>
+              ))}
+            </View>
+          ))}
+        </View>
+      ))}
+      <Text style={{ fontSize: sectionSize * 0.9, fontWeight: '500', color: textDark, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: lineGap * 2 }}>SKILLS</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 3 * f }}>
+        {skills.map((sk, i) => (
+          <Text key={i} style={{ fontSize: bulletSize - 0.5 * f, color: textMid, paddingHorizontal: 4 * f, paddingVertical: 1.5 * f, borderWidth: 0.5, borderColor: borderColor, borderRadius: 2 * f }}>{sk}</Text>
         ))}
       </View>
     </View>
   );
 }
 
-// Sizing tokens for small (grid card) vs large (modal preview)
-const previewSmall = StyleSheet.create({
+const pv = StyleSheet.create({
   canvas: { flex: 1, overflow: 'hidden' },
-  centeredHeader: { alignItems: 'center', paddingVertical: 8, borderBottomWidth: 2, marginHorizontal: 8 },
-  nameLine: { height: 8, borderRadius: 2 },
-  section: { paddingHorizontal: 8, marginBottom: 4 },
-  sectionLabel: { height: 3, borderRadius: 1 },
-  sidebar: { width: '30%', padding: 6, alignItems: 'center' },
-  avatarCircle: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, backgroundColor: 'rgba(255,255,255,0.3)' },
-  sidebarContent: { flex: 1, padding: 6 },
-  boldHeader: { paddingVertical: 12, paddingHorizontal: 8, alignItems: 'flex-start' },
-  splitHeader: { paddingVertical: 10, paddingHorizontal: 8, alignItems: 'flex-start' },
-  splitSubHeader: { paddingHorizontal: 8, paddingVertical: 5, gap: 3 },
-});
-
-const previewLarge = StyleSheet.create({
-  canvas: { flex: 1, overflow: 'hidden' },
-  centeredHeader: { alignItems: 'center', paddingVertical: 18, borderBottomWidth: 3, marginHorizontal: 16 },
-  nameLine: { height: 14, borderRadius: 3 },
-  section: { paddingHorizontal: 16, marginBottom: 8 },
-  sectionLabel: { height: 5, borderRadius: 2 },
-  sidebar: { width: '32%', padding: 12, alignItems: 'center' },
-  avatarCircle: { width: 44, height: 44, borderRadius: 22, borderWidth: 3, backgroundColor: 'rgba(255,255,255,0.3)' },
-  sidebarContent: { flex: 1, padding: 12 },
-  boldHeader: { paddingVertical: 22, paddingHorizontal: 16, alignItems: 'flex-start' },
-  splitHeader: { paddingVertical: 18, paddingHorizontal: 16, alignItems: 'flex-start' },
-  splitSubHeader: { paddingHorizontal: 16, paddingVertical: 10, gap: 5 },
 });
 
 const categories = ['All', 'Classic', 'Contemporary', 'Tech', 'Design', 'Leadership', 'Simple'];
