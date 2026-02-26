@@ -525,7 +525,11 @@ export default function CareerPathDesignerScreen() {
           const statusResult = await api.getCareerPlanJobStatus(asyncJobId);
 
           if (!statusResult.success) {
-            throw new Error(statusResult.error || 'Failed to get job status');
+            // If job not found (404), stop polling and show error
+            setError(statusResult.error || 'Failed to get job status');
+            setStep('questions');
+            setLoading(false);
+            return;
           }
 
           const status = statusResult.data?.status;
@@ -548,7 +552,9 @@ export default function CareerPathDesignerScreen() {
             if (pollCount < maxPolls) {
               setTimeout(pollForResults, pollInterval);
             } else {
-              throw new Error('Career plan generation timed out. Please try again.');
+              setError('Career plan generation timed out. Please try again.');
+              setStep('questions');
+              setLoading(false);
             }
           } else if (status === 'completed') {
             // Success - process the results
@@ -586,7 +592,9 @@ export default function CareerPathDesignerScreen() {
             setStep('results');
             setLoading(false);
           } else if (status === 'failed') {
-            throw new Error(statusResult.data?.error || 'Career plan generation failed');
+            setError(statusResult.data?.error || 'Career plan generation failed');
+            setStep('questions');
+            setLoading(false);
           }
         };
 

@@ -979,7 +979,14 @@ export default function CareerPathDesigner() {
         const statusResult = await api.getCareerPlanJobStatus(currentJobId)
 
         if (!statusResult.success) {
-          // Continue polling on status check errors
+          // If job not found (404), stop polling - job ID is stale/invalid
+          if (statusResult.error?.includes('404') || statusResult.error?.includes('not found') || statusResult.error?.toLowerCase()?.includes('not found')) {
+            setError('Career plan generation job not found. Please try again.')
+            setStep('questions')
+            setLoading(false)
+            return
+          }
+          // For transient errors, retry up to max attempts
           setTimeout(poll, pollInterval)
           return
         }
