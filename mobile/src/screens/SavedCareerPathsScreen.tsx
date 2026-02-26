@@ -14,6 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   FolderOpen, Trash2, Eye, Plus, CheckSquare, Square,
   ArrowRight, Calendar, Clock, Award, Briefcase, TrendingUp, XCircle,
+  DollarSign, GraduationCap, Target, Zap,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
@@ -40,6 +41,22 @@ interface CareerPlanListItem {
   numProjects?: number;
   profile_summary?: string;
   profileSummary?: string;
+  salary_range?: string;
+  salaryRange?: string;
+  top_certifications?: string[];
+  topCertifications?: string[];
+  skills_gap_count?: number;
+  skillsGapCount?: number;
+  skills_have_count?: number;
+  skillsHaveCount?: number;
+  bridge_role?: string;
+  bridgeRole?: string;
+  top_education?: string;
+  topEducation?: string;
+  current_phase?: string;
+  currentPhase?: string;
+  num_events?: number;
+  numEvents?: number;
   created_at?: string;
   createdAt?: string;
   updated_at?: string;
@@ -107,6 +124,30 @@ export default function SavedCareerPathsScreen() {
 
   const getProjectCount = (item: CareerPlanListItem) =>
     item.num_projects ?? item.numProjects ?? 0;
+
+  const getSalaryRange = (item: CareerPlanListItem) =>
+    item.salary_range || item.salaryRange || '';
+
+  const getTopCertifications = (item: CareerPlanListItem): string[] =>
+    item.top_certifications || item.topCertifications || [];
+
+  const getSkillsGapCount = (item: CareerPlanListItem) =>
+    item.skills_gap_count ?? item.skillsGapCount ?? 0;
+
+  const getSkillsHaveCount = (item: CareerPlanListItem) =>
+    item.skills_have_count ?? item.skillsHaveCount ?? 0;
+
+  const getBridgeRole = (item: CareerPlanListItem) =>
+    item.bridge_role || item.bridgeRole || '';
+
+  const getTopEducation = (item: CareerPlanListItem) =>
+    item.top_education || item.topEducation || '';
+
+  const getCurrentPhase = (item: CareerPlanListItem) =>
+    item.current_phase || item.currentPhase || '';
+
+  const getTargetRoles = (item: CareerPlanListItem): string[] =>
+    item.target_roles || item.targetRoles || [];
 
   const getCreatedAt = (item: CareerPlanListItem) =>
     item.created_at || item.createdAt || '';
@@ -194,9 +235,21 @@ export default function SavedCareerPathsScreen() {
     const projects = getProjectCount(item);
     const timeline = getTimeline(item);
     const created = formatDate(getCreatedAt(item));
+    const salaryRange = getSalaryRange(item);
+    const topCerts = getTopCertifications(item);
+    const skillsGap = getSkillsGapCount(item);
+    const skillsHave = getSkillsHaveCount(item);
+    const bridgeRole = getBridgeRole(item);
+    const topEdu = getTopEducation(item);
+    const phase = getCurrentPhase(item);
+    const targetRoles = getTargetRoles(item);
 
     return (
-      <View style={[styles.card, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate('SavedCareerPlanDetail', { planId: item.id })}
+        style={[styles.card, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+      >
         <View style={styles.cardRow}>
           {/* Checkbox */}
           <TouchableOpacity onPress={() => toggleSelect(item.id)} style={styles.checkbox}>
@@ -225,6 +278,56 @@ export default function SavedCareerPathsScreen() {
               </View>
             ) : null}
 
+            {/* Target roles (if more than 1) */}
+            {targetRoles.length > 1 && (
+              <View style={styles.targetRolesRow}>
+                <Target size={13} color={colors.textSecondary} />
+                <Text style={[styles.targetRolesText, { color: colors.textSecondary }]} numberOfLines={1}>
+                  Targeting: {targetRoles.slice(0, 3).join(', ')}
+                </Text>
+              </View>
+            )}
+
+            {/* Salary + bridge role */}
+            {(salaryRange || bridgeRole) ? (
+              <View style={styles.salaryBridgeRow}>
+                {salaryRange ? (
+                  <View style={styles.salaryPill}>
+                    <DollarSign size={12} color="#10B981" />
+                    <Text style={styles.salaryText}>{salaryRange}</Text>
+                  </View>
+                ) : null}
+                {bridgeRole ? (
+                  <View style={styles.bridgeRow}>
+                    <TrendingUp size={12} color={colors.textSecondary} />
+                    <Text style={[styles.bridgeText, { color: colors.textSecondary }]} numberOfLines={1}>
+                      via: {bridgeRole}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+
+            {/* Top certifications */}
+            {topCerts.length > 0 && (
+              <View style={styles.certRow}>
+                <Award size={13} color="#F59E0B" />
+                <Text style={[styles.certListText, { color: colors.textSecondary }]} numberOfLines={1}>
+                  {topCerts.join(', ')}
+                </Text>
+              </View>
+            )}
+
+            {/* Top education */}
+            {topEdu ? (
+              <View style={styles.educationRow}>
+                <GraduationCap size={13} color="#8B5CF6" />
+                <Text style={[styles.educationText, { color: colors.textSecondary }]} numberOfLines={1}>
+                  {topEdu}
+                </Text>
+              </View>
+            ) : null}
+
             {industries.length > 0 && (
               <View style={styles.pillRow}>
                 {industries.slice(0, 3).map((ind, i) => (
@@ -244,6 +347,25 @@ export default function SavedCareerPathsScreen() {
               </Text>
             ) : null}
 
+            {/* Skills stats + phase */}
+            {(skillsHave > 0 || skillsGap > 0 || phase) ? (
+              <View style={styles.skillsStatsRow}>
+                {(skillsHave > 0 || skillsGap > 0) && (
+                  <View style={styles.skillStat}>
+                    <Zap size={12} color="#F59E0B" />
+                    <Text style={[styles.skillStatText, { color: colors.textSecondary }]}>
+                      {skillsHave} skills | {skillsGap} gaps
+                    </Text>
+                  </View>
+                )}
+                {phase ? (
+                  <View style={[styles.phasePill, { backgroundColor: 'rgba(139,92,246,0.15)' }]}>
+                    <Text style={styles.phaseText}>{phase}</Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+
             <View style={styles.metaRow}>
               {created ? (
                 <View style={styles.metaItem}>
@@ -260,13 +382,7 @@ export default function SavedCareerPathsScreen() {
               {certs > 0 && (
                 <View style={styles.metaItem}>
                   <Award size={12} color={colors.textTertiary} />
-                  <Text style={[styles.metaText, { color: colors.textTertiary }]}>{certs}</Text>
-                </View>
-              )}
-              {projects > 0 && (
-                <View style={styles.metaItem}>
-                  <TrendingUp size={12} color={colors.textTertiary} />
-                  <Text style={[styles.metaText, { color: colors.textTertiary }]}>{projects}</Text>
+                  <Text style={[styles.metaText, { color: colors.textTertiary }]}>{certs} certs</Text>
                 </View>
               )}
             </View>
@@ -292,7 +408,7 @@ export default function SavedCareerPathsScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -460,6 +576,30 @@ const styles = StyleSheet.create({
   pill: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, borderWidth: 1 },
   pillText: { fontSize: 11, fontFamily: FONTS.medium },
   moreText: { fontSize: 11, fontFamily: FONTS.regular, alignSelf: 'center' },
+  targetRolesRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 5, paddingLeft: 0 },
+  targetRolesText: { fontSize: 12, fontFamily: FONTS.regular, flex: 1 },
+  salaryBridgeRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 5, flexWrap: 'wrap' },
+  salaryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(16,185,129,0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  salaryText: { fontSize: 12, fontFamily: FONTS.semibold, color: '#10B981' },
+  bridgeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 },
+  bridgeText: { fontSize: 12, fontFamily: FONTS.regular },
+  certRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 4 },
+  certListText: { fontSize: 12, fontFamily: FONTS.regular, flex: 1 },
+  educationRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 5 },
+  educationText: { fontSize: 12, fontFamily: FONTS.regular, flex: 1 },
+  skillsStatsRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  skillStat: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  skillStatText: { fontSize: 11, fontFamily: FONTS.medium },
+  phasePill: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  phaseText: { fontSize: 11, fontFamily: FONTS.medium, color: '#8B5CF6' },
   summary: { fontSize: 13, fontFamily: FONTS.regular, lineHeight: 18, marginBottom: 6 },
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },

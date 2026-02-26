@@ -13,6 +13,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   ArrowLeft, Trash2, Share2, Loader,
+  Target, Award, Zap, DollarSign, Briefcase,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
@@ -144,8 +145,53 @@ export default function SavedCareerPlanDetailScreen() {
           {/* Header card */}
           <View style={[styles.headerCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
             <Text style={[styles.planTitle, { color: colors.text }]}>
-              {plan.target_role || 'Career Plan'}
+              {plan.targetRoles?.[0]?.title || 'Career Plan'}
             </Text>
+
+            {/* Salary range */}
+            {plan.targetRoles?.[0]?.salaryRange ? (
+              <View style={styles.detailSalaryRow}>
+                <DollarSign size={14} color="#10B981" />
+                <Text style={styles.detailSalaryText}>{plan.targetRoles[0].salaryRange}</Text>
+              </View>
+            ) : null}
+
+            {/* Quick stats */}
+            <View style={styles.quickStatsRow}>
+              {plan.targetRoles?.length > 0 && (
+                <View style={[styles.quickStat, { backgroundColor: 'rgba(96,165,250,0.12)' }]}>
+                  <Target size={11} color="#60A5FA" />
+                  <Text style={[styles.quickStatText, { color: '#60A5FA' }]}>
+                    {plan.targetRoles.length} role{plan.targetRoles.length !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+              )}
+              {plan.certificationPath?.length > 0 && (
+                <View style={[styles.quickStat, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
+                  <Award size={11} color="#F59E0B" />
+                  <Text style={[styles.quickStatText, { color: '#F59E0B' }]}>
+                    {plan.certificationPath.length} cert{plan.certificationPath.length !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+              )}
+              {plan.skillsAnalysis?.needToBuild?.length > 0 && (
+                <View style={[styles.quickStat, { backgroundColor: 'rgba(239,68,68,0.1)' }]}>
+                  <Zap size={11} color="#EF4444" />
+                  <Text style={[styles.quickStatText, { color: '#EF4444' }]}>
+                    {plan.skillsAnalysis.needToBuild.length} gap{plan.skillsAnalysis.needToBuild.length !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+              )}
+              {plan.experiencePlan?.length > 0 && (
+                <View style={[styles.quickStat, { backgroundColor: 'rgba(139,92,246,0.12)' }]}>
+                  <Briefcase size={11} color="#8B5CF6" />
+                  <Text style={[styles.quickStatText, { color: '#8B5CF6' }]}>
+                    {plan.experiencePlan.length} project{plan.experiencePlan.length !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+              )}
+            </View>
+
             {plan.profileSummary ? (
               <Text style={[styles.planSummary, { color: colors.textSecondary }]}>
                 {plan.profileSummary}
@@ -209,6 +255,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   planTitle: { fontSize: 22, fontFamily: FONTS.bold, marginBottom: 6 },
+  detailSalaryRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 8 },
+  detailSalaryText: { fontSize: 15, fontFamily: FONTS.semibold, color: '#10B981' },
+  quickStatsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
+  quickStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  quickStatText: { fontSize: 12, fontFamily: FONTS.medium },
   planSummary: { fontSize: 14, fontFamily: FONTS.regular, lineHeight: 20, marginBottom: 6 },
   planDate: { fontSize: 12, fontFamily: FONTS.regular },
 });
