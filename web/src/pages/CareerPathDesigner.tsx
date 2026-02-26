@@ -262,6 +262,14 @@ export default function CareerPathDesigner() {
   const [specificTechnologiesInterest, setSpecificTechnologiesInterest] = useState<string[]>([])
   const [certificationAreasInterest, setCertificationAreasInterest] = useState<string[]>([])
 
+  // Enhanced fields (6 new)
+  const [currentSalaryRange, setCurrentSalaryRange] = useState('')
+  const [existingCertifications, setExistingCertifications] = useState<string[]>([])
+  const [trainingBudget, setTrainingBudget] = useState('')
+  const [biggestConcern, setBiggestConcern] = useState('')
+  const [alreadyStarted, setAlreadyStarted] = useState(false)
+  const [stepsAlreadyTaken, setStepsAlreadyTaken] = useState('')
+
   // Results screen
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [expandedCert, setExpandedCert] = useState<number | null>(null)
@@ -942,7 +950,15 @@ export default function CareerPathDesigner() {
         // Motivation & Goals
         transition_motivation: transitionMotivation,
         specific_technologies_interest: specificTechnologiesInterest,
-        certification_areas_interest: certificationAreasInterest
+        certification_areas_interest: certificationAreasInterest,
+
+        // Enhanced fields
+        current_salary_range: currentSalaryRange || undefined,
+        existing_certifications: existingCertifications.filter(c => c.trim()),
+        training_budget: trainingBudget || undefined,
+        biggest_concern: biggestConcern || undefined,
+        already_started: alreadyStarted,
+        steps_already_taken: stepsAlreadyTaken.trim() || undefined,
       }
 
 
@@ -1837,6 +1853,29 @@ export default function CareerPathDesigner() {
                       </button>
                     )}
                   </div>
+
+                  {/* Current Salary Range */}
+                  <div>
+                    <label className="text-theme font-semibold mb-3 block text-sm sm:text-base">Current Salary Range</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        'Under $40K', '$40-60K', '$60-80K', '$80-100K',
+                        '$100-130K', '$130-170K', '$170K+', 'Prefer not to say',
+                      ].map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => setCurrentSalaryRange(currentSalaryRange === option ? '' : option)}
+                          className={`p-2 rounded-lg border-2 text-center transition-all text-sm ${
+                            currentSalaryRange === option
+                              ? 'border-theme bg-theme-glass-10'
+                              : 'border-theme-muted hover:border-theme'
+                          }`}
+                        >
+                          <div className="font-semibold text-theme">{option}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -2148,6 +2187,66 @@ export default function CareerPathDesigner() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Existing Certifications */}
+                  <div>
+                    <label className="text-theme font-semibold mb-2 block">Certifications You Already Hold</label>
+                    {existingCertifications.length === 0 ? (
+                      <button
+                        onClick={() => setExistingCertifications([''])}
+                        className="text-theme-muted hover:text-theme text-sm"
+                      >
+                        + Add a certification
+                      </button>
+                    ) : (
+                      <>
+                        {existingCertifications.map((cert, idx) => (
+                          <input
+                            key={idx}
+                            type="text"
+                            value={cert}
+                            onChange={(e) => {
+                              const updated = [...existingCertifications]
+                              updated[idx] = e.target.value
+                              setExistingCertifications(updated)
+                            }}
+                            placeholder={`Cert ${idx + 1} (e.g., PMP, AWS SAA, CompTIA Security+)`}
+                            className="w-full px-4 py-3 bg-theme-glass-5 border-2 border-theme-subtle rounded-lg focus:border-theme focus:ring-0 text-theme placeholder-theme-tertiary mb-2"
+                          />
+                        ))}
+                        {existingCertifications.length < 10 && (
+                          <button
+                            onClick={() => setExistingCertifications([...existingCertifications, ''])}
+                            className="text-theme-muted hover:text-theme text-sm"
+                          >
+                            + Add another certification
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Training Budget */}
+                  <div>
+                    <label className="text-theme font-semibold mb-3 block">Training Budget</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {[
+                        'Under $500', '$500-2K', '$2K-5K', '$5K+', 'Employer pays',
+                      ].map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => setTrainingBudget(trainingBudget === option ? '' : option)}
+                          className={`p-3 rounded-lg border-2 text-center transition-all ${
+                            trainingBudget === option
+                              ? 'border-theme bg-theme-glass-10'
+                              : 'border-theme-muted hover:border-theme'
+                          }`}
+                        >
+                          <div className="font-semibold text-theme text-sm">{option}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -2230,6 +2329,60 @@ export default function CareerPathDesigner() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Biggest Concern */}
+                  <div>
+                    <label className="text-theme font-semibold mb-3 block">Biggest Concern About This Transition</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        'Not qualified enough', 'Too late to switch', "Can't afford it",
+                        "Don't know where to start", 'Impostor syndrome', 'Will take too long', 'Too risky',
+                      ].map((concern) => (
+                        <button
+                          key={concern}
+                          onClick={() => setBiggestConcern(biggestConcern === concern ? '' : concern)}
+                          className={`p-3 rounded-lg border-2 text-center transition-all ${
+                            biggestConcern === concern
+                              ? 'border-theme bg-theme-glass-10'
+                              : 'border-theme-muted hover:border-theme'
+                          }`}
+                        >
+                          <div className="font-semibold text-theme text-sm">{concern}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Already Started */}
+                  <div>
+                    <label className="text-theme font-semibold mb-3 block">Have you already started transitioning?</label>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setAlreadyStarted(!alreadyStarted)}
+                        className={`px-6 py-3 rounded-lg border-2 transition-all ${
+                          alreadyStarted
+                            ? 'border-theme bg-theme-glass-10'
+                            : 'border-theme-muted hover:border-theme'
+                        }`}
+                      >
+                        <div className="font-semibold text-theme text-sm">{alreadyStarted ? 'Yes' : 'No'}</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Steps Already Taken */}
+                  {alreadyStarted && (
+                    <div>
+                      <label className="text-theme font-semibold mb-2 block">What steps have you already taken?</label>
+                      <textarea
+                        value={stepsAlreadyTaken}
+                        onChange={(e) => setStepsAlreadyTaken(e.target.value)}
+                        placeholder="e.g., Completed AWS Cloud Practitioner, started learning Python on Coursera, attended a local tech meetup..."
+                        rows={3}
+                        className="w-full px-4 py-3 bg-theme-glass-5 border-2 border-theme-subtle rounded-lg focus:border-theme focus:ring-0 text-theme placeholder-theme-tertiary resize-none"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             )}

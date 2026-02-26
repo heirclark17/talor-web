@@ -175,6 +175,7 @@ function autoPopulateFromResume(
   setYearsExperience: (v: number) => void,
   setEducationLevel: (v: string) => void,
   setStrengths: (v: string[]) => void,
+  setTools?: (v: string[]) => void,
 ) {
   let experience = data.experience || [];
   let skills = data.skills || [];
@@ -209,6 +210,14 @@ function autoPopulateFromResume(
   // Infer top strengths
   const inferredStrengths = inferStrengths(experience, skills, data.summary || '');
   if (inferredStrengths.length > 0) setStrengths(inferredStrengths);
+
+  // Pre-fill tools from skills/technologies
+  if (setTools && Array.isArray(skills) && skills.length > 0) {
+    const toolsFromSkills = skills.slice(0, 5).map((s: any) => typeof s === 'string' ? s : s.name || '');
+    if (toolsFromSkills.filter((t: string) => t).length > 0) {
+      setTools(toolsFromSkills.filter((t: string) => t));
+    }
+  }
 }
 
 export default function CareerPathDesignerScreen() {
@@ -262,10 +271,14 @@ export default function CareerPathDesignerScreen() {
   const [educationLevel, setEducationLevel] = useState('bachelors');
   const [topTasks, setTopTasks] = useState<string[]>(['', '', '']);
   const [strengths, setStrengths] = useState<string[]>(['', '']);
+  const [currentSalaryRange, setCurrentSalaryRange] = useState('');
+  const [dislikes, setDislikes] = useState<string[]>([]);
 
   // Target Role Details (Step 2)
   const [targetRoleLevel, setTargetRoleLevel] = useState('mid-level');
   const [targetIndustries, setTargetIndustries] = useState<string[]>([]);
+  const [specificCompanies, setSpecificCompanies] = useState<string[]>(['']);
+  const [specificTechnologiesInterest, setSpecificTechnologiesInterest] = useState<string[]>([]);
 
   // Work Preferences (Step 3)
   const [timeline, setTimeline] = useState('6months');
@@ -278,9 +291,17 @@ export default function CareerPathDesignerScreen() {
   // Learning Preferences (Step 4)
   const [learningStyle, setLearningStyle] = useState<string[]>([]);
   const [technicalBackground, setTechnicalBackground] = useState('some-technical');
+  const [tools, setTools] = useState<string[]>(['', '', '']);
+  const [existingCertifications, setExistingCertifications] = useState<string[]>([]);
+  const [trainingBudget, setTrainingBudget] = useState('');
+  const [preferredPlatforms, setPreferredPlatforms] = useState<string[]>([]);
+  const [certificationAreasInterest, setCertificationAreasInterest] = useState<string[]>([]);
 
   // Motivation & Goals (Step 5)
   const [transitionMotivation, setTransitionMotivation] = useState<string[]>([]);
+  const [biggestConcern, setBiggestConcern] = useState('');
+  const [alreadyStarted, setAlreadyStarted] = useState(false);
+  const [stepsAlreadyTaken, setStepsAlreadyTaken] = useState('');
 
   // Fetch existing resumes when on upload step
   useFocusEffect(
@@ -384,6 +405,7 @@ export default function CareerPathDesignerScreen() {
           setYearsExperience,
           setEducationLevel,
           setStrengths,
+          setTools,
         );
       }
 
@@ -444,6 +466,7 @@ export default function CareerPathDesignerScreen() {
           setYearsExperience,
           setEducationLevel,
           setStrengths,
+          setTools,
         );
       }
 
@@ -482,24 +505,49 @@ export default function CareerPathDesignerScreen() {
 
     try {
       const intake = {
+        // Basic Profile
         current_role_title: currentRole || dreamRole,
         current_industry: currentIndustry || 'General',
         years_experience: yearsExperience,
         education_level: educationLevel,
         top_tasks: topTasks.filter(t => t.trim()),
+        tools: tools.filter(t => t.trim()),
         strengths: strengths.filter(s => s.trim()),
+        dislikes: dislikes,
+
+        // Target Role
         target_role_interest: dreamRole,
         target_role_level: targetRoleLevel,
         target_industries: targetIndustries,
+        specific_companies: specificCompanies.filter(c => c.trim()),
+
+        // Timeline & Availability
         time_per_week: timePerWeek,
         timeline: timeline,
         current_employment_status: currentEmploymentStatus,
+
+        // Location & Work Preferences
         location: location || 'Remote',
         willing_to_relocate: willingToRelocate,
         in_person_vs_remote: inPersonVsRemote,
+
+        // Learning Preferences
         learning_style: learningStyle,
+        preferred_platforms: preferredPlatforms,
         technical_background: technicalBackground,
+        specific_technologies_interest: specificTechnologiesInterest,
+        certification_areas_interest: certificationAreasInterest,
+
+        // Motivation & Goals
         transition_motivation: transitionMotivation,
+
+        // Enhanced fields
+        current_salary_range: currentSalaryRange || undefined,
+        existing_certifications: existingCertifications.filter(c => c.trim()),
+        training_budget: trainingBudget || undefined,
+        biggest_concern: biggestConcern || undefined,
+        already_started: alreadyStarted,
+        steps_already_taken: stepsAlreadyTaken.trim() || undefined,
       };
 
       // Try async generation first (better results with web research)
@@ -1151,6 +1199,62 @@ export default function CareerPathDesignerScreen() {
                       </TouchableOpacity>
                     )}
                   </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Current Salary Range</Text>
+                    <View style={styles.chipGrid}>
+                      {[
+                        'Under $40K', '$40-60K', '$60-80K', '$80-100K',
+                        '$100-130K', '$130-170K', '$170K+', 'Prefer not to say',
+                      ].map((option) => (
+                        <TouchableOpacity
+                          key={option}
+                          style={[
+                            styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                            currentSalaryRange === option && styles.chipSelected,
+                          ]}
+                          onPress={() => setCurrentSalaryRange(currentSalaryRange === option ? '' : option)}
+                        >
+                          <Text style={[
+                            styles.chipText,
+                            { color: colors.text },
+                            currentSalaryRange === option && { color: colors.background },
+                          ]}>
+                            {option}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>What do you dislike about your current work?</Text>
+                    <View style={styles.chipGrid}>
+                      {[
+                        'Repetitive tasks', 'No growth', 'Bad management', 'Low pay',
+                        'Long hours', 'No remote', 'No creativity',
+                      ].map((item) => (
+                        <TouchableOpacity
+                          key={item}
+                          style={[
+                            styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                            dislikes.includes(item) && styles.chipSelected,
+                          ]}
+                          onPress={() => toggleArrayItem(dislikes, setDislikes, item)}
+                        >
+                          <Text style={[
+                            styles.chipText,
+                            { color: colors.text },
+                            dislikes.includes(item) && { color: colors.background },
+                          ]}>
+                            {item}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
                 </View>
               </View>
             )}
@@ -1219,6 +1323,58 @@ export default function CareerPathDesignerScreen() {
                             targetIndustries.includes(industry) && { color: colors.background },
                           ]}>
                             {industry}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Dream Companies (up to 3)</Text>
+                    {specificCompanies.map((company, idx) => (
+                      <TextInput
+                        key={idx}
+                        style={[styles.input, styles.inputMargin, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
+                        value={company}
+                        onChangeText={(text) => {
+                          const updated = [...specificCompanies];
+                          updated[idx] = text;
+                          setSpecificCompanies(updated);
+                        }}
+                        placeholder={`Company ${idx + 1} (e.g., Google)`}
+                        placeholderTextColor={colors.textTertiary}
+                      />
+                    ))}
+                    {specificCompanies.length < 3 && (
+                      <TouchableOpacity onPress={() => setSpecificCompanies([...specificCompanies, ''])}>
+                        <Text style={styles.linkText}>+ Add another company</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Technologies You Want to Work With</Text>
+                    <View style={styles.chipGrid}>
+                      {[
+                        'Python', 'JavaScript', 'TypeScript', 'React', 'Node.js',
+                        'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes',
+                        'AI/ML', 'Data Science', 'Cybersecurity', 'Blockchain',
+                      ].map((tech) => (
+                        <TouchableOpacity
+                          key={tech}
+                          style={[
+                            styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                            specificTechnologiesInterest.includes(tech) && styles.chipSelected,
+                          ]}
+                          onPress={() => toggleArrayItem(specificTechnologiesInterest, setSpecificTechnologiesInterest, tech)}
+                        >
+                          <Text style={[
+                            styles.chipText,
+                            { color: colors.text },
+                            specificTechnologiesInterest.includes(tech) && { color: colors.background },
+                          ]}>
+                            {tech}
                           </Text>
                         </TouchableOpacity>
                       ))}
@@ -1434,6 +1590,143 @@ export default function CareerPathDesignerScreen() {
                       ))}
                     </View>
                   </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Tools/Software You Use Daily</Text>
+                    {tools.map((tool, idx) => (
+                      <TextInput
+                        key={idx}
+                        style={[styles.input, styles.inputMargin, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
+                        value={tool}
+                        onChangeText={(text) => {
+                          const updated = [...tools];
+                          updated[idx] = text;
+                          setTools(updated);
+                        }}
+                        placeholder={`Tool ${idx + 1} (e.g., Jira, Excel, Python)`}
+                        placeholderTextColor={colors.textTertiary}
+                      />
+                    ))}
+                    {tools.length < 8 && (
+                      <TouchableOpacity onPress={() => setTools([...tools, ''])}>
+                        <Text style={styles.linkText}>+ Add another tool</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Certifications You Already Hold</Text>
+                    {existingCertifications.length === 0 ? (
+                      <TouchableOpacity onPress={() => setExistingCertifications([''])}>
+                        <Text style={styles.linkText}>+ Add a certification</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <>
+                        {existingCertifications.map((cert, idx) => (
+                          <TextInput
+                            key={idx}
+                            style={[styles.input, styles.inputMargin, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
+                            value={cert}
+                            onChangeText={(text) => {
+                              const updated = [...existingCertifications];
+                              updated[idx] = text;
+                              setExistingCertifications(updated);
+                            }}
+                            placeholder={`Cert ${idx + 1} (e.g., PMP, AWS SAA)`}
+                            placeholderTextColor={colors.textTertiary}
+                          />
+                        ))}
+                        {existingCertifications.length < 10 && (
+                          <TouchableOpacity onPress={() => setExistingCertifications([...existingCertifications, ''])}>
+                            <Text style={styles.linkText}>+ Add another certification</Text>
+                          </TouchableOpacity>
+                        )}
+                      </>
+                    )}
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Training Budget</Text>
+                    <View style={styles.chipGrid}>
+                      {[
+                        'Under $500', '$500-2K', '$2K-5K', '$5K+', 'Employer pays',
+                      ].map((option) => (
+                        <TouchableOpacity
+                          key={option}
+                          style={[
+                            styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                            trainingBudget === option && styles.chipSelected,
+                          ]}
+                          onPress={() => setTrainingBudget(trainingBudget === option ? '' : option)}
+                        >
+                          <Text style={[
+                            styles.chipText,
+                            { color: colors.text },
+                            trainingBudget === option && { color: colors.background },
+                          ]}>
+                            {option}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Preferred Learning Platforms</Text>
+                    <View style={styles.chipGrid}>
+                      {[
+                        'Coursera', 'Udemy', 'YouTube', 'LinkedIn Learning',
+                        'Pluralsight', 'edX',
+                      ].map((platform) => (
+                        <TouchableOpacity
+                          key={platform}
+                          style={[
+                            styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                            preferredPlatforms.includes(platform) && styles.chipSelected,
+                          ]}
+                          onPress={() => toggleArrayItem(preferredPlatforms, setPreferredPlatforms, platform)}
+                        >
+                          <Text style={[
+                            styles.chipText,
+                            { color: colors.text },
+                            preferredPlatforms.includes(platform) && { color: colors.background },
+                          ]}>
+                            {platform}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Certification Areas of Interest</Text>
+                    <View style={styles.chipGrid}>
+                      {[
+                        'Cloud', 'Cybersecurity', 'Data Science', 'PMP',
+                        'Agile', 'DevOps', 'AI/ML',
+                      ].map((area) => (
+                        <TouchableOpacity
+                          key={area}
+                          style={[
+                            styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                            certificationAreasInterest.includes(area) && styles.chipSelected,
+                          ]}
+                          onPress={() => toggleArrayItem(certificationAreasInterest, setCertificationAreasInterest, area)}
+                        >
+                          <Text style={[
+                            styles.chipText,
+                            { color: colors.text },
+                            certificationAreasInterest.includes(area) && { color: colors.background },
+                          ]}>
+                            {area}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
                 </View>
               </View>
             )}
@@ -1480,6 +1773,71 @@ export default function CareerPathDesignerScreen() {
                       ))}
                     </View>
                   </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Biggest Concern About This Transition</Text>
+                    <View style={styles.chipGrid}>
+                      {[
+                        'Not qualified enough', 'Too late to switch', "Can't afford it",
+                        "Don't know where to start", 'Impostor syndrome', 'Will take too long', 'Too risky',
+                      ].map((concern) => (
+                        <TouchableOpacity
+                          key={concern}
+                          style={[
+                            styles.chip,
+                            { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                            biggestConcern === concern && styles.chipSelected,
+                          ]}
+                          onPress={() => setBiggestConcern(biggestConcern === concern ? '' : concern)}
+                        >
+                          <Text style={[
+                            styles.chipText,
+                            { color: colors.text },
+                            biggestConcern === concern && { color: colors.background },
+                          ]}>
+                            {concern}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={[styles.label, { color: colors.text }]}>Have you already started transitioning?</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                      <TouchableOpacity
+                        style={[
+                          styles.chip,
+                          { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent' },
+                          alreadyStarted && styles.chipSelected,
+                        ]}
+                        onPress={() => setAlreadyStarted(!alreadyStarted)}
+                      >
+                        <Text style={[
+                          styles.chipText,
+                          { color: colors.text },
+                          alreadyStarted && { color: colors.background },
+                        ]}>
+                          {alreadyStarted ? 'Yes' : 'No'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {alreadyStarted && (
+                    <View style={styles.formGroup}>
+                      <Text style={[styles.label, { color: colors.text }]}>What steps have you already taken?</Text>
+                      <TextInput
+                        style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text, minHeight: 80, textAlignVertical: 'top' }]}
+                        value={stepsAlreadyTaken}
+                        onChangeText={setStepsAlreadyTaken}
+                        placeholder="e.g., Completed AWS Cloud Practitioner, started learning Python on Coursera..."
+                        placeholderTextColor={colors.textTertiary}
+                        multiline
+                        numberOfLines={3}
+                      />
+                    </View>
+                  )}
                 </View>
               </View>
             )}
