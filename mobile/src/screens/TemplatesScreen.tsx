@@ -4,7 +4,7 @@
  * Updated: Fixed FileText reference error with custom renderer
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,14 +13,17 @@ import {
   StyleSheet,
   Dimensions,
   Modal,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { Check, Eye } from 'lucide-react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Check, Eye, Crown, Info, Upload, FileText, ChevronDown } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
-import { COLORS, TYPOGRAPHY, SPACING, FONTS } from '../utils/constants';
+import { COLORS, TYPOGRAPHY, SPACING, FONTS, ALPHA_COLORS } from '../utils/constants';
 import { useTheme } from '../hooks/useTheme';
+import { api } from '../api/client';
 
 const { width } = Dimensions.get('window');
 const TEMPLATE_WIDTH = (width - 48) / 2;
@@ -32,6 +35,17 @@ interface Template {
   description: string;
   accentColor: string;
   headerStyle: 'centered' | 'left' | 'sidebar' | 'bold' | 'split' | 'minimal';
+  atsScore: number;
+  isPremium: boolean;
+}
+
+interface ResumeOption {
+  id: number;
+  label: string;
+  type: 'base' | 'tailored';
+  filename?: string;
+  company?: string;
+  jobTitle?: string;
 }
 
 const templates: Template[] = [
@@ -42,6 +56,8 @@ const templates: Template[] = [
     description: 'Clean and professional design suitable for any industry',
     accentColor: '#2563EB',
     headerStyle: 'centered',
+    atsScore: 10,
+    isPremium: false,
   },
   {
     id: '2',
@@ -50,6 +66,8 @@ const templates: Template[] = [
     description: 'Modern design with bold typography and clean layout',
     accentColor: '#7C3AED',
     headerStyle: 'left',
+    atsScore: 9,
+    isPremium: false,
   },
   {
     id: '3',
@@ -58,6 +76,8 @@ const templates: Template[] = [
     description: 'Optimized for software engineers and technical roles',
     accentColor: '#059669',
     headerStyle: 'sidebar',
+    atsScore: 8,
+    isPremium: false,
   },
   {
     id: '4',
@@ -66,6 +86,8 @@ const templates: Template[] = [
     description: 'Eye-catching design for creative professionals',
     accentColor: '#DC2626',
     headerStyle: 'bold',
+    atsScore: 7,
+    isPremium: true,
   },
   {
     id: '5',
@@ -74,6 +96,8 @@ const templates: Template[] = [
     description: 'Sophisticated design for senior-level positions',
     accentColor: '#1E293B',
     headerStyle: 'split',
+    atsScore: 9,
+    isPremium: true,
   },
   {
     id: '6',
@@ -82,8 +106,16 @@ const templates: Template[] = [
     description: 'Minimalist design that focuses on content',
     accentColor: '#6B7280',
     headerStyle: 'minimal',
+    atsScore: 10,
+    isPremium: false,
   },
 ];
+
+function getAtsColor(score: number): string {
+  if (score >= 9) return COLORS.success;
+  if (score >= 7) return COLORS.primary;
+  return '#EAB308';
+}
 
 // Rendered template preview - no network required, no images needed.
 // Each style renders a distinct layout that visually represents the actual
@@ -347,10 +379,77 @@ const categories = ['All', 'Classic', 'Contemporary', 'Tech', 'Design', 'Leaders
 
 export default function TemplatesScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
   const { colors, isDark } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [previewVisible, setPreviewVisible] = useState(false);
+
+  // Resume selector state
+  const [resumeOptions, setResumeOptions] = useState<ResumeOption[]>([]);
+  const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null);
+  const [resumeType, setResumeType] = useState<'base' | 'tailored'>('base');
+  const [loadingResumes, setLoadingResumes] = useState(true);
+  const [resumeSelectorOpen, setResumeSelectorOpen] = useState(false);
+
+  // Load resumes on mount
+  useEffect(() => {
+    const loadResumes = async () => {
+      setLoadingResumes(true);
+      try {
+        // Fetch base resumes
+        const baseResult = await api.getResumes();
+        const baseResumes: ResumeOption[] = [];
+        if (baseResult.success && Array.isArray(baseResult.data)) {
+          baseResult.data.forEach((r: any) => {
+            baseResumes.push({
+              id: r.resume_id || r.id,
+              label: r.filename || r.original_filename || 'Resume',
+              type: 'base',
+              filename: r.filename || r.original_filename,
+            });
+          });
+        }
+
+        // Fetch tailored resumes
+        const tailoredResult = await api.listTailoredResumes();
+        const tailoredResumes: ResumeOption[] = [];
+        if (tailoredResult.success && Array.isArray(tailoredResult.data)) {
+          tailoredResult.data.forEach((r: any) => {
+            tailoredResumes.push({
+              id: r.id || r.tailored_resume_id,
+              label: `${r.job_title || r.jobTitle || 'Job'} - ${r.company || 'Company'}`,
+              type: 'tailored',
+              company: r.company,
+              jobTitle: r.job_title || r.jobTitle,
+            });
+          });
+        }
+
+        const allOptions = [...baseResumes, ...tailoredResumes];
+        setResumeOptions(allOptions);
+
+        // Check if we have a resumeId from navigation params (e.g., from batch tailor)
+        const params = route.params as any;
+        if (params?.resumeId) {
+          const targetId = Number(params.resumeId);
+          const match = allOptions.find((o) => o.id === targetId);
+          if (match) {
+            setSelectedResumeId(match.id);
+            setResumeType(match.type);
+          }
+        } else if (allOptions.length > 0) {
+          setSelectedResumeId(allOptions[0].id);
+          setResumeType(allOptions[0].type);
+        }
+      } catch (err) {
+        console.error('[Templates] Error loading resumes:', err);
+      } finally {
+        setLoadingResumes(false);
+      }
+    };
+    loadResumes();
+  }, [route.params]);
 
   const ds = useMemo(() => ({
     container: { backgroundColor: colors.background },
@@ -374,13 +473,34 @@ export default function TemplatesScreen() {
       ? templates
       : templates.filter((t) => t.category === selectedCategory);
 
+  const selectedResumeLabel = useMemo(() => {
+    const option = resumeOptions.find((o) => o.id === selectedResumeId);
+    return option?.label || 'Select a resume';
+  }, [resumeOptions, selectedResumeId]);
+
   const handleSelectTemplate = (templateId: string) => {
+    const tmpl = templates.find((t) => t.id === templateId);
+    if (tmpl?.isPremium) {
+      Alert.alert(
+        'Premium Template',
+        'This template requires a Pro subscription. Upgrade to access all premium templates.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'View Plans', onPress: () => (navigation as any).navigate('Pricing') },
+        ],
+      );
+      return;
+    }
     setSelectedTemplate(templateId);
   };
 
   const handleUseTemplate = () => {
     if (selectedTemplate) {
-      (navigation as any).navigate('ResumeBuilder', { templateId: selectedTemplate });
+      (navigation as any).navigate('ResumeBuilder', {
+        templateId: selectedTemplate,
+        resumeId: selectedResumeId,
+        resumeType,
+      });
     }
   };
 
@@ -398,8 +518,89 @@ export default function TemplatesScreen() {
           <Text style={[styles.title, ds.title]}>Resume Templates</Text>
         </View>
         <Text style={[styles.subtitle, ds.subtitle]}>
-          Choose a professional template to get started
+          Choose a professional, ATS-friendly template
         </Text>
+
+        {/* Resume Selector */}
+        {loadingResumes ? (
+          <View style={styles.resumeSelectorLoading}>
+            <ActivityIndicator size="small" color={COLORS.primary} />
+            <Text style={[styles.resumeSelectorLoadingText, { color: colors.textSecondary }]}>
+              Loading resumes...
+            </Text>
+          </View>
+        ) : resumeOptions.length === 0 ? (
+          <GlassCard style={styles.emptyResumeCard}>
+            <Upload size={24} color={colors.textSecondary} />
+            <Text style={[styles.emptyResumeText, { color: colors.textSecondary }]}>
+              Upload a resume first to preview with templates
+            </Text>
+            <GlassButton
+              variant="primary"
+              onPress={() => (navigation as any).navigate('UploadResume')}
+              style={styles.uploadButton}
+            >
+              <Text style={styles.uploadButtonText}>Upload Resume</Text>
+            </GlassButton>
+          </GlassCard>
+        ) : (
+          <TouchableOpacity
+            style={[styles.resumeSelector, { borderColor: colors.border }]}
+            onPress={() => setResumeSelectorOpen(!resumeSelectorOpen)}
+          >
+            <View style={styles.resumeSelectorInner}>
+              <FileText size={18} color={colors.textSecondary} />
+              <View style={styles.resumeSelectorTextContainer}>
+                <Text style={[styles.resumeSelectorLabel, { color: colors.textTertiary }]}>
+                  {resumeType === 'tailored' ? 'Tailored Resume' : 'Base Resume'}
+                </Text>
+                <Text style={[styles.resumeSelectorValue, { color: colors.text }]} numberOfLines={1}>
+                  {selectedResumeLabel}
+                </Text>
+              </View>
+            </View>
+            <ChevronDown size={18} color={colors.textTertiary} />
+          </TouchableOpacity>
+        )}
+
+        {/* Resume Selector Dropdown */}
+        {resumeSelectorOpen && resumeOptions.length > 0 && (
+          <GlassCard style={styles.resumeDropdown} padding={4}>
+            {resumeOptions.map((option) => (
+              <TouchableOpacity
+                key={`${option.type}-${option.id}`}
+                style={[
+                  styles.resumeDropdownItem,
+                  selectedResumeId === option.id && { backgroundColor: ALPHA_COLORS.primary.bg },
+                ]}
+                onPress={() => {
+                  setSelectedResumeId(option.id);
+                  setResumeType(option.type);
+                  setResumeSelectorOpen(false);
+                }}
+              >
+                <Text style={[styles.resumeDropdownType, { color: colors.textTertiary }]}>
+                  {option.type === 'tailored' ? 'TAILORED' : 'BASE'}
+                </Text>
+                <Text style={[styles.resumeDropdownLabel, { color: colors.text }]} numberOfLines={1}>
+                  {option.label}
+                </Text>
+                {selectedResumeId === option.id && <Check size={16} color={COLORS.primary} />}
+              </TouchableOpacity>
+            ))}
+          </GlassCard>
+        )}
+
+        {/* ATS Info Banner */}
+        <View style={[styles.atsBanner, { backgroundColor: isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.05)' }]}>
+          <Info size={14} color={COLORS.primary} />
+          <Text style={[styles.atsBannerText, { color: colors.textSecondary }]}>
+            ATS Score: Higher scores pass more applicant tracking systems.{' '}
+            <Text style={{ color: COLORS.success }}>9-10</Text> Excellent{' '}
+            <Text style={{ color: COLORS.primary }}>7-8</Text> Good{' '}
+            <Text style={{ color: '#EAB308' }}>5-6</Text> Fair
+          </Text>
+        </View>
 
         {/* Category Filter */}
         <ScrollView
@@ -463,12 +664,24 @@ export default function TemplatesScreen() {
                     )}
 
                     <View style={styles.templateInfo}>
-                      <Text style={[styles.templateName, ds.templateName]}>
-                        {template.name}
-                      </Text>
-                      <Text style={[styles.templateCategory, ds.templateCategory]}>
-                        {template.category}
-                      </Text>
+                      <View style={styles.templateInfoRow}>
+                        <Text style={[styles.templateName, ds.templateName]}>
+                          {template.name}
+                        </Text>
+                        {template.isPremium && (
+                          <Crown size={14} color="#EAB308" />
+                        )}
+                      </View>
+                      <View style={styles.templateInfoRow}>
+                        <Text style={[styles.templateCategory, ds.templateCategory]}>
+                          {template.category}
+                        </Text>
+                        <View style={[styles.atsBadge, { backgroundColor: getAtsColor(template.atsScore) + '20' }]}>
+                          <Text style={[styles.atsBadgeText, { color: getAtsColor(template.atsScore) }]}>
+                            ATS {template.atsScore}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
                   </GlassCard>
                 </TouchableOpacity>
@@ -477,15 +690,23 @@ export default function TemplatesScreen() {
           </View>
 
           {/* Selected Template Details */}
-          {selectedTemplate && (
+          {selectedTemplate && (() => {
+            const tmpl = templates.find((t) => t.id === selectedTemplate);
+            return tmpl ? (
             <GlassCard style={styles.detailsCard}>
-              {templates.find((t) => t.id === selectedTemplate) && (
                 <>
-                  <Text style={[styles.detailsTitle, ds.detailsTitle]}>
-                    {templates.find((t) => t.id === selectedTemplate)!.name}
-                  </Text>
+                  <View style={styles.detailsTitleRow}>
+                    <Text style={[styles.detailsTitle, ds.detailsTitle]}>
+                      {tmpl.name}
+                    </Text>
+                    <View style={[styles.atsScoreBadgeLarge, { backgroundColor: getAtsColor(tmpl.atsScore) + '20' }]}>
+                      <Text style={[styles.atsScoreBadgeLargeText, { color: getAtsColor(tmpl.atsScore) }]}>
+                        ATS Score: {tmpl.atsScore}/10
+                      </Text>
+                    </View>
+                  </View>
                   <Text style={[styles.detailsDescription, ds.detailsDescription]}>
-                    {templates.find((t) => t.id === selectedTemplate)!.description}
+                    {tmpl.description}
                   </Text>
 
                   <View style={styles.detailsActions}>
@@ -511,9 +732,9 @@ export default function TemplatesScreen() {
                     </GlassButton>
                   </View>
                 </>
-              )}
             </GlassCard>
-          )}
+            ) : null;
+          })()}
         </ScrollView>
       </View>
 
@@ -654,19 +875,49 @@ const styles = StyleSheet.create({
   templateInfo: {
     padding: 12,
   },
+  templateInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
   templateName: {
     ...TYPOGRAPHY.h6,
-    marginBottom: 4,
+    flex: 1,
   },
   templateCategory: {
     ...TYPOGRAPHY.caption1,
   },
+  atsBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  atsBadgeText: {
+    fontSize: 10,
+    fontFamily: FONTS.semibold,
+  },
   detailsCard: {
     padding: 20,
   },
+  detailsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
   detailsTitle: {
     ...TYPOGRAPHY.title3,
-    marginBottom: 8,
+    flex: 1,
+  },
+  atsScoreBadgeLarge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  atsScoreBadgeLargeText: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
   },
   detailsDescription: {
     ...TYPOGRAPHY.subhead,
@@ -739,5 +990,103 @@ const styles = StyleSheet.create({
     height: 500,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  // Resume selector styles
+  resumeSelectorLoading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    gap: 8,
+  },
+  resumeSelectorLoadingText: {
+    ...TYPOGRAPHY.subhead,
+  },
+  emptyResumeCard: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    alignItems: 'center',
+    padding: SPACING.xl,
+    gap: SPACING.sm,
+  },
+  emptyResumeText: {
+    ...TYPOGRAPHY.subhead,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
+  uploadButton: {
+    paddingHorizontal: SPACING.xl,
+  },
+  uploadButtonText: {
+    color: '#FFF',
+    fontFamily: FONTS.semibold,
+    fontSize: 14,
+  },
+  resumeSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderWidth: 1,
+    borderRadius: 12,
+  },
+  resumeSelectorInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: SPACING.sm,
+  },
+  resumeSelectorTextContainer: {
+    flex: 1,
+  },
+  resumeSelectorLabel: {
+    fontSize: 10,
+    fontFamily: FONTS.semibold,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  resumeSelectorValue: {
+    ...TYPOGRAPHY.subhead,
+    fontSize: 14,
+  },
+  resumeDropdown: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+  },
+  resumeDropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 8,
+    gap: SPACING.sm,
+  },
+  resumeDropdownType: {
+    fontSize: 9,
+    fontFamily: FONTS.semibold,
+    letterSpacing: 0.5,
+    width: 60,
+  },
+  resumeDropdownLabel: {
+    ...TYPOGRAPHY.subhead,
+    fontSize: 13,
+    flex: 1,
+  },
+  atsBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 8,
+    gap: 6,
+  },
+  atsBannerText: {
+    fontSize: 11,
+    flex: 1,
   },
 });

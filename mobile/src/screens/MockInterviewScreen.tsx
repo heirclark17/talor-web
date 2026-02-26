@@ -16,6 +16,8 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Share,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -31,6 +33,13 @@ import {
   TrendingUp,
   AlertCircle,
   Lightbulb,
+  Pause,
+  Square,
+  Check,
+  Star,
+  Download,
+  Share2,
+  HelpCircle,
 } from 'lucide-react-native';
 import { GlassCard } from '../components/glass/GlassCard';
 import { GlassButton } from '../components/glass/GlassButton';
@@ -40,11 +49,17 @@ import { api } from '../api/client';
 
 type InterviewType = 'behavioral' | 'technical' | 'company-specific';
 
+interface MessageFeedback {
+  strengths: string[];
+  improvements: string[];
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
+  feedback?: MessageFeedback;
 }
 
 interface Performance {
@@ -54,6 +69,38 @@ interface Performance {
   improvements: string[];
   tips: string[];
 }
+
+function getLetterGrade(score: number): { grade: string; color: string } {
+  if (score >= 9) return { grade: 'A', color: COLORS.success };
+  if (score >= 7) return { grade: 'B', color: COLORS.primary };
+  if (score >= 5) return { grade: 'C', color: '#EAB308' };
+  if (score >= 3) return { grade: 'D', color: COLORS.warning };
+  return { grade: 'F', color: COLORS.danger };
+}
+
+const INTERVIEW_TIPS: Record<InterviewType, string[]> = {
+  behavioral: [
+    'Use the STAR method: Situation, Task, Action, Result',
+    'Be specific with examples from your experience',
+    'Quantify results when possible (%, $, time)',
+    'Focus on YOUR contributions, not the team',
+    'Keep answers to 2-3 minutes each',
+  ],
+  technical: [
+    'Think out loud - explain your reasoning process',
+    'Ask clarifying questions before diving in',
+    'Start with a brute-force approach, then optimize',
+    'Consider edge cases and error handling',
+    'Discuss time and space complexity trade-offs',
+  ],
+  'company-specific': [
+    'Research the company mission and values beforehand',
+    'Show genuine enthusiasm for the role and company',
+    'Connect your experience to their specific needs',
+    'Ask thoughtful questions about the team and culture',
+    'Demonstrate cultural alignment with concrete examples',
+  ],
+};
 
 export default function MockInterviewScreen() {
   const navigation = useNavigation();
@@ -74,6 +121,8 @@ export default function MockInterviewScreen() {
   const [isComplete, setIsComplete] = useState(false);
   const [performance, setPerformance] = useState<Performance | null>(null);
   const [starting, setStarting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [showTips, setShowTips] = useState(false);
 
   const ds = useMemo(() => ({
     container: { backgroundColor: colors.background },
@@ -133,7 +182,7 @@ export default function MockInterviewScreen() {
   };
 
   const handleSend = async () => {
-    if (!inputText.trim() || sending || isComplete) return;
+    if (!inputText.trim() || sending || isComplete || isPaused) return;
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -163,6 +212,11 @@ export default function MockInterviewScreen() {
         role: 'assistant',
         content: data.message,
         timestamp: Date.now(),
+        // Capture per-message feedback from API
+        feedback: data.feedback ? {
+          strengths: data.feedback.strengths || [],
+          improvements: data.feedback.improvements || [],
+        } : undefined,
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -180,6 +234,45 @@ export default function MockInterviewScreen() {
       Alert.alert('Error', error.message || 'Failed to get response');
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleEndInterview = () => {
+    Alert.alert(
+      'End Interview',
+      'End the interview early and see your results?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'End Interview',
+          style: 'destructive',
+          onPress: () => {
+            setIsComplete(true);
+            // Generate a summary from what we have
+            if (!performance) {
+              setPerformance({
+                summary: `Interview ended early after ${questionNumber} of 10 questions.`,
+                score: 0,
+                strengths: [],
+                improvements: ['Complete all 10 questions for a full performance evaluation.'],
+                tips: ['Try completing the full interview next time for detailed feedback.'],
+              });
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const handleShareResults = async () => {
+    if (!performance) return;
+    try {
+      const { grade } = getLetterGrade(performance.score);
+      await Share.share({
+        message: `Mock Interview Results\n\nCompany: ${company}\nRole: ${jobTitle}\nScore: ${performance.score}/10 (${grade})\n\n${performance.summary}\n\nStrengths:\n${performance.strengths.map(s => `- ${s}`).join('\n')}\n\nAreas to Improve:\n${performance.improvements.map(s => `- ${s}`).join('\n')}\n\nPowered by Talor`,
+      });
+    } catch {
+      // User cancelled share
     }
   };
 
@@ -223,12 +316,34 @@ export default function MockInterviewScreen() {
         ]}>
           {item.content}
         </Text>
+        {/* Per-message feedback (from web) */}
+        {isAI && item.feedback && (item.feedback.strengths.length > 0 || item.feedback.improvements.length > 0) && (
+          <View style={[styles.inlineFeedback, { borderTopColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}>
+            <View style={styles.inlineFeedbackHeader}>
+              <Star size={12} color={COLORS.warning} />
+              <Text style={[styles.inlineFeedbackTitle, { color: colors.textSecondary }]}>Feedback</Text>
+            </View>
+            {item.feedback.strengths.map((s, i) => (
+              <View key={`s-${i}`} style={styles.inlineFeedbackRow}>
+                <Check size={12} color={COLORS.success} />
+                <Text style={[styles.inlineFeedbackText, { color: colors.textSecondary }]}>{s}</Text>
+              </View>
+            ))}
+            {item.feedback.improvements.map((s, i) => (
+              <View key={`i-${i}`} style={styles.inlineFeedbackRow}>
+                <AlertCircle size={12} color={COLORS.warning} />
+                <Text style={[styles.inlineFeedbackText, { color: colors.textSecondary }]}>{s}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     );
   };
 
   const renderPerformanceSummary = () => {
     if (!performance) return null;
+    const { grade, color: gradeColor } = getLetterGrade(performance.score);
 
     return (
       <GlassCard style={styles.performanceCard}>
@@ -237,9 +352,22 @@ export default function MockInterviewScreen() {
           <Text style={[styles.performanceTitle, { color: colors.text }]}>Interview Complete</Text>
         </View>
 
-        <View style={[styles.scoreCircle, { borderColor: COLORS.primary }]}>
-          <Text style={[styles.scoreText, { color: COLORS.primary }]}>{performance.score}/10</Text>
+        {/* Score + Grade row */}
+        <View style={styles.scoreRow}>
+          <View style={[styles.scoreCircle, { borderColor: gradeColor }]}>
+            <Text style={[styles.scoreText, { color: gradeColor }]}>{performance.score}/10</Text>
+          </View>
+          <View style={[styles.gradeBadge, { backgroundColor: gradeColor + '20' }]}>
+            <Text style={[styles.gradeText, { color: gradeColor }]}>{grade}</Text>
+          </View>
         </View>
+
+        {performance.score >= 7 && (
+          <View style={[styles.hireBadge, { backgroundColor: COLORS.success + '15' }]}>
+            <Check size={14} color={COLORS.success} />
+            <Text style={[styles.hireBadgeText, { color: COLORS.success }]}>Strong Candidate</Text>
+          </View>
+        )}
 
         <Text style={[styles.performanceSummary, { color: colors.textSecondary }]}>
           {performance.summary}
@@ -252,7 +380,10 @@ export default function MockInterviewScreen() {
               <Text style={[styles.perfSectionTitle, { color: COLORS.success }]}>Strengths</Text>
             </View>
             {performance.strengths.map((s, i) => (
-              <Text key={i} style={[styles.perfItem, { color: colors.text }]}>  {s}</Text>
+              <View key={i} style={styles.perfItemRow}>
+                <Check size={12} color={COLORS.success} />
+                <Text style={[styles.perfItem, { color: colors.text }]}>{s}</Text>
+              </View>
             ))}
           </View>
         )}
@@ -264,7 +395,10 @@ export default function MockInterviewScreen() {
               <Text style={[styles.perfSectionTitle, { color: COLORS.warning }]}>Areas to Improve</Text>
             </View>
             {performance.improvements.map((s, i) => (
-              <Text key={i} style={[styles.perfItem, { color: colors.text }]}>  {s}</Text>
+              <View key={i} style={styles.perfItemRow}>
+                <AlertCircle size={12} color={COLORS.warning} />
+                <Text style={[styles.perfItem, { color: colors.text }]}>{s}</Text>
+              </View>
             ))}
           </View>
         )}
@@ -273,29 +407,43 @@ export default function MockInterviewScreen() {
           <View style={styles.perfSection}>
             <View style={styles.perfSectionHeader}>
               <Lightbulb size={16} color={COLORS.primary} />
-              <Text style={[styles.perfSectionTitle, { color: COLORS.primary }]}>Tips</Text>
+              <Text style={[styles.perfSectionTitle, { color: COLORS.primary }]}>Recommendations</Text>
             </View>
             {performance.tips.map((s, i) => (
-              <Text key={i} style={[styles.perfItem, { color: colors.text }]}>  {s}</Text>
+              <View key={i} style={styles.perfItemRow}>
+                <View style={[styles.recNumberBadge, { backgroundColor: COLORS.primary + '20' }]}>
+                  <Text style={[styles.recNumber, { color: COLORS.primary }]}>{i + 1}</Text>
+                </View>
+                <Text style={[styles.perfItem, { color: colors.text }]}>{s}</Text>
+              </View>
             ))}
           </View>
         )}
 
-        <GlassButton
-          onPress={() => {
-            setMessages([]);
-            setInputText('');
-            setQuestionNumber(0);
-            setIsComplete(false);
-            setPerformance(null);
-            setShowChat(false);
-          }}
-          variant="primary"
-          style={styles.newInterviewButton}
-        >
-          <RotateCcw size={18} color="#FFF" />
-          <Text style={styles.newInterviewText}>Start New Interview</Text>
-        </GlassButton>
+        {/* Action buttons */}
+        <View style={styles.perfActions}>
+          <GlassButton
+            onPress={() => {
+              setMessages([]);
+              setInputText('');
+              setQuestionNumber(0);
+              setIsComplete(false);
+              setPerformance(null);
+              setIsPaused(false);
+              setShowChat(false);
+            }}
+            variant="primary"
+            style={styles.newInterviewButton}
+          >
+            <RotateCcw size={18} color="#FFF" />
+            <Text style={styles.newInterviewText}>Try Again</Text>
+          </GlassButton>
+
+          <TouchableOpacity onPress={handleShareResults} style={[styles.shareButton, { borderColor: colors.border }]}>
+            <Share2 size={16} color={colors.textSecondary} />
+            <Text style={[styles.shareButtonText, { color: colors.textSecondary }]}>Share</Text>
+          </TouchableOpacity>
+        </View>
       </GlassCard>
     );
   };
@@ -319,13 +467,33 @@ export default function MockInterviewScreen() {
                 {company} - {jobTitle}
               </Text>
               <Text style={[styles.chatHeaderSub, { color: colors.textTertiary }]}>
-                {isComplete ? 'Interview Complete' : `Question ${questionNumber} of 10`}
+                {isComplete ? 'Interview Complete' : isPaused ? 'Paused' : `Question ${questionNumber} of 10`}
               </Text>
             </View>
-            <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
-              <RotateCcw size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
+            <View style={styles.chatHeaderActions}>
+              <TouchableOpacity onPress={() => setShowTips(true)} style={styles.headerActionBtn}>
+                <HelpCircle size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
+              {!isComplete && (
+                <TouchableOpacity onPress={() => setIsPaused(!isPaused)} style={styles.headerActionBtn}>
+                  {isPaused ? <Play size={18} color={COLORS.success} /> : <Pause size={18} color={colors.textSecondary} />}
+                </TouchableOpacity>
+              )}
+              {!isComplete && (
+                <TouchableOpacity onPress={handleEndInterview} style={styles.headerActionBtn}>
+                  <Square size={16} color={COLORS.danger} />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
+
+          {/* Paused indicator */}
+          {isPaused && !isComplete && (
+            <View style={[styles.pausedBanner, { backgroundColor: COLORS.warning + '15' }]}>
+              <Pause size={14} color={COLORS.warning} />
+              <Text style={[styles.pausedText, { color: COLORS.warning }]}>Interview paused - tap play to resume</Text>
+            </View>
+          )}
 
           {/* Progress bar */}
           <View style={[styles.progressTrack, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}>
@@ -367,32 +535,87 @@ export default function MockInterviewScreen() {
               <TextInput
                 value={inputText}
                 onChangeText={setInputText}
-                placeholder="Type your response..."
+                placeholder={isPaused ? 'Interview paused...' : 'Type your response...'}
                 placeholderTextColor={colors.textTertiary}
                 style={[styles.chatInput, ds.textInput]}
                 multiline
                 maxLength={2000}
-                editable={!sending}
+                editable={!sending && !isPaused}
                 onSubmitEditing={handleSend}
                 blurOnSubmit={false}
               />
               <TouchableOpacity
                 onPress={handleSend}
-                disabled={sending || !inputText.trim()}
+                disabled={sending || !inputText.trim() || isPaused}
                 style={[
                   styles.sendBtn,
-                  { backgroundColor: inputText.trim() ? COLORS.primary : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)') },
+                  { backgroundColor: inputText.trim() && !isPaused ? COLORS.primary : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)') },
                 ]}
               >
                 {sending ? (
                   <ActivityIndicator size="small" color="#FFF" />
                 ) : (
-                  <Send size={18} color={inputText.trim() ? '#FFF' : colors.textTertiary} />
+                  <Send size={18} color={inputText.trim() && !isPaused ? '#FFF' : colors.textTertiary} />
                 )}
               </TouchableOpacity>
             </View>
           )}
         </KeyboardAvoidingView>
+
+        {/* Tips Modal */}
+        <Modal visible={showTips} transparent animationType="slide" onRequestClose={() => setShowTips(false)}>
+          <View style={styles.tipsOverlay}>
+            <TouchableOpacity style={styles.tipsBackdrop} activeOpacity={1} onPress={() => setShowTips(false)} />
+            <View style={[styles.tipsSheet, { backgroundColor: colors.background }]}>
+              <View style={styles.tipsHandle} />
+              <View style={styles.tipsHeader}>
+                <Award size={20} color={COLORS.warning} />
+                <Text style={[styles.tipsTitle, { color: colors.text }]}>Interview Tips</Text>
+                <TouchableOpacity onPress={() => setShowTips(false)}>
+                  <Text style={[styles.tipsDone, { color: COLORS.primary }]}>Done</Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.tipsContent} showsVerticalScrollIndicator={false}>
+                <Text style={[styles.tipsTypeLabel, { color: colors.textTertiary }]}>
+                  {interviewType === 'behavioral' ? 'BEHAVIORAL' : interviewType === 'technical' ? 'TECHNICAL' : 'COMPANY-SPECIFIC'} TIPS
+                </Text>
+                {INTERVIEW_TIPS[interviewType].map((tip, i) => (
+                  <View key={i} style={styles.tipRow}>
+                    <View style={[styles.tipBullet, { backgroundColor: COLORS.primary + '20' }]}>
+                      <Text style={[styles.tipBulletText, { color: COLORS.primary }]}>{i + 1}</Text>
+                    </View>
+                    <Text style={[styles.tipText, { color: colors.text }]}>{tip}</Text>
+                  </View>
+                ))}
+
+                <Text style={[styles.tipsTypeLabel, { color: colors.textTertiary, marginTop: SPACING.lg }]}>
+                  GENERAL TIPS
+                </Text>
+                {[
+                  'Listen carefully to each question before responding',
+                  'Take a moment to organize your thoughts',
+                  'Be concise - aim for 2-3 minute responses',
+                  'Show enthusiasm and genuine interest',
+                  'Ask clarifying questions when needed',
+                ].map((tip, i) => (
+                  <View key={`g-${i}`} style={styles.tipRow}>
+                    <View style={[styles.tipBullet, { backgroundColor: COLORS.success + '20' }]}>
+                      <Lightbulb size={12} color={COLORS.success} />
+                    </View>
+                    <Text style={[styles.tipText, { color: colors.text }]}>{tip}</Text>
+                  </View>
+                ))}
+
+                <View style={styles.tipResponseCount}>
+                  <Text style={[styles.tipResponseCountText, { color: colors.textSecondary }]}>
+                    {messages.filter(m => m.role === 'user').length} responses so far
+                  </Text>
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     );
   }
@@ -532,7 +755,10 @@ const styles = StyleSheet.create({
   chatHeaderInfo: { flex: 1, marginHorizontal: 12 },
   chatHeaderTitle: { fontSize: 16, fontWeight: '600' },
   chatHeaderSub: { fontSize: 12, marginTop: 2 },
-  resetButton: { padding: 8 },
+  chatHeaderActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  headerActionBtn: { padding: 8 },
+  pausedBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 8, gap: 6 },
+  pausedText: { fontSize: 13, fontWeight: '500' },
   progressTrack: { height: 3 },
   progressFill: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 2 },
   messagesList: { padding: 16, paddingBottom: 24 },
@@ -548,17 +774,52 @@ const styles = StyleSheet.create({
   chatInput: { flex: 1, borderWidth: 1, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, maxHeight: 100, minHeight: 40 },
   sendBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
 
+  // Per-message feedback
+  inlineFeedback: { borderTopWidth: 1, marginTop: 10, paddingTop: 8 },
+  inlineFeedbackHeader: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 6 },
+  inlineFeedbackTitle: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  inlineFeedbackRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, marginBottom: 3 },
+  inlineFeedbackText: { fontSize: 12, lineHeight: 16, flex: 1 },
+
   // Performance summary
   performanceCard: { padding: 20, marginTop: 16 },
   performanceHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
   performanceTitle: { fontSize: 20, fontWeight: 'bold' },
-  scoreCircle: { width: 80, height: 80, borderRadius: 40, borderWidth: 3, alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 16 },
+  scoreRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 16 },
+  scoreCircle: { width: 80, height: 80, borderRadius: 40, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
   scoreText: { fontSize: 24, fontWeight: 'bold' },
+  gradeBadge: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  gradeText: { fontSize: 28, fontWeight: 'bold' },
+  hireBadge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8, borderRadius: 8, marginBottom: 16 },
+  hireBadgeText: { fontSize: 14, fontWeight: '600' },
   performanceSummary: { fontSize: 15, lineHeight: 22, marginBottom: 20, textAlign: 'center' },
   perfSection: { marginBottom: 16 },
   perfSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   perfSectionTitle: { fontSize: 14, fontWeight: '600' },
-  perfItem: { fontSize: 14, lineHeight: 20, marginBottom: 4, paddingLeft: 4 },
-  newInterviewButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16 },
+  perfItemRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 6 },
+  perfItem: { fontSize: 14, lineHeight: 20, flex: 1 },
+  recNumberBadge: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  recNumber: { fontSize: 11, fontWeight: '600' },
+  perfActions: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16 },
+  newInterviewButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   newInterviewText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  shareButton: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderRadius: 12 },
+  shareButtonText: { fontSize: 14, fontWeight: '500' },
+
+  // Tips modal
+  tipsOverlay: { flex: 1, justifyContent: 'flex-end' },
+  tipsBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)' },
+  tipsSheet: { borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%', paddingBottom: 40 },
+  tipsHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: 'rgba(128,128,128,0.3)', alignSelf: 'center', marginTop: 8 },
+  tipsHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(128,128,128,0.15)' },
+  tipsTitle: { fontSize: 18, fontWeight: '600', flex: 1 },
+  tipsDone: { fontSize: 15, fontWeight: '600' },
+  tipsContent: { paddingHorizontal: 20, paddingTop: 16 },
+  tipsTypeLabel: { fontSize: 11, fontWeight: '600', letterSpacing: 1, marginBottom: 12 },
+  tipRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 12 },
+  tipBullet: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
+  tipBulletText: { fontSize: 12, fontWeight: '600' },
+  tipText: { fontSize: 14, lineHeight: 20, flex: 1 },
+  tipResponseCount: { alignItems: 'center', paddingVertical: 16 },
+  tipResponseCountText: { fontSize: 13 },
 });
