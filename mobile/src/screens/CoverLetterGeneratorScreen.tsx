@@ -31,6 +31,9 @@ import {
   ChevronDown,
   ChevronUp,
   Settings2,
+  Bookmark,
+  Briefcase,
+  MapPin,
 } from 'lucide-react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { api } from '../api/client';
@@ -60,8 +63,18 @@ interface ResumeItem {
   uploadedAt: string;
 }
 
+interface SavedJob {
+  id: number;
+  url: string;
+  company: string;
+  title: string;
+  location: string;
+  salary: string;
+  created_at: string | null;
+}
+
 type ResumeSource = 'none' | 'existing' | 'upload';
-type JobInputMethod = 'text' | 'url';
+type JobInputMethod = 'text' | 'url' | 'saved';
 
 interface FieldErrors {
   jobTitle?: string;
@@ -120,6 +133,11 @@ export default function CoverLetterGeneratorScreen() {
   const [extracting, setExtracting] = useState(false);
   const [extractionError, setExtractionError] = useState<{ company?: string; title?: string }>({});
 
+  // Saved jobs state
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
+  const [loadingSavedJobs, setLoadingSavedJobs] = useState(false);
+  const [selectedSavedJobId, setSelectedSavedJobId] = useState<number | null>(null);
+
   // Resume picker state
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null);
@@ -143,6 +161,7 @@ export default function CoverLetterGeneratorScreen() {
   useEffect(() => {
     loadLetters();
     loadResumes();
+    loadSavedJobs();
   }, []);
 
   async function loadLetters() {
@@ -171,6 +190,28 @@ export default function CoverLetterGeneratorScreen() {
     } finally {
       setLoadingResumes(false);
     }
+  }
+
+  async function loadSavedJobs() {
+    setLoadingSavedJobs(true);
+    try {
+      const res = await api.getSavedJobs();
+      if (res.success && res.data) {
+        setSavedJobs(res.data);
+      }
+    } catch (err) {
+      console.error('Error loading saved jobs:', err);
+    } finally {
+      setLoadingSavedJobs(false);
+    }
+  }
+
+  function handleSelectSavedJob(job: SavedJob) {
+    setSelectedSavedJobId(job.id);
+    setCompanyName(job.company);
+    setJobTitle(job.title);
+    setJobUrl(job.url);
+    setFieldErrors({});
   }
 
   async function handleExtract() {
@@ -292,6 +333,7 @@ export default function CoverLetterGeneratorScreen() {
     setCompanyExtracted(false);
     setTitleExtracted(false);
     setExtractionError({});
+    setSelectedSavedJobId(null);
     setResumeSource('none');
     setSelectedResumeId(null);
     setTone('professional');
@@ -315,6 +357,9 @@ export default function CoverLetterGeneratorScreen() {
     }
     if (jobInputMethod === 'url' && !jobUrl.trim()) {
       errors.jobUrl = 'Job URL is required';
+    }
+    if (jobInputMethod === 'saved' && !selectedSavedJobId) {
+      errors.jobUrl = 'Please select a saved job';
     }
 
     setFieldErrors(errors);
@@ -340,9 +385,9 @@ export default function CoverLetterGeneratorScreen() {
         focus,
       };
 
-      if (jobInputMethod === 'url') {
+      if (jobInputMethod === 'url' || jobInputMethod === 'saved') {
         params.jobUrl = jobUrl;
-        if (extractionAttempted && jobDescription) {
+        if (jobDescription) {
           params.jobDescription = jobDescription;
         }
       } else {
@@ -555,58 +600,114 @@ export default function CoverLetterGeneratorScreen() {
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>How would you like to provide the job details?</Text>
         <View style={styles.methodToggle}>
-          <TouchableOpacity
-            style={[
-              styles.methodButton,
-              {
-                backgroundColor: jobInputMethod === 'text' ? ALPHA_COLORS.primary.bg : (isDark ? ALPHA_COLORS.white[10] : colors.backgroundSecondary),
-                borderColor: jobInputMethod === 'text' ? ALPHA_COLORS.primary.border : (isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20]),
-              },
-            ]}
-            onPress={() => {
-              setJobInputMethod('text');
-              setExtractionAttempted(false);
-              setCompanyExtracted(false);
-              setTitleExtracted(false);
-              setExtractionError({});
-              setFieldErrors(prev => ({ ...prev, jobUrl: undefined }));
-            }}
-            activeOpacity={0.7}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: jobInputMethod === 'text' }}
-            accessibilityLabel="Paste Text: Manually enter job details"
-          >
-            <Type color={jobInputMethod === 'text' ? COLORS.primary : colors.textSecondary} size={18} />
-            <Text style={[styles.methodLabel, { color: jobInputMethod === 'text' ? COLORS.primary : colors.text }]}>Paste Text</Text>
-            <Text style={[styles.methodDesc, { color: colors.textTertiary }]}>Manually enter job details</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.methodButton,
-              {
-                backgroundColor: jobInputMethod === 'url' ? ALPHA_COLORS.primary.bg : (isDark ? ALPHA_COLORS.white[10] : colors.backgroundSecondary),
-                borderColor: jobInputMethod === 'url' ? ALPHA_COLORS.primary.border : (isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20]),
-              },
-            ]}
-            onPress={() => {
-              setJobInputMethod('url');
-              setExtractionAttempted(false);
-              setCompanyExtracted(false);
-              setTitleExtracted(false);
-              setExtractionError({});
-              setFieldErrors(prev => ({ ...prev, jobDescription: undefined }));
-            }}
-            activeOpacity={0.7}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: jobInputMethod === 'url' }}
-            accessibilityLabel="Enter URL: Extract from job posting"
-          >
-            <Link color={jobInputMethod === 'url' ? COLORS.primary : colors.textSecondary} size={18} />
-            <Text style={[styles.methodLabel, { color: jobInputMethod === 'url' ? COLORS.primary : colors.text }]}>Enter URL</Text>
-            <Text style={[styles.methodDesc, { color: colors.textTertiary }]}>Extract from job posting</Text>
-          </TouchableOpacity>
+          {([
+            { key: 'saved' as JobInputMethod, icon: Bookmark, label: 'Saved Jobs', desc: `${savedJobs.length} saved` },
+            { key: 'text' as JobInputMethod, icon: Type, label: 'Paste Text', desc: 'Enter manually' },
+            { key: 'url' as JobInputMethod, icon: Link, label: 'Enter URL', desc: 'Extract from link' },
+          ]).map(({ key, icon: Icon, label, desc }) => {
+            const isActive = jobInputMethod === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[
+                  styles.methodButton,
+                  {
+                    backgroundColor: isActive ? ALPHA_COLORS.primary.bg : (isDark ? ALPHA_COLORS.white[10] : colors.backgroundSecondary),
+                    borderColor: isActive ? ALPHA_COLORS.primary.border : (isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20]),
+                  },
+                ]}
+                onPress={() => {
+                  setJobInputMethod(key);
+                  setExtractionAttempted(false);
+                  setCompanyExtracted(false);
+                  setTitleExtracted(false);
+                  setExtractionError({});
+                  setFieldErrors(prev => ({ ...prev, jobUrl: undefined, jobDescription: undefined }));
+                  if (key !== 'saved') setSelectedSavedJobId(null);
+                }}
+                activeOpacity={0.7}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isActive }}
+                accessibilityLabel={`${label}: ${desc}`}
+              >
+                <Icon color={isActive ? COLORS.primary : colors.textSecondary} size={18} />
+                <Text style={[styles.methodLabel, { color: isActive ? COLORS.primary : colors.text }]}>{label}</Text>
+                <Text style={[styles.methodDesc, { color: colors.textTertiary }]}>{desc}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
+
+      {/* Saved Jobs Picker */}
+      {jobInputMethod === 'saved' && (
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { color: colors.text }]}>Select a saved job</Text>
+          {loadingSavedJobs ? (
+            <ActivityIndicator color={COLORS.primary} style={{ paddingVertical: SPACING.lg }} />
+          ) : savedJobs.length === 0 ? (
+            <View style={[styles.savedJobsEmpty, { backgroundColor: isDark ? ALPHA_COLORS.white[5] : colors.backgroundSecondary, borderColor: isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20] }]}>
+              <Bookmark color={colors.textTertiary} size={24} />
+              <Text style={[styles.savedJobsEmptyText, { color: colors.textSecondary }]}>
+                No saved jobs yet. Jobs you extract or tailor resumes for are saved automatically.
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.savedJobsList}>
+              {savedJobs.map((job) => {
+                const isSelected = selectedSavedJobId === job.id;
+                return (
+                  <TouchableOpacity
+                    key={job.id}
+                    style={[
+                      styles.savedJobCard,
+                      {
+                        backgroundColor: isSelected ? ALPHA_COLORS.primary.bg : (isDark ? ALPHA_COLORS.white[5] : colors.backgroundSecondary),
+                        borderColor: isSelected ? ALPHA_COLORS.primary.border : (isDark ? GLASS.getBorderColor() : ALPHA_COLORS.white[20]),
+                      },
+                    ]}
+                    onPress={() => handleSelectSavedJob(job)}
+                    activeOpacity={0.7}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    accessibilityLabel={`${job.title} at ${job.company}`}
+                  >
+                    <View style={styles.savedJobCardRow}>
+                      {isSelected ? (
+                        <CheckCircle color={COLORS.primary} size={20} />
+                      ) : (
+                        <Circle color={colors.textSecondary} size={20} />
+                      )}
+                      <View style={styles.savedJobCardText}>
+                        <Text style={[styles.savedJobTitle, { color: isSelected ? COLORS.primary : colors.text }]} numberOfLines={1}>
+                          {job.title}
+                        </Text>
+                        <View style={styles.savedJobMeta}>
+                          <Briefcase color={colors.textTertiary} size={12} />
+                          <Text style={[styles.savedJobCompany, { color: colors.textSecondary }]} numberOfLines={1}>
+                            {job.company}
+                          </Text>
+                          {job.location ? (
+                            <>
+                              <MapPin color={colors.textTertiary} size={12} />
+                              <Text style={[styles.savedJobLocation, { color: colors.textTertiary }]} numberOfLines={1}>
+                                {job.location}
+                              </Text>
+                            </>
+                          ) : null}
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+          {fieldErrors.jobUrl && jobInputMethod === 'saved' && (
+            <Text style={styles.errorText}>{fieldErrors.jobUrl}</Text>
+          )}
+        </View>
+      )}
 
       {/* URL Input */}
       {jobInputMethod === 'url' && (
@@ -1296,6 +1397,58 @@ const styles = StyleSheet.create({
   },
   methodDesc: {
     fontSize: 11,
+    fontFamily: FONTS.regular,
+    lineHeight: 16,
+  },
+  // Saved jobs picker
+  savedJobsEmpty: {
+    padding: SPACING.lg,
+    borderRadius: GLASS.getCornerRadius('medium'),
+    borderWidth: 1,
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  savedJobsEmptyText: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
+  savedJobsList: {
+    gap: SPACING.sm,
+  },
+  savedJobCard: {
+    padding: SPACING.md,
+    borderRadius: GLASS.getCornerRadius('medium'),
+    borderWidth: 1,
+  },
+  savedJobCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  savedJobCardText: {
+    flex: 1,
+  },
+  savedJobTitle: {
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    lineHeight: 20,
+    marginBottom: 2,
+  },
+  savedJobMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  savedJobCompany: {
+    fontSize: 12,
+    fontFamily: FONTS.regular,
+    lineHeight: 16,
+    marginRight: SPACING.xs,
+  },
+  savedJobLocation: {
+    fontSize: 12,
     fontFamily: FONTS.regular,
     lineHeight: 16,
   },
