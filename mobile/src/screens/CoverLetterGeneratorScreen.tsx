@@ -401,14 +401,20 @@ export default function CoverLetterGeneratorScreen() {
       const res = await api.generateCoverLetter(params);
 
       if (res.success && res.data) {
+        // Extract the cover letter from the response before any state transitions
+        const generatedLetter = res.data.cover_letter || res.data.coverLetter || null;
+
         await loadLetters();
         setShowGenerator(false);
         resetGeneratorForm();
 
-        if (res.data.cover_letter || res.data.coverLetter) {
-          const letter = res.data.cover_letter || res.data.coverLetter;
-          setSelectedCoverLetter(letter);
-          setModalVisible(true);
+        // Show the detail modal with the generated cover letter
+        if (generatedLetter) {
+          // Use setTimeout to ensure the generator-to-list transition renders first
+          setTimeout(() => {
+            setSelectedCoverLetter(generatedLetter);
+            setModalVisible(true);
+          }, 100);
         }
       } else {
         Alert.alert('Error', res.error || 'Generation failed. Please try again.');
