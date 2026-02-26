@@ -31,6 +31,7 @@ import {
   AlertCircle,
   FolderOpen,
   Briefcase,
+  Link2,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../api/client';
@@ -280,6 +281,9 @@ export default function CareerPathDesignerScreen() {
 
   // Basic Profile (Step 1)
   const [dreamRole, setDreamRole] = useState('');
+  const [dreamRoleMethod, setDreamRoleMethod] = useState<'type' | 'url' | null>(null);
+  const [jobUrl, setJobUrl] = useState('');
+  const [extractingJob, setExtractingJob] = useState(false);
   const [currentRole, setCurrentRole] = useState('');
   const [currentIndustry, setCurrentIndustry] = useState('');
   const [yearsExperience, setYearsExperience] = useState(5);
@@ -537,6 +541,7 @@ export default function CareerPathDesignerScreen() {
         target_role_level: targetRoleLevel,
         target_industries: targetIndustries,
         specific_companies: specificCompanies.filter(c => c.trim()),
+        job_url: jobUrl.trim() || undefined,
 
         // Timeline & Availability
         time_per_week: timePerWeek,
@@ -727,13 +732,40 @@ export default function CareerPathDesignerScreen() {
     }
   };
 
-  const handleNextQuestionStep = () => {
+  const handleNextQuestionStep = async () => {
     // Validate current step
     if (questionStep === 1) {
       const validTopTasks = topTasks.filter(t => t.trim()).length >= 3;
       const validStrengths = strengths.filter(s => s.trim()).length >= 2;
 
-      if (!dreamRole.trim()) {
+      // If user has a job URL but no dream role, try to extract it first
+      if (!dreamRole.trim() && jobUrl.trim()) {
+        setExtractingJob(true);
+        try {
+          const result = await api.extractJobDetails(jobUrl.trim());
+          if (result.success && result.data) {
+            const title = result.data.job_title || result.data.title || result.data.Title || '';
+            if (title) {
+              setDreamRole(title);
+              // Continue validation with extracted title
+            } else {
+              setError('Could not extract role from URL. Please enter your dream role manually.');
+              setExtractingJob(false);
+              return;
+            }
+          } else {
+            setError('Could not extract role from URL. Please enter your dream role manually.');
+            setExtractingJob(false);
+            return;
+          }
+        } catch (err) {
+          setError('Could not extract role from URL. Please enter your dream role manually.');
+          setExtractingJob(false);
+          return;
+        } finally {
+          setExtractingJob(false);
+        }
+      } else if (!dreamRole.trim()) {
         setError('Please provide your dream role');
         return;
       }
@@ -1105,15 +1137,124 @@ export default function CareerPathDesignerScreen() {
 
                 <View style={styles.formContainer}>
                   <View style={styles.formGroup}>
-                    <Text style={[styles.label, { color: colors.text }]}>Dream Role or Career Goal *</Text>
-                    <TextInput
-                      style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
-                      value={dreamRole}
-                      onChangeText={setDreamRole}
-                      placeholder="e.g., Senior Cloud Security Architect"
-                      placeholderTextColor={colors.textTertiary}
-                    />
+                    <Text style={[styles.label, { color: colors.text }]}>How would you like to target your next role?</Text>
+                    <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
+                      <TouchableOpacity
+                        style={[
+                          styles.chip,
+                          { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent', flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12 },
+                          dreamRoleMethod === 'type' && styles.chipSelected,
+                        ]}
+                        onPress={() => setDreamRoleMethod(dreamRoleMethod === 'type' ? null : 'type')}
+                      >
+                        <Lightbulb size={16} color={dreamRoleMethod === 'type' ? colors.background : colors.text} />
+                        <Text style={[styles.chipText, { color: colors.text }, dreamRoleMethod === 'type' && { color: colors.background }]}>I know my role</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[
+                          styles.chip,
+                          { backgroundColor: colors.backgroundTertiary, borderColor: isDark ? colors.glassBorder : 'transparent', flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12 },
+                          dreamRoleMethod === 'url' && styles.chipSelected,
+                        ]}
+                        onPress={() => setDreamRoleMethod(dreamRoleMethod === 'url' ? null : 'url')}
+                      >
+                        <Link2 size={16} color={dreamRoleMethod === 'url' ? colors.background : colors.text} />
+                        <Text style={[styles.chipText, { color: colors.text }, dreamRoleMethod === 'url' && { color: colors.background }]}>I have a job posting</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
+
+                  {dreamRoleMethod === 'type' && (
+                    <View style={styles.formGroup}>
+                      <Text style={[styles.label, { color: colors.text }]}>Dream Role or Career Goal *</Text>
+                      <TextInput
+                        style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
+                        value={dreamRole}
+                        onChangeText={setDreamRole}
+                        placeholder="e.g., Senior Cloud Security Architect"
+                        placeholderTextColor={colors.textTertiary}
+                      />
+                    </View>
+                  )}
+
+                  {dreamRoleMethod === 'url' && (
+                    <View style={styles.formGroup}>
+                      <Text style={[styles.label, { color: colors.text }]}>Job Posting URL</Text>
+                      <TextInput
+                        style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
+                        value={jobUrl}
+                        onChangeText={setJobUrl}
+                        placeholder="https://linkedin.com/jobs/... or any job posting URL"
+                        placeholderTextColor={colors.textTertiary}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        keyboardType="url"
+                      />
+                      <Text style={{ color: colors.textTertiary, fontSize: 11, marginTop: 4 }}>Job details will be extracted automatically</Text>
+
+                      <View style={{ marginTop: 12 }}>
+                        <Text style={[styles.label, { color: colors.text }]}>
+                          Dream Role{' '}
+                          <Text style={{ fontWeight: '400', fontSize: 11, color: colors.textSecondary }}>(auto-filled from URL or enter manually)</Text>
+                          {extractingJob && <Text style={{ fontWeight: '400', fontSize: 11, color: colors.textSecondary }}> extracting...</Text>}
+                        </Text>
+                        <TextInput
+                          style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
+                          value={dreamRole}
+                          onChangeText={setDreamRole}
+                          placeholder="e.g., Senior Cloud Security Architect"
+                          placeholderTextColor={colors.textTertiary}
+                        />
+                      </View>
+
+                      {jobUrl.trim() && !dreamRole.trim() && (
+                        <TouchableOpacity
+                          style={[styles.chip, styles.chipSelected, { marginTop: 8, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 10, paddingHorizontal: 16 }]}
+                          onPress={async () => {
+                            setExtractingJob(true);
+                            try {
+                              const result = await api.extractJobDetails(jobUrl.trim());
+                              if (result.success && result.data) {
+                                const title = result.data.job_title || result.data.title || result.data.Title || '';
+                                if (title) setDreamRole(title);
+                              }
+                            } catch (err) {
+                              // Extraction failed silently - user can type manually
+                            } finally {
+                              setExtractingJob(false);
+                            }
+                          }}
+                          disabled={extractingJob}
+                        >
+                          {extractingJob ? (
+                            <ActivityIndicator size="small" color={colors.background} />
+                          ) : (
+                            <Sparkles size={14} color={colors.background} />
+                          )}
+                          <Text style={[styles.chipText, { color: colors.background }]}>
+                            {extractingJob ? 'Extracting...' : 'Extract Role from URL'}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
+
+                  {/* Show dream role field if no method selected yet (backward compat) */}
+                  {dreamRoleMethod === null && (
+                    <View style={styles.formGroup}>
+                      <Text style={[styles.label, { color: colors.text }]}>Dream Role or Career Goal *</Text>
+                      <TextInput
+                        style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
+                        value={dreamRole}
+                        onChangeText={(text) => {
+                          setDreamRole(text);
+                          if (text.trim()) setDreamRoleMethod('type');
+                        }}
+                        placeholder="e.g., Senior Cloud Security Architect"
+                        placeholderTextColor={colors.textTertiary}
+                      />
+                    </View>
+                  )}
 
                   <View style={styles.formGroup}>
                     <Text style={[styles.label, { color: colors.text }]}>Current Role Title</Text>
