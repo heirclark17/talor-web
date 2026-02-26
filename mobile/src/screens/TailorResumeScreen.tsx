@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -17,8 +17,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   Target, Link, FileText, ChevronDown, Sparkles, Building2, ArrowLeft,
   Check, Download, RefreshCw, Bookmark, Briefcase, ChevronRight, BarChart3,
-  Key, Share2, BookOpen, ClipboardCheck, Clock, X, History
+  Key, Share2, BookOpen, ClipboardCheck, Clock, X, History,
+  Edit3, Save, Plus, Trash2, ChevronUp, Copy, CheckCircle2,
+  ChevronsDown, ChevronsUp,
 } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Clipboard from 'expo-clipboard';
 import { MatchScore, KeywordPanel, ResumeAnalysis } from '../components';
 import { GlassButton } from '../components/glass/GlassButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -32,6 +36,8 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { ScreenContainer } from '../components/layout';
 import { NumberText } from '../components/ui';
 import { usePostHog } from '../contexts/PostHogContext';
+
+const TAILOR_SESSION_KEY = 'tailor_session_data';
 
 interface BaseResumeData {
   id: number;
@@ -99,6 +105,40 @@ export default function TailorResumeScreen() {
 
   // Saved jobs state
   const [savedJobs, setSavedJobs] = useState<any[]>([]);
+
+  // Edit mode state
+  const [editMode, setEditMode] = useState<Record<string, boolean>>({});
+  const [editedContent, setEditedContent] = useState<Record<string, string>>({});
+  const [editedSkills, setEditedSkills] = useState<string[] | null>(null);
+  const [editedExperience, setEditedExperience] = useState<any[] | null>(null);
+  const [newSkill, setNewSkill] = useState('');
+  const [savingSection, setSavingSection] = useState<string | null>(null);
+
+  // Show changes toggle
+  const [showChanges, setShowChanges] = useState(true);
+
+  // Expand/collapse sections
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    summary: true,
+    skills: true,
+    experience: true,
+    education: true,
+    certifications: true,
+    alignment: true,
+  });
+
+  // Title options
+  const [titleOptionsOpen, setTitleOptionsOpen] = useState<number | null>(null);
+  const [customTitleEdit, setCustomTitleEdit] = useState<{ index: number; value: string } | null>(null);
+
+  // Copy state
+  const [copiedSection, setCopiedSection] = useState<string | null>(null);
+
+  // Next step prompt
+  const [showNextStepPrompt, setShowNextStepPrompt] = useState(false);
+
+  // Analysis progress
+  const [analysisProgress, setAnalysisProgress] = useState<string>('');
 
   // Set selected resume when resumes are loaded
   useEffect(() => {
@@ -228,6 +268,7 @@ export default function TailorResumeScreen() {
         // Show the comparison view
         setShowComparison(true);
         setActiveTab('tailored');
+        setShowNextStepPrompt(true);
       } else {
         console.error('Tailoring failed:', result.error);
         Alert.alert('Error', result.error || 'Failed to tailor resume. Please try again.');
@@ -245,23 +286,38 @@ export default function TailorResumeScreen() {
     setBaseResumeData(null);
     setTailoredResumeData(null);
     setAnalysisData(null);
+    setKeywordsData(null);
     setJobUrl('');
     setCompany('');
     setJobTitle('');
     setActiveTab('tailored');
+    setShowNextStepPrompt(false);
+    setEditMode({});
+    setEditedContent({});
+    setEditedSkills(null);
+    setEditedExperience(null);
+    clearSession();
   };
 
-  const loadAnalysis = async () => {
+  const loadAnalysis = async (forceRefresh: boolean = false) => {
     if (!tailoredResumeData || loadingAnalysis) return;
 
     setLoadingAnalysis(true);
+    setAnalysisProgress(forceRefresh ? 'Refreshing AI analysis...' : 'Loading AI analysis...');
     try {
-      const result = await api.analyzeAll(tailoredResumeData.id);
+      const result = await api.analyzeAll(tailoredResumeData.id, forceRefresh);
       if (result.success && result.data) {
         setAnalysisData(result.data);
+        if (result.data.keywords) setKeywordsData(result.data.keywords);
+        setAnalysisProgress(
+          result.data.cached
+            ? `Analysis loaded from cache`
+            : `Analysis complete`
+        );
       }
     } catch (error) {
       console.error('Error loading analysis:', error);
+      setAnalysisProgress('Error loading analysis');
     } finally {
       setLoadingAnalysis(false);
     }
@@ -384,6 +440,242 @@ export default function TailorResumeScreen() {
     }
   };
 
+  // ── Session Persistence ──
+  const saveSession = useCallback(async () => {
+    if (!tailoredResumeData || !baseResumeData) return;
+    try {
+      const sessionData = {
+        baseResumeData,
+        tailoredResumeData,
+        jobUrl,
+        company,
+        jobTitle,
+        analysisData,
+        keywordsData,
+        timestamp: Date.now(),
+      };
+      await AsyncStorage.setItem(TAILOR_SESSION_KEY, JSON.stringify(sessionData));
+    } catch {}
+  }, [tailoredResumeData, baseResumeData, jobUrl, company, jobTitle, analysisData, keywordsData]);
+
+  // Auto-save session when data changes
+  useEffect(() => {
+    if (tailoredResumeData && baseResumeData) {
+      saveSession();
+    }
+  }, [tailoredResumeData, baseResumeData, analysisData, keywordsData, saveSession]);
+
+  // Restore session on mount
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const raw = await AsyncStorage.getItem(TAILOR_SESSION_KEY);
+        if (!raw) return;
+        const session = JSON.parse(raw);
+        if (session.tailoredResumeData && session.baseResumeData) {
+          setBaseResumeData(session.baseResumeData);
+          setTailoredResumeData(session.tailoredResumeData);
+          setJobUrl(session.jobUrl || '');
+          setCompany(session.company || '');
+          setJobTitle(session.jobTitle || '');
+          if (session.analysisData) setAnalysisData(session.analysisData);
+          if (session.keywordsData) setKeywordsData(session.keywordsData);
+          setShowComparison(true);
+        }
+      } catch {}
+    };
+    if (!showComparison && !tailoredResumeData) {
+      restoreSession();
+    }
+  }, []);
+
+  const clearSession = useCallback(async () => {
+    try {
+      await AsyncStorage.removeItem(TAILOR_SESSION_KEY);
+    } catch {}
+  }, []);
+
+  // ── Edit Mode Functions ──
+  const toggleEditMode = (section: string) => {
+    if (editMode[section]) {
+      // Exiting edit mode without saving
+      setEditedContent((prev) => {
+        const next = { ...prev };
+        delete next[section];
+        return next;
+      });
+      if (section === 'skills') setEditedSkills(null);
+      if (section === 'experience') setEditedExperience(null);
+    } else {
+      // Entering edit mode - initialize copies
+      if (section === 'skills' && tailoredResumeData) {
+        setEditedSkills([...tailoredResumeData.competencies]);
+      }
+      if (section === 'experience' && tailoredResumeData) {
+        setEditedExperience(JSON.parse(JSON.stringify(tailoredResumeData.experience)));
+      }
+      if (section === 'summary' && tailoredResumeData) {
+        setEditedContent((prev) => ({ ...prev, summary: tailoredResumeData.summary }));
+      }
+      if (section === 'alignment' && tailoredResumeData) {
+        setEditedContent((prev) => ({ ...prev, alignment: tailoredResumeData.alignment_statement }));
+      }
+    }
+    setEditMode((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const saveEdit = async (section: string) => {
+    if (!tailoredResumeData) return;
+    setSavingSection(section);
+
+    const updatePayload: any = {};
+    if (section === 'summary' && editedContent.summary !== undefined) {
+      updatePayload.summary = editedContent.summary;
+    } else if (section === 'skills' && editedSkills) {
+      updatePayload.competencies = editedSkills;
+    } else if (section === 'experience' && editedExperience) {
+      updatePayload.experience = editedExperience;
+    } else if (section === 'alignment' && editedContent.alignment !== undefined) {
+      updatePayload.alignment_statement = editedContent.alignment;
+    }
+
+    if (Object.keys(updatePayload).length === 0) {
+      setSavingSection(null);
+      setEditMode((prev) => ({ ...prev, [section]: false }));
+      return;
+    }
+
+    try {
+      const result = await api.updateTailoredResume(tailoredResumeData.id, updatePayload);
+      if (result.data?.success !== false) {
+        // Update local state
+        setTailoredResumeData((prev: any) => {
+          if (!prev) return prev;
+          const updated = { ...prev };
+          if (updatePayload.summary !== undefined) updated.summary = updatePayload.summary;
+          if (updatePayload.competencies) updated.competencies = updatePayload.competencies;
+          if (updatePayload.experience) updated.experience = updatePayload.experience;
+          if (updatePayload.alignment_statement !== undefined) updated.alignment_statement = updatePayload.alignment_statement;
+          return updated;
+        });
+        setEditMode((prev) => ({ ...prev, [section]: false }));
+        setEditedSkills(null);
+        setEditedExperience(null);
+      } else {
+        Alert.alert('Error', 'Failed to save changes');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to save changes');
+    } finally {
+      setSavingSection(null);
+    }
+  };
+
+  // Skills helpers
+  const deleteSkill = (index: number) => {
+    setEditedSkills((prev) => prev ? prev.filter((_, i) => i !== index) : prev);
+  };
+
+  const addSkill = () => {
+    if (newSkill.trim() && editedSkills) {
+      setEditedSkills([...editedSkills, newSkill.trim()]);
+      setNewSkill('');
+    }
+  };
+
+  // Experience helpers
+  const updateExperience = (index: number, field: string, value: string) => {
+    setEditedExperience((prev) => {
+      if (!prev) return prev;
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
+  const updateExperienceBullet = (expIndex: number, bulletIndex: number, value: string) => {
+    setEditedExperience((prev) => {
+      if (!prev) return prev;
+      const updated = JSON.parse(JSON.stringify(prev));
+      updated[expIndex].bullets[bulletIndex] = value;
+      return updated;
+    });
+  };
+
+  const deleteExperienceBullet = (expIndex: number, bulletIndex: number) => {
+    setEditedExperience((prev) => {
+      if (!prev) return prev;
+      const updated = JSON.parse(JSON.stringify(prev));
+      updated[expIndex].bullets.splice(bulletIndex, 1);
+      return updated;
+    });
+  };
+
+  const addExperienceBullet = (expIndex: number) => {
+    setEditedExperience((prev) => {
+      if (!prev) return prev;
+      const updated = JSON.parse(JSON.stringify(prev));
+      if (!updated[expIndex].bullets) updated[expIndex].bullets = [];
+      updated[expIndex].bullets.push('');
+      return updated;
+    });
+  };
+
+  // Title options
+  const selectTitleOption = async (expIndex: number, selectedTitle: string) => {
+    if (!tailoredResumeData) return;
+    const updatedExperience = JSON.parse(JSON.stringify(tailoredResumeData.experience));
+    const exp = updatedExperience[expIndex];
+    const currentHeader = exp.header || '';
+    const dashIndex = currentHeader.indexOf(' – ');
+    const suffix = dashIndex !== -1 ? currentHeader.substring(dashIndex) : '';
+    exp.header = selectedTitle + suffix;
+
+    setTailoredResumeData((prev: any) => prev ? { ...prev, experience: updatedExperience } : prev);
+    setTitleOptionsOpen(null);
+    setCustomTitleEdit(null);
+
+    try {
+      await api.updateTailoredResume(tailoredResumeData.id, { experience: updatedExperience });
+    } catch {}
+  };
+
+  const saveCustomTitle = (expIndex: number) => {
+    if (customTitleEdit && customTitleEdit.value.trim()) {
+      selectTitleOption(expIndex, customTitleEdit.value.trim());
+    }
+  };
+
+  // Copy to clipboard
+  const handleCopy = async (content: string, section: string) => {
+    try {
+      await Clipboard.setStringAsync(content);
+      setCopiedSection(section);
+      setTimeout(() => setCopiedSection(null), 2000);
+    } catch {
+      Alert.alert('Error', 'Failed to copy to clipboard');
+    }
+  };
+
+  // Section expand/collapse
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const toggleExpandAll = () => {
+    const allExpanded = Object.values(expandedSections).every((v) => v);
+    const newState = Object.keys(expandedSections).reduce<Record<string, boolean>>(
+      (acc, key) => ({ ...acc, [key]: !allExpanded }),
+      {}
+    );
+    setExpandedSections(newState);
+  };
+
+  // Show changes check
+  const hasChanged = (original: string | undefined, tailored: string | undefined): boolean => {
+    return (original || '') !== (tailored || '');
+  };
+
   const selectedResume = resumes?.find((r) => r.id === selectedResumeId);
 
   // Loading state
@@ -418,11 +710,92 @@ export default function TailorResumeScreen() {
           </View>
         </View>
 
-        {/* Success Banner */}
-        <View style={styles.successBanner}>
-          <Check color={COLORS.success} size={20} />
-          <Text style={styles.successText}>Resume Successfully Tailored!</Text>
-        </View>
+        {/* Next Step Prompt */}
+        {showNextStepPrompt && (
+          <View style={[styles.nextStepPrompt, { backgroundColor: ALPHA_COLORS.primary.bg, borderColor: ALPHA_COLORS.primary.border }]}>
+            <View style={styles.nextStepContent}>
+              <Check color={COLORS.success} size={20} />
+              <Text style={[styles.nextStepText, { color: colors.text }]}>Resume tailored! What's next?</Text>
+              <TouchableOpacity onPress={() => setShowNextStepPrompt(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <X color={colors.textTertiary} size={16} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.nextStepActions}>
+              <TouchableOpacity
+                style={[styles.nextStepButton, { backgroundColor: COLORS.primary }]}
+                onPress={() => {
+                  setShowNextStepPrompt(false);
+                  navigation.navigate('CoverLetters' as any);
+                }}
+              >
+                <BookOpen color="#fff" size={16} />
+                <Text style={styles.nextStepButtonText}>Cover Letter</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.nextStepButton, { backgroundColor: COLORS.purple }]}
+                onPress={() => {
+                  setShowNextStepPrompt(false);
+                  handleViewInterviewPrep();
+                }}
+              >
+                <Briefcase color="#fff" size={16} />
+                <Text style={styles.nextStepButtonText}>Interview Prep</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.nextStepButtonOutline, { borderColor: colors.border }]}
+                onPress={() => {
+                  setShowNextStepPrompt(false);
+                  showExportOptions();
+                }}
+              >
+                <Download color={colors.textSecondary} size={16} />
+                <Text style={[styles.nextStepButtonOutlineText, { color: colors.textSecondary }]}>Download</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Toolbar: Show Changes + Expand/Collapse */}
+        {activeTab === 'tailored' && (
+          <View style={styles.comparisonToolbar}>
+            <TouchableOpacity
+              style={[styles.toolbarButton, showChanges && { backgroundColor: ALPHA_COLORS.success.bg }]}
+              onPress={() => setShowChanges(!showChanges)}
+            >
+              <Sparkles color={showChanges ? COLORS.success : colors.textSecondary} size={14} />
+              <Text style={[styles.toolbarButtonText, { color: showChanges ? COLORS.success : colors.textSecondary }]}>
+                {showChanges ? 'Changes On' : 'Changes Off'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.toolbarButton}
+              onPress={toggleExpandAll}
+            >
+              {Object.values(expandedSections).every((v) => v) ? (
+                <ChevronsUp color={colors.textSecondary} size={14} />
+              ) : (
+                <ChevronsDown color={colors.textSecondary} size={14} />
+              )}
+              <Text style={[styles.toolbarButtonText, { color: colors.textSecondary }]}>
+                {Object.values(expandedSections).every((v) => v) ? 'Collapse' : 'Expand'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.toolbarButton}
+              onPress={() => tailoredResumeData && loadAnalysis(true)}
+              disabled={loadingAnalysis}
+            >
+              <RefreshCw
+                color={loadingAnalysis ? COLORS.primary : colors.textSecondary}
+                size={14}
+                style={loadingAnalysis ? { opacity: 0.5 } : undefined}
+              />
+              <Text style={[styles.toolbarButtonText, { color: loadingAnalysis ? COLORS.primary : colors.textSecondary }]}>
+                {loadingAnalysis ? 'Refreshing' : 'Refresh'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Tab Switcher */}
         <ScrollView
@@ -547,97 +920,399 @@ export default function TailorResumeScreen() {
                 </View>
               </View>
             </View>
-          ) : (
-            // Tailored Resume Content
+          ) : activeTab === 'tailored' ? (
+            // Tailored Resume Content with Edit Mode + Show Changes
             <View>
-              {/* Summary - Highlighted as changed */}
-              <View style={[styles.comparisonSection, styles.changedSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
-                <View style={styles.sectionHeaderRow}>
-                  <Text style={[styles.sectionHeader, { color: colors.text }]}>Professional Summary</Text>
-                  <View style={styles.changedBadge}>
-                    <Text style={styles.changedBadgeText}>Enhanced</Text>
+              {/* Professional Summary */}
+              <View style={[
+                styles.comparisonSection,
+                showChanges && hasChanged(baseResumeData.summary, tailoredResumeData.summary) && styles.changedSection,
+                { backgroundColor: colors.glass, borderColor: colors.glassBorder },
+              ]}>
+                <TouchableOpacity style={styles.sectionHeaderRow} onPress={() => toggleSection('summary')}>
+                  <View style={styles.sectionHeaderLeft}>
+                    {expandedSections.summary ? <ChevronDown color={colors.textTertiary} size={16} /> : <ChevronRight color={colors.textTertiary} size={16} />}
+                    <Text style={[styles.sectionHeader, { color: colors.text, padding: 0 }]}>Professional Summary</Text>
                   </View>
-                </View>
-                <View style={styles.sectionContent}>
-                  <Text style={[styles.sectionText, { color: colors.text }]}>
-                    {tailoredResumeData.summary}
-                  </Text>
-                </View>
+                  <View style={styles.sectionHeaderActions}>
+                    {showChanges && hasChanged(baseResumeData.summary, tailoredResumeData.summary) && (
+                      <View style={styles.changedBadge}><Text style={styles.changedBadgeText}>Enhanced</Text></View>
+                    )}
+                    <TouchableOpacity
+                      onPress={() => handleCopy(tailoredResumeData.summary, 'summary')}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      {copiedSection === 'summary' ? <Check color={COLORS.success} size={16} /> : <Copy color={colors.textTertiary} size={16} />}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => editMode.summary ? saveEdit('summary') : toggleEditMode('summary')}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      {savingSection === 'summary' ? (
+                        <ActivityIndicator size="small" color={COLORS.primary} />
+                      ) : editMode.summary ? (
+                        <Save color={COLORS.primary} size={16} />
+                      ) : (
+                        <Edit3 color={colors.textTertiary} size={16} />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+                {expandedSections.summary && (
+                  <View style={styles.sectionContent}>
+                    {editMode.summary ? (
+                      <View>
+                        <TextInput
+                          style={[styles.editTextArea, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                          value={editedContent.summary ?? tailoredResumeData.summary}
+                          onChangeText={(text) => setEditedContent((prev) => ({ ...prev, summary: text }))}
+                          multiline
+                          textAlignVertical="top"
+                        />
+                        <View style={styles.editActions}>
+                          <TouchableOpacity style={styles.editCancelButton} onPress={() => toggleEditMode('summary')}>
+                            <Text style={[styles.editCancelText, { color: colors.textSecondary }]}>Cancel</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ) : (
+                      <Text style={[styles.sectionText, { color: colors.text }]}>
+                        {tailoredResumeData.summary}
+                      </Text>
+                    )}
+                  </View>
+                )}
               </View>
 
-              {/* Core Competencies - Highlighted as changed */}
-              <View style={[styles.comparisonSection, styles.changedSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
-                <View style={styles.sectionHeaderRow}>
-                  <Text style={[styles.sectionHeader, { color: colors.text }]}>Core Competencies</Text>
-                  <View style={styles.changedBadge}>
-                    <Text style={styles.changedBadgeText}>Tailored</Text>
+              {/* Core Competencies */}
+              <View style={[
+                styles.comparisonSection,
+                showChanges && styles.changedSection,
+                { backgroundColor: colors.glass, borderColor: colors.glassBorder },
+              ]}>
+                <TouchableOpacity style={styles.sectionHeaderRow} onPress={() => toggleSection('skills')}>
+                  <View style={styles.sectionHeaderLeft}>
+                    {expandedSections.skills ? <ChevronDown color={colors.textTertiary} size={16} /> : <ChevronRight color={colors.textTertiary} size={16} />}
+                    <Text style={[styles.sectionHeader, { color: colors.text, padding: 0 }]}>Core Competencies</Text>
                   </View>
-                </View>
-                <View style={styles.skillsContainer}>
-                  {tailoredResumeData.competencies.map((skill, index) => (
-                    <View key={index} style={[styles.skillPill, styles.tailoredSkillPill]}>
-                      <Text style={[styles.skillText, { color: colors.text }]}>{skill}</Text>
+                  <View style={styles.sectionHeaderActions}>
+                    {showChanges && <View style={styles.changedBadge}><Text style={styles.changedBadgeText}>Tailored</Text></View>}
+                    <TouchableOpacity
+                      onPress={() => editMode.skills ? saveEdit('skills') : toggleEditMode('skills')}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      {savingSection === 'skills' ? (
+                        <ActivityIndicator size="small" color={COLORS.primary} />
+                      ) : editMode.skills ? (
+                        <Save color={COLORS.primary} size={16} />
+                      ) : (
+                        <Edit3 color={colors.textTertiary} size={16} />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+                {expandedSections.skills && (
+                  <View style={styles.skillsContainer}>
+                    {editMode.skills ? (
+                      <View style={{ width: '100%', gap: SPACING.sm }}>
+                        <View style={styles.editSkillsWrap}>
+                          {(editedSkills || tailoredResumeData.competencies).map((skill, index) => (
+                            <View key={index} style={[styles.skillPill, styles.tailoredSkillPill, styles.editSkillPill]}>
+                              <Text style={[styles.skillText, { color: colors.text }]}>{skill}</Text>
+                              <TouchableOpacity onPress={() => deleteSkill(index)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                                <X color={COLORS.danger} size={12} />
+                              </TouchableOpacity>
+                            </View>
+                          ))}
+                        </View>
+                        <View style={styles.addSkillRow}>
+                          <TextInput
+                            style={[styles.addSkillInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                            value={newSkill}
+                            onChangeText={setNewSkill}
+                            placeholder="Add a skill..."
+                            placeholderTextColor={colors.textTertiary}
+                            onSubmitEditing={addSkill}
+                            returnKeyType="done"
+                          />
+                          <TouchableOpacity style={styles.addSkillButton} onPress={addSkill}>
+                            <Plus color="#fff" size={16} />
+                          </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity style={styles.editCancelButton} onPress={() => toggleEditMode('skills')}>
+                          <Text style={[styles.editCancelText, { color: colors.textSecondary }]}>Cancel</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      tailoredResumeData.competencies.map((skill, index) => (
+                        <View key={index} style={[styles.skillPill, styles.tailoredSkillPill]}>
+                          <Text style={[styles.skillText, { color: colors.text }]}>{skill}</Text>
+                        </View>
+                      ))
+                    )}
+                  </View>
+                )}
+              </View>
+
+              {/* Experience */}
+              <View style={[
+                styles.comparisonSection,
+                showChanges && styles.changedSection,
+                { backgroundColor: colors.glass, borderColor: colors.glassBorder },
+              ]}>
+                <TouchableOpacity style={styles.sectionHeaderRow} onPress={() => toggleSection('experience')}>
+                  <View style={styles.sectionHeaderLeft}>
+                    {expandedSections.experience ? <ChevronDown color={colors.textTertiary} size={16} /> : <ChevronRight color={colors.textTertiary} size={16} />}
+                    <Text style={[styles.sectionHeader, { color: colors.text, padding: 0 }]}>Experience</Text>
+                  </View>
+                  <View style={styles.sectionHeaderActions}>
+                    {showChanges && <View style={styles.changedBadge}><Text style={styles.changedBadgeText}>Reframed</Text></View>}
+                    <TouchableOpacity
+                      onPress={() => editMode.experience ? saveEdit('experience') : toggleEditMode('experience')}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      {savingSection === 'experience' ? (
+                        <ActivityIndicator size="small" color={COLORS.primary} />
+                      ) : editMode.experience ? (
+                        <Save color={COLORS.primary} size={16} />
+                      ) : (
+                        <Edit3 color={colors.textTertiary} size={16} />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+                {expandedSections.experience && (
+                  editMode.experience ? (
+                    // Edit mode for experience
+                    <View style={{ padding: SPACING.md, gap: SPACING.lg }}>
+                      {(editedExperience || tailoredResumeData.experience).map((exp, index) => (
+                        <View key={index} style={[styles.editExperienceItem, { borderColor: colors.border }]}>
+                          <TextInput
+                            style={[styles.editExperienceTitle, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                            value={exp.header}
+                            onChangeText={(text) => updateExperience(index, 'header', text)}
+                            placeholder="Job title - Company"
+                            placeholderTextColor={colors.textTertiary}
+                          />
+                          {exp.location !== undefined && (
+                            <TextInput
+                              style={[styles.editExperienceField, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                              value={exp.location || ''}
+                              onChangeText={(text) => updateExperience(index, 'location', text)}
+                              placeholder="Location"
+                              placeholderTextColor={colors.textTertiary}
+                            />
+                          )}
+                          {exp.dates !== undefined && (
+                            <TextInput
+                              style={[styles.editExperienceField, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                              value={exp.dates || ''}
+                              onChangeText={(text) => updateExperience(index, 'dates', text)}
+                              placeholder="Dates"
+                              placeholderTextColor={colors.textTertiary}
+                            />
+                          )}
+                          <Text style={[styles.editBulletsLabel, { color: colors.textSecondary }]}>Bullet Points</Text>
+                          {(exp.bullets || []).map((bullet: string, bIndex: number) => (
+                            <View key={bIndex} style={styles.editBulletRow}>
+                              <TextInput
+                                style={[styles.editBulletInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                                value={bullet}
+                                onChangeText={(text) => updateExperienceBullet(index, bIndex, text)}
+                                multiline
+                                textAlignVertical="top"
+                              />
+                              <TouchableOpacity onPress={() => deleteExperienceBullet(index, bIndex)}>
+                                <Trash2 color={COLORS.danger} size={16} />
+                              </TouchableOpacity>
+                            </View>
+                          ))}
+                          <TouchableOpacity style={styles.addBulletButton} onPress={() => addExperienceBullet(index)}>
+                            <Plus color={COLORS.primary} size={14} />
+                            <Text style={styles.addBulletText}>Add Bullet</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                      <TouchableOpacity style={styles.editCancelButton} onPress={() => toggleEditMode('experience')}>
+                        <Text style={[styles.editCancelText, { color: colors.textSecondary }]}>Cancel</Text>
+                      </TouchableOpacity>
                     </View>
-                  ))}
-                </View>
-              </View>
+                  ) : (
+                    // View mode for experience with title options
+                    tailoredResumeData.experience.map((exp, index) => (
+                      <View key={index} style={styles.experienceItem}>
+                        <View style={styles.experienceHeaderRow}>
+                          <Text style={[styles.experienceHeader, { color: colors.text, flex: 1 }]}>{exp.header}</Text>
+                          {exp.title_options && exp.title_options.length > 1 && (
+                            <TouchableOpacity
+                              style={[styles.titleOptionsButton, titleOptionsOpen === index && { backgroundColor: ALPHA_COLORS.primary.bg }]}
+                              onPress={() => {
+                                setTitleOptionsOpen(titleOptionsOpen === index ? null : index);
+                                setCustomTitleEdit(null);
+                              }}
+                            >
+                              <Sparkles color={COLORS.primary} size={10} />
+                              <Text style={styles.titleOptionsButtonText}>
+                                {titleOptionsOpen === index ? 'Close' : `${exp.title_options.length} Options`}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
 
-              {/* Experience - Highlighted as changed */}
-              <View style={[styles.comparisonSection, styles.changedSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
-                <View style={styles.sectionHeaderRow}>
-                  <Text style={[styles.sectionHeader, { color: colors.text }]}>Experience</Text>
-                  <View style={styles.changedBadge}>
-                    <Text style={styles.changedBadgeText}>Reframed</Text>
-                  </View>
-                </View>
-                {tailoredResumeData.experience.map((exp, index) => (
-                  <View key={index} style={styles.experienceItem}>
-                    <Text style={[styles.experienceHeader, { color: colors.text }]}>{exp.header}</Text>
-                    {(exp.bullets || []).map((bullet: string, bIndex: number) => (
-                      <Text key={bIndex} style={[styles.bulletPoint, { color: colors.textSecondary }]}>• {bullet}</Text>
-                    ))}
-                  </View>
-                ))}
+                        {/* Title Options Dropdown */}
+                        {titleOptionsOpen === index && exp.title_options && (
+                          <View style={[styles.titleOptionsDropdown, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
+                            <Text style={[styles.titleOptionsLabel, { color: colors.textTertiary }]}>Select a title or write your own</Text>
+                            {exp.title_options.map((option: string, optIdx: number) => {
+                              const currentHeader = exp.header || '';
+                              const dashIdx = currentHeader.indexOf(' – ');
+                              const currentTitle = dashIdx !== -1 ? currentHeader.substring(0, dashIdx) : currentHeader;
+                              const isSelected = option.trim() === currentTitle.trim();
+                              return (
+                                <TouchableOpacity
+                                  key={optIdx}
+                                  style={[styles.titleOption, isSelected && { backgroundColor: ALPHA_COLORS.primary.bg }]}
+                                  onPress={() => selectTitleOption(index, option)}
+                                >
+                                  {isSelected ? (
+                                    <CheckCircle2 color={COLORS.primary} size={14} />
+                                  ) : (
+                                    <View style={[styles.titleOptionCircle, { borderColor: colors.textTertiary }]} />
+                                  )}
+                                  <Text style={[styles.titleOptionText, { color: isSelected ? COLORS.primary : colors.text }]}>{option}</Text>
+                                </TouchableOpacity>
+                              );
+                            })}
+                            {customTitleEdit?.index === index ? (
+                              <View style={styles.customTitleRow}>
+                                <TextInput
+                                  style={[styles.customTitleInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                                  value={customTitleEdit.value}
+                                  onChangeText={(text) => setCustomTitleEdit({ index, value: text })}
+                                  onSubmitEditing={() => saveCustomTitle(index)}
+                                  placeholder="Type your own title..."
+                                  placeholderTextColor={colors.textTertiary}
+                                  autoFocus
+                                />
+                                <TouchableOpacity onPress={() => saveCustomTitle(index)} style={styles.customTitleSave}>
+                                  <Check color={COLORS.success} size={16} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setCustomTitleEdit(null)}>
+                                  <X color={colors.textTertiary} size={16} />
+                                </TouchableOpacity>
+                              </View>
+                            ) : (
+                              <TouchableOpacity
+                                style={styles.customTitleButton}
+                                onPress={() => {
+                                  const currentHeader = exp.header || '';
+                                  const dashIdx = currentHeader.indexOf(' – ');
+                                  const currentTitle = dashIdx !== -1 ? currentHeader.substring(0, dashIdx) : currentHeader;
+                                  setCustomTitleEdit({ index, value: currentTitle });
+                                }}
+                              >
+                                <Edit3 color={colors.textTertiary} size={14} />
+                                <Text style={[styles.customTitleButtonText, { color: colors.textTertiary }]}>Write a custom title...</Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        )}
+
+                        {(exp.bullets || []).map((bullet: string, bIndex: number) => (
+                          <Text key={bIndex} style={[styles.bulletPoint, { color: colors.textSecondary }]}>• {bullet}</Text>
+                        ))}
+                      </View>
+                    ))
+                  )
+                )}
               </View>
 
               {/* Education */}
               <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
-                <Text style={[styles.sectionHeader, { color: colors.text }]}>Education</Text>
-                <View style={styles.sectionContent}>
-                  <Text style={[styles.sectionText, { color: colors.text }]}>
-                    {tailoredResumeData.education || baseResumeData.education || 'No education listed'}
-                  </Text>
-                </View>
+                <TouchableOpacity style={styles.sectionHeaderRow} onPress={() => toggleSection('education')}>
+                  <View style={styles.sectionHeaderLeft}>
+                    {expandedSections.education ? <ChevronDown color={colors.textTertiary} size={16} /> : <ChevronRight color={colors.textTertiary} size={16} />}
+                    <Text style={[styles.sectionHeader, { color: colors.text, padding: 0 }]}>Education</Text>
+                  </View>
+                </TouchableOpacity>
+                {expandedSections.education && (
+                  <View style={styles.sectionContent}>
+                    <Text style={[styles.sectionText, { color: colors.text }]}>
+                      {tailoredResumeData.education || baseResumeData.education || 'No education listed'}
+                    </Text>
+                  </View>
+                )}
               </View>
 
               {/* Certifications */}
               <View style={[styles.comparisonSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
-                <Text style={[styles.sectionHeader, { color: colors.text }]}>Certifications</Text>
-                <View style={styles.sectionContent}>
-                  <Text style={[styles.sectionText, { color: colors.text }]}>
-                    {tailoredResumeData.certifications || baseResumeData.certifications || 'No certifications listed'}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Alignment Statement - New Section */}
-              {tailoredResumeData.alignment_statement && (
-                <View style={[styles.comparisonSection, styles.newSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
-                  <View style={styles.sectionHeaderRow}>
-                    <Text style={[styles.sectionHeader, { color: colors.text }]}>Company Alignment</Text>
-                    <View style={styles.newBadge}>
-                      <Text style={styles.newBadgeText}>New</Text>
-                    </View>
+                <TouchableOpacity style={styles.sectionHeaderRow} onPress={() => toggleSection('certifications')}>
+                  <View style={styles.sectionHeaderLeft}>
+                    {expandedSections.certifications ? <ChevronDown color={colors.textTertiary} size={16} /> : <ChevronRight color={colors.textTertiary} size={16} />}
+                    <Text style={[styles.sectionHeader, { color: colors.text, padding: 0 }]}>Certifications</Text>
                   </View>
+                </TouchableOpacity>
+                {expandedSections.certifications && (
                   <View style={styles.sectionContent}>
                     <Text style={[styles.sectionText, { color: colors.text }]}>
-                      {tailoredResumeData.alignment_statement}
+                      {tailoredResumeData.certifications || baseResumeData.certifications || 'No certifications listed'}
                     </Text>
                   </View>
+                )}
+              </View>
+
+              {/* Alignment Statement */}
+              {tailoredResumeData.alignment_statement && (
+                <View style={[styles.comparisonSection, styles.newSection, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
+                  <TouchableOpacity style={styles.sectionHeaderRow} onPress={() => toggleSection('alignment')}>
+                    <View style={styles.sectionHeaderLeft}>
+                      {expandedSections.alignment ? <ChevronDown color={colors.textTertiary} size={16} /> : <ChevronRight color={colors.textTertiary} size={16} />}
+                      <Text style={[styles.sectionHeader, { color: colors.text, padding: 0 }]}>Company Alignment</Text>
+                    </View>
+                    <View style={styles.sectionHeaderActions}>
+                      <View style={styles.newBadge}><Text style={styles.newBadgeText}>New</Text></View>
+                      <TouchableOpacity
+                        onPress={() => editMode.alignment ? saveEdit('alignment') : toggleEditMode('alignment')}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        {savingSection === 'alignment' ? (
+                          <ActivityIndicator size="small" color={COLORS.primary} />
+                        ) : editMode.alignment ? (
+                          <Save color={COLORS.primary} size={16} />
+                        ) : (
+                          <Edit3 color={colors.textTertiary} size={16} />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                  {expandedSections.alignment && (
+                    <View style={styles.sectionContent}>
+                      {editMode.alignment ? (
+                        <View>
+                          <TextInput
+                            style={[styles.editTextArea, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                            value={editedContent.alignment ?? tailoredResumeData.alignment_statement}
+                            onChangeText={(text) => setEditedContent((prev) => ({ ...prev, alignment: text }))}
+                            multiline
+                            textAlignVertical="top"
+                          />
+                          <View style={styles.editActions}>
+                            <TouchableOpacity style={styles.editCancelButton} onPress={() => toggleEditMode('alignment')}>
+                              <Text style={[styles.editCancelText, { color: colors.textSecondary }]}>Cancel</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      ) : (
+                        <Text style={[styles.sectionText, { color: colors.text }]}>
+                          {tailoredResumeData.alignment_statement}
+                        </Text>
+                      )}
+                    </View>
+                  )}
                 </View>
               )}
             </View>
-          )}
+          ) : null}
 
           {/* Keywords Tab Content */}
           {activeTab === 'keywords' && (
@@ -1523,5 +2198,285 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+
+  // Next Step Prompt
+  nextStepPrompt: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.sm,
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+  },
+  nextStepContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  nextStepText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  nextStepActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  nextStepButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.sm,
+  },
+  nextStepButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+  },
+  nextStepButtonOutline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+  },
+  nextStepButtonOutlineText: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+  },
+
+  // Toolbar
+  comparisonToolbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  toolbarButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    borderRadius: RADIUS.sm,
+  },
+  toolbarButtonText: {
+    fontSize: 12,
+    fontFamily: FONTS.medium,
+  },
+
+  // Section Header with expand/collapse
+  sectionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    flex: 1,
+  },
+  sectionHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+
+  // Edit mode styles
+  editTextArea: {
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    padding: SPACING.sm,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+    minHeight: 120,
+    lineHeight: 22,
+  },
+  editActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: SPACING.sm,
+  },
+  editCancelButton: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+  },
+  editCancelText: {
+    fontSize: 14,
+    fontFamily: FONTS.medium,
+  },
+  editSkillsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  editSkillPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  addSkillRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  addSkillInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 8,
+    fontSize: 14,
+    fontFamily: FONTS.regular,
+  },
+  addSkillButton: {
+    width: 36,
+    height: 36,
+    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editExperienceItem: {
+    borderBottomWidth: 1,
+    paddingBottom: SPACING.md,
+    gap: SPACING.sm,
+  },
+  editExperienceTitle: {
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    padding: SPACING.sm,
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+  },
+  editExperienceField: {
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    padding: SPACING.sm,
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+  },
+  editBulletsLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: SPACING.xs,
+  },
+  editBulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+  },
+  editBulletInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    padding: SPACING.sm,
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    minHeight: 60,
+    lineHeight: 20,
+  },
+  addBulletButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: SPACING.xs,
+  },
+  addBulletText: {
+    fontSize: 13,
+    fontFamily: FONTS.medium,
+    color: COLORS.primary,
+  },
+
+  // Experience header row with title options
+  experienceHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+
+  // Title Options
+  titleOptionsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+    backgroundColor: ALPHA_COLORS.primary.bg,
+  },
+  titleOptionsButtonText: {
+    fontSize: 10,
+    fontFamily: FONTS.semibold,
+    color: COLORS.primary,
+  },
+  titleOptionsDropdown: {
+    marginBottom: SPACING.sm,
+    padding: SPACING.sm,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    gap: 6,
+  },
+  titleOptionsLabel: {
+    fontSize: 10,
+    fontFamily: FONTS.semibold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  titleOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingVertical: 8,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.sm,
+  },
+  titleOptionCircle: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 1.5,
+  },
+  titleOptionText: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    flex: 1,
+  },
+  customTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)',
+  },
+  customTitleInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+  },
+  customTitleSave: {
+    padding: 4,
+  },
+  customTitleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingVertical: 6,
+    paddingHorizontal: SPACING.sm,
+  },
+  customTitleButtonText: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
   },
 });
