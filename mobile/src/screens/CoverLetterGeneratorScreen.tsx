@@ -386,12 +386,24 @@ export default function CoverLetterGeneratorScreen() {
       };
 
       if (jobInputMethod === 'url' || jobInputMethod === 'saved') {
-        params.jobUrl = jobUrl;
+        // Only send jobUrl if it's a real URL (not manual_ placeholders)
+        if (jobUrl && (jobUrl.startsWith('http://') || jobUrl.startsWith('https://'))) {
+          params.jobUrl = jobUrl;
+        }
         if (jobDescription) {
           params.jobDescription = jobDescription;
         }
       } else {
         params.jobDescription = jobDescription;
+      }
+
+      // Ensure we have at least a description or valid URL before calling API
+      if (!params.jobDescription && !params.jobUrl) {
+        Alert.alert('Missing Info', 'Please provide a job description or a valid job URL.');
+        clearTimeout(stageTimer);
+        setGenerating(false);
+        setGenerationStage(null);
+        return;
       }
 
       if (resumeSource !== 'none' && selectedResumeId) {
