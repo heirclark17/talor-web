@@ -2410,7 +2410,8 @@ export const api = {
         };
       }
 
-      return { success: true, data: data.cover_letters || [] };
+      const letters = (data.cover_letters || []).map((letter: any) => snakeToCamel(letter));
+      return { success: true, data: letters };
     } catch (error: any) {
       console.error('Error listing cover letters:', error);
       return { success: false, error: error.message };
@@ -2466,7 +2467,12 @@ export const api = {
         };
       }
 
-      return { success: true, data };
+      // Convert snake_case fields in the returned cover letter to camelCase
+      const convertedData = {
+        ...data,
+        coverLetter: data.cover_letter ? snakeToCamel(data.cover_letter) : undefined,
+      };
+      return { success: true, data: convertedData };
     } catch (error: any) {
       console.error('Error generating cover letter:', error);
       return { success: false, error: error.message };

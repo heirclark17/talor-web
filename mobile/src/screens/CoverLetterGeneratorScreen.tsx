@@ -400,31 +400,42 @@ export default function CoverLetterGeneratorScreen() {
 
       const res = await api.generateCoverLetter(params);
 
-      if (res.success && res.data) {
-        // Extract the cover letter from the response before any state transitions
-        const generatedLetter = res.data.cover_letter || res.data.coverLetter || null;
+      // Clear generating state immediately — before any async list refresh or
+      // state transitions — so the UI is never stuck on the loading button.
+      clearTimeout(stageTimer);
+      setGenerating(false);
+      setGenerationStage(null);
 
-        await loadLetters();
+      if (res.success && res.data) {
+        // The API client converts snake_case → camelCase, so the letter
+        // is always at res.data.coverLetter.
+        const generatedLetter: CoverLetter | null = res.data.coverLetter || null;
+
+        // Switch to the list view and reset the form first.
         setShowGenerator(false);
         resetGeneratorForm();
 
-        // Show the detail modal with the generated cover letter
+        // Refresh the list in the background — do NOT await so we don't
+        // block the UI or trigger the loadingLetters full-screen spinner
+        // before the transition is rendered.
+        loadLetters();
+
+        // Open the detail modal for the newly generated letter.
         if (generatedLetter) {
-          // Use setTimeout to ensure the generator-to-list transition renders first
+          // Small delay so the generator→list view transition renders first.
           setTimeout(() => {
             setSelectedCoverLetter(generatedLetter);
             setModalVisible(true);
-          }, 100);
+          }, 150);
         }
       } else {
         Alert.alert('Error', res.error || 'Generation failed. Please try again.');
       }
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Failed to generate cover letter.');
-    } finally {
       clearTimeout(stageTimer);
       setGenerating(false);
       setGenerationStage(null);
+      Alert.alert('Error', err.message || 'Failed to generate cover letter.');
     }
   }
 
@@ -1126,7 +1137,7 @@ export default function CoverLetterGeneratorScreen() {
               </TouchableOpacity>
             </View>
 
-            {loadingLetters ? (
+            {loadingLetters && letters.length === 0 ? (
               <View style={styles.centerLoading}>
                 <ActivityIndicator color={COLORS.primary} size="large" />
               </View>
