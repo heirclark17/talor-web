@@ -224,7 +224,7 @@ export function AppHeader() {
       {/* Navigation Dropdown Menu */}
       <Modal
         visible={menuOpen}
-        animationType="fade"
+        animationType="none"
         transparent
         onRequestClose={() => setMenuOpen(false)}
       >

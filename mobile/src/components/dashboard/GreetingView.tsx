@@ -1,13 +1,12 @@
 import React from 'react';
-import { StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
-import Animated, { AnimatedStyle } from 'react-native-reanimated';
+import { StyleSheet, Text, TouchableWithoutFeedback, View, ViewStyle } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { TYPOGRAPHY, FONTS } from '../../utils/constants';
 
 interface GreetingViewProps {
   greeting: string;
   userName: string;
-  animatedStyle: AnimatedStyle;
+  animatedStyle?: ViewStyle;
   onDismiss: () => void;
 }
 
@@ -16,19 +15,19 @@ export function GreetingView({ greeting, userName, animatedStyle, onDismiss }: G
 
   return (
     <TouchableWithoutFeedback onPress={onDismiss}>
-      <Animated.View style={[styles.container, animatedStyle]}>
+      <View style={[styles.container, animatedStyle]}>
         <View style={styles.content}>
-          <Animated.Text style={[styles.greeting, { color: colors.textSecondary }]}>
+          <Text style={[styles.greeting, { color: colors.textSecondary }]}>
             {greeting}
-          </Animated.Text>
-          <Animated.Text style={[styles.name, { color: colors.text }]}>
+          </Text>
+          <Text style={[styles.name, { color: colors.text }]}>
             {userName}
-          </Animated.Text>
-          <Animated.Text style={[styles.subtitle, { color: colors.textTertiary }]}>
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textTertiary }]}>
             Your career tools are ready.
-          </Animated.Text>
+          </Text>
         </View>
-      </Animated.View>
+      </View>
     </TouchableWithoutFeedback>
   );
 }

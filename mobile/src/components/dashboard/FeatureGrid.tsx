@@ -1,16 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
-import { AnimatedStyle } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING } from '../../utils/constants';
-import { DASHBOARD_FEATURES, FEATURE_CATEGORIES, FeatureCategory } from '../../constants/dashboardFeatures';
+import { DASHBOARD_FEATURES, FEATURE_CATEGORIES } from '../../constants/dashboardFeatures';
 import { FeatureCard } from './FeatureCard';
 
-interface FeatureGridProps {
-  cardAnimatedStyles: AnimatedStyle[];
-}
-
-export function FeatureGrid({ cardAnimatedStyles }: FeatureGridProps) {
+export function FeatureGrid() {
   const { colors } = useTheme();
 
   // Group features by category
@@ -18,9 +13,6 @@ export function FeatureGrid({ cardAnimatedStyles }: FeatureGridProps) {
     category,
     features: DASHBOARD_FEATURES.filter((f) => f.category === category),
   }));
-
-  // Track global card index for animation mapping
-  let globalIndex = 0;
 
   return (
     <ScrollView
@@ -41,17 +33,9 @@ export function FeatureGrid({ cardAnimatedStyles }: FeatureGridProps) {
               {category.toUpperCase()}
             </Text>
             {rows.map((row, rowIdx) => {
-              const cards = row.map((feature) => {
-                const cardIndex = globalIndex;
-                globalIndex++;
-                return (
-                  <FeatureCard
-                    key={feature.id}
-                    feature={feature}
-                    animatedStyle={cardAnimatedStyles[cardIndex] || {}}
-                  />
-                );
-              });
+              const cards = row.map((feature) => (
+                <FeatureCard key={feature.id} feature={feature} />
+              ));
 
               // Add spacer if odd number in last row
               if (row.length === 1) {
