@@ -403,9 +403,10 @@ export default function CareerPathDesignerScreen() {
       setUploadProgress(100);
 
       // Auto-fill fields from resume using inference functions
-      if (resumeResult.data.parsed_data) {
+      const parsedData = resumeResult.data.parsed_data || resumeResult.data;
+      if (parsedData) {
         autoPopulateFromResume(
-          resumeResult.data.parsed_data,
+          parsedData,
           setCurrentRole,
           setCurrentIndustry,
           setYearsExperience,
@@ -2030,7 +2031,7 @@ export default function CareerPathDesignerScreen() {
             </Text>
 
             <Text style={[styles.generatingSubtext, { color: colors.textTertiary }]}>
-              This may take 2-3 minutes for comprehensive research
+              This typically takes 5-7 minutes
             </Text>
 
             <View style={styles.progressContainer}>
