@@ -983,7 +983,7 @@ export default function CoverLetterGeneratorScreen() {
         {showGenerator ? (
           // Generator View
           <View style={{ flex: 1 }}>
-            <View style={[styles.generatorHeader, { borderBottomColor: isDark ? GLASS.getBorderColor() : colors.backgroundSecondary }]}>
+            <View style={styles.generatorHeader}>
               <Text style={[styles.pageTitle, { color: colors.text }]}>Generate Cover Letter</Text>
               <TouchableOpacity
                 onPress={() => { if (!generating) setShowGenerator(false); }}
@@ -1222,7 +1222,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
   },
   closeButton: {
     padding: SPACING.sm,
