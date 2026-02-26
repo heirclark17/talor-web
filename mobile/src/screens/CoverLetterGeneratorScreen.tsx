@@ -114,7 +114,8 @@ export default function CoverLetterGeneratorScreen() {
       const result = await api.generateCoverLetter({
         jobTitle: selectedResume.jobTitle,
         companyName: selectedResume.company,
-        jobDescription: selectedResume.jobDescription || '',
+        jobDescription: selectedResume.jobDescription || undefined,
+        tailoredResumeId: selectedResume.id,
         baseResumeId: selectedResume.resumeId,
         tone: tone as any,
         length: length as any,

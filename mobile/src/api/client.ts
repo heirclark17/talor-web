@@ -2426,6 +2426,7 @@ export const api = {
     jobDescription?: string;
     jobUrl?: string;
     baseResumeId?: number;
+    tailoredResumeId?: number;
     tone?: 'professional' | 'enthusiastic' | 'strategic' | 'technical';
     length?: 'concise' | 'standard' | 'detailed';
     focus?: 'leadership' | 'technical' | 'program_management' | 'cross_functional';
@@ -2445,6 +2446,9 @@ export const api = {
       }
       if (payload.jobUrl) {
         body.job_url = payload.jobUrl;
+      }
+      if (payload.tailoredResumeId != null) {
+        body.tailored_resume_id = payload.tailoredResumeId;
       }
       if (payload.baseResumeId != null) {
         body.base_resume_id = payload.baseResumeId;
