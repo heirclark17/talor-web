@@ -95,6 +95,7 @@ const LONG_TIMEOUT_MS = 420000;
  */
 const LONG_TIMEOUT_ENDPOINTS = [
   '/api/resumes/upload', // File upload
+  '/api/resumes/list',   // List resumes (can be slow with large files)
   '/api/tailor/',
   '/api/resumes/analyze',
   '/api/interview-prep/',

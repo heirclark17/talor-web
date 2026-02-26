@@ -370,6 +370,10 @@ export const api = {
   async getResumes(): Promise<ApiResponse> {
     try {
       const response = await fetchWithAuth('/api/resumes/list');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return { success: false, data: [], error: errorData.error || errorData.detail || `Server error: ${response.status}` };
+      }
       const json = await response.json();
       // Backend returns {"resumes": [...]}
       const data = json.resumes || [];

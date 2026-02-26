@@ -78,12 +78,16 @@ export default function UploadResumeScreen() {
   const fetchResumes = useCallback(async () => {
     try {
       setLoadingResumes(true);
+      setError(null);
       const result = await api.getResumes();
       if (result.success && result.data) {
         setAllResumes(result.data);
+      } else if (!result.success) {
+        setError(result.error || 'Failed to load resumes');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[UploadResume] Error fetching resumes:', err);
+      setError(err.message || 'Failed to load resumes');
     } finally {
       setLoadingResumes(false);
     }
@@ -138,7 +142,7 @@ export default function UploadResumeScreen() {
     if (selectedIds.size === allResumes.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(allResumes.map((r: any) => r.id || r.resumeId)));
+      setSelectedIds(new Set(allResumes.map((r: any) => r.id)));
     }
   };
 
@@ -616,12 +620,12 @@ export default function UploadResumeScreen() {
 
           {/* Contact Information - ATS Critical */}
           <GlassCard
-            style={[styles.parsedSection, { borderWidth: 2, borderColor: 'rgba(59, 130, 246, 0.3)' }]}
+            style={[styles.parsedSection, { borderWidth: 2, borderColor: ALPHA_COLORS.primary.border }]}
             material="thin"
             padding={SPACING.lg}
           >
             <View style={styles.atsSectionHeader}>
-              <AlertCircle color="#60a5fa" size={20} />
+              <AlertCircle color={COLORS.primary} size={20} />
               <Text style={[TYPOGRAPHY.headline, { color: colors.text, marginLeft: SPACING.sm }]}>
                 Contact Information
               </Text>
@@ -860,13 +864,13 @@ export default function UploadResumeScreen() {
               My Resumes ({allResumes.length})
             </Text>
             {!selectMode ? (
-              <TouchableOpacity onPress={toggleSelectMode} style={styles.selectModeButton}>
+              <TouchableOpacity onPress={toggleSelectMode} style={styles.selectModeButton} accessibilityRole="button" accessibilityLabel="Select resumes">
                 <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontWeight: '600' }]}>
                   Select
                 </Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity onPress={toggleSelectMode} style={styles.selectModeButton}>
+              <TouchableOpacity onPress={toggleSelectMode} style={styles.selectModeButton} accessibilityRole="button" accessibilityLabel="Cancel selection">
                 <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, fontWeight: '600' }]}>
                   Cancel
                 </Text>
@@ -877,7 +881,7 @@ export default function UploadResumeScreen() {
           {/* Select All + Bulk Delete Bar */}
           {selectMode && (
             <View style={styles.bulkActionBar}>
-              <TouchableOpacity onPress={handleSelectAll} style={styles.selectAllButton}>
+              <TouchableOpacity onPress={handleSelectAll} style={styles.selectAllButton} accessibilityRole="button" accessibilityLabel="Select all resumes">
                 {selectedIds.size === allResumes.length ? (
                   <CheckCircle2 color={COLORS.primary} size={22} />
                 ) : (
@@ -892,6 +896,8 @@ export default function UploadResumeScreen() {
                   onPress={handleBulkDelete}
                   style={styles.bulkDeleteButton}
                   disabled={bulkDeleting}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Delete ${selectedIds.size} selected resumes`}
                 >
                   {bulkDeleting ? (
                     <ActivityIndicator size="small" color={COLORS.danger} />
@@ -1085,14 +1091,14 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   atsBadge: {
-    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    backgroundColor: ALPHA_COLORS.primary.bgStrong,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     marginLeft: SPACING.sm,
   },
   atsBadgeText: {
-    color: '#60a5fa',
+    color: COLORS.primary,
     fontSize: 10,
     fontWeight: '600',
     fontFamily: FONTS.semibold,
@@ -1104,9 +1110,9 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   missingField: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: ALPHA_COLORS.danger.bgSubtle,
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderColor: ALPHA_COLORS.danger.border,
     borderRadius: 8,
     padding: SPACING.sm,
   },
@@ -1171,6 +1177,8 @@ const styles = StyleSheet.create({
   selectModeButton: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
+    minHeight: SPACING.touchTarget,
+    justifyContent: 'center',
   },
   bulkActionBar: {
     flexDirection: 'row',
@@ -1183,12 +1191,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: SPACING.xs,
+    minHeight: SPACING.touchTarget,
   },
   bulkDeleteButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.sm,
+    minHeight: SPACING.touchTarget,
   },
   resumeListItem: {
     marginHorizontal: SPACING.screenMargin,
