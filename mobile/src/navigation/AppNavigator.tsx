@@ -74,7 +74,7 @@ export type MainStackParamList = {
   BehavioralTechnicalQuestions: { interviewPrepId: number };
   Certifications: { interviewPrepId: number };
   STARStoryBuilder: { interviewPrepId: number; tailoredResumeId: number };
-  MockInterview: undefined;
+  MockInterview: { interviewPrepId?: number; company?: string; jobTitle?: string } | undefined;
   PracticeHistory: undefined;
 
   // Stories

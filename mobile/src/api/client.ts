@@ -2635,6 +2635,60 @@ export const api = {
     }
   },
 
+  async saveMockSession(prepId: number, data: {
+    interview_type: string;
+    company: string;
+    job_title: string;
+    messages: any[];
+    performance?: any;
+    question_count: number;
+  }): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${prepId}/mock-sessions`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        return { success: false, error: result.detail || result.error || `HTTP ${response.status}` };
+      }
+      return { success: true, data: result.data || result };
+    } catch (error: any) {
+      console.error('Error saving mock session:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async getMockSessions(prepId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${prepId}/mock-sessions`);
+      const result = await response.json();
+      if (!response.ok) {
+        return { success: false, error: result.detail || result.error || `HTTP ${response.status}` };
+      }
+      return { success: true, data: result.data || result };
+    } catch (error: any) {
+      console.error('Error getting mock sessions:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async deleteMockSession(prepId: number, sessionId: number): Promise<ApiResponse> {
+    try {
+      const response = await fetchWithAuth(`/api/interview-prep/${prepId}/mock-sessions/${sessionId}`, {
+        method: 'DELETE',
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        return { success: false, error: result.detail || result.error || `HTTP ${response.status}` };
+      }
+      return { success: true, data: result };
+    } catch (error: any) {
+      console.error('Error deleting mock session:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
   // ─── RESUME BUILDER AI ──────────────────────────────────────────
   async builderGenerateSummary(payload: {
     jobTitle: string;

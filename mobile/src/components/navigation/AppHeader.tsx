@@ -33,8 +33,6 @@ import {
   User,
   LogOut,
   FolderOpen,
-  MessageSquare,
-  History,
 } from 'lucide-react-native';
 import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -85,8 +83,6 @@ export function AppHeader() {
         { to: '/job-search', screen: 'JobSearch', stack: 'Jobs', icon: Search, label: 'Job Search', desc: 'Find and tailor for jobs', iconColor: '#10B981' },
         { to: '/applications', screen: 'Applications', stack: 'Saved', icon: Briefcase, label: 'Applications', desc: 'Track your job applications', iconColor: '#F59E0B' },
         { to: '/interview-preps', screen: 'InterviewList', stack: 'InterviewPreps', icon: BookOpen, label: 'Interview Prep', desc: 'Practice for upcoming interviews', iconColor: '#06B6D4' },
-        { to: '/mock-interview', screen: 'MockInterview', stack: 'Interview', icon: MessageSquare, label: 'Mock Interview', desc: 'Practice with AI interviewer', iconColor: '#8B5CF6' },
-        { to: '/practice-history', screen: 'PracticeHistory', stack: 'Interview', icon: History, label: 'Practice History', desc: 'Review past practice sessions', iconColor: '#F59E0B' },
         { to: '/star-stories', screen: 'StoriesMain', stack: 'Stories', icon: Sparkles, label: 'STAR Stories', desc: 'Build behavioral interview answers', iconColor: '#FBBF24' },
         { to: '/cover-letters', screen: 'CoverLetters', stack: 'Career', icon: FileEdit, label: 'Cover Letters', desc: 'Generate tailored cover letters', iconColor: '#6366F1' },
       ],

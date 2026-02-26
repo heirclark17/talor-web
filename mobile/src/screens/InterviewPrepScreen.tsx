@@ -46,6 +46,7 @@ import {
   ChevronsDown,
   ChevronsUp,
   X,
+  MessageSquare,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api, ReadinessScore, ValuesAlignment, CompanyResearch, StrategicNewsItem, CompetitiveIntelligence, InterviewStrategy, ExecutiveInsights } from '../api/client';
@@ -208,6 +209,7 @@ export default function InterviewPrepScreen() {
   const [showDateInput, setShowDateInput] = useState(false);
   const [dateInputValue, setDateInputValue] = useState('');
   const [allExpanded, setAllExpanded] = useState(false);
+  const [mockSessionCount, setMockSessionCount] = useState(0);
 
   // Debounced save refs
   const saveTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
@@ -216,6 +218,17 @@ export default function InterviewPrepScreen() {
   // Keep ref in sync
   useEffect(() => {
     interviewPrepIdRef.current = interviewPrepId;
+  }, [interviewPrepId]);
+
+  // Load mock session count
+  useEffect(() => {
+    if (interviewPrepId) {
+      api.getMockSessions(interviewPrepId).then(result => {
+        if (result.success && Array.isArray(result.data)) {
+          setMockSessionCount(result.data.length);
+        }
+      });
+    }
   }, [interviewPrepId]);
 
   // Debounced save to backend
@@ -1597,6 +1610,36 @@ export default function InterviewPrepScreen() {
                       </View>
                       <Text style={[styles.stackedCardSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
                         {loadingCertifications ? 'Loading recommendations...' : 'Recommended certifications for this role'}
+                      </Text>
+                    </View>
+                  </View>
+                  <ChevronRight color={colors.textTertiary} size={20} />
+                </TouchableOpacity>
+              </GlassCard>
+
+              {/* Mock Interview Card */}
+              <GlassCard padding={0} material="thin" borderRadius={RADIUS.lg} style={styles.individualCard}>
+                <TouchableOpacity
+                  style={styles.stackedCardItem}
+                  onPress={() => {
+                    navigation.navigate('MockInterview' as any, {
+                      interviewPrepId,
+                      company: prepData?.company_profile?.name || '',
+                      jobTitle: prepData?.role_analysis?.job_title || '',
+                    });
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.stackedCardLeft}>
+                    <View style={[styles.stackedCardIcon, { backgroundColor: '#8B5CF620' }]}>
+                      <MessageSquare color="#8B5CF6" size={20} />
+                    </View>
+                    <View style={styles.stackedCardContent}>
+                      <View style={styles.stackedCardTitleRow}>
+                        <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Mock Interview</Text>
+                      </View>
+                      <Text style={[styles.stackedCardSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+                        {mockSessionCount > 0 ? `${mockSessionCount} session${mockSessionCount !== 1 ? 's' : ''} completed` : 'Practice with AI interviewer'}
                       </Text>
                     </View>
                   </View>

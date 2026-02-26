@@ -41,6 +41,7 @@ import CommonInterviewQuestions from '../components/CommonInterviewQuestions'
 import CertificationRecommendations from '../components/CertificationRecommendations'
 import BehavioralTechnicalQuestions from '../components/BehavioralTechnicalQuestions'
 import AILoadingScreen from '../components/AILoadingScreen'
+import MockInterviewChat from '../components/interview/MockInterviewChat'
 
 // API base URL - same logic as API client
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://resume-ai-backend-production-3134.up.railway.app')
@@ -222,7 +223,7 @@ export default function InterviewPrep() {
     return saved ? JSON.parse(saved) : {}
   })
 
-  const ALL_SECTION_KEYS = ['companyResearch', 'rolePositioning', 'practiceQuestions', 'prepGrowth'] as const
+  const ALL_SECTION_KEYS = ['companyResearch', 'rolePositioning', 'practiceQuestions', 'prepGrowth', 'mockInterviews'] as const
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
     const saved = localStorage.getItem(`interview-prep-expanded-${tailoredResumeId}`)
@@ -230,11 +231,11 @@ export default function InterviewPrep() {
       const parsed = JSON.parse(saved)
       // If saved state has old per-card keys, reset to new group keys
       if ('companyProfile' in parsed || Object.keys(parsed).length === 0) {
-        return { companyResearch: true, rolePositioning: true, practiceQuestions: true, prepGrowth: true }
+        return { companyResearch: true, rolePositioning: true, practiceQuestions: true, prepGrowth: true, mockInterviews: true }
       }
       return parsed
     }
-    return { companyResearch: true, rolePositioning: true, practiceQuestions: true, prepGrowth: true }
+    return { companyResearch: true, rolePositioning: true, practiceQuestions: true, prepGrowth: true, mockInterviews: true }
   })
 
   const [notes, setNotes] = useState<Record<string, string>>(() => {
@@ -266,6 +267,12 @@ export default function InterviewPrep() {
   })
 
   const [showExportMenu, setShowExportMenu] = useState(false)
+
+  // Mock Interview state
+  const [mockSessions, setMockSessions] = useState<any[]>([])
+  const [loadingMockSessions, setLoadingMockSessions] = useState(false)
+  const [mockInterviewType, setMockInterviewType] = useState<'behavioral' | 'technical' | 'company-specific'>('behavioral')
+  const [selectedMockSession, setSelectedMockSession] = useState<any>(null)
 
   // Cached data from DB for child components
   const [cachedBehavioralTechnical, setCachedBehavioralTechnical] = useState<any>(null)
@@ -326,6 +333,7 @@ export default function InterviewPrep() {
   useEffect(() => {
     if (interviewPrepId) {
       loadCertifications()
+      loadMockSessions()
     }
   }, [interviewPrepId])
 
@@ -712,6 +720,53 @@ export default function InterviewPrep() {
     } catch (error) {
     } finally {
       setLoadingCertifications(false)
+    }
+  }
+
+  const loadMockSessions = async () => {
+    if (!interviewPrepId) return
+    setLoadingMockSessions(true)
+    try {
+      const result = await api.getMockSessions(interviewPrepId)
+      if (result.success && Array.isArray(result.data)) {
+        setMockSessions(result.data)
+      }
+    } catch (error) {
+      console.error('Failed to load mock sessions:', error)
+    } finally {
+      setLoadingMockSessions(false)
+    }
+  }
+
+  const handleMockInterviewComplete = async (transcript: any[]) => {
+    if (!interviewPrepId || !prepData) return
+    try {
+      const company = prepData.company_profile?.name || ''
+      const jobTitle = prepData.role_analysis?.job_title || ''
+      await api.saveMockSession(interviewPrepId, {
+        interview_type: mockInterviewType,
+        company,
+        job_title: jobTitle,
+        messages: transcript.map(m => ({ role: m.role, content: m.content })),
+        question_count: transcript.filter((m: any) => m.role === 'assistant').length,
+      })
+      loadMockSessions()
+    } catch (error) {
+      console.error('Failed to save mock session:', error)
+    }
+  }
+
+  const handleDeleteMockSession = async (sessionId: number) => {
+    if (!interviewPrepId) return
+    try {
+      await api.deleteMockSession(interviewPrepId, sessionId)
+      setMockSessions(prev => prev.filter(s => s.id !== sessionId))
+      if (selectedMockSession?.id === sessionId) {
+        setSelectedMockSession(null)
+        closeModal()
+      }
+    } catch (error) {
+      console.error('Failed to delete mock session:', error)
     }
   }
 
@@ -1248,6 +1303,93 @@ export default function InterviewPrep() {
             </div>}
           </div>
 
+          {/* Section 5: Mock Interviews */}
+          <div>
+            <button
+              onClick={() => toggleSection('mockInterviews')}
+              className="flex items-center gap-2 mb-3 px-1 w-full text-left group"
+            >
+              <MessageSquare className="w-4 h-4 text-violet-400" />
+              <h2 className="text-sm font-semibold text-theme-secondary uppercase tracking-wider">Mock Interviews</h2>
+              <div className="flex-1 h-px bg-theme-glass-10" />
+              {expandedSections['mockInterviews'] ? <ChevronUp className="w-4 h-4 text-theme-secondary" /> : <ChevronDown className="w-4 h-4 text-theme-secondary" />}
+            </button>
+            {expandedSections['mockInterviews'] && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* Start New Mock Interview Card */}
+              <button
+                onClick={() => openModal('mockInterviewSetup')}
+                className="glass rounded-2xl p-6 text-left hover:bg-theme-glass-10 transition-all hover:scale-[1.02] group cursor-pointer border-2 border-dashed border-violet-500/30 hover:border-violet-500/50"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-violet-500/20">
+                    <PlayCircle className="w-6 h-6 text-violet-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-theme">Start New</h3>
+                </div>
+                <p className="text-theme-secondary text-sm line-clamp-2">
+                  Practice with an AI interviewer adapted to this role
+                </p>
+                <div className="mt-3 text-violet-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                  Begin Interview <ChevronRight className="w-4 h-4" />
+                </div>
+              </button>
+
+              {/* Past Session Cards */}
+              {loadingMockSessions && (
+                <div className="glass rounded-2xl p-6 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-theme-secondary" />
+                </div>
+              )}
+              {mockSessions.map((session) => {
+                const score = session.performance?.score
+                const grade = score != null ? (score >= 9 ? 'A' : score >= 7 ? 'B' : score >= 5 ? 'C' : score >= 3 ? 'D' : 'F') : null
+                const gradeColor = score != null ? (score >= 9 ? 'text-green-400' : score >= 7 ? 'text-blue-400' : score >= 5 ? 'text-yellow-400' : 'text-red-400') : ''
+                const typeBadge = session.interview_type === 'behavioral' ? 'Behavioral' : session.interview_type === 'technical' ? 'Technical' : 'Company'
+                const dateStr = new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                return (
+                  <div key={session.id} className="glass rounded-2xl p-6 text-left group relative">
+                    <button
+                      onClick={() => handleDeleteMockSession(session.id)}
+                      className="absolute top-3 right-3 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 transition-all"
+                      title="Delete session"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-400" />
+                    </button>
+                    <button
+                      onClick={() => { setSelectedMockSession(session); openModal('mockInterviewTranscript') }}
+                      className="w-full text-left"
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-lg bg-violet-500/20">
+                          <MessageSquare className="w-6 h-6 text-violet-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-theme">{typeBadge}</h3>
+                          <p className="text-xs text-theme-tertiary">{dateStr} &middot; {session.question_count || 0} questions</p>
+                        </div>
+                        {grade && (
+                          <span className={`ml-auto text-2xl font-bold ${gradeColor}`}>{grade}</span>
+                        )}
+                      </div>
+                      {session.performance?.summary && (
+                        <p className="text-theme-secondary text-sm line-clamp-2">{session.performance.summary}</p>
+                      )}
+                      <div className="mt-3 text-violet-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                        View Transcript <ChevronRight className="w-4 h-4" />
+                      </div>
+                    </button>
+                  </div>
+                )
+              })}
+              {!loadingMockSessions && mockSessions.length === 0 && (
+                <div className="glass rounded-2xl p-6 flex flex-col items-center justify-center text-center col-span-1 sm:col-span-1 lg:col-span-2">
+                  <MessageSquare className="w-8 h-8 text-theme-tertiary mb-2" />
+                  <p className="text-theme-secondary text-sm">No sessions yet. Start a mock interview to practice!</p>
+                </div>
+              )}
+            </div>}
+          </div>
+
         </div>
 
         {/* Modal Backdrop & Content */}
@@ -1277,6 +1419,8 @@ export default function InterviewPrep() {
                   {activeModal === 'commonQuestions' && 'Common Interview Questions'}
                   {activeModal === 'certifications' && 'Recommended Certifications'}
                   {activeModal === 'positioning' && 'Candidate Positioning'}
+                  {activeModal === 'mockInterviewSetup' && 'Mock Interview'}
+                  {activeModal === 'mockInterviewTranscript' && 'Interview Transcript'}
                 </h2>
                 <div className="flex items-center gap-2">
                   <button
@@ -2056,6 +2200,114 @@ export default function InterviewPrep() {
                             </div>
                           ))}
                         </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Mock Interview Setup Modal */}
+                {activeModal === 'mockInterviewSetup' && prepData && (
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-theme font-semibold mb-3">Select Interview Type</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {([
+                          { type: 'behavioral' as const, label: 'Behavioral', desc: 'STAR method, past experiences, soft skills', color: 'blue' },
+                          { type: 'technical' as const, label: 'Technical', desc: 'Technical skills, problem-solving, system design', color: 'green' },
+                          { type: 'company-specific' as const, label: 'Company-Specific', desc: `${prepData.company_profile.name} culture & challenges`, color: 'purple' },
+                        ]).map(({ type, label, desc, color }) => (
+                          <button
+                            key={type}
+                            onClick={() => setMockInterviewType(type)}
+                            className={`p-4 rounded-xl border-2 transition-all text-left ${
+                              mockInterviewType === type
+                                ? `border-${color}-500 bg-${color}-500/10`
+                                : 'border-theme-subtle hover:border-theme-muted'
+                            }`}
+                          >
+                            <h5 className="font-semibold text-theme mb-1">{label}</h5>
+                            <p className="text-xs text-theme-secondary">{desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="border-t border-theme-subtle pt-4" style={{ minHeight: '500px' }}>
+                      <MockInterviewChat
+                        company={prepData.company_profile.name}
+                        jobTitle={prepData.role_analysis.job_title}
+                        interviewType={mockInterviewType}
+                        onComplete={handleMockInterviewComplete}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Mock Interview Transcript Modal */}
+                {activeModal === 'mockInterviewTranscript' && selectedMockSession && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="px-3 py-1 bg-violet-500/20 text-violet-400 rounded-full text-sm font-medium capitalize">
+                        {selectedMockSession.interview_type}
+                      </span>
+                      <span className="text-theme-secondary text-sm">
+                        {new Date(selectedMockSession.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </span>
+                      <span className="text-theme-secondary text-sm">
+                        {selectedMockSession.question_count || 0} questions
+                      </span>
+                    </div>
+
+                    {/* Transcript Messages */}
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                      {(selectedMockSession.messages || []).map((msg: any, idx: number) => (
+                        <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[80%] rounded-lg p-3 ${
+                            msg.role === 'user'
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-theme-glass-10 text-theme'
+                          }`}>
+                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Performance Summary */}
+                    {selectedMockSession.performance && (
+                      <div className="mt-6 pt-4 border-t border-theme-subtle space-y-3">
+                        <h4 className="text-theme font-semibold">Performance Summary</h4>
+                        {selectedMockSession.performance.score != null && (
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl font-bold text-violet-400">{selectedMockSession.performance.score}/10</span>
+                            <span className="text-theme-secondary">{selectedMockSession.performance.summary}</span>
+                          </div>
+                        )}
+                        {selectedMockSession.performance.strengths?.length > 0 && (
+                          <div>
+                            <p className="text-green-400 font-medium text-sm mb-1">Strengths</p>
+                            <ul className="space-y-1">
+                              {selectedMockSession.performance.strengths.map((s: string, i: number) => (
+                                <li key={i} className="text-theme-secondary text-sm flex items-start gap-2">
+                                  <CheckCircle2 className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
+                                  {s}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {selectedMockSession.performance.improvements?.length > 0 && (
+                          <div>
+                            <p className="text-yellow-400 font-medium text-sm mb-1">Areas to Improve</p>
+                            <ul className="space-y-1">
+                              {selectedMockSession.performance.improvements.map((s: string, i: number) => (
+                                <li key={i} className="text-theme-secondary text-sm flex items-start gap-2">
+                                  <TrendingUp className="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" />
+                                  {s}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

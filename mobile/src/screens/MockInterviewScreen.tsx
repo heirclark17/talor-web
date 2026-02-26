@@ -20,7 +20,8 @@ import {
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation/AppNavigator';
 import {
   Brain,
   Code,
@@ -104,14 +105,20 @@ const INTERVIEW_TIPS: Record<InterviewType, string[]> = {
 
 export default function MockInterviewScreen() {
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'MockInterview'>>();
   const { colors, isDark } = useTheme();
   const scrollRef = useRef<FlatList>(null);
 
-  // Setup state
+  const routeParams = route.params;
+  const interviewPrepId = routeParams?.interviewPrepId;
+
+  // Setup state — pre-fill from route params
   const [showChat, setShowChat] = useState(false);
-  const [company, setCompany] = useState('');
-  const [jobTitle, setJobTitle] = useState('');
+  const [company, setCompany] = useState(routeParams?.company || '');
+  const [jobTitle, setJobTitle] = useState(routeParams?.jobTitle || '');
   const [interviewType, setInterviewType] = useState<InterviewType>('behavioral');
+  const [pastSessions, setPastSessions] = useState<any[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
 
   // Chat state
   const [messages, setMessages] = useState<Message[]>([]);
@@ -140,6 +147,18 @@ export default function MockInterviewScreen() {
       backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
     },
   }), [colors, isDark]);
+
+  // Load past sessions when navigated from InterviewPrep
+  React.useEffect(() => {
+    if (interviewPrepId) {
+      setLoadingSessions(true);
+      api.getMockSessions(interviewPrepId).then(result => {
+        if (result.success && Array.isArray(result.data)) {
+          setPastSessions(result.data);
+        }
+      }).finally(() => setLoadingSessions(false));
+    }
+  }, [interviewPrepId]);
 
   const sendToAPI = useCallback(async (chatMessages: Array<{ role: string; content: string }>) => {
     const result = await api.mockInterviewChat({
@@ -226,6 +245,25 @@ export default function MockInterviewScreen() {
         setIsComplete(true);
         if (data.performance) {
           setPerformance(data.performance);
+        }
+        // Auto-save session if navigated from InterviewPrep
+        if (interviewPrepId) {
+          const allMessages = [...updatedMessages, aiMessage];
+          api.saveMockSession(interviewPrepId, {
+            interview_type: interviewType,
+            company,
+            job_title: jobTitle,
+            messages: allMessages.map(m => ({ role: m.role, content: m.content })),
+            performance: data.performance || undefined,
+            question_count: (data.question_number || questionNumber + 1),
+          }).then(() => {
+            // Refresh past sessions list
+            api.getMockSessions(interviewPrepId).then(result => {
+              if (result.success && Array.isArray(result.data)) {
+                setPastSessions(result.data);
+              }
+            });
+          });
         }
       }
 
@@ -708,6 +746,31 @@ export default function MockInterviewScreen() {
             </GlassButton>
           </GlassCard>
 
+          {/* Past Sessions */}
+          {interviewPrepId && pastSessions.length > 0 && (
+            <GlassCard style={styles.setupCard}>
+              <Text style={[styles.setupTitle, { color: colors.text }]}>Past Sessions</Text>
+              {pastSessions.map((session) => {
+                const score = session.performance?.score;
+                const grade = score != null ? (score >= 9 ? 'A' : score >= 7 ? 'B' : score >= 5 ? 'C' : score >= 3 ? 'D' : 'F') : null;
+                const gradeColor = score != null ? (score >= 9 ? COLORS.success : score >= 7 ? COLORS.primary : score >= 5 ? '#EAB308' : COLORS.danger) : '';
+                const dateStr = new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const typeBadge = session.interview_type === 'behavioral' ? 'Behavioral' : session.interview_type === 'technical' ? 'Technical' : 'Company';
+                return (
+                  <View key={session.id} style={[styles.pastSessionRow, { borderBottomColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.infoCardTitle, { color: colors.text, marginBottom: 2 }]}>{typeBadge}</Text>
+                      <Text style={[styles.infoCardText, { color: colors.textSecondary }]}>{dateStr} · {session.question_count || 0} questions</Text>
+                    </View>
+                    {grade && (
+                      <Text style={{ fontSize: 24, fontWeight: 'bold', color: gradeColor }}>{grade}</Text>
+                    )}
+                  </View>
+                );
+              })}
+            </GlassCard>
+          )}
+
           <View style={styles.infoCards}>
             {[
               { title: 'Adaptive Questions', text: 'AI adapts follow-up questions based on your answers' },
@@ -748,6 +811,7 @@ const styles = StyleSheet.create({
   infoCard: { padding: 16 },
   infoCardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 8 },
   infoCardText: { fontSize: 14, lineHeight: 20 },
+  pastSessionRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1 },
 
   // Chat styles
   chatHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 12, borderBottomWidth: 1 },
