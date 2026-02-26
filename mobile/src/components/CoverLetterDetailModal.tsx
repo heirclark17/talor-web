@@ -10,12 +10,16 @@ import {
   ActivityIndicator,
   Alert,
   Share,
+  Platform,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { X, Edit2, Save, Trash2, Download, Share2 } from 'lucide-react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Clipboard from 'expo-clipboard';
+import { X, Edit2, Save, Trash2, Download, Share2, Copy } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
-import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../utils/constants';
+import { SPACING, TYPOGRAPHY, GLASS, COLORS, ALPHA_COLORS, FONTS } from '../utils/constants';
 import { api } from '../api';
+
 // Lazy-load expo-sharing to avoid crash when native module isn't built
 let Sharing: any = null;
 try {
@@ -53,11 +57,13 @@ export function CoverLetterDetailModal({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   React.useEffect(() => {
     if (coverLetter) {
       setEditedContent(coverLetter.content);
       setEditMode(false);
+      setCopied(false);
     }
   }, [coverLetter]);
 
@@ -65,7 +71,7 @@ export function CoverLetterDetailModal({
 
   const handleSave = async () => {
     if (!editedContent.trim()) {
-      Alert.alert('Validation Error', 'Content cannot be empty');
+      Alert.alert('Content Required', 'Cover letter content cannot be empty.');
       return;
     }
 
@@ -76,14 +82,13 @@ export function CoverLetterDetailModal({
       });
 
       if (result.success) {
-        Alert.alert('Success', 'Cover letter updated successfully');
         setEditMode(false);
         onUpdate?.();
       } else {
-        Alert.alert('Error', result.error || 'Failed to update cover letter');
+        Alert.alert('Save Failed', result.error || 'Could not save changes. Please try again.');
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update cover letter');
+      Alert.alert('Save Failed', error.message || 'Could not save changes. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -102,16 +107,14 @@ export function CoverLetterDetailModal({
             setDeleting(true);
             try {
               const result = await api.deleteCoverLetter(coverLetter.id);
-
               if (result.success) {
-                Alert.alert('Success', 'Cover letter deleted');
                 onDelete?.();
                 onClose();
               } else {
-                Alert.alert('Error', result.error || 'Failed to delete cover letter');
+                Alert.alert('Delete Failed', result.error || 'Could not delete cover letter.');
               }
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete cover letter');
+              Alert.alert('Delete Failed', error.message || 'Could not delete cover letter.');
             } finally {
               setDeleting(false);
             }
@@ -121,28 +124,60 @@ export function CoverLetterDetailModal({
     );
   };
 
+  const handleCopyToClipboard = async () => {
+    try {
+      await Clipboard.setStringAsync(coverLetter.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      Alert.alert('Copy Failed', 'Could not copy to clipboard.');
+    }
+  };
+
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      const result = await api.downloadCoverLetter(coverLetter.id);
+      const result = await api.exportCoverLetter(coverLetter.id, 'docx');
 
       if (result.success && result.data) {
-        // Create blob URL and share
+        // Convert blob to base64 and write to file
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => {
+            const base64 = (reader.result as string).split(',')[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+        });
+        reader.readAsDataURL(result.data as Blob);
+        const base64Data = await base64Promise;
+
+        const filename = `Cover_Letter_${coverLetter.companyName}_${coverLetter.jobTitle}.docx`
+          .replace(/[^a-zA-Z0-9._-]/g, '_');
+        const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+
+        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        // Share the file
         const canShare = Sharing && typeof Sharing.isAvailableAsync === 'function'
           ? await Sharing.isAvailableAsync()
           : false;
+
         if (canShare) {
-          // In a real implementation, you'd save the blob to a file first
-          // then share the file URI
-          Alert.alert('Success', 'Cover letter ready to download');
+          await Sharing.shareAsync(fileUri, {
+            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            dialogTitle: `Save ${coverLetter.jobTitle} Cover Letter`,
+          });
         } else {
-          Alert.alert('Info', 'Sharing not available on this device');
+          Alert.alert('File Saved', `Cover letter saved to:\n${fileUri}`);
         }
       } else {
-        Alert.alert('Error', result.error || 'Failed to download cover letter');
+        Alert.alert('Download Failed', result.error || 'Could not download the cover letter.');
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to download cover letter');
+      Alert.alert('Download Failed', error.message || 'Could not download the cover letter.');
     } finally {
       setDownloading(false);
     }
@@ -170,14 +205,23 @@ export function CoverLetterDetailModal({
             {/* Header */}
             <View style={[styles.header, { borderBottomColor: GLASS.getBorderColor() }]}>
               <View style={styles.headerLeft}>
-                <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
+                <Text
+                  style={[styles.headerTitle, { color: colors.text }]}
+                  numberOfLines={1}
+                  accessibilityRole="header"
+                >
                   {coverLetter.jobTitle}
                 </Text>
                 <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
                   {coverLetter.companyName}
                 </Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={styles.closeButton}
+                accessibilityLabel="Close cover letter"
+                accessibilityRole="button"
+              >
                 <X color={colors.textSecondary} size={24} />
               </TouchableOpacity>
             </View>
@@ -187,8 +231,22 @@ export function CoverLetterDetailModal({
               {!editMode ? (
                 <>
                   <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: ALPHA_COLORS.primary.bg }]}
+                    onPress={handleCopyToClipboard}
+                    accessibilityLabel={copied ? 'Copied to clipboard' : 'Copy to clipboard'}
+                    accessibilityRole="button"
+                  >
+                    <Copy color={COLORS.primary} size={20} />
+                    <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>
+                      {copied ? 'Copied!' : 'Copy'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: colors.backgroundSecondary }]}
                     onPress={() => setEditMode(true)}
+                    accessibilityLabel="Edit cover letter"
+                    accessibilityRole="button"
                   >
                     <Edit2 color={COLORS.primary} size={20} />
                     <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>Edit</Text>
@@ -198,27 +256,33 @@ export function CoverLetterDetailModal({
                     style={[styles.actionButton, { backgroundColor: colors.backgroundSecondary }]}
                     onPress={handleDownload}
                     disabled={downloading}
+                    accessibilityLabel="Download as Word document"
+                    accessibilityRole="button"
                   >
                     {downloading ? (
                       <ActivityIndicator size="small" color={COLORS.primary} />
                     ) : (
                       <Download color={COLORS.primary} size={20} />
                     )}
-                    <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>Download</Text>
+                    <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>Export</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: colors.backgroundSecondary }]}
                     onPress={handleShare}
+                    accessibilityLabel="Share cover letter"
+                    accessibilityRole="button"
                   >
                     <Share2 color={COLORS.primary} size={20} />
                     <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>Share</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.actionButton, { backgroundColor: COLORS.error + '20' }]}
+                    style={[styles.actionButton, { backgroundColor: ALPHA_COLORS.danger.bg }]}
                     onPress={handleDelete}
                     disabled={deleting}
+                    accessibilityLabel="Delete cover letter"
+                    accessibilityRole="button"
                   >
                     {deleting ? (
                       <ActivityIndicator size="small" color={COLORS.error} />
@@ -231,9 +295,11 @@ export function CoverLetterDetailModal({
               ) : (
                 <>
                   <TouchableOpacity
-                    style={[styles.actionButton, { backgroundColor: COLORS.success + '20' }]}
+                    style={[styles.actionButton, { backgroundColor: ALPHA_COLORS.success.bg }]}
                     onPress={handleSave}
                     disabled={saving}
+                    accessibilityLabel="Save changes"
+                    accessibilityRole="button"
                   >
                     {saving ? (
                       <ActivityIndicator size="small" color={COLORS.success} />
@@ -249,6 +315,8 @@ export function CoverLetterDetailModal({
                       setEditedContent(coverLetter.content);
                       setEditMode(false);
                     }}
+                    accessibilityLabel="Cancel editing"
+                    accessibilityRole="button"
                   >
                     <X color={colors.textSecondary} size={20} />
                     <Text style={[styles.actionButtonText, { color: colors.textSecondary }]}>Cancel</Text>
@@ -275,9 +343,15 @@ export function CoverLetterDetailModal({
                   textAlignVertical="top"
                   placeholder="Enter cover letter content..."
                   placeholderTextColor={colors.textTertiary}
+                  accessibilityLabel="Cover letter content"
                 />
               ) : (
-                <Text style={[styles.content, { color: colors.text }]}>{coverLetter.content}</Text>
+                <Text
+                  style={[styles.content, { color: colors.text }]}
+                  selectable
+                >
+                  {coverLetter.content}
+                </Text>
               )}
 
               <Text style={[styles.timestamp, { color: colors.textTertiary }]}>
@@ -333,7 +407,7 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body,
   },
   closeButton: {
-    padding: SPACING.sm,
+    padding: 10,
   },
   actions: {
     flexDirection: 'row',
@@ -350,7 +424,9 @@ const styles = StyleSheet.create({
     borderRadius: GLASS.getCornerRadius('medium'),
   },
   actionButtonText: {
-    ...TYPOGRAPHY.bodyBold,
+    fontSize: 14,
+    fontFamily: FONTS.semibold,
+    lineHeight: 20,
   },
   scrollView: {
     flex: 1,
