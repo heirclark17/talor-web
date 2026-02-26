@@ -20,6 +20,8 @@ import { CareerPlanResults } from '../components';
 import { COLORS, SPACING, RADIUS, FONTS, TAB_BAR_HEIGHT } from '../utils/constants';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
+import type { CareerPlan } from '../types/career-plan';
+import { transformApiResponse } from '../utils/careerPlanTransform';
 
 type DetailRouteProp = RouteProp<RootStackParamList, 'SavedCareerPlanDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -46,24 +48,8 @@ export default function SavedCareerPlanDetailScreen() {
       const result = await api.getCareerPlan(planId);
       if (result.success && result.data) {
         const planData = result.data;
-        // Map to CareerPlanResults expected shape (handles both snake_case and camelCase)
-        setPlan({
-          id: planId,
-          profileSummary: planData.profile_summary || planData.profileSummary,
-          generatedAt: planData.created_at || planData.generatedAt,
-          estimated_timeline: planData.estimated_timeline || planData.estimatedTimeline,
-          milestones: planData.milestones || [],
-          skill_gaps: planData.skill_gaps || planData.skillGaps || [],
-          immediate_actions: planData.immediate_actions || planData.immediateActions || [],
-          long_term_goals: planData.long_term_goals || planData.longTermGoals || [],
-          salary_progression: planData.salary_progression || planData.salaryProgression,
-          summary: planData.summary,
-          certifications: planData.certifications || [],
-          networking_events: planData.networking_events || planData.networkingEvents || [],
-          learning_resources: planData.learning_resources || planData.learningResources || [],
-          current_role: planData.current_role || planData.currentRole || '',
-          target_role: planData.target_role || planData.targetRole || '',
-        });
+        const transformed = transformApiResponse(planData.plan || planData);
+        setPlan({ ...transformed, id: planId, _timeline: planData.timeline || '' });
       } else {
         setError(result.error || 'Failed to load career plan');
       }
@@ -96,7 +82,7 @@ export default function SavedCareerPlanDetailScreen() {
     if (!plan) return;
     try {
       await Share.share({
-        message: `Career Plan: ${plan.target_role || 'My Career Plan'}\n\n${plan.profileSummary || ''}`,
+        message: `Career Plan: ${plan.targetRoles?.[0]?.title || 'My Career Plan'}\n\n${plan.profileSummary || ''}`,
         title: 'Career Plan',
       });
     } catch { }
@@ -175,7 +161,7 @@ export default function SavedCareerPlanDetailScreen() {
           </View>
 
           {/* Career Plan Results component */}
-          <CareerPlanResults planData={plan} />
+          <CareerPlanResults plan={plan as CareerPlan} timeline={plan._timeline || ''} />
         </ScrollView>
       )}
     </SafeAreaView>

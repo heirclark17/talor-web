@@ -41,6 +41,8 @@ import { useTheme } from '../hooks/useTheme';
 import { CareerPlanResults, CareerPathCertifications } from '../components';
 import { useResumeStore } from '../stores/resumeStore';
 import { usePostHog } from '../contexts/PostHogContext';
+import type { CareerPlan } from '../types/career-plan';
+import { transformApiResponse } from '../utils/careerPlanTransform';
 let DocumentPicker: typeof import('expo-document-picker') | null = null;
 try { DocumentPicker = require('expo-document-picker'); } catch {}
 
@@ -48,10 +50,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type WizardStep = 'welcome' | 'upload' | 'questions' | 'generating' | 'results';
 type QuestionStep = 1 | 2 | 3 | 4 | 5;
 
-interface CareerPlan {
+interface StoredPlan extends Partial<CareerPlan> {
   id?: number;
-  profileSummary?: string;
-  generatedAt?: string;
   [key: string]: any;
 }
 
@@ -368,21 +368,8 @@ export default function CareerPathDesignerScreen() {
       const result = await api.getCareerPlan(planId);
       if (result.success && result.data) {
         const planData = result.data;
-        setPlan({
-          id: planId,
-          profileSummary: planData.profile_summary || planData.profileSummary,
-          generatedAt: planData.created_at || planData.generatedAt,
-          estimated_timeline: planData.estimated_timeline || planData.estimatedTimeline,
-          milestones: planData.milestones || [],
-          skill_gaps: planData.skill_gaps || planData.skillGaps || [],
-          immediate_actions: planData.immediate_actions || planData.immediateActions || [],
-          long_term_goals: planData.long_term_goals || planData.longTermGoals || [],
-          salary_progression: planData.salary_progression || planData.salaryProgression,
-          summary: planData.summary,
-          certifications: planData.certifications || [],
-          networking_events: planData.networking_events || planData.networkingEvents || [],
-          learning_resources: planData.learning_resources || planData.learningResources || [],
-        });
+        const transformed = transformApiResponse(planData.plan || planData);
+        setPlan({ ...transformed, id: planId } as any);
         // Set the context from saved plan
         if (planData.current_role) setCurrentRole(planData.current_role);
         if (planData.target_role) setDreamRole(planData.target_role);
@@ -631,22 +618,9 @@ export default function CareerPathDesignerScreen() {
             setJobProgress(100);
             setJobMessage('Career plan generated!');
 
-            const planData = statusResult.data?.plan || statusResult.data;
-            setPlan({
-              id: statusResult.data?.planId,
-              profileSummary: planData?.profileSummary || planData?.profile_summary || `Career transition from ${currentRole} to ${dreamRole}`,
-              generatedAt: new Date().toISOString(),
-              estimated_timeline: planData?.estimatedTimeline || planData?.estimated_timeline || timeline,
-              milestones: planData?.milestones || [],
-              skill_gaps: planData?.skillGaps || planData?.skill_gaps || [],
-              immediate_actions: planData?.immediateActions || planData?.immediate_actions || [],
-              long_term_goals: planData?.longTermGoals || planData?.long_term_goals || [],
-              salary_progression: planData?.salaryProgression || planData?.salary_progression,
-              summary: planData?.summary,
-              certifications: planData?.certifications || [],
-              networking_events: planData?.networkingEvents || planData?.networking_events || [],
-              learning_resources: planData?.learningResources || planData?.learning_resources || [],
-            });
+            const planRaw = statusResult.data?.plan || statusResult.data;
+            const transformed = transformApiResponse(planRaw);
+            setPlan({ ...transformed, id: statusResult.data?.planId } as any);
 
             // Track successful career plan generation
             capture('career_plan_generated', {
@@ -693,23 +667,10 @@ export default function CareerPathDesignerScreen() {
         setJobProgress(100);
         setJobMessage('Career plan generated!');
 
-        // Map API response to plan format
-        const planData = result.data?.plan || result.data;
-        setPlan({
-          id: result.data?.planId || result.data?.plan_id,
-          profileSummary: planData?.profileSummary || planData?.profile_summary || `Career transition from ${currentRole} to ${dreamRole}`,
-          generatedAt: new Date().toISOString(),
-          estimated_timeline: planData?.estimatedTimeline || planData?.estimated_timeline || timeline,
-          milestones: planData?.milestones || [],
-          skill_gaps: planData?.skillGaps || planData?.skill_gaps || [],
-          immediate_actions: planData?.immediateActions || planData?.immediate_actions || [],
-          long_term_goals: planData?.longTermGoals || planData?.long_term_goals || [],
-          salary_progression: planData?.salaryProgression || planData?.salary_progression,
-          summary: planData?.summary,
-          certifications: planData?.certifications || [],
-          networking_events: planData?.networkingEvents || planData?.networking_events || [],
-          learning_resources: planData?.learningResources || planData?.learning_resources || [],
-        });
+        // Map API response to full CareerPlan format
+        const planRaw = result.data?.plan || result.data;
+        const transformed = transformApiResponse(planRaw);
+        setPlan({ ...transformed, id: result.data?.planId || result.data?.plan_id } as any);
 
         // Track successful career plan generation
         capture('career_plan_generated', {
@@ -2150,30 +2111,8 @@ export default function CareerPathDesignerScreen() {
       );
     }
 
-    // Transform plan data to CareerPlanResults format
-    const planData = {
-      current_role: currentRole || 'Current Role',
-      target_role: dreamRole || 'Target Role',
-      estimated_timeline: plan.estimated_timeline || timeline,
-      milestones: plan.milestones || [],
-      skill_gaps: plan.skill_gaps || [],
-      immediate_actions: plan.immediate_actions || [],
-      long_term_goals: plan.long_term_goals || [],
-      salary_progression: plan.salary_progression,
-      experience_plan: plan.experience_plan || [],
-      education_options: plan.education_options || [],
-      certification_journey_summary: plan.certification_journey_summary,
-      education_recommendation: plan.education_recommendation,
-    };
-
-    const handleSavePlan = async () => {
-      try {
-        // Save plan is already done during generation
-        Alert.alert('Success', 'Your career plan has been saved!');
-      } catch (error) {
-        Alert.alert('Error', 'Failed to save plan');
-      }
-    };
+    // Use the full CareerPlan directly
+    const fullPlan = plan as CareerPlan;
 
     const handleExportPlan = async () => {
       Alert.alert('Export', 'Export functionality coming soon!');
@@ -2433,11 +2372,11 @@ export default function CareerPathDesignerScreen() {
           </ScrollView>
         )}
 
-        {planData.milestones.length > 0 ? (
+        {fullPlan.targetRoles?.length > 0 ? (
           <CareerPlanResults
-            planData={planData}
-            onSavePlan={handleSavePlan}
-            onExportPlan={handleExportPlan}
+            plan={fullPlan}
+            timeline={timeline}
+            onExportPDF={handleExportPlan}
           />
         ) : (
           <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -2464,7 +2403,7 @@ export default function CareerPathDesignerScreen() {
                   Plan generated successfully!
                 </Text>
                 <Text style={[styles.planText, { color: colors.textSecondary }]}>
-                  {plan.summary || 'Your career transition roadmap is ready.'}
+                  {plan.profileSummary || 'Your career transition roadmap is ready.'}
                 </Text>
               </View>
             </View>
