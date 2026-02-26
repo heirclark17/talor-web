@@ -273,7 +273,7 @@ export default function HomeScreen() {
             <Text style={[TYPOGRAPHY.body, styles.filename, { color: colors.text, marginBottom: 0, flexShrink: 1 }]} numberOfLines={1}>
               {item.filename}
             </Text>
-            <View style={[BadgeStyles.base, { backgroundColor: ALPHA_COLORS.primary.bg, flexShrink: 0 }]}>
+            <View style={[BadgeStyles.base, { backgroundColor: ALPHA_COLORS.primary.bg, flexShrink: 0, borderWidth: 0 }]}>
               <Text style={[TYPOGRAPHY.caption2, { color: COLORS.primary, fontWeight: '600' }]}>Base</Text>
             </View>
           </View>
@@ -371,7 +371,7 @@ export default function HomeScreen() {
               <Text style={[TYPOGRAPHY.body, styles.filename, { color: colors.text, marginBottom: 0, flexShrink: 1 }]} numberOfLines={1}>
                 {item.job_title || 'Untitled Position'}
               </Text>
-              <View style={[BadgeStyles.base, { backgroundColor: ALPHA_COLORS.purple.bg, flexShrink: 0 }]}>
+              <View style={[BadgeStyles.base, { backgroundColor: ALPHA_COLORS.purple.bg, flexShrink: 0, borderWidth: 0 }]}>
                 <Text style={[TYPOGRAPHY.caption2, { color: COLORS.purple, fontWeight: '600' }]}>Tailored</Text>
               </View>
             </View>
