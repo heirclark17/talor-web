@@ -286,7 +286,7 @@ export default function Home() {
   }
 
   const handleViewTailored = (tailoredId: number) => {
-    navigate(`/tailor?tailoredId=${tailoredId}`)
+    navigate(`/tailor?resumeId=${tailoredId}`)
   }
 
   const handleAnalyze = async (resumeId: number, filename: string) => {
