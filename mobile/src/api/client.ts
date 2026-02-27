@@ -399,7 +399,7 @@ export const api = {
 
   async uploadResume(formData: FormData): Promise<ApiResponse> {
     try {
-      console.log('[UploadResume] Starting file upload via XMLHttpRequest');
+      if (__DEV__) console.log('[UploadResume] Starting file upload via XMLHttpRequest');
 
       // Get auth token from Supabase (same pattern as base.ts fetchWithAuth)
       let token: string | null = null;
@@ -426,18 +426,19 @@ export const api = {
         };
       }
 
-      console.log('[UploadResume] Auth credentials ready:', {
-        hasToken: !!token,
-        hasUserId: !!userId,
-        tokenPrefix: token?.substring(0, 20),
-      });
+      if (__DEV__) {
+        console.log('[UploadResume] Auth credentials ready:', {
+          hasToken: !!token,
+          hasUserId: !!userId,
+        });
+      }
 
       // iOS WORKAROUND: Add auth to FormData fields in addition to headers
       // iOS has known bugs dropping custom headers on multipart requests
       formData.append('authorization', `Bearer ${token}`);
       formData.append('x_user_id', userId);
 
-      console.log('[UploadResume] Auth added to both headers AND form fields (iOS compatibility)');
+      if (__DEV__) console.log('[UploadResume] Auth added to both headers AND form fields (iOS compatibility)');
 
       // Use XMLHttpRequest instead of fetch for better iOS FormData + header support
       // Fetch on iOS has known issues with custom headers when uploading FormData
@@ -445,17 +446,13 @@ export const api = {
         const xhr = new XMLHttpRequest();
 
         xhr.onload = () => {
-          console.log('[UploadResume] XHR Response:', {
-            status: xhr.status,
-            statusText: xhr.statusText,
-            bodyPreview: xhr.responseText.substring(0, 200),
-          });
+          if (__DEV__) console.log('[UploadResume] XHR Response:', { status: xhr.status });
 
           try {
             const data = JSON.parse(xhr.responseText);
 
             if (xhr.status >= 200 && xhr.status < 300) {
-              console.log('[UploadResume] Upload successful');
+              if (__DEV__) console.log('[UploadResume] Upload successful');
               resolve({ success: true, data });
             } else {
               const errorMsg = data?.error || data?.detail || data?.message || `Upload failed (${xhr.status})`;
@@ -494,7 +491,7 @@ export const api = {
         xhr.setRequestHeader('Authorization', `Bearer ${token}`);
         xhr.setRequestHeader('X-User-ID', userId);
 
-        console.log('[UploadResume] Sending XHR with auth headers');
+        if (__DEV__) console.log('[UploadResume] Sending XHR with auth headers');
 
         // Set timeout (2 minutes)
         xhr.timeout = 120000;

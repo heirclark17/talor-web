@@ -181,20 +181,16 @@ export async function fetchWithAuth(
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  // Log auth headers for debugging
-  console.log(`[API] ${options.method || 'GET'} ${endpoint}:`, {
-    hasAuth: !!headers['Authorization'],
-    hasUserId: !!headers['X-User-ID'],
-    authPrefix: headers['Authorization']?.substring(0, 20),
-    isFormData: body instanceof FormData,
-    headerKeys: Object.keys(headers),
-  });
-
-  if (!headers['Authorization']) {
-    console.warn(`[API] ⚠️ No Authorization header for ${endpoint}!`, {
-      userId: headers['X-User-ID']?.substring(0, 15),
-      token: token?.substring(0, 20) || 'NO TOKEN',
+  if (__DEV__) {
+    console.log(`[API] ${options.method || 'GET'} ${endpoint}:`, {
+      hasAuth: !!headers['Authorization'],
+      hasUserId: !!headers['X-User-ID'],
+      isFormData: body instanceof FormData,
     });
+
+    if (!headers['Authorization']) {
+      console.warn(`[API] No Authorization header for ${endpoint}`);
+    }
   }
 
   try {

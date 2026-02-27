@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { saveAuthToken, clearAuthTokens, getUserId, saveSessionData, saveUserId } from '../utils/userSession';
+import { saveAuthToken, clearAuthTokens, getUserId, saveSessionData, saveUserId, clearUserSession } from '../utils/userSession';
 
 interface AuthContextType {
   user: User | null;
@@ -11,6 +11,7 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<{ error: any; data?: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<{ error: any }>;
   resendVerification: (email: string) => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
 }
@@ -23,17 +24,16 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('[SupabaseAuth] Initializing auth provider');
+    if (__DEV__) console.log('[SupabaseAuth] Initializing auth provider');
 
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('[SupabaseAuth] Initial session:', session?.user?.email || 'No session');
+      if (__DEV__) console.log('[SupabaseAuth] Initial session:', session ? 'active' : 'none');
 
       // Save JWT token and user ID for backend API calls
       if (session?.access_token) {
-        console.log('[SupabaseAuth] Saving initial JWT token and user ID to secure storage');
         await saveAuthToken(session.access_token);
-        await saveUserId(session.user.id); // Save user ID for API headers
+        await saveUserId(session.user.id);
         await saveSessionData({
           userId: session.user.id,
           email: session.user.email,
@@ -47,21 +47,17 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('[SupabaseAuth] Auth state changed:', _event, 'User:', session?.user?.email || 'No user');
+      if (__DEV__) console.log('[SupabaseAuth] Auth state changed:', _event);
 
       // Save or clear JWT token and user ID for backend API calls
       if (session?.access_token) {
-        console.log('[SupabaseAuth] Saving JWT token and user ID to secure storage');
         await saveAuthToken(session.access_token);
-        await saveUserId(session.user.id); // Save user ID for API headers
-
-        // Also save user ID and email for session data
+        await saveUserId(session.user.id);
         await saveSessionData({
           userId: session.user.id,
           email: session.user.email,
         });
       } else {
-        console.log('[SupabaseAuth] Clearing JWT token from secure storage');
         await clearAuthTokens();
       }
 
@@ -71,13 +67,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     });
 
     return () => {
-      console.log('[SupabaseAuth] Cleaning up auth listener');
       subscription.unsubscribe();
     };
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    console.log('[SupabaseAuth] Starting sign up for:', email);
+    if (__DEV__) console.log('[SupabaseAuth] Starting sign up');
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -85,7 +80,6 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         password,
         options: {
           emailRedirectTo: 'talor://auth/callback',
-          // Fallback to web URL if deep link fails
           data: {
             email_confirm_redirect: 'https://talorme.com/auth/confirm',
           }
@@ -93,34 +87,20 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       });
 
       if (error) {
-        console.error('[SupabaseAuth] Sign up error:', error.message);
-        console.error('[SupabaseAuth] Error details:', JSON.stringify(error, null, 2));
+        if (__DEV__) console.error('[SupabaseAuth] Sign up error:', error.message);
         return { error };
       }
 
-      console.log('[SupabaseAuth] Sign up successful!');
-      console.log('[SupabaseAuth] User created:', data.user?.email);
-      console.log('[SupabaseAuth] User ID:', data.user?.id);
-      console.log('[SupabaseAuth] Email confirmed:', data.user?.email_confirmed_at || 'NOT CONFIRMED');
-      console.log('[SupabaseAuth] Confirmation required:', !data.user?.email_confirmed_at);
-
-      // Check if user was auto-confirmed (means email confirmations are disabled)
-      if (data.user?.email_confirmed_at) {
-        console.warn('[SupabaseAuth] ⚠️ User auto-confirmed - email verification is DISABLED in Supabase dashboard');
-      } else {
-        console.log('[SupabaseAuth] ✉️ Verification email should be sent to:', email);
-      }
-
+      if (__DEV__) console.log('[SupabaseAuth] Sign up successful');
       return { error: null, data };
     } catch (error: any) {
-      console.error('[SupabaseAuth] Sign up exception:', error);
-      console.error('[SupabaseAuth] Exception details:', error?.message || error);
+      if (__DEV__) console.error('[SupabaseAuth] Sign up exception:', error?.message);
       return { error };
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    console.log('[SupabaseAuth] Starting sign in for:', email);
+    if (__DEV__) console.log('[SupabaseAuth] Starting sign in');
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -129,31 +109,72 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       });
 
       if (error) {
-        console.error('[SupabaseAuth] Sign in error:', error.message);
+        if (__DEV__) console.error('[SupabaseAuth] Sign in error:', error.message);
         return { error };
       }
 
-      console.log('[SupabaseAuth] Sign in successful!');
+      if (__DEV__) console.log('[SupabaseAuth] Sign in successful');
       return { error: null };
     } catch (error: any) {
-      console.error('[SupabaseAuth] Sign in exception:', error);
+      if (__DEV__) console.error('[SupabaseAuth] Sign in exception:', error?.message);
       return { error };
     }
   };
 
   const signOut = async () => {
-    console.log('[SupabaseAuth] Signing out');
+    if (__DEV__) console.log('[SupabaseAuth] Signing out');
 
     try {
       await supabase.auth.signOut();
-      console.log('[SupabaseAuth] Sign out successful');
     } catch (error) {
       console.error('[SupabaseAuth] Sign out error:', error);
     }
   };
 
+  const deleteAccount = async () => {
+    if (__DEV__) console.log('[SupabaseAuth] Deleting account');
+
+    try {
+      const accessToken = session?.access_token;
+      if (!accessToken) {
+        return { error: { message: 'No active session' } };
+      }
+
+      // Call backend to delete user data and auth account
+      const { API_BASE_URL } = require('../utils/constants');
+      const { getUserId: getStoredUserId } = require('../utils/userSession');
+      const storedUserId = await getStoredUserId();
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/delete-account`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-User-ID': storedUserId || '',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        return { error: { message: data.detail || 'Failed to delete account' } };
+      }
+
+      // Clear all local data
+      await clearUserSession();
+      await clearAuthTokens();
+
+      // Sign out locally
+      await supabase.auth.signOut();
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('[SupabaseAuth] Delete account error:', error?.message);
+      return { error: { message: error?.message || 'Failed to delete account' } };
+    }
+  };
+
   const resendVerification = async (email: string) => {
-    console.log('[SupabaseAuth] Resending verification email to:', email);
+    if (__DEV__) console.log('[SupabaseAuth] Resending verification email');
 
     try {
       const { error } = await supabase.auth.resend({
@@ -162,20 +183,19 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       });
 
       if (error) {
-        console.error('[SupabaseAuth] Resend error:', error.message);
+        if (__DEV__) console.error('[SupabaseAuth] Resend error:', error.message);
         return { error };
       }
 
-      console.log('[SupabaseAuth] Verification email resent successfully');
       return { error: null };
     } catch (error: any) {
-      console.error('[SupabaseAuth] Resend exception:', error);
+      if (__DEV__) console.error('[SupabaseAuth] Resend exception:', error?.message);
       return { error };
     }
   };
 
   const resetPassword = async (email: string) => {
-    console.log('[SupabaseAuth] Sending password reset email to:', email);
+    if (__DEV__) console.log('[SupabaseAuth] Sending password reset email');
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -183,14 +203,13 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       });
 
       if (error) {
-        console.error('[SupabaseAuth] Reset password error:', error.message);
+        if (__DEV__) console.error('[SupabaseAuth] Reset password error:', error.message);
         return { error };
       }
 
-      console.log('[SupabaseAuth] Password reset email sent successfully');
       return { error: null };
     } catch (error: any) {
-      console.error('[SupabaseAuth] Reset password exception:', error);
+      if (__DEV__) console.error('[SupabaseAuth] Reset password exception:', error?.message);
       return { error };
     }
   };
@@ -203,15 +222,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     signUp,
     signIn,
     signOut,
+    deleteAccount,
     resendVerification,
     resetPassword,
   };
-
-  console.log('[SupabaseAuth] Context state:', {
-    isLoading,
-    isSignedIn: !!user,
-    userEmail: user?.email || 'none',
-  });
 
   return (
     <AuthContext.Provider value={value}>

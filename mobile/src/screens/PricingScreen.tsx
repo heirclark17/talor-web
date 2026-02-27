@@ -118,19 +118,9 @@ export default function PricingScreen() {
       Alert.alert('Free Plan', 'You are already on the Free plan. Start using the app!');
       return;
     }
-    if (tierId === 'lifetime') {
-      Alert.alert(
-        'Get Lifetime Access',
-        'Lifetime plan: $199 one-time payment. Unlimited access forever. In-app purchases coming soon.',
-        [{ text: 'OK' }]
-      );
-      return;
-    }
     Alert.alert(
-      'Upgrade to Pro',
-      billingPeriod === 'annually'
-        ? 'Pro plan: $99/year (Save 45% vs monthly). In-app purchases coming soon.'
-        : 'Pro plan: $15/month. In-app purchases coming soon.',
+      'Coming Soon',
+      'In-app subscriptions are coming soon. Stay tuned!',
       [{ text: 'OK' }]
     );
   };
@@ -280,7 +270,7 @@ export default function PricingScreen() {
               What payment methods do you accept?
             </Text>
             <Text style={[styles.faqAnswer, ds.faqAnswer]}>
-              We accept all major credit cards, debit cards, and PayPal.
+              Payments are handled securely through Apple's App Store.
             </Text>
           </View>
 
@@ -299,9 +289,9 @@ export default function PricingScreen() {
           </View>
 
           <View style={styles.faqItem}>
-            <Text style={[styles.faqQuestion, ds.faqQuestion]}>Do you offer refunds?</Text>
+            <Text style={[styles.faqQuestion, ds.faqQuestion]}>How do I manage my subscription?</Text>
             <Text style={[styles.faqAnswer, ds.faqAnswer]}>
-              We offer a 14-day money-back guarantee on all paid plans. If you're not satisfied, contact support for a full refund.
+              You can manage or cancel your subscription anytime through your Apple ID settings in the App Store.
             </Text>
           </View>
         </GlassCard>
@@ -312,15 +302,8 @@ export default function PricingScreen() {
             Trusted by professionals worldwide
           </Text>
           <Text style={[styles.trustText, ds.faqAnswer]}>
-            Secure payments powered by Stripe
+            Secure payments via the App Store
           </Text>
-          <View style={styles.trustBadges}>
-            <Text style={[styles.trustBadge, { color: colors.textTertiary }]}>256-bit SSL</Text>
-            <Text style={[styles.trustDot, { color: colors.textTertiary }]}>{'\u2022'}</Text>
-            <Text style={[styles.trustBadge, { color: colors.textTertiary }]}>PCI Compliant</Text>
-            <Text style={[styles.trustDot, { color: colors.textTertiary }]}>{'\u2022'}</Text>
-            <Text style={[styles.trustBadge, { color: colors.textTertiary }]}>SOC 2 Certified</Text>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -506,18 +489,5 @@ const styles = StyleSheet.create({
   trustText: {
     fontSize: 12,
     textAlign: 'center',
-  },
-  trustBadges: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 8,
-    opacity: 0.6,
-  },
-  trustBadge: {
-    fontSize: 11,
-  },
-  trustDot: {
-    fontSize: 8,
   },
 });

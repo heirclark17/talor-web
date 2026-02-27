@@ -7,12 +7,12 @@ import {
   StyleSheet,
   Alert,
   Linking,
-  Switch,
+  ActivityIndicator,
 } from 'react-native';
+import Constants from 'expo-constants';
 import {
   Settings,
   User,
-  Bell,
   Moon,
   Sun,
   Shield,
@@ -24,7 +24,6 @@ import {
   BookOpen,
   TrendingUp,
   Palette,
-  Image as ImageIcon,
   LogOut,
   Copy,
   Check,
@@ -47,10 +46,10 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { isDark, themeMode, setThemeMode, colors, backgroundId, customBackgroundUri } = useTheme();
-  const { user, signOut } = useSupabaseAuth();
+  const { user, signOut, deleteAccount } = useSupabaseAuth();
   const [userId, setUserId] = useState<string>('');
-  const [notifications, setNotifications] = useState(true);
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [copiedUserId, setCopiedUserId] = useState(false);
 
   useEffect(() => {
@@ -143,6 +142,33 @@ export default function SettingsScreen() {
     } catch {
       Alert.alert('Error', 'Failed to copy User ID');
     }
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account and all associated data including resumes, tailored documents, career plans, and interview prep materials. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete Account',
+          style: 'destructive',
+          onPress: async () => {
+            setDeletingAccount(true);
+            try {
+              const result = await deleteAccount();
+              if (result.error) {
+                setDeletingAccount(false);
+                Alert.alert('Error', result.error.message || 'Failed to delete account. Please try again or contact support@talorme.com.');
+              }
+            } catch {
+              setDeletingAccount(false);
+              Alert.alert('Error', 'Failed to delete account. Please contact support@talorme.com.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleContact = () => {
@@ -241,6 +267,16 @@ export default function SettingsScreen() {
             true,
             'Sign out of your account'
           )}
+          {renderItem(
+            deletingAccount
+              ? <ActivityIndicator size={20} color={COLORS.danger} />
+              : <Trash2 color={COLORS.danger} size={20} />,
+            'Delete Account',
+            deletingAccount ? undefined : handleDeleteAccount,
+            undefined,
+            true,
+            'Permanently delete your account and all data'
+          )}
         </GlassCard>
 
         {/* Features Section */}
@@ -296,27 +332,6 @@ export default function SettingsScreen() {
             </View>,
             false,
             'Choose a custom background'
-          )}
-        </GlassCard>
-
-        {/* Preferences Section */}
-        {renderSection('PREFERENCES')}
-        <GlassCard padding={0} material="thin">
-          {renderItem(
-            <Bell color={colors.textSecondary} size={20} />,
-            'Notifications',
-            undefined,
-            <Switch
-              value={notifications}
-              onValueChange={setNotifications}
-              trackColor={{ false: colors.border, true: COLORS.primary }}
-              thumbColor={colors.text}
-              accessibilityLabel="Enable notifications"
-              accessibilityHint={notifications ? "Notifications are currently enabled" : "Notifications are currently disabled"}
-              accessibilityRole="switch"
-            />,
-            false,
-            'Toggle push notifications on or off'
           )}
         </GlassCard>
 
@@ -387,7 +402,7 @@ export default function SettingsScreen() {
           </GlassCard>
           <Text style={[styles.appName, { color: colors.text }]}>Talor</Text>
           <Text style={[styles.appVersion, { color: colors.textSecondary }]}>
-            Version 1.0.0
+            Version {Constants.expoConfig?.version || '1.0.0'}
           </Text>
           <Text style={[styles.appCopyright, { color: colors.textTertiary }]}>
             {new Date().getFullYear()} Talor. All rights reserved.

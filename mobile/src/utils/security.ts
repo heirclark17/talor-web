@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
 /**
  * Security utilities for the mobile application
@@ -117,7 +118,7 @@ export async function secureFetch(
   const securityHeaders: Record<string, string> = {
     'X-Requested-With': 'XMLHttpRequest', // Prevent CSRF
     'X-Client-Platform': Platform.OS,
-    'X-Client-Version': '1.0.0', // Should come from app.json
+    'X-Client-Version': Constants.expoConfig?.version || '1.0.0',
   };
 
   const mergedHeaders = {
