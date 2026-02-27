@@ -258,11 +258,13 @@ export default function MockInterviewScreen() {
             question_count: (data.question_number || questionNumber + 1),
           }).then(() => {
             // Refresh past sessions list
-            api.getMockSessions(interviewPrepId).then(result => {
+            return api.getMockSessions(interviewPrepId).then(result => {
               if (result.success && Array.isArray(result.data)) {
                 setPastSessions(result.data);
               }
             });
+          }).catch(err => {
+            console.error('[MockInterview] Error saving session:', err);
           });
         }
       }

@@ -233,7 +233,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
             <View style={s.mt12}>
               <Text style={[s.xsLabel, { color: colors.textTertiary }]}>Research Sources:</Text>
               {role.sourceCitations.map((url, i) => (
-                <TouchableOpacity key={i} style={s.linkRow} onPress={() => openUrl(url)}>
+                <TouchableOpacity key={i} style={s.linkRow} onPress={() => openUrl(url)} accessibilityRole="link" accessibilityLabel={`Open resource link ${i + 1}`}>
                   <ExternalLink color="#60a5fa" size={12} />
                   <Text style={s.linkText} numberOfLines={2}>{url}</Text>
                 </TouchableOpacity>
@@ -385,7 +385,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
         <View style={s.mt8}>
           <Text style={[s.innerCardLabel, { color: colors.text }]}>Learning Resources</Text>
           {skill.resources.map((url: string, i: number) => (
-            <TouchableOpacity key={i} style={s.linkRow} onPress={() => openUrl(url)}>
+            <TouchableOpacity key={i} style={s.linkRow} onPress={() => openUrl(url)} accessibilityRole="link" accessibilityLabel={`Open learning resource ${i + 1}`}>
               <ExternalLink color="#60a5fa" size={12} />
               <Text style={s.linkText} numberOfLines={2}>{url}</Text>
             </TouchableOpacity>
@@ -481,7 +481,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
           return (
             <GlassCard key={idx} style={s.modalCard}>
-              <TouchableOpacity onPress={() => setExpandedProject(isExpanded ? null : idx)}>
+              <TouchableOpacity onPress={() => setExpandedProject(isExpanded ? null : idx)} accessibilityRole="button" accessibilityLabel={`${isExpanded ? 'Collapse' : 'Expand'} project: ${project.title}`}>
                 <View style={s.rowWrap}>
                   <Text style={[s.cardTitle, { color: colors.text, marginRight: 6 }]}>{project.title}</Text>
                   <View style={[s.badge, { backgroundColor: 'rgba(255,255,255,0.06)' }]}>
@@ -543,7 +543,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                             <Text style={[s.smallText, { color: colors.textSecondary }]}>{tech.whyThisTech}</Text>
                           </View>
                           {tech.learningResources?.length > 0 && tech.learningResources.map((url, ui) => (
-                            <TouchableOpacity key={ui} style={s.linkRow} onPress={() => openUrl(url)}>
+                            <TouchableOpacity key={ui} style={s.linkRow} onPress={() => openUrl(url)} accessibilityRole="link" accessibilityLabel={`Open technology resource ${ui + 1}`}>
                               <ExternalLink color="#60a5fa" size={12} />
                               <Text style={s.linkText} numberOfLines={1}>Resource {ui + 1}</Text>
                             </TouchableOpacity>
@@ -595,7 +595,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                       <Text style={[s.innerCardLabel, { color: colors.text }]}>Similar Projects on GitHub</Text>
                       <View style={s.chipRow}>
                         {project.githubExampleRepos.map((repo, ri) => (
-                          <TouchableOpacity key={ri} style={s.linkRow} onPress={() => openUrl(repo)}>
+                          <TouchableOpacity key={ri} style={s.linkRow} onPress={() => openUrl(repo)} accessibilityRole="link" accessibilityLabel={`Open GitHub example ${ri + 1}`}>
                             <ExternalLink color={colors.textSecondary} size={12} />
                             <Text style={[s.linkText, { color: colors.textSecondary }]}>Example {ri + 1}</Text>
                           </TouchableOpacity>
@@ -687,7 +687,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                   </View>
                 )}
                 {event.registrationLink && (
-                  <TouchableOpacity style={[s.linkButton, { backgroundColor: 'rgba(255,255,255,0.06)' }]} onPress={() => openUrl(event.registrationLink!)}>
+                  <TouchableOpacity style={[s.linkButton, { backgroundColor: 'rgba(255,255,255,0.06)' }]} onPress={() => openUrl(event.registrationLink!)} accessibilityRole="link" accessibilityLabel="Register for event">
                     <ExternalLink color={colors.text} size={14} />
                     <Text style={[s.linkButtonText, { color: colors.text }]}>Register for Event</Text>
                   </TouchableOpacity>
@@ -1114,7 +1114,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
             )}
 
             {option.officialLink && (
-              <TouchableOpacity style={[s.linkButton, { backgroundColor: 'rgba(99,102,241,0.2)', borderColor: 'rgba(99,102,241,0.3)' }]} onPress={() => openUrl(option.officialLink!)}>
+              <TouchableOpacity style={[s.linkButton, { backgroundColor: 'rgba(99,102,241,0.2)', borderColor: 'rgba(99,102,241,0.3)' }]} onPress={() => openUrl(option.officialLink!)} accessibilityRole="link" accessibilityLabel="View certification program">
                 <ExternalLink color="#a5b4fc" size={14} />
                 <Text style={[s.linkButtonText, { color: '#a5b4fc' }]}>View Program</Text>
               </TouchableOpacity>
@@ -1128,7 +1128,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
   const renderSourcesModal = () => (
     <View style={s.modalBody}>
       {plan.researchSources?.map((source, idx) => (
-        <TouchableOpacity key={idx} style={s.sourceRow} onPress={() => openUrl(source)}>
+        <TouchableOpacity key={idx} style={s.sourceRow} onPress={() => openUrl(source)} accessibilityRole="link" accessibilityLabel={`Open research source ${idx + 1}`}>
           <ExternalLink color={colors.textSecondary} size={14} style={{ flexShrink: 0 }} />
           <Text style={[s.smallText, { color: colors.textSecondary, marginLeft: 6, flex: 1 }]} numberOfLines={2}>{source}</Text>
         </TouchableOpacity>
