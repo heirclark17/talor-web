@@ -396,6 +396,24 @@ function Dashboard() {
           <p className="text-xs sm:text-sm text-theme-tertiary mt-3 sm:mt-4">Takes less than 2 minutes to get started</p>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/10 mt-12">
+        <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-12">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-theme-tertiary" />
+              <span className="text-sm text-theme-tertiary">&copy; {new Date().getFullYear()} TalorMe. All rights reserved.</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link to="/privacy" className="text-sm text-theme-tertiary hover:text-theme-secondary transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="text-sm text-theme-tertiary hover:text-theme-secondary transition-colors">Terms of Service</Link>
+              <Link to="/help" className="text-sm text-theme-tertiary hover:text-theme-secondary transition-colors">Help</Link>
+              <Link to="/pricing" className="text-sm text-theme-tertiary hover:text-theme-secondary transition-colors">Pricing</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
@@ -705,6 +723,22 @@ function AppContent() {
           </Suspense>
         </ErrorBoundary>
       </main>
+
+      {/* App Footer - Hidden on landing page (has its own) and auth pages */}
+      {!isLandingPage && !isAuthPage && (
+        <footer className="border-t border-theme-subtle mt-8">
+          <div className="container mx-auto px-4 sm:px-6 py-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-xs text-theme-tertiary">&copy; {new Date().getFullYear()} TalorMe</span>
+              <div className="flex items-center gap-4">
+                <Link to="/privacy" className="text-xs text-theme-tertiary hover:text-theme-secondary transition-colors">Privacy</Link>
+                <Link to="/terms" className="text-xs text-theme-tertiary hover:text-theme-secondary transition-colors">Terms</Link>
+                <Link to="/help" className="text-xs text-theme-tertiary hover:text-theme-secondary transition-colors">Help</Link>
+              </div>
+            </div>
+          </div>
+        </footer>
+      )}
 
       {/* Toast notifications */}
       <Toaster position="bottom-right" toastOptions={{ duration: 4000 }} />
