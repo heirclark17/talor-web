@@ -547,7 +547,7 @@ export default function HomeScreen() {
           <GlassCard style={[styles.versionsModalContent, { backgroundColor: colors.background }]}>
             <View style={styles.versionsModalHeader}>
               <Text style={[TYPOGRAPHY.title2, { color: colors.text }]}>Tailored Versions</Text>
-              <TouchableOpacity onPress={() => { setVersionsModal(false); setTailoredVersions([]); }}>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close versions modal" onPress={() => { setVersionsModal(false); setTailoredVersions([]); }}>
                 <X color={colors.text} size={24} />
               </TouchableOpacity>
             </View>

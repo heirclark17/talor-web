@@ -93,20 +93,22 @@ export default function SavedCareerPlanDetailScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['bottom']}>
       {/* Top bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="Go back">
           <ArrowLeft size={20} color={colors.textSecondary} />
           <Text style={[styles.backText, { color: colors.textSecondary }]}>Back</Text>
         </TouchableOpacity>
 
         {plan && (
           <View style={styles.topActions}>
-            <TouchableOpacity onPress={handleShare} style={[styles.actionBtn, { backgroundColor: colors.glass }]}>
+            <TouchableOpacity onPress={handleShare} style={[styles.actionBtn, { backgroundColor: colors.glass }]} accessibilityRole="button" accessibilityLabel="Share career plan">
               <Share2 size={16} color={colors.textSecondary} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleDelete}
               disabled={deleting}
               style={[styles.actionBtn, { backgroundColor: 'rgba(239,68,68,0.1)' }]}
+              accessibilityRole="button"
+              accessibilityLabel="Delete career plan"
             >
               {deleting
                 ? <ActivityIndicator size="small" color={COLORS.error} />
@@ -130,7 +132,7 @@ export default function SavedCareerPlanDetailScreen() {
         <View style={styles.centerContainer}>
           <Text style={[styles.errorTitle, { color: COLORS.error }]}>Error</Text>
           <Text style={[styles.centerText, { color: colors.textSecondary }]}>{error}</Text>
-          <TouchableOpacity onPress={fetchPlan} style={styles.retryBtn}>
+          <TouchableOpacity onPress={fetchPlan} style={styles.retryBtn} accessibilityRole="button" accessibilityLabel="Try again">
             <Text style={styles.retryText}>Try Again</Text>
           </TouchableOpacity>
         </View>

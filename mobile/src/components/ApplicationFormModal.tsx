@@ -244,7 +244,7 @@ export function ApplicationFormModal({
               <Text style={[styles.headerTitle, { color: colors.text }]}>
                 {application?.id ? 'Edit Application' : 'New Application'}
               </Text>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" accessibilityLabel="Close form">
                 <X color={colors.textSecondary} size={24} />
               </TouchableOpacity>
             </View>

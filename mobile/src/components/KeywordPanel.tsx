@@ -173,7 +173,7 @@ export default function KeywordPanel({ keywords, loading }: KeywordPanelProps) {
             style={[styles.searchInput, { color: colors.text }]}
           />
           {searchQuery !== '' && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton} accessibilityRole="button" accessibilityLabel="Clear search">
               <X color={colors.textTertiary} size={16} />
             </TouchableOpacity>
           )}

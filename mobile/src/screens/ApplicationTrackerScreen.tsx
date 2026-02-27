@@ -279,7 +279,7 @@ export default function ApplicationTrackerScreen() {
           autoCapitalize="none"
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
+          <TouchableOpacity onPress={() => setSearchQuery('')} accessibilityRole="button" accessibilityLabel="Clear search">
             <X color={colors.textTertiary} size={16} />
           </TouchableOpacity>
         )}

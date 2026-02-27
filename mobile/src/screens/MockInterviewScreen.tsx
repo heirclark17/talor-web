@@ -479,7 +479,7 @@ export default function MockInterviewScreen() {
             <Text style={styles.newInterviewText}>Try Again</Text>
           </GlassButton>
 
-          <TouchableOpacity onPress={handleShareResults} style={[styles.shareButton, { borderColor: colors.border }]}>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Share results" onPress={handleShareResults} style={[styles.shareButton, { borderColor: colors.border }]}>
             <Share2 size={16} color={colors.textSecondary} />
             <Text style={[styles.shareButtonText, { color: colors.textSecondary }]}>Share</Text>
           </TouchableOpacity>
@@ -499,7 +499,7 @@ export default function MockInterviewScreen() {
         >
           {/* Header bar */}
           <View style={[styles.chatHeader, { borderBottomColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}>
-            <TouchableOpacity onPress={handleReset} style={styles.backButton}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Go back" onPress={handleReset} style={styles.backButton}>
               <ArrowLeft size={20} color={colors.text} />
             </TouchableOpacity>
             <View style={styles.chatHeaderInfo}>
@@ -511,16 +511,16 @@ export default function MockInterviewScreen() {
               </Text>
             </View>
             <View style={styles.chatHeaderActions}>
-              <TouchableOpacity onPress={() => setShowTips(true)} style={styles.headerActionBtn}>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel="Interview tips" onPress={() => setShowTips(true)} style={styles.headerActionBtn}>
                 <HelpCircle size={18} color={colors.textSecondary} />
               </TouchableOpacity>
               {!isComplete && (
-                <TouchableOpacity onPress={() => setIsPaused(!isPaused)} style={styles.headerActionBtn}>
+                <TouchableOpacity accessibilityRole="button" accessibilityLabel={isPaused ? "Resume interview" : "Pause interview"} onPress={() => setIsPaused(!isPaused)} style={styles.headerActionBtn}>
                   {isPaused ? <Play size={18} color={COLORS.success} /> : <Pause size={18} color={colors.textSecondary} />}
                 </TouchableOpacity>
               )}
               {!isComplete && (
-                <TouchableOpacity onPress={handleEndInterview} style={styles.headerActionBtn}>
+                <TouchableOpacity accessibilityRole="button" accessibilityLabel="End interview" onPress={handleEndInterview} style={styles.headerActionBtn}>
                   <Square size={16} color={COLORS.danger} />
                 </TouchableOpacity>
               )}
@@ -605,13 +605,13 @@ export default function MockInterviewScreen() {
         {/* Tips Modal */}
         <Modal visible={showTips} transparent animationType="slide" onRequestClose={() => setShowTips(false)}>
           <View style={styles.tipsOverlay}>
-            <TouchableOpacity style={styles.tipsBackdrop} activeOpacity={1} onPress={() => setShowTips(false)} />
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close tips" style={styles.tipsBackdrop} activeOpacity={1} onPress={() => setShowTips(false)} />
             <View style={[styles.tipsSheet, { backgroundColor: colors.background }]}>
               <View style={styles.tipsHandle} />
               <View style={styles.tipsHeader}>
                 <Award size={20} color={COLORS.warning} />
                 <Text style={[styles.tipsTitle, { color: colors.text }]}>Interview Tips</Text>
-                <TouchableOpacity onPress={() => setShowTips(false)}>
+                <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close tips" onPress={() => setShowTips(false)}>
                   <Text style={[styles.tipsDone, { color: COLORS.primary }]}>Done</Text>
                 </TouchableOpacity>
               </View>

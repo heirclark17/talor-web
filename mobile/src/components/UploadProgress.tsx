@@ -136,7 +136,7 @@ export function UploadProgress({
         </View>
 
         {status === 'uploading' && onCancel && (
-          <TouchableOpacity onPress={onCancel} style={styles.cancelButton}>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Cancel upload" onPress={onCancel} style={styles.cancelButton}>
             <Ionicons name="close" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         )}

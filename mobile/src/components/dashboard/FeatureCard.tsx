@@ -27,7 +27,7 @@ export function FeatureCard({ feature, style }: FeatureCardProps) {
 
   return (
     <View style={[{ flex: 1 }, style]}>
-      <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
+      <TouchableOpacity onPress={handlePress} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={feature.label}>
         <GlassCard
           variant="elevated"
           bordered

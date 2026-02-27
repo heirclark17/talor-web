@@ -325,7 +325,7 @@ export function SearchFilter({
             <View style={styles.filterHeader}>
               <Text style={[styles.filterTitle, { color: colors.textSecondary }]}>Filters</Text>
               {hasActiveFilters && (
-                <TouchableOpacity onPress={handleClearFilters}>
+                <TouchableOpacity onPress={handleClearFilters} accessibilityRole="button" accessibilityLabel="Clear all filters">
                   <Text style={[styles.clearAllText, { color: COLORS.primary }]}>Clear all</Text>
                 </TouchableOpacity>
               )}

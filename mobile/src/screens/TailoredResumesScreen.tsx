@@ -316,12 +316,12 @@ export default function TailoredResumesScreen() {
 
         {selectionMode && (
           <View style={styles.selectionActions}>
-            <TouchableOpacity style={styles.selectionButton} onPress={toggleSelectAll}>
+            <TouchableOpacity style={styles.selectionButton} onPress={toggleSelectAll} accessibilityRole="button" accessibilityLabel={selectedIds.length === resumes.length ? 'Deselect all' : 'Select all'}>
               <Text style={[styles.selectionButtonText, { color: COLORS.primary }]}>
                 {selectedIds.length === resumes.length ? 'Deselect All' : 'Select All'}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.selectionButton} onPress={cancelSelectionMode}>
+            <TouchableOpacity style={styles.selectionButton} onPress={cancelSelectionMode} accessibilityRole="button" accessibilityLabel="Cancel selection">
               <XIcon color={colors.textSecondary} size={20} />
             </TouchableOpacity>
           </View>

@@ -618,7 +618,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
         const isExpanded = expandedEvent === idx;
         return (
           <GlassCard key={idx} style={s.modalCard}>
-            <TouchableOpacity onPress={() => setExpandedEvent(isExpanded ? null : idx)}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel={isExpanded ? "Collapse event details" : "Expand event details"} onPress={() => setExpandedEvent(isExpanded ? null : idx)}>
               <View style={s.rowWrap}>
                 <Text style={[s.cardTitle, { color: colors.text, marginRight: 6 }]}>{event.name}</Text>
                 <View style={[s.badge, { backgroundColor: 'rgba(255,255,255,0.06)' }]}>
@@ -866,7 +866,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           <Text style={[s.sectionTitle, { color: colors.text, marginBottom: 8 }]}>Achievement Bullets for Resume</Text>
           {plan.resumeAssets.targetRoleBullets.map((bullet, idx) => (
             <View key={idx} style={[s.innerCard, { backgroundColor: 'rgba(255,255,255,0.03)' }]}>
-              <TouchableOpacity onPress={() => setExpandedBullet(expandedBullet === idx ? null : idx)}>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel={expandedBullet === idx ? "Collapse bullet details" : "Expand bullet details"} onPress={() => setExpandedBullet(expandedBullet === idx ? null : idx)}>
                 <View style={s.rowSpaceBetween}>
                   <Text style={[s.smallText, { color: colors.textSecondary, flex: 1, paddingRight: 8 }]}>{bullet.bulletText}</Text>
                   <ChevronDown color={colors.textSecondary} size={16} style={expandedBullet === idx ? s.chevronUp : undefined} />
@@ -1173,7 +1173,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.quickStartScroll}>
             {quickStart.primaryRole && (
-              <TouchableOpacity style={[s.quickStartItem, { borderColor: 'rgba(59,130,246,0.3)' }]} onPress={() => setActiveModal('roles')}>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel="Step 1: View target role" style={[s.quickStartItem, { borderColor: 'rgba(59,130,246,0.3)' }]} onPress={() => setActiveModal('roles')}>
                 <View style={s.rowCenter}>
                   <View style={[s.iconCircleSmall, { backgroundColor: 'rgba(59,130,246,0.2)' }]}>
                     <Target color="#60a5fa" size={14} />
@@ -1190,7 +1190,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
             )}
 
             {quickStart.firstWeekTask && (
-              <TouchableOpacity style={[s.quickStartItem, { borderColor: 'rgba(249,115,22,0.3)' }]} onPress={() => setActiveModal('timeline')}>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel="Week 1: View first week tasks" style={[s.quickStartItem, { borderColor: 'rgba(249,115,22,0.3)' }]} onPress={() => setActiveModal('timeline')}>
                 <View style={s.rowCenter}>
                   <View style={[s.iconCircleSmall, { backgroundColor: 'rgba(249,115,22,0.2)' }]}>
                     <Calendar color="#fb923c" size={14} />
@@ -1207,7 +1207,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
             )}
 
             {quickStart.topCert && (
-              <TouchableOpacity style={[s.quickStartItem, { borderColor: 'rgba(234,179,8,0.3)' }]} onPress={() => setActiveModal('certs')}>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel="Priority certification: View recommended certification" style={[s.quickStartItem, { borderColor: 'rgba(234,179,8,0.3)' }]} onPress={() => setActiveModal('certs')}>
                 <View style={s.rowCenter}>
                   <View style={[s.iconCircleSmall, { backgroundColor: 'rgba(234,179,8,0.2)' }]}>
                     <Award color="#facc15" size={14} />
@@ -1267,7 +1267,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                 <Calendar color="#fb923c" size={18} />
                 <Text style={[s.cardTitle, { color: colors.text, marginLeft: 8 }]}>12-Week Journey</Text>
               </View>
-              <TouchableOpacity style={s.rowCenter} onPress={() => setActiveModal('timeline')}>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel="View full timeline" style={s.rowCenter} onPress={() => setActiveModal('timeline')}>
                 <Text style={[s.xsText, { color: '#fb923c' }]}>View Full Timeline</Text>
                 <ChevronRight color="#fb923c" size={12} />
               </TouchableOpacity>
@@ -1304,7 +1304,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           {sectionConfig.filter(c => c.isAvailable(plan)).map(({ key, title, Icon, getSubtitle }) => {
             const color = sectionColors[key];
             return (
-              <TouchableOpacity key={key} style={s.sectionCard} onPress={() => setActiveModal(key)} activeOpacity={0.7}>
+              <TouchableOpacity key={key} accessibilityRole="button" accessibilityLabel={`View ${title} details`} style={s.sectionCard} onPress={() => setActiveModal(key)} activeOpacity={0.7}>
                 <GlassCard style={s.sectionCardInner}>
                   <View style={s.rowCenter}>
                     <View style={[s.sectionIcon, { backgroundColor: color.bg }]}>
@@ -1330,7 +1330,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
               <Text style={[s.cardTitle, { color: colors.text }]}>Export Your Plan</Text>
               <Text style={[s.xsText, { color: colors.textSecondary }]}>Share this career plan</Text>
             </View>
-            <TouchableOpacity style={s.exportButton} onPress={handleExport}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Share career plan" style={s.exportButton} onPress={handleExport}>
               <ExternalLink color={colors.text} size={16} />
               <Text style={[s.exportButtonText, { color: colors.text }]}>Share</Text>
             </TouchableOpacity>
@@ -1345,7 +1345,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
         <View style={[s.modalContainer, { backgroundColor: colors.background }]}>
           <View style={[s.modalHeader, { backgroundColor: colors.background, borderBottomColor: colors.glassBorder }]}>
             <Text style={[s.modalTitle, { color: colors.text }]} numberOfLines={1}>{activeConfig?.modalTitle}</Text>
-            <TouchableOpacity style={s.modalClose} onPress={() => { setActiveModal(null); setExpandedProject(null); setExpandedEvent(null); setExpandedBullet(null); }}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close modal" style={s.modalClose} onPress={() => { setActiveModal(null); setExpandedProject(null); setExpandedEvent(null); setExpandedBullet(null); }}>
               <X color={colors.textSecondary} size={22} />
             </TouchableOpacity>
           </View>

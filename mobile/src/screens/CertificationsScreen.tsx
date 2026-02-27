@@ -214,7 +214,7 @@ export default function CertificationsScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Go back">
             <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Certifications</Text>
@@ -237,7 +237,7 @@ export default function CertificationsScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Go back">
             <ArrowLeft color={colors.text} size={24} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Certifications</Text>

@@ -252,7 +252,7 @@ export default function SavedCareerPathsScreen() {
       >
         <View style={styles.cardRow}>
           {/* Checkbox */}
-          <TouchableOpacity onPress={() => toggleSelect(item.id)} style={styles.checkbox}>
+          <TouchableOpacity onPress={() => toggleSelect(item.id)} style={styles.checkbox} accessibilityRole="checkbox" accessibilityLabel={`Select career plan`}>
             {selectedIds.has(item.id)
               ? <CheckSquare size={20} color={COLORS.success} />
               : <Square size={20} color={colors.textTertiary} />
@@ -457,7 +457,7 @@ export default function SavedCareerPathsScreen() {
       {/* Bulk Actions */}
       {plans.length > 0 && (
         <View style={styles.bulkActions}>
-          <TouchableOpacity onPress={toggleSelectAll} style={styles.bulkBtn}>
+          <TouchableOpacity onPress={toggleSelectAll} style={styles.bulkBtn} accessibilityRole="button" accessibilityLabel={allSelected ? 'Deselect all' : 'Select all'}>
             {allSelected
               ? <CheckSquare size={16} color={COLORS.success} />
               : <Square size={16} color={colors.textTertiary} />
@@ -467,7 +467,7 @@ export default function SavedCareerPathsScreen() {
             </Text>
           </TouchableOpacity>
           {selectedIds.size > 0 && (
-            <TouchableOpacity onPress={handleDeleteSelected} disabled={bulkDeleting} style={styles.bulkDeleteBtn}>
+            <TouchableOpacity onPress={handleDeleteSelected} disabled={bulkDeleting} style={styles.bulkDeleteBtn} accessibilityRole="button" accessibilityLabel={`Delete ${selectedIds.size} selected`}>
               {bulkDeleting
                 ? <ActivityIndicator size="small" color={COLORS.error} />
                 : <Trash2 size={14} color={COLORS.error} />
@@ -475,7 +475,7 @@ export default function SavedCareerPathsScreen() {
               <Text style={styles.bulkDeleteText}>Delete ({selectedIds.size})</Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={handleDeleteAll} disabled={bulkDeleting} style={styles.bulkDeleteAllBtn}>
+          <TouchableOpacity onPress={handleDeleteAll} disabled={bulkDeleting} style={styles.bulkDeleteAllBtn} accessibilityRole="button" accessibilityLabel="Delete all career plans">
             <XCircle size={14} color="rgba(239,68,68,0.7)" />
             <Text style={[styles.bulkDeleteText, { color: 'rgba(239,68,68,0.7)' }]}>All</Text>
           </TouchableOpacity>

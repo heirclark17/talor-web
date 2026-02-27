@@ -220,7 +220,7 @@ export default function JobSearchScreen() {
             </TouchableOpacity>
 
             {activeFilterCount > 0 && (
-              <TouchableOpacity onPress={clearFilters} style={styles.clearFilters}>
+              <TouchableOpacity onPress={clearFilters} style={styles.clearFilters} accessibilityRole="button" accessibilityLabel="Clear all filters">
                 <X size={16} color={colors.textSecondary} />
                 <Text style={[styles.clearFiltersText, { color: colors.textSecondary }]}>
                   Clear Filters

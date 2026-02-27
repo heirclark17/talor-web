@@ -172,7 +172,7 @@ export function Toast({
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.closeButton} onPress={dismiss}>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Dismiss notification" style={styles.closeButton} onPress={dismiss}>
           <Ionicons name="close" size={20} color={colors.textTertiary} />
         </TouchableOpacity>
       </TouchableOpacity>

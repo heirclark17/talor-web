@@ -293,7 +293,7 @@ export default function SignUpScreen() {
 
               <View style={styles.footer}>
                 <Text style={[styles.footerText, { color: colors.textSecondary }]}>Already have an account?</Text>
-                <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+                <TouchableOpacity accessibilityRole="link" accessibilityLabel="Navigate to sign in" onPress={() => navigation.navigate('SignIn')}>
                   <Text style={styles.footerLink}> Sign In</Text>
                 </TouchableOpacity>
               </View>
