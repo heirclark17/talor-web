@@ -154,7 +154,7 @@ describe('InterviewStrategyCard', () => {
         loading: true,
         colors: mockColors,
       });
-      const json = tree.toJSON();
+      const json = tree.toJSON() as any;
       expect(json.type).toBe('GlassCard');
       expect(json.props.material).toBe('regular');
     });
@@ -253,7 +253,7 @@ describe('InterviewStrategyCard', () => {
         loading: false,
         colors: mockColors,
       });
-      const json = tree.toJSON();
+      const json = tree.toJSON() as any;
       expect(json.type).toBe('GlassCard');
       expect(json.props.material).toBe('regular');
     });

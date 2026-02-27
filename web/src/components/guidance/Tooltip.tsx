@@ -6,6 +6,7 @@ import { useOnboardingStore } from '../../stores/onboardingStore'
 interface TooltipProps {
   tooltipId: string
   trigger?: React.ReactNode
+  children?: React.ReactNode
   content: string
   expandedContent?: React.ReactNode
   placement?: 'top' | 'bottom' | 'left' | 'right'
@@ -14,6 +15,7 @@ interface TooltipProps {
 export default function Tooltip({
   tooltipId,
   trigger,
+  children,
   content,
   expandedContent,
   placement = 'top',
@@ -39,7 +41,7 @@ export default function Tooltip({
             className="inline-flex items-center text-theme-tertiary hover:text-theme transition-colors"
             onClick={() => expandedContent && setIsExpanded(!isExpanded)}
           >
-            {trigger || <HelpCircle className="w-4 h-4" />}
+            {trigger || children || <HelpCircle className="w-4 h-4" />}
           </button>
         </TooltipPrimitive.Trigger>
 

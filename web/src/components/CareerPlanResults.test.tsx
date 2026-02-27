@@ -12,7 +12,7 @@ vi.mock('./CareerPathCertifications', () => ({
   )
 }))
 
-const mockPlan: CareerPlan = {
+const mockPlan = {
   targetRole: {
     title: 'Senior Security Engineer',
     alternativeTitles: ['Security Architect', 'AppSec Engineer'],
@@ -210,7 +210,7 @@ const mockPlan: CareerPlan = {
     'AWS Certification Guide',
     'Kubernetes Documentation'
   ]
-}
+} as unknown as CareerPlan
 
 describe('CareerPlanResults Component', () => {
   beforeEach(() => {
@@ -328,7 +328,7 @@ describe('CareerPlanResults Component', () => {
       }
 
       expect(() => {
-        render(<CareerPlanResults plan={emptyPlan} timeline="3 months" />)
+        render(<CareerPlanResults plan={emptyPlan as unknown as CareerPlan} timeline="3 months" />)
       }).not.toThrow()
     })
 
@@ -336,13 +336,13 @@ describe('CareerPlanResults Component', () => {
       const noPlan = {
         ...mockPlan,
         targetRole: {
-          ...mockPlan.targetRole,
+          ...(mockPlan as any).targetRole,
           targetCompanies: []
         }
       }
 
       expect(() => {
-        render(<CareerPlanResults plan={noPlan} timeline="3 months" />)
+        render(<CareerPlanResults plan={noPlan as unknown as CareerPlan} timeline="3 months" />)
       }).not.toThrow()
     })
 
@@ -350,13 +350,13 @@ describe('CareerPlanResults Component', () => {
       const noAltTitles = {
         ...mockPlan,
         targetRole: {
-          ...mockPlan.targetRole,
+          ...(mockPlan as any).targetRole,
           alternativeTitles: []
         }
       }
 
       expect(() => {
-        render(<CareerPlanResults plan={noAltTitles} timeline="3 months" />)
+        render(<CareerPlanResults plan={noAltTitles as unknown as CareerPlan} timeline="3 months" />)
       }).not.toThrow()
     })
   })

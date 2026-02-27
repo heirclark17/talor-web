@@ -132,7 +132,7 @@ describe('CommonInterviewQuestions Component', () => {
 
   describe('Loading State', () => {
     it('should show loading screen when generating', async () => {
-      global.fetch = vi.fn(() => new Promise(() => {})) // Never resolves
+      global.fetch = vi.fn(() => new Promise(() => {})) as unknown as typeof fetch // Never resolves
 
       render(<CommonInterviewQuestions {...defaultProps} />)
 
@@ -145,7 +145,7 @@ describe('CommonInterviewQuestions Component', () => {
     })
 
     it('should hide generate button when loading starts', async () => {
-      global.fetch = vi.fn(() => new Promise(() => {}))
+      global.fetch = vi.fn(() => new Promise(() => {})) as unknown as typeof fetch
 
       render(<CommonInterviewQuestions {...defaultProps} />)
 
@@ -653,7 +653,7 @@ describe('CommonInterviewQuestions Component', () => {
     })
 
     it('should show loading spinner during regeneration', async () => {
-      global.fetch = vi.fn(() => new Promise(() => {}))
+      global.fetch = vi.fn(() => new Promise(() => {})) as unknown as typeof fetch
 
       const regenerateButton = screen.getByRole('button', { name: /^regenerate$/i })
       fireEvent.click(regenerateButton)
@@ -665,7 +665,7 @@ describe('CommonInterviewQuestions Component', () => {
     })
 
     it('should disable regenerate button while regenerating', async () => {
-      global.fetch = vi.fn(() => new Promise(() => {}))
+      global.fetch = vi.fn(() => new Promise(() => {})) as unknown as typeof fetch
 
       const regenerateButton = screen.getByRole('button', { name: /^regenerate$/i })
       fireEvent.click(regenerateButton)

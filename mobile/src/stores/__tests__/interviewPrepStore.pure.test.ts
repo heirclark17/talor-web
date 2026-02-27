@@ -60,7 +60,7 @@ const mockPrepData = {
   company: 'TestCorp',
   job_title: 'Senior Engineer',
   questions: [{ text: 'Tell me about yourself', category: 'behavioral' }],
-};
+} as any;
 
 const mockApiResponse = {
   interview_prep_id: 100,

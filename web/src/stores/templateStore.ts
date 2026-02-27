@@ -63,7 +63,7 @@ export const useTemplateStore = create<TemplateState>()(
 
         // Filter by ATS score
         if (filter.atsMinScore !== undefined) {
-          filtered = filtered.filter((t) => t.atsScore >= filter.atsMinScore)
+          filtered = filtered.filter((t) => t.atsScore >= filter.atsMinScore!)
         }
 
         // Filter by premium status

@@ -23,29 +23,18 @@ import {
   X as XIcon,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { tailorApi } from '../api/tailorApi';
+import { tailorApi, TailoredResume } from '../api/tailorApi';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS, TAB_BAR_HEIGHT, TYPOGRAPHY } from '../utils/constants';
 import { MainStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../hooks/useTheme';
 import { GlassCard } from '../components/glass/GlassCard';
-
-interface TailoredResumeItem {
-  id: number;
-  baseResumeId: number;
-  jobId: number;
-  jobTitle: string;
-  companyName?: string;
-  summary?: string;
-  qualityScore?: number;
-  createdAt: string;
-}
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
 export default function TailoredResumesScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors, isDark } = useTheme();
-  const [resumes, setResumes] = useState<TailoredResumeItem[]>([]);
+  const [resumes, setResumes] = useState<TailoredResume[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -114,7 +103,7 @@ export default function TailoredResumesScreen() {
     );
   };
 
-  const handleViewResume = (item: TailoredResumeItem) => {
+  const handleViewResume = (item: TailoredResume) => {
     navigation.navigate('TailorResume', { resumeId: item.id });
   };
 
@@ -192,7 +181,7 @@ export default function TailoredResumesScreen() {
     setSelectedIds([]);
   };
 
-  const renderItem = ({ item }: { item: TailoredResumeItem }) => (
+  const renderItem = ({ item }: { item: TailoredResume }) => (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() => (selectionMode ? toggleSelection(item.id) : handleViewResume(item))}

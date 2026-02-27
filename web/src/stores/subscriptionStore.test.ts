@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useSubscriptionStore, FEATURE_ACCESS } from './subscriptionStore'
+import { useSubscriptionStore } from './subscriptionStore'
 import * as apiClient from '../api/client'
 
 vi.mock('../api/client')

@@ -242,12 +242,14 @@ describe('MatchScore', () => {
 
   describe('grade display fallback logic', () => {
     it('should use matchScore.grade when provided', () => {
-      const displayGrade = 'Custom Grade' || 'Very Good';
+      const grade: string = 'Custom Grade';
+      const displayGrade = grade || 'Very Good';
       expect(displayGrade).toBe('Custom Grade');
     });
 
     it('should fall back to computed grade when grade is empty', () => {
-      const displayGrade = '' || 'Very Good';
+      const grade: string = '';
+      const displayGrade = grade || 'Very Good';
       expect(displayGrade).toBe('Very Good');
     });
   });

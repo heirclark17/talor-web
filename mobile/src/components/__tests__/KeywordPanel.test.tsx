@@ -278,7 +278,8 @@ describe('KeywordPanel', () => {
 
   describe('empty state handling', () => {
     it('should handle null keywords', () => {
-      expect(!null).toBe(true);
+      const value: unknown = null;
+      expect(!value).toBe(true);
     });
 
     it('should handle empty keyword_groups', () => {
@@ -313,7 +314,7 @@ describe('KeywordPanel', () => {
         loading: false,
       });
       expect(element).toBeTruthy();
-      expect(element.props.keywords.keyword_groups).toHaveLength(0);
+      expect(element.props.keywords!.keyword_groups).toHaveLength(0);
     });
   });
 
@@ -321,14 +322,14 @@ describe('KeywordPanel', () => {
     it('should create element with full keyword data', () => {
       const element = React.createElement(KeywordPanel, { keywords: fullKeywords, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.keywords.keyword_groups).toHaveLength(3);
+      expect(element.props.keywords!.keyword_groups).toHaveLength(3);
     });
 
     it('should create element with single keyword group', () => {
       const single = { keyword_groups: [sampleKeywordGroups[0]], total_keywords_added: 2, ats_optimization_score: 50 };
       const element = React.createElement(KeywordPanel, { keywords: single, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.keywords.keyword_groups).toHaveLength(1);
+      expect(element.props.keywords!.keyword_groups).toHaveLength(1);
     });
 
     it('should create element with high ATS score', () => {
@@ -337,7 +338,7 @@ describe('KeywordPanel', () => {
         loading: false,
       });
       expect(element).toBeTruthy();
-      expect(element.props.keywords.ats_optimization_score).toBe(100);
+      expect(element.props.keywords!.ats_optimization_score).toBe(100);
     });
 
     it('should create element with zero ATS score', () => {
@@ -346,7 +347,7 @@ describe('KeywordPanel', () => {
         loading: false,
       });
       expect(element).toBeTruthy();
-      expect(element.props.keywords.ats_optimization_score).toBe(0);
+      expect(element.props.keywords!.ats_optimization_score).toBe(0);
     });
   });
 

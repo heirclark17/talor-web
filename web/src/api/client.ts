@@ -1192,6 +1192,7 @@ class ApiClient {
    */
   async savePracticeResponse(data: {
     interview_prep_id: number;
+    question_id?: string;
     question_text: string;
     question_category?: string;
     star_story?: any;
@@ -2718,6 +2719,7 @@ class ApiClient {
     summary?: string;
     competencies?: string[];
     alignment_statement?: string;
+    experience?: any[];
   }): Promise<ApiResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/api/tailoring/tailored/${tailoredResumeId}`, {

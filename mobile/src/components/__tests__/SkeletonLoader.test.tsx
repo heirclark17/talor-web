@@ -21,7 +21,7 @@ const mockUseTheme = jest.fn(() => ({
 }));
 
 jest.mock('../../context/ThemeContext', () => ({
-  useTheme: (...args: any[]) => mockUseTheme(...args),
+  useTheme: () => mockUseTheme(),
 }));
 
 // Re-mock react-native-reanimated to provide a valid Animated.View for react-test-renderer.
@@ -50,15 +50,15 @@ jest.mock('react-native-reanimated', () => {
       ScrollView: 'AnimatedScrollView',
       createAnimatedComponent: jest.fn((comp: any) => comp),
     },
-    useSharedValue: (...args: any[]) => mockUseSharedValue(...args),
-    useAnimatedStyle: (...args: any[]) => mockUseAnimatedStyle(...args),
+    useSharedValue: (init: any) => mockUseSharedValue(init),
+    useAnimatedStyle: (cb: any) => mockUseAnimatedStyle(cb),
     withSpring: jest.fn((val: any) => val),
-    withTiming: (...args: any[]) => mockWithTiming(...args),
+    withTiming: (val: any) => mockWithTiming(val),
     withDelay: jest.fn((_delay: any, val: any) => val),
     withSequence: jest.fn((...vals: any[]) => vals[vals.length - 1]),
-    withRepeat: (...args: any[]) => mockWithRepeat(...args),
+    withRepeat: (val: any) => mockWithRepeat(val),
     interpolateColor: jest.fn(),
-    interpolate: (...args: any[]) => mockInterpolate(...args),
+    interpolate: (val: any) => mockInterpolate(val),
     Easing: {
       linear: jest.fn(),
       ease: jest.fn(),

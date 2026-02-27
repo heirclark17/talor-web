@@ -263,43 +263,43 @@ describe('ResumeAnalysis', () => {
 
   describe('getChangeTypeIcon logic', () => {
     it('should use CheckCircle for added type', () => {
-      const type = 'added';
+      const type: string = 'added';
       const iconName = type === 'added' ? 'CheckCircle' : type === 'modified' ? 'AlertCircle' : type === 'removed' ? 'Info' : 'Info';
       expect(iconName).toBe('CheckCircle');
     });
 
     it('should use AlertCircle for modified type', () => {
-      const type = 'modified';
+      const type: string = 'modified';
       const iconName = type === 'added' ? 'CheckCircle' : type === 'modified' ? 'AlertCircle' : type === 'removed' ? 'Info' : 'Info';
       expect(iconName).toBe('AlertCircle');
     });
 
     it('should use Info for removed type', () => {
-      const type = 'removed';
+      const type: string = 'removed';
       const iconName = type === 'added' ? 'CheckCircle' : type === 'modified' ? 'AlertCircle' : type === 'removed' ? 'Info' : 'Info';
       expect(iconName).toBe('Info');
     });
 
     it('should use Info for unknown type', () => {
-      const type = 'unknown';
+      const type: string = 'unknown';
       const iconName = type === 'added' ? 'CheckCircle' : type === 'modified' ? 'AlertCircle' : type === 'removed' ? 'Info' : 'Info';
       expect(iconName).toBe('Info');
     });
 
     it('should use success color for added type icon', () => {
-      const type = 'added';
+      const type: string = 'added';
       const iconColor = type === 'added' ? COLORS.success : type === 'modified' ? COLORS.warning : COLORS.danger;
       expect(iconColor).toBe(COLORS.success);
     });
 
     it('should use warning color for modified type icon', () => {
-      const type = 'modified';
+      const type: string = 'modified';
       const iconColor = type === 'added' ? COLORS.success : type === 'modified' ? COLORS.warning : COLORS.danger;
       expect(iconColor).toBe(COLORS.warning);
     });
 
     it('should use danger color for removed type icon', () => {
-      const type = 'removed';
+      const type: string = 'removed';
       const iconColor = type === 'added' ? COLORS.success : type === 'modified' ? COLORS.warning : COLORS.danger;
       expect(iconColor).toBe(COLORS.danger);
     });
@@ -392,13 +392,13 @@ describe('ResumeAnalysis', () => {
 
   describe('section count pluralization', () => {
     it('should use plural "sections" for count > 1', () => {
-      const count = 3;
+      const count: number = 3;
       const text = `${count} section${count !== 1 ? 's' : ''} modified`;
       expect(text).toBe('3 sections modified');
     });
 
     it('should use singular "section" for count === 1', () => {
-      const count = 1;
+      const count: number = 1;
       const text = `${count} section${count !== 1 ? 's' : ''} modified`;
       expect(text).toBe('1 section modified');
     });
@@ -406,13 +406,13 @@ describe('ResumeAnalysis', () => {
 
   describe('change count pluralization', () => {
     it('should use plural "changes" for count > 1', () => {
-      const count = 5;
+      const count: number = 5;
       const text = `${count} change${count !== 1 ? 's' : ''}`;
       expect(text).toBe('5 changes');
     });
 
     it('should use singular "change" for count === 1', () => {
-      const count = 1;
+      const count: number = 1;
       const text = `${count} change${count !== 1 ? 's' : ''}`;
       expect(text).toBe('1 change');
     });
@@ -516,7 +516,7 @@ describe('ResumeAnalysis', () => {
     it('should create element with empty sections', () => {
       const element = React.createElement(ResumeAnalysis, { analysis: { sections: [] }, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.analysis.sections).toHaveLength(0);
+      expect(element.props.analysis!.sections).toHaveLength(0);
     });
   });
 
@@ -524,14 +524,14 @@ describe('ResumeAnalysis', () => {
     it('should create element with full analysis data', () => {
       const element = React.createElement(ResumeAnalysis, { analysis: sampleAnalysis, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.analysis.sections).toHaveLength(2);
+      expect(element.props.analysis!.sections).toHaveLength(2);
     });
 
     it('should create element with single section', () => {
       const singleSection = { sections: [sampleAnalysis.sections[0]] };
       const element = React.createElement(ResumeAnalysis, { analysis: singleSection, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.analysis.sections).toHaveLength(1);
+      expect(element.props.analysis!.sections).toHaveLength(1);
     });
 
     it('should create element with all change types', () => {
@@ -543,7 +543,7 @@ describe('ResumeAnalysis', () => {
       };
       const element = React.createElement(ResumeAnalysis, { analysis: allTypes, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.analysis.sections[0].changes).toHaveLength(3);
+      expect(element.props.analysis!.sections[0].changes).toHaveLength(3);
     });
 
     it('should create element with many sections', () => {
@@ -555,7 +555,7 @@ describe('ResumeAnalysis', () => {
       };
       const element = React.createElement(ResumeAnalysis, { analysis: manySections, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.analysis.sections).toHaveLength(5);
+      expect(element.props.analysis!.sections).toHaveLength(5);
     });
 
     it('should create element with change having keywords and requirements', () => {
@@ -567,7 +567,7 @@ describe('ResumeAnalysis', () => {
       };
       const element = React.createElement(ResumeAnalysis, { analysis: withChips, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.analysis.sections[0].changes[0].keywords_added).toEqual(['cybersecurity', 'enterprise']);
+      expect(element.props.analysis!.sections[0].changes[0].keywords_added).toEqual(['cybersecurity', 'enterprise']);
     });
 
     it('should create element with change without original_text', () => {
@@ -579,7 +579,7 @@ describe('ResumeAnalysis', () => {
       };
       const element = React.createElement(ResumeAnalysis, { analysis: addedOnly, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.analysis.sections[0].changes[0].original_text).toBeNull();
+      expect(element.props.analysis!.sections[0].changes[0].original_text).toBeNull();
     });
 
     it('should create element with change without new_text', () => {
@@ -591,7 +591,7 @@ describe('ResumeAnalysis', () => {
       };
       const element = React.createElement(ResumeAnalysis, { analysis: removedOnly, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.analysis.sections[0].changes[0].new_text).toBeNull();
+      expect(element.props.analysis!.sections[0].changes[0].new_text).toBeNull();
     });
 
     it('should create element with empty changes array in section', () => {
@@ -600,7 +600,7 @@ describe('ResumeAnalysis', () => {
       };
       const element = React.createElement(ResumeAnalysis, { analysis: emptyChanges, loading: false });
       expect(element).toBeTruthy();
-      expect(element.props.analysis.sections[0].changes).toHaveLength(0);
+      expect(element.props.analysis!.sections[0].changes).toHaveLength(0);
     });
 
     it('should create element with all null text fields', () => {

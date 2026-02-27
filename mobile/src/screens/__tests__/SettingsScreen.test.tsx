@@ -96,8 +96,8 @@ jest.mock('../../constants/backgrounds', () => ({
 }));
 
 jest.mock('../../utils/userSession', () => ({
-  clearUserSession: (...args: any[]) => mockClearUserSession(...args),
-  getUserId: (...args: any[]) => mockGetUserId(...args),
+  clearUserSession: () => mockClearUserSession(),
+  getUserId: () => mockGetUserId(),
 }));
 
 jest.mock('../../navigation/AppNavigator', () => ({

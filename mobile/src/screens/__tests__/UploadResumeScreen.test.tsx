@@ -67,7 +67,7 @@ jest.mock('@react-navigation/native', () => ({
   },
 }));
 
-let mockUploadResume = jest.fn(() =>
+let mockUploadResume: jest.Mock = jest.fn(() =>
   Promise.resolve({ success: true, data: { id: 1 } }),
 );
 
@@ -94,7 +94,7 @@ jest.mock('../../navigation/AppNavigator', () => ({
   RootStackParamList: {},
 }));
 
-let mockGetDocumentAsync = jest.fn(() =>
+let mockGetDocumentAsync: jest.Mock = jest.fn(() =>
   Promise.resolve({ canceled: true, assets: [] }),
 );
 
@@ -861,7 +861,7 @@ describe('UploadResumeScreen', () => {
       it('should handle result with null assets', async () => {
         mockGetDocumentAsync.mockResolvedValueOnce({
           canceled: false,
-          assets: null,
+          assets: null as any,
         });
 
         const tree = renderScreen();

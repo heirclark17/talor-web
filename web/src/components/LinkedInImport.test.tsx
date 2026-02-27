@@ -84,12 +84,12 @@ describe('LinkedInImport', () => {
     };
 
     const mockResumeData = {
-      personalInfo: { name: 'John Doe', email: '', phone: '', location: 'SF' },
+      personalInfo: { name: 'John Doe', email: '', phone: '', location: 'SF', linkedin: undefined },
       summary: 'Software Engineer',
-      experience: [],
-      education: [],
-      skills: [],
-      certifications: [],
+      experience: [] as { company: string; title: string; location: string; startDate: string; endDate: string; description: string; achievements: string[] }[],
+      education: [] as { school: string; degree: string; field: string; startDate: string; endDate: string; gpa: string | undefined }[],
+      skills: [] as string[],
+      certifications: [] as { name: string; issuer: string; date: string; credentialId: string | undefined }[],
     };
 
     vi.mocked(linkedinParser.parseLinkedInPDF).mockResolvedValue(mockProfile);
@@ -186,12 +186,12 @@ describe('LinkedInImport', () => {
     };
 
     const mockResumeData = {
-      personalInfo: { name: 'John Doe', email: '', phone: '', location: 'SF' },
+      personalInfo: { name: 'John Doe', email: '', phone: '', location: 'SF', linkedin: undefined },
       summary: 'Engineer',
-      experience: [],
-      education: [],
-      skills: [],
-      certifications: [],
+      experience: [] as { company: string; title: string; location: string; startDate: string; endDate: string; description: string; achievements: string[] }[],
+      education: [] as { school: string; degree: string; field: string; startDate: string; endDate: string; gpa: string | undefined }[],
+      skills: [] as string[],
+      certifications: [] as { name: string; issuer: string; date: string; credentialId: string | undefined }[],
     };
 
     vi.mocked(linkedinParser.parseLinkedInPDF).mockResolvedValue(mockProfile);

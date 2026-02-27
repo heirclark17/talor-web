@@ -100,7 +100,7 @@ function renderCard(props: {
  */
 function findTouchables(root: renderer.ReactTestInstance): renderer.ReactTestInstance[] {
   return root.findAll((node) => {
-    return node.type === 'TouchableOpacity' && typeof node.props.onPress === 'function';
+    return (node.type as any) === 'TouchableOpacity' && typeof node.props.onPress === 'function';
   });
 }
 
@@ -114,7 +114,7 @@ function findTouchableByText(
   const touchables = findTouchables(root);
   return touchables.find((t) => {
     try {
-      const children = t.findAll((n) => n.type === 'Text');
+      const children = t.findAll((n) => (n.type as any) === 'Text');
       return children.some((c) => {
         const content = Array.isArray(c.props.children)
           ? c.props.children.join('')
@@ -719,7 +719,7 @@ describe('ExecutiveInsightsCard', () => {
         colors: customColors,
       });
       const textNodes = tree.root.findAll(
-        (n) => n.type === 'Text' && n.props.children === 'Executive Insights',
+        (n) => (n.type as any) === 'Text' && n.props.children === 'Executive Insights',
       );
       expect(textNodes.length).toBeGreaterThan(0);
       const titleStyle = textNodes[0].props.style;

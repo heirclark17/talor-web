@@ -770,12 +770,12 @@ export default function TailorResume() {
     try {
       const result = await api.getResume(resumeId)
       if (result.success) {
-        setSelectedResume(result.data)
+        setSelectedResume(result.data as BaseResume)
       }
     } catch (err: any) {
       // Fallback to partial data from list
       const resume = resumes.find(r => r.id === resumeId)
-      setSelectedResume(resume || null)
+      setSelectedResume((resume as BaseResume) || null)
     }
   }
 
@@ -1076,13 +1076,6 @@ export default function TailorResume() {
       if (!success) {
         throw new Error('Failed to delete resume')
       }
-
-      // Remove from selected if it was selected
-      setSelectedResumeIds(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(resumeId)
-        return newSet
-      })
 
       // If deleted resume was selected, clear selection
       if (selectedResumeId === resumeId) {
@@ -3235,18 +3228,27 @@ export default function TailorResume() {
               if (tailoredResume) {
                 const { selectedTemplate } = useTemplateStore.getState()
                 const template = selectedTemplate || defaultTemplates[0]
-                await exportResumeToPDF({
-                  resumeData: {
-                    ...selectedResume!,
+                await exportResumeToPDF(
+                  {
+                    personalInfo: {
+                      name: selectedResume!.name || '',
+                      email: selectedResume!.email || '',
+                      phone: selectedResume!.phone || '',
+                      location: selectedResume!.location || '',
+                      linkedin: selectedResume!.linkedin,
+                    },
                     summary: tailoredResume.tailored_summary,
-                    skills: tailoredResume.tailored_skills,
-                    experience: tailoredResume.tailored_experience,
-                    education: tailoredResume.tailored_education,
-                    certifications: tailoredResume.tailored_certifications,
+                    skills: tailoredResume.tailored_skills || [],
+                    experience: tailoredResume.tailored_experience || [],
+                    education: Array.isArray(tailoredResume.tailored_education)
+                      ? tailoredResume.tailored_education
+                      : [],
                   },
-                  template,
-                  fileName: `${tailoredResume.company}_Resume_${template.name.replace(/\s+/g, '_')}.pdf`,
-                })
+                  {
+                    template,
+                    fileName: `${tailoredResume.company}_Resume_${template.name.replace(/\s+/g, '_')}.pdf`,
+                  },
+                )
               }
             },
           }}

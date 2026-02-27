@@ -211,29 +211,41 @@ describe('UploadProgress', () => {
 
   describe('cancel button visibility logic', () => {
     it('should show cancel when uploading with onCancel', () => {
-      expect('uploading' === 'uploading' && !!(() => {})).toBe(true);
+      const status: string = 'uploading';
+      const onCancel: (() => void) | undefined = () => {};
+      expect(status === 'uploading' && !!onCancel).toBe(true);
     });
 
     it('should not show cancel when not uploading', () => {
-      expect('processing' === 'uploading' && !!(() => {})).toBe(false);
+      const status: string = 'processing';
+      const onCancel: (() => void) | undefined = () => {};
+      expect(status === 'uploading' && !!onCancel).toBe(false);
     });
 
     it('should not show cancel when no onCancel', () => {
-      expect('uploading' === 'uploading' && !!undefined).toBe(false);
+      const status: string = 'uploading';
+      const onCancel: (() => void) | undefined = undefined;
+      expect(status === 'uploading' && !!onCancel).toBe(false);
     });
   });
 
   describe('retry button visibility logic', () => {
     it('should show retry when error with onRetry', () => {
-      expect('error' === 'error' && !!(() => {})).toBe(true);
+      const status: string = 'error';
+      const onRetry: (() => void) | undefined = () => {};
+      expect(status === 'error' && !!onRetry).toBe(true);
     });
 
     it('should not show retry when not error', () => {
-      expect('uploading' === 'error' && !!(() => {})).toBe(false);
+      const status: string = 'uploading';
+      const onRetry: (() => void) | undefined = () => {};
+      expect(status === 'error' && !!onRetry).toBe(false);
     });
 
     it('should not show retry when no onRetry', () => {
-      expect('error' === 'error' && !!undefined).toBe(false);
+      const status: string = 'error';
+      const onRetry: (() => void) | undefined = undefined;
+      expect(status === 'error' && !!onRetry).toBe(false);
     });
   });
 

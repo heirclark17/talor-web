@@ -32,16 +32,16 @@ interface ApplicationData {
   id?: number;
   jobTitle: string;
   companyName: string;
-  jobUrl?: string;
+  jobUrl?: string | null;
   status: string;
-  location?: string;
-  salaryMin?: number;
-  salaryMax?: number;
-  notes?: string;
-  appliedDate?: string;
-  nextFollowUp?: string;
-  contactName?: string;
-  contactEmail?: string;
+  location?: string | null;
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  notes?: string | null;
+  appliedDate?: string | null;
+  nextFollowUp?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
 }
 
 interface SavedJob {

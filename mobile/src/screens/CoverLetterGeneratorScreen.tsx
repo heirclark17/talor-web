@@ -379,12 +379,12 @@ export default function CoverLetterGeneratorScreen() {
     }, 5000);
 
     try {
-      const params: Record<string, any> = {
+      const params: Parameters<typeof api.generateCoverLetter>[0] = {
         jobTitle,
         companyName,
-        tone,
-        length,
-        focus,
+        tone: tone as 'professional' | 'enthusiastic' | 'strategic' | 'technical',
+        length: length as 'concise' | 'standard' | 'detailed',
+        focus: focus as 'leadership' | 'technical' | 'program_management' | 'cross_functional',
       };
 
       if (jobInputMethod === 'url' || jobInputMethod === 'saved') {

@@ -60,10 +60,13 @@ export async function generateResumePDF(
   options: PDFExportOptions
 ): Promise<Blob> {
   const {
-    template,
+    template: rawTemplate,
     pageSize = 'letter',
     margins = { top: 0.75, right: 0.75, bottom: 0.75, left: 0.75 },
   } = options
+
+  // Alias colors from template.style for convenience
+  const template = { ...rawTemplate, colors: rawTemplate.style.colors }
 
   // Create jsPDF instance
   const pdf = new jsPDF({
@@ -112,7 +115,7 @@ export async function generateResumePDF(
   }
 
   // Helper: Add line separator
-  const addLine = (color: string = template.colors.accent, thickness: number = 0.02) => {
+  const addLine = (color: string = template.colors.primary, thickness: number = 0.02) => {
     const rgb = hexToRgb(color)
     pdf.setDrawColor(rgb.r, rgb.g, rgb.b)
     pdf.setLineWidth(thickness)
@@ -142,7 +145,7 @@ export async function generateResumePDF(
     const linksLine = [resumeData.personalInfo.linkedin, resumeData.personalInfo.website]
       .filter(Boolean)
       .join(' • ')
-    addText(linksLine, 10, 'normal', template.colors.accent, 'center')
+    addText(linksLine, 10, 'normal', template.colors.primary, 'center')
   }
 
   addSpace(0.2)
@@ -150,7 +153,7 @@ export async function generateResumePDF(
 
   // PROFESSIONAL SUMMARY
   if (resumeData.summary) {
-    addText('PROFESSIONAL SUMMARY', 12, 'bold', template.colors.accent)
+    addText('PROFESSIONAL SUMMARY', 12, 'bold', template.colors.primary)
     addSpace(0.1)
     addText(resumeData.summary, 10, 'normal', template.colors.text)
     addSpace(0.2)
@@ -159,7 +162,7 @@ export async function generateResumePDF(
 
   // EXPERIENCE
   if (resumeData.experience.length > 0) {
-    addText('PROFESSIONAL EXPERIENCE', 12, 'bold', template.colors.accent)
+    addText('PROFESSIONAL EXPERIENCE', 12, 'bold', template.colors.primary)
     addSpace(0.1)
 
     for (const exp of resumeData.experience) {
@@ -200,7 +203,7 @@ export async function generateResumePDF(
 
   // EDUCATION
   if (resumeData.education.length > 0) {
-    addText('EDUCATION', 12, 'bold', template.colors.accent)
+    addText('EDUCATION', 12, 'bold', template.colors.primary)
     addSpace(0.1)
 
     for (const edu of resumeData.education) {
@@ -219,7 +222,7 @@ export async function generateResumePDF(
 
   // SKILLS
   if (resumeData.skills.length > 0) {
-    addText('CORE COMPETENCIES', 12, 'bold', template.colors.accent)
+    addText('CORE COMPETENCIES', 12, 'bold', template.colors.primary)
     addSpace(0.1)
     const skillsText = resumeData.skills.join(' • ')
     addText(skillsText, 10, 'normal', template.colors.text)
@@ -232,7 +235,7 @@ export async function generateResumePDF(
 
   // CERTIFICATIONS
   if (resumeData.certifications && resumeData.certifications.length > 0) {
-    addText('CERTIFICATIONS & TRAINING', 12, 'bold', template.colors.accent)
+    addText('CERTIFICATIONS & TRAINING', 12, 'bold', template.colors.primary)
     addSpace(0.1)
 
     for (const cert of resumeData.certifications) {

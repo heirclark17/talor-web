@@ -40,7 +40,7 @@ const mockUseNetwork = jest.fn(() => ({
 }));
 
 jest.mock('../../hooks/useNetwork', () => ({
-  useNetwork: (...args: any[]) => mockUseNetwork(...args),
+  useNetwork: () => mockUseNetwork(),
 }));
 
 import { OfflineIndicator, OfflineDot, OfflineOverlay } from '../OfflineIndicator';
@@ -117,8 +117,8 @@ describe('OfflineIndicator', () => {
     });
 
     it('should use plural "requests" when total is greater than 1', () => {
-      const total = 5;
-      const byPriorityHigh = 0;
+      const total: number = 5;
+      const byPriorityHigh: number = 0;
       const subtitle = `${total} pending ${total === 1 ? 'request' : 'requests'}${
         byPriorityHigh > 0 ? ` (${byPriorityHigh} high priority)` : ''
       }`;
@@ -126,8 +126,8 @@ describe('OfflineIndicator', () => {
     });
 
     it('should append high priority count when present', () => {
-      const total = 3;
-      const byPriorityHigh = 2;
+      const total: number = 3;
+      const byPriorityHigh: number = 2;
       const subtitle = `${total} pending ${total === 1 ? 'request' : 'requests'}${
         byPriorityHigh > 0 ? ` (${byPriorityHigh} high priority)` : ''
       }`;
@@ -135,8 +135,8 @@ describe('OfflineIndicator', () => {
     });
 
     it('should not append high priority text when high is zero', () => {
-      const total = 4;
-      const byPriorityHigh = 0;
+      const total: number = 4;
+      const byPriorityHigh: number = 0;
       const subtitle = `${total} pending ${total === 1 ? 'request' : 'requests'}${
         byPriorityHigh > 0 ? ` (${byPriorityHigh} high priority)` : ''
       }`;
@@ -144,7 +144,7 @@ describe('OfflineIndicator', () => {
     });
 
     it('should use plural "requests" for zero total', () => {
-      const total = 0;
+      const total: number = 0;
       const subtitle = `${total} pending ${total === 1 ? 'request' : 'requests'}`;
       expect(subtitle).toBe('0 pending requests');
     });
@@ -188,7 +188,7 @@ describe('OfflineIndicator', () => {
     });
 
     it('should use bottom position when specified', () => {
-      const position: 'top' | 'bottom' = 'bottom';
+      const position = 'bottom' as 'top' | 'bottom';
       const positionStyle = position === 'top' ? { top: 0, paddingTop: 44 } : { bottom: 0, paddingBottom: 34 };
       expect(positionStyle).toEqual({ bottom: 0, paddingBottom: 34 });
     });
@@ -196,13 +196,13 @@ describe('OfflineIndicator', () => {
 
   describe('slide animation target logic', () => {
     it('should slide to -100 for top position when hiding', () => {
-      const position: 'top' | 'bottom' = 'top';
+      const position = 'top' as 'top' | 'bottom';
       const hideTarget = position === 'top' ? -100 : 100;
       expect(hideTarget).toBe(-100);
     });
 
     it('should slide to 100 for bottom position when hiding', () => {
-      const position: 'top' | 'bottom' = 'bottom';
+      const position = 'bottom' as 'top' | 'bottom';
       const hideTarget = position === 'top' ? -100 : 100;
       expect(hideTarget).toBe(100);
     });
@@ -300,7 +300,7 @@ describe('OfflineIndicator', () => {
 
     it('should not call onRetry when it is undefined', async () => {
       const processQueue = jest.fn(() => Promise.resolve());
-      const onRetry: (() => void) | undefined = undefined;
+      const onRetry = undefined as (() => void) | undefined;
       const setIsProcessing = jest.fn();
 
       setIsProcessing(true);

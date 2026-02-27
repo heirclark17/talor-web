@@ -23,6 +23,7 @@ export interface ApiResponse<T = unknown> {
 export interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: object | FormData;
   skipRateLimit?: boolean;
+  timeout?: number;
 }
 
 /**
@@ -176,7 +177,7 @@ export async function fetchWithAuth(
 
   // Create abort controller for timeout
   // Use longer timeout for AI operations
-  const timeoutMs = requiresLongTimeout(endpoint) ? LONG_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
+  const timeoutMs = options.timeout ?? (requiresLongTimeout(endpoint) ? LONG_TIMEOUT_MS : DEFAULT_TIMEOUT_MS);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 

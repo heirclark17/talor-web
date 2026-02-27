@@ -10,5 +10,5 @@ export const starStoryApi = {
   delete: (id: number) => api.deleteStarStory(id),
   generate: (data: any) => api.generateStarStory(data),
   generateFromExperience: (data: any) => api.generateStarStoryFromExperience(data),
-  matchToQuestions: (data: { questions: string[] }) => api.matchStarStoriesToQuestions(data),
+  matchToQuestions: (data: { star_story_ids: number[]; questions: string[] }) => api.matchStarStoriesToQuestions(data),
 }

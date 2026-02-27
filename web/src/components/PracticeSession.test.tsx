@@ -46,9 +46,13 @@ describe('PracticeSession Component', () => {
     }
 
     global.MediaRecorder = vi.fn(() => mockMediaRecorder) as any
-    global.navigator.mediaDevices = {
-      getUserMedia: vi.fn().mockResolvedValue(mockMediaStream)
-    } as any
+    Object.defineProperty(global.navigator, 'mediaDevices', {
+      value: {
+        getUserMedia: vi.fn().mockResolvedValue(mockMediaStream)
+      },
+      writable: true,
+      configurable: true,
+    })
 
     // Mock URL.createObjectURL
     global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')

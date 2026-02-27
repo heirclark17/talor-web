@@ -24,7 +24,7 @@ jest.mock('../../../api', () => ({
   },
 }));
 
-const mockInterviewApi = interviewApi as {
+const mockInterviewApi = interviewApi as unknown as {
   getInterviewPrep: jest.Mock;
   getCompanyResearch: jest.Mock;
   getValuesAlignment: jest.Mock;

@@ -343,7 +343,7 @@ export interface ResumeAnalysis {
 // go through security controls (host validation, rate limiting)
 const fetchWithAuth = async (
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit & { timeout?: number } = {}
 ): Promise<Response> => {
   // Convert RequestInit body to object for base.ts compatibility
   let body: object | FormData | undefined;
@@ -358,9 +358,11 @@ const fetchWithAuth = async (
     }
   }
 
+  const { timeout, ...restOptions } = options;
   return secureFetchWithAuth(endpoint, {
-    ...options,
+    ...restOptions,
     body,
+    timeout,
   });
 };
 

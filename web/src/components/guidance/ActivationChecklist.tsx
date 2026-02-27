@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom'
 import { Upload, FileText, Sparkles, Mail, CheckCircle, X, ChevronRight } from 'lucide-react'
 import { useOnboardingStore } from '../../stores/onboardingStore'
 
+type ActivationStepId = 'upload_resume' | 'select_template' | 'tailor_resume' | 'generate_cover_letter'
+
 interface ChecklistStep {
-  id: keyof ReturnType<typeof useOnboardingStore>['activationSteps']
+  id: ActivationStepId
   label: string
   description: string
   href: string

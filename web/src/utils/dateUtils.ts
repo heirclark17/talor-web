@@ -128,7 +128,7 @@ export function isToday(dateStr?: string | null): boolean {
 /**
  * Check if a date is within the last N days in the user's local timezone
  */
-export function isWithinDays(dateStr?: string | null, days: number): boolean {
+export function isWithinDays(dateStr: string | null | undefined, days: number): boolean {
   if (!dateStr) return false
 
   const date = new Date(dateStr)

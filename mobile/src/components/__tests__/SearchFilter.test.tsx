@@ -316,9 +316,9 @@ describe('SearchFilter', () => {
     it('should add a filter value', () => {
       const selectedFilters: Record<string, string> = {};
       const key = 'status';
-      const value = 'active';
+      const value: string = 'active';
 
-      const newFilters = { ...selectedFilters };
+      const newFilters: Record<string, string> = { ...selectedFilters };
       if (value === '') {
         delete newFilters[key];
       } else {
@@ -329,11 +329,11 @@ describe('SearchFilter', () => {
     });
 
     it('should remove a filter when value is empty string', () => {
-      const selectedFilters = { status: 'active', category: 'tech' };
+      const selectedFilters: Record<string, string> = { status: 'active', category: 'tech' };
       const key = 'status';
-      const value = '';
+      const value: string = '';
 
-      const newFilters = { ...selectedFilters };
+      const newFilters: Record<string, string> = { ...selectedFilters };
       if (value === '') {
         delete newFilters[key];
       } else {
@@ -345,11 +345,11 @@ describe('SearchFilter', () => {
     });
 
     it('should replace an existing filter value', () => {
-      const selectedFilters = { status: 'active' };
+      const selectedFilters: Record<string, string> = { status: 'active' };
       const key = 'status';
-      const value = 'draft';
+      const value: string = 'draft';
 
-      const newFilters = { ...selectedFilters };
+      const newFilters: Record<string, string> = { ...selectedFilters };
       if (value === '') {
         delete newFilters[key];
       } else {

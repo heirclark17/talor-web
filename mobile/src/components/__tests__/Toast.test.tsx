@@ -339,10 +339,10 @@ describe('Toast Component', () => {
         }
       });
 
-      jest.spyOn(React, 'useState').mockImplementation((initial: any) => {
+      jest.spyOn(React, 'useState').mockImplementation(((initial: any) => {
         capturedState = initial;
         return [capturedState, mockSetState];
-      });
+      }) as any);
     });
 
     afterEach(() => {

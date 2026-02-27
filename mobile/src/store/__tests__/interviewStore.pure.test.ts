@@ -449,7 +449,7 @@ describe('InterviewStore', () => {
   it('fetchPracticeHistory non-array data: sets empty array', async () => {
     mockedApi.getPracticeHistory.mockResolvedValue({
       success: true,
-      data: { some: 'object' },
+      data: { some: 'object' } as any,
     });
 
     await useInterviewStore.getState().fetchPracticeHistory(1);

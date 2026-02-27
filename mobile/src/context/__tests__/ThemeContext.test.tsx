@@ -201,21 +201,21 @@ describe('ThemeContext - ThemeMode logic', () => {
   });
 
   test('light mode: isDark is false', () => {
-    const themeMode = 'light';
+    const themeMode: string = 'light';
     const isDark = themeMode === 'dark';
     expect(isDark).toBe(false);
   });
 
   test('system mode with dark system: isDark is true', () => {
-    const themeMode = 'system';
-    const systemColorScheme = 'dark';
+    const themeMode: string = 'system';
+    const systemColorScheme: string = 'dark';
     const isDark = themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark';
     expect(isDark).toBe(true);
   });
 
   test('system mode with light system: isDark is false', () => {
-    const themeMode = 'system';
-    const systemColorScheme = 'light';
+    const themeMode: string = 'system';
+    const systemColorScheme: string = 'light';
     const isDark = themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark';
     expect(isDark).toBe(false);
   });

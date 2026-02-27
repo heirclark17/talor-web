@@ -191,7 +191,7 @@ const mockUseTheme = jest.fn(() => ({
 }));
 
 jest.mock('../../../context/ThemeContext', () => ({
-  useTheme: (...args: any[]) => mockUseTheme(...args),
+  useTheme: () => mockUseTheme(),
 }));
 
 // ---- Mock backgrounds module for fallback testing ----

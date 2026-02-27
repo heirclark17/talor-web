@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import CareerPathCertifications from './CareerPathCertifications'
+import type { Certification } from '../types/career-plan'
 
 // Mock toast utilities
 vi.mock('../utils/toast', () => ({
@@ -8,11 +9,11 @@ vi.mock('../utils/toast', () => ({
   showError: vi.fn()
 }))
 
-const mockCertifications = [
+const mockCertifications: Certification[] = [
   {
     name: 'AWS Certified Security - Specialty',
     certifyingBody: 'Amazon Web Services',
-    level: 'advanced' as const,
+    level: 'advanced',
     prerequisites: ['AWS Cloud Practitioner or Associate level cert recommended'],
     estStudyWeeks: 10,
     estCostRange: '$300',
@@ -29,15 +30,23 @@ const mockCertifications = [
     studyMaterials: [
       {
         title: 'AWS Security Specialty Exam Guide',
-        link: 'https://aws.amazon.com/certification/security-specialty/',
-        type: 'official' as const,
-        description: 'Official AWS exam guide'
+        url: 'https://aws.amazon.com/certification/security-specialty/',
+        type: 'official',
+        provider: 'AWS',
+        cost: 'Free',
+        duration: 'Self-paced',
+        description: 'Official AWS exam guide',
+        recommendedOrder: 1
       },
       {
         title: 'A Cloud Guru Course',
-        link: 'https://acloudguru.com/course/aws-certified-security-specialty',
-        type: 'course' as const,
-        description: 'Comprehensive video course'
+        url: 'https://acloudguru.com/course/aws-certified-security-specialty',
+        type: 'course',
+        provider: 'A Cloud Guru',
+        cost: '$35/month',
+        duration: '40 hours',
+        description: 'Comprehensive video course',
+        recommendedOrder: 2
       }
     ],
     studyPlanWeeks: [
@@ -47,7 +56,7 @@ const mockCertifications = [
       { week: 4, focus: 'Incident response' }
     ],
     sourceCitations: ['AWS Official Documentation', 'Industry salary surveys'],
-    priority: 'high' as const,
+    priority: 'high',
     roiRating: 'high',
     skillsGained: ['Cloud Security', 'AWS Security Services', 'Incident Response'],
     whyRecommended: 'Essential for cloud security roles'
@@ -55,7 +64,7 @@ const mockCertifications = [
   {
     name: 'CISSP',
     certifyingBody: 'ISC2',
-    level: 'advanced' as const,
+    level: 'advanced',
     prerequisites: ['5 years security experience required'],
     estStudyWeeks: 16,
     estCostRange: '$749',
@@ -71,9 +80,13 @@ const mockCertifications = [
     studyMaterials: [
       {
         title: 'ISC2 Official Study Guide',
-        link: 'https://isc2.org/cissp',
-        type: 'official' as const,
-        description: 'Official ISC2 study materials'
+        url: 'https://isc2.org/cissp',
+        type: 'official',
+        provider: 'ISC2',
+        cost: '$50',
+        duration: 'Self-paced',
+        description: 'Official ISC2 study materials',
+        recommendedOrder: 1
       }
     ],
     studyPlanWeeks: [
@@ -81,14 +94,14 @@ const mockCertifications = [
       { week: 2, focus: 'Asset Security' }
     ],
     sourceCitations: ['ISC2 Official'],
-    priority: 'high' as const,
+    priority: 'high',
     roiRating: 'high',
     skillsGained: ['Security Management', 'Risk Management', 'Governance']
   },
   {
     name: 'CompTIA Security+',
     certifyingBody: 'CompTIA',
-    level: 'foundation' as const,
+    level: 'foundation',
     prerequisites: [],
     estStudyWeeks: 6,
     estCostRange: '$392',
@@ -105,7 +118,7 @@ const mockCertifications = [
     studyMaterials: [],
     studyPlanWeeks: [],
     sourceCitations: ['CompTIA Official'],
-    priority: 'medium' as const,
+    priority: 'medium',
     roiRating: 'medium',
     skillsGained: ['Network Security', 'Threats and Vulnerabilities', 'Security Operations']
   }
@@ -425,11 +438,7 @@ describe('CareerPathCertifications Component', () => {
     })
 
     it('should not show roadmap when path is empty', () => {
-      const noPathRecommendations = {
-        ...mockCertifications,
-        recommended_path: []
-      }
-      render(<CareerPathCertifications recommendations={noPathRecommendations} isLoading={false} />)
+      render(<CareerPathCertifications certifications={[]} loading={false} />)
       expect(screen.queryByText(/recommended certification path/i)).not.toBeInTheDocument()
     })
   })
@@ -489,10 +498,10 @@ describe('CareerPathCertifications Component', () => {
 
   describe('Error Handling', () => {
     it('should handle missing optional fields gracefully', () => {
-      const minimalCert = [{
+      const minimalCert: Certification[] = [{
         name: 'Minimal Cert',
         certifyingBody: 'Test Provider',
-        level: 'foundation' as const,
+        level: 'foundation',
         prerequisites: [],
         estStudyWeeks: 4,
         estCostRange: '$100',

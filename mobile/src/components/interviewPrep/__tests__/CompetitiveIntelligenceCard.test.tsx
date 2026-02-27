@@ -842,15 +842,15 @@ describe('CompetitiveIntelligenceCard', () => {
       expect(iconNames).toContain('Award');
       // Verify color props on specific icons
       const lightbulb = allNodes.find((n: any) => n.type.displayName === 'Lightbulb');
-      expect(lightbulb.props.color).toBe(COLORS.warning);
+      expect(lightbulb!.props.color).toBe(COLORS.warning);
       const trendingUp = allNodes.find((n: any) => n.type.displayName === 'TrendingUp');
-      expect(trendingUp.props.color).toBe(COLORS.info);
+      expect(trendingUp!.props.color).toBe(COLORS.info);
       const checkCircles = allNodes.filter((n: any) => n.type.displayName === 'CheckCircle');
       expect(checkCircles[0].props.color).toBe(COLORS.success);
       const alertTriangles = allNodes.filter((n: any) => n.type.displayName === 'AlertTriangle');
       expect(alertTriangles[0].props.color).toBe(COLORS.error);
       const award = allNodes.find((n: any) => n.type.displayName === 'Award');
-      expect(award.props.color).toBe(COLORS.purple);
+      expect(award!.props.color).toBe(COLORS.purple);
     });
   });
 

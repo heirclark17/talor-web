@@ -998,8 +998,11 @@ describe('api - Interview intelligence', () => {
 
     const result = await api.saveQuestionStarStory({
       interviewPrepId: 1,
-      questionId: 'q1',
+      questionId: 1,
+      questionText: 'Test question',
+      questionType: 'behavioral',
       starStory: { situation: 'Test' },
+      questionKey: 'q1',
     });
     expect(result.success).toBe(true);
   });

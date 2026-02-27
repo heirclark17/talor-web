@@ -359,7 +359,7 @@ describe('InterviewPrepCards', () => {
       });
 
       it('should expand when different section toggled', () => {
-        const expanded = 'interview_angles';
+        const expanded: string | null = 'interview_angles';
         const result = expanded === 'market_trends' ? null : 'market_trends';
         expect(result).toBe('market_trends');
       });
@@ -580,7 +580,7 @@ describe('InterviewPrepCards', () => {
       });
 
       it('should expand when different index toggled', () => {
-        const expanded = 0;
+        const expanded: number | null = 0;
         const result = expanded === 3 ? null : 3;
         expect(result).toBe(3);
       });

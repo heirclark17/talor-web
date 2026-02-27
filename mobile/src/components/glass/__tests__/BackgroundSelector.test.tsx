@@ -40,7 +40,7 @@ const mockUseTheme = jest.fn(() => ({
 }));
 
 jest.mock('../../../context/ThemeContext', () => ({
-  useTheme: (...args: any[]) => mockUseTheme(...args),
+  useTheme: () => mockUseTheme(),
 }));
 
 jest.mock('../GlassButton', () => {
@@ -161,11 +161,11 @@ const treeStr = (tree: renderer.ReactTestRenderer) =>
 const findCategoryTab = (root: renderer.ReactTestInstance, name: string) => {
   // Category tabs have key matching the category key or contain the text
   // We search all TouchableOpacity elements and check their children safely
-  const touchables = root.findAllByType('TouchableOpacity');
+  const touchables = root.findAllByType('TouchableOpacity' as any);
   return touchables.find((t) => {
     try {
       // Check if any child is a Text with the matching content
-      const texts = t.findAllByType('Text');
+      const texts = t.findAllByType('Text' as any);
       return texts.some((text) => {
         const children = text.props.children;
         if (typeof children === 'string') return children === name;
@@ -182,10 +182,10 @@ const findCategoryTab = (root: renderer.ReactTestInstance, name: string) => {
  * Find the Custom tab (has ImagePlus icon + "Custom" text)
  */
 const findCustomTab = (root: renderer.ReactTestInstance) => {
-  const touchables = root.findAllByType('TouchableOpacity');
+  const touchables = root.findAllByType('TouchableOpacity' as any);
   return touchables.find((t) => {
     try {
-      const texts = t.findAllByType('Text');
+      const texts = t.findAllByType('Text' as any);
       const hasCustomText = texts.some((text) => {
         const children = text.props.children;
         if (typeof children === 'string') return children === 'Custom';
@@ -203,7 +203,7 @@ const findCustomTab = (root: renderer.ReactTestInstance) => {
  * Get all background thumbnails (have activeOpacity=0.7)
  */
 const findBgThumbnails = (root: renderer.ReactTestInstance) =>
-  root.findAllByType('TouchableOpacity').filter(
+  root.findAllByType('TouchableOpacity' as any).filter(
     (t) => t.props.activeOpacity === 0.7
   );
 
@@ -306,12 +306,12 @@ describe('BackgroundSelector - header', () => {
     // The close button is a TouchableOpacity in the header containing an X icon
     // X icon mock returns 'XIcon' string. We find the touchable that is NOT a thumbnail
     // and NOT a category tab
-    const touchables = root.findAllByType('TouchableOpacity');
+    const touchables = root.findAllByType('TouchableOpacity' as any);
     // Close button: no activeOpacity=0.7, no text children matching category names
     const closeBtn = touchables.find((t) => {
       if (t.props.activeOpacity === 0.7) return false;
       try {
-        const texts = t.findAllByType('Text');
+        const texts = t.findAllByType('Text' as any);
         if (texts.length > 0) return false; // category tabs have text
       } catch {
         // no children
@@ -422,7 +422,7 @@ describe('BackgroundSelector - thumbnail rendering', () => {
     renderer.act(() => {
       natureTab!.props.onPress();
     });
-    const gradients = root.findAllByType('LinearGradient');
+    const gradients = root.findAllByType('LinearGradient' as any);
     expect(gradients.length).toBeGreaterThan(0);
   });
 
@@ -503,7 +503,7 @@ describe('BackgroundSelector - handleSelectBackground', () => {
     const tree = renderComponent();
     const root = tree.root;
     // Initially, no confirm button
-    expect(root.findAllByType('MockGlassButton').length).toBe(0);
+    expect(root.findAllByType('MockGlassButton' as any).length).toBe(0);
 
     // Click a thumbnail
     const thumbnails = findBgThumbnails(root);
@@ -511,7 +511,7 @@ describe('BackgroundSelector - handleSelectBackground', () => {
       thumbnails[1].props.onPress();
     });
 
-    const glassButtons = root.findAllByType('MockGlassButton');
+    const glassButtons = root.findAllByType('MockGlassButton' as any);
     expect(glassButtons.length).toBe(1);
     expect(glassButtons[0].props.label).toBe('Apply Background');
   });
@@ -533,7 +533,7 @@ describe('BackgroundSelector - handleConfirmSelection', () => {
     });
 
     // Step 2: Click the "Apply Background" button
-    const glassButtons = root.findAllByType('MockGlassButton');
+    const glassButtons = root.findAllByType('MockGlassButton' as any);
     expect(glassButtons.length).toBe(1);
     renderer.act(() => {
       glassButtons[0].props.onPress();
@@ -548,7 +548,7 @@ describe('BackgroundSelector - handleConfirmSelection', () => {
   it('does nothing when previewId is null (no button visible)', () => {
     const tree = renderComponent();
     const root = tree.root;
-    expect(root.findAllByType('MockGlassButton').length).toBe(0);
+    expect(root.findAllByType('MockGlassButton' as any).length).toBe(0);
     expect(mockSetBackgroundImage).not.toHaveBeenCalled();
   });
 
@@ -559,11 +559,11 @@ describe('BackgroundSelector - handleConfirmSelection', () => {
     renderer.act(() => {
       thumbnails[1].props.onPress();
     });
-    const btns = root.findAllByType('MockGlassButton');
+    const btns = root.findAllByType('MockGlassButton' as any);
     renderer.act(() => {
       btns[0].props.onPress();
     });
-    expect(root.findAllByType('MockGlassButton').length).toBe(0);
+    expect(root.findAllByType('MockGlassButton' as any).length).toBe(0);
   });
 });
 
@@ -730,7 +730,7 @@ describe('BackgroundSelector - custom photo thumbnail', () => {
     setThemeDark({ customBackgroundUri: 'file:///custom.jpg' });
     const tree = renderComponent();
     const root = tree.root;
-    const images = root.findAllByType('Image');
+    const images = root.findAllByType('Image' as any);
     const customImg = images.find(
       (img: any) => img.props.source?.uri === 'file:///custom.jpg'
     );
@@ -777,7 +777,7 @@ describe('BackgroundSelector - preview area', () => {
     setThemeDark({ backgroundId: 'aurora' });
     const tree = renderComponent();
     const root = tree.root;
-    const gradients = root.findAllByType('LinearGradient');
+    const gradients = root.findAllByType('LinearGradient' as any);
     expect(gradients.length).toBeGreaterThan(0);
   });
 
@@ -791,7 +791,7 @@ describe('BackgroundSelector - preview area', () => {
     setThemeDark({ customBackgroundUri: 'file:///custom-bg.jpg' });
     const tree = renderComponent();
     const root = tree.root;
-    const images = root.findAllByType('Image');
+    const images = root.findAllByType('Image' as any);
     const previewImg = images.find(
       (img: any) =>
         img.props.source?.uri === 'file:///custom-bg.jpg' &&
@@ -809,7 +809,7 @@ describe('BackgroundSelector - preview area', () => {
   it('renders BlurView glass card preview with intensity 30', () => {
     const tree = renderComponent();
     const root = tree.root;
-    const blurViews = root.findAllByType('BlurView');
+    const blurViews = root.findAllByType('BlurView' as any);
     const previewCard = blurViews.find((bv: any) => bv.props.intensity === 30);
     expect(previewCard).toBeTruthy();
   });
@@ -868,7 +868,7 @@ describe('BackgroundSelector - preview area', () => {
     });
 
     // Preview should show a LinearGradient (animated uses gradient preview path)
-    const gradients = root.findAllByType('LinearGradient');
+    const gradients = root.findAllByType('LinearGradient' as any);
     expect(gradients.length).toBeGreaterThan(0);
   });
 });
@@ -895,7 +895,7 @@ describe('BackgroundSelector - dark vs light mode', () => {
     const tree = renderComponent();
     const root = tree.root;
     const previewBlur = root
-      .findAllByType('BlurView')
+      .findAllByType('BlurView' as any)
       .find((bv: any) => bv.props.intensity === 30);
     expect(previewBlur?.props.tint).toBe('dark');
   });
@@ -905,7 +905,7 @@ describe('BackgroundSelector - dark vs light mode', () => {
     const tree = renderComponent();
     const root = tree.root;
     const previewBlur = root
-      .findAllByType('BlurView')
+      .findAllByType('BlurView' as any)
       .find((bv: any) => bv.props.intensity === 30);
     expect(previewBlur?.props.tint).toBe('light');
   });
@@ -935,7 +935,7 @@ describe('BackgroundSelector - dark vs light mode', () => {
 describe('BackgroundSelector - confirm button', () => {
   it('does not render confirm button initially', () => {
     const tree = renderComponent();
-    expect(tree.root.findAllByType('MockGlassButton').length).toBe(0);
+    expect(tree.root.findAllByType('MockGlassButton' as any).length).toBe(0);
   });
 
   it('renders confirm button with primary variant after thumbnail selection', () => {
@@ -945,7 +945,7 @@ describe('BackgroundSelector - confirm button', () => {
     renderer.act(() => {
       thumbnails[1].props.onPress();
     });
-    const btns = root.findAllByType('MockGlassButton');
+    const btns = root.findAllByType('MockGlassButton' as any);
     expect(btns.length).toBe(1);
     expect(btns[0].props.variant).toBe('primary');
     expect(btns[0].props.fullWidth).toBe(true);
@@ -1039,7 +1039,7 @@ describe('BackgroundSelector - full interactive flow', () => {
     expect(Haptics.impactAsync).toHaveBeenCalledWith('light');
 
     // 3. Confirm button appears
-    const btns = root.findAllByType('MockGlassButton');
+    const btns = root.findAllByType('MockGlassButton' as any);
     expect(btns.length).toBe(1);
 
     // 4. Click confirm
@@ -1118,7 +1118,7 @@ describe('BackgroundSelector - remaining branch coverage', () => {
     setThemeLight({ backgroundId: 'aurora' });
     const tree = renderComponent();
     const root = tree.root;
-    const gradients = root.findAllByType('LinearGradient');
+    const gradients = root.findAllByType('LinearGradient' as any);
     // At least one gradient should use light colors
     expect(gradients.length).toBeGreaterThan(0);
     // Aurora light colors start with '#d1fae5'
@@ -1130,7 +1130,7 @@ describe('BackgroundSelector - remaining branch coverage', () => {
     setThemeLight({ backgroundId: 'dynamic' });
     const tree = renderComponent();
     const root = tree.root;
-    const gradients = root.findAllByType('LinearGradient');
+    const gradients = root.findAllByType('LinearGradient' as any);
     expect(gradients.length).toBeGreaterThan(0);
     // dynamic light colors start with '#dbeafe'
     expect(treeStr(tree)).toContain('#dbeafe');

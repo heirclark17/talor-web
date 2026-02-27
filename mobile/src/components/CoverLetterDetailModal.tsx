@@ -13,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Clipboard from 'expo-clipboard';
 import { X, Edit2, Save, Trash2, Download, Share2, Copy } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
@@ -137,7 +137,7 @@ export function CoverLetterDetailModal({
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      const result = await api.exportCoverLetter(coverLetter.id, 'docx');
+      const result = await api.downloadCoverLetter(coverLetter.id, 'docx');
 
       if (result.success && result.data) {
         // Convert blob to base64 and write to file

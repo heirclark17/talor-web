@@ -23,7 +23,7 @@ const mockUseTheme = jest.fn(() => ({
 }));
 
 jest.mock('../../../context/ThemeContext', () => ({
-  useTheme: (...args: any[]) => mockUseTheme(...args),
+  useTheme: () => mockUseTheme(),
 }));
 
 let mockIsLiquidGlassSupported = false;

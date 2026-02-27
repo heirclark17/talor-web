@@ -398,7 +398,7 @@ export default function PracticeRecorder({
         await api.updateStarStory(starStoryId, { video_recording_url: s3_key });
       } else if (interviewPrepId && questionText) {
         // Practice question response
-        await api.savePracticeQuestionResponse({
+        await api.savePracticeResponse({
           interview_prep_id: interviewPrepId,
           question_id: questionContext,
           question_text: questionText,

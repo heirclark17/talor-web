@@ -109,7 +109,7 @@ export default function CoverLetterGenerator() {
       const res = await api.uploadResume(file)
       if (res.success && res.data) {
         const newResume = res.data.resume || res.data
-        setResumes(prev => [newResume, ...prev])
+        await fetchResumes()
         setSelectedResumeId(newResume.id)
       } else {
         showError('Upload failed. Please try again.')
@@ -240,7 +240,7 @@ export default function CoverLetterGenerator() {
     }, 5000)
 
     try {
-      const params: Record<string, any> = {
+      const params: Parameters<typeof api.generateCoverLetter>[0] & Record<string, any> = {
         job_title: jobTitle,
         company_name: companyName,
         tone,
@@ -706,7 +706,7 @@ export default function CoverLetterGenerator() {
                         <option value="">Select a resume...</option>
                         {resumes.map(r => (
                           <option key={r.id} value={r.id}>
-                            {r.candidate_name || r.filename} — {new Date(r.uploaded_at).toLocaleDateString()}
+                            {r.name || r.filename} — {new Date(r.uploaded_at).toLocaleDateString()}
                           </option>
                         ))}
                       </select>

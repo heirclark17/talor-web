@@ -45,24 +45,19 @@ export function useReduceMotion(): boolean {
 }
 
 /**
- * Helper function to get animation duration based on Reduce Motion preference
+ * Hook to get animation duration based on Reduce Motion preference.
+ *
+ * Must be called from a React component or custom hook (follows Rules of Hooks).
  *
  * @param normalDuration - Duration in ms when Reduce Motion is disabled
  * @param reducedDuration - Duration in ms when Reduce Motion is enabled (default: 0)
  * @returns Appropriate duration based on user preference
  */
-export function getAnimationDuration(
+export function useAnimationDuration(
   normalDuration: number,
   reducedDuration: number = 0
 ): number {
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    AccessibilityInfo.isReduceMotionEnabled()
-      .then((enabled) => setReduceMotion(enabled ?? false))
-      .catch(() => setReduceMotion(false));
-  }, []);
-
+  const reduceMotion = useReduceMotion();
   return reduceMotion ? reducedDuration : normalDuration;
 }
 

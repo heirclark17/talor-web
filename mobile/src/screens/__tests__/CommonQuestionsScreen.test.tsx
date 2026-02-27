@@ -43,15 +43,15 @@ jest.mock('@react-navigation/native-stack', () => ({
   createNativeStackNavigator: jest.fn(),
 }));
 
-const mockGenerateCommonQuestions = jest.fn(() =>
+const mockGenerateCommonQuestions = jest.fn((): Promise<any> =>
   Promise.resolve({ success: true, data: { questions: [] } })
 );
 const mockRegenerateSingleQuestion = jest.fn();
 
 jest.mock('../../api/client', () => ({
   api: {
-    generateCommonQuestions: (...args: any[]) => mockGenerateCommonQuestions(...args),
-    regenerateSingleQuestion: (...args: any[]) => mockRegenerateSingleQuestion(...args),
+    get generateCommonQuestions() { return mockGenerateCommonQuestions; },
+    get regenerateSingleQuestion() { return mockRegenerateSingleQuestion; },
   },
 }));
 
