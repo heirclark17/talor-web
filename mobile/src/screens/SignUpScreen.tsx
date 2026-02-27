@@ -56,7 +56,7 @@ export default function SignUpScreen() {
     setIsLoading(true);
     setError('');
 
-    console.log('[SignUp] Starting sign up for:', email.trim());
+    if (__DEV__) console.log('[SignUp] Starting sign up');
 
     const { error: signUpError } = await signUp(email.trim(), password);
 

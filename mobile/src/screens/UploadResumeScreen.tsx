@@ -261,7 +261,7 @@ export default function UploadResumeScreen() {
         setUploading(false);
         return;
       }
-      console.log('[UploadResume] Valid Supabase session found');
+      if (__DEV__) console.log('[UploadResume] Valid Supabase session found');
 
       // Validate file before upload
       if (!selectedFile.uri || !selectedFile.name) {

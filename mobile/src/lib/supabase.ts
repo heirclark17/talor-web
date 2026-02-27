@@ -10,7 +10,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 if (__DEV__) {
-  console.log('[Supabase] Initializing client');
+  if (__DEV__) console.log('[Supabase] Initializing client');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {

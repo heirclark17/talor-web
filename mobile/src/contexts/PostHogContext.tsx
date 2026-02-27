@@ -63,7 +63,7 @@ export const PostHogProvider: React.FC<PostHogProviderProps> = ({ children }) =>
 
         setPosthog(client);
         setIsReady(true);
-        console.log('[PostHog] ✅ Initialized successfully');
+        if (__DEV__) console.log('[PostHog] Initialized successfully');
       } catch (error) {
         console.error('[PostHog] Initialization error:', error);
         setIsReady(true); // Mark as ready even on error to not block app
@@ -81,7 +81,7 @@ export const PostHogProvider: React.FC<PostHogProviderProps> = ({ children }) =>
 
     try {
       posthog.identify(userId, properties);
-      console.log('[PostHog] User identified:', userId);
+      if (__DEV__) console.log('[PostHog] User identified');
     } catch (error) {
       console.error('[PostHog] Identify error:', error);
     }
@@ -95,7 +95,6 @@ export const PostHogProvider: React.FC<PostHogProviderProps> = ({ children }) =>
 
     try {
       posthog.capture(event, properties);
-      console.log('[PostHog] Event captured:', event, properties);
     } catch (error) {
       console.error('[PostHog] Capture error:', error);
     }
@@ -109,7 +108,7 @@ export const PostHogProvider: React.FC<PostHogProviderProps> = ({ children }) =>
 
     try {
       posthog.reset();
-      console.log('[PostHog] Session reset');
+      if (__DEV__) console.log('[PostHog] Session reset');
     } catch (error) {
       console.error('[PostHog] Reset error:', error);
     }

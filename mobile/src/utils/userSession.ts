@@ -73,7 +73,7 @@ export const saveUserId = async (userId: string): Promise<void> => {
     } else {
       await AsyncStorage.setItem(STORAGE_KEYS.USER_ID, userId);
     }
-    console.log('[UserSession] User ID saved:', userId.substring(0, 15) + '...');
+    if (__DEV__) console.log('[UserSession] User ID saved');
   } catch (error) {
     console.error('Error saving user ID:', error);
   }
@@ -102,7 +102,7 @@ export const clearUserSession = async (): Promise<void> => {
       STORAGE_KEYS.LAST_TAILORED_RESUME,
     ]);
 
-    console.log('User session cleared');
+    if (__DEV__) console.log('[UserSession] Session cleared');
   } catch (error) {
     console.error('Error clearing user session:', error);
   }

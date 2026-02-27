@@ -555,7 +555,7 @@ export const api = {
     jobTitle?: string;
   }): Promise<ApiResponse> {
     try {
-      console.log('API: Sending tailor request to /api/tailor/tailor');
+      if (__DEV__) console.log('API: Sending tailor request to /api/tailor/tailor');
       const response = await fetchWithAuth('/api/tailor/tailor', {
         method: 'POST',
         body: JSON.stringify({
@@ -566,9 +566,9 @@ export const api = {
         }),
       });
 
-      console.log('API: Tailor response status:', response.status);
+      if (__DEV__) console.log('API: Tailor response status:', response.status);
       const data = await response.json();
-      console.log('API: Tailor response data:', data);
+      if (__DEV__) console.log('API: Tailor response data:', data);
 
       if (!response.ok) {
         return {

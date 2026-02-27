@@ -90,7 +90,7 @@ export default function TermsOfServiceScreen() {
             <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               If you have questions about these Terms, please contact us at:
             </Text>
-            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Email: support@talor-ai.com</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Email: support@talorme.com</Text>
           </View>
         </BlurView>
       </ScrollView>

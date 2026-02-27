@@ -231,9 +231,8 @@ export default function AppNavigator() {
 
   // Enhanced logging to track auth state changes
   React.useEffect(() => {
-    console.log('[AppNavigator] Auth state changed:', {
+    if (__DEV__) console.log('[AppNavigator] Auth state changed:', {
       isSignedIn,
-      userEmail: user?.email || 'none',
       willShow: isSignedIn ? 'MAIN APP' : 'AUTH SCREEN',
     });
   }, [isSignedIn, user]);
@@ -254,7 +253,7 @@ export default function AppNavigator() {
 
   // Show themed loading screen while auth is loading
   if (isLoading) {
-    console.log('[AppNavigator] Supabase auth loading...');
+    if (__DEV__) console.log('[AppNavigator] Supabase auth loading...');
     return (
       <View style={[loadingStyles.container, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -262,7 +261,7 @@ export default function AppNavigator() {
     );
   }
 
-  console.log('[AppNavigator] Supabase ready - isSignedIn:', isSignedIn, 'user:', user?.email || 'none', '→ showing:', isSignedIn ? 'MAIN APP' : 'AUTH SCREEN');
+  if (__DEV__) console.log('[AppNavigator] Supabase ready - isSignedIn:', isSignedIn, '→ showing:', isSignedIn ? 'MAIN APP' : 'AUTH SCREEN');
 
   return (
     <NavigationContainer theme={navigationTheme}>

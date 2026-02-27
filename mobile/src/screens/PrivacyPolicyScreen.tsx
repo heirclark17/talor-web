@@ -75,7 +75,7 @@ export default function PrivacyPolicyScreen() {
             <Text style={[styles.paragraph, { color: colors.textSecondary }]}>
               If you have questions about this Privacy Policy, please contact us at:
             </Text>
-            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Email: privacy@talor-ai.com</Text>
+            <Text style={[styles.bulletPoint, { color: colors.textSecondary }]}>• Email: support@talorme.com</Text>
           </View>
         </BlurView>
       </ScrollView>

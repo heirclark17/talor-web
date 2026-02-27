@@ -43,7 +43,7 @@ export default function SignInScreen() {
     setIsLoading(true);
     setError('');
 
-    console.log('[SignIn] Signing in:', email.trim());
+    if (__DEV__) console.log('[SignIn] Signing in');
 
     const { error: signInError } = await signIn(email.trim(), password);
 
