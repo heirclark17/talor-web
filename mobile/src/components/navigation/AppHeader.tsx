@@ -35,6 +35,7 @@ import {
   FolderOpen,
 } from 'lucide-react-native';
 import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { SPACING, TYPOGRAPHY, GLASS, COLORS, FONTS } from '../../utils/constants';
@@ -63,6 +64,7 @@ export function AppHeader() {
   const { user, signOut } = useSupabaseAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const menuSections: MenuSection[] = [
     {
@@ -125,7 +127,7 @@ export function AppHeader() {
 
   return (
     <>
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 6, backgroundColor: colors.background, borderBottomColor: colors.glassBorder }]}>
         <View style={styles.headerContent}>
           {/* Logo */}
           <TouchableOpacity
@@ -184,7 +186,7 @@ export function AppHeader() {
           <BlurView
             intensity={GLASS.getBlurIntensity('regular')}
             tint={isDark ? 'dark' : 'light'}
-            style={styles.userDropdown}
+            style={[styles.userDropdown, { top: insets.top + 44 }]}
           >
             <View style={[styles.userDropdownContent, { borderColor: colors.glassBorder }]}>
               {/* Close Button Header */}
@@ -228,7 +230,7 @@ export function AppHeader() {
         transparent
         onRequestClose={() => setMenuOpen(false)}
       >
-        <View style={styles.menuContainer}>
+        <View style={[styles.menuContainer, { marginTop: insets.top + 50 }]}>
           {/* Backdrop */}
           <Pressable
             style={styles.backdrop}
@@ -318,10 +320,10 @@ export function AppHeader() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 75,
-    paddingBottom: SPACING.md,
+    paddingBottom: SPACING.sm,
     overflow: 'visible',
     zIndex: 100,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   headerContent: {
     flexDirection: 'row',
@@ -344,16 +346,16 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   iconButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: GLASS.getCornerRadius('medium'),
   },
   userButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: COLORS.primary + '33',
     justifyContent: 'center',
     alignItems: 'center',
@@ -377,7 +379,6 @@ const styles = StyleSheet.create({
   },
   userDropdown: {
     position: 'absolute',
-    top: 60,
     right: SPACING.lg,
     width: 240,
     borderRadius: GLASS.getCornerRadius('large'),
@@ -428,7 +429,6 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     flex: 1,
-    marginTop: 65,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,

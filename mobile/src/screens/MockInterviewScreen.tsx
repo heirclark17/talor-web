@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollView: { flex: 1 },
   scrollContent: { padding: 16 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.lg, marginTop: -SPACING.sm, paddingBottom: SPACING.xs },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.lg, marginTop: 0, paddingBottom: SPACING.xs },
   title: { fontSize: 34, fontFamily: FONTS.semibold, marginBottom: 12 },
   subtitle: { fontSize: 16, textAlign: 'center', lineHeight: 24, maxWidth: 320, paddingHorizontal: SPACING.lg, marginBottom: SPACING.lg },
   setupCard: { padding: 20, marginBottom: 16 },

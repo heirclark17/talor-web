@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useSafeAreaInsets, SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { COLORS } from '../utils/constants';
@@ -139,21 +140,35 @@ function AuthStackNavigator() {
   );
 }
 
+// Screen layout wrapper - renders AppHeader and zeroes out top safe area for children
+function ScreenLayoutWrapper({ children, hideHeader }: { children: React.ReactNode; hideHeader: boolean }) {
+  const insets = useSafeAreaInsets();
+
+  if (hideHeader) {
+    return <>{children}</>;
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+      <AppHeader />
+      <SafeAreaInsetsContext.Provider value={{ ...insets, top: 0 }}>
+        {children}
+      </SafeAreaInsetsContext.Provider>
+    </View>
+  );
+}
+
 // Main Stack Navigator with AppHeader
 function MainStackNavigator() {
   return (
     <ErrorBoundary screenName="Main">
       <MainStack.Navigator
         screenOptions={stackScreenOptions}
-        screenLayout={({ children, route }) => {
-          const hideHeader = route.name === 'Dashboard';
-          return (
-            <>
-              {!hideHeader && <AppHeader />}
-              {children}
-            </>
-          );
-        }}
+        screenLayout={({ children, route }) => (
+          <ScreenLayoutWrapper hideHeader={route.name === 'Dashboard'}>
+            {children}
+          </ScreenLayoutWrapper>
+        )}
       >
         {/* Dashboard - initial route */}
         <MainStack.Screen name="Dashboard" component={DashboardScreen} />

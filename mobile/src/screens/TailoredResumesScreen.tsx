@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: SPACING.lg,
-    marginTop: -SPACING.sm,
+    marginTop: 0,
     paddingBottom: SPACING.xs,
   },
   headerLeft: {

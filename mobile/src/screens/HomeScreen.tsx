@@ -848,7 +848,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    marginTop: -SPACING.sm,
+    marginTop: 0,
     paddingBottom: SPACING.xs,
   },
   pageTitle: {

@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     paddingHorizontal: SPACING.lg,
-    marginTop: -SPACING.sm,
+    marginTop: 0,
     paddingBottom: SPACING.sm,
   },
   headerTitleRow: {
