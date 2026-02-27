@@ -17,6 +17,7 @@ import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { Mail, Lock, Eye, EyeOff, UserPlus, ShieldCheck } from 'lucide-react-native';
 import { COLORS, GLASS, SPACING, RADIUS, FONTS } from '../utils/constants';
+import { useTheme } from '../context/ThemeContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../navigation/AppNavigator';
 
@@ -25,6 +26,7 @@ type SignUpNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'SignU
 export default function SignUpScreen() {
   const { signUp, resendVerification } = useSupabaseAuth();
   const navigation = useNavigation<SignUpNavigationProp>();
+  const { colors, isDark } = useTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -111,8 +113,8 @@ export default function SignUpScreen() {
           >
             <View style={styles.header}>
               <ShieldCheck color={COLORS.primary} size={48} />
-              <Text style={styles.title}>Check Your Email</Text>
-              <Text style={styles.subtitle}>
+              <Text style={[styles.title, { color: colors.text }]}>Check Your Email</Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                 We sent a verification link to{'\n'}
                 <Text style={styles.emailText}>{email}</Text>
               </Text>
@@ -120,13 +122,13 @@ export default function SignUpScreen() {
 
             <BlurView
               intensity={GLASS.getBlurIntensity('regular')}
-              tint="dark"
-              style={styles.glassContainer}
+              tint={isDark ? 'dark' : 'light'}
+              style={[styles.glassContainer, { borderColor: colors.glassBorder }]}
             >
               <View style={styles.innerContainer}>
                 <View style={styles.instructionBox}>
                   <Text style={styles.instructionTitle}>Next Steps:</Text>
-                  <Text style={styles.instructionText}>
+                  <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
                     1. Check your email inbox{'\n'}
                     2. Click the verification link{'\n'}
                     3. Return to this app and sign in
@@ -193,14 +195,14 @@ export default function SignUpScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Sign up to get started with Talor</Text>
+            <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Sign up to get started with Talor</Text>
           </View>
 
           <BlurView
             intensity={GLASS.getBlurIntensity('regular')}
-            tint="dark"
-            style={styles.glassContainer}
+            tint={isDark ? 'dark' : 'light'}
+            style={[styles.glassContainer, { borderColor: colors.glassBorder }]}
           >
             <View style={styles.innerContainer}>
               {error ? (
@@ -209,12 +211,12 @@ export default function SignUpScreen() {
                 </View>
               ) : null}
 
-              <View style={styles.inputWrapper}>
-                <Mail color={COLORS.dark.textTertiary} size={20} />
+              <View style={[styles.inputWrapper, { borderColor: colors.glassBorder, backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)' }]}>
+                <Mail color={colors.textTertiary} size={20} />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="Email address"
-                  placeholderTextColor={COLORS.dark.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={email}
                   onChangeText={setEmail}
                   autoCapitalize="none"
@@ -225,12 +227,12 @@ export default function SignUpScreen() {
                 />
               </View>
 
-              <View style={styles.inputWrapper}>
-                <Lock color={COLORS.dark.textTertiary} size={20} />
+              <View style={[styles.inputWrapper, { borderColor: colors.glassBorder, backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)' }]}>
+                <Lock color={colors.textTertiary} size={20} />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="Password (min 8 characters)"
-                  placeholderTextColor={COLORS.dark.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -242,19 +244,19 @@ export default function SignUpScreen() {
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   {showPassword ? (
-                    <EyeOff color={COLORS.dark.textTertiary} size={20} />
+                    <EyeOff color={colors.textTertiary} size={20} />
                   ) : (
-                    <Eye color={COLORS.dark.textTertiary} size={20} />
+                    <Eye color={colors.textTertiary} size={20} />
                   )}
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.inputWrapper}>
-                <Lock color={COLORS.dark.textTertiary} size={20} />
+              <View style={[styles.inputWrapper, { borderColor: colors.glassBorder, backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)' }]}>
+                <Lock color={colors.textTertiary} size={20} />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="Confirm password"
-                  placeholderTextColor={COLORS.dark.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry={!showConfirmPassword}
@@ -266,9 +268,9 @@ export default function SignUpScreen() {
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff color={COLORS.dark.textTertiary} size={20} />
+                    <EyeOff color={colors.textTertiary} size={20} />
                   ) : (
-                    <Eye color={COLORS.dark.textTertiary} size={20} />
+                    <Eye color={colors.textTertiary} size={20} />
                   )}
                 </TouchableOpacity>
               </View>
@@ -290,7 +292,7 @@ export default function SignUpScreen() {
               </TouchableOpacity>
 
               <View style={styles.footer}>
-                <Text style={styles.footerText}>Already have an account?</Text>
+                <Text style={[styles.footerText, { color: colors.textSecondary }]}>Already have an account?</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
                   <Text style={styles.footerLink}> Sign In</Text>
                 </TouchableOpacity>
@@ -314,10 +316,10 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
   },
   header: { alignItems: 'center', marginBottom: SPACING.xl },
-  title: { fontSize: 34, fontFamily: FONTS.semibold, color: COLORS.dark.text, marginBottom: SPACING.xs },
-  subtitle: { fontSize: 16, fontFamily: FONTS.regular, color: COLORS.dark.textSecondary, textAlign: 'center', marginTop: SPACING.sm },
+  title: { fontSize: 34, fontFamily: FONTS.semibold, marginBottom: SPACING.xs },
+  subtitle: { fontSize: 16, fontFamily: FONTS.regular, textAlign: 'center', marginTop: SPACING.sm },
   emailText: { fontFamily: FONTS.semibold, color: COLORS.primary },
-  glassContainer: { borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.dark.glassBorder, overflow: 'hidden' },
+  glassContainer: { borderRadius: RADIUS.lg, borderWidth: 1, overflow: 'hidden' },
   innerContainer: { padding: SPACING.xl },
   errorContainer: { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)', borderRadius: RADIUS.md, padding: SPACING.md, marginBottom: SPACING.md },
   errorText: { color: COLORS.danger, fontSize: 14, fontFamily: FONTS.medium, textAlign: 'center' },
@@ -336,18 +338,17 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   instructionText: {
-    color: COLORS.dark.textSecondary,
     fontSize: 14,
     fontFamily: FONTS.regular,
     lineHeight: 22,
   },
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.06)', borderWidth: 1, borderColor: COLORS.dark.glassBorder, borderRadius: RADIUS.md, paddingHorizontal: SPACING.md, marginBottom: SPACING.md, height: 52 },
-  input: { flex: 1, color: COLORS.dark.text, fontSize: 16, fontFamily: FONTS.regular, marginLeft: SPACING.sm, height: '100%' },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: RADIUS.md, paddingHorizontal: SPACING.md, marginBottom: SPACING.md, height: 52 },
+  input: { flex: 1, fontSize: 16, fontFamily: FONTS.regular, marginLeft: SPACING.sm, height: '100%' },
   signUpButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.primary, borderRadius: RADIUS.md, height: 52, marginTop: SPACING.sm, gap: SPACING.sm },
   signUpButtonDisabled: { opacity: 0.6 },
   signUpButtonText: { color: '#fff', fontSize: 16, fontFamily: FONTS.semibold },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.lg },
-  footerText: { color: COLORS.dark.textSecondary, fontSize: 14, fontFamily: FONTS.regular },
+  footerText: { fontSize: 14, fontFamily: FONTS.regular },
   footerLink: { color: COLORS.primary, fontSize: 14, fontFamily: FONTS.semibold },
   goBackContainer: {
     alignItems: 'center',

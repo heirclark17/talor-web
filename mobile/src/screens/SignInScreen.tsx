@@ -9,6 +9,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -16,14 +17,16 @@ import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react-native';
 import { COLORS, GLASS, SPACING, RADIUS, FONTS } from '../utils/constants';
+import { useTheme } from '../context/ThemeContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../navigation/AppNavigator';
 
 type SignInNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'SignIn'>;
 
 export default function SignInScreen() {
-  const { signIn } = useSupabaseAuth();
+  const { signIn, resetPassword } = useSupabaseAuth();
   const navigation = useNavigation<SignInNavigationProp>();
+  const { colors, isDark } = useTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -64,6 +67,23 @@ export default function SignInScreen() {
     // Navigation happens automatically via AppNavigator when isSignedIn becomes true
   };
 
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      Alert.alert('Email Required', 'Please enter your email address first, then tap "Forgot Password?"');
+      return;
+    }
+
+    setIsLoading(true);
+    const { error: resetError } = await resetPassword(email.trim());
+    setIsLoading(false);
+
+    if (resetError) {
+      Alert.alert('Error', resetError.message || 'Could not send reset email. Please try again.');
+    } else {
+      Alert.alert('Check Your Email', `We sent a password reset link to ${email.trim()}`);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView
@@ -76,14 +96,14 @@ export default function SignInScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue with Talor</Text>
+            <Text style={[styles.title, { color: colors.text }]}>Welcome Back</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Sign in to continue with Talor</Text>
           </View>
 
           <BlurView
             intensity={GLASS.getBlurIntensity('regular')}
-            tint="dark"
-            style={styles.glassContainer}
+            tint={isDark ? 'dark' : 'light'}
+            style={[styles.glassContainer, { borderColor: colors.glassBorder }]}
           >
             <View style={styles.innerContainer}>
               {error ? (
@@ -92,12 +112,12 @@ export default function SignInScreen() {
                 </View>
               ) : null}
 
-              <View style={styles.inputWrapper}>
-                <Mail color={COLORS.dark.textTertiary} size={20} />
+              <View style={[styles.inputWrapper, { borderColor: colors.glassBorder, backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)' }]}>
+                <Mail color={colors.textTertiary} size={20} />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="Email address"
-                  placeholderTextColor={COLORS.dark.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={email}
                   onChangeText={setEmail}
                   autoCapitalize="none"
@@ -108,12 +128,12 @@ export default function SignInScreen() {
                 />
               </View>
 
-              <View style={styles.inputWrapper}>
-                <Lock color={COLORS.dark.textTertiary} size={20} />
+              <View style={[styles.inputWrapper, { borderColor: colors.glassBorder, backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)' }]}>
+                <Lock color={colors.textTertiary} size={20} />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="Password"
-                  placeholderTextColor={COLORS.dark.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -125,12 +145,20 @@ export default function SignInScreen() {
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   {showPassword ? (
-                    <EyeOff color={COLORS.dark.textTertiary} size={20} />
+                    <EyeOff color={colors.textTertiary} size={20} />
                   ) : (
-                    <Eye color={COLORS.dark.textTertiary} size={20} />
+                    <Eye color={colors.textTertiary} size={20} />
                   )}
                 </TouchableOpacity>
               </View>
+
+              <TouchableOpacity
+                onPress={handleForgotPassword}
+                style={styles.forgotPasswordContainer}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={[styles.forgotPasswordText, { color: colors.textSecondary }]}>Forgot Password?</Text>
+              </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.signInButton, isLoading && styles.signInButtonDisabled]}
@@ -149,7 +177,7 @@ export default function SignInScreen() {
               </TouchableOpacity>
 
               <View style={styles.footer}>
-                <Text style={styles.footerText}>Don't have an account?</Text>
+                <Text style={[styles.footerText, { color: colors.textSecondary }]}>Don't have an account?</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                   <Text style={styles.footerLink}> Sign Up</Text>
                 </TouchableOpacity>
@@ -167,18 +195,20 @@ const styles = StyleSheet.create({
   keyboardView: { flex: 1 },
   scrollContent: { flexGrow: 1, justifyContent: 'center', padding: SPACING.lg },
   header: { alignItems: 'center', marginBottom: SPACING.xl },
-  title: { fontSize: 34, fontFamily: FONTS.semibold, color: COLORS.dark.text, marginBottom: SPACING.xs },
-  subtitle: { fontSize: 16, fontFamily: FONTS.regular, color: COLORS.dark.textSecondary, textAlign: 'center', marginTop: SPACING.sm },
-  glassContainer: { borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.dark.glassBorder, overflow: 'hidden' },
+  title: { fontSize: 34, fontFamily: FONTS.semibold, marginBottom: SPACING.xs },
+  subtitle: { fontSize: 16, fontFamily: FONTS.regular, textAlign: 'center', marginTop: SPACING.sm },
+  glassContainer: { borderRadius: RADIUS.lg, borderWidth: 1, overflow: 'hidden' },
   innerContainer: { padding: SPACING.xl },
   errorContainer: { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)', borderRadius: RADIUS.md, padding: SPACING.md, marginBottom: SPACING.md },
   errorText: { color: COLORS.danger, fontSize: 14, fontFamily: FONTS.medium, textAlign: 'center' },
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.06)', borderWidth: 1, borderColor: COLORS.dark.glassBorder, borderRadius: RADIUS.md, paddingHorizontal: SPACING.md, marginBottom: SPACING.md, height: 52 },
-  input: { flex: 1, color: COLORS.dark.text, fontSize: 16, fontFamily: FONTS.regular, marginLeft: SPACING.sm, height: '100%' },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: RADIUS.md, paddingHorizontal: SPACING.md, marginBottom: SPACING.md, height: 52 },
+  input: { flex: 1, fontSize: 16, fontFamily: FONTS.regular, marginLeft: SPACING.sm, height: '100%' },
+  forgotPasswordContainer: { alignSelf: 'flex-end', marginBottom: SPACING.sm },
+  forgotPasswordText: { fontSize: 14, fontFamily: FONTS.medium },
   signInButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.primary, borderRadius: RADIUS.md, height: 52, marginTop: SPACING.sm, gap: SPACING.sm },
   signInButtonDisabled: { opacity: 0.6 },
   signInButtonText: { color: '#fff', fontSize: 16, fontFamily: FONTS.semibold },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.lg },
-  footerText: { color: COLORS.dark.textSecondary, fontSize: 14, fontFamily: FONTS.regular },
+  footerText: { fontSize: 14, fontFamily: FONTS.regular },
   footerLink: { color: COLORS.primary, fontSize: 14, fontFamily: FONTS.semibold },
 });

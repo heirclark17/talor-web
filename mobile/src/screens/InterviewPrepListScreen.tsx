@@ -121,7 +121,7 @@ export default function InterviewPrepListScreen() {
             </Text>
             {(storyCounts[item.id] || 0) > 0 && (
               <View style={styles.storyBadge}>
-                <Star color="#f59e0b" size={12} />
+                <Star color={COLORS.warning} size={12} />
                 <Text style={styles.storyBadgeText}>{storyCounts[item.id]} STAR {storyCounts[item.id] === 1 ? 'story' : 'stories'}</Text>
               </View>
             )}
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   jobTitle: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   meta: {
@@ -272,13 +272,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#f59e0b20',
+    backgroundColor: `${COLORS.warning}20`,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
   },
   storyBadgeText: {
-    color: '#f59e0b',
+    color: COLORS.warning,
     fontSize: 11,
     fontFamily: FONTS.medium,
   },

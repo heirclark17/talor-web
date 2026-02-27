@@ -351,6 +351,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     textAlign: 'center',
     maxWidth: 320,
     paddingHorizontal: SPACING.lg,
@@ -376,11 +377,11 @@ const styles = StyleSheet.create({
   },
   billingOptionText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
   },
   billingOptionTextActive: {
     color: COLORS.primary,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   saveBadge: {
     backgroundColor: COLORS.success,
@@ -391,7 +392,7 @@ const styles = StyleSheet.create({
   saveBadgeText: {
     color: '#FFF',
     fontSize: 10,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   pricingCards: {
     gap: 16,
@@ -418,7 +419,7 @@ const styles = StyleSheet.create({
   popularBadgeText: {
     color: '#FFF',
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   cardHeader: {
     alignItems: 'center',
@@ -426,12 +427,13 @@ const styles = StyleSheet.create({
   },
   tierName: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
     marginTop: 12,
     marginBottom: 8,
   },
   tierDescription: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     textAlign: 'center',
   },
   priceContainer: {
@@ -440,10 +442,11 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 48,
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   period: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     marginTop: 4,
   },
   features: {
@@ -458,12 +461,13 @@ const styles = StyleSheet.create({
   featureText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: FONTS.regular,
   },
   subscribeButton: {},
   subscribeButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   subscribeButtonTextPrimary: {
     color: '#FFF',
@@ -473,7 +477,7 @@ const styles = StyleSheet.create({
   },
   faqTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
     marginBottom: 20,
   },
   faqItem: {
@@ -481,16 +485,17 @@ const styles = StyleSheet.create({
   },
   faqQuestion: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 8,
   },
   faqAnswer: {
     fontSize: 14,
+    fontFamily: FONTS.regular,
     lineHeight: 20,
   },
   savingsNote: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
     marginTop: 4,
   },
   trustSection: {

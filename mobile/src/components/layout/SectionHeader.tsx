@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, TYPOGRAPHY } from '../../utils/constants';
+import { SPACING, TYPOGRAPHY, FONTS } from '../../utils/constants';
 import { SectionStyles } from '../../constants/SharedStyles';
 
 interface SectionHeaderProps {
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   titleLarge: {
     ...TYPOGRAPHY.title2,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   subtitle: {
     ...TYPOGRAPHY.footnote,

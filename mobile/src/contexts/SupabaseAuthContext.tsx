@@ -12,6 +12,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resendVerification: (email: string) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -173,6 +174,27 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   };
 
+  const resetPassword = async (email: string) => {
+    console.log('[SupabaseAuth] Sending password reset email to:', email);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'talor://auth/reset-password',
+      });
+
+      if (error) {
+        console.error('[SupabaseAuth] Reset password error:', error.message);
+        return { error };
+      }
+
+      console.log('[SupabaseAuth] Password reset email sent successfully');
+      return { error: null };
+    } catch (error: any) {
+      console.error('[SupabaseAuth] Reset password exception:', error);
+      return { error };
+    }
+  };
+
   const value = {
     user,
     session,
@@ -182,6 +204,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     signIn,
     signOut,
     resendVerification,
+    resetPassword,
   };
 
   console.log('[SupabaseAuth] Context state:', {

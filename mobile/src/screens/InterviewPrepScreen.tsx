@@ -1331,8 +1331,8 @@ export default function InterviewPrepScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.stackedCardLeft}>
-                <View style={[styles.stackedCardIcon, { backgroundColor: '#10b98120' }]}>
-                  <Award color="#10b981" size={24} />
+                <View style={[styles.stackedCardIcon, { backgroundColor: `${COLORS.success}20` }]}>
+                  <Award color={COLORS.success} size={24} />
                 </View>
                 <View style={styles.stackedCardContent}>
                   <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Candidate Positioning</Text>
@@ -1342,7 +1342,7 @@ export default function InterviewPrepScreen() {
                 </View>
               </View>
               {selectedSection === 'positioning' ? (
-                <ChevronDown color="#10b981" size={20} />
+                <ChevronDown color={COLORS.success} size={20} />
               ) : (
                 <ChevronRight color={colors.textTertiary} size={20} />
               )}
@@ -1356,8 +1356,8 @@ export default function InterviewPrepScreen() {
                     <Text style={[styles.sectionHint, { color: colors.textTertiary }]}>Key areas to highlight in your resume</Text>
                     {candidate_positioning.resume_focus_areas.map((area, index) => (
                       <View key={index} style={styles.focusAreaItem}>
-                        <View style={[styles.focusAreaNumber, { backgroundColor: '#10b98120' }]}>
-                          <Text style={[styles.focusAreaNumberText, { color: '#10b981' }]}>{index + 1}</Text>
+                        <View style={[styles.focusAreaNumber, { backgroundColor: `${COLORS.success}20` }]}>
+                          <Text style={[styles.focusAreaNumberText, { color: COLORS.success }]}>{index + 1}</Text>
                         </View>
                         <Text style={[styles.focusAreaText, { color: colors.textSecondary }]}>{area}</Text>
                       </View>
@@ -1382,8 +1382,8 @@ export default function InterviewPrepScreen() {
                           <ChevronDown color={colors.textTertiary} size={16} />
                         </View>
                         <View style={styles.keywordRow}>
-                          <View style={[styles.keywordBadge, { backgroundColor: '#10b98120' }]}>
-                            <Text style={[styles.keywordBadgeText, { color: '#10b981' }]}>You say</Text>
+                          <View style={[styles.keywordBadge, { backgroundColor: `${COLORS.success}20` }]}>
+                            <Text style={[styles.keywordBadgeText, { color: COLORS.success }]}>You say</Text>
                           </View>
                           <Text style={[styles.keywordText, { color: colors.text }]}>{keyword.candidate_equivalent || keyword.equivalent}</Text>
                         </View>
@@ -1403,7 +1403,7 @@ export default function InterviewPrepScreen() {
                     {candidate_positioning.story_prompts.map((prompt, index) => (
                       <View key={index} style={[styles.storyPromptCard, { backgroundColor: colors.backgroundTertiary, borderLeftColor: '#10b981' }]}>
                         <View style={styles.storyPromptHeader}>
-                          <Star color="#f59e0b" size={16} />
+                          <Star color={COLORS.warning} size={16} />
                           <Text style={[styles.storyPromptTitle, { color: colors.text }]}>{prompt.title}</Text>
                         </View>
                         <Text style={[styles.storyPromptDescription, { color: colors.textSecondary }]}>{prompt.description}</Text>
@@ -1432,17 +1432,17 @@ export default function InterviewPrepScreen() {
                     ))}
                     {/* Build Stories Button */}
                     <TouchableOpacity
-                      style={[styles.buildStoriesButton, { backgroundColor: '#10b98120' }]}
+                      style={[styles.buildStoriesButton, { backgroundColor: `${COLORS.success}20` }]}
                       onPress={() => navigation.navigate('STARStoryBuilder' as any, { interviewPrepId, tailoredResumeId })}
                     >
-                      <Star color="#10b981" size={18} />
-                      <Text style={[styles.buildStoriesButtonText, { color: '#10b981' }]}>Build Full STAR Stories</Text>
+                      <Star color={COLORS.success} size={18} />
+                      <Text style={[styles.buildStoriesButtonText, { color: COLORS.success }]}>Build Full STAR Stories</Text>
                       {starStoryCount > 0 && (
-                        <View style={[styles.storyCountBadge, { backgroundColor: '#10b981' }]}>
+                        <View style={[styles.storyCountBadge, { backgroundColor: COLORS.success }]}>
                           <Text style={styles.storyCountText}>{starStoryCount}</Text>
                         </View>
                       )}
-                      <ChevronRight color="#10b981" size={18} />
+                      <ChevronRight color={COLORS.success} size={18} />
                     </TouchableOpacity>
                     {starStoryCount > 0 && (
                       <TouchableOpacity
@@ -1505,8 +1505,8 @@ export default function InterviewPrepScreen() {
                   activeOpacity={0.7}
                 >
                   <View style={styles.stackedCardLeft}>
-                    <View style={[styles.stackedCardIcon, { backgroundColor: '#ec489920' }]}>
-                      <MessageCircle color="#ec4899" size={20} />
+                    <View style={[styles.stackedCardIcon, { backgroundColor: `${COLORS.semanticColors.errorMuted}20` }]}>
+                      <MessageCircle color={COLORS.semanticColors.errorMuted} size={20} />
                     </View>
                     <View style={styles.stackedCardContent}>
                       <View style={styles.stackedCardTitleRow}>
@@ -1563,8 +1563,8 @@ export default function InterviewPrepScreen() {
                   activeOpacity={0.7}
                 >
                   <View style={styles.stackedCardLeft}>
-                    <View style={[styles.stackedCardIcon, { backgroundColor: '#f59e0b20' }]}>
-                      <Star color="#f59e0b" size={20} />
+                    <View style={[styles.stackedCardIcon, { backgroundColor: `${COLORS.warning}20` }]}>
+                      <Star color={COLORS.warning} size={20} />
                     </View>
                     <View style={styles.stackedCardContent}>
                       <View style={styles.stackedCardTitleRow}>
@@ -1592,14 +1592,14 @@ export default function InterviewPrepScreen() {
                   activeOpacity={0.7}
                 >
                   <View style={styles.stackedCardLeft}>
-                    <View style={[styles.stackedCardIcon, { backgroundColor: '#8b5cf620' }]}>
-                      <Award color="#8b5cf6" size={20} />
+                    <View style={[styles.stackedCardIcon, { backgroundColor: `${COLORS.purple}20` }]}>
+                      <Award color={COLORS.purple} size={20} />
                     </View>
                     <View style={styles.stackedCardContent}>
                       <View style={styles.stackedCardTitleRow}>
                         <Text style={[styles.stackedCardTitle, { color: colors.text }]}>Certifications</Text>
                         {loadingCertifications ? (
-                          <ActivityIndicator size="small" color="#8b5cf6" style={{ marginLeft: 8 }} />
+                          <ActivityIndicator size="small" color={COLORS.purple} style={{ marginLeft: 8 }} />
                         ) : certificationRecommendations ? (
                           <CheckCircle color={COLORS.success} size={16} style={{ marginLeft: 8 }} />
                         ) : (
@@ -1631,8 +1631,8 @@ export default function InterviewPrepScreen() {
                   activeOpacity={0.7}
                 >
                   <View style={styles.stackedCardLeft}>
-                    <View style={[styles.stackedCardIcon, { backgroundColor: '#8B5CF620' }]}>
-                      <MessageSquare color="#8B5CF6" size={20} />
+                    <View style={[styles.stackedCardIcon, { backgroundColor: `${COLORS.purple}20` }]}>
+                      <MessageSquare color={COLORS.purple} size={20} />
                     </View>
                     <View style={styles.stackedCardContent}>
                       <View style={styles.stackedCardTitleRow}>
@@ -1718,7 +1718,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   actionButtonFlex: {
     flex: 1,
@@ -1736,7 +1736,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...TYPOGRAPHY.caption1,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
     marginTop: SPACING.lg,
     letterSpacing: 0.5,
@@ -1792,14 +1792,14 @@ const styles = StyleSheet.create({
     marginLeft: 64,
   },
   aiBadge: {
-    backgroundColor: '#8B5CF6',
+    backgroundColor: COLORS.purple,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
   aiBadgeText: {
     ...TYPOGRAPHY.caption2,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: '#FFFFFF',
   },
   // Expanded content styles for inline card expansion
@@ -1820,7 +1820,7 @@ const styles = StyleSheet.create({
   },
   expandedLabel: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginRight: SPACING.sm,
   },
   expandedValue: {
@@ -1832,7 +1832,7 @@ const styles = StyleSheet.create({
   },
   expandedSectionTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
   },
   bulletItem: {
@@ -1930,7 +1930,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     flex: 1,
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   sectionContent: {
     paddingHorizontal: SPACING.screenMargin,
@@ -1942,7 +1942,7 @@ const styles = StyleSheet.create({
   },
   subsectionTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
   },
   overviewText: {
@@ -1957,7 +1957,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginRight: SPACING.xs,
   },
   infoValue: {
@@ -1973,7 +1973,7 @@ const styles = StyleSheet.create({
   },
   valueName: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   valueDescription: {
@@ -1987,7 +1987,7 @@ const styles = StyleSheet.create({
   },
   themeName: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   themeRationale: {
@@ -2001,7 +2001,7 @@ const styles = StyleSheet.create({
   },
   techName: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.info,
     marginBottom: 4,
   },
@@ -2022,7 +2022,7 @@ const styles = StyleSheet.create({
   },
   newsHeadline: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   newsDate: {
@@ -2072,7 +2072,7 @@ const styles = StyleSheet.create({
   storyPromptTitle: {
     flex: 1,
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginLeft: SPACING.sm,
   },
   storyPromptDescription: {
@@ -2099,7 +2099,7 @@ const styles = StyleSheet.create({
   },
   keywordLabel: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primary,
     marginBottom: 4,
   },
@@ -2142,7 +2142,7 @@ const styles = StyleSheet.create({
   },
   generateButtonText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   // Readiness Score Styles
   readinessCard: {
@@ -2172,7 +2172,7 @@ const styles = StyleSheet.create({
   },
   readinessSectionTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
   },
   readinessItem: {
@@ -2221,7 +2221,7 @@ const styles = StyleSheet.create({
   },
   preparationBadgeText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   // Values Alignment Styles
   valuesCard: {
@@ -2251,7 +2251,7 @@ const styles = StyleSheet.create({
   },
   valuesSectionTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
   },
   valuesMatchItem: {
@@ -2268,7 +2268,7 @@ const styles = StyleSheet.create({
   },
   valuesMatchValue: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   valuesMatchContext: {
     ...TYPOGRAPHY.footnote,
@@ -2296,7 +2296,7 @@ const styles = StyleSheet.create({
   },
   valuesGapValue: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   valuesGapContext: {
     ...TYPOGRAPHY.footnote,
@@ -2371,7 +2371,7 @@ const styles = StyleSheet.create({
   },
   companyResearchSubtitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   companyResearchInlineHeader: {
     flexDirection: 'row',
@@ -2393,7 +2393,7 @@ const styles = StyleSheet.create({
   },
   companyResearchNewsHeadline: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   companyResearchNewsDate: {
@@ -2425,7 +2425,7 @@ const styles = StyleSheet.create({
   },
   companyResearchCompetitorName: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   companyResearchCompetitorContext: {
@@ -2515,7 +2515,7 @@ const styles = StyleSheet.create({
   },
   strategicNewsHeadline: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     lineHeight: 21,
     marginBottom: SPACING.sm,
   },
@@ -2787,7 +2787,7 @@ const styles = StyleSheet.create({
   },
   strategyStoryTheme: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
     lineHeight: 18,
   },
@@ -2986,7 +2986,7 @@ const styles = StyleSheet.create({
   },
   strategyItemTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   strategyItemDesc: {
     ...TYPOGRAPHY.footnote,
@@ -3018,7 +3018,7 @@ const styles = StyleSheet.create({
   },
   relevanceLabel: {
     ...TYPOGRAPHY.caption1,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginRight: 4,
   },
   relevanceText: {
@@ -3035,7 +3035,7 @@ const styles = StyleSheet.create({
   newsTitle: {
     flex: 1,
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     lineHeight: 20,
   },
   impactContainer: {
@@ -3156,7 +3156,7 @@ const styles = StyleSheet.create({
   },
   buildStoriesButtonText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     flex: 1,
   },
   storyCountBadge: {

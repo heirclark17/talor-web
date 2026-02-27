@@ -1,16 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { useTheme } from '../context/ThemeContext';
 import { SPACING, TYPOGRAPHY, GLASS, FONTS } from '../utils/constants';
 
 export default function TermsOfServiceScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <BlurView intensity={GLASS.getBlurIntensity('regular')} tint="light" style={styles.contentBlur}>
+        <BlurView intensity={GLASS.getBlurIntensity('regular')} tint={isDark ? 'dark' : 'light'} style={styles.contentBlur}>
           <View style={styles.contentContainer}>
             <Text style={[styles.title, { color: colors.text }]}>Terms of Service</Text>
             <Text style={[styles.lastUpdated, { color: colors.textTertiary }]}>Last Updated: January 2026</Text>

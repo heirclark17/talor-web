@@ -13,7 +13,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { X, Save, Trash2, Bookmark, Check } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
-import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../utils/constants';
+import { SPACING, TYPOGRAPHY, GLASS, COLORS, FONTS } from '../utils/constants';
 import { api } from '../api';
 
 const STATUS_OPTIONS = [
@@ -385,7 +385,7 @@ export function ApplicationFormModal({
                         style={[
                           styles.chipText,
                           { color: colors.textSecondary },
-                          status === option.value && { color: '#ffffff', fontWeight: '600' },
+                          status === option.value && { color: '#ffffff', fontFamily: FONTS.semibold },
                         ]}
                       >
                         {option.label}

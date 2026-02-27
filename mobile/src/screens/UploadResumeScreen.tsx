@@ -473,7 +473,7 @@ export default function UploadResumeScreen() {
               accessibilityRole="button"
               accessibilityLabel="Upload another resume"
             >
-              <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontWeight: '600' }]}>
+              <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontFamily: FONTS.semibold }]}>
                 Upload Another Resume
               </Text>
             </TouchableOpacity>
@@ -495,7 +495,7 @@ export default function UploadResumeScreen() {
               accessibilityRole="button"
               accessibilityLabel="Try again"
             >
-              <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontWeight: '600' }]}>
+              <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontFamily: FONTS.semibold }]}>
                 Try Again
               </Text>
             </TouchableOpacity>
@@ -515,7 +515,7 @@ export default function UploadResumeScreen() {
             <View style={styles.fileIcon}>
               <FileText color={COLORS.primary} size={48} />
             </View>
-            <Text style={[TYPOGRAPHY.body, { color: colors.text, fontWeight: '600', textAlign: 'center', marginBottom: SPACING.xs }]} numberOfLines={2}>
+            <Text style={[TYPOGRAPHY.body, { color: colors.text, fontFamily: FONTS.semibold, textAlign: 'center', marginBottom: SPACING.xs }]} numberOfLines={2}>
               {selectedFile.name}
             </Text>
             <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, marginBottom: SPACING.lg }]}>
@@ -528,7 +528,7 @@ export default function UploadResumeScreen() {
               accessibilityLabel="Change selected file"
               accessibilityHint="Opens document picker to select a different resume file"
             >
-              <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontWeight: '600' }]}>
+              <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontFamily: FONTS.semibold }]}>
                 Change File
               </Text>
             </TouchableOpacity>
@@ -639,7 +639,7 @@ export default function UploadResumeScreen() {
               {parsedResume.parsed_data.name ? (
                 <View style={styles.contactField}>
                   <Text style={[TYPOGRAPHY.caption1, { color: colors.textSecondary }]}>Name</Text>
-                  <Text style={[TYPOGRAPHY.body, { color: colors.text, fontWeight: '600' }]}>
+                  <Text style={[TYPOGRAPHY.body, { color: colors.text, fontFamily: FONTS.semibold }]}>
                     {parsedResume.parsed_data.name}
                   </Text>
                 </View>
@@ -658,7 +658,7 @@ export default function UploadResumeScreen() {
               {parsedResume.parsed_data.email ? (
                 <View style={styles.contactField}>
                   <Text style={[TYPOGRAPHY.caption1, { color: colors.textSecondary }]}>Email</Text>
-                  <Text style={[TYPOGRAPHY.body, { color: colors.text, fontWeight: '600' }]}>
+                  <Text style={[TYPOGRAPHY.body, { color: colors.text, fontFamily: FONTS.semibold }]}>
                     {parsedResume.parsed_data.email}
                   </Text>
                 </View>
@@ -677,7 +677,7 @@ export default function UploadResumeScreen() {
               {parsedResume.parsed_data.phone ? (
                 <View style={styles.contactField}>
                   <Text style={[TYPOGRAPHY.caption1, { color: colors.textSecondary }]}>Phone</Text>
-                  <Text style={[TYPOGRAPHY.body, { color: colors.text, fontWeight: '600' }]}>
+                  <Text style={[TYPOGRAPHY.body, { color: colors.text, fontFamily: FONTS.semibold }]}>
                     {parsedResume.parsed_data.phone}
                   </Text>
                 </View>
@@ -735,7 +735,7 @@ export default function UploadResumeScreen() {
               <View style={styles.skillsContainer}>
                 {parsedResume.parsed_data.skills.map((skill, idx) => (
                   <View key={idx} style={[styles.skillPill, { backgroundColor: colors.backgroundTertiary }]}>
-                    <Text style={[TYPOGRAPHY.caption1, { color: colors.text, fontWeight: '500' }]}>
+                    <Text style={[TYPOGRAPHY.caption1, { color: colors.text, fontFamily: FONTS.medium }]}>
                       {skill}
                     </Text>
                   </View>
@@ -752,7 +752,7 @@ export default function UploadResumeScreen() {
               </Text>
               {parsedResume.parsed_data.experience.map((job, idx) => (
                 <GlassCard key={idx} style={styles.parsedSection} material="thin" padding={SPACING.lg}>
-                  <Text style={[TYPOGRAPHY.body, { color: colors.text, fontWeight: '600', marginBottom: 4 }]}>
+                  <Text style={[TYPOGRAPHY.body, { color: colors.text, fontFamily: FONTS.semibold, marginBottom: 4 }]}>
                     {getExperienceTitle(job)}
                   </Text>
                   {getExperienceMeta(job) ? (
@@ -830,7 +830,7 @@ export default function UploadResumeScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="View all resumes"
               >
-                <Text style={[TYPOGRAPHY.subhead, { color: colors.text, fontWeight: '600' }]}>
+                <Text style={[TYPOGRAPHY.subhead, { color: colors.text, fontFamily: FONTS.semibold }]}>
                   View All Resumes
                 </Text>
               </TouchableOpacity>
@@ -846,7 +846,7 @@ export default function UploadResumeScreen() {
                 ) : (
                   <Trash2 color={COLORS.danger} size={20} />
                 )}
-                <Text style={[TYPOGRAPHY.subhead, { color: COLORS.danger, fontWeight: '600', marginLeft: 6 }]}>
+                <Text style={[TYPOGRAPHY.subhead, { color: COLORS.danger, fontFamily: FONTS.semibold, marginLeft: 6 }]}>
                   {deletingId === parsedResume.resume_id ? 'Deleting...' : 'Delete'}
                 </Text>
               </TouchableOpacity>
@@ -865,13 +865,13 @@ export default function UploadResumeScreen() {
             </Text>
             {!selectMode ? (
               <TouchableOpacity onPress={toggleSelectMode} style={styles.selectModeButton} accessibilityRole="button" accessibilityLabel="Select resumes">
-                <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontWeight: '600' }]}>
+                <Text style={[TYPOGRAPHY.subhead, { color: COLORS.primary, fontFamily: FONTS.semibold }]}>
                   Select
                 </Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={toggleSelectMode} style={styles.selectModeButton} accessibilityRole="button" accessibilityLabel="Cancel selection">
-                <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, fontWeight: '600' }]}>
+                <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, fontFamily: FONTS.semibold }]}>
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -887,7 +887,7 @@ export default function UploadResumeScreen() {
                 ) : (
                   <Circle color={colors.textSecondary} size={22} />
                 )}
-                <Text style={[TYPOGRAPHY.subhead, { color: colors.text, marginLeft: SPACING.sm, fontWeight: '500' }]}>
+                <Text style={[TYPOGRAPHY.subhead, { color: colors.text, marginLeft: SPACING.sm, fontFamily: FONTS.medium }]}>
                   Select All
                 </Text>
               </TouchableOpacity>
@@ -904,7 +904,7 @@ export default function UploadResumeScreen() {
                   ) : (
                     <Trash2 color={COLORS.danger} size={18} />
                   )}
-                  <Text style={[TYPOGRAPHY.subhead, { color: COLORS.danger, marginLeft: 6, fontWeight: '600' }]}>
+                  <Text style={[TYPOGRAPHY.subhead, { color: COLORS.danger, marginLeft: 6, fontFamily: FONTS.semibold }]}>
                     Delete ({selectedIds.size})
                   </Text>
                 </TouchableOpacity>
@@ -957,7 +957,7 @@ export default function UploadResumeScreen() {
                     )}
                     <FileText color={COLORS.primary} size={24} />
                     <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                      <Text style={[TYPOGRAPHY.body, { color: colors.text, fontWeight: '600' }]} numberOfLines={1}>
+                      <Text style={[TYPOGRAPHY.body, { color: colors.text, fontFamily: FONTS.semibold }]} numberOfLines={1}>
                         {filename}
                       </Text>
                       {uploadedAt && (
@@ -1100,7 +1100,6 @@ const styles = StyleSheet.create({
   atsBadgeText: {
     color: COLORS.primary,
     fontSize: 10,
-    fontWeight: '600',
     fontFamily: FONTS.semibold,
   },
   contactGrid: {

@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
   questionText: {
     flex: 1,
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     lineHeight: 22,
   },
   answerContent: {
@@ -711,7 +711,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   sectionText: {
     ...TYPOGRAPHY.subhead,
@@ -829,7 +829,7 @@ const styles = StyleSheet.create({
   },
   answerLabel: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   answerMeta: {
     flexDirection: 'row',
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
   },
   regenerateButtonText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primary,
   },
 });

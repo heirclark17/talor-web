@@ -1421,7 +1421,7 @@ const styles = StyleSheet.create({
   },
   navButtonText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
 
   // Entry cards (experience, education, certs)
@@ -1438,7 +1438,7 @@ const styles = StyleSheet.create({
   },
   entryNumber: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
 
   // Date row
@@ -1469,7 +1469,7 @@ const styles = StyleSheet.create({
   checkmark: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   checkboxLabel: {
     ...TYPOGRAPHY.subhead,
@@ -1517,7 +1517,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   aiButton: {
     flexDirection: 'row',
@@ -1530,7 +1530,7 @@ const styles = StyleSheet.create({
   aiButtonText: {
     ...TYPOGRAPHY.caption1,
     color: COLORS.primary,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
 
   // Skills
@@ -1562,7 +1562,7 @@ const styles = StyleSheet.create({
   },
   skillTagText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
   },
 
   // Empty state
@@ -1650,11 +1650,11 @@ const styles = StyleSheet.create({
   },
   scoreCatName: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   scoreCatValue: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   scoreCatBar: {
     height: 4,
@@ -1697,6 +1697,6 @@ const styles = StyleSheet.create({
   },
   statValue: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
 });

@@ -415,17 +415,17 @@ function TemplatePreviewRenderer({
     return (
       <View style={[pv.canvas, { backgroundColor: bg, padding: pad }]}>
         <View style={{ alignItems: 'center', paddingBottom: pad * 0.6, borderBottomWidth: 1.5 * f, borderBottomColor: accent, marginBottom: sectionGap }}>
-          <Text style={{ fontSize: nameSize, fontWeight: '700', color: textDark, letterSpacing: 1 }} numberOfLines={1}>{name}</Text>
+          <Text style={{ fontSize: nameSize, fontFamily: FONTS.bold, color: textDark, letterSpacing: 1 }} numberOfLines={1}>{name}</Text>
           <Text style={{ fontSize: contactSize, color: textMid, marginTop: lineGap }} numberOfLines={1}>{contact}</Text>
         </View>
         <Text style={{ fontSize: bodySize, color: textMid, lineHeight: bodySize * 1.5, marginBottom: sectionGap }} numberOfLines={large ? 6 : 3}>{summaryText}</Text>
         {sections.map((sec, si) => (
           <View key={si} style={{ marginBottom: sectionGap }}>
-            <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 1, textTransform: 'uppercase', borderBottomWidth: 0.5 * f, borderBottomColor: borderColor, paddingBottom: lineGap }}>{sec.title}</Text>
+            <Text style={{ fontSize: sectionSize, fontFamily: FONTS.bold, color: accent, letterSpacing: 1, textTransform: 'uppercase', borderBottomWidth: 0.5 * f, borderBottomColor: borderColor, paddingBottom: lineGap }}>{sec.title}</Text>
             {sec.items.map((item, ii) => (
               <View key={ii} style={{ marginTop: lineGap * 1.5 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '600', color: textDark }} numberOfLines={1}>{item.role}</Text>
+                  <Text style={{ fontSize: bulletSize + 0.5 * f, fontFamily: FONTS.semibold, color: textDark }} numberOfLines={1}>{item.role}</Text>
                   <Text style={{ fontSize: bulletSize, color: textMid }}>{item.date}</Text>
                 </View>
                 <Text style={{ fontSize: bulletSize, color: textMid, fontStyle: 'italic' }} numberOfLines={1}>{item.company}{item.loc ? ` | ${item.loc}` : ''}</Text>
@@ -437,7 +437,7 @@ function TemplatePreviewRenderer({
           </View>
         ))}
         <View style={{ marginBottom: sectionGap }}>
-          <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 1, textTransform: 'uppercase', borderBottomWidth: 0.5 * f, borderBottomColor: borderColor, paddingBottom: lineGap }}>SKILLS</Text>
+          <Text style={{ fontSize: sectionSize, fontFamily: FONTS.bold, color: accent, letterSpacing: 1, textTransform: 'uppercase', borderBottomWidth: 0.5 * f, borderBottomColor: borderColor, paddingBottom: lineGap }}>SKILLS</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 3 * f, marginTop: lineGap * 1.5 }}>
             {skills.map((sk, i) => (
               <View key={i} style={{ backgroundColor: accent + '12', paddingHorizontal: 4 * f, paddingVertical: 1.5 * f, borderRadius: 2 * f }}>
@@ -454,17 +454,17 @@ function TemplatePreviewRenderer({
   if (template.headerStyle === 'left') {
     return (
       <View style={[pv.canvas, { backgroundColor: bg, padding: pad }]}>
-        <Text style={{ fontSize: nameSize * 1.1, fontWeight: '700', color: accent }} numberOfLines={1}>{name}</Text>
+        <Text style={{ fontSize: nameSize * 1.1, fontFamily: FONTS.bold, color: accent }} numberOfLines={1}>{name}</Text>
         <Text style={{ fontSize: contactSize, color: textMid, marginTop: lineGap }} numberOfLines={1}>{contact}</Text>
         <View style={{ height: 0.5 * f, backgroundColor: borderColor, marginVertical: sectionGap }} />
         <Text style={{ fontSize: bodySize, color: textMid, lineHeight: bodySize * 1.5, marginBottom: sectionGap }} numberOfLines={large ? 6 : 3}>{summaryText}</Text>
         {sections.map((sec, si) => (
           <View key={si} style={{ borderLeftWidth: 2 * f, borderLeftColor: accent, paddingLeft: pad * 0.7, marginBottom: sectionGap }}>
-            <Text style={{ fontSize: sectionSize, fontWeight: '700', color: textDark, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap * 1.5 }}>{sec.title}</Text>
+            <Text style={{ fontSize: sectionSize, fontFamily: FONTS.bold, color: textDark, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap * 1.5 }}>{sec.title}</Text>
             {sec.items.map((item, ii) => (
               <View key={ii} style={{ marginBottom: lineGap * 2 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '600', color: textDark }} numberOfLines={1}>{item.role}</Text>
+                  <Text style={{ fontSize: bulletSize + 0.5 * f, fontFamily: FONTS.semibold, color: textDark }} numberOfLines={1}>{item.role}</Text>
                   <Text style={{ fontSize: bulletSize, color: textMid }}>{item.date}</Text>
                 </View>
                 <Text style={{ fontSize: bulletSize, color: accent, marginTop: lineGap * 0.3 }} numberOfLines={1}>{item.company}{item.loc ? ` \u2022 ${item.loc}` : ''}</Text>
@@ -476,11 +476,11 @@ function TemplatePreviewRenderer({
           </View>
         ))}
         <View style={{ borderLeftWidth: 2 * f, borderLeftColor: accent, paddingLeft: pad * 0.7 }}>
-          <Text style={{ fontSize: sectionSize, fontWeight: '700', color: textDark, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap * 1.5 }}>SKILLS</Text>
+          <Text style={{ fontSize: sectionSize, fontFamily: FONTS.bold, color: textDark, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap * 1.5 }}>SKILLS</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 3 * f }}>
             {skills.map((sk, i) => (
               <View key={i} style={{ backgroundColor: accent + '15', paddingHorizontal: 5 * f, paddingVertical: 2 * f, borderRadius: 10 * f }}>
-                <Text style={{ fontSize: bulletSize - 0.5 * f, color: accent, fontWeight: '500' }} numberOfLines={1}>{sk}</Text>
+                <Text style={{ fontSize: bulletSize - 0.5 * f, color: accent, fontFamily: FONTS.medium }} numberOfLines={1}>{sk}</Text>
               </View>
             ))}
           </View>
@@ -496,19 +496,19 @@ function TemplatePreviewRenderer({
       <View style={[pv.canvas, { backgroundColor: bg, flexDirection: 'row' }]}>
         {/* Sidebar */}
         <View style={{ width: '32%', backgroundColor: accent + '0D', borderRightWidth: 2 * f, borderRightColor: accent + '30', padding: pad * 0.8 }}>
-          <Text style={{ fontSize: nameSize * 0.75, fontWeight: '700', color: textDark, lineHeight: nameSize * 0.9, marginBottom: sectionGap * 0.5 }} numberOfLines={2}>{name}</Text>
-          <Text style={{ fontSize: sectionSize * 0.75, fontWeight: '700', color: accent, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: lineGap }}>CONTACT</Text>
+          <Text style={{ fontSize: nameSize * 0.75, fontFamily: FONTS.bold, color: textDark, lineHeight: nameSize * 0.9, marginBottom: sectionGap * 0.5 }} numberOfLines={2}>{name}</Text>
+          <Text style={{ fontSize: sectionSize * 0.75, fontFamily: FONTS.bold, color: accent, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: lineGap }}>CONTACT</Text>
           {sidebarContact.map((c, i) => (
             <Text key={i} style={{ fontSize: bulletSize * 0.85, color: textMid, marginBottom: lineGap * 0.5 }} numberOfLines={1}>{c}</Text>
           ))}
-          <Text style={{ fontSize: sectionSize * 0.75, fontWeight: '700', color: accent, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: sectionGap * 0.6, marginBottom: lineGap }}>SKILLS</Text>
+          <Text style={{ fontSize: sectionSize * 0.75, fontFamily: FONTS.bold, color: accent, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: sectionGap * 0.6, marginBottom: lineGap }}>SKILLS</Text>
           {skills.slice(0, 6).map((sk, i) => (
             <Text key={i} style={{ fontSize: bulletSize * 0.85, color: textDark, marginBottom: lineGap * 0.3 }} numberOfLines={1}>{'\u2022'} {sk}</Text>
           ))}
           {content.education.length > 0 && (
             <>
-              <Text style={{ fontSize: sectionSize * 0.75, fontWeight: '700', color: accent, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: sectionGap * 0.6, marginBottom: lineGap }}>EDUCATION</Text>
-              <Text style={{ fontSize: bulletSize * 0.85, fontWeight: '600', color: textDark }} numberOfLines={2}>{content.education[0].degree}</Text>
+              <Text style={{ fontSize: sectionSize * 0.75, fontFamily: FONTS.bold, color: accent, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: sectionGap * 0.6, marginBottom: lineGap }}>EDUCATION</Text>
+              <Text style={{ fontSize: bulletSize * 0.85, fontFamily: FONTS.semibold, color: textDark }} numberOfLines={2}>{content.education[0].degree}</Text>
               <Text style={{ fontSize: bulletSize * 0.75, color: textMid }} numberOfLines={1}>{content.education[0].institution}</Text>
               <Text style={{ fontSize: bulletSize * 0.75, color: textMid }}>{content.education[0].year}</Text>
             </>
@@ -516,13 +516,13 @@ function TemplatePreviewRenderer({
         </View>
         {/* Main content */}
         <View style={{ flex: 1, padding: pad * 0.8 }}>
-          <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap }}>PROFILE</Text>
+          <Text style={{ fontSize: sectionSize, fontFamily: FONTS.bold, color: accent, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap }}>PROFILE</Text>
           <Text style={{ fontSize: bodySize * 0.9, color: textMid, lineHeight: bodySize * 1.4, marginBottom: sectionGap }} numberOfLines={large ? 6 : 3}>{summaryText}</Text>
-          <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap }}>EXPERIENCE</Text>
+          <Text style={{ fontSize: sectionSize, fontFamily: FONTS.bold, color: accent, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: lineGap }}>EXPERIENCE</Text>
           {experienceItems.map((item, ii) => (
             <View key={ii} style={{ marginBottom: lineGap * 2 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ fontSize: bulletSize, fontWeight: '600', color: textDark }} numberOfLines={1}>{item.role}</Text>
+                <Text style={{ fontSize: bulletSize, fontFamily: FONTS.semibold, color: textDark }} numberOfLines={1}>{item.role}</Text>
               </View>
               <Text style={{ fontSize: bulletSize * 0.85, color: textMid }} numberOfLines={1}>{item.company} | {item.date}</Text>
               {item.bullets.slice(0, 2).map((b, bi) => (
@@ -540,7 +540,7 @@ function TemplatePreviewRenderer({
     return (
       <View style={[pv.canvas, { backgroundColor: bg }]}>
         <View style={{ backgroundColor: accent, paddingVertical: pad * 1.2, paddingHorizontal: pad }}>
-          <Text style={{ fontSize: nameSize * 1.2, fontWeight: '700', color: '#FFFFFF', letterSpacing: 1.5, textTransform: 'uppercase' }} numberOfLines={1}>{name}</Text>
+          <Text style={{ fontSize: nameSize * 1.2, fontFamily: FONTS.bold, color: '#FFFFFF', letterSpacing: 1.5, textTransform: 'uppercase' }} numberOfLines={1}>{name}</Text>
           <Text style={{ fontSize: contactSize, color: 'rgba(255,255,255,0.7)', marginTop: lineGap }} numberOfLines={1}>{contact}</Text>
         </View>
         <View style={{ padding: pad }}>
@@ -549,12 +549,12 @@ function TemplatePreviewRenderer({
             <View key={si} style={{ marginBottom: sectionGap }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: lineGap * 1.5 }}>
                 <View style={{ width: 4 * f, height: 4 * f, borderRadius: 2 * f, backgroundColor: accent, marginRight: 4 * f }} />
-                <Text style={{ fontSize: sectionSize, fontWeight: '700', color: textDark, letterSpacing: 0.8, textTransform: 'uppercase' }}>{sec.title}</Text>
+                <Text style={{ fontSize: sectionSize, fontFamily: FONTS.bold, color: textDark, letterSpacing: 0.8, textTransform: 'uppercase' }}>{sec.title}</Text>
               </View>
               {sec.items.map((item, ii) => (
                 <View key={ii} style={{ marginBottom: lineGap * 2 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '600', color: textDark }} numberOfLines={1}>{item.role}</Text>
+                    <Text style={{ fontSize: bulletSize + 0.5 * f, fontFamily: FONTS.semibold, color: textDark }} numberOfLines={1}>{item.role}</Text>
                     <Text style={{ fontSize: bulletSize, color: textMid }}>{item.date}</Text>
                   </View>
                   <Text style={{ fontSize: bulletSize, color: accent }} numberOfLines={1}>{item.company}</Text>
@@ -575,7 +575,7 @@ function TemplatePreviewRenderer({
     return (
       <View style={[pv.canvas, { backgroundColor: bg }]}>
         <View style={{ backgroundColor: accent, paddingVertical: pad, paddingHorizontal: pad * 1.2 }}>
-          <Text style={{ fontSize: nameSize, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.5 }} numberOfLines={1}>{name}</Text>
+          <Text style={{ fontSize: nameSize, fontFamily: FONTS.bold, color: '#FFFFFF', letterSpacing: 0.5 }} numberOfLines={1}>{name}</Text>
           <Text style={{ fontSize: contactSize, color: 'rgba(255,255,255,0.6)', marginTop: lineGap }} numberOfLines={1}>{contact}</Text>
         </View>
         <View style={{ paddingHorizontal: pad * 1.2, paddingVertical: sectionGap * 0.6, borderBottomWidth: 1 * f, borderBottomColor: accent + '40' }}>
@@ -584,12 +584,12 @@ function TemplatePreviewRenderer({
         <View style={{ padding: pad * 1.2, paddingTop: sectionGap }}>
           {sections.map((sec, si) => (
             <View key={si} style={{ marginBottom: sectionGap }}>
-              <Text style={{ fontSize: sectionSize, fontWeight: '700', color: accent, letterSpacing: 1, textTransform: 'uppercase' }}>{sec.title}</Text>
+              <Text style={{ fontSize: sectionSize, fontFamily: FONTS.bold, color: accent, letterSpacing: 1, textTransform: 'uppercase' }}>{sec.title}</Text>
               <View style={{ height: 0.5 * f, backgroundColor: borderColor, marginTop: lineGap, marginBottom: lineGap * 1.5 }} />
               {sec.items.map((item, ii) => (
                 <View key={ii} style={{ marginBottom: lineGap * 2 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '600', color: textDark }} numberOfLines={1}>{item.role}</Text>
+                    <Text style={{ fontSize: bulletSize + 0.5 * f, fontFamily: FONTS.semibold, color: textDark }} numberOfLines={1}>{item.role}</Text>
                     <Text style={{ fontSize: bulletSize, color: textMid }}>{item.date}</Text>
                   </View>
                   <Text style={{ fontSize: bulletSize, color: textMid, fontStyle: 'italic' }} numberOfLines={1}>{item.company}</Text>
@@ -608,17 +608,17 @@ function TemplatePreviewRenderer({
   // ---- Minimal: ultra-clean, maximum whitespace ---
   return (
     <View style={[pv.canvas, { backgroundColor: bg, padding: pad * 1.2 }]}>
-      <Text style={{ fontSize: nameSize * 0.9, fontWeight: '300', color: textDark, letterSpacing: 0.5 }} numberOfLines={1}>{name}</Text>
+      <Text style={{ fontSize: nameSize * 0.9, fontFamily: FONTS.light, color: textDark, letterSpacing: 0.5 }} numberOfLines={1}>{name}</Text>
       <Text style={{ fontSize: contactSize, color: textLight, marginTop: lineGap }} numberOfLines={1}>{contact}</Text>
       <View style={{ height: 0.5 * f, backgroundColor: borderColor, marginVertical: sectionGap }} />
       <Text style={{ fontSize: bodySize, color: textMid, lineHeight: bodySize * 1.6, marginBottom: sectionGap }} numberOfLines={large ? 6 : 3}>{summaryText}</Text>
       {sections.map((sec, si) => (
         <View key={si} style={{ marginBottom: sectionGap * 1.2 }}>
-          <Text style={{ fontSize: sectionSize * 0.9, fontWeight: '500', color: textDark, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: lineGap * 2 }}>{sec.title}</Text>
+          <Text style={{ fontSize: sectionSize * 0.9, fontFamily: FONTS.medium, color: textDark, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: lineGap * 2 }}>{sec.title}</Text>
           {sec.items.map((item, ii) => (
             <View key={ii} style={{ marginBottom: lineGap * 2 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ fontSize: bulletSize + 0.5 * f, fontWeight: '500', color: textDark }} numberOfLines={1}>{item.role}</Text>
+                <Text style={{ fontSize: bulletSize + 0.5 * f, fontFamily: FONTS.medium, color: textDark }} numberOfLines={1}>{item.role}</Text>
                 <Text style={{ fontSize: bulletSize, color: textLight }}>{item.date}</Text>
               </View>
               <Text style={{ fontSize: bulletSize, color: textLight }} numberOfLines={1}>{item.company}</Text>
@@ -629,7 +629,7 @@ function TemplatePreviewRenderer({
           ))}
         </View>
       ))}
-      <Text style={{ fontSize: sectionSize * 0.9, fontWeight: '500', color: textDark, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: lineGap * 2 }}>SKILLS</Text>
+      <Text style={{ fontSize: sectionSize * 0.9, fontFamily: FONTS.medium, color: textDark, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: lineGap * 2 }}>SKILLS</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 3 * f }}>
         {skills.map((sk, i) => (
           <Text key={i} style={{ fontSize: bulletSize - 0.5 * f, color: textMid, paddingHorizontal: 4 * f, paddingVertical: 1.5 * f, borderWidth: 0.5, borderColor: borderColor, borderRadius: 2 * f }} numberOfLines={1}>{sk}</Text>
@@ -1679,7 +1679,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     fontSize: 28,
-    fontWeight: '300',
+    fontFamily: FONTS.light,
     lineHeight: 32,
   },
   previewScrollView: {

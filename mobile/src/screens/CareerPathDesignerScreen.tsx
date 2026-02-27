@@ -1163,8 +1163,8 @@ export default function CareerPathDesignerScreen() {
                       <View style={{ marginTop: 12 }}>
                         <Text style={[styles.label, { color: colors.text }]}>
                           Dream Role{' '}
-                          <Text style={{ fontWeight: '400', fontSize: 11, color: colors.textSecondary }}>(auto-filled from URL or enter manually)</Text>
-                          {extractingJob && <Text style={{ fontWeight: '400', fontSize: 11, color: colors.textSecondary }}> extracting...</Text>}
+                          <Text style={{ fontFamily: FONTS.regular, fontSize: 11, color: colors.textSecondary }}>(auto-filled from URL or enter manually)</Text>
+                          {extractingJob && <Text style={{ fontFamily: FONTS.regular, fontSize: 11, color: colors.textSecondary }}> extracting...</Text>}
                         </Text>
                         <TextInput
                           style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.glassBorder, color: colors.text }]}
@@ -2454,7 +2454,7 @@ const styles = StyleSheet.create({
   },
   welcomeBadgeText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   welcomeTitle: {
     fontSize: 34,
@@ -2495,7 +2495,7 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.xs,
   },
   featureText: {
@@ -2514,7 +2514,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   secondaryButton: {
     flexDirection: 'row',
@@ -2529,7 +2529,7 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   welcomeFooter: {
     ...TYPOGRAPHY.caption1,
@@ -2547,7 +2547,7 @@ const styles = StyleSheet.create({
   },
   savedPlansTitle: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   savedPlanItem: {
     flexDirection: 'row',
@@ -2571,7 +2571,7 @@ const styles = StyleSheet.create({
   },
   savedPlanRole: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 2,
   },
   savedPlanDate: {
@@ -2596,7 +2596,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.md,
     textAlign: 'center',
   },
@@ -2614,7 +2614,7 @@ const styles = StyleSheet.create({
   },
   resumeName: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   resumeDate: {
@@ -2690,7 +2690,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   questionsContainer: {
     flex: 1,
@@ -2715,7 +2715,7 @@ const styles = StyleSheet.create({
   },
   stepDotText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   stepHeader: {
     alignItems: 'center',
@@ -2746,7 +2746,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   input: {
     borderWidth: 2,
@@ -2782,7 +2782,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   chipTextSelected: {
   },
@@ -2802,7 +2802,7 @@ const styles = StyleSheet.create({
   linkText: {
     color: COLORS.primary,
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginTop: SPACING.xs,
   },
   switchRow: {
@@ -2975,7 +2975,7 @@ const styles = StyleSheet.create({
   },
   analyzeButtonText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   analysisCard: {
     borderRadius: SPACING.radiusMD,
@@ -3044,7 +3044,7 @@ const styles = StyleSheet.create({
   },
   pathStepRole: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   pathStepTimeline: {
@@ -3067,7 +3067,7 @@ const styles = StyleSheet.create({
   },
   insightValue: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   companiesList: {
     marginTop: SPACING.md,
@@ -3102,7 +3102,7 @@ const styles = StyleSheet.create({
   },
   skillGapName: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     flex: 1,
   },
   importanceBadge: {
@@ -3145,14 +3145,14 @@ const styles = StyleSheet.create({
   },
   trendingChipText: {
     ...TYPOGRAPHY.caption1,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   resourceSection: {
     marginBottom: SPACING.lg,
   },
   resourceSkillName: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
   },
   resourceCard: {
@@ -3198,7 +3198,7 @@ const styles = StyleSheet.create({
   },
   priorityNumberText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   prioritySkill: {
     flex: 1,

@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.xs,
   },
   titleRow: {

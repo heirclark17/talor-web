@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   },
   prepJobTitle: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   prepMeta: {
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   },
   questionText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     flex: 1,
   },
   categoryBadge: {
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
   },
   categoryBadgeText: {
     ...TYPOGRAPHY.caption1,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   metaRow: {
     flexDirection: 'row',
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   },
   starToggleText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   starContainer: {
     marginTop: SPACING.sm,
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
   },
   starLabelText: {
     ...TYPOGRAPHY.caption1,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },

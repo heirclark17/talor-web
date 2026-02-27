@@ -676,7 +676,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
   },
   uploadButtonText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   resultCard: {
     borderRadius: RADIUS.md,
@@ -832,7 +832,7 @@ const styles = StyleSheet.create({
   },
   resultCompany: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   resultTitle: {
     ...TYPOGRAPHY.subhead,

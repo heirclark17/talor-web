@@ -6,7 +6,7 @@
  */
 
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { SPACING, RADIUS, TYPOGRAPHY, ALPHA_COLORS, SHADOWS } from '../utils/constants';
+import { SPACING, RADIUS, TYPOGRAPHY, ALPHA_COLORS, SHADOWS, FONTS } from '../utils/constants';
 
 /**
  * Card Styles
@@ -96,7 +96,7 @@ export const ListStyles = StyleSheet.create({
     ...TYPOGRAPHY.caption1,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   } as TextStyle,
 });
 
@@ -114,7 +114,7 @@ export const InputStyles = StyleSheet.create({
   label: {
     ...TYPOGRAPHY.subhead,
     marginBottom: SPACING.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   } as TextStyle,
 
   // Text input field
@@ -189,7 +189,7 @@ export const SectionStyles = StyleSheet.create({
     ...TYPOGRAPHY.caption1,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.sm,
   } as TextStyle,
 });
@@ -232,13 +232,13 @@ export const ButtonStyles = StyleSheet.create({
   // Button text
   text: {
     ...TYPOGRAPHY.headline,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   } as TextStyle,
 
   // Small button text
   textSmall: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   } as TextStyle,
 });
 
@@ -259,7 +259,7 @@ export const BadgeStyles = StyleSheet.create({
   // Badge text
   text: {
     ...TYPOGRAPHY.caption1,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   } as TextStyle,
 
   // Success badge

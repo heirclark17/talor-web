@@ -965,7 +965,7 @@ const styles = StyleSheet.create({
   },
   roadmapStepName: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     flex: 1,
   },
   roadmapStepTimeline: {

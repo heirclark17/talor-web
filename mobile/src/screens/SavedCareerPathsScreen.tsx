@@ -293,7 +293,7 @@ export default function SavedCareerPathsScreen() {
               <View style={styles.salaryBridgeRow}>
                 {salaryRange ? (
                   <View style={styles.salaryPill}>
-                    <DollarSign size={12} color="#10B981" />
+                    <DollarSign size={12} color={COLORS.success} />
                     <Text style={styles.salaryText}>{salaryRange}</Text>
                   </View>
                 ) : null}
@@ -311,7 +311,7 @@ export default function SavedCareerPathsScreen() {
             {/* Top certifications */}
             {topCerts.length > 0 && (
               <View style={styles.certRow}>
-                <Award size={13} color="#F59E0B" />
+                <Award size={13} color={COLORS.warning} />
                 <Text style={[styles.certListText, { color: colors.textSecondary }]} numberOfLines={1}>
                   {topCerts.join(', ')}
                 </Text>
@@ -321,7 +321,7 @@ export default function SavedCareerPathsScreen() {
             {/* Top education */}
             {topEdu ? (
               <View style={styles.educationRow}>
-                <GraduationCap size={13} color="#8B5CF6" />
+                <GraduationCap size={13} color={COLORS.purple} />
                 <Text style={[styles.educationText, { color: colors.textSecondary }]} numberOfLines={1}>
                   {topEdu}
                 </Text>
@@ -332,7 +332,7 @@ export default function SavedCareerPathsScreen() {
               <View style={styles.pillRow}>
                 {industries.slice(0, 3).map((ind, i) => (
                   <View key={i} style={[styles.pill, { backgroundColor: 'rgba(96,165,250,0.15)', borderColor: 'rgba(96,165,250,0.2)' }]}>
-                    <Text style={[styles.pillText, { color: '#60A5FA' }]}>{ind}</Text>
+                    <Text style={[styles.pillText, { color: COLORS.primary }]}>{ind}</Text>
                   </View>
                 ))}
                 {industries.length > 3 && (
@@ -352,7 +352,7 @@ export default function SavedCareerPathsScreen() {
               <View style={styles.skillsStatsRow}>
                 {(skillsHave > 0 || skillsGap > 0) && (
                   <View style={styles.skillStat}>
-                    <Zap size={12} color="#F59E0B" />
+                    <Zap size={12} color={COLORS.warning} />
                     <Text style={[styles.skillStatText, { color: colors.textSecondary }]}>
                       {skillsHave} skills | {skillsGap} gaps
                     </Text>
@@ -402,8 +402,8 @@ export default function SavedCareerPathsScreen() {
               style={[styles.deleteBtn, { backgroundColor: 'rgba(239,68,68,0.1)' }]}
             >
               {deletingId === item.id
-                ? <ActivityIndicator size="small" color="#EF4444" />
-                : <Trash2 size={16} color="#EF4444" />
+                ? <ActivityIndicator size="small" color={COLORS.error} />
+                : <Trash2 size={16} color={COLORS.error} />
               }
             </TouchableOpacity>
           </View>
@@ -469,8 +469,8 @@ export default function SavedCareerPathsScreen() {
           {selectedIds.size > 0 && (
             <TouchableOpacity onPress={handleDeleteSelected} disabled={bulkDeleting} style={styles.bulkDeleteBtn}>
               {bulkDeleting
-                ? <ActivityIndicator size="small" color="#EF4444" />
-                : <Trash2 size={14} color="#EF4444" />
+                ? <ActivityIndicator size="small" color={COLORS.error} />
+                : <Trash2 size={14} color={COLORS.error} />
               }
               <Text style={styles.bulkDeleteText}>Delete ({selectedIds.size})</Text>
             </TouchableOpacity>
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
   },
-  bulkDeleteText: { fontSize: 12, fontFamily: FONTS.medium, color: '#EF4444' },
+  bulkDeleteText: { fontSize: 12, fontFamily: FONTS.medium, color: COLORS.error },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: SPACING.md },
   loadingText: { fontSize: 15 },
   listContent: { paddingHorizontal: SPACING.lg, paddingBottom: TAB_BAR_HEIGHT + SPACING.xl },

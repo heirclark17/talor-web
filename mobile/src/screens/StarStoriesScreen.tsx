@@ -38,10 +38,10 @@ interface StarStory {
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const STAR_COLORS = {
-  situation: { bg: 'rgba(34, 197, 94, 0.2)', text: '#4ade80' },
-  task: { bg: 'rgba(59, 130, 246, 0.2)', text: '#60a5fa' },
-  action: { bg: 'rgba(168, 85, 247, 0.2)', text: '#c084fc' },
-  result: { bg: 'rgba(234, 179, 8, 0.2)', text: '#facc15' },
+  situation: { bg: 'rgba(34, 197, 94, 0.2)', text: COLORS.semanticColors.successStrong },
+  task: { bg: 'rgba(59, 130, 246, 0.2)', text: COLORS.primary },
+  action: { bg: 'rgba(168, 85, 247, 0.2)', text: COLORS.purple },
+  result: { bg: 'rgba(234, 179, 8, 0.2)', text: COLORS.warning },
 };
 
 export default function StarStoriesScreen() {
@@ -142,7 +142,7 @@ export default function StarStoriesScreen() {
           styles.card,
           {
             backgroundColor: colors.glass,
-            borderColor: isSelected ? '#60a5fa' : colors.glassBorder,
+            borderColor: isSelected ? COLORS.primary : colors.glassBorder,
           },
           isSelected && styles.cardSelected,
         ]}
@@ -178,9 +178,9 @@ export default function StarStoriesScreen() {
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             {deletingId === item.id ? (
-              <ActivityIndicator size="small" color="#f87171" />
+              <ActivityIndicator size="small" color={COLORS.error} />
             ) : (
-              <Trash2 color="#f87171" size={18} />
+              <Trash2 color={COLORS.error} size={18} />
             )}
           </TouchableOpacity>
         </View>
@@ -240,7 +240,7 @@ export default function StarStoriesScreen() {
   const renderErrorState = () => (
     <View style={styles.errorState}>
       <View style={styles.errorCard}>
-        <AlertCircle color="#f87171" size={40} />
+        <AlertCircle color={COLORS.error} size={40} />
         <Text style={styles.errorTitle}>Error Loading STAR Stories</Text>
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error}</Text>
         <TouchableOpacity
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardSelected: {
-    shadowColor: '#3b82f6',
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
   themeBadgeText: {
     fontSize: 12,
     fontFamily: FONTS.medium,
-    color: '#c084fc',
+    color: COLORS.purple,
   },
   companyRow: {
     flexDirection: 'row',
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontFamily: FONTS.semibold,
-    color: '#f87171',
+    color: COLORS.error,
     marginTop: 16,
     marginBottom: 8,
   },

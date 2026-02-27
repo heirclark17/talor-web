@@ -274,7 +274,7 @@ export default function HomeScreen() {
               {item.filename}
             </Text>
             <View style={[BadgeStyles.base, { backgroundColor: ALPHA_COLORS.primary.bg, flexShrink: 0, borderWidth: 0 }]}>
-              <Text style={[TYPOGRAPHY.caption2, { color: COLORS.primary, fontWeight: '600' }]}>Base</Text>
+              <Text style={[TYPOGRAPHY.caption2, { color: COLORS.primary, fontFamily: FONTS.semibold }]}>Base</Text>
             </View>
           </View>
           {item.name && (
@@ -372,7 +372,7 @@ export default function HomeScreen() {
                 {item.job_title || 'Untitled Position'}
               </Text>
               <View style={[BadgeStyles.base, { backgroundColor: ALPHA_COLORS.purple.bg, flexShrink: 0, borderWidth: 0 }]}>
-                <Text style={[TYPOGRAPHY.caption2, { color: COLORS.purple, fontWeight: '600' }]}>Tailored</Text>
+                <Text style={[TYPOGRAPHY.caption2, { color: COLORS.purple, fontFamily: FONTS.semibold }]}>Tailored</Text>
               </View>
             </View>
             <Text style={[TYPOGRAPHY.subhead, { color: colors.textSecondary, marginBottom: 4 }]}>
@@ -381,7 +381,7 @@ export default function HomeScreen() {
             <View style={styles.metaRow}>
               {item.quality_score != null && (
                 <>
-                  <Text style={[TYPOGRAPHY.caption1, { color: scoreColor, fontWeight: '600' }]}>
+                  <Text style={[TYPOGRAPHY.caption1, { color: scoreColor, fontFamily: FONTS.semibold }]}>
                     Score: {item.quality_score}%
                   </Text>
                   <Text style={[TYPOGRAPHY.caption1, { color: colors.textTertiary }]}> {'\u2022'} </Text>
@@ -569,7 +569,7 @@ export default function HomeScreen() {
                   <GlassCard key={version.id} style={styles.versionCard} material="thin">
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                       <Building2 color={COLORS.primary} size={16} />
-                      <Text style={[TYPOGRAPHY.bodyBold || { fontSize: 14, fontWeight: '600' }, { color: colors.text, marginLeft: 8, flex: 1 }]} numberOfLines={1}>
+                      <Text style={[TYPOGRAPHY.bodyBold || { fontSize: 14, fontFamily: FONTS.semibold }, { color: colors.text, marginLeft: 8, flex: 1 }]} numberOfLines={1}>
                         {version.company || 'Unknown Company'}
                       </Text>
                     </View>
@@ -744,7 +744,7 @@ export default function HomeScreen() {
                   </Text>
                   {currentAnalysis.keyword_optimization.missing_keywords.length > 0 && (
                     <>
-                      <Text style={[TYPOGRAPHY.caption1, { color: colors.textTertiary, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: SPACING.sm, marginBottom: SPACING.sm }]}>Missing Keywords:</Text>
+                      <Text style={[TYPOGRAPHY.caption1, { color: colors.textTertiary, fontFamily: FONTS.semibold, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: SPACING.sm, marginBottom: SPACING.sm }]}>Missing Keywords:</Text>
                       <View style={styles.keywordContainer}>
                         {currentAnalysis.keyword_optimization.missing_keywords.map((keyword, idx) => (
                           <View key={idx} style={[BadgeStyles.base, BadgeStyles.info]}>
@@ -772,7 +772,7 @@ export default function HomeScreen() {
                   </Text>
                   {currentAnalysis.ats_compatibility.issues.length > 0 && (
                     <>
-                      <Text style={[TYPOGRAPHY.caption1, { color: colors.textTertiary, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: SPACING.sm, marginBottom: SPACING.sm }]}>Issues Found:</Text>
+                      <Text style={[TYPOGRAPHY.caption1, { color: colors.textTertiary, fontFamily: FONTS.semibold, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: SPACING.sm, marginBottom: SPACING.sm }]}>Issues Found:</Text>
                       {currentAnalysis.ats_compatibility.issues.map((issue, idx) => (
                         <View key={idx} style={styles.bulletItem}>
                           <View style={[styles.bulletDot, { backgroundColor: COLORS.warning }]} />
@@ -792,7 +792,7 @@ export default function HomeScreen() {
                   {currentAnalysis.improvement_recommendations.map((rec, idx) => (
                     <View key={idx} style={[styles.recommendationCard, { backgroundColor: colors.backgroundTertiary }]}>
                       <View style={styles.recommendationHeader}>
-                        <Text style={[TYPOGRAPHY.subhead, { color: colors.text, fontWeight: '600' }]}>{rec.category}</Text>
+                        <Text style={[TYPOGRAPHY.subhead, { color: colors.text, fontFamily: FONTS.semibold }]}>{rec.category}</Text>
                         <View style={[
                           BadgeStyles.base,
                           rec.priority === 'high' ? BadgeStyles.error :
@@ -807,7 +807,7 @@ export default function HomeScreen() {
                                 : rec.priority === 'medium'
                                 ? COLORS.warning
                                 : COLORS.info,
-                              fontWeight: '700',
+                              fontFamily: FONTS.bold,
                               textTransform: 'uppercase',
                             }
                           ]}>
@@ -819,7 +819,7 @@ export default function HomeScreen() {
                         {rec.recommendation}
                       </Text>
                       <View style={[styles.exampleBox, { backgroundColor: ALPHA_COLORS.success.bg, padding: SPACING.sm, borderRadius: SPACING.radiusSM, marginTop: SPACING.xs }]}>
-                        <Text style={[TYPOGRAPHY.caption1, { color: COLORS.success, fontWeight: '600', marginBottom: 4 }]}>Example:</Text>
+                        <Text style={[TYPOGRAPHY.caption1, { color: COLORS.success, fontFamily: FONTS.semibold, marginBottom: 4 }]}>Example:</Text>
                         <Text style={[TYPOGRAPHY.caption1, { color: colors.textSecondary }]}>{rec.example}</Text>
                       </View>
                     </View>
@@ -911,7 +911,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   filename: {
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   metaRow: {

@@ -877,7 +877,7 @@ const styles = StyleSheet.create({
   },
   questionText: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     lineHeight: 22,
     marginBottom: SPACING.sm,
   },
@@ -890,7 +890,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.xs,
   },
   sectionText: {
@@ -928,7 +928,7 @@ const styles = StyleSheet.create({
   },
   starTitle: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primary,
     marginBottom: SPACING.md,
   },
@@ -1033,7 +1033,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   statsCard: {
     borderRadius: SPACING.radiusMD,
@@ -1118,7 +1118,7 @@ const styles = StyleSheet.create({
   },
   historySectionTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.xs,
   },
   historyResponseText: {

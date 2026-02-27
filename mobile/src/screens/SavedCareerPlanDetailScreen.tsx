@@ -109,8 +109,8 @@ export default function SavedCareerPlanDetailScreen() {
               style={[styles.actionBtn, { backgroundColor: 'rgba(239,68,68,0.1)' }]}
             >
               {deleting
-                ? <ActivityIndicator size="small" color="#EF4444" />
-                : <Trash2 size={16} color="#EF4444" />
+                ? <ActivityIndicator size="small" color={COLORS.error} />
+                : <Trash2 size={16} color={COLORS.error} />
               }
             </TouchableOpacity>
           </View>
@@ -128,7 +128,7 @@ export default function SavedCareerPlanDetailScreen() {
       {/* Error */}
       {error && !loading && (
         <View style={styles.centerContainer}>
-          <Text style={[styles.errorTitle, { color: '#EF4444' }]}>Error</Text>
+          <Text style={[styles.errorTitle, { color: COLORS.error }]}>Error</Text>
           <Text style={[styles.centerText, { color: colors.textSecondary }]}>{error}</Text>
           <TouchableOpacity onPress={fetchPlan} style={styles.retryBtn}>
             <Text style={styles.retryText}>Try Again</Text>
@@ -151,7 +151,7 @@ export default function SavedCareerPlanDetailScreen() {
             {/* Salary range */}
             {plan.targetRoles?.[0]?.salaryRange ? (
               <View style={styles.detailSalaryRow}>
-                <DollarSign size={14} color="#10B981" />
+                <DollarSign size={14} color={COLORS.success} />
                 <Text style={styles.detailSalaryText}>{plan.targetRoles[0].salaryRange}</Text>
               </View>
             ) : null}
@@ -160,32 +160,32 @@ export default function SavedCareerPlanDetailScreen() {
             <View style={styles.quickStatsRow}>
               {plan.targetRoles?.length > 0 && (
                 <View style={[styles.quickStat, { backgroundColor: 'rgba(96,165,250,0.12)' }]}>
-                  <Target size={11} color="#60A5FA" />
-                  <Text style={[styles.quickStatText, { color: '#60A5FA' }]}>
+                  <Target size={11} color={COLORS.primary} />
+                  <Text style={[styles.quickStatText, { color: COLORS.primary }]}>
                     {plan.targetRoles.length} role{plan.targetRoles.length !== 1 ? 's' : ''}
                   </Text>
                 </View>
               )}
               {plan.certificationPath?.length > 0 && (
                 <View style={[styles.quickStat, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
-                  <Award size={11} color="#F59E0B" />
-                  <Text style={[styles.quickStatText, { color: '#F59E0B' }]}>
+                  <Award size={11} color={COLORS.warning} />
+                  <Text style={[styles.quickStatText, { color: COLORS.warning }]}>
                     {plan.certificationPath.length} cert{plan.certificationPath.length !== 1 ? 's' : ''}
                   </Text>
                 </View>
               )}
               {plan.skillsAnalysis?.needToBuild?.length > 0 && (
                 <View style={[styles.quickStat, { backgroundColor: 'rgba(239,68,68,0.1)' }]}>
-                  <Zap size={11} color="#EF4444" />
-                  <Text style={[styles.quickStatText, { color: '#EF4444' }]}>
+                  <Zap size={11} color={COLORS.error} />
+                  <Text style={[styles.quickStatText, { color: COLORS.error }]}>
                     {plan.skillsAnalysis.needToBuild.length} gap{plan.skillsAnalysis.needToBuild.length !== 1 ? 's' : ''}
                   </Text>
                 </View>
               )}
               {plan.experiencePlan?.length > 0 && (
                 <View style={[styles.quickStat, { backgroundColor: 'rgba(139,92,246,0.12)' }]}>
-                  <Briefcase size={11} color="#8B5CF6" />
-                  <Text style={[styles.quickStatText, { color: '#8B5CF6' }]}>
+                  <Briefcase size={11} color={COLORS.purple} />
+                  <Text style={[styles.quickStatText, { color: COLORS.purple }]}>
                     {plan.experiencePlan.length} project{plan.experiencePlan.length !== 1 ? 's' : ''}
                   </Text>
                 </View>
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     marginTop: SPACING.sm,
   },
-  retryText: { color: '#EF4444', fontSize: 14, fontFamily: FONTS.semibold },
+  retryText: { color: COLORS.error, fontSize: 14, fontFamily: FONTS.semibold },
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: TAB_BAR_HEIGHT + SPACING.xl,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   planTitle: { fontSize: 22, fontFamily: FONTS.bold, marginBottom: 6 },
   detailSalaryRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 8 },
-  detailSalaryText: { fontSize: 15, fontFamily: FONTS.semibold, color: '#10B981' },
+  detailSalaryText: { fontSize: 15, fontFamily: FONTS.semibold, color: COLORS.success },
   quickStatsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
   quickStat: {
     flexDirection: 'row',

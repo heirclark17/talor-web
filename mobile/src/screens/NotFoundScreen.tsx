@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   },
   errorCode: {
     fontSize: 72,
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
     color: COLORS.danger,
     marginBottom: 16,
   },
@@ -168,14 +168,14 @@ const styles = StyleSheet.create({
   homeButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   quickLinks: {
     gap: 12,
   },
   quickLinksTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 8,
   },
   quickLinkCard: {
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   quickLinkTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   quickLinkDescription: {

@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   searchButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   filtersToggleRow: {
     flexDirection: 'row',
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   filterBadgeText: {
     color: COLORS.primary,
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   clearFilters: {
     flexDirection: 'row',
@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
     marginBottom: 8,
   },
   filterButtons: {
@@ -506,14 +506,14 @@ const styles = StyleSheet.create({
   },
   filterButtonTextActive: {
     color: COLORS.primary,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   recentSearches: {
     marginBottom: 24,
   },
   recentSearchesTitle: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 12,
@@ -540,7 +540,7 @@ const styles = StyleSheet.create({
   },
   resultsCount: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 8,
   },
   jobCard: {
@@ -564,12 +564,12 @@ const styles = StyleSheet.create({
   },
   jobTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: 4,
   },
   jobCompany: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
   },
   jobMeta: {
     flexDirection: 'row',
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
   tailorButtonText: {
     color: '#FFF',
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   viewJobButton: {
     flexDirection: 'row',
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
   },
   viewJobText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
   },
   emptyState: {
     padding: 48,
@@ -623,7 +623,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginTop: 16,
     marginBottom: 8,
   },

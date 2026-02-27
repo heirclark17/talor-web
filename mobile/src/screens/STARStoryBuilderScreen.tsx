@@ -406,11 +406,11 @@ export default function STARStoryBuilderScreen() {
                 </Text>
               </View>
             ) : experiences.length === 0 ? (
-              <View style={[styles.warningBanner, { backgroundColor: '#f59e0b20', borderColor: '#f59e0b50' }]}>
-                <Text style={{ color: '#f59e0b', fontSize: 14, fontFamily: FONTS.medium }}>
+              <View style={[styles.warningBanner, { backgroundColor: `${COLORS.warning}20`, borderColor: `${COLORS.warning}50` }]}>
+                <Text style={{ color: COLORS.warning, fontSize: 14, fontFamily: FONTS.medium }}>
                   Loading resume experiences...
                 </Text>
-                <Text style={{ color: '#f59e0b', fontSize: 13, fontFamily: FONTS.regular, marginTop: 4 }}>
+                <Text style={{ color: COLORS.warning, fontSize: 13, fontFamily: FONTS.regular, marginTop: 4 }}>
                   Your resume experiences will appear here once the interview prep data is loaded. If this persists, please go back and try again.
                 </Text>
               </View>
@@ -563,8 +563,8 @@ export default function STARStoryBuilderScreen() {
 
         {/* Info Banner */}
         {stories.length > 0 && (
-          <View style={[styles.infoBanner, { backgroundColor: '#3b82f620', borderColor: '#3b82f650' }]}>
-            <Text style={{ color: '#60a5fa', fontSize: 14, fontFamily: FONTS.medium }}>
+          <View style={[styles.infoBanner, { backgroundColor: `${COLORS.primary}20`, borderColor: '#3b82f650' }]}>
+            <Text style={{ color: COLORS.dark.accent, fontSize: 14, fontFamily: FONTS.medium }}>
               Ready to create another story? Select different experiences and a new theme, then tap Generate again.
             </Text>
           </View>
@@ -720,7 +720,7 @@ export default function STARStoryBuilderScreen() {
                             onPress={() => setPracticingStory(story)}
                             accessibilityLabel="Practice this story"
                           >
-                            <Play color="#4ade80" size={20} />
+                            <Play color={COLORS.semanticColors.successStrong} size={20} />
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={styles.storyActionBtn}
@@ -738,7 +738,7 @@ export default function STARStoryBuilderScreen() {
                             {isDeleting ? (
                               <ActivityIndicator size="small" color={COLORS.error} />
                             ) : (
-                              <Trash2 color="#f87171" size={20} />
+                              <Trash2 color={COLORS.error} size={20} />
                             )}
                           </TouchableOpacity>
                         </View>
@@ -756,22 +756,22 @@ export default function STARStoryBuilderScreen() {
                         <View style={[styles.storyContent, { borderTopColor: colors.border }]}>
                           {/* STAR Sections */}
                           <View style={styles.starSection}>
-                            <Text style={[styles.starLabel, { color: '#4ade80' }]}>Situation</Text>
+                            <Text style={[styles.starLabel, { color: COLORS.semanticColors.successStrong }]}>Situation</Text>
                             <Text style={[styles.starText, { color: colors.textSecondary }]}>{story.situation}</Text>
                           </View>
 
                           <View style={styles.starSection}>
-                            <Text style={[styles.starLabel, { color: '#60a5fa' }]}>Task</Text>
+                            <Text style={[styles.starLabel, { color: COLORS.dark.accent }]}>Task</Text>
                             <Text style={[styles.starText, { color: colors.textSecondary }]}>{story.task}</Text>
                           </View>
 
                           <View style={styles.starSection}>
-                            <Text style={[styles.starLabel, { color: '#c084fc' }]}>Action</Text>
+                            <Text style={[styles.starLabel, { color: COLORS.purple }]}>Action</Text>
                             <Text style={[styles.starText, { color: colors.textSecondary }]}>{story.action}</Text>
                           </View>
 
                           <View style={styles.starSection}>
-                            <Text style={[styles.starLabel, { color: '#fbbf24' }]}>Result</Text>
+                            <Text style={[styles.starLabel, { color: COLORS.warning }]}>Result</Text>
                             <Text style={[styles.starText, { color: colors.textSecondary }]}>{story.result}</Text>
                           </View>
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { COLORS } from '../utils/constants';
@@ -251,10 +252,14 @@ export default function AppNavigator() {
     },
   };
 
-  // Show nothing while auth is loading
+  // Show themed loading screen while auth is loading
   if (isLoading) {
     console.log('[AppNavigator] Supabase auth loading...');
-    return null;
+    return (
+      <View style={[loadingStyles.container, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
   }
 
   console.log('[AppNavigator] Supabase ready - isSignedIn:', isSignedIn, 'user:', user?.email || 'none', '→ showing:', isSignedIn ? 'MAIN APP' : 'AUTH SCREEN');
@@ -269,3 +274,7 @@ export default function AppNavigator() {
     </NavigationContainer>
   );
 }
+
+const loadingStyles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+});

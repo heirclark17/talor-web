@@ -1172,7 +1172,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   activeTabText: {
     color: COLORS.primary,
@@ -1222,7 +1222,7 @@ const styles = StyleSheet.create({
   },
   contextTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.info,
   },
   contextText: {
@@ -1237,7 +1237,7 @@ const styles = StyleSheet.create({
   },
   techStackTitle: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.md,
   },
   techSection: {
@@ -1327,7 +1327,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.subhead,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   sectionText: {
     ...TYPOGRAPHY.subhead,
@@ -1482,7 +1482,7 @@ const styles = StyleSheet.create({
   },
   prepStrategyTitle: {
     ...TYPOGRAPHY.callout,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     marginBottom: SPACING.md,
   },
   prepSection: {

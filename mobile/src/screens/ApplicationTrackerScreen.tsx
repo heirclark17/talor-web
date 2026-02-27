@@ -463,7 +463,7 @@ export default function ApplicationTrackerScreen() {
       onRequestClose={() => setStatusPickerVisible(false)}
     >
       <Pressable style={styles.pickerOverlay} onPress={() => setStatusPickerVisible(false)}>
-        <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+        <BlurView intensity={40} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
       </Pressable>
       <View style={styles.pickerContainer}>
         <BlurView
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
   },
   savedJobsTitle: {
     ...TYPOGRAPHY.caption,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.3,
   },
@@ -775,7 +775,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   companyName: {
     ...TYPOGRAPHY.body,

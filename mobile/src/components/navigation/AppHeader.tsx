@@ -37,7 +37,7 @@ import {
 import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
-import { SPACING, TYPOGRAPHY, GLASS, COLORS } from '../../utils/constants';
+import { SPACING, TYPOGRAPHY, GLASS, COLORS, FONTS } from '../../utils/constants';
 import { MainStackParamList } from '../../navigation/AppNavigator';
 
 interface MenuItem {
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   },
   logoText: {
     ...TYPOGRAPHY.heading2,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   actions: {
     flexDirection: 'row',
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
   menuTitle: {
     ...TYPOGRAPHY.heading2,
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   menuCloseButton: {
     width: 44,
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   sectionLinks: {
     gap: SPACING.sm,

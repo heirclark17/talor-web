@@ -847,7 +847,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
                 ))}
               </View>
               <Text style={[s.xsText, { color: colors.textSecondary, marginTop: 4 }]}>
-                <Text style={{ fontWeight: '600' }}>Why grouped: </Text>{group.whyGroupThese}
+                <Text style={{ fontFamily: FONTS.semibold }}>Why grouped: </Text>{group.whyGroupThese}
               </Text>
             </View>
           ))}
@@ -1255,7 +1255,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
           <View style={s.salaryBar}>
             <DollarSign color="#4ade80" size={14} />
             <Text style={[s.smallText, { color: colors.textSecondary, marginLeft: 4 }]}>Target Salary Range: </Text>
-            <Text style={[s.smallText, { color: '#4ade80', fontWeight: '600' }]}>{stats.salaryRange}</Text>
+            <Text style={[s.smallText, { color: '#4ade80', fontFamily: FONTS.semibold }]}>{stats.salaryRange}</Text>
           </View>
         </GlassCard>
 
@@ -1292,7 +1292,7 @@ export default function CareerPlanResults({ plan, timeline, onExportPDF }: Caree
             <View style={s.thisWeekBanner}>
               <Star color="#fb923c" size={14} />
               <Text style={[s.xsText, { color: colors.textSecondary, marginLeft: 6, flex: 1 }]}>
-                <Text style={{ color: '#fb923c', fontWeight: '600' }}>This week: </Text>
+                <Text style={{ color: '#fb923c', fontFamily: FONTS.semibold }}>This week: </Text>
                 {plan.timeline.twelveWeekPlan[0]?.milestone || plan.timeline.twelveWeekPlan[0]?.tasks?.[0] || 'Start your journey'}
               </Text>
             </View>
@@ -1366,7 +1366,7 @@ const s = StyleSheet.create({
   // Quick Start
   quickStartCard: { marginBottom: SPACING.md },
   quickStartHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  quickStartTitle: { fontSize: 18, fontWeight: '700' },
+  quickStartTitle: { fontSize: 18, fontFamily: FONTS.bold },
   quickStartScroll: { marginTop: 4 },
   quickStartItem: {
     width: SCREEN_WIDTH * 0.6,
@@ -1376,10 +1376,10 @@ const s = StyleSheet.create({
     padding: SPACING.md,
     marginRight: SPACING.sm,
   },
-  quickStartItemTitle: { fontSize: 14, fontWeight: '600', marginTop: 8, marginBottom: 4 },
-  stepLabel: { fontSize: 10, fontWeight: '700', marginLeft: 6 },
+  quickStartItemTitle: { fontSize: 14, fontFamily: FONTS.semibold, marginTop: 8, marginBottom: 4 },
+  stepLabel: { fontSize: 10, fontFamily: FONTS.bold, marginLeft: 6 },
   startHereBadge: { backgroundColor: 'rgba(34,197,94,0.2)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
-  startHereText: { color: '#86efac', fontSize: 9, fontWeight: '700' },
+  startHereText: { color: '#86efac', fontSize: 9, fontFamily: FONTS.bold },
 
   // Stats
   statsCard: { marginBottom: SPACING.md },
@@ -1393,7 +1393,7 @@ const s = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
   },
-  statValue: { fontSize: 22, fontWeight: '700' },
+  statValue: { fontSize: 22, fontFamily: FONTS.bold },
   statLabel: { fontSize: 10, marginTop: 2 },
   salaryBar: {
     flexDirection: 'row',
@@ -1426,12 +1426,12 @@ const s = StyleSheet.create({
   sectionCard: { width: '50%', padding: 4, marginBottom: 4 },
   sectionCardInner: { minHeight: 120 },
   sectionIcon: { width: 36, height: 36, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
-  sectionCardTitle: { fontSize: 14, fontWeight: '700', flex: 1 },
+  sectionCardTitle: { fontSize: 14, fontFamily: FONTS.bold, flex: 1 },
 
   // Export
   exportCard: { marginTop: SPACING.sm },
   exportButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.06)', paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.md },
-  exportButtonText: { fontSize: 13, fontWeight: '600', marginLeft: 6 },
+  exportButtonText: { fontSize: 13, fontFamily: FONTS.semibold, marginLeft: 6 },
 
   // Modal
   modalContainer: { flex: 1 },
@@ -1440,7 +1440,7 @@ const s = StyleSheet.create({
     paddingHorizontal: SPACING.md, paddingTop: SPACING.lg, paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
   },
-  modalTitle: { fontSize: 20, fontWeight: '700', flex: 1 },
+  modalTitle: { fontSize: 20, fontFamily: FONTS.bold, flex: 1 },
   modalClose: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20 },
   modalScroll: { paddingBottom: 40 },
   modalBody: { padding: SPACING.md },
@@ -1461,18 +1461,18 @@ const s = StyleSheet.create({
   iconCircle: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: 10 },
   iconCircleSmall: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
 
-  cardTitle: { fontSize: 15, fontWeight: '600' },
+  cardTitle: { fontSize: 15, fontFamily: FONTS.semibold },
   cardBody: { fontSize: 13, lineHeight: 20, marginTop: 4 },
-  label: { fontSize: 11, fontWeight: '500', marginBottom: 2 },
+  label: { fontSize: 11, fontFamily: FONTS.medium, marginBottom: 2 },
   smallText: { fontSize: 12, lineHeight: 18 },
   xsText: { fontSize: 11 },
-  xsLabel: { fontSize: 10, fontWeight: '600', marginBottom: 4 },
+  xsLabel: { fontSize: 10, fontFamily: FONTS.semibold, marginBottom: 4 },
 
   sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
-  sectionTitle: { fontSize: 16, fontWeight: '700' },
+  sectionTitle: { fontSize: 16, fontFamily: FONTS.bold },
 
   badge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-  badgeText: { fontSize: 9, fontWeight: '600' },
+  badgeText: { fontSize: 9, fontFamily: FONTS.semibold },
 
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 },
   chip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
@@ -1483,15 +1483,15 @@ const s = StyleSheet.create({
   bulletText: { fontSize: 12, lineHeight: 18, flex: 1 },
 
   innerCard: { borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', borderRadius: RADIUS.md, padding: 12, marginTop: 8 },
-  innerTitle: { fontSize: 14, fontWeight: '600', marginLeft: 6 },
-  innerItemTitle: { fontSize: 13, fontWeight: '600' },
+  innerTitle: { fontSize: 14, fontFamily: FONTS.semibold, marginLeft: 6 },
+  innerItemTitle: { fontSize: 13, fontFamily: FONTS.semibold },
   innerItem: { borderRadius: RADIUS.sm, padding: 10, marginTop: 6 },
-  innerCardLabel: { fontSize: 12, fontWeight: '600', marginBottom: 4 },
+  innerCardLabel: { fontSize: 12, fontFamily: FONTS.semibold, marginBottom: 4 },
 
   linkRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 4 },
   linkText: { fontSize: 11, color: '#60a5fa', marginLeft: 4, flex: 1, textDecorationLine: 'underline' },
   linkButton: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: RADIUS.md, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginTop: 8, alignSelf: 'flex-start' },
-  linkButtonText: { fontSize: 12, fontWeight: '500', marginLeft: 6 },
+  linkButtonText: { fontSize: 12, fontFamily: FONTS.medium, marginLeft: 6 },
 
   highlightBox: { borderRadius: RADIUS.md, padding: 12, marginTop: 4 },
 
@@ -1502,25 +1502,25 @@ const s = StyleSheet.create({
 
   filterRow: { marginBottom: 12 },
   filterChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, marginRight: 6 },
-  filterChipText: { fontSize: 11, fontWeight: '500' },
+  filterChipText: { fontSize: 11, fontFamily: FONTS.medium },
 
   weekBadge: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' },
-  weekBadgeText: { fontSize: 12, fontWeight: '600', color: '#fff' },
+  weekBadgeText: { fontSize: 12, fontFamily: FONTS.semibold, color: '#fff' },
 
   monthBadge: { width: 40, height: 40, borderRadius: RADIUS.md, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' },
-  monthBadgeText: { fontSize: 13, fontWeight: '600', color: '#fff' },
+  monthBadgeText: { fontSize: 13, fontFamily: FONTS.semibold, color: '#fff' },
 
   checkpointBadge: { backgroundColor: 'rgba(34,197,94,0.2)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: RADIUS.md, marginTop: 8, alignSelf: 'flex-start' },
   checkpointText: { fontSize: 10, color: '#86efac' },
 
   applyReadyBanner: { backgroundColor: 'rgba(34,197,94,0.15)', borderWidth: 2, borderColor: 'rgba(34,197,94,0.4)', borderRadius: RADIUS.lg, padding: SPACING.md, alignItems: 'center', marginTop: 16 },
-  applyReadyTitle: { fontSize: 16, fontWeight: '700', color: '#86efac', marginBottom: 6 },
+  applyReadyTitle: { fontSize: 16, fontFamily: FONTS.bold, color: '#86efac', marginBottom: 6 },
 
   strategyBanner: { borderWidth: 1, borderRadius: RADIUS.lg, padding: SPACING.md, marginBottom: 12, backgroundColor: 'rgba(168,85,247,0.06)' },
 
   stepRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 6, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: RADIUS.sm, padding: 10 },
   stepNumber: { width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(168,85,247,0.2)', alignItems: 'center', justifyContent: 'center', marginRight: 10, flexShrink: 0 },
-  stepNumberText: { fontSize: 11, fontWeight: '700', color: '#c084fc' },
+  stepNumberText: { fontSize: 11, fontFamily: FONTS.bold, color: '#c084fc' },
 
   sourceRow: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 6, borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.04)' },
 });
