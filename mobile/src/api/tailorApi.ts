@@ -316,9 +316,38 @@ export async function bulkDeleteTailoredResumes(ids: number[]): Promise<ApiRespo
   return post<{ deletedCount: number }>('/api/tailor/tailored/bulk-delete', { ids });
 }
 
+/**
+ * Start an async tailoring job (non-blocking).
+ * Returns { success, jobId } — poll with getTailorJobStatus().
+ */
+export async function tailorResumeAsync(params: TailorRequest): Promise<ApiResponse<{ jobId: string }>> {
+  return post<{ jobId: string }>('/api/tailor/tailor-async', {
+    base_resume_id: params.baseResumeId,
+    job_url: params.jobUrl,
+    company: params.company,
+    job_title: params.jobTitle,
+    job_description: params.jobDescription,
+  });
+}
+
+/**
+ * Poll status of an async tailoring job.
+ */
+export async function getTailorJobStatus(jobId: string): Promise<ApiResponse<{
+  status: string;
+  progress: number;
+  message: string;
+  result?: unknown;
+  error?: string;
+}>> {
+  return get(`/api/tailor/job/${jobId}`);
+}
+
 export const tailorApi = {
   extractJobDetails,
   tailorResume,
+  tailorResumeAsync,
+  getTailorJobStatus,
   getTailoredResume,
   getTailoredResumes,
   listTailoredResumes,

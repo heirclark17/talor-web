@@ -9,6 +9,22 @@ import { supabase } from '../lib/supabase';
 import { validateHost, rateLimiter } from '../utils/security';
 
 /**
+ * Generate a UUID v4 for request correlation.
+ * Uses crypto.randomUUID when available, otherwise falls back to a simple implementation.
+ */
+function generateCorrelationId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+/**
  * Standard API response wrapper
  */
 export interface ApiResponse<T = unknown> {
@@ -146,8 +162,11 @@ export async function fetchWithAuth(
     console.warn('[API] Failed to get Supabase session:', e);
   }
 
+  const correlationId = generateCorrelationId();
+
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
+    'X-Correlation-ID': correlationId,
   };
 
   // Add Authorization header if token exists

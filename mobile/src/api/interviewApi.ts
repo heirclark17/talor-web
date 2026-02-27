@@ -333,10 +333,35 @@ export async function getCompetitiveIntelligence(prepId: number): Promise<ApiRes
   return get(`/api/interview-prep/${prepId}/competitive-intelligence`);
 }
 
+/**
+ * Start async interview prep generation. Returns { jobId }.
+ * Poll with getInterviewPrepJobStatus().
+ */
+export async function generateInterviewPrepAsync(
+  tailoredResumeId: number,
+): Promise<ApiResponse<{ jobId: string }>> {
+  return post<{ jobId: string }>(`/api/interview-prep/generate-async/${tailoredResumeId}`);
+}
+
+/**
+ * Poll status of an async interview prep job.
+ */
+export async function getInterviewPrepJobStatus(jobId: string): Promise<ApiResponse<{
+  status: string;
+  progress: number;
+  message: string;
+  result?: unknown;
+  error?: string;
+}>> {
+  return get(`/api/interview-prep/job/${jobId}`);
+}
+
 export const interviewApi = {
   getInterviewPreps,
   getInterviewPrep,
   generateInterviewPrep,
+  generateInterviewPrepAsync,
+  getInterviewPrepJobStatus,
   deleteInterviewPrep,
   getCommonQuestions,
   getBehavioralQuestions,
