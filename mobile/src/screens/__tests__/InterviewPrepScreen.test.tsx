@@ -15,6 +15,23 @@
  * - Certifications loading/loaded badge states (lines 972-984)
  */
 
+// Mock expo-constants BEFORE any imports to prevent EXDevLauncher crash
+jest.mock('expo-constants', () => ({
+  default: { expoConfig: { extra: {} }, manifest: { extra: {} } },
+  expoConfig: { extra: {} },
+  manifest: { extra: {} },
+}));
+
+// Mock supabase BEFORE any imports to prevent BlobModule crash
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
+    },
+  },
+}));
+
 // ---- MOCKS (must be before imports) ----
 
 const mockNavigate = jest.fn();
@@ -93,7 +110,11 @@ jest.mock('../../components/glass/GlassCard', () => ({
 jest.mock('../../components/interviewPrep/types', () => ({}));
 
 jest.mock('../../api/client', () => ({
-  api: {},
+  api: {
+    getMockSessions: jest.fn(() => Promise.resolve({ success: true, data: [] })),
+    listStarStories: jest.fn(() => Promise.resolve({ success: true, data: [] })),
+    cacheInterviewPrepData: jest.fn(() => Promise.resolve({ success: true })),
+  },
   ReadinessScore: {},
   ValuesAlignment: {},
   CompanyResearch: {},
@@ -1136,7 +1157,8 @@ describe('InterviewPrepScreen', () => {
     it('should show task count in subtitle', () => {
       const tree = renderScreen();
       const text = getTreeText(tree.toJSON());
-      expect(text).toContain('2 tasks to complete');
+      // Subtitle shows "0/4 tasks completed" format (2 research + 2 day-of = 4 total)
+      expect(text).toContain('0/4 tasks completed');
     });
 
     it('should render research tasks and day-of checklist when expanded', () => {
@@ -1173,8 +1195,10 @@ describe('InterviewPrepScreen', () => {
         touchables[4].props.onPress();
       });
       const text = getTreeText(tree.toJSON());
-      expect(text).not.toContain('Research Tasks');
-      expect(text).not.toContain('Day-of Checklist');
+      // The expanded section hides content items when arrays are empty
+      // (section headers still appear in the progress bar area outside the expanded section)
+      expect(text).not.toContain('Research company history');
+      expect(text).not.toContain('Bring copies of resume');
     });
   });
 
@@ -1677,7 +1701,8 @@ describe('InterviewPrepScreen', () => {
       };
       const tree = renderScreen();
       const text = getTreeText(tree.toJSON());
-      expect(text).toContain('0 tasks to complete');
+      // Format changed to "0/0 tasks completed"
+      expect(text).toContain('0/0 tasks completed');
     });
   });
 
@@ -1911,7 +1936,8 @@ describe('InterviewPrepScreen', () => {
         touchables[4].props.onPress();
       });
       const text = getTreeText(tree.toJSON());
-      expect(text).not.toContain('Research Tasks');
+      // "Research Tasks" appears in the progress bar section always; check specific content items
+      expect(text).not.toContain('Research company history');
     });
 
     it('should handle null candidate_positioning fields', () => {

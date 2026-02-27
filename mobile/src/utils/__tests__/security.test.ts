@@ -1,3 +1,11 @@
+jest.mock('expo-constants', () => ({
+  __esModule: true,
+  default: {
+    expoConfig: { extra: {} },
+    manifest: null,
+  },
+}));
+
 import {
   validateHost,
   sanitizeInput,

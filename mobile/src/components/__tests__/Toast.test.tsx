@@ -464,7 +464,7 @@ describe('Toast Component', () => {
     });
 
     it('error color should be COLORS.danger', () => {
-      expect(COLORS.danger).toBe('#ef4444');
+      expect(COLORS.danger).toBe('#f87171');
     });
 
     it('warning color should be COLORS.warning', () => {

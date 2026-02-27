@@ -6,6 +6,23 @@
  * full component rendering with interactions (react-test-renderer).
  */
 
+// Mock expo-constants BEFORE any imports to prevent EXDevLauncher crash
+jest.mock('expo-constants', () => ({
+  default: { expoConfig: { extra: {} }, manifest: { extra: {} } },
+  expoConfig: { extra: {} },
+  manifest: { extra: {} },
+}));
+
+// Mock supabase BEFORE any imports to prevent BlobModule crash
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
+    },
+  },
+}));
+
 // ---- Mock ALL dependencies BEFORE imports ----
 
 const mockNavigate = jest.fn();
@@ -18,7 +35,10 @@ jest.mock('@react-navigation/native', () => ({
     canGoBack: jest.fn(() => false),
   })),
   useRoute: jest.fn(() => ({ params: {} })),
-  useFocusEffect: jest.fn((callback: any) => callback()),
+  useFocusEffect: jest.fn((callback: any) => {
+    const React = require('react');
+    React.useEffect(() => { callback(); }, []);
+  }),
   useIsFocused: jest.fn(() => true),
 }));
 
@@ -203,6 +223,70 @@ jest.mock('../../stores/resumeStore', () => ({
 jest.mock('../../navigation/AppNavigator', () => ({
   RootStackParamList: {},
 }));
+
+jest.mock('../../contexts/PostHogContext', () => ({
+  usePostHog: jest.fn(() => ({ capture: jest.fn() })),
+}));
+
+jest.mock('../../components/ui', () => {
+  const RealReact = require('react');
+  return {
+    NumberText: (props: any) => RealReact.createElement('NumberText', props, props.children),
+    RoundedNumeral: (props: any) => RealReact.createElement('RoundedNumeral', props, props.children),
+  };
+});
+
+jest.mock('../../components/layout', () => {
+  const RealReact = require('react');
+  return {
+    SectionHeader: (props: any) => RealReact.createElement('SectionHeader', props, props.children),
+    ScreenContainer: (props: any) => RealReact.createElement('ScreenContainer', props, props.children),
+  };
+});
+
+jest.mock('../../constants/SharedStyles', () => ({
+  CardStyles: {},
+  BadgeStyles: {},
+  ModalStyles: {},
+}));
+
+let mockListTailoredResumes: jest.Mock = jest.fn(() => Promise.resolve({ success: true, data: [] }));
+let mockDeleteTailoredResume: jest.Mock = jest.fn(() => Promise.resolve({ success: true }));
+let mockDownloadTailoredResume: jest.Mock = jest.fn(() => Promise.resolve({ success: true, data: 'https://example.com/resume.pdf' }));
+
+jest.mock('../../api/client', () => ({
+  api: {
+    get listTailoredResumes() { return mockListTailoredResumes; },
+    get deleteTailoredResume() { return mockDeleteTailoredResume; },
+    get downloadTailoredResume() { return mockDownloadTailoredResume; },
+  },
+}));
+
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(() => Promise.resolve(null)),
+    setItem: jest.fn(() => Promise.resolve()),
+    removeItem: jest.fn(() => Promise.resolve()),
+  },
+}));
+
+jest.mock('lucide-react-native', () => {
+  const RealReact = require('react');
+  const MockIcon = (props: any) =>
+    RealReact.createElement('MockIcon', { ...props, testID: `icon-${props.name || 'unknown'}` });
+  const iconNames = [
+    'FileText', 'Upload', 'Trash2', 'Target', 'FileSearch', 'X',
+    'CheckCircle', 'AlertCircle', 'TrendingUp', 'TrendingDown', 'BookOpen',
+    'Briefcase', 'Clock', 'GitBranch', 'Download', 'Building2', 'Sparkles', 'Eye',
+  ];
+  const result: Record<string, any> = {};
+  iconNames.forEach((name) => {
+    result[name] = (props: any) =>
+      RealReact.createElement('MockIcon', { ...props, testID: `icon-${name}` });
+  });
+  return result;
+});
 
 // ---- Imports ----
 
@@ -586,9 +670,9 @@ describe('HomeScreen', () => {
     });
 
     it('should use RADIUS constants for border radii', () => {
-      expect(RADIUS.md).toBe(16);
-      expect(RADIUS.sm).toBe(10);
-      expect(RADIUS.lg).toBe(24);
+      expect(RADIUS.md).toBe(12);
+      expect(RADIUS.sm).toBe(8);
+      expect(RADIUS.lg).toBe(16);
     });
 
     it('should use FONTS constants for typography', () => {
@@ -769,9 +853,9 @@ describe('HomeScreen', () => {
         const tree = renderScreen({ resumes: sampleResumes });
         const root = tree.root;
         const sf = root.findAllByType('SearchFilter')[0];
-        expect(sf.props.sortOptions).toHaveLength(4);
+        expect(sf.props.sortOptions).toHaveLength(5);
         const values = sf.props.sortOptions.map((o: any) => o.value);
-        expect(values).toEqual(['newest', 'oldest', 'name', 'skills']);
+        expect(values).toEqual(['newest', 'oldest', 'name', 'skills', 'base_first']);
       });
     });
 
@@ -841,7 +925,7 @@ describe('HomeScreen', () => {
         renderer.act(() => {
           tailorBtn!.props.onPress();
         });
-        expect(mockNavigate).toHaveBeenCalledWith('Tailor', { screen: 'TailorResume', params: { resumeId: 1 } });
+        expect(mockNavigate).toHaveBeenCalledWith('TailorResume', { resumeId: 1 });
       });
     });
 
@@ -1004,8 +1088,8 @@ describe('HomeScreen', () => {
           await analyzeBtn!.props.onPress();
         });
 
-        // After analysis, modal should be visible
-        const modal = root.findAllByType('Modal')[0];
+        // After analysis, modal should be visible (index 1 = analysis modal, index 0 = versions modal)
+        const modal = root.findAllByType('Modal')[1];
         expect(modal.props.visible).toBe(true);
       });
 
@@ -1163,20 +1247,19 @@ describe('HomeScreen', () => {
           await analyzeBtn!.props.onPress();
         });
 
-        // Find close button (TouchableOpacity inside modal header)
+        // Find close button by accessibilityLabel
         const touchables = root.findAllByType('TouchableOpacity');
-        const closeBtn = touchables.find((t: any) => {
-          // Close button contains the X icon
-          return t.props.onPress !== undefined;
-        });
+        const closeBtn = touchables.find((t: any) =>
+          t.props.accessibilityLabel === 'Close analysis'
+        );
 
         renderer.act(() => {
           closeBtn!.props.onPress();
         });
 
         expect(mockClear).toHaveBeenCalled();
-        // Modal should now be invisible
-        const modal = root.findAllByType('Modal')[0];
+        // Modal should now be invisible (index 1 = analysis modal)
+        const modal = root.findAllByType('Modal')[1];
         expect(modal.props.visible).toBe(false);
       });
 
@@ -1199,7 +1282,7 @@ describe('HomeScreen', () => {
           await analyzeBtn!.props.onPress();
         });
 
-        const modal = root.findAllByType('Modal')[0];
+        const modal = root.findAllByType('Modal')[1];
         renderer.act(() => {
           modal.props.onRequestClose();
         });

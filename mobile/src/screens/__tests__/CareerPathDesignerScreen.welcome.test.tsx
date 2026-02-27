@@ -13,6 +13,23 @@
  * Target: 100% coverage
  */
 
+// Mock expo-constants BEFORE any imports to prevent EXDevLauncher crash
+jest.mock('expo-constants', () => ({
+  default: { expoConfig: { extra: {} }, manifest: { extra: {} } },
+  expoConfig: { extra: {} },
+  manifest: { extra: {} },
+}));
+
+// Mock supabase BEFORE any imports to prevent BlobModule crash
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
+    },
+  },
+}));
+
 import React from 'react';
 import renderer from 'react-test-renderer';
 import { Alert } from 'react-native';

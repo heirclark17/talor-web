@@ -12,6 +12,23 @@
  * - Helper functions (getLevelColor, getPriorityColor, getRoiColor)
  */
 
+// Mock expo-constants BEFORE any imports to prevent EXDevLauncher crash
+jest.mock('expo-constants', () => ({
+  default: { expoConfig: { extra: {} }, manifest: { extra: {} } },
+  expoConfig: { extra: {} },
+  manifest: { extra: {} },
+}));
+
+// Mock supabase BEFORE any imports to prevent BlobModule crash
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
+    },
+  },
+}));
+
 import React from 'react';
 import renderer from 'react-test-renderer';
 
@@ -28,6 +45,15 @@ const mockUseInterviewPrepStoreFn = jest.fn((selector?: any) => {
   }
   return mockStoreState;
 });
+// Add Zustand static methods that the component may call outside hooks
+mockUseInterviewPrepStoreFn.getState = () => mockStoreState;
+mockUseInterviewPrepStoreFn.setState = (updater: any) => {
+  if (typeof updater === 'function') {
+    mockStoreState = { ...mockStoreState, ...updater(mockStoreState) };
+  } else {
+    mockStoreState = { ...mockStoreState, ...updater };
+  }
+};
 
 // ---- Navigation mocks ----
 const mockNavigate = jest.fn();
@@ -277,7 +303,7 @@ describe('CertificationsScreen', () => {
       const str = stringify(tree);
 
       expect(str).toContain('ActivityIndicator');
-      expect(str).toContain('Loading certification recommendations');
+      expect(str).toContain('Generating Certifications');
     });
 
     it('should render with certifications data showing cert names', async () => {
@@ -305,7 +331,8 @@ describe('CertificationsScreen', () => {
       const tree = await renderScreen();
       const str = stringify(tree);
 
-      expect(str).toContain('No certifications found');
+      // When no cached prep exists, component shows the "Generate Recommendations" state
+      expect(str).toContain('Generate Recommendations');
     });
 
     it('should render recommended path section', async () => {
@@ -875,8 +902,8 @@ describe('CertificationsScreen', () => {
 
       const tree = await renderScreen();
       const str = stringify(tree);
-      // Error color for advanced level
-      expect(str).toContain('#ef4444');
+      // Error color for advanced level (COLORS.error = #f87171)
+      expect(str).toContain('#f87171');
     });
 
     it('should apply correct priority color for high (red)', async () => {

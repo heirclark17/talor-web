@@ -321,7 +321,7 @@ describe('EditableSkillsList', () => {
 
     it('should use COLORS for icon colors', () => {
       expect(COLORS.success).toBe('#10b981');
-      expect(COLORS.danger).toBe('#ef4444');
+      expect(COLORS.danger).toBe('#f87171');
       expect(COLORS.info).toBe('#06b6d4');
     });
   });

@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/20</span>
+                <span class='fraction'>15/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>2/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/20</span>
+                <span class='fraction'>15/20</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -143,25 +143,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">16x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -170,15 +170,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">16x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * Wrapper for @callstack/liquid-glass that handles unsupported platforms gracefully.
  * On platforms without iOS 26 / Xcode 26 support, exports fallback components.
@@ -201,25 +201,25 @@ interface LiquidGlassContainerViewProps extends ViewProps {
 }
 &nbsp;
 // Try to import the native module, fall back to View if unavailable
-let LiquidGlassViewComponent: React.ComponentType&lt;any&gt; = <span class="cstat-no" title="statement not covered" >View;</span>
-let LiquidGlassContainerViewComponent: React.ComponentType&lt;any&gt; = <span class="cstat-no" title="statement not covered" >View;</span>
-let liquidGlassSupported = <span class="cstat-no" title="statement not covered" >false;</span>
+let LiquidGlassViewComponent: React.ComponentType&lt;any&gt; = View;
+let LiquidGlassContainerViewComponent: React.ComponentType&lt;any&gt; = View;
+let liquidGlassSupported = false;
 &nbsp;
 // Only attempt to load on iOS
-<span class="cstat-no" title="statement not covered" >if (Platform.OS === 'ios') {</span>
-<span class="cstat-no" title="statement not covered" >  try {</span>
-    const liquidGlass = <span class="cstat-no" title="statement not covered" >require('@callstack/liquid-glass');</span>
-<span class="cstat-no" title="statement not covered" >    console.log('[LiquidGlass] Module loaded:', Object.keys(liquidGlass));</span>
-<span class="cstat-no" title="statement not covered" >    console.log('[LiquidGlass] isLiquidGlassSupported:', liquidGlass.isLiquidGlassSupported);</span>
+<span class="missing-if-branch" title="else path not taken" >E</span>if (Platform.OS === 'ios') {
+  try {
+    const liquidGlass = require('@callstack/liquid-glass');
+    console.log('[LiquidGlass] Module loaded:', Object.keys(liquidGlass));
+    console.log('[LiquidGlass] isLiquidGlassSupported:', liquidGlass.isLiquidGlassSupported);
 &nbsp;
     // The library exports isLiquidGlassSupported as a boolean constant
-<span class="cstat-no" title="statement not covered" >    if (liquidGlass.isLiquidGlassSupported === true) {</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (liquidGlass.isLiquidGlassSupported === true) {
 <span class="cstat-no" title="statement not covered" >      LiquidGlassViewComponent = liquidGlass.LiquidGlassView;</span>
 <span class="cstat-no" title="statement not covered" >      LiquidGlassContainerViewComponent = liquidGlass.LiquidGlassContainerView;</span>
 <span class="cstat-no" title="statement not covered" >      liquidGlassSupported = true;</span>
 <span class="cstat-no" title="statement not covered" >      console.log('[LiquidGlass] Native Liquid Glass enabled!');</span>
     } else {
-<span class="cstat-no" title="statement not covered" >      console.log('[LiquidGlass] iOS version does not support Liquid Glass (requires iOS 26+)');</span>
+      console.log('[LiquidGlass] iOS version does not support Liquid Glass (requires iOS 26+)');
     }
   } catch (e: any) {
     // Native module not available, use fallbacks
@@ -228,15 +228,15 @@ let liquidGlassSupported = <span class="cstat-no" title="statement not covered" 
 }
 &nbsp;
 // Export wrapped components that pass through all props
-export const LiquidGlassView: React.FC&lt;LiquidGlassViewProps&gt; = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(p</span>rops) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  return &lt;LiquidGlassViewComponent {...props} /&gt;;</span>
+export const LiquidGlassView: React.FC&lt;LiquidGlassViewProps&gt; = (props) =&gt; {
+  return &lt;LiquidGlassViewComponent {...props} /&gt;;
 };
 &nbsp;
-export const LiquidGlassContainerView: React.FC&lt;LiquidGlassContainerViewProps&gt; = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(p</span>rops) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  return &lt;LiquidGlassContainerViewComponent {...props} /&gt;;</span>
+export const LiquidGlassContainerView: React.FC&lt;LiquidGlassContainerViewProps&gt; = (props) =&gt; {
+  return &lt;LiquidGlassContainerViewComponent {...props} /&gt;;
 };
 &nbsp;
-export const isLiquidGlassSupported = <span class="cstat-no" title="statement not covered" >liquidGlassSupported;</span>
+export const isLiquidGlassSupported = liquidGlassSupported;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -244,7 +244,7 @@ export const isLiquidGlassSupported = <span class="cstat-no" title="statement no
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-07T16:46:49.007Z
+                at 2026-02-27T20:38:33.054Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

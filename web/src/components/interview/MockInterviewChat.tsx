@@ -4,10 +4,61 @@
  * Interactive ChatGPT-style mock interviews with adaptive follow-up questions
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Loader2, RotateCcw, PlayCircle, StopCircle, Mic, MicOff } from 'lucide-react';
 import { api } from '../../api/client';
 import { showError } from '../../utils/toast';
+
+interface SpeechRecognitionResult {
+  readonly isFinal: boolean;
+  readonly length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  readonly results: SpeechRecognitionResultList;
+  readonly resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  readonly error: string;
+  readonly message: string;
+}
+
+interface SpeechRecognitionInstance extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onend: (() => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognitionInstance;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: SpeechRecognitionConstructor;
+    webkitSpeechRecognition: SpeechRecognitionConstructor;
+  }
+}
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -35,14 +86,75 @@ export default function MockInterviewChat({
   const [isLoading, setIsLoading] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [questionCount, setQuestionCount] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   const MAX_QUESTIONS = 10;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const stopListening = useCallback(() => {
+    recognitionRef.current?.stop();
+    recognitionRef.current = null;
+    setIsRecording(false);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+    };
+  }, []);
+
+  const startListening = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      showError('Speech recognition is not supported in this browser. Try Chrome or Edge.');
+      return;
+    }
+
+    const recognition = new SR();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInputValue(transcript);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+      recognitionRef.current = null;
+    };
+
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (event.error !== 'aborted') {
+        showError(`Speech recognition error: ${event.error}`);
+      }
+      setIsRecording(false);
+      recognitionRef.current = null;
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsRecording(true);
+  };
+
+  const toggleListening = () => {
+    if (isRecording) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   const getInterviewPrompt = () => {
     const basePrompt = `You are conducting a ${interviewType} interview for the position of ${jobTitle} at ${company}.
@@ -157,6 +269,7 @@ Start the interview with a warm greeting and the first question.`;
   };
 
   const resetInterview = () => {
+    stopListening();
     setMessages([]);
     setInputValue('');
     setIsActive(false);
@@ -281,27 +394,51 @@ Start the interview with a warm greeting and the first question.`;
       {isActive && (
         <div className="glass rounded-b-xl p-4 border-t border-border">
           <div className="flex gap-3">
-            <textarea
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your response... (Shift+Enter for new line)"
-              className="flex-1 input resize-none"
-              rows={2}
-              disabled={isLoading || questionCount >= MAX_QUESTIONS}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={!inputValue.trim() || isLoading || questionCount >= MAX_QUESTIONS}
-              className="btn-primary px-6"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
+            <div className="flex-1 relative">
+              <textarea
+                ref={inputRef}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={isRecording
+                  ? "Listening... speak your answer"
+                  : "Type your response... (Shift+Enter for new line)"}
+                className="w-full input resize-none"
+                rows={2}
+                disabled={isLoading || questionCount >= MAX_QUESTIONS}
+              />
+              {isRecording && (
+                <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                  <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  Listening...
+                </p>
               )}
-            </button>
+            </div>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={toggleListening}
+                disabled={isLoading || questionCount >= MAX_QUESTIONS}
+                className={`px-4 py-2 rounded-lg transition-all ${
+                  isRecording
+                    ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+                    : 'btn-secondary'
+                }`}
+                title={isRecording ? 'Stop recording' : 'Speak your answer'}
+              >
+                {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={sendMessage}
+                disabled={!inputValue.trim() || isLoading || questionCount >= MAX_QUESTIONS}
+                className="btn-primary px-4 py-2"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
           {questionCount >= MAX_QUESTIONS && (
             <p className="text-sm text-green-500 mt-2 text-center">

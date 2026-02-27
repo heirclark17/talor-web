@@ -342,7 +342,7 @@ describe('EditableResumeCard', () => {
     });
 
     it('should use COLORS.danger for cancel button icon/text', () => {
-      expect(COLORS.danger).toBe('#ef4444');
+      expect(COLORS.danger).toBe('#f87171');
     });
   });
 

@@ -7,6 +7,18 @@
  * null/empty array handling, expanded/collapsed states, and style props.
  */
 
+jest.mock('../../../context/ThemeContext', () => ({
+  useTheme: jest.fn(() => ({
+    isDark: false,
+    colors: {
+      text: '#000000',
+      background: '#ffffff',
+      glass: 'rgba(255, 255, 255, 0.04)',
+      glassBorder: 'rgba(255, 255, 255, 0.08)',
+    },
+  })),
+}));
+
 import React from 'react';
 import renderer from 'react-test-renderer';
 import { COLORS, SPACING, RADIUS, FONTS, ALPHA_COLORS } from '../../../utils/constants';
@@ -371,55 +383,63 @@ describe('SharedComponents', () => {
   });
 
   describe('ConfidenceBar', () => {
+    // ConfidenceBar uses useTheme() hook, so must be rendered via act()
+    const renderBar = (props: { level: number; color: string }) => {
+      let tree: any;
+      renderer.act(() => {
+        tree = renderer.create(React.createElement(ConfidenceBar, props));
+      });
+      return JSON.stringify(tree!.toJSON());
+    };
+
     it('should be exported as a function', () => {
       expect(typeof ConfidenceBar).toBe('function');
     });
 
     it('should render a React element', () => {
-      const element = ConfidenceBar({ level: 75, color: '#10b981' });
-      expect(element).toBeTruthy();
+      let tree: any;
+      renderer.act(() => {
+        tree = renderer.create(
+          React.createElement(ConfidenceBar, { level: 75, color: '#10b981' })
+        );
+      });
+      expect(tree!.toJSON()).toBeTruthy();
     });
 
     it('should display the level as percentage text', () => {
-      const element = ConfidenceBar({ level: 85, color: '#3b82f6' });
-      const json = JSON.stringify(element);
+      const json = renderBar({ level: 85, color: '#3b82f6' });
       expect(json).toContain('85%');
     });
 
     it('should set fill width to level percentage', () => {
-      const element = ConfidenceBar({ level: 60, color: '#10b981' });
-      const json = JSON.stringify(element);
+      const json = renderBar({ level: 60, color: '#10b981' });
       expect(json).toContain('60%');
     });
 
     it('should apply the color to fill and label', () => {
-      const element = ConfidenceBar({ level: 50, color: '#ef4444' });
-      const json = JSON.stringify(element);
+      const json = renderBar({ level: 50, color: '#ef4444' });
       expect(json).toContain('#ef4444');
     });
 
     it('should apply border color with 40 opacity suffix', () => {
-      const element = ConfidenceBar({ level: 50, color: '#3b82f6' });
-      const json = JSON.stringify(element);
+      const json = renderBar({ level: 50, color: '#3b82f6' });
       expect(json).toContain('#3b82f640');
     });
 
     it('should render at 0% level', () => {
-      const element = ConfidenceBar({ level: 0, color: '#999' });
-      const json = JSON.stringify(element);
+      const json = renderBar({ level: 0, color: '#999' });
       expect(json).toContain('0%');
     });
 
     it('should render at 100% level', () => {
-      const element = ConfidenceBar({ level: 100, color: '#10b981' });
-      const json = JSON.stringify(element);
+      const json = renderBar({ level: 100, color: '#10b981' });
       expect(json).toContain('100%');
     });
   });
 
   describe('style constants verification', () => {
     it('should use RADIUS.lg for sectionCard borderRadius', () => {
-      expect(RADIUS.lg).toBe(24);
+      expect(RADIUS.lg).toBe(16);
     });
 
     it('should use SPACING.lg for section header padding', () => {

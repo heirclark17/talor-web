@@ -9,6 +9,23 @@
  * Uses react-test-renderer with renderer.act() for full interactive testing.
  */
 
+// Mock expo-constants BEFORE any imports to prevent EXDevLauncher crash
+jest.mock('expo-constants', () => ({
+  default: { expoConfig: { extra: {} }, manifest: { extra: {} } },
+  expoConfig: { extra: {} },
+  manifest: { extra: {} },
+}));
+
+// Mock supabase BEFORE any imports to prevent BlobModule crash
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
+    },
+  },
+}));
+
 // ========== MOCKS (must be before imports) ==========
 
 const mockNavigate = jest.fn();
@@ -54,6 +71,10 @@ jest.mock('../../api/client', () => ({
     tailorResume: (...args: any[]) => mockTailorResume(...args),
     analyzeAll: (...args: any[]) => mockAnalyzeAll(...args),
     saveComparison: (...args: any[]) => mockSaveComparison(...args),
+    getSavedJobs: jest.fn(() => Promise.resolve({ success: true, data: [] })),
+    saveJob: jest.fn(() => Promise.resolve({ success: true })),
+    deleteSavedJob: jest.fn(() => Promise.resolve({ success: true })),
+    updateTailoredResume: jest.fn(() => Promise.resolve({ success: true })),
   },
 }));
 
@@ -88,8 +109,44 @@ jest.mock('../../components', () => {
       React.createElement('KeywordPanel', props),
     ResumeAnalysis: (props: any) =>
       React.createElement('ResumeAnalysis', props),
+    ProgressStepper: (props: any) =>
+      React.createElement('ProgressStepper', props),
   };
 });
+
+jest.mock('../../components/glass/GlassCard', () => {
+  const React = require('react');
+  return {
+    GlassCard: (props: any) => React.createElement('GlassCard', props, props.children),
+  };
+});
+
+jest.mock('../../components/layout', () => {
+  const React = require('react');
+  return {
+    ScreenContainer: (props: any) => React.createElement('ScreenContainer', props, props.children),
+  };
+});
+
+jest.mock('../../components/ui', () => {
+  const React = require('react');
+  return {
+    NumberText: (props: any) => React.createElement('NumberText', props, props.children),
+  };
+});
+
+jest.mock('../../contexts/PostHogContext', () => ({
+  usePostHog: jest.fn(() => ({
+    capture: jest.fn(),
+    identify: jest.fn(),
+    reset: jest.fn(),
+  })),
+}));
+
+jest.mock('expo-clipboard', () => ({
+  setStringAsync: jest.fn(() => Promise.resolve()),
+  getStringAsync: jest.fn(() => Promise.resolve('')),
+}));
 
 jest.mock('../../components/glass/GlassButton', () => {
   const React = require('react');
@@ -114,12 +171,24 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(() => Promise.resolve(null)),
+    setItem: jest.fn(() => Promise.resolve()),
+    removeItem: jest.fn(() => Promise.resolve()),
+  },
+}));
+
 jest.mock('lucide-react-native', () => {
   const React = require('react');
   const icons = [
     'Target', 'Link', 'FileText', 'ChevronDown', 'Sparkles', 'Building2',
     'ArrowLeft', 'Check', 'Download', 'RefreshCw', 'Bookmark', 'Briefcase',
     'ChevronRight', 'BarChart3', 'Key', 'Share2',
+    'BookOpen', 'ClipboardCheck', 'Clock', 'X', 'History',
+    'Edit3', 'Save', 'Plus', 'Trash2', 'ChevronUp', 'Copy', 'CheckCircle2',
+    'ChevronsDown', 'ChevronsUp',
   ];
   const mocks: any = {};
   icons.forEach((name) => {
@@ -746,7 +815,7 @@ describe('TailorResumeScreen - Comprehensive Tests', () => {
       const str = JSON.stringify(tree.toJSON());
       expect(str).toContain('Resume Comparison');
       expect(str).toContain('Google');
-      expect(str).toContain('Resume Successfully Tailored');
+      expect(str).toContain("Resume tailored! What's next?");
     });
 
     it('should successfully tailor resume with company only', async () => {
@@ -1309,7 +1378,7 @@ describe('TailorResumeScreen - Comprehensive Tests', () => {
     it('should show success banner', async () => {
       const tree = await enterComparisonView();
       const str = JSON.stringify(tree.toJSON());
-      expect(str).toContain('Resume Successfully Tailored');
+      expect(str).toContain("Resume tailored! What's next?");
     });
 
     it('should show tailored subtitle with company name', async () => {
@@ -1893,9 +1962,8 @@ describe('TailorResumeScreen - Comprehensive Tests', () => {
         prepBtn!.props.onPress();
       });
 
-      expect(mockNavigate).toHaveBeenCalledWith('InterviewPreps', {
-        screen: 'InterviewPrep',
-        params: { tailoredResumeId: 10 },
+      expect(mockNavigate).toHaveBeenCalledWith('InterviewPrep', {
+        tailoredResumeId: 10,
       });
     });
 

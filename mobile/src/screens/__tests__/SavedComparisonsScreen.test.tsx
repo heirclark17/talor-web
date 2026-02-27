@@ -381,7 +381,7 @@ describe('SavedComparisonsScreen', () => {
       mockGetSavedComparisons.mockResolvedValue({ success: true, data: mockData });
       const tree = await renderScreen();
       const str = treeStr(tree);
-      expect(str).toContain('#ef4444');
+      expect(str).toContain('#f87171');
     });
 
     it('should not render score badge when score is undefined', async () => {
@@ -432,7 +432,7 @@ describe('SavedComparisonsScreen', () => {
       const str = treeStr(tree);
       expect(str).toContain('Test');
       expect(str).not.toContain('icon-Building2');
-      expect(str).not.toContain('icon-Briefcase');
+      // icon-Briefcase is now a permanent header button (Track Applications), not a card icon
     });
 
     it('should render match score badge when match_score is present', async () => {
@@ -496,7 +496,7 @@ describe('SavedComparisonsScreen', () => {
       await renderer.act(async () => {
         tailorBtn!.props.onPress();
       });
-      expect(mockNavigate).toHaveBeenCalledWith('Tailor');
+      expect(mockNavigate).toHaveBeenCalledWith('TailorMain');
     });
 
     it('should navigate to InterviewPreps when Prep button is pressed', async () => {
@@ -512,9 +512,8 @@ describe('SavedComparisonsScreen', () => {
       await renderer.act(async () => {
         prepBtn!.props.onPress();
       });
-      expect(mockNavigate).toHaveBeenCalledWith('InterviewPreps', {
-        screen: 'InterviewPrep',
-        params: { tailoredResumeId: 42 },
+      expect(mockNavigate).toHaveBeenCalledWith('InterviewPrep', {
+        tailoredResumeId: 42,
       });
     });
   });

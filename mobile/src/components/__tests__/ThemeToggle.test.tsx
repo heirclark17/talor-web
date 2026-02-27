@@ -10,7 +10,7 @@
 const mockSetThemeMode = jest.fn();
 let mockThemeState = {
   isDark: true,
-  themeMode: 'dark' as 'light' | 'dark' | 'system',
+  themeMode: 'dark' as 'light' | 'dark' | 'sand-tan' | 'system',
   setThemeMode: mockSetThemeMode,
 };
 
@@ -100,7 +100,7 @@ describe('ThemeToggle Component', () => {
 
     it('should set accessibilityHint', () => {
       const element = ThemeToggle();
-      expect(element.props.accessibilityHint).toBe('Cycles between light, dark, and system theme');
+      expect(element.props.accessibilityHint).toBe('Cycles between light, dark, sand-tan, and system theme');
     });
   });
 
@@ -165,8 +165,15 @@ describe('ThemeToggle Component', () => {
       expect(mockSetThemeMode).toHaveBeenCalledWith('dark');
     });
 
-    it('should cycle from dark to system on press', () => {
+    it('should cycle from dark to sand-tan on press', () => {
       mockThemeState = { isDark: true, themeMode: 'dark', setThemeMode: mockSetThemeMode };
+      const element = ThemeToggle();
+      element.props.onPress();
+      expect(mockSetThemeMode).toHaveBeenCalledWith('sand-tan');
+    });
+
+    it('should cycle from sand-tan to system on press', () => {
+      mockThemeState = { isDark: false, themeMode: 'sand-tan', setThemeMode: mockSetThemeMode };
       const element = ThemeToggle();
       element.props.onPress();
       expect(mockSetThemeMode).toHaveBeenCalledWith('system');
@@ -179,15 +186,21 @@ describe('ThemeToggle Component', () => {
       expect(mockSetThemeMode).toHaveBeenCalledWith('light');
     });
 
-    it('should complete a full cycle: light -> dark -> system -> light', () => {
+    it('should complete a full cycle: light -> dark -> sand-tan -> system -> light', () => {
       // light -> dark
       mockThemeState = { isDark: false, themeMode: 'light', setThemeMode: mockSetThemeMode };
       ThemeToggle().props.onPress();
       expect(mockSetThemeMode).toHaveBeenCalledWith('dark');
 
-      // dark -> system
+      // dark -> sand-tan
       mockSetThemeMode.mockClear();
       mockThemeState = { isDark: true, themeMode: 'dark', setThemeMode: mockSetThemeMode };
+      ThemeToggle().props.onPress();
+      expect(mockSetThemeMode).toHaveBeenCalledWith('sand-tan');
+
+      // sand-tan -> system
+      mockSetThemeMode.mockClear();
+      mockThemeState = { isDark: false, themeMode: 'sand-tan', setThemeMode: mockSetThemeMode };
       ThemeToggle().props.onPress();
       expect(mockSetThemeMode).toHaveBeenCalledWith('system');
 

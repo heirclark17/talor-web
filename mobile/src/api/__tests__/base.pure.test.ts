@@ -27,6 +27,14 @@ jest.mock('../../utils/constants', () => ({
   API_BASE_URL: 'https://test-api.example.com',
 }));
 
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: { access_token: 'fake-token' } }, error: null }),
+    },
+  },
+}));
+
 // ---------------------------------------------------------------------------
 // Imports
 // ---------------------------------------------------------------------------

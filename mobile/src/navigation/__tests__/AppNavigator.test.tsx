@@ -4,6 +4,9 @@
  */
 
 // Mock all screen imports
+jest.mock('../../screens/SignInScreen', () => 'SignInScreen');
+jest.mock('../../screens/SignUpScreen', () => 'SignUpScreen');
+jest.mock('../../screens/DashboardScreen', () => 'DashboardScreen');
 jest.mock('../../screens/HomeScreen', () => 'HomeScreen');
 jest.mock('../../screens/UploadResumeScreen', () => 'UploadResumeScreen');
 jest.mock('../../screens/TailorResumeScreen', () => 'TailorResumeScreen');
@@ -16,9 +19,23 @@ jest.mock('../../screens/SavedComparisonsScreen', () => 'SavedComparisonsScreen'
 jest.mock('../../screens/SettingsScreen', () => 'SettingsScreen');
 jest.mock('../../screens/StarStoriesScreen', () => 'StarStoriesScreen');
 jest.mock('../../screens/CareerPathDesignerScreen', () => 'CareerPathDesignerScreen');
+jest.mock('../../screens/SavedCareerPathsScreen', () => 'SavedCareerPathsScreen');
+jest.mock('../../screens/SavedCareerPlanDetailScreen', () => 'SavedCareerPlanDetailScreen');
 jest.mock('../../screens/BatchTailorScreen', () => 'BatchTailorScreen');
+jest.mock('../../screens/TailoredResumesScreen', () => 'TailoredResumesScreen');
 jest.mock('../../screens/CertificationsScreen', () => 'CertificationsScreen');
 jest.mock('../../screens/STARStoryBuilderScreen', () => 'STARStoryBuilderScreen');
+jest.mock('../../screens/CoverLetterGeneratorScreen', () => 'CoverLetterGeneratorScreen');
+jest.mock('../../screens/ApplicationTrackerScreen', () => 'ApplicationTrackerScreen');
+jest.mock('../../screens/PrivacyPolicyScreen', () => 'PrivacyPolicyScreen');
+jest.mock('../../screens/TermsOfServiceScreen', () => 'TermsOfServiceScreen');
+jest.mock('../../screens/JobSearchScreen', () => 'JobSearchScreen');
+jest.mock('../../screens/MockInterviewScreen', () => 'MockInterviewScreen');
+jest.mock('../../screens/ResumeBuilderScreen', () => 'ResumeBuilderScreen');
+jest.mock('../../screens/TemplatesScreen', () => 'TemplatesScreen');
+jest.mock('../../screens/PricingScreen', () => 'PricingScreen');
+jest.mock('../../screens/PracticeHistoryScreen', () => 'PracticeHistoryScreen');
+jest.mock('../../screens/NotFoundScreen', () => 'NotFoundScreen');
 
 // Mock navigation libraries
 jest.mock('@react-navigation/native', () => ({
@@ -49,6 +66,28 @@ jest.mock('../../components/glass/GlassTabBar', () => ({
 jest.mock('../../components/ErrorBoundary', () => {
   return ({ children }: any) => children;
 });
+
+// Mock Supabase and auth context
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
+    },
+  },
+}));
+
+jest.mock('../../contexts/SupabaseAuthContext', () => ({
+  useAuth: jest.fn(() => ({
+    session: null,
+    user: null,
+    loading: false,
+    signIn: jest.fn(),
+    signOut: jest.fn(),
+    signUp: jest.fn(),
+  })),
+  AuthProvider: ({ children }: any) => children,
+}));
 
 // Mock ThemeContext
 jest.mock('../../context/ThemeContext', () => ({
@@ -91,16 +130,16 @@ describe('AppNavigator - Stack navigators created', () => {
     jest.clearAllMocks();
   });
 
-  test('creates 7 stack navigators + 1 tab navigator', () => {
+  test('creates 3 stack navigators (no bottom tabs)', () => {
     // Re-require to trigger creation
     jest.isolateModules(() => {
       require('../AppNavigator');
     });
 
-    // createNativeStackNavigator called 7 times (Home, Tailor, Interview, Stories, Career, Saved, Settings)
-    expect(createNativeStackNavigator).toHaveBeenCalledTimes(7);
-    // createBottomTabNavigator called 1 time
-    expect(createBottomTabNavigator).toHaveBeenCalledTimes(1);
+    // createNativeStackNavigator called 3 times (RootStack, AuthStack, MainStack)
+    expect(createNativeStackNavigator).toHaveBeenCalledTimes(3);
+    // No bottom tab navigator used (all native stacks)
+    expect(createBottomTabNavigator).toHaveBeenCalledTimes(0);
   });
 });
 

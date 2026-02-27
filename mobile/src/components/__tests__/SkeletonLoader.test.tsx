@@ -53,10 +53,10 @@ jest.mock('react-native-reanimated', () => {
     useSharedValue: (init: any) => mockUseSharedValue(init),
     useAnimatedStyle: (cb: any) => mockUseAnimatedStyle(cb),
     withSpring: jest.fn((val: any) => val),
-    withTiming: (val: any) => mockWithTiming(val),
+    withTiming: (...args: any[]) => mockWithTiming(...args),
     withDelay: jest.fn((_delay: any, val: any) => val),
     withSequence: jest.fn((...vals: any[]) => vals[vals.length - 1]),
-    withRepeat: (val: any) => mockWithRepeat(val),
+    withRepeat: (...args: any[]) => mockWithRepeat(...args),
     interpolateColor: jest.fn(),
     interpolate: (val: any) => mockInterpolate(val),
     Easing: {

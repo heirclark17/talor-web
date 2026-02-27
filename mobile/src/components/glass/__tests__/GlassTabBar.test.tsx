@@ -554,7 +554,8 @@ describe('GlassTabBar', () => {
       const tree = renderComponent(props);
       const json = JSON.stringify(tree.toJSON());
       expect(json).toContain(ALPHA_COLORS.white[80]);
-      expect(json).toContain(ALPHA_COLORS.black[10]);
+      // In light mode the tab bar border color is set to "transparent"
+      expect(json).toContain('"borderColor":"transparent"');
     });
 
     it('should use light tint for BlurView in light mode', () => {
@@ -807,7 +808,7 @@ describe('GlassTabBar', () => {
     });
 
     it('should use RADIUS.xl for tab bar border radius', () => {
-      expect(RADIUS.xl).toBe(32);
+      expect(RADIUS.xl).toBe(20);
     });
   });
 

@@ -112,7 +112,7 @@ describe('Phase 1: Critical Design Parity', () => {
 
       // Test default light theme
       const lightBg = GLASS.getBg(false, false, 'default');
-      expect(lightBg).toBe('rgba(0, 0, 0, 0.02)');
+      expect(lightBg).toBe('rgba(0, 0, 0, 0.04)');
 
       // Test midnight gold theme
       const goldBg = GLASS.getBg(true, false, 'midnightGold');
@@ -136,7 +136,7 @@ describe('Phase 1: Critical Design Parity', () => {
 
       // Test default light theme
       const lightBorder = GLASS.getBorder(false, false, 'default');
-      expect(lightBorder).toBe('rgba(0, 0, 0, 0.04)');
+      expect(lightBorder).toBe('rgba(0, 0, 0, 0.08)');
 
       // Test selected state
       const selectedBorder = GLASS.getBorder(true, true, 'default');
@@ -274,8 +274,8 @@ describe('Phase 2: Component Polish', () => {
 
     test('should have iOS 26 extra round border radius', () => {
       expect(SPACING.radiusMD).toBe(20); // Cards - extra round
-      expect(RADIUS.md).toBe(16);        // Standard radius
-      expect(RADIUS.lg).toBe(24);        // Large radius
+      expect(RADIUS.md).toBe(12);        // Standard radius
+      expect(RADIUS.lg).toBe(16);        // Large radius
     });
 
     test('should have semantic spacing', () => {

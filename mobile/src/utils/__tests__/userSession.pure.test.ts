@@ -3,6 +3,17 @@
  * Tests all exported functions from userSession.ts
  */
 
+const mockGetSession = jest.fn().mockResolvedValue({ data: { session: null }, error: null });
+
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: (...args: any[]) => mockGetSession(...args),
+      signOut: jest.fn().mockResolvedValue({ error: null }),
+    },
+  },
+}));
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import {
@@ -34,63 +45,43 @@ describe('userSession utilities', () => {
     (mockAsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
     (mockAsyncStorage.removeItem as jest.Mock).mockResolvedValue(undefined);
     (mockAsyncStorage.multiRemove as jest.Mock).mockResolvedValue(undefined);
+    // Default: no Supabase session
+    mockGetSession.mockResolvedValue({ data: { session: null }, error: null });
   });
 
   // =============================================
   // getUserId
   // =============================================
   describe('getUserId', () => {
-    it('should return existing ID from SecureStore when available', async () => {
+    it('should return supa_ prefixed ID from Supabase session', async () => {
+      mockGetSession.mockResolvedValue({
+        data: { session: { user: { id: 'abc-123-uuid' } } },
+        error: null,
+      });
+
+      const userId = await getUserId();
+
+      expect(userId).toBe('supa_abc-123-uuid');
+    });
+
+    it('should return ID as-is if already prefixed with supa_', async () => {
+      mockGetSession.mockResolvedValue({
+        data: { session: { user: { id: 'supa_already-prefixed' } } },
+        error: null,
+      });
+
+      const userId = await getUserId();
+
+      expect(userId).toBe('supa_already-prefixed');
+    });
+
+    it('should fall back to SecureStore when no Supabase session', async () => {
       mockSecureStore.getItemAsync.mockResolvedValue('user_existing-id-1234');
 
       const userId = await getUserId();
 
       expect(userId).toBe('user_existing-id-1234');
       expect(mockSecureStore.getItemAsync).toHaveBeenCalledWith('secure_user_id');
-    });
-
-    it('should migrate from AsyncStorage to SecureStore when no SecureStore ID exists', async () => {
-      mockSecureStore.getItemAsync.mockResolvedValue(null);
-      (mockAsyncStorage.getItem as jest.Mock).mockResolvedValue('user_legacy-id-5678');
-
-      const userId = await getUserId();
-
-      expect(userId).toBe('user_legacy-id-5678');
-      expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
-        'secure_user_id',
-        'user_legacy-id-5678'
-      );
-      expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith(STORAGE_KEYS.USER_ID);
-    });
-
-    it('should generate a new ID when none exists in either store', async () => {
-      mockSecureStore.getItemAsync.mockResolvedValue(null);
-      (mockAsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
-
-      const userId = await getUserId();
-
-      expect(userId).toBeTruthy();
-      expect(typeof userId).toBe('string');
-      expect(mockSecureStore.setItemAsync).toHaveBeenCalled();
-    });
-
-    it('should generate an ID that starts with user_', async () => {
-      mockSecureStore.getItemAsync.mockResolvedValue(null);
-      (mockAsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
-
-      const userId = await getUserId();
-
-      expect(userId.startsWith('user_')).toBe(true);
-    });
-
-    it('should generate an ID with UUID-like format (user_XXXXXXXX-XXXX-4XXX-XXXX-XXXXXXXXXXXX)', async () => {
-      mockSecureStore.getItemAsync.mockResolvedValue(null);
-      (mockAsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
-
-      const userId = await getUserId();
-
-      // Should start with user_ followed by UUID v4 pattern
-      expect(userId).toMatch(/^user_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     });
 
     it('should fall back to AsyncStorage when SecureStore is unavailable', async () => {
@@ -100,68 +91,32 @@ describe('userSession utilities', () => {
       const userId = await getUserId();
 
       expect(userId).toBe('user_async-fallback-id');
-      // Should NOT call SecureStore.getItemAsync when unavailable
       expect(mockSecureStore.getItemAsync).not.toHaveBeenCalled();
     });
 
-    it('should generate new ID via AsyncStorage when SecureStore unavailable and no existing ID', async () => {
+    it('should throw when no session and no stored ID', async () => {
+      mockSecureStore.getItemAsync.mockResolvedValue(null);
+      (mockAsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
+
+      await expect(getUserId()).rejects.toThrow('No user session - please sign in');
+    });
+
+    it('should throw when SecureStore unavailable and no AsyncStorage ID', async () => {
       mockSecureStore.isAvailableAsync.mockResolvedValue(false);
       (mockAsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
 
-      const userId = await getUserId();
-
-      expect(userId.startsWith('user_')).toBe(true);
-      expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
-        STORAGE_KEYS.USER_ID,
-        expect.stringContaining('user_')
-      );
+      await expect(getUserId()).rejects.toThrow('No user session - please sign in');
     });
 
-    it('should handle exceptions gracefully and return a generated ID', async () => {
-      mockSecureStore.isAvailableAsync.mockRejectedValue(new Error('Device error'));
-
-      const userId = await getUserId();
-
-      // Should still return a valid generated ID despite the error
-      expect(userId).toBeTruthy();
-      expect(userId.startsWith('user_')).toBe(true);
-    });
-
-    it('should return unique IDs on separate generation calls', async () => {
-      mockSecureStore.getItemAsync.mockResolvedValue(null);
-      (mockAsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
-
-      // Capture the generated ID from the first call
-      let firstSavedId: string | undefined;
-      mockSecureStore.setItemAsync.mockImplementation(async (_key: string, value: string) => {
-        firstSavedId = value;
+    it('should not check storage when Supabase session exists', async () => {
+      mockGetSession.mockResolvedValue({
+        data: { session: { user: { id: 'session-user-id' } } },
+        error: null,
       });
 
       await getUserId();
 
-      // Reset for second call
-      mockSecureStore.getItemAsync.mockResolvedValue(null);
-      (mockAsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
-
-      let secondSavedId: string | undefined;
-      mockSecureStore.setItemAsync.mockImplementation(async (_key: string, value: string) => {
-        secondSavedId = value;
-      });
-
-      await getUserId();
-
-      expect(firstSavedId).toBeTruthy();
-      expect(secondSavedId).toBeTruthy();
-      // Due to random byte generation, IDs should differ
-      expect(firstSavedId).not.toBe(secondSavedId);
-    });
-
-    it('should not attempt to migrate when SecureStore already has an ID', async () => {
-      mockSecureStore.getItemAsync.mockResolvedValue('user_already-in-secure');
-
-      await getUserId();
-
-      // AsyncStorage.getItem should NOT be called for migration
+      expect(mockSecureStore.getItemAsync).not.toHaveBeenCalled();
       expect(mockAsyncStorage.getItem).not.toHaveBeenCalled();
     });
   });
@@ -342,12 +297,13 @@ describe('userSession utilities', () => {
   // clearAuthTokens
   // =============================================
   describe('clearAuthTokens', () => {
-    it('should delete both auth and refresh tokens from SecureStore', async () => {
+    it('should delete user ID, auth token, and refresh token from SecureStore', async () => {
       await clearAuthTokens();
 
+      expect(mockSecureStore.deleteItemAsync).toHaveBeenCalledWith('secure_user_id');
       expect(mockSecureStore.deleteItemAsync).toHaveBeenCalledWith('secure_auth_token');
       expect(mockSecureStore.deleteItemAsync).toHaveBeenCalledWith('secure_refresh_token');
-      expect(mockSecureStore.deleteItemAsync).toHaveBeenCalledTimes(2);
+      expect(mockSecureStore.deleteItemAsync).toHaveBeenCalledTimes(3);
     });
   });
 });

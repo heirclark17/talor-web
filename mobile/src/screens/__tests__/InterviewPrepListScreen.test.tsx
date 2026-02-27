@@ -268,8 +268,8 @@ describe('InterviewPrepListScreen', () => {
     });
 
     it('should use correct RADIUS values', () => {
-      expect(RADIUS.lg).toBe(24);
-      expect(RADIUS.md).toBe(16);
+      expect(RADIUS.lg).toBe(16);
+      expect(RADIUS.md).toBe(12);
     });
 
     it('should use correct FONTS values', () => {

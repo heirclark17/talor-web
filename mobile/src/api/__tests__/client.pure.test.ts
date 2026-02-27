@@ -3,6 +3,18 @@
  * Tests the main API client object with 70+ methods
  */
 
+// Mock XMLHttpRequest for uploadResume (iOS XHR workaround)
+const mockXHRInstance = {
+  open: jest.fn(),
+  send: jest.fn(),
+  setRequestHeader: jest.fn(),
+  onload: null as any,
+  onerror: null as any,
+  status: 200,
+  responseText: '{"id":1,"success":true}',
+};
+(global as any).XMLHttpRequest = jest.fn(() => mockXHRInstance);
+
 // Mock base module before importing client
 jest.mock('../base', () => ({
   fetchWithAuth: jest.fn(),
@@ -17,6 +29,14 @@ jest.mock('../../utils/userSession', () => ({
   getUserId: jest.fn(() => Promise.resolve('test-user-id')),
 }));
 
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: { access_token: 'fake-token' } }, error: null }),
+    },
+  },
+}));
+
 import { api } from '../client';
 import { fetchWithAuth } from '../base';
 
@@ -24,6 +44,8 @@ const mockFetchWithAuth = fetchWithAuth as jest.MockedFunction<typeof fetchWithA
 
 // Helper to create a mock Response
 function mockResponse(data: any, ok = true, status = 200) {
+  const headers = new Headers();
+  headers.set('content-type', 'application/json');
   return {
     ok,
     status,
@@ -31,12 +53,17 @@ function mockResponse(data: any, ok = true, status = 200) {
     json: jest.fn(() => Promise.resolve(data)),
     text: jest.fn(() => Promise.resolve(JSON.stringify(data))),
     blob: jest.fn(() => Promise.resolve(new Blob(['test']))),
-    headers: new Headers(),
+    headers,
   } as unknown as Response;
 }
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Reset XHR mock state
+  mockXHRInstance.status = 200;
+  mockXHRInstance.responseText = '{"id":1,"success":true}';
+  mockXHRInstance.onload = null;
+  mockXHRInstance.onerror = null;
 });
 
 // =========================================================================
@@ -88,22 +115,30 @@ describe('api - Resume endpoints', () => {
 
   test('uploadResume sends FormData', async () => {
     const formData = new FormData();
-    mockFetchWithAuth.mockResolvedValue(mockResponse({ id: 1 }));
+    // XHR mock - simulate successful upload
+    mockXHRInstance.status = 200;
+    mockXHRInstance.responseText = '{"id":1}';
+    mockXHRInstance.send.mockImplementation(() => {
+      // Trigger onload asynchronously
+      setTimeout(() => mockXHRInstance.onload?.(), 0);
+    });
 
     const result = await api.uploadResume(formData);
     expect(result.success).toBe(true);
-    expect(mockFetchWithAuth).toHaveBeenCalledWith(
-      '/api/resumes/upload',
-      expect.objectContaining({ method: 'POST', body: formData })
+    expect(mockXHRInstance.open).toHaveBeenCalledWith(
+      'POST',
+      expect.stringContaining('/api/resumes/upload')
     );
   });
 
   test('uploadResume handles error', async () => {
-    mockFetchWithAuth.mockRejectedValue(new Error('Upload failed'));
+    // XHR mock - simulate network error
+    mockXHRInstance.send.mockImplementation(() => {
+      setTimeout(() => mockXHRInstance.onerror?.(), 0);
+    });
 
     const result = await api.uploadResume(new FormData());
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Upload failed');
   });
 
   test('deleteResume sends POST to delete endpoint', async () => {
@@ -1236,7 +1271,7 @@ describe('api - Company research methods', () => {
 describe('api - Error handling patterns', () => {
   const methodsToTest = [
     ['getResume', [1]],
-    ['uploadResume', [new FormData()]],
+    // uploadResume uses XMLHttpRequest directly (not fetchWithAuth), tested separately above
     ['deleteResume', [1]],
     ['tailorResume', [{ baseResumeId: 1 }]],
     ['getTailoredResume', [1]],

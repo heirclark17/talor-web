@@ -42,6 +42,9 @@ describe('interviewApi', () => {
     it('should call fetchWithAuth and extract interview_preps', async () => {
       const mockPreps = [{ id: 1, company: 'TestCorp' }];
       const mockResponse = {
+        ok: true,
+        status: 200,
+        headers: { get: jest.fn().mockReturnValue('application/json') },
         json: jest.fn().mockResolvedValue({ interview_preps: mockPreps }),
       };
       fetchWithAuth.mockResolvedValue(mockResponse);
@@ -56,6 +59,9 @@ describe('interviewApi', () => {
     it('should fall back to json root if interview_preps key is missing', async () => {
       const mockData = [{ id: 2 }];
       const mockResponse = {
+        ok: true,
+        status: 200,
+        headers: { get: jest.fn().mockReturnValue('application/json') },
         json: jest.fn().mockResolvedValue(mockData),
       };
       fetchWithAuth.mockResolvedValue(mockResponse);

@@ -71,8 +71,8 @@ describe('Constants', () => {
       expect(COLORS.primary).toBe('#3b82f6');
       expect(COLORS.success).toBe('#10b981');
       expect(COLORS.warning).toBe('#f59e0b');
-      expect(COLORS.danger).toBe('#ef4444');
-      expect(COLORS.error).toBe('#ef4444');
+      expect(COLORS.danger).toBe('#f87171');
+      expect(COLORS.error).toBe('#f87171');
       expect(COLORS.purple).toBe('#8b5cf6');
       expect(COLORS.info).toBe('#06b6d4');
       expect(COLORS.cyan).toBe('#06b6d4');
@@ -94,14 +94,12 @@ describe('Constants', () => {
 
   describe('SPACING', () => {
     it('should have correct spacing values', () => {
-      expect(SPACING).toEqual({
-        xs: 4,
-        sm: 8,
-        md: 16,
-        lg: 24,
-        xl: 32,
-        xxl: 48,
-      });
+      expect(SPACING.xs).toBe(4);
+      expect(SPACING.sm).toBe(8);
+      expect(SPACING.md).toBe(16);
+      expect(SPACING.lg).toBe(24);
+      expect(SPACING.xl).toBe(32);
+      expect(SPACING.xxl).toBe(48);
     });
   });
 
@@ -113,13 +111,11 @@ describe('Constants', () => {
 
   describe('RADIUS', () => {
     it('should have correct border radius values', () => {
-      expect(RADIUS).toEqual({
-        sm: 10,
-        md: 16,
-        lg: 24,
-        xl: 32,
-        full: 9999,
-      });
+      expect(RADIUS.sm).toBe(8);
+      expect(RADIUS.md).toBe(12);
+      expect(RADIUS.lg).toBe(16);
+      expect(RADIUS.xl).toBe(20);
+      expect(RADIUS.full).toBe(9999);
     });
   });
 

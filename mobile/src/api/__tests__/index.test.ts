@@ -12,6 +12,15 @@ jest.mock('../base', () => ({
   camelToSnake: jest.fn((x: any) => x),
 }));
 
+jest.mock('../client', () => ({
+  api: {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+  },
+}));
+
 describe('api/index barrel exports', () => {
   it('should export resumeApi', () => {
     const mod = require('../index');

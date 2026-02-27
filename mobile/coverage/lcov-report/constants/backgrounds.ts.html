@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/7</span>
+                <span class='fraction'>7/7</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -805,7 +805,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1407,7 +1407,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1419,16 +1419,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">100x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1345x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Background definitions for iOS 26 Liquid Glass design
 // 50+ backgrounds organized by category
 &nbsp;
@@ -1488,7 +1488,7 @@ export interface Background {
 &nbsp;
 export type BackgroundId = typeof BACKGROUNDS[number]['id'];
 &nbsp;
-export const BACKGROUNDS = <span class="cstat-no" title="statement not covered" >[</span>
+export const BACKGROUNDS = [
   // ========== DEFAULT ==========
   {
     id: 'default',
@@ -2090,7 +2090,7 @@ export const BACKGROUNDS = <span class="cstat-no" title="statement not covered" 
 ] as const;
 &nbsp;
 // Category display names and order
-export const BACKGROUND_CATEGORIES: Record&lt;BackgroundCategory, { name: string; order: number }&gt; = <span class="cstat-no" title="statement not covered" >{</span>
+export const BACKGROUND_CATEGORIES: Record&lt;BackgroundCategory, { name: string; order: number }&gt; = {
   default: { name: 'Default', order: 0 },
   patterns: { name: 'Patterns', order: 1 },
   'animal-prints': { name: 'Animal Prints', order: 2 },
@@ -2101,17 +2101,17 @@ export const BACKGROUND_CATEGORIES: Record&lt;BackgroundCategory, { name: string
 };
 &nbsp;
 // Helper to get backgrounds by category
-export function <span class="fstat-no" title="function not covered" >getBackgroundsByCategory(</span>category: BackgroundCategory): Background[] {
-<span class="cstat-no" title="statement not covered" >  return BACKGROUNDS.filter(<span class="fstat-no" title="function not covered" >(b</span>g) =&gt; <span class="cstat-no" title="statement not covered" >bg.category === category)</span> as unknown as Background[];</span>
+export function getBackgroundsByCategory(category: BackgroundCategory): Background[] {
+  return BACKGROUNDS.filter((bg) =&gt; bg.category === category) as unknown as Background[];
 }
 &nbsp;
 // Helper to get background by ID
-export function <span class="fstat-no" title="function not covered" >getBackgroundById(</span>id: string): Background | undefined {
-<span class="cstat-no" title="statement not covered" >  return BACKGROUNDS.find(<span class="fstat-no" title="function not covered" >(b</span>g) =&gt; <span class="cstat-no" title="statement not covered" >bg.id === id)</span> as Background | undefined;</span>
+export function getBackgroundById(id: string): Background | undefined {
+  return BACKGROUNDS.find((bg) =&gt; bg.id === id) as Background | undefined;
 }
 &nbsp;
 // Default background
-export const DEFAULT_BACKGROUND_ID = <span class="cstat-no" title="statement not covered" >'default';</span>
+export const DEFAULT_BACKGROUND_ID = 'default';
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -2119,7 +2119,7 @@ export const DEFAULT_BACKGROUND_ID = <span class="cstat-no" title="statement not
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-07T16:46:49.007Z
+                at 2026-02-27T20:38:33.054Z
             </div>
         <script src="../prettify.js"></script>
         <script>

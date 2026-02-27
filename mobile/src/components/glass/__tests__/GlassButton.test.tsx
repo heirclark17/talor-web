@@ -330,7 +330,7 @@ describe('GlassButton', () => {
     });
 
     it('should use COLORS.danger for danger text', () => {
-      expect(COLORS.danger).toBe('#ef4444');
+      expect(COLORS.danger).toBe('#f87171');
     });
 
     it('should use COLORS.success for success text', () => {
@@ -338,7 +338,7 @@ describe('GlassButton', () => {
     });
 
     it('should use RADIUS.md for button borderRadius', () => {
-      expect(RADIUS.md).toBe(16);
+      expect(RADIUS.md).toBe(12);
     });
 
     it('should use FONTS.semibold for label font', () => {

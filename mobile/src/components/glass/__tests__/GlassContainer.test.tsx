@@ -5,7 +5,7 @@
  * - Dark vs light mode background/border color computation
  * - useBlur true (BlurView path) vs false (plain View path)
  * - square vs rounded (borderRadius toggle)
- * - All 5 material types
+ * - All 7 material types
  * - Custom style prop
  */
 
@@ -107,7 +107,7 @@ describe('GlassContainer', () => {
   });
 
   describe('all material types', () => {
-    const materials: Array<keyof typeof GLASS.materials> = ['ultraThin', 'thin', 'regular', 'thick', 'chrome'];
+    const materials: Array<keyof typeof GLASS.materials> = ['ultraThin', 'thin', 'regular', 'thick', 'chrome', 'subtle', 'strong'];
 
     materials.forEach((material) => {
       it(`should render with ${material} material using blur`, () => {
@@ -159,13 +159,15 @@ describe('GlassContainer', () => {
   });
 
   describe('GLASS materials configuration', () => {
-    it('should have all five material types', () => {
-      expect(Object.keys(GLASS.materials)).toHaveLength(5);
+    it('should have all seven material types', () => {
+      expect(Object.keys(GLASS.materials)).toHaveLength(7);
       expect(GLASS.materials.ultraThin).toEqual({ blur: 20, opacity: 0.15 });
       expect(GLASS.materials.thin).toEqual({ blur: 40, opacity: 0.25 });
       expect(GLASS.materials.regular).toEqual({ blur: 60, opacity: 0.35 });
       expect(GLASS.materials.thick).toEqual({ blur: 80, opacity: 0.50 });
       expect(GLASS.materials.chrome).toEqual({ blur: 70, opacity: 0.40 });
+      expect(GLASS.materials.subtle).toEqual({ blur: 25, opacity: 0.18 });
+      expect(GLASS.materials.strong).toEqual({ blur: 90, opacity: 0.55 });
     });
   });
 

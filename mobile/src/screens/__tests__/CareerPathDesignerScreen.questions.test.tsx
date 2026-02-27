@@ -13,6 +13,23 @@
  * Target: 100% coverage
  */
 
+// Mock expo-constants BEFORE any imports to prevent EXDevLauncher crash
+jest.mock('expo-constants', () => ({
+  default: { expoConfig: { extra: {} }, manifest: { extra: {} } },
+  expoConfig: { extra: {} },
+  manifest: { extra: {} },
+}));
+
+// Mock supabase BEFORE any imports to prevent BlobModule crash
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
+    },
+  },
+}));
+
 import React from 'react';
 import renderer from 'react-test-renderer';
 import { Alert } from 'react-native';
@@ -374,41 +391,48 @@ describe('CareerPathDesignerScreen - Questions Step Tests', () => {
         dreamRoleInput!.props.onChangeText('Product Manager');
       });
 
-      expect(dreamRoleInput!.props.value).toBe('Product Manager');
+      // Re-find input after re-render to avoid stale node reference
+      const updatedInputs = tree.root.findAllByType('TextInput');
+      const updatedDreamRoleInput = updatedInputs.find(
+        (i: any) =>
+          i.props.placeholder && i.props.placeholder.includes('Senior Cloud Security')
+      );
+      expect(updatedDreamRoleInput!.props.value).toBe('Product Manager');
     });
 
     it('should navigate to step 2 with valid step 1 data', async () => {
       const tree = await navigateToQuestions();
-      const root = tree.root;
 
-      // Fill dreamRole
-      const inputs = root.findAllByType('TextInput');
-      const dreamRoleInput = inputs.find(
+      // Fill dreamRole - re-find after each state update to avoid stale nodes
+      const dreamRoleInput = tree.root.findAllByType('TextInput').find(
         (i: any) =>
           i.props.placeholder && i.props.placeholder.includes('Senior Cloud Security')
       );
-
       await renderer.act(async () => {
         dreamRoleInput!.props.onChangeText('Product Manager');
       });
 
-      // Fill top tasks (3 required)
-      const taskInputs = inputs.filter(
+      // Fill top tasks (3 required) - re-find after previous state update
+      const taskInputs = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
       );
       for (let i = 0; i < 3; i++) {
+        // Re-find each time to get fresh node
+        const freshTaskInputs = tree.root.findAllByType('TextInput').filter(
+          (inp: any) => inp.props.placeholder && inp.props.placeholder.includes('Task')
+        );
         await renderer.act(async () => {
-          taskInputs[i].props.onChangeText(`Task ${i + 1}`);
+          freshTaskInputs[i].props.onChangeText(`Task ${i + 1}`);
         });
       }
 
-      // Fill strengths (2 required)
-      const strengthInputs = inputs.filter(
-        (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
-      );
+      // Fill strengths (2 required) - re-find after previous state updates
       for (let i = 0; i < 2; i++) {
+        const freshStrengthInputs = tree.root.findAllByType('TextInput').filter(
+          (inp: any) => inp.props.placeholder && inp.props.placeholder.includes('Strength')
+        );
         await renderer.act(async () => {
-          strengthInputs[i].props.onChangeText(`Strength ${i + 1}`);
+          freshStrengthInputs[i].props.onChangeText(`Strength ${i + 1}`);
         });
       }
 
@@ -426,31 +450,36 @@ describe('CareerPathDesignerScreen - Questions Step Tests', () => {
 
     it('should render step 2 with target role level and industry chips', async () => {
       const tree = await navigateToQuestions();
-      const root = tree.root;
 
-      // Fill step 1 quickly
-      const inputs = root.findAllByType('TextInput');
-      const dreamRoleInput = inputs.find(
-        (i: any) =>
-          i.props.placeholder && i.props.placeholder.includes('Senior Cloud')
+      // Fill step 1 quickly - re-find nodes fresh after each state update
+      const dreamRoleInput = tree.root.findAllByType('TextInput').find(
+        (i: any) => i.props.placeholder && i.props.placeholder.includes('Senior Cloud')
       );
       await renderer.act(async () => {
         dreamRoleInput!.props.onChangeText('PM');
       });
-      const taskInputs = inputs.filter(
+
+      const taskCount = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
-      );
-      for (const ti of taskInputs) {
+      ).length;
+      for (let idx = 0; idx < taskCount; idx++) {
+        const freshTaskInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
+        );
         await renderer.act(async () => {
-          ti.props.onChangeText('t');
+          freshTaskInputs[idx].props.onChangeText('t');
         });
       }
-      const strengthInputs = inputs.filter(
+
+      const strengthCount = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
-      );
-      for (const si of strengthInputs) {
+      ).length;
+      for (let idx = 0; idx < strengthCount; idx++) {
+        const freshStrengthInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
+        );
         await renderer.act(async () => {
-          si.props.onChangeText('s');
+          freshStrengthInputs[idx].props.onChangeText('s');
         });
       }
 
@@ -475,30 +504,36 @@ describe('CareerPathDesignerScreen - Questions Step Tests', () => {
 
     it('should allow changing career level on step 2', async () => {
       const tree = await navigateToQuestions();
-      const root = tree.root;
 
-      // Fill step 1 quickly
-      const inputs2 = root.findAllByType('TextInput');
-      const dreamRoleInput2 = inputs2.find(
+      // Fill step 1 quickly - re-find nodes fresh after each state update
+      const dreamRoleInput2 = tree.root.findAllByType('TextInput').find(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Senior Cloud')
       );
       await renderer.act(async () => {
         dreamRoleInput2!.props.onChangeText('PM');
       });
-      const taskInputs2 = inputs2.filter(
+
+      const taskCount2 = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
-      );
-      for (const ti of taskInputs2) {
+      ).length;
+      for (let idx = 0; idx < taskCount2; idx++) {
+        const freshTaskInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
+        );
         await renderer.act(async () => {
-          ti.props.onChangeText('t');
+          freshTaskInputs[idx].props.onChangeText('t');
         });
       }
-      const strengthInputs2 = inputs2.filter(
+
+      const strengthCount2 = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
-      );
-      for (const si of strengthInputs2) {
+      ).length;
+      for (let idx = 0; idx < strengthCount2; idx++) {
+        const freshStrengthInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
+        );
         await renderer.act(async () => {
-          si.props.onChangeText('s');
+          freshStrengthInputs[idx].props.onChangeText('s');
         });
       }
 
@@ -521,31 +556,36 @@ describe('CareerPathDesignerScreen - Questions Step Tests', () => {
 
     it('should handle Previous button to go back to step 1', async () => {
       const tree = await navigateToQuestions();
-      const root = tree.root;
 
-      // Fill step 1
-      const inputs = root.findAllByType('TextInput');
-      const dreamRoleInput = inputs.find(
-        (i: any) =>
-          i.props.placeholder && i.props.placeholder.includes('Senior Cloud')
+      // Fill step 1 - re-find nodes fresh after each state update
+      const dreamRoleInput = tree.root.findAllByType('TextInput').find(
+        (i: any) => i.props.placeholder && i.props.placeholder.includes('Senior Cloud')
       );
       await renderer.act(async () => {
         dreamRoleInput!.props.onChangeText('PM');
       });
-      const taskInputs = inputs.filter(
+
+      const taskCount = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
-      );
-      for (const ti of taskInputs) {
+      ).length;
+      for (let idx = 0; idx < taskCount; idx++) {
+        const freshTaskInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
+        );
         await renderer.act(async () => {
-          ti.props.onChangeText('t');
+          freshTaskInputs[idx].props.onChangeText('t');
         });
       }
-      const strengthInputs = inputs.filter(
+
+      const strengthCount = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
-      );
-      for (const si of strengthInputs) {
+      ).length;
+      for (let idx = 0; idx < strengthCount; idx++) {
+        const freshStrengthInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
+        );
         await renderer.act(async () => {
-          si.props.onChangeText('s');
+          freshStrengthInputs[idx].props.onChangeText('s');
         });
       }
 
@@ -568,36 +608,41 @@ describe('CareerPathDesignerScreen - Questions Step Tests', () => {
 
     it('should toggle industry selection', async () => {
       const tree = await navigateToQuestions();
-      const root = tree.root;
 
-      // Fill step 1 quickly
-      const inputs = root.findAllByType('TextInput');
-      const dreamRoleInput = inputs.find(
-        (i: any) =>
-          i.props.placeholder && i.props.placeholder.includes('Senior Cloud')
+      // Fill step 1 quickly - re-find nodes fresh after each state update
+      const dreamRoleInput = tree.root.findAllByType('TextInput').find(
+        (i: any) => i.props.placeholder && i.props.placeholder.includes('Senior Cloud')
       );
       await renderer.act(async () => {
         dreamRoleInput!.props.onChangeText('PM');
       });
-      const taskInputs = inputs.filter(
+
+      const taskCount = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
-      );
-      for (const ti of taskInputs) {
+      ).length;
+      for (let idx = 0; idx < taskCount; idx++) {
+        const freshTaskInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
+        );
         await renderer.act(async () => {
-          ti.props.onChangeText('t');
+          freshTaskInputs[idx].props.onChangeText('t');
         });
       }
-      const strengthInputs = inputs.filter(
+
+      const strengthCount = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
-      );
-      for (const si of strengthInputs) {
+      ).length;
+      for (let idx = 0; idx < strengthCount; idx++) {
+        const freshStrengthInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
+        );
         await renderer.act(async () => {
-          si.props.onChangeText('s');
+          freshStrengthInputs[idx].props.onChangeText('s');
         });
       }
 
       // Go to step 2
-      let continueBtn = findTouchableByText(tree.root, 'Continue');
+      const continueBtn = findTouchableByText(tree.root, 'Continue');
       await renderer.act(async () => {
         continueBtn!.props.onPress();
       });
@@ -623,29 +668,40 @@ describe('CareerPathDesignerScreen - Questions Step Tests', () => {
   // Full question flow through all 5 steps
   // ================================================================
   describe('Full question flow', () => {
-    const fillStep1 = async (root: any) => {
-      const inputs = root.findAllByType('TextInput');
-      const dreamRoleInput = inputs.find(
+    // fillStep1 accepts the tree object and re-finds nodes fresh after each state update
+    const fillStep1 = async (tree: any) => {
+      // Fill dreamRole
+      const dreamRoleInput = tree.root.findAllByType('TextInput').find(
         (i: any) =>
           i.props.placeholder && i.props.placeholder.includes('Senior Cloud')
       );
       await renderer.act(async () => {
         dreamRoleInput!.props.onChangeText('PM');
       });
-      const taskInputs = inputs.filter(
+
+      // Fill task inputs - re-find after each state change
+      const taskCount = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
-      );
-      for (const ti of taskInputs) {
+      ).length;
+      for (let idx = 0; idx < taskCount; idx++) {
+        const freshTaskInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Task')
+        );
         await renderer.act(async () => {
-          ti.props.onChangeText('task');
+          freshTaskInputs[idx].props.onChangeText('task');
         });
       }
-      const strengthInputs = inputs.filter(
+
+      // Fill strength inputs - re-find after each state change
+      const strengthCount = tree.root.findAllByType('TextInput').filter(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
-      );
-      for (const si of strengthInputs) {
+      ).length;
+      for (let idx = 0; idx < strengthCount; idx++) {
+        const freshStrengthInputs = tree.root.findAllByType('TextInput').filter(
+          (i: any) => i.props.placeholder && i.props.placeholder.includes('Strength')
+        );
         await renderer.act(async () => {
-          si.props.onChangeText('str');
+          freshStrengthInputs[idx].props.onChangeText('str');
         });
       }
     };
@@ -668,8 +724,8 @@ describe('CareerPathDesignerScreen - Questions Step Tests', () => {
         skipBtn!.props.onPress();
       });
 
-      // Fill step 1
-      await fillStep1(tree!.root);
+      // Fill step 1 - pass tree so fillStep1 can re-find nodes fresh
+      await fillStep1(tree!);
 
       // Navigate forward through question steps
       for (let step = 1; step < targetStep; step++) {
@@ -747,16 +803,18 @@ describe('CareerPathDesignerScreen - Questions Step Tests', () => {
 
     it('should allow text input for location', async () => {
       const tree = await navigateToStep(3);
-      const root = tree.root;
-      const inputs = root.findAllByType('TextInput');
-      const locationInput = inputs.find(
+      const locationInput = tree.root.findAllByType('TextInput').find(
         (i: any) => i.props.placeholder && i.props.placeholder.includes('Austin')
       );
       expect(locationInput).toBeDefined();
       await renderer.act(async () => {
         locationInput!.props.onChangeText('Houston, TX');
       });
-      expect(locationInput!.props.value).toBe('Houston, TX');
+      // Re-find after re-render to avoid stale node reference
+      const updatedLocationInput = tree.root.findAllByType('TextInput').find(
+        (i: any) => i.props.placeholder && i.props.placeholder.includes('Austin')
+      );
+      expect(updatedLocationInput!.props.value).toBe('Houston, TX');
     });
 
     it('should render step 4 (Learning Preferences)', async () => {

@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -217,16 +217,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -236,23 +234,23 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -277,10 +275,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -329,15 +329,15 @@ export interface ResumeList {
 /**
  * Get all resumes for the current user
  */
-export async function <span class="fstat-no" title="function not covered" >getResumes(</span>): Promise&lt;ApiResponse&lt;Resume[]&gt;&gt; {
-<span class="cstat-no" title="statement not covered" >  try {</span>
-    const response = <span class="cstat-no" title="statement not covered" >await fetchWithAuth('/api/resumes/list');</span>
-    const json = <span class="cstat-no" title="statement not covered" >await response.json();</span>
-    const data = <span class="cstat-no" title="statement not covered" >json.resumes || [];</span>
-<span class="cstat-no" title="statement not covered" >    return { success: true, data };</span>
+export async function getResumes(): Promise&lt;ApiResponse&lt;Resume[]&gt;&gt; {
+  try {
+    const response = await fetchWithAuth('/api/resumes/list');
+    const json = await response.json();
+    const data = json.resumes || [];
+    return { success: true, data };
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('Error fetching resumes:', error);</span>
-<span class="cstat-no" title="statement not covered" >    return {</span>
+    console.error('Error fetching resumes:', error);
+    return {
       success: false,
       data: [],
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -348,28 +348,28 @@ export async function <span class="fstat-no" title="function not covered" >getRe
 /**
  * Get a specific resume by ID
  */
-export async function <span class="fstat-no" title="function not covered" >getResume(</span>resumeId: number): Promise&lt;ApiResponse&lt;Resume&gt;&gt; {
-<span class="cstat-no" title="statement not covered" >  return get&lt;Resume&gt;(`/api/resumes/${resumeId}`);</span>
+export async function getResume(resumeId: number): Promise&lt;ApiResponse&lt;Resume&gt;&gt; {
+  return get&lt;Resume&gt;(`/api/resumes/${resumeId}`);
 }
 &nbsp;
 /**
  * Upload a new resume
  */
-export async function <span class="fstat-no" title="function not covered" >uploadResume(</span>formData: FormData): Promise&lt;ApiResponse&lt;Resume&gt;&gt; {
-<span class="cstat-no" title="statement not covered" >  return post&lt;Resume&gt;('/api/resumes/upload', formData);</span>
+export async function uploadResume(formData: FormData): Promise&lt;ApiResponse&lt;Resume&gt;&gt; {
+  return post&lt;Resume&gt;('/api/resumes/upload', formData);
 }
 &nbsp;
 /**
  * Delete a resume
  */
-export async function <span class="fstat-no" title="function not covered" >deleteResume(</span>resumeId: number): Promise&lt;ApiResponse&lt;void&gt;&gt; {
-<span class="cstat-no" title="statement not covered" >  return post&lt;void&gt;(`/api/resumes/${resumeId}/delete`);</span>
+export async function deleteResume(resumeId: number): Promise&lt;ApiResponse&lt;void&gt;&gt; {
+  return post&lt;void&gt;(`/api/resumes/${resumeId}/delete`);
 }
 &nbsp;
 /**
  * Get resume analysis
  */
-export async function <span class="fstat-no" title="function not covered" >getResumeAnalysis(</span>resumeId: number): Promise&lt;ApiResponse&lt;{
+export async function getResumeAnalysis(resumeId: number): Promise&lt;ApiResponse&lt;{
   overallScore: number;
   strengths: string[];
   weaknesses: string[];
@@ -390,10 +390,10 @@ export async function <span class="fstat-no" title="function not covered" >getRe
     example: string;
   }&gt;;
 }&gt;&gt; {
-<span class="cstat-no" title="statement not covered" >  return get(`/api/resumes/${resumeId}/analysis`);</span>
+  return get(`/api/resumes/${resumeId}/analysis`);
 }
 &nbsp;
-export const resumeApi = <span class="cstat-no" title="statement not covered" >{</span>
+export const resumeApi = {
   getResumes,
   getResume,
   uploadResume,
@@ -409,7 +409,7 @@ export default resumeApi;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-07T16:46:49.007Z
+                at 2026-02-27T20:38:33.054Z
             </div>
         <script src="../prettify.js"></script>
         <script>

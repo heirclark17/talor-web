@@ -179,8 +179,20 @@ const findTouchableByLabel = (root: any, label: string) => {
   return touchables.find((t: any) => t.props?.accessibilityLabel === label);
 };
 
-/** Expand the Nth cert card (1-indexed) */
+/** Switch to Priority view mode */
+const switchToPriorityView = (tree: any) => {
+  const root = tree.toJSON();
+  const priorityBtn = findTouchableByLabel(root, 'Priority view');
+  if (priorityBtn) {
+    renderer.act(() => {
+      priorityBtn.props.onPress();
+    });
+  }
+};
+
+/** Expand the Nth cert card (1-indexed) - switches to priority view first */
 const expandCert = (tree: any, index: number) => {
+  switchToPriorityView(tree);
   const root = tree.toJSON();
   const header = findTouchableByLabel(root, `Certification ${index}`);
   renderer.act(() => {
@@ -262,6 +274,7 @@ describe('CareerPathCertifications', () => {
   describe('priority filter', () => {
     it('should render all four filter chips', () => {
       const tree = renderComponent({ certifications: [certHigh] });
+      switchToPriorityView(tree);
       const json = getTreeJSON(tree);
       expect(json).toContain('All');
       expect(json).toContain('High');
@@ -273,6 +286,7 @@ describe('CareerPathCertifications', () => {
       const tree = renderComponent({
         certifications: [certHigh, certMedium, certLow],
       });
+      switchToPriorityView(tree);
       const json = getTreeJSON(tree);
       expect(json).toContain('CISSP');
       expect(json).toContain('CompTIA Security+');
@@ -283,6 +297,7 @@ describe('CareerPathCertifications', () => {
       const tree = renderComponent({
         certifications: [certHigh, certMedium, certLow],
       });
+      switchToPriorityView(tree);
       const root = tree.toJSON();
       const highChip = findTouchableByLabel(root, 'Filter by high priority');
       expect(highChip).toBeTruthy();
@@ -299,6 +314,7 @@ describe('CareerPathCertifications', () => {
       const tree = renderComponent({
         certifications: [certHigh, certMedium, certLow],
       });
+      switchToPriorityView(tree);
       const root = tree.toJSON();
       const medChip = findTouchableByLabel(root, 'Filter by medium priority');
 
@@ -314,6 +330,7 @@ describe('CareerPathCertifications', () => {
       const tree = renderComponent({
         certifications: [certHigh, certMedium, certLow],
       });
+      switchToPriorityView(tree);
       const root = tree.toJSON();
       const lowChip = findTouchableByLabel(root, 'Filter by low priority');
 
@@ -327,6 +344,7 @@ describe('CareerPathCertifications', () => {
 
     it('should show empty state when filter matches no certs', () => {
       const tree = renderComponent({ certifications: [certHigh] });
+      switchToPriorityView(tree);
       const root = tree.toJSON();
       const lowChip = findTouchableByLabel(root, 'Filter by low priority');
 
@@ -340,6 +358,7 @@ describe('CareerPathCertifications', () => {
       const tree = renderComponent({
         certifications: [certHigh, certMedium, certLow],
       });
+      switchToPriorityView(tree);
 
       // Filter to high first
       const root1 = tree.toJSON();
@@ -364,6 +383,7 @@ describe('CareerPathCertifications', () => {
   describe('filter chip text color', () => {
     it('should use COLORS.primary for active "all" chip text', () => {
       const tree = renderComponent({ certifications: [certHigh] });
+      switchToPriorityView(tree);
       const root = tree.toJSON();
       // Find text nodes with content "All"
       const textNodes = findByType(root, 'Text');
@@ -376,6 +396,7 @@ describe('CareerPathCertifications', () => {
 
     it('should use getPriorityColor for active non-all chip text (e.g. high -> danger)', () => {
       const tree = renderComponent({ certifications: [certHigh] });
+      switchToPriorityView(tree);
       const root = tree.toJSON();
       const highChip = findTouchableByLabel(root, 'Filter by high priority');
 
@@ -398,6 +419,7 @@ describe('CareerPathCertifications', () => {
       const tree = renderComponent({
         certifications: [certLow, certMedium, certHigh],
       });
+      switchToPriorityView(tree);
       const json = getTreeJSON(tree);
       const highPos = json.indexOf('CISSP');
       const medPos = json.indexOf('CompTIA Security+');
@@ -410,6 +432,7 @@ describe('CareerPathCertifications', () => {
       const tree = renderComponent({
         certifications: [certHighLower, certHigh],
       });
+      switchToPriorityView(tree);
       const json = getTreeJSON(tree);
       // certHigh (95) should come before certHighLower (85)
       expect(json.indexOf('CISSP')).toBeLessThan(json.indexOf('CISM'));
@@ -422,18 +445,21 @@ describe('CareerPathCertifications', () => {
   describe('getPriorityColor mapping', () => {
     it('should apply COLORS.danger for high priority badge', () => {
       const tree = renderComponent({ certifications: [certHigh] });
+      switchToPriorityView(tree);
       const json = getTreeJSON(tree);
       expect(json).toContain(`${COLORS.danger}20`);
     });
 
     it('should apply COLORS.warning for medium priority badge', () => {
       const tree = renderComponent({ certifications: [certMedium] });
+      switchToPriorityView(tree);
       const json = getTreeJSON(tree);
       expect(json).toContain(`${COLORS.warning}20`);
     });
 
     it('should apply COLORS.info for low priority badge', () => {
       const tree = renderComponent({ certifications: [certLow] });
+      switchToPriorityView(tree);
       const json = getTreeJSON(tree);
       expect(json).toContain(`${COLORS.info}20`);
     });
@@ -441,6 +467,7 @@ describe('CareerPathCertifications', () => {
     it('should apply textSecondary color for unknown priority (default branch)', () => {
       const unknownCert = makeCert({ id: 'x', priority: 'unknown' as any });
       const tree = renderComponent({ certifications: [unknownCert] });
+      switchToPriorityView(tree);
       const json = getTreeJSON(tree);
       // default returns colors.textSecondary ('#9ca3af')
       expect(json).toContain('#9ca3af20');
@@ -485,6 +512,9 @@ describe('CareerPathCertifications', () => {
 
     it('should set accessibilityState expanded to true when expanded', () => {
       const tree = renderComponent({ certifications: [fullCert] });
+
+      // Switch to priority view first so "Certification 1" label is present
+      switchToPriorityView(tree);
 
       // Initially not expanded
       const root1 = tree.toJSON();
@@ -888,12 +918,14 @@ describe('CareerPathCertifications', () => {
   describe('empty state', () => {
     it('should show empty state when certifications array is empty', () => {
       const tree = renderComponent({ certifications: [] });
+      switchToPriorityView(tree);
       const json = getTreeJSON(tree);
       expect(json).toContain('No certifications match the selected filter');
     });
 
     it('should render Award icon in empty state', () => {
       const tree = renderComponent({ certifications: [] });
+      switchToPriorityView(tree);
       const root = tree.toJSON();
       const awardIcons = findByType(root, 'Award');
       expect(awardIcons.length).toBe(1);
@@ -915,6 +947,7 @@ describe('CareerPathCertifications', () => {
 
     it('should display priority badge text in uppercase', () => {
       const tree = renderComponent({ certifications: [certHigh] });
+      switchToPriorityView(tree);
       expect(getTreeJSON(tree)).toContain('HIGH');
     });
 
